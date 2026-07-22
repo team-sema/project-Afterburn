@@ -39,14 +39,22 @@ func request_offer() -> bool:
 	phase = Phase.PLAYER
 	selected_player_augment = null
 	enemy_choices = _pick_enemy_choices()
+	offer_started.emit()
+	_start_offer.call_deferred()
+	return true
+
+
+func _start_offer() -> void:
+	await get_tree().process_frame
+	if not is_offer_active or not is_inside_tree():
+		return
 	get_tree().paused = true
-	selection_ui.show_choices(
+	await selection_ui.open_choices(
 		"PLAYER AUGMENT",
 		"Choose one upgrade",
 		_pick_player_choices(),
+		selection_ui.player_accent_color,
 	)
-	offer_started.emit()
-	return true
 
 
 func _pick_player_choices() -> Array[PlayerAugment]:
@@ -71,20 +79,21 @@ func _on_choice_selected(choice: Resource) -> void:
 			selected_player_augment = player_augment
 			player_registry.add_augment(player_augment)
 			phase = Phase.ENEMY
-			selection_ui.show_choices(
+			await selection_ui.transition_choices(
 				"ENEMY AUGMENT",
 				"Choose the next threat",
 				enemy_choices,
+				selection_ui.enemy_accent_color,
 			)
 		Phase.ENEMY:
 			var enemy_augment := choice as EnemyAugment
 			assert(enemy_augment != null, "Enemy phase requires an EnemyAugment choice.")
 			enemy_registry.add_augment(enemy_augment)
-			_finish_offer(enemy_augment)
+			await _finish_offer(enemy_augment)
 
 
 func _finish_offer(enemy_augment: EnemyAugment) -> void:
-	selection_ui.hide_choices()
+	await selection_ui.close_with_result(selected_player_augment, enemy_augment)
 	is_offer_active = false
 	get_tree().paused = false
 	offer_completed.emit(selected_player_augment, enemy_augment)

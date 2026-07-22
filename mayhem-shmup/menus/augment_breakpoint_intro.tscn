@@ -1,0 +1,185 @@
+[gd_scene format=3 uid="uid://c6x6veg03hm8w"]
+
+[ext_resource type="Script" uid="uid://b7yi1aiv8r845" path="res://menus/augment_breakpoint_intro.gd" id="1_intro"]
+[ext_resource type="FontFile" uid="uid://bkvb0tejtprq8" path="res://fonts/kenney_mini_square.ttf" id="2_font"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_card"]
+bg_color = Color(0.015, 0.04, 0.085, 0.98)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.18, 0.82, 1, 0.9)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+shadow_color = Color(0.05, 0.55, 0.85, 0.28)
+shadow_size = 4
+
+[sub_resource type="LabelSettings" id="LabelSettings_eyebrow"]
+font = ExtResource("2_font")
+font_size = 7
+font_color = Color(0.35, 0.88, 1, 0.9)
+
+[sub_resource type="LabelSettings" id="LabelSettings_title"]
+font = ExtResource("2_font")
+font_size = 14
+font_color = Color(0.9, 0.98, 1, 1)
+outline_size = 2
+outline_color = Color(0.04, 0.35, 0.55, 0.8)
+
+[sub_resource type="LabelSettings" id="LabelSettings_subtitle"]
+font = ExtResource("2_font")
+font_size = 7
+font_color = Color(0.65, 0.82, 0.9, 0.9)
+
+[sub_resource type="Animation" id="Animation_reset"]
+resource_name = "RESET"
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("CenterContainer/BreakpointCard:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("CenterContainer/BreakpointCard:scale")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(0.9, 0.9)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("CenterContainer/BreakpointCard/MarginContainer/VBoxContainer/AccentBar:scale")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(0, 1)]
+}
+
+[sub_resource type="Animation" id="Animation_reveal"]
+resource_name = "reveal"
+length = 1.5
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("CenterContainer/BreakpointCard:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.36666667, 1.2666667, 1.5),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 1), Color(1, 1, 1, 1), Color(1, 1, 1, 0)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("CenterContainer/BreakpointCard:scale")
+tracks/1/interp = 2
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.3666667, 1.2666667, 1.5),
+"transitions": PackedFloat32Array(0.5, 1, 1, 1),
+"update": 0,
+"values": [Vector2(0.9, 0.9), Vector2(1.02, 1.02), Vector2(1, 1), Vector2(0.98, 0.98)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("CenterContainer/BreakpointCard/MarginContainer/VBoxContainer/AccentBar:scale")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0.16666667, 0.93333334),
+"transitions": PackedFloat32Array(0.5, 1),
+"update": 0,
+"values": [Vector2(0, 1), Vector2(1, 1)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_intro"]
+_data = {
+&"RESET": SubResource("Animation_reset"),
+&"reveal": SubResource("Animation_reveal")
+}
+
+[node name="AugmentBreakpointIntro" type="Control" unique_id=1574932396]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("1_intro")
+
+[node name="CenterContainer" type="CenterContainer" parent="." unique_id=1989267585]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="BreakpointCard" type="PanelContainer" parent="CenterContainer" unique_id=288702059]
+modulate = Color(1, 1, 1, 0)
+custom_minimum_size = Vector2(144, 84)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBox_card")
+
+[node name="MarginContainer" type="MarginContainer" parent="CenterContainer/BreakpointCard" unique_id=794774445]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 7
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 7
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer/BreakpointCard/MarginContainer" unique_id=1061958367]
+layout_mode = 2
+theme_override_constants/separation = 3
+
+[node name="EventLabel" type="Label" parent="CenterContainer/BreakpointCard/MarginContainer/VBoxContainer" unique_id=55440925]
+layout_mode = 2
+text = "SYSTEM EVENT"
+label_settings = SubResource("LabelSettings_eyebrow")
+horizontal_alignment = 1
+
+[node name="TitleLabel" type="Label" parent="CenterContainer/BreakpointCard/MarginContainer/VBoxContainer" unique_id=1050792614]
+layout_mode = 2
+text = "AUGMENT
+BREAKPOINT"
+label_settings = SubResource("LabelSettings_title")
+horizontal_alignment = 1
+
+[node name="AccentBar" type="ColorRect" parent="CenterContainer/BreakpointCard/MarginContainer/VBoxContainer" unique_id=157634722]
+custom_minimum_size = Vector2(0, 2)
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.18, 0.82, 1, 1)
+
+[node name="SubtitleLabel" type="Label" parent="CenterContainer/BreakpointCard/MarginContainer/VBoxContainer" unique_id=1454096373]
+layout_mode = 2
+text = "POWER SHIFT DETECTED"
+label_settings = SubResource("LabelSettings_subtitle")
+horizontal_alignment = 1
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=1298729978]
+libraries/ = SubResource("AnimationLibrary_intro")

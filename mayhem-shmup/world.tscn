@@ -10,7 +10,7 @@
 [ext_resource type="Script" uid="uid://b1vehes3nnrj2" path="res://player_augment_registry.gd" id="8_player_augment_registry"]
 [ext_resource type="Script" uid="uid://bcjr83yghjtmb" path="res://augment_offer_controller.gd" id="9_offer_controller"]
 [ext_resource type="Script" uid="uid://xnvxav21p7tu" path="res://score_augment_offer_trigger.gd" id="10_score_trigger"]
-[ext_resource type="PackedScene" path="res://menus/augment_selection_overlay.tscn" id="11_selection_ui"]
+[ext_resource type="PackedScene" uid="uid://503oqsi4rpuh" path="res://menus/augment_selection_overlay.tscn" id="11_selection_ui"]
 [ext_resource type="Script" uid="uid://bj3m8sydgty8w" path="res://resources/player_augments/player_augment.gd" id="12_player_augment"]
 [ext_resource type="Script" uid="uid://be4x07sn0gawv" path="res://resources/enemy_augments/enemy_augment.gd" id="13_enemy_augment"]
 [ext_resource type="Resource" uid="uid://cfjn3mfbhkk5u" path="res://resources/player_augments/player_move_speed_boost_1_2.tres" id="14_player_move"]
@@ -48,6 +48,7 @@ script = ExtResource("6_augment_registry")
 script = ExtResource("8_player_augment_registry")
 
 [node name="AugmentSelectionOverlay" parent="." unique_id=860252183 instance=ExtResource("11_selection_ui")]
+close_duration = 1.0
 
 [node name="AugmentOfferController" type="Node" parent="." unique_id=536362798 node_paths=PackedStringArray("player_registry", "enemy_registry", "selection_ui")]
 script = ExtResource("9_offer_controller")
@@ -61,7 +62,7 @@ enemy_augment_pool = Array[ExtResource("13_enemy_augment")]([ExtResource("17_ene
 script = ExtResource("10_score_trigger")
 game_stats = ExtResource("2_dwbse")
 offer_controller = NodePath("../AugmentOfferController")
-first_offer_score = 100
+first_offer_score = 10
 score_interval = 100
 
 [node name="Ship" parent="." unique_id=546523985 node_paths=PackedStringArray("augment_registry") instance=ExtResource("1_f3sb7")]
