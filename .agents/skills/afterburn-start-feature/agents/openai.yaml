@@ -1,0 +1,7 @@
+interface:
+  display_name: "Afterburn Start Feature"
+  short_description: "Start an Afterburn feature branch"
+  default_prompt: "Use $afterburn-start-feature to start a new Afterburn feature branch."
+
+policy:
+  allow_implicit_invocation: true

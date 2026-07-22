@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Project Afterburn · 백로그 칸반</title>
+  <link rel="stylesheet" href="board.css" />
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <h1>Project Afterburn</h1>
+      <p class="sub">7열 칸반 · 카드 = MD 파일 · Issues 없음</p>
+    </div>
+    <div class="actions">
+      <span id="meta" class="meta"></span>
+      <button type="button" id="btn-reset" class="btn ghost" title="브라우저 임시 저장을 지우고 저장소 JSON으로 되돌립니다">저장소 기준으로 되돌리기</button>
+      <button type="button" id="btn-copy" class="btn">JSON 복사</button>
+      <button type="button" id="btn-download" class="btn primary">cards.json 저장</button>
+      <a class="btn ghost" href="../">문서 홈</a>
+    </div>
+  </header>
+
+  <p class="hint">
+    <strong>드래그</strong>로 열을 옮기고, <strong>클릭</strong>하면 MD 상세 팝업이 열립니다.
+    열 이동은 브라우저에만 임시 저장됩니다. 팀에 반영하려면 JSON을 저장해
+    <code>docs/board/cards.json</code>에 커밋하세요. 카드 본문은
+    <code>docs/board/cards/&lt;id&gt;.md</code>와 1:1입니다.
+  </p>
+
+  <main id="board" class="board" aria-label="칸반 보드"></main>
+
+  <footer class="foot">
+    <span>인덱스: <code>cards.json</code></span>
+    <span>·</span>
+    <span>본문: <code>cards/*.md</code></span>
+  </footer>
+
+  <div id="modal" class="modal" hidden>
+    <div class="modal-backdrop" data-close="1"></div>
+    <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <header class="modal-head">
+        <div>
+          <h2 id="modal-title"></h2>
+          <p id="modal-desc" class="modal-desc"></p>
+          <p id="modal-file" class="modal-file"></p>
+        </div>
+        <button type="button" id="modal-close" class="btn ghost" aria-label="닫기">닫기</button>
+      </header>
+      <div id="modal-body" class="modal-body md"></div>
+    </div>
+  </div>
+
+  <script src="board.js"></script>
+</body>
+</html>

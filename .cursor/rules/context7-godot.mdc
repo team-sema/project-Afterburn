@@ -1,0 +1,46 @@
+---
+description: "Context7 MCP로 Godot 4.7 공식 문서 조회 — API·마이그레이션 검증"
+globs:
+  - "**/*.gd"
+  - "**/*.tscn"
+  - "**/project.godot"
+  - "**/*.tres"
+alwaysApply: false
+---
+
+# Context7 + Godot 4.7
+
+MCP 서버 `user-context7`가 등록되어 있으면 Godot API·엔진 기능 질문에 **우선** 사용한다. 웹 검색보다 공식 문서에 가깝다.
+
+## 언제 쓰는가
+
+- 노드·시그널·Resource·GDScript 2.0 API 문법
+- 4.6→4.7 마이그레이션, breaking change 확인
+- `@export`, `Callable`, 애니메이션·UI·물리 등 엔진 기능 구현 전 검증
+
+## 쓰지 않는 경우
+
+- 이 프로젝트 **게임 규칙** (오그먼트·점수·스폰 등) — `docs/spec/`, `docs/design/systems/`가 정본
+- 리팩터·코드 리뷰·비즈니스 로직 디버깅
+
+## 호출 순서 (일반 패턴)
+
+1. **library ID가 이미 정해져 있으면** `resolve-library-id` 생략.
+2. **`query-docs`** — 구체적 질문 한 줄 (예: `Tween pause and resume in Godot 4.7`).
+3. 질문당 도구 호출 **최대 3회** (`resolve` + `query` 합산). 부족하면 가장 관련 높은 결과로 진행.
+
+## 이 프로젝트 고정 ID
+
+| 용도 | library ID |
+|------|------------|
+| Godot **4.7** 공식 문서 (기본) | `/websites/godotengine_en_4_7` |
+
+`resolve-library-id`로 Godot를 검색할 때도 **4.7 문서** (`/websites/godotengine_en_4_7`)를 선택한다. `/godotengine/godot`(소스 트리)는 기본으로 쓰지 않는다.
+
+## 에이전트 체크리스트
+
+Godot 관련 코드를 **새로 쓰거나 수정**할 때:
+
+- [ ] 익숙하지 않은 API·4.7 변경 가능성이 있으면 `query-docs`로 확인
+- [ ] 답변·코드가 4.7 문서와 맞는지 맞춘 뒤 구현
+- [ ] Godot 3 패턴(`connect("signal", self, "method")` 등) 사용 금지

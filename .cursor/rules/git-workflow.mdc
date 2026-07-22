@@ -1,0 +1,44 @@
+---
+description: "Git workflow: feature branches to main only, no develop branch"
+alwaysApply: true
+---
+
+# Git 워크플로
+
+## 브랜치 정책
+
+- **`main`**: 항상 실행·플레이 가능한 상태. 장기간 “반쯤 된 기능”만 두지 않는다.
+- **`develop` / `staging`**: 사용하지 않는다.
+- 작업: `feature/짧은-영문` (예: `feature/player-augment-behaviors`) → 검증 후 `main`에 merge → 브랜치 삭제.
+- **feature 범위**: 해당 slug 작업만 수정. 상세는 `feature-scope` rule.
+
+## 커밋
+
+- 메시지 접두: `feat:`, `fix:`, `docs:`, `godot:` 등 짧게 통일.
+- `--no-verify`, `push --force`(특히 `main`)는 사용자가 명시할 때만.
+- git config 변경 금지.
+
+## 2인 협업
+
+- 같은 날 둘 다 작업할 때: 서로 `main` pull 후 feature에서 작업.
+- feature는 **1~3일 안**에 merge해 `main`과 격차를 키우지 않는다.
+- Godot **`.tscn` 충돌**이 잦으면 상대방에게 머지 전 알린다.
+
+## Godot PR·머지 전 (해당 시)
+
+- [ ] 에디터에서 관련 씬이 열림
+- [ ] 변경 플로우 1회 플레이 또는 최소 시나리오 확인
+- [ ] `docs/spec`·시스템 스펙과 모순 없음 (또는 `docs/` 수정 포함)
+
+## 슬래시 명령 (기본)
+
+| 명령 / 스크립트 | 때 |
+|-----------------|-----|
+| `./tools/start-feature.sh <slug>` | 작업 시작 |
+| **`/push`** | 피쳐 완료 (커밋+merge, **일반적으로 이것만**) |
+
+`origin/main` 신규 커밋 시 **pull 후 중단** → feature에서 `git merge main` → `/push` 재실행.
+
+## AI
+
+- commit·push·merge는 사용자가 **요청·슬래시 스킬**을 쓸 때만 실행. 그 외에는 `git-workflow`만 안내.
