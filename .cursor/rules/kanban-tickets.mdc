@@ -1,0 +1,87 @@
+---
+description: "Manage development as kanban tickets (docs/board); auto-update cards on /feature and /push"
+alwaysApply: true
+---
+
+# 칸반 티켓 (카드) 관리
+
+개발 단위는 **티켓(카드)** 이다. Issues/Projects 대신 `docs/board/` 칸반을 쓴다.
+
+정본: [docs/design/systems/kanban-v2.md](docs/design/systems/kanban-v2.md) · 보드: `docs/board/`  
+패턴 참고: [cat_dice_game 보드](https://team-sema.github.io/cat_dice_game/board/)
+
+## 데이터
+
+| 경로 | 역할 |
+|------|------|
+| `docs/board/cards.json` | 카드 인덱스 (`id`, `title`, `description`, `column`, `file`, `tags`) |
+| `docs/board/cards/<id>.md` | 카드 본문 (1카드 = 1 MD) |
+
+**카드 `id` = feature slug** 를 기본으로 한다 (`feature/shop-ui` → `shop-ui`).  
+기존 카드가 다른 id면 `cards.json`에서 slug·제목으로 찾아 매칭하고, 없으면 **새 카드+MD를 만든다**.
+
+## 열 (이동 규칙)
+
+| column | 언제 |
+|--------|------|
+| `ideas` | 미확정 후보만 |
+| `speccing` | `/feature`로 스펙·Task **작성 중** |
+| `ready` | 스펙·AC 확정, 코딩 직전 |
+| `doing` | 실제 구현 중 (인당 1~2장 권장) |
+| `review` | **코드가 main에 들어간 직후** (`/push` 기본 도착) |
+| `fix` | 검증에서 문제 → 수정 후 다시 `doing` → `review` |
+| `done` | **사람이 플레이/검증 확인한 뒤만** — 에이전트가 `/push`만으로 `done` 넣지 않음 |
+
+**시작 열은 `ideas`만이 아니다.** 카드를 만들 때 성숙도에 맞는 열로 **바로 넣는다**:
+
+- 미확정 아이디어 → `ideas`
+- **스펙·AC가 이미 확정된** 항목 → `ready` (구현 대기)로 바로
+- 지금 바로 구현에 들어갈 항목 → `doing` (구현 중)으로 바로
+
+`ideas`/`speccing`을 반드시 거칠 필요 없다.
+
+## 카드 추가 (브랜치 불필요)
+
+**단순 카드 추가·열 변경 같은 칸반 전용 편집은 `feature/*` 브랜치 없이 `main`에서 바로** 해도 된다.
+
+- 대상: `docs/board/cards.json` + `docs/board/cards/<id>.md`. **이 파일들만** 바뀌는 경우.
+- 커밋은 사용자가 요청할 때만 (`git-workflow` 유지). 브랜치·`/push` 스킬은 불필요.
+- 게임 코드·씬·리소스가 **함께** 바뀌면 이 예외 아님 → `feature/*` + `/push`.
+
+## Agent — `/feature`·작업 시작 시
+
+1. slug로 카드 검색 (`id` 일치 우선).
+2. 없으면 `cards/<slug>.md` + `cards.json` 항목 생성 (`column`: 스펙부터면 `speccing`, 스펙 확정돼 있으면 `ready`, 바로 구현이면 `doing`).
+3. 있으면 열을 맞춤: 스펙 작성 → `speccing`, 구현 시작 → `doing`.
+4. MD에 목표·AC 요약을 짧게 갱신 (있으면).
+
+사용자에게 “카드 만들어줘”를 시키지 말고 **에이전트가 직접** 파일을 수정한다.
+
+## Agent — `/push` 직전 (커밋 메시지 작성 전, 필수)
+
+정합성 체크(스펙·Task) **통과 후**, 스크립트 실행 **전에**:
+
+1. 현재 `feature/<slug>`의 카드를 찾거나 생성.
+2. `column`을 **`review`** 로 설정 (사용자가 `done`/`fix`을 명시하지 않는 한).
+3. `cards/<id>.md`에 한 줄 이력 추가 예: `## 구현` / `- YYYY-MM-DD feature/<slug> → main (검증 대기)`.
+4. `cards.json`의 `updated` 날짜 갱신.
+5. 위 파일 변경을 **같은 feature 커밋에 포함**.
+
+`/push` 응답의 정합성 블록에 티켓 한 줄 추가:
+
+```markdown
+- 티켓: <id> → review (OK / 생성함 / 이슈)
+```
+
+## Agent — 검증·수정 피드백 시
+
+- “검증 OK / 완료 처리” → 해당 카드 `done`.
+- “버그·수정 필요” → `fix` (또는 바로 고치면 `doing`).
+- 수정 `/push` 후 → 다시 `review`.
+
+## 하지 않음
+
+- GitHub Issues/Projects로 대체하지 않음.
+- `/push`만으로 `done` 자동 처리 금지.
+- 무관한 다른 카드의 `column`을 마음대로 바꾸지 않음 (이번 slug 티켓만).
+- Godot 게임 로직과 칸반 파일을 한 커밋에 섞는 것은 **허용** (같은 feature의 티켓 갱신).

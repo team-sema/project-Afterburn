@@ -1,0 +1,171 @@
+{
+  "updated": "2026-07-22",
+  "source": "docs/board/cards/*.md",
+  "columns": [
+    {
+      "id": "ideas",
+      "title": "아이디어 / 백로그",
+      "hint": "아직 구현 확정 전 · 후보군"
+    },
+    {
+      "id": "speccing",
+      "title": "스펙 작성 중",
+      "hint": "스펙·Task 작성 중"
+    },
+    {
+      "id": "ready",
+      "title": "구현 대기",
+      "hint": "스펙 확정 · 바로 개발 가능"
+    },
+    {
+      "id": "doing",
+      "title": "구현 중",
+      "hint": "인당 1~2개 권장"
+    },
+    {
+      "id": "review",
+      "title": "검증 대기",
+      "hint": "플레이·코드 검증 필요"
+    },
+    {
+      "id": "fix",
+      "title": "수정 필요",
+      "hint": "검증에서 문제 발견"
+    },
+    {
+      "id": "done",
+      "title": "완료",
+      "hint": "구현+검증 통과"
+    }
+  ],
+  "cards": [
+    {
+      "id": "docs-site-kanban",
+      "title": "docs 스펙·칸반 사이트",
+      "description": "카테고리 스펙 브라우저 + 7열 칸반 + Cursor /feature·/push 워크플로 + Godot 루트 승격.",
+      "column": "review",
+      "file": "cards/docs-site-kanban.md",
+      "tags": ["문서", "칸반", "워크플로"]
+    },
+    {
+      "id": "player-augment-behaviors",
+      "title": "플레이어 오그먼트 behavior 적용",
+      "description": "PlayerAugment.behavior_components를 Applier가 부착하도록.",
+      "column": "ready",
+      "file": "cards/player-augment-behaviors.md",
+      "tags": ["오그먼트", "플레이어"]
+    },
+    {
+      "id": "enemy-action-rate-asset",
+      "title": "ACTION_RATE 적 오그먼트 에셋",
+      "description": "Factory는 지원하는데 .tres가 없음.",
+      "column": "ready",
+      "file": "cards/enemy-action-rate-asset.md",
+      "tags": ["오그먼트", "적"]
+    },
+    {
+      "id": "wire-enemy-augment-grant",
+      "title": "EnemyAugmentGrantComponent 연결",
+      "description": "완성된 grant API를 씬/드롭에 연결.",
+      "column": "ideas",
+      "file": "cards/wire-enemy-augment-grant.md",
+      "tags": ["오그먼트", "후보"]
+    },
+    {
+      "id": "physics-layers-projectiles",
+      "title": "탄 물리 레이어 3·4 정리",
+      "description": "이름만 있고 탄은 layer 0 + mask 패턴.",
+      "column": "ideas",
+      "file": "cards/physics-layers-projectiles.md",
+      "tags": ["전투", "후보"]
+    },
+    {
+      "id": "clear-augments-on-run",
+      "title": "런 시작 시 clear_augments",
+      "description": "명시적 초기화로 씬 리로드 의존 줄이기.",
+      "column": "ideas",
+      "file": "cards/clear-augments-on-run.md",
+      "tags": ["오그먼트", "후보"]
+    },
+    {
+      "id": "enemy-death-path-cleanup",
+      "title": "적 사망 경로 정리",
+      "description": "queue_free + DestroyedComponent 이중 처리 정리.",
+      "column": "ideas",
+      "file": "cards/enemy-death-path-cleanup.md",
+      "tags": ["적", "리팩터"]
+    },
+    {
+      "id": "weapon-unlock-flow",
+      "title": "무기 해금·교체 플로우",
+      "description": "Blaster+Laser 상시 → 선택/해금.",
+      "column": "ideas",
+      "file": "cards/weapon-unlock-flow.md",
+      "tags": ["플레이어", "후보"]
+    },
+    {
+      "id": "augment-pool-data-driven",
+      "title": "오그먼트 풀 데이터 드리븐화",
+      "description": "world.tscn 하드코드 풀을 Resource/Registry로.",
+      "column": "ideas",
+      "file": "cards/augment-pool-data-driven.md",
+      "tags": ["오그먼트", "장기"]
+    },
+    {
+      "id": "pause-settings-menu",
+      "title": "일시정지·설정 메뉴",
+      "description": "볼륨, 재시작, 메뉴 복귀.",
+      "column": "ideas",
+      "file": "cards/pause-settings-menu.md",
+      "tags": ["UI", "후보"]
+    },
+    {
+      "id": "component-architecture",
+      "title": "컴포넌트 아키텍처",
+      "description": "커스텀 노드 조합으로 엔티티 구성.",
+      "column": "done",
+      "file": "cards/component-architecture.md",
+      "tags": ["코어", "완료"]
+    },
+    {
+      "id": "scene-flow-loop",
+      "title": "메뉴·World·게임오버 루프",
+      "description": "기본 씬 전환과 점수/하이스코어.",
+      "column": "done",
+      "file": "cards/scene-flow-loop.md",
+      "tags": ["코어", "완료"]
+    },
+    {
+      "id": "score-augment-offer",
+      "title": "점수 기반 오그먼트 오퍼",
+      "description": "10점 첫 오퍼 · 이후 100점 간격 · pause UI.",
+      "column": "done",
+      "file": "cards/score-augment-offer.md",
+      "tags": ["오그먼트", "완료"]
+    },
+    {
+      "id": "player-dual-weapons",
+      "title": "Blaster + Laser 이중 무기",
+      "description": "연사 탄과 연속 빔 동시 장착.",
+      "column": "done",
+      "file": "cards/player-dual-weapons.md",
+      "tags": ["플레이어", "완료"]
+    },
+    {
+      "id": "enemy-generator-types",
+      "title": "적 3종 + 생성기",
+      "description": "Green/Yellow/Pink · 점수 스케일 스폰.",
+      "column": "done",
+      "file": "cards/enemy-generator-types.md",
+      "tags": ["적", "완료"]
+    },
+    {
+      "id": "nova-drift-visuals",
+      "title": "Nova Drift풍 네온 비주얼",
+      "description": "다중 글로우 · 배경 · 폭발 · WorldEnvironment.",
+      "column": "done",
+      "file": "cards/nova-drift-visuals.md",
+      "tags": ["비주얼", "완료"]
+    }
+  ]
+}

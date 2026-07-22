@@ -1,0 +1,30 @@
+---
+description: "Project Afterburn identity, spec source of truth, MVP scope"
+alwaysApply: true
+---
+
+# Project Afterburn — 프로젝트
+
+Godot 종스크롤 슈팅 + 점수 기반 오그먼트 프로토타입 (`mayhem_shmup`).
+
+## 단일 기준 (Source of Truth)
+
+- **구현 현황 스펙:** `docs/spec/` (카테고리별) — 현재 코드가 하는 일의 정본.
+- **기능 설계:** `docs/design/systems/<slug>.md` — `/feature`로 추가·변경하는 규칙의 동작의 정본.
+- **Task:** `docs/design/tasks/<slug>-tasks.md`
+- 기획 방향 문서(GDD)가 생기면 그것을 방향 정본으로 두고, 계산·UI 상세는 시스템 스펙이 정본.
+
+기획·동작이 바뀌면 **스펙을 먼저** 고치거나 같은 커밋/PR에 스펙 diff를 포함한다.
+
+## 핵심 설계 (구현 시 참고)
+
+- 재미 축: 탄막 회피·사격, 점수 구간 오그먼트 선택(플레이어 강화 vs 적 강화).
+- 엔티티는 **컴포넌트(커스텀 노드)** 조합 (`components/`).
+- 비주얼 방향: Nova Drift풍 네온 — `.agents/godot_nova_drift_visual_guide.md`, `docs/spec/effects.md`.
+
+## 에이전트 동작
+
+- 작업 전 관련 `docs/spec/`·`docs/design/systems/`를 읽는다.
+- 사용자가 스펙과 다른 구현을 요청하면, 스펙 갱신 여부를 짧게 확인한다.
+- 커밋은 사용자가 요청할 때만 생성한다 (명시 없으면 커밋·푸시 금지).
+- 백로그는 Issues 대신 `docs/board/` 칸반 (`kanban-tickets` rule).
