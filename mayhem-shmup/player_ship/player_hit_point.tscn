@@ -1,0 +1,40 @@
+[gd_scene format=3 uid="uid://ca7c0uj2pkxwe"]
+
+[ext_resource type="Script" uid="uid://cx2rlsi2idbph" path="res://player_ship/player_hit_point.gd" id="1_hit_point"]
+[ext_resource type="Script" uid="uid://c70ifjbywa6cc" path="res://components/hurtbox_component.gd" id="2_hurtbox"]
+[ext_resource type="Texture2D" uid="uid://djvqurciuxfie" path="res://assets/svg/radial_glow.svg" id="3_radial_glow"]
+[ext_resource type="Material" uid="uid://c75j508nnunik" path="res://effects/diffuse_glow_material.tres" id="5_diffuse"]
+[ext_resource type="Material" path="res://effects/tight_glow_material.tres" id="6_tight"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_hit_point"]
+radius = 3.0
+
+[node name="PlayerHitPoint" type="Node2D" unique_id=135735898]
+z_index = 4
+script = ExtResource("1_hit_point")
+
+[node name="Visual" type="Node2D" parent="." unique_id=1834716889]
+
+[node name="DiffuseGlow" type="Sprite2D" parent="Visual" unique_id=1241978893]
+self_modulate = Color(0.7557697, 0.27849358, 0.21241558, 0.2784314)
+material = ExtResource("5_diffuse")
+scale = Vector2(0.16, 0.16)
+texture = ExtResource("3_radial_glow")
+
+[node name="TightGlow" type="Sprite2D" parent="Visual" unique_id=1243273136]
+self_modulate = Color(0.9844379, 0.8029659, 0.780096, 0.72156864)
+material = ExtResource("6_tight")
+scale = Vector2(0.09, 0.09)
+texture = ExtResource("3_radial_glow")
+
+[node name="Core" type="Sprite2D" parent="Visual" unique_id=1248615721]
+self_modulate = Color(0.97756237, 0.2340565, 0.25810012, 1)
+scale = Vector2(0.05, 0.05)
+texture = ExtResource("3_radial_glow")
+
+[node name="HurtboxComponent" type="Area2D" parent="." unique_id=1864557322]
+script = ExtResource("2_hurtbox")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HurtboxComponent" unique_id=1564903720]
+visible = false
+shape = SubResource("CircleShape2D_hit_point")

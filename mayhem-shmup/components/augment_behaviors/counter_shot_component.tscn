@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://bniv8l57wugr5"]
+
+[ext_resource type="Script" uid="uid://cwcbvvojubs61" path="res://components/augment_behaviors/counter_shot_component.gd" id="1_counter_shot"]
+[ext_resource type="PackedScene" uid="uid://bok2jkoccksub" path="res://projectiles/curve_projectile.tscn" id="2_projectile"]
+
+[node name="CounterShotComponent" type="Node" unique_id=783941351]
+script = ExtResource("1_counter_shot")
+projectile_scene = ExtResource("2_projectile")
+spread_degrees = 5.0
+projectile_speed = 200.0

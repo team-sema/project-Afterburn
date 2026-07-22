@@ -1,0 +1,137 @@
+[gd_scene format=3 uid="uid://bok2jkoccksub"]
+
+[ext_resource type="Script" uid="uid://dvbx3vf45ogeb" path="res://projectiles/curve_projectile.gd" id="1_cqv5r"]
+[ext_resource type="Material" path="res://effects/wide_glow_material.tres" id="2_y17g6"]
+[ext_resource type="Texture2D" uid="uid://d3odh03yjdlf8" path="res://assets/svg/enemy_projectile.svg" id="3_1pdhl"]
+[ext_resource type="Material" path="res://effects/tight_glow_material.tres" id="4_u2hyf"]
+[ext_resource type="Material" path="res://effects/core_unshaded_material.tres" id="5_1h1n7"]
+[ext_resource type="Material" path="res://effects/additive_unshaded_material.tres" id="6_aq5d1"]
+[ext_resource type="Texture2D" uid="uid://bp1d64ncpt4rh" path="res://assets/svg/particle_diamond.svg" id="7_gql3r"]
+[ext_resource type="Script" uid="uid://cvmjafhyfx5xo" path="res://components/hitbox_component.gd" id="8_fbtqa"]
+[ext_resource type="Script" uid="uid://dx86ewq6s2alh" path="res://components/free_offscreen_component.gd" id="9_pvwcr"]
+[ext_resource type="Script" uid="uid://dbgfouplndi2j" path="res://components/move_component.gd" id="10_vjn06"]
+[ext_resource type="Script" uid="uid://c1yamqkv7l4ue" path="res://components/scale_component.gd" id="11_lvae1"]
+
+[sub_resource type="Gradient" id="Gradient_trail"]
+colors = PackedColorArray(1, 0.28, 0.06, 0.7, 0.8, 0.08, 0.02, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture_trail"]
+gradient = SubResource("Gradient_trail")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_trail"]
+particle_flag_disable_z = true
+direction = Vector3(0, -1, 0)
+spread = 10.0
+initial_velocity_min = 6.0
+initial_velocity_max = 12.0
+gravity = Vector3(0, 0, 0)
+scale_min = 0.08
+scale_max = 0.18
+color_ramp = SubResource("GradientTexture_trail")
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_7jo6o"]
+radius = 4.0
+
+[sub_resource type="Animation" id="Animation_7ytmt"]
+resource_name = "Oscillate"
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Anchor:position")
+tracks/0/interp = 2
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.5, 1),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Vector2(-4, 0), Vector2(4, 0), Vector2(-4, 0)]
+}
+
+[sub_resource type="Animation" id="Animation_04bmb"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Anchor:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(0, 0)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_04bmb"]
+_data = {
+&"Oscillate": SubResource("Animation_7ytmt"),
+&"RESET": SubResource("Animation_04bmb")
+}
+
+[node name="PinkEnemyProjectile" type="Node2D" unique_id=1090424476]
+script = ExtResource("1_cqv5r")
+
+[node name="Anchor" type="Node2D" parent="." unique_id=425826843]
+
+[node name="AnimatedSprite2D" type="Node2D" parent="Anchor" unique_id=632973034]
+
+[node name="WideGlow" type="Sprite2D" parent="Anchor/AnimatedSprite2D" unique_id=779840985]
+self_modulate = Color(1, 0.2, 0.04, 0.13)
+show_behind_parent = true
+material = ExtResource("2_y17g6")
+scale = Vector2(0.32, 0.32)
+texture = ExtResource("3_1pdhl")
+
+[node name="TightGlow" type="Sprite2D" parent="Anchor/AnimatedSprite2D" unique_id=77412484]
+self_modulate = Color(1, 0.25, 0.06, 0.4)
+show_behind_parent = true
+material = ExtResource("4_u2hyf")
+scale = Vector2(0.2, 0.2)
+texture = ExtResource("3_1pdhl")
+
+[node name="Core" type="Sprite2D" parent="Anchor/AnimatedSprite2D" unique_id=1395513763]
+self_modulate = Color(1, 0.96, 0.88, 1)
+material = ExtResource("5_1h1n7")
+scale = Vector2(0.18, 0.18)
+texture = ExtResource("3_1pdhl")
+
+[node name="Trail" type="GPUParticles2D" parent="Anchor/AnimatedSprite2D" unique_id=2141287918]
+material = ExtResource("6_aq5d1")
+position = Vector2(0, -3)
+amount = 16
+texture = ExtResource("7_gql3r")
+lifetime = 0.28
+visibility_rect = Rect2(-10, -20, 20, 32)
+process_material = SubResource("ParticleProcessMaterial_trail")
+
+[node name="HitboxComponent" type="Area2D" parent="Anchor" unique_id=1713314667]
+collision_layer = 0
+script = ExtResource("8_fbtqa")
+metadata/_custom_type_script = "uid://cvmjafhyfx5xo"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Anchor/HitboxComponent" unique_id=1674944007]
+shape = SubResource("CircleShape2D_7jo6o")
+
+[node name="FreeOffscreenComponent" type="VisibleOnScreenNotifier2D" parent="." unique_id=1314618494 node_paths=PackedStringArray("actor")]
+rect = Rect2(-4, -4, 8, 8)
+script = ExtResource("9_pvwcr")
+actor = NodePath("..")
+metadata/_custom_type_script = "uid://dx86ewq6s2alh"
+
+[node name="MoveComponent" type="Node" parent="." unique_id=635776044 node_paths=PackedStringArray("actor")]
+script = ExtResource("10_vjn06")
+actor = NodePath("..")
+velocity = Vector2(0, 20)
+metadata/_custom_type_script = "uid://dbgfouplndi2j"
+
+[node name="ScaleComponent" type="Node" parent="." unique_id=1746850103 node_paths=PackedStringArray("sprite")]
+script = ExtResource("11_lvae1")
+sprite = NodePath("../Anchor/AnimatedSprite2D")
+scale_amount = Vector2(2, 2)
+scale_duration = 1.0
+metadata/_custom_type_script = "uid://c1yamqkv7l4ue"
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=1347874734]
+libraries/ = SubResource("AnimationLibrary_04bmb")
+autoplay = &"Oscillate"

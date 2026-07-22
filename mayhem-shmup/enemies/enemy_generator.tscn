@@ -1,0 +1,31 @@
+[gd_scene format=3 uid="uid://e4v02s4qv8gl"]
+
+[ext_resource type="Script" uid="uid://b81hx75o63oad" path="res://enemy_generator.gd" id="1_k80ol"]
+[ext_resource type="Script" uid="uid://fwissbryiv1s" path="res://components/spawner_component.gd" id="2_d5nw7"]
+[ext_resource type="Resource" uid="uid://qvwx7dbvubh0" path="res://game_stats.tres" id="2_m4hnj"]
+
+[node name="EnemyGenerator" type="Node2D" unique_id=755348219]
+script = ExtResource("1_k80ol")
+game_stats = ExtResource("2_m4hnj")
+
+[node name="SpawnerComponent" type="Node2D" parent="." unique_id=1844585373]
+script = ExtResource("2_d5nw7")
+
+[node name="GreenEnemySpawnTimer" type="Timer" parent="." unique_id=1919793622]
+unique_name_in_owner = true
+wait_time = 3.0
+one_shot = true
+autostart = true
+
+[node name="YellowEnemySpawnTimer" type="Timer" parent="." unique_id=2079851595]
+unique_name_in_owner = true
+wait_time = 5.0
+one_shot = true
+autostart = true
+
+[node name="PinkEnemySpawnTimer" type="Timer" parent="." unique_id=1999505517]
+unique_name_in_owner = true
+process_mode = 4
+wait_time = 8.0
+one_shot = true
+autostart = true

@@ -1,0 +1,46 @@
+[gd_scene format=3 uid="uid://d0nj13ptnmpmp"]
+
+[ext_resource type="Script" uid="uid://b2d4gofxh8hmh" path="res://player_ship/weapons/laser_weapon_system.gd" id="1_laser"]
+[ext_resource type="Material" uid="uid://c12oxsfcofdko" path="res://effects/additive_unshaded_material.tres" id="2_additive"]
+[ext_resource type="Texture2D" uid="uid://dibdtiaxbccii" path="res://assets/Beam.png" id="2_beam"]
+[ext_resource type="Script" uid="uid://cvmjafhyfx5xo" path="res://components/hitbox_component.gd" id="3_hitbox"]
+
+[node name="LaserWeaponSystem" type="Node2D" unique_id=395281251]
+script = ExtResource("1_laser")
+
+[node name="RayCast2D" type="RayCast2D" parent="." unique_id=872900014]
+target_position = Vector2(0, -260)
+collision_mask = 2
+collide_with_areas = true
+collide_with_bodies = false
+
+[node name="GlowLine" type="Sprite2D" parent="." unique_id=2107826507]
+self_modulate = Color(0.1, 0.75, 1, 0.35)
+z_index = 1
+material = ExtResource("2_additive")
+position = Vector2(0, -133)
+rotation = 3.14159
+scale = Vector2(0.053, 0.992)
+texture = ExtResource("2_beam")
+
+[node name="CoreLine" type="Line2D" parent="." unique_id=1816449984]
+z_index = 2
+material = ExtResource("2_additive")
+points = PackedVector2Array(0, -6, 0, -260)
+width = 1.0
+default_color = Color(0.82, 0.98, 1, 0.95)
+begin_cap_mode = 2
+end_cap_mode = 2
+antialiased = true
+
+[node name="DamageTickTimer" type="Timer" parent="." unique_id=1475382514]
+process_callback = 0
+wait_time = 0.1
+autostart = true
+
+[node name="DamageHitbox" type="Area2D" parent="." unique_id=568910206]
+collision_layer = 0
+collision_mask = 0
+script = ExtResource("3_hitbox")
+damage = 3
+metadata/_custom_type_script = "uid://cvmjafhyfx5xo"

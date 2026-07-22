@@ -1,0 +1,92 @@
+[gd_scene format=3 uid="uid://0th6okc5yjpd"]
+
+[ext_resource type="PackedScene" uid="uid://psmpwiapllcb" path="res://enemies/enemy.tscn" id="1_7jykc"]
+[ext_resource type="Script" uid="uid://duumbl2eoy0ot" path="res://enemies/shooting_enemy/shooting_enemy.gd" id="2_bxlr2"]
+[ext_resource type="Texture2D" uid="uid://cjhfuwqq2ffkl" path="res://assets/svg/enemy_caster.svg" id="3_gb8yh"]
+[ext_resource type="Script" uid="uid://5ebfckwk4w3h" path="res://components/state_machine_component.gd" id="4_5bhcg"]
+[ext_resource type="Script" uid="uid://chx8h3aikt6eq" path="res://components/timed_state_componoent.gd" id="5_g1k3v"]
+[ext_resource type="Script" uid="uid://dbgfouplndi2j" path="res://components/move_component.gd" id="6_drofs"]
+[ext_resource type="Script" uid="uid://dv8vl7my0r60w" path="res://components/move_left_or_right_component.gd" id="7_icdnh"]
+[ext_resource type="Script" uid="uid://dq8pwqawl2q7u" path="res://components/border_bounce_component.gd" id="8_7a0ox"]
+[ext_resource type="Script" uid="uid://fwissbryiv1s" path="res://components/spawner_component.gd" id="9_eya3n"]
+[ext_resource type="PackedScene" uid="uid://bok2jkoccksub" path="res://projectiles/curve_projectile.tscn" id="10_fv328"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_7jo6o"]
+size = Vector2(16, 16)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_psv4m"]
+size = Vector2(8, 8)
+
+[node name="ShootingEnemy" unique_id=2144985965 instance=ExtResource("1_7jykc")]
+script = ExtResource("2_bxlr2")
+
+[node name="WideGlow" parent="Anchor" parent_id_path=PackedInt32Array(93118890) index="1" unique_id=1704439409]
+texture = ExtResource("3_gb8yh")
+
+[node name="TightGlow" parent="Anchor" parent_id_path=PackedInt32Array(93118890) index="2" unique_id=1479335934]
+texture = ExtResource("3_gb8yh")
+
+[node name="Core" parent="Anchor" parent_id_path=PackedInt32Array(93118890) index="3" unique_id=1004814504]
+texture = ExtResource("3_gb8yh")
+
+[node name="StatsComponent" parent="." index="1" unique_id=1304120856]
+health = 60
+
+[node name="VisibleOnScreenNotifier2D" parent="." index="3" unique_id=1344806211]
+rect = Rect2(-9, -9, 18, 18)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HurtboxComponent" parent_id_path=PackedInt32Array(863455394) index="0" unique_id=1535794178]
+shape = SubResource("RectangleShape2D_7jo6o")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HitboxComponent" parent_id_path=PackedInt32Array(486674932) index="0" unique_id=823329422]
+shape = SubResource("RectangleShape2D_psv4m")
+
+[node name="ScoreComponent" parent="." index="12" unique_id=1849553207]
+adjust_amount = 20
+
+[node name="StateMachine" type="Node" parent="." index="13" unique_id=1578137984]
+unique_name_in_owner = true
+script = ExtResource("4_5bhcg")
+metadata/_custom_type_script = "uid://5ebfckwk4w3h"
+
+[node name="MoveDownState" type="Node" parent="StateMachine" index="0" unique_id=1858093268]
+unique_name_in_owner = true
+script = ExtResource("5_g1k3v")
+duration = 3.0
+metadata/_custom_type_script = "uid://chx8h3aikt6eq"
+
+[node name="MoveComponent" type="Node" parent="StateMachine/MoveDownState" index="0" unique_id=1602550067 node_paths=PackedStringArray("actor")]
+script = ExtResource("6_drofs")
+actor = NodePath("../../..")
+velocity = Vector2(0, 20)
+metadata/_custom_type_script = "uid://dbgfouplndi2j"
+
+[node name="MoveSideState" type="Node" parent="StateMachine" index="1" unique_id=448758568]
+unique_name_in_owner = true
+script = ExtResource("5_g1k3v")
+duration = 3.0
+
+[node name="MoveLeftOrRightComponent" type="Node" parent="StateMachine/MoveSideState" index="0" unique_id=1447962759 node_paths=PackedStringArray("state", "actor")]
+script = ExtResource("7_icdnh")
+state = NodePath("..")
+actor = NodePath("../../..")
+velocity = Vector2(20, 0)
+metadata/_custom_type_script = "uid://dbgfouplndi2j"
+
+[node name="BorderBounceComponent" type="Node" parent="StateMachine/MoveSideState" index="1" unique_id=496724204 node_paths=PackedStringArray("actor", "move_component")]
+script = ExtResource("8_7a0ox")
+actor = NodePath("../../..")
+move_component = NodePath("../MoveLeftOrRightComponent")
+metadata/_custom_type_script = "uid://dq8pwqawl2q7u"
+
+[node name="PauseState" type="Node" parent="StateMachine" index="2" unique_id=1120797910]
+unique_name_in_owner = true
+script = ExtResource("5_g1k3v")
+duration = 3.0
+metadata/_custom_type_script = "uid://chx8h3aikt6eq"
+
+[node name="ProjectileSpawnerComponent" type="Node2D" parent="." index="14" unique_id=1943752203]
+unique_name_in_owner = true
+script = ExtResource("9_eya3n")
+scene = ExtResource("10_fv328")
+metadata/_custom_type_script = "uid://fwissbryiv1s"

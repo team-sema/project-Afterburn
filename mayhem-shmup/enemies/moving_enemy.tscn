@@ -1,0 +1,48 @@
+[gd_scene format=3 uid="uid://dxo5ywpsobagu"]
+
+[ext_resource type="PackedScene" uid="uid://psmpwiapllcb" path="res://enemies/enemy.tscn" id="1_i7e5m"]
+[ext_resource type="Script" uid="uid://chfx4jufyxtju" path="res://enemies/moving_enemy.gd" id="2_pj1js"]
+[ext_resource type="Texture2D" uid="uid://cqo8ule6bvype" path="res://assets/svg/enemy_striker.svg" id="3_2nfdr"]
+[ext_resource type="Script" uid="uid://dq8pwqawl2q7u" path="res://components/border_bounce_component.gd" id="4_5442w"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_7jo6o"]
+size = Vector2(16, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_shxo4"]
+size = Vector2(12, 8)
+
+[node name="MovingEnemy" unique_id=1867910848 instance=ExtResource("1_i7e5m")]
+script = ExtResource("2_pj1js")
+
+[node name="WideGlow" parent="Anchor" parent_id_path=PackedInt32Array(93118890) index="1" unique_id=1704439409]
+texture = ExtResource("3_2nfdr")
+
+[node name="TightGlow" parent="Anchor" parent_id_path=PackedInt32Array(93118890) index="2" unique_id=1479335934]
+texture = ExtResource("3_2nfdr")
+
+[node name="Core" parent="Anchor" parent_id_path=PackedInt32Array(93118890) index="3" unique_id=1004814504]
+texture = ExtResource("3_2nfdr")
+
+[node name="StatsComponent" parent="." index="1" unique_id=1304120856]
+health = 60
+
+[node name="MoveComponent" parent="." index="2" unique_id=695129192]
+velocity = Vector2(0, 10)
+
+[node name="VisibleOnScreenNotifier2D" parent="." index="3" unique_id=1344806211]
+rect = Rect2(-10, -7, 20, 14)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HurtboxComponent" parent_id_path=PackedInt32Array(863455394) index="0" unique_id=2070733100]
+shape = SubResource("RectangleShape2D_7jo6o")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HitboxComponent" parent_id_path=PackedInt32Array(486674932) index="0" unique_id=214876756]
+shape = SubResource("RectangleShape2D_shxo4")
+
+[node name="ScoreComponent" parent="." index="12" unique_id=1849553207]
+adjust_amount = 10
+
+[node name="BorderBounceComponent" type="Node" parent="." index="13" unique_id=305435562 node_paths=PackedStringArray("actor", "move_component")]
+script = ExtResource("4_5442w")
+actor = NodePath("..")
+move_component = NodePath("../MoveComponent")
+metadata/_custom_type_script = "uid://dq8pwqawl2q7u"

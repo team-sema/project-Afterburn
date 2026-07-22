@@ -1,0 +1,95 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://menus/augment_selection_overlay.gd" id="1_overlay"]
+[ext_resource type="LabelSettings" uid="uid://c0rnshv8jeh2e" path="res://fonts/title_label_settings.tres" id="2_title_settings"]
+[ext_resource type="LabelSettings" uid="uid://x33lbqidu7sv" path="res://fonts/default_label_settings.tres" id="3_label_settings"]
+[ext_resource type="FontFile" uid="uid://bkvb0tejtprq8" path="res://fonts/kenney_mini_square.ttf" id="4_font"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_panel"]
+bg_color = Color(0.025, 0.055, 0.11, 0.96)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.18, 0.78, 1, 0.8)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[node name="AugmentSelectionOverlay" type="CanvasLayer"]
+process_mode = 3
+layer = 100
+script = ExtResource("1_overlay")
+
+[node name="Backdrop" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+color = Color(0.005, 0.01, 0.03, 0.88)
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="PanelContainer" type="PanelContainer" parent="MarginContainer"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBox_panel")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/PanelContainer"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="TitleLabel" type="Label" parent="MarginContainer/PanelContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "AUGMENT"
+label_settings = ExtResource("2_title_settings")
+horizontal_alignment = 1
+
+[node name="PromptLabel" type="Label" parent="MarginContainer/PanelContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Choose one of three"
+label_settings = ExtResource("3_label_settings")
+horizontal_alignment = 1
+
+[node name="ChoiceButton1" type="Button" parent="MarginContainer/PanelContainer/VBoxContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_fonts/font = ExtResource("4_font")
+theme_override_font_sizes/font_size = 8
+text = "Choice 1"
+autowrap_mode = 2
+
+[node name="ChoiceButton2" type="Button" parent="MarginContainer/PanelContainer/VBoxContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_fonts/font = ExtResource("4_font")
+theme_override_font_sizes/font_size = 8
+text = "Choice 2"
+autowrap_mode = 2
+
+[node name="ChoiceButton3" type="Button" parent="MarginContainer/PanelContainer/VBoxContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_fonts/font = ExtResource("4_font")
+theme_override_font_sizes/font_size = 8
+text = "Choice 3"
+autowrap_mode = 2

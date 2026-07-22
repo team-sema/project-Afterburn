@@ -1,0 +1,26 @@
+[gd_scene format=3 uid="uid://bhw7lkvyjx43v"]
+
+[ext_resource type="PackedScene" uid="uid://psmpwiapllcb" path="res://enemies/enemy.tscn" id="1_pg5ck"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_b0nf3"]
+radius = 8.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_7jo6o"]
+radius = 6.0
+
+[node name="NormalEnemy" unique_id=1613877094 instance=ExtResource("1_pg5ck")]
+
+[node name="StatsComponent" parent="." index="1" unique_id=1304120856]
+health = 30
+
+[node name="MoveComponent" parent="." index="2" unique_id=695129192]
+velocity = Vector2(0, 40)
+
+[node name="VisibleOnScreenNotifier2D" parent="." index="3" unique_id=1344806211]
+rect = Rect2(-8, -8, 16, 16)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HurtboxComponent" parent_id_path=PackedInt32Array(863455394) index="0" unique_id=523652588]
+shape = SubResource("CircleShape2D_b0nf3")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HitboxComponent" parent_id_path=PackedInt32Array(486674932) index="0" unique_id=568090678]
+shape = SubResource("CircleShape2D_7jo6o")

@@ -1,0 +1,365 @@
+[gd_scene format=3 uid="uid://bwoe7r57jas7q"]
+
+[ext_resource type="Script" uid="uid://bomt5y4vj1hd2" path="res://effects/neon_explosion.gd" id="1_effect"]
+[ext_resource type="Texture2D" uid="uid://djvqurciuxfie" path="res://assets/svg/radial_glow.svg" id="2_glow"]
+[ext_resource type="Texture2D" uid="uid://dgx4kyuwjq5rw" path="res://assets/svg/ring.svg" id="3_ring"]
+[ext_resource type="Texture2D" uid="uid://cb3mlqxj6irxe" path="res://assets/svg/particle_streak.svg" id="4_streak"]
+[ext_resource type="Texture2D" uid="uid://bp1d64ncpt4rh" path="res://assets/svg/particle_diamond.svg" id="5_spark"]
+[ext_resource type="Material" path="res://effects/additive_unshaded_material.tres" id="6_add"]
+[ext_resource type="Material" path="res://effects/diffuse_glow_material.tres" id="7_diffuse"]
+[ext_resource type="AudioStream" uid="uid://yrj7al2878oi" path="res://sounds/explosion_sound.wav" id="8_audio"]
+[ext_resource type="Script" uid="uid://bqoa4vrmw2efx" path="res://components/variable_pitch_audio_stream_player.gd" id="9_audio_script"]
+
+[sub_resource type="Gradient" id="Gradient_streak"]
+colors = PackedColorArray(1, 1, 1, 1, 1, 0.25, 0.55, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture_streak"]
+gradient = SubResource("Gradient_streak")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_streak"]
+particle_flag_disable_z = true
+direction = Vector3(0, -1, 0)
+spread = 180.0
+initial_velocity_min = 65.0
+initial_velocity_max = 105.0
+gravity = Vector3(0, 0, 0)
+scale_min = 0.12
+scale_max = 0.24
+color_ramp = SubResource("GradientTexture_streak")
+
+[sub_resource type="Gradient" id="Gradient_spark"]
+offsets = PackedFloat32Array(0, 0.35, 1)
+colors = PackedColorArray(1, 0.92, 0.75, 1, 1, 0.25, 0.55, 0.8, 0.7, 0.05, 0.3, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture_spark"]
+gradient = SubResource("Gradient_spark")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_spark"]
+particle_flag_disable_z = true
+direction = Vector3(0, -1, 0)
+spread = 180.0
+initial_velocity_min = 22.0
+initial_velocity_max = 52.0
+gravity = Vector3(0, 0, 0)
+scale_min = 0.1
+scale_max = 0.22
+color_ramp = SubResource("GradientTexture_spark")
+
+[sub_resource type="Gradient" id="Gradient_debris"]
+colors = PackedColorArray(1, 0.55, 0.75, 0.85, 0.45, 0.08, 0.3, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture_debris"]
+gradient = SubResource("Gradient_debris")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_debris"]
+particle_flag_disable_z = true
+direction = Vector3(0, -1, 0)
+spread = 180.0
+initial_velocity_min = 12.0
+initial_velocity_max = 34.0
+angular_velocity_min = -320.0
+angular_velocity_max = 320.0
+gravity = Vector3(0, 4, 0)
+scale_min = 0.14
+scale_max = 0.3
+color_ramp = SubResource("GradientTexture_debris")
+
+[sub_resource type="Animation" id="Animation_reset"]
+resource_name = "RESET"
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("FlashSprite:scale")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(0.02, 0.02)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("FlashSprite:modulate")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("GlowSprite:scale")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(0.05, 0.05)]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("GlowSprite:modulate")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/4/type = "value"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath("RingSprite:scale")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(0.04, 0.04)]
+}
+tracks/5/type = "value"
+tracks/5/imported = false
+tracks/5/enabled = true
+tracks/5/path = NodePath("RingSprite:modulate")
+tracks/5/interp = 1
+tracks/5/loop_wrap = true
+tracks/5/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/6/type = "value"
+tracks/6/imported = false
+tracks/6/enabled = true
+tracks/6/path = NodePath("StreakParticles:emitting")
+tracks/6/interp = 1
+tracks/6/loop_wrap = true
+tracks/6/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [false]
+}
+tracks/7/type = "value"
+tracks/7/imported = false
+tracks/7/enabled = true
+tracks/7/path = NodePath("SparkParticles:emitting")
+tracks/7/interp = 1
+tracks/7/loop_wrap = true
+tracks/7/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [false]
+}
+tracks/8/type = "value"
+tracks/8/imported = false
+tracks/8/enabled = true
+tracks/8/path = NodePath("DebrisParticles:emitting")
+tracks/8/interp = 1
+tracks/8/loop_wrap = true
+tracks/8/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [false]
+}
+
+[sub_resource type="Animation" id="Animation_explode"]
+resource_name = "explode"
+length = 0.75
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("FlashSprite:scale")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.06),
+"transitions": PackedFloat32Array(0.5, 1),
+"update": 0,
+"values": [Vector2(0.02, 0.02), Vector2(0.12, 0.12)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("FlashSprite:modulate")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.06),
+"transitions": PackedFloat32Array(2, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 1), Color(1, 1, 1, 0)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("GlowSprite:scale")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 0.16),
+"transitions": PackedFloat32Array(0.5, 1),
+"update": 0,
+"values": [Vector2(0.05, 0.05), Vector2(0.18, 0.18)]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("GlowSprite:modulate")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0, 0.16),
+"transitions": PackedFloat32Array(2, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 1), Color(1, 1, 1, 0)]
+}
+tracks/4/type = "value"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath("RingSprite:scale")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"times": PackedFloat32Array(0, 0.28),
+"transitions": PackedFloat32Array(0.5, 1),
+"update": 0,
+"values": [Vector2(0.04, 0.04), Vector2(0.23, 0.23)]
+}
+tracks/5/type = "value"
+tracks/5/imported = false
+tracks/5/enabled = true
+tracks/5/path = NodePath("RingSprite:modulate")
+tracks/5/interp = 1
+tracks/5/loop_wrap = true
+tracks/5/keys = {
+"times": PackedFloat32Array(0, 0.28),
+"transitions": PackedFloat32Array(2, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 1), Color(1, 1, 1, 0)]
+}
+tracks/6/type = "value"
+tracks/6/imported = false
+tracks/6/enabled = true
+tracks/6/path = NodePath("StreakParticles:emitting")
+tracks/6/interp = 1
+tracks/6/loop_wrap = true
+tracks/6/keys = {
+"times": PackedFloat32Array(0, 0.02),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [true, false]
+}
+tracks/7/type = "value"
+tracks/7/imported = false
+tracks/7/enabled = true
+tracks/7/path = NodePath("SparkParticles:emitting")
+tracks/7/interp = 1
+tracks/7/loop_wrap = true
+tracks/7/keys = {
+"times": PackedFloat32Array(0, 0.02),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [true, false]
+}
+tracks/8/type = "value"
+tracks/8/imported = false
+tracks/8/enabled = true
+tracks/8/path = NodePath("DebrisParticles:emitting")
+tracks/8/interp = 1
+tracks/8/loop_wrap = true
+tracks/8/keys = {
+"times": PackedFloat32Array(0, 0.02),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [true, false]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_explosion"]
+_data = {
+&"RESET": SubResource("Animation_reset"),
+&"explode": SubResource("Animation_explode")
+}
+
+[node name="ExplosionEffect" type="Node2D" unique_id=137626489]
+script = ExtResource("1_effect")
+
+[node name="GlowSprite" type="Sprite2D" parent="." unique_id=375411311]
+modulate = Color(1, 1, 1, 0)
+self_modulate = Color(1, 0.15, 0.5, 0.35)
+texture_filter = 2
+material = ExtResource("7_diffuse")
+scale = Vector2(0.05, 0.05)
+texture = ExtResource("2_glow")
+
+[node name="FlashSprite" type="Sprite2D" parent="." unique_id=578975876]
+modulate = Color(1, 1, 1, 0)
+self_modulate = Color(1, 0.98, 0.9, 1)
+texture_filter = 2
+material = ExtResource("6_add")
+scale = Vector2(0.02, 0.02)
+texture = ExtResource("2_glow")
+
+[node name="RingSprite" type="Sprite2D" parent="." unique_id=953594690]
+modulate = Color(1, 1, 1, 0)
+self_modulate = Color(1, 0.22, 0.55, 0.8)
+texture_filter = 2
+material = ExtResource("6_add")
+scale = Vector2(0.04, 0.04)
+texture = ExtResource("3_ring")
+
+[node name="StreakParticles" type="GPUParticles2D" parent="." unique_id=391644158]
+material = ExtResource("6_add")
+emitting = false
+amount = 18
+texture = ExtResource("4_streak")
+lifetime = 0.15
+one_shot = true
+explosiveness = 1.0
+visibility_rect = Rect2(-32, -32, 64, 64)
+process_material = SubResource("ParticleProcessMaterial_streak")
+
+[node name="SparkParticles" type="GPUParticles2D" parent="." unique_id=1203357934]
+material = ExtResource("6_add")
+emitting = false
+amount = 24
+texture = ExtResource("5_spark")
+lifetime = 0.42
+one_shot = true
+explosiveness = 1.0
+visibility_rect = Rect2(-32, -32, 64, 64)
+process_material = SubResource("ParticleProcessMaterial_spark")
+
+[node name="DebrisParticles" type="GPUParticles2D" parent="." unique_id=244620192]
+material = ExtResource("6_add")
+emitting = false
+amount = 10
+texture = ExtResource("5_spark")
+lifetime = 0.7
+one_shot = true
+explosiveness = 1.0
+visibility_rect = Rect2(-32, -32, 64, 64)
+process_material = SubResource("ParticleProcessMaterial_debris")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=790639912]
+libraries/ = SubResource("AnimationLibrary_explosion")
+
+[node name="VariablePitchAudioStreamPlayer" type="AudioStreamPlayer" parent="." unique_id=871922758]
+stream = ExtResource("8_audio")
+bus = &"SFX"
+script = ExtResource("9_audio_script")
+auto_play_with_variance = true
+metadata/_custom_type_script = "uid://bqoa4vrmw2efx"

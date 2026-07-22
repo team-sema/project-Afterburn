@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="EnemyAugment" format=3 uid="uid://s3405kw20hyh"]
+
+[ext_resource type="PackedScene" uid="uid://bniv8l57wugr5" path="res://components/augment_behaviors/counter_shot_component.tscn" id="1_d0oas"]
+[ext_resource type="Script" uid="uid://be4x07sn0gawv" path="res://resources/enemy_augments/enemy_augment.gd" id="2_2xnlj"]
+[ext_resource type="Script" uid="uid://bd2vhj2tclcdr" path="res://resources/enemy_augments/enemy_stat_modifier.gd" id="3_v4x6w"]
+
+[resource]
+script = ExtResource("2_2xnlj")
+augment_id = &"enemy_counter_shot_on_hit"
+display_name = "Retaliation Protocol"
+description = "Enemies spawned after acquisition fire at the player when hit."
+behavior_components = Array[PackedScene]([ExtResource("1_d0oas")])

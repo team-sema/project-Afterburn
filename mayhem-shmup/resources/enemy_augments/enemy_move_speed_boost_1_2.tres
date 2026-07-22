@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="EnemyAugment" format=3 uid="uid://bg0yl0s7f0b4p"]
+
+[ext_resource type="Script" uid="uid://be4x07sn0gawv" path="res://resources/enemy_augments/enemy_augment.gd" id="1_augment"]
+[ext_resource type="Script" uid="uid://bd2vhj2tclcdr" path="res://resources/enemy_augments/enemy_stat_modifier.gd" id="2_modifier"]
+
+[sub_resource type="Resource" id="Resource_move_speed_modifier"]
+script = ExtResource("2_modifier")
+stat = 1
+multiplier = 1.2
+
+[resource]
+script = ExtResource("1_augment")
+augment_id = &"enemy_move_speed_boost_1_2"
+display_name = "Accelerated Hostiles"
+description = "Enemies spawned after acquisition move 20% faster."
+stat_modifiers = Array[ExtResource("2_modifier")]([SubResource("Resource_move_speed_modifier")])

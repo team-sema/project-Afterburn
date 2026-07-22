@@ -1,0 +1,50 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=5
+
+[application]
+
+config/name="mayhem_shmup"
+run/main_scene="uid://bjwoypvha1bvg"
+config/features=PackedStringArray("4.7", "Mobile")
+config/icon="res://icon.svg"
+
+[audio]
+
+buses/default_bus_layout="uid://dhp5nmgmk01ss"
+
+[autoload]
+
+ResourceStash="*uid://c8ddbdwt5ti7k"
+MusicPlayer="*uid://cgx0x2vh73geh"
+
+[display]
+
+window/size/viewport_width=160
+window/size/viewport_height=240
+window/size/window_width_override=640
+window/size/window_height_override=960
+window/stretch/mode="canvas_items"
+
+[layer_names]
+
+2d_physics/layer_1="player_hurtbox"
+2d_physics/layer_2="enemy_hurtbox"
+2d_physics/layer_3="player_projectile"
+2d_physics/layer_4="enemy_projectile"
+
+[physics]
+
+3d/physics_engine="Jolt Physics"
+
+[rendering]
+
+rendering_device/driver.windows="d3d12"
+renderer/rendering_method="mobile"
+viewport/hdr_2d=true

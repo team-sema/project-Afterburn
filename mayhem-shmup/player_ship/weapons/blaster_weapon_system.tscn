@@ -1,0 +1,30 @@
+[gd_scene format=3 uid="uid://cdav5tnthslwr"]
+
+[ext_resource type="Script" uid="uid://cjt0katdklwxe" path="res://player_ship/weapons/blaster_weapon_system.gd" id="1_0erch"]
+[ext_resource type="Script" uid="uid://fwissbryiv1s" path="res://components/spawner_component.gd" id="2_pi7xe"]
+[ext_resource type="PackedScene" uid="uid://duxfqhn7edvv1" path="res://projectiles/player_blaster.tscn" id="3_0erch"]
+[ext_resource type="AudioStream" uid="uid://dqoje4sxotvw1" path="res://sounds/blaster_sound.wav" id="4_0erch"]
+[ext_resource type="Script" uid="uid://bqoa4vrmw2efx" path="res://components/variable_pitch_audio_stream_player.gd" id="5_ewlq3"]
+
+[node name="BlasterWeaponSystem" type="Node2D" unique_id=2042985464]
+script = ExtResource("1_0erch")
+
+[node name="LeftMuzzle" type="Marker2D" parent="." unique_id=1864647179]
+position = Vector2(-5, -5)
+
+[node name="RightMuzzle" type="Marker2D" parent="." unique_id=692502159]
+position = Vector2(5, -5)
+
+[node name="SpawnerComponent" type="Node2D" parent="." unique_id=981355845]
+script = ExtResource("2_pi7xe")
+scene = ExtResource("3_0erch")
+
+[node name="FireRateTimer" type="Timer" parent="." unique_id=434099209]
+wait_time = 0.15
+autostart = true
+
+[node name="BlasterSoundPlayer" type="AudioStreamPlayer" parent="." unique_id=2083092559]
+stream = ExtResource("4_0erch")
+bus = &"SFX"
+script = ExtResource("5_ewlq3")
+metadata/_custom_type_script = "uid://bqoa4vrmw2efx"

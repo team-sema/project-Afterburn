@@ -1,0 +1,81 @@
+[gd_scene format=3 uid="uid://biklivgjp6cup"]
+
+[ext_resource type="Script" uid="uid://dpwaj8mjch41h" path="res://world.gd" id="1_aqk2v"]
+[ext_resource type="PackedScene" uid="uid://cj6atpgfbbki0" path="res://player_ship/ship.tscn" id="1_f3sb7"]
+[ext_resource type="Resource" uid="uid://qvwx7dbvubh0" path="res://game_stats.tres" id="2_dwbse"]
+[ext_resource type="PackedScene" uid="uid://da58jpbo01r7q" path="res://effects/space_background.tscn" id="2_fj7yv"]
+[ext_resource type="PackedScene" uid="uid://e4v02s4qv8gl" path="res://enemies/enemy_generator.tscn" id="4_aqk2v"]
+[ext_resource type="LabelSettings" uid="uid://x33lbqidu7sv" path="res://fonts/default_label_settings.tres" id="5_036b0"]
+[ext_resource type="Script" uid="uid://tgkx11lah8ro" path="res://enemy_augment_registry.gd" id="6_augment_registry"]
+[ext_resource type="Script" uid="uid://b1vehes3nnrj2" path="res://player_augment_registry.gd" id="8_player_augment_registry"]
+[ext_resource type="Script" uid="uid://bcjr83yghjtmb" path="res://augment_offer_controller.gd" id="9_offer_controller"]
+[ext_resource type="Script" uid="uid://xnvxav21p7tu" path="res://score_augment_offer_trigger.gd" id="10_score_trigger"]
+[ext_resource type="PackedScene" path="res://menus/augment_selection_overlay.tscn" id="11_selection_ui"]
+[ext_resource type="Script" uid="uid://bj3m8sydgty8w" path="res://resources/player_augments/player_augment.gd" id="12_player_augment"]
+[ext_resource type="Script" uid="uid://be4x07sn0gawv" path="res://resources/enemy_augments/enemy_augment.gd" id="13_enemy_augment"]
+[ext_resource type="Resource" uid="uid://cfjn3mfbhkk5u" path="res://resources/player_augments/player_move_speed_boost_1_2.tres" id="14_player_move"]
+[ext_resource type="Resource" uid="uid://ckajigegymf5n" path="res://resources/player_augments/player_fire_rate_boost_1_2.tres" id="15_player_fire"]
+[ext_resource type="Resource" uid="uid://bx055ywmcy0qr" path="res://resources/player_augments/player_weapon_damage_boost_1_2.tres" id="16_player_damage"]
+[ext_resource type="Resource" uid="uid://dck0gm7gvfvng" path="res://resources/enemy_augments/enemy_health_boost_1_2.tres" id="17_enemy_health"]
+[ext_resource type="Resource" uid="uid://s3405kw20hyh" path="res://resources/enemy_augments/enemy_counter_shot_on_hit.tres" id="18_enemy_counter"]
+[ext_resource type="Resource" uid="uid://bg0yl0s7f0b4p" path="res://resources/enemy_augments/enemy_move_speed_boost_1_2.tres" id="19_enemy_move"]
+
+[sub_resource type="Environment" id="Environment_neon"]
+background_mode = 3
+glow_enabled = true
+glow_levels/1 = 0.35
+glow_levels/2 = 0.2
+glow_levels/3 = 0.08
+glow_normalized = true
+glow_intensity = 0.45
+glow_strength = 0.65
+glow_bloom = 0.06
+glow_hdr_threshold = 1.05
+glow_hdr_scale = 1.4
+glow_hdr_luminance_cap = 2.0
+
+[node name="World" type="Node2D" unique_id=1824462065]
+script = ExtResource("1_aqk2v")
+game_stats = ExtResource("2_dwbse")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1576001542]
+environment = SubResource("Environment_neon")
+
+[node name="EnemyAugmentRegistry" type="Node" parent="." unique_id=1127529951]
+script = ExtResource("6_augment_registry")
+
+[node name="PlayerAugmentRegistry" type="Node" parent="." unique_id=1936025888]
+script = ExtResource("8_player_augment_registry")
+
+[node name="AugmentSelectionOverlay" parent="." unique_id=860252183 instance=ExtResource("11_selection_ui")]
+
+[node name="AugmentOfferController" type="Node" parent="." unique_id=536362798 node_paths=PackedStringArray("player_registry", "enemy_registry", "selection_ui")]
+script = ExtResource("9_offer_controller")
+player_registry = NodePath("../PlayerAugmentRegistry")
+enemy_registry = NodePath("../EnemyAugmentRegistry")
+selection_ui = NodePath("../AugmentSelectionOverlay")
+player_augment_pool = Array[ExtResource("12_player_augment")]([ExtResource("14_player_move"), ExtResource("15_player_fire"), ExtResource("16_player_damage")])
+enemy_augment_pool = Array[ExtResource("13_enemy_augment")]([ExtResource("17_enemy_health"), ExtResource("18_enemy_counter"), ExtResource("19_enemy_move")])
+
+[node name="ScoreAugmentOfferTrigger" type="Node" parent="." unique_id=2083869815 node_paths=PackedStringArray("offer_controller")]
+script = ExtResource("10_score_trigger")
+game_stats = ExtResource("2_dwbse")
+offer_controller = NodePath("../AugmentOfferController")
+first_offer_score = 100
+score_interval = 100
+
+[node name="Ship" parent="." unique_id=546523985 node_paths=PackedStringArray("augment_registry") instance=ExtResource("1_f3sb7")]
+position = Vector2(80, 216)
+augment_registry = NodePath("../PlayerAugmentRegistry")
+
+[node name="SpaceBackground" parent="." unique_id=254113572 instance=ExtResource("2_fj7yv")]
+
+[node name="EnemyGenerator" parent="." unique_id=755348219 node_paths=PackedStringArray("augment_registry") instance=ExtResource("4_aqk2v")]
+augment_registry = NodePath("../EnemyAugmentRegistry")
+
+[node name="ScoreLabel" type="Label" parent="." unique_id=1545919711]
+offset_right = 160.0
+offset_bottom = 10.0
+text = "SCORE"
+label_settings = ExtResource("5_036b0")
+horizontal_alignment = 1

@@ -1,0 +1,138 @@
+[gd_scene format=3 uid="uid://cj6atpgfbbki0"]
+
+[ext_resource type="Script" uid="uid://crpoj55qvrg86" path="res://player_ship/ship.gd" id="1_etvdo"]
+[ext_resource type="Material" uid="uid://c12oxsfcofdko" path="res://effects/additive_unshaded_material.tres" id="2_add_material"]
+[ext_resource type="Material" path="res://effects/core_unshaded_material.tres" id="2_core_material"]
+[ext_resource type="Material" uid="uid://c75j508nnunik" path="res://effects/diffuse_glow_material.tres" id="2_diffuse_material"]
+[ext_resource type="Texture2D" uid="uid://djvqurciuxfie" path="res://assets/svg/radial_glow.svg" id="2_diffuse_visual"]
+[ext_resource type="Texture2D" uid="uid://bp1d64ncpt4rh" path="res://assets/svg/particle_diamond.svg" id="2_particle_visual"]
+[ext_resource type="Texture2D" uid="uid://cl128g6v4ouqf" path="res://assets/svg/player_ship.svg" id="2_ship_visual"]
+[ext_resource type="Material" path="res://effects/tight_glow_material.tres" id="2_tight_material"]
+[ext_resource type="Material" path="res://effects/wide_glow_material.tres" id="2_wide_material"]
+[ext_resource type="Script" uid="uid://dbgfouplndi2j" path="res://components/move_component.gd" id="2_y3mk2"]
+[ext_resource type="Script" uid="uid://4aq784f5i8dm" path="res://components/move_input_component.gd" id="3_snm6p"]
+[ext_resource type="Resource" uid="uid://pmtel2tvy20u" path="res://player_ship/ship_move_stats.tres" id="4_0n25c"]
+[ext_resource type="Script" uid="uid://sbnjkqxaq3n5" path="res://components/position_clamp_component.gd" id="5_6u6rn"]
+[ext_resource type="Script" uid="uid://fwissbryiv1s" path="res://components/spawner_component.gd" id="7_iekxl"]
+[ext_resource type="PackedScene" uid="uid://cdav5tnthslwr" path="res://player_ship/weapons/blaster_weapon_system.tscn" id="8_blaster_weapon"]
+[ext_resource type="Script" uid="uid://c1yamqkv7l4ue" path="res://components/scale_component.gd" id="9_le0bn"]
+[ext_resource type="Script" uid="uid://cevdd3xts0btk" path="res://components/stats_component.gd" id="11_lltil"]
+[ext_resource type="PackedScene" path="res://player_ship/player_hit_point.tscn" id="12_hit_point"]
+[ext_resource type="Script" uid="uid://dte0u84j5jjya" path="res://components/hurt_component.gd" id="13_kbeao"]
+[ext_resource type="PackedScene" uid="uid://bwoe7r57jas7q" path="res://effects/explosion_effect.tscn" id="14_a146t"]
+[ext_resource type="Script" uid="uid://c3k4jpus0y6t2" path="res://components/destroyed_component.gd" id="15_gglps"]
+[ext_resource type="Script" uid="uid://pplrd0hkg7ca" path="res://components/player_augment_applier.gd" id="17_player_augment_applier"]
+[ext_resource type="PackedScene" uid="uid://d0nj13ptnmpmp" path="res://player_ship/weapons/laser_weapon_system.tscn" id="18_laser_weapon"]
+
+[sub_resource type="Gradient" id="Gradient_engine"]
+offsets = PackedFloat32Array(0, 0.35, 1)
+colors = PackedColorArray(0.85, 1, 1, 0.9, 0.25, 0.9, 1, 0.55, 0.12, 0.7, 1, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture_engine"]
+gradient = SubResource("Gradient_engine")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_engine"]
+particle_flag_disable_z = true
+direction = Vector3(0, 1, 0)
+spread = 10.0
+initial_velocity_min = 20.0
+initial_velocity_max = 30.0
+gravity = Vector3(0, 0, 0)
+scale_min = 0.12
+scale_max = 0.28
+color_ramp = SubResource("GradientTexture_engine")
+
+[node name="Ship" type="Node2D" unique_id=1742674716 groups=["player"]]
+script = ExtResource("1_etvdo")
+
+[node name="Anchor" type="Node2D" parent="." unique_id=1947035463]
+
+[node name="DiffuseGlow" type="Sprite2D" parent="Anchor" unique_id=1192610444]
+self_modulate = Color(0.25, 0.9, 1, 0.08)
+show_behind_parent = true
+material = ExtResource("2_diffuse_material")
+position = Vector2(0, 4)
+scale = Vector2(0.26, 0.2)
+texture = ExtResource("2_diffuse_visual")
+
+[node name="WideGlow" type="Sprite2D" parent="Anchor" unique_id=1405667258]
+self_modulate = Color(0.25, 0.9, 1, 0.11)
+show_behind_parent = true
+material = ExtResource("2_wide_material")
+scale = Vector2(0.38, 0.38)
+texture = ExtResource("2_ship_visual")
+
+[node name="TightGlow" type="Sprite2D" parent="Anchor" unique_id=304609758]
+self_modulate = Color(0.3, 0.95, 1, 0.36)
+show_behind_parent = true
+material = ExtResource("2_tight_material")
+scale = Vector2(0.27, 0.27)
+texture = ExtResource("2_ship_visual")
+
+[node name="ShipSprite" type="Sprite2D" parent="Anchor" unique_id=1918650723]
+unique_name_in_owner = true
+self_modulate = Color(0.92, 1, 1, 1)
+material = ExtResource("2_core_material")
+scale = Vector2(0.25, 0.25)
+texture = ExtResource("2_ship_visual")
+
+[node name="EngineTrail" type="GPUParticles2D" parent="Anchor" unique_id=2105544778]
+material = ExtResource("2_add_material")
+position = Vector2(0, 11)
+amount = 32
+texture = ExtResource("2_particle_visual")
+lifetime = 0.35
+visibility_rect = Rect2(-18, -8, 36, 48)
+process_material = SubResource("ParticleProcessMaterial_engine")
+
+[node name="MoveComponent" type="Node" parent="." unique_id=647428154 node_paths=PackedStringArray("actor")]
+script = ExtResource("2_y3mk2")
+actor = NodePath("..")
+metadata/_custom_type_script = "uid://dbgfouplndi2j"
+
+[node name="MoveInputComponent" type="Node" parent="." unique_id=440981363 node_paths=PackedStringArray("move_component")]
+script = ExtResource("3_snm6p")
+move_stats = ExtResource("4_0n25c")
+move_component = NodePath("../MoveComponent")
+metadata/_custom_type_script = "uid://4aq784f5i8dm"
+
+[node name="PositionClampComponent" type="Node2D" parent="." unique_id=218517231 node_paths=PackedStringArray("actor")]
+script = ExtResource("5_6u6rn")
+actor = NodePath("..")
+
+[node name="WeaponMount" type="Node2D" parent="." unique_id=729018196]
+
+[node name="BlasterWeaponSystem" parent="WeaponMount" unique_id=165002011 instance=ExtResource("8_blaster_weapon")]
+
+[node name="LaserWeaponSystem" parent="WeaponMount" unique_id=2092351212 instance=ExtResource("18_laser_weapon")]
+
+[node name="PlayerAugmentApplier" type="Node" parent="." unique_id=2001884346 node_paths=PackedStringArray("move_component")]
+script = ExtResource("17_player_augment_applier")
+move_component = NodePath("../MoveComponent")
+
+[node name="ScaleComponent" type="Node" parent="." unique_id=409266105 node_paths=PackedStringArray("sprite")]
+script = ExtResource("9_le0bn")
+sprite = NodePath("../Anchor")
+scale_amount = Vector2(1.25, 1.25)
+scale_duration = 0.3
+
+[node name="StatsComponent" type="Node" parent="." unique_id=337505827]
+script = ExtResource("11_lltil")
+
+[node name="PlayerHitPoint" parent="." instance=ExtResource("12_hit_point")]
+
+[node name="HurtComponent" type="Node" parent="." unique_id=918904643 node_paths=PackedStringArray("stats_component", "hurtbox_component")]
+script = ExtResource("13_kbeao")
+stats_component = NodePath("../StatsComponent")
+hurtbox_component = NodePath("../PlayerHitPoint/HurtboxComponent")
+
+[node name="ExplosionSpawnerComponent" type="Node2D" parent="." unique_id=925069816]
+script = ExtResource("7_iekxl")
+scene = ExtResource("14_a146t")
+
+[node name="DestroyedComponent" type="Node" parent="." unique_id=921357973 node_paths=PackedStringArray("actor", "stats_component", "destroy_effect_spawner_component")]
+script = ExtResource("15_gglps")
+actor = NodePath("..")
+stats_component = NodePath("../StatsComponent")
+destroy_effect_spawner_component = NodePath("../ExplosionSpawnerComponent")
+destroy_effect_color = Color(0.25, 0.9, 1, 1)
