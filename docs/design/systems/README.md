@@ -4,6 +4,7 @@
 
 | slug | 제목 | 상태 |
 |------|------|------|
+| [readme-docs-links](readme-docs-links.md) | README 스펙·칸반 링크 | review |
 | [docs-site-kanban](docs-site-kanban.md) | docs 사이트 · 칸반 · 워크플로 | review |
 | [kanban-v2](kanban-v2.md) | 백로그 칸반 v2 | 운영 |
 

@@ -40,6 +40,14 @@
   ],
   "cards": [
     {
+      "id": "readme-docs-links",
+      "title": "README에 스펙·칸반 링크",
+      "description": "루트 README에 Pages 스펙·칸반 URL 추가.",
+      "column": "review",
+      "file": "cards/readme-docs-links.md",
+      "tags": ["문서"]
+    },
+    {
       "id": "docs-site-kanban",
       "title": "docs 스펙·칸반 사이트",
       "description": "카테고리 스펙 브라우저 + 7열 칸반 + Cursor /feature·/push 워크플로 + Godot 루트 승격.",
