@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="PlayerAugment" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://resources/player_augments/player_augment.gd" id="1_aug"]
+[ext_resource type="Resource" path="res://resources/weapons/definitions/main_laser.tres" id="2_weapon"]
+
+[resource]
+script = ExtResource("1_aug")
+augment_id = &"equip_main_laser"
+display_name = "레이저 시스템"
+description = "주무기를 연속 빔 레이저로 교체합니다."
+augment_type = 1
+weapon_definition = ExtResource("2_weapon")

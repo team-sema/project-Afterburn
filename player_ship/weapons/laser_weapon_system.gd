@@ -20,10 +20,14 @@ func _ready() -> void:
 
 
 func _physics_process(_delta: float) -> void:
+	if is_shutdown:
+		return
 	_update_beam_endpoint()
 
 
 func apply_damage_tick() -> void:
+	if is_shutdown:
+		return
 	_update_beam_endpoint()
 	if not ray_cast.is_colliding():
 		return
@@ -40,6 +44,15 @@ func _apply_stat_multipliers() -> void:
 	if not is_node_ready():
 		return
 	damage_tick_timer.wait_time = base_tick_interval / get_effective_fire_rate_multiplier()
+
+
+func _on_weapon_shutdown() -> void:
+	set_physics_process(false)
+	visible = false
+	if damage_tick_timer != null:
+		damage_tick_timer.stop()
+		if damage_tick_timer.timeout.is_connected(apply_damage_tick):
+			damage_tick_timer.timeout.disconnect(apply_damage_tick)
 
 
 func _update_beam_endpoint() -> void:

@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="WeaponDropTable" load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://resources/weapons/weapon_drop_table.gd" id="1_script"]
+[ext_resource type="Resource" path="res://resources/weapons/definitions/main_blaster.tres" id="2_blaster"]
+[ext_resource type="Resource" path="res://resources/weapons/definitions/main_laser.tres" id="3_laser"]
+[ext_resource type="Resource" path="res://resources/weapons/definitions/aux_test_cannon.tres" id="4_cannon"]
+[ext_resource type="Resource" path="res://resources/weapons/definitions/aux_test_flak.tres" id="5_flak"]
+[ext_resource type="Resource" path="res://resources/weapons/definitions/aux_orbital_barrier.tres" id="6_barrier"]
+
+[resource]
+script = ExtResource("1_script")
+weapons = Array[Resource]([ExtResource("2_blaster"), ExtResource("3_laser"), ExtResource("4_cannon"), ExtResource("5_flak"), ExtResource("6_barrier")])

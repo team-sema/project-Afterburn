@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://cmey2cic1ef7d" path="res://menus/augment_selection_overlay.gd" id="1_overlay"]
 [ext_resource type="LabelSettings" uid="uid://c0rnshv8jeh2e" path="res://fonts/title_label_settings.tres" id="2_title_settings"]
 [ext_resource type="LabelSettings" uid="uid://x33lbqidu7sv" path="res://fonts/default_label_settings.tres" id="3_label_settings"]
-[ext_resource type="FontFile" uid="uid://bkvb0tejtprq8" path="res://fonts/kenney_mini_square.ttf" id="4_font"]
+[ext_resource type="FontFile" uid="uid://dhbb73hkpge3y" path="res://fonts/Mulmaru.ttf" id="4_font"]
 [ext_resource type="PackedScene" path="res://menus/augment_breakpoint_intro.tscn" id="5_breakpoint_intro"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_panel"]
@@ -57,14 +57,14 @@ theme_override_constants/separation = 4
 [node name="TitleLabel" type="Label" parent="MarginContainer/PanelContainer/VBoxContainer" unique_id=1887388987]
 unique_name_in_owner = true
 layout_mode = 2
-text = "AUGMENT"
+text = "강화"
 label_settings = ExtResource("2_title_settings")
 horizontal_alignment = 1
 
 [node name="PromptLabel" type="Label" parent="MarginContainer/PanelContainer/VBoxContainer" unique_id=1056033097]
 unique_name_in_owner = true
 layout_mode = 2
-text = "Choose one of three"
+text = "셋 중 하나를 고르세요"
 label_settings = ExtResource("3_label_settings")
 horizontal_alignment = 1
 autowrap_mode = 2
@@ -81,8 +81,8 @@ custom_minimum_size = Vector2(0, 52)
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_fonts/font = ExtResource("4_font")
-theme_override_font_sizes/font_size = 8
-text = "Choice 1"
+theme_override_font_sizes/font_size = 10
+text = "선택 1"
 autowrap_mode = 2
 
 [node name="ChoiceButton2" type="Button" parent="MarginContainer/PanelContainer/VBoxContainer" unique_id=1842936470]
@@ -91,8 +91,8 @@ custom_minimum_size = Vector2(0, 52)
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_fonts/font = ExtResource("4_font")
-theme_override_font_sizes/font_size = 8
-text = "Choice 2"
+theme_override_font_sizes/font_size = 10
+text = "선택 2"
 autowrap_mode = 2
 
 [node name="ChoiceButton3" type="Button" parent="MarginContainer/PanelContainer/VBoxContainer" unique_id=779700868]
@@ -101,6 +101,6 @@ custom_minimum_size = Vector2(0, 52)
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_fonts/font = ExtResource("4_font")
-theme_override_font_sizes/font_size = 8
-text = "Choice 3"
+theme_override_font_sizes/font_size = 10
+text = "선택 3"
 autowrap_mode = 2

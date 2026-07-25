@@ -1,6 +1,7 @@
 [gd_resource type="LabelSettings" format=3 uid="uid://c0rnshv8jeh2e"]
 
-[ext_resource type="FontFile" uid="uid://bkvb0tejtprq8" path="res://fonts/kenney_mini_square.ttf" id="1_ft0t3"]
+[ext_resource type="FontFile" uid="uid://dhbb73hkpge3y" path="res://fonts/Mulmaru.ttf" id="1_ft0t3"]
 
 [resource]
 font = ExtResource("1_ft0t3")
+font_size = 14

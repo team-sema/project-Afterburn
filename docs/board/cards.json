@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-22",
+  "updated": "2026-07-25",
   "source": "docs/board/cards/*.md",
   "columns": [
     {
@@ -39,6 +39,14 @@
     }
   ],
   "cards": [
+    {
+      "id": "weapon-slot-loadout",
+      "title": "무기 획득 및 강화",
+      "description": "드롭으로 주/보조 획득·동일무기 강화. 오그먼트는 성능만.",
+      "column": "review",
+      "file": "cards/weapon-slot-loadout.md",
+      "tags": ["플레이어", "무기", "드롭"]
+    },
     {
       "id": "readme-docs-links",
       "title": "README에 스펙·칸반 링크",

@@ -18,6 +18,8 @@ func _ready() -> void:
 
 
 func fire() -> void:
+	if is_shutdown:
+		return
 	blaster_sound_player.play_with_variance()
 
 	var muzzle := right_muzzle
@@ -25,9 +27,13 @@ func fire() -> void:
 		muzzle = left_muzzle
 	is_left_firing = not is_left_firing
 
+	var parent_scene := get_tree().current_scene
+	if parent_scene == null:
+		return
+
 	spawner_component.spawn(
 		muzzle.global_position,
-		get_tree().current_scene,
+		parent_scene,
 		_configure_projectile,
 	)
 	fired.emit()
@@ -37,6 +43,13 @@ func _apply_stat_multipliers() -> void:
 	if not is_node_ready():
 		return
 	fire_rate_timer.wait_time = base_fire_wait_time / get_effective_fire_rate_multiplier()
+
+
+func _on_weapon_shutdown() -> void:
+	if fire_rate_timer != null:
+		fire_rate_timer.stop()
+		if fire_rate_timer.timeout.is_connected(fire):
+			fire_rate_timer.timeout.disconnect(fire)
 
 
 func _configure_projectile(projectile: Node) -> void:

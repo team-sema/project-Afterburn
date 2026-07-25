@@ -17,15 +17,14 @@ Move / MoveInput / PositionClamp / WeaponMount(Blaster+Laser) / PlayerAugmentApp
 - Hurtbox CollisionShape + 비주얼 스케일
 - 플레이어 Hurtbox 위치 (기본 **layer 1** `player_hurtbox`)
 
-## 무기
+## 무기 (슬롯 무장)
 
-| 클래스 | 동작 |
-|--------|------|
-| `WeaponSystem` | 전역/로컬 연사·데미지 배수 API · `fired` |
-| `BlasterWeaponSystem` | L/R 교대 · 타이머 **0.15s** · `player_blaster.tscn` |
-| `LaserWeaponSystem` | RayCast(mask 2) 연속빔 · tick마다 hurtbox에 `hurt` |
-
-두 무기는 **항상 장착**. 교체/해금 플로우 없음.
+- `PlayerWeaponLoadout`: 주무기 1 + 보조 최대 3 (시작 시 보조 슬롯 3개 모두 해금·빈칸)
+- 시작 주무기: 블래스터 Lv.1
+- **획득**: 적 드롭 픽업 (`WeaponAcquisitionController`). 오그먼트로 무기 지급하지 않음
+- 동일 무기 픽업 → 해당 슬롯 강화 (최대 Lv.3, 불가 시 아이템 유지)
+- 다른 주무기 → 교체 확인 / 보조 빈칸 자동 장착 / 가득 차면 교체 UI
+- 무기 교체 시 해당 슬롯 레벨은 1로 리셋. 최종 배율 = 플레이어 공통 × 슬롯
 
 ## PlayerAugmentApplier
 
@@ -33,5 +32,6 @@ Move / MoveInput / PositionClamp / WeaponMount(Blaster+Laser) / PlayerAugmentApp
 
 - `MOVE_SPEED` → `MoveComponent.velocity_multiplier`
 - `FIRE_RATE` / `WEAPON_DAMAGE` → 각 WeaponSystem 전역 배수
+- `UPGRADE_*` → 슬롯 오버클럭 (성능). 장착/해금 타입은 무시
 
 > `PlayerAugment.behavior_components`는 **적용하지 않음** (적 쪽만 동작).

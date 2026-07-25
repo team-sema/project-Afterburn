@@ -26,4 +26,4 @@ func _ready() -> void:
 	)
 
 func update_score_label(score: int):
-	score_label.text = "Score: %s" % score
+	score_label.text = "점수: %s" % score
