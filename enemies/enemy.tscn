@@ -25,6 +25,9 @@
 [ext_resource type="AudioStream" uid="uid://cgkwd7l7dft5k" path="res://sounds/hit_sound.wav" id="16_grymm"]
 [ext_resource type="Script" uid="uid://c68y72o52sjpg" path="res://components/targeting_component.gd" id="17_targeting"]
 [ext_resource type="Script" uid="uid://dc07e26n4nnok" path="res://components/enemy_modifier_factory.gd" id="24_factory"]
+[ext_resource type="Script" path="res://components/weapon_drop_component.gd" id="25_drop"]
+[ext_resource type="Resource" path="res://resources/weapons/default_weapon_drop_table.tres" id="26_drop_table"]
+[ext_resource type="PackedScene" path="res://pickups/weapon_pickup.tscn" id="27_pickup"]
 
 [node name="Enemy" type="Node2D" unique_id=1578043332]
 script = ExtResource("1_3t1x0")
@@ -128,3 +131,11 @@ script = ExtResource("17_targeting")
 
 [node name="EnemyModifierFactory" type="Node" parent="." unique_id=1356113284]
 script = ExtResource("24_factory")
+
+[node name="WeaponDropComponent" type="Node" parent="." node_paths=PackedStringArray("stats_component", "actor")]
+script = ExtResource("25_drop")
+stats_component = NodePath("../StatsComponent")
+actor = NodePath("..")
+drop_table = ExtResource("26_drop_table")
+pickup_scene = ExtResource("27_pickup")
+drop_chance = 0.08

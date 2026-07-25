@@ -10,6 +10,6 @@ multiplier = 1.2
 [resource]
 script = ExtResource("1_augment")
 augment_id = &"enemy_health_boost_1_2"
-display_name = "Enemy Reinforcement"
-description = "Enemies spawned after acquisition have 20% more health."
+display_name = "적 증원"
+description = "이후 등장하는 적의 체력이 20% 증가합니다."
 stat_modifiers = Array[ExtResource("2_modifier")]([SubResource("Resource_health_modifier")])

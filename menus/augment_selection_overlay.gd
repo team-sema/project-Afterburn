@@ -82,8 +82,8 @@ func close_with_result(player_augment: PlayerAugment, enemy_augment: EnemyAugmen
 	await _fade_content(0.0, phase_transition_duration * 0.75)
 	current_choices.clear()
 	_set_choice_buttons_visible(false)
-	title_label.text = "AUGMENTS LOCKED"
-	prompt_label.text = "YOU: %s\nTHREAT: %s" % [player_augment.display_name, enemy_augment.display_name]
+	title_label.text = "강화 확정"
+	prompt_label.text = "아군: %s\n위협: %s" % [player_augment.display_name, enemy_augment.display_name]
 	accent_bar.color = Color.WHITE
 	await _fade_content(1.0, phase_transition_duration)
 	await _wait(result_hold_duration)

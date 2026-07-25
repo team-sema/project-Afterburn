@@ -11,6 +11,6 @@ multiplier = 1.2
 [resource]
 script = ExtResource("1_augment")
 augment_id = &"player_fire_rate_boost_1_2"
-display_name = "Accelerated Capacitors"
-description = "Increases fire rate by 20%."
+display_name = "가속 캐패시터"
+description = "공격 속도가 20% 증가합니다."
 stat_modifiers = Array[ExtResource("2_modifier")]([SubResource("Resource_fire_rate_modifier")])

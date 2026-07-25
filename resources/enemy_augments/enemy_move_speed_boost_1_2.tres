@@ -11,6 +11,6 @@ multiplier = 1.2
 [resource]
 script = ExtResource("1_augment")
 augment_id = &"enemy_move_speed_boost_1_2"
-display_name = "Accelerated Hostiles"
-description = "Enemies spawned after acquisition move 20% faster."
+display_name = "가속 적대"
+description = "이후 등장하는 적의 이동 속도가 20% 증가합니다."
 stat_modifiers = Array[ExtResource("2_modifier")]([SubResource("Resource_move_speed_modifier")])

@@ -7,6 +7,6 @@
 [resource]
 script = ExtResource("2_2xnlj")
 augment_id = &"enemy_counter_shot_on_hit"
-display_name = "Retaliation Protocol"
-description = "Enemies spawned after acquisition fire at the player when hit."
+display_name = "보복 프로토콜"
+description = "이후 등장하는 적이 피격 시 플레이어를 향해 반격합니다."
 behavior_components = Array[PackedScene]([ExtResource("1_d0oas")])

@@ -31,7 +31,7 @@ layout_mode = 2
 
 [node name="GameOverLabel" type="Label" parent="CenterContainer/VBoxContainer" unique_id=453045991]
 layout_mode = 2
-text = "Game Over"
+text = "게임 오버"
 label_settings = ExtResource("2_slp2k")
 horizontal_alignment = 1
 
@@ -41,7 +41,7 @@ layout_mode = 2
 [node name="ScoreLabel" type="Label" parent="CenterContainer/VBoxContainer/ScoreHBoxContainer" unique_id=2092091296]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Score:"
+text = "점수:"
 label_settings = ExtResource("3_hl86a")
 
 [node name="ScoreValue" type="Label" parent="CenterContainer/VBoxContainer/ScoreHBoxContainer" unique_id=728922124]
@@ -56,7 +56,7 @@ layout_mode = 2
 [node name="HighScoreLabel" type="Label" parent="CenterContainer/VBoxContainer/HighScoreHBoxContainer" unique_id=1281679424]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "High Score:"
+text = "최고 점수:"
 label_settings = ExtResource("3_hl86a")
 
 [node name="HighScoreValue" type="Label" parent="CenterContainer/VBoxContainer/HighScoreHBoxContainer" unique_id=1853253167]
@@ -71,7 +71,7 @@ layout_mode = 2
 
 [node name="MenuLabel" type="Label" parent="CenterContainer/VBoxContainer" unique_id=789483620]
 layout_mode = 2
-text = "Press 'space' to return
-to the start menu"
+text = "스페이스 키로
+시작 메뉴로 돌아가기"
 label_settings = ExtResource("3_hl86a")
 horizontal_alignment = 1

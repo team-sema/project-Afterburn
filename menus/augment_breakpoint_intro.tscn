@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://c6x6veg03hm8w"]
 
 [ext_resource type="Script" uid="uid://b7yi1aiv8r845" path="res://menus/augment_breakpoint_intro.gd" id="1_intro"]
-[ext_resource type="FontFile" uid="uid://bkvb0tejtprq8" path="res://fonts/kenney_mini_square.ttf" id="2_font"]
+[ext_resource type="FontFile" uid="uid://dhbb73hkpge3y" path="res://fonts/Mulmaru.ttf" id="2_font"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_card"]
 bg_color = Color(0.015, 0.04, 0.085, 0.98)
@@ -19,19 +19,19 @@ shadow_size = 4
 
 [sub_resource type="LabelSettings" id="LabelSettings_eyebrow"]
 font = ExtResource("2_font")
-font_size = 7
+font_size = 8
 font_color = Color(0.35, 0.88, 1, 0.9)
 
 [sub_resource type="LabelSettings" id="LabelSettings_title"]
 font = ExtResource("2_font")
-font_size = 14
+font_size = 12
 font_color = Color(0.9, 0.98, 1, 1)
 outline_size = 2
 outline_color = Color(0.04, 0.35, 0.55, 0.8)
 
 [sub_resource type="LabelSettings" id="LabelSettings_subtitle"]
 font = ExtResource("2_font")
-font_size = 7
+font_size = 8
 font_color = Color(0.65, 0.82, 0.9, 0.9)
 
 [sub_resource type="Animation" id="Animation_reset"]
@@ -158,14 +158,14 @@ theme_override_constants/separation = 3
 
 [node name="EventLabel" type="Label" parent="CenterContainer/BreakpointCard/MarginContainer/VBoxContainer" unique_id=55440925]
 layout_mode = 2
-text = "SYSTEM EVENT"
+text = "시스템 이벤트"
 label_settings = SubResource("LabelSettings_eyebrow")
 horizontal_alignment = 1
 
 [node name="TitleLabel" type="Label" parent="CenterContainer/BreakpointCard/MarginContainer/VBoxContainer" unique_id=1050792614]
 layout_mode = 2
-text = "AUGMENT
-BREAKPOINT"
+text = "강화
+분기점"
 label_settings = SubResource("LabelSettings_title")
 horizontal_alignment = 1
 
@@ -177,7 +177,7 @@ color = Color(0.18, 0.82, 1, 1)
 
 [node name="SubtitleLabel" type="Label" parent="CenterContainer/BreakpointCard/MarginContainer/VBoxContainer" unique_id=1454096373]
 layout_mode = 2
-text = "POWER SHIFT DETECTED"
+text = "전력 변동 감지"
 label_settings = SubResource("LabelSettings_subtitle")
 horizontal_alignment = 1
 

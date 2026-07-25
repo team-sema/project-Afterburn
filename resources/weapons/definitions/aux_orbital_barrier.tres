@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="WeaponDefinition" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://resources/weapons/weapon_definition.gd" id="1_def"]
+[ext_resource type="PackedScene" path="res://player_ship/weapons/orbital_barrier_weapon_system.tscn" id="2_scene"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"aux_orbital_barrier"
+display_name = "궤도 방벽"
+category = 1
+weapon_scene = ExtResource("2_scene")
+description = "플레이어 주변을 돌며 적에게 피해를 주고, 피격 시 조각이 파괴되는 방어막."

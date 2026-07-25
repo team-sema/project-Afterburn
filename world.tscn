@@ -11,6 +11,10 @@
 [ext_resource type="Script" uid="uid://bcjr83yghjtmb" path="res://augment_offer_controller.gd" id="9_offer_controller"]
 [ext_resource type="Script" uid="uid://xnvxav21p7tu" path="res://score_augment_offer_trigger.gd" id="10_score_trigger"]
 [ext_resource type="PackedScene" uid="uid://503oqsi4rpuh" path="res://menus/augment_selection_overlay.tscn" id="11_selection_ui"]
+[ext_resource type="PackedScene" path="res://menus/weapon_slot_selection_overlay.tscn" id="11b_slot_ui"]
+[ext_resource type="PackedScene" path="res://menus/weapon_acquire_confirm_overlay.tscn" id="11d_confirm_ui"]
+[ext_resource type="Script" path="res://menus/weapon_loadout_hud.gd" id="11c_hud"]
+[ext_resource type="Script" path="res://player_ship/weapon_acquisition_controller.gd" id="11e_acquire"]
 [ext_resource type="Script" uid="uid://bj3m8sydgty8w" path="res://resources/player_augments/player_augment.gd" id="12_player_augment"]
 [ext_resource type="Script" uid="uid://be4x07sn0gawv" path="res://resources/enemy_augments/enemy_augment.gd" id="13_enemy_augment"]
 [ext_resource type="Resource" uid="uid://cfjn3mfbhkk5u" path="res://resources/player_augments/player_move_speed_boost_1_2.tres" id="14_player_move"]
@@ -19,6 +23,8 @@
 [ext_resource type="Resource" uid="uid://dck0gm7gvfvng" path="res://resources/enemy_augments/enemy_health_boost_1_2.tres" id="17_enemy_health"]
 [ext_resource type="Resource" uid="uid://s3405kw20hyh" path="res://resources/enemy_augments/enemy_counter_shot_on_hit.tres" id="18_enemy_counter"]
 [ext_resource type="Resource" uid="uid://bg0yl0s7f0b4p" path="res://resources/enemy_augments/enemy_move_speed_boost_1_2.tres" id="19_enemy_move"]
+[ext_resource type="Resource" path="res://resources/player_augments/weapon/upgrade_main_slot.tres" id="23_up_main"]
+[ext_resource type="Resource" path="res://resources/player_augments/weapon/upgrade_auxiliary_slot.tres" id="24_up_aux"]
 
 [sub_resource type="Environment" id="Environment_neon"]
 background_mode = 3
@@ -50,12 +56,24 @@ script = ExtResource("8_player_augment_registry")
 [node name="AugmentSelectionOverlay" parent="." unique_id=860252183 instance=ExtResource("11_selection_ui")]
 close_duration = 1.0
 
-[node name="AugmentOfferController" type="Node" parent="." unique_id=536362798 node_paths=PackedStringArray("player_registry", "enemy_registry", "selection_ui")]
+[node name="WeaponSlotSelectionOverlay" parent="." instance=ExtResource("11b_slot_ui")]
+
+[node name="WeaponAcquireConfirmOverlay" parent="." instance=ExtResource("11d_confirm_ui")]
+
+[node name="WeaponAcquisitionController" type="Node" parent="." node_paths=PackedStringArray("ship", "slot_selection_ui", "confirm_ui")]
+script = ExtResource("11e_acquire")
+ship = NodePath("../Ship")
+slot_selection_ui = NodePath("../WeaponSlotSelectionOverlay")
+confirm_ui = NodePath("../WeaponAcquireConfirmOverlay")
+
+[node name="AugmentOfferController" type="Node" parent="." unique_id=536362798 node_paths=PackedStringArray("player_registry", "enemy_registry", "selection_ui", "slot_selection_ui", "ship")]
 script = ExtResource("9_offer_controller")
 player_registry = NodePath("../PlayerAugmentRegistry")
 enemy_registry = NodePath("../EnemyAugmentRegistry")
 selection_ui = NodePath("../AugmentSelectionOverlay")
-player_augment_pool = Array[ExtResource("12_player_augment")]([ExtResource("14_player_move"), ExtResource("15_player_fire"), ExtResource("16_player_damage")])
+slot_selection_ui = NodePath("../WeaponSlotSelectionOverlay")
+ship = NodePath("../Ship")
+player_augment_pool = Array[ExtResource("12_player_augment")]([ExtResource("14_player_move"), ExtResource("15_player_fire"), ExtResource("16_player_damage"), ExtResource("23_up_main"), ExtResource("24_up_aux")])
 enemy_augment_pool = Array[ExtResource("13_enemy_augment")]([ExtResource("17_enemy_health"), ExtResource("18_enemy_counter"), ExtResource("19_enemy_move")])
 
 [node name="ScoreAugmentOfferTrigger" type="Node" parent="." unique_id=2083869815 node_paths=PackedStringArray("offer_controller")]
@@ -77,6 +95,15 @@ augment_registry = NodePath("../EnemyAugmentRegistry")
 [node name="ScoreLabel" type="Label" parent="." unique_id=1545919711]
 offset_right = 160.0
 offset_bottom = 10.0
-text = "SCORE"
+text = "점수"
 label_settings = ExtResource("5_036b0")
 horizontal_alignment = 1
+
+[node name="WeaponLoadoutHud" type="Label" parent="." node_paths=PackedStringArray("ship")]
+offset_top = 12.0
+offset_right = 160.0
+offset_bottom = 70.0
+text = "무장"
+label_settings = ExtResource("5_036b0")
+script = ExtResource("11c_hud")
+ship = NodePath("../Ship")

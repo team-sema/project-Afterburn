@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="PlayerAugment" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/player_augments/player_augment.gd" id="1_aug"]
+
+[resource]
+script = ExtResource("1_aug")
+augment_id = &"upgrade_main_slot"
+display_name = "주무기 오버클럭"
+description = "주무기 슬롯 레벨을 1 올립니다. (최대 3)"
+augment_type = 4
