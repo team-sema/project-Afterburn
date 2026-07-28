@@ -7,6 +7,7 @@
 [ext_resource type="Script" path="res://menus/score_hud.gd" id="5_score_hud"]
 [ext_resource type="Script" path="res://menus/weapon_loadout_hud.gd" id="6_weapon_hud"]
 [ext_resource type="Script" path="res://world_shell.gd" id="7_world_shell"]
+[ext_resource type="Script" path="res://menus/progression_hud.gd" id="8_progression_hud"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_left_panel"]
 bg_color = Color(0.018, 0.035, 0.075, 1)
@@ -17,6 +18,32 @@ border_color = Color(0.1, 0.65, 0.95, 0.85)
 bg_color = Color(0.018, 0.035, 0.075, 1)
 border_width_left = 2
 border_color = Color(0.1, 0.65, 0.95, 0.85)
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_progress_background"]
+bg_color = Color(0.006, 0.015, 0.035, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.12, 0.28, 0.42, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_experience_fill"]
+bg_color = Color(0.12, 0.75, 1, 0.95)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_threat_fill"]
+bg_color = Color(1, 0.18, 0.5, 0.95)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
 
 [node name="World" type="Control"]
 layout_mode = 3
@@ -74,6 +101,50 @@ text = "000000"
 label_settings = ExtResource("4_title_label")
 script = ExtResource("5_score_hud")
 game_stats = ExtResource("2_stats")
+
+[node name="ProgressionHud" type="VBoxContainer" parent="Layout/LeftPanel/Margin/VBox" node_paths=PackedStringArray("progression")]
+layout_mode = 2
+theme_override_constants/separation = 3
+script = ExtResource("8_progression_hud")
+progression = NodePath("../../../../Playfield/ViewportContainer/PlayfieldViewport/Gameplay/AugmentProgressionController")
+
+[node name="ExperienceLabel" type="Label" parent="Layout/LeftPanel/Margin/VBox/ProgressionHud"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "LEVEL 01   0 / 5 XP"
+label_settings = ExtResource("3_default_label")
+theme_override_colors/font_color = Color(0.35, 0.88, 1, 1)
+
+[node name="ExperienceBar" type="ProgressBar" parent="Layout/LeftPanel/Margin/VBox/ProgressionHud"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 10)
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/background = SubResource("StyleBox_progress_background")
+theme_override_styles/fill = SubResource("StyleBox_experience_fill")
+max_value = 5.0
+show_percentage = false
+
+[node name="ThreatSpacer" type="Control" parent="Layout/LeftPanel/Margin/VBox/ProgressionHud"]
+custom_minimum_size = Vector2(0, 3)
+layout_mode = 2
+
+[node name="ThreatLabel" type="Label" parent="Layout/LeftPanel/Margin/VBox/ProgressionHud"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "THREAT 01   01:00"
+label_settings = ExtResource("3_default_label")
+theme_override_colors/font_color = Color(1, 0.35, 0.58, 1)
+
+[node name="ThreatBar" type="ProgressBar" parent="Layout/LeftPanel/Margin/VBox/ProgressionHud"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 10)
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/background = SubResource("StyleBox_progress_background")
+theme_override_styles/fill = SubResource("StyleBox_threat_fill")
+max_value = 60.0
+show_percentage = false
 
 [node name="FlexibleSpace" type="Control" parent="Layout/LeftPanel/Margin/VBox"]
 layout_mode = 2

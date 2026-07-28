@@ -23,6 +23,7 @@
 [ext_resource type="Script" uid="uid://pplrd0hkg7ca" path="res://components/player_augment_applier.gd" id="17_player_augment_applier"]
 [ext_resource type="Script" path="res://player_ship/player_weapon_loadout.gd" id="19_loadout"]
 [ext_resource type="Resource" path="res://resources/weapons/definitions/main_blaster.tres" id="20_default_main"]
+[ext_resource type="Script" path="res://components/experience_collector_component.gd" id="21_experience_collector"]
 
 [sub_resource type="Gradient" id="Gradient_engine"]
 offsets = PackedFloat32Array(0, 0.35, 1)
@@ -41,6 +42,9 @@ gravity = Vector3(0, 0, 0)
 scale_min = 0.12
 scale_max = 0.28
 color_ramp = SubResource("GradientTexture_engine")
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_experience_collector"]
+radius = 36.0
 
 [node name="Ship" type="Node2D" unique_id=1742674716 groups=["player"]]
 script = ExtResource("1_etvdo")
@@ -131,6 +135,12 @@ scale_duration = 0.3
 
 [node name="StatsComponent" type="Node" parent="." unique_id=337505827]
 script = ExtResource("11_lltil")
+
+[node name="ExperienceCollector" type="Area2D" parent="."]
+script = ExtResource("21_experience_collector")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ExperienceCollector"]
+shape = SubResource("CircleShape2D_experience_collector")
 
 [node name="PlayerHitPoint" parent="." instance=ExtResource("12_hit_point")]
 

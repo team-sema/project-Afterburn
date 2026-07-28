@@ -9,7 +9,13 @@
 
 ### 주요 자식
 
-Move / MoveInput / PositionClamp / WeaponMount(Blaster+Laser) / PlayerAugmentApplier / Scale / Stats(**HP 1**) / PlayerHitPoint / Hurt / ExplosionSpawner / Destroyed
+Move / MoveInput / PositionClamp / WeaponMount(Blaster+Laser) / PlayerAugmentApplier / Scale / Stats(**HP 1**) / ExperienceCollector / PlayerHitPoint / Hurt / ExplosionSpawner / Destroyed
+
+## ExperienceCollector
+
+- 기본 수집 반경 **36px** (`collection_radius`)
+- XP 오브가 범위에 들어오면 바깥으로 짧게 튕긴 뒤 플레이어에게 가속
+- Collector 중심 근처에서 XP를 지급하며 PlayerHitPoint와 독립
 
 ## PlayerHitPoint
 

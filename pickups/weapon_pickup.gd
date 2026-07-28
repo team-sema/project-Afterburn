@@ -55,6 +55,8 @@ func _on_area_entered(area: Area2D) -> void:
 		_collecting = false
 		process_mode = Node.PROCESS_MODE_PAUSABLE
 		return
+	# Leave the Area2D signal's physics-query flush before adding a weapon scene.
+	await get_tree().process_frame
 	var consumed := await controller.try_collect(weapon_definition)
 	if consumed:
 		collected.emit(weapon_definition)

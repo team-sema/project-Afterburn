@@ -8,11 +8,11 @@
 | Yellow | `moving_enemy.tscn` | 60 | 10 | 랜덤 ±20 X + BorderBounce |
 | Pink | `shooting_enemy.tscn` | 60 | 20 | 상태머신 + 곡선탄 |
 
-베이스 `enemies/enemy.tscn`: 네온 레이어 스프라이트, 전투/VFX 스택, `TargetingComponent`, `EnemyModifierFactory`.
+베이스 `enemies/enemy.tscn`: 네온 레이어 스프라이트, 전투/VFX 스택, `TargetingComponent`, `EnemyModifierFactory`, 경험치 오브 드롭.
 
 ## Enemy 베이스 동작
 
-- `no_health` → 점수 가산 + `queue_free` (+ DestroyedComponent 폭발)
+- `no_health` → 점수 가산 + 경험치 오브 1개 드롭 + `queue_free` (+ DestroyedComponent 폭발)
 - Hurt → scale / flash / shake / hit SFX
 - 몸 Hitbox가 플레이어 Hurtbox에 닿으면 `queue_free` (카미카제)
 

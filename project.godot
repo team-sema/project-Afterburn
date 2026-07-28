@@ -42,6 +42,7 @@ project/assembly_name="mayhem_shmup"
 2d_physics/layer_2="enemy_hurtbox"
 2d_physics/layer_3="player_projectile"
 2d_physics/layer_4="enemy_projectile"
+2d_physics/layer_5="experience_collector"
 
 [physics]
 

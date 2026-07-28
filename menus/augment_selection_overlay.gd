@@ -64,27 +64,14 @@ func open_choices(title: String, prompt: String, choices: Array, accent_color: C
 	choice_buttons[0].grab_focus()
 
 
-func transition_choices(title: String, prompt: String, choices: Array, accent_color: Color) -> void:
-	_set_input_enabled(false)
-	await _fade_content(0.0, phase_transition_duration)
-	_set_choices(choices)
-	title_label.text = title
-	prompt_label.text = prompt
-	accent_bar.color = accent_color
-	_set_choice_buttons_visible(true)
-	await _fade_content(1.0, phase_transition_duration)
-	_set_input_enabled(true)
-	choice_buttons[0].grab_focus()
-
-
-func close_with_result(player_augment: PlayerAugment, enemy_augment: EnemyAugment) -> void:
+func close_with_result(result_title: String, augment: Resource, accent_color: Color) -> void:
 	_set_input_enabled(false)
 	await _fade_content(0.0, phase_transition_duration * 0.75)
 	current_choices.clear()
 	_set_choice_buttons_visible(false)
-	title_label.text = "강화 확정"
-	prompt_label.text = "아군: %s\n위협: %s" % [player_augment.display_name, enemy_augment.display_name]
-	accent_bar.color = Color.WHITE
+	title_label.text = result_title
+	prompt_label.text = str(augment.get("display_name"))
+	accent_bar.color = accent_color
 	await _fade_content(1.0, phase_transition_duration)
 	await _wait(result_hold_duration)
 

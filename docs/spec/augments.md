@@ -28,23 +28,25 @@
 
 ## 트리거 · 컨트롤러
 
-### ScoreAugmentOfferTrigger (World 오버라이드)
+### AugmentProgressionController
 
-- `first_offer_score = **10**` (스크립트 기본 50)
-- `score_interval = **100**` (스크립트 기본 50)
-- `score >= next`이면 큐에 쌓고 임계치를 interval만큼 전진
+- 플레이어: 경험치 오브 획득 → 요구 경험치 충족 시 PLAYER 오퍼를 큐에 추가
+- 첫 요구 경험치 `5`, 레벨마다 요구량 `+2`
+- 적: 플레이 시간 `60초`마다 ENEMY 오퍼를 큐에 추가
+- 플레이어/적 이벤트가 겹치면 도달 순서대로 처리
 
 ### AugmentOfferController
 
-- 시그널: `offer_started`, `offer_completed(player, enemy)`
-- 페이즈: PLAYER → ENEMY
+- 시그널: `offer_started(offer_type)`, `offer_completed(offer_type)`
+- PLAYER와 ENEMY 오퍼는 각각 독립된 단일 선택 단계
 - `choices_per_offer = 3` (풀 크기 ≥ 3 필요)
-- 플레이어 선택 즉시 registry 반영 → 적 선택 후 UI 종료
+- 선택 즉시 해당 registry에 반영한 뒤 UI 종료
 
 ### UI
 
-- `AugmentSelectionOverlay` — `open_choices` / `transition_choices` / `close_with_result`
+- `AugmentSelectionOverlay` — `open_choices` / `close_with_result`
 - `AugmentBreakpointIntro` — AnimationPlayer `"reveal"`
+- `ProgressionHud` — 플레이어 XP와 다음 적 증강까지의 시간 진행 표시
 
 ## 레지스트리
 

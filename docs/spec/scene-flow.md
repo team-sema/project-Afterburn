@@ -22,7 +22,7 @@ Menu (ui_accept)
 
 - `WorldEnvironment` — 네온 글로우
 - `EnemyAugmentRegistry` / `PlayerAugmentRegistry`
-- `AugmentSelectionOverlay` / `AugmentOfferController` / `ScoreAugmentOfferTrigger`
+- `AugmentSelectionOverlay` / `AugmentOfferController` / `AugmentProgressionController`
 - `Ship` / `SpaceBackground` / `EnemyGenerator` / `ScoreLabel`
 
 ### 라이프사이클
@@ -39,9 +39,9 @@ Menu (ui_accept)
 
 ## 오그먼트 오버레이 플로우
 
-1. `ScoreAugmentOfferTrigger`가 임계 점수 감지 → 큐
-2. `AugmentOfferController.request_offer()` → `offer_started` → pause
-3. 플레이어 선택 3지선다 → 즉시 `PlayerAugmentRegistry.add_augment`
-4. 적 선택 3지선다 → `EnemyAugmentRegistry.add_augment` → UI 닫기
-5. unpause → `offer_completed`
+1. 적 사망 시 경험치 오브 드롭 → 플레이어 접촉 시 경험치 획득
+2. 레벨업은 PLAYER 오퍼, 60초 경과는 ENEMY 오퍼를 큐에 추가
+3. `AugmentOfferController.request_offer(type)` → `offer_started(type)` → pause
+4. 해당 타입의 3지선다 선택 → registry 반영 → UI 닫기
+5. unpause → `offer_completed(type)`
 6. 대기 중인 오퍼가 있으면 deferred로 재요청

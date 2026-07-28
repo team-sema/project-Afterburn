@@ -1,10 +1,10 @@
 class_name AugmentOfferController
 extends Node
 
-signal offer_started
-signal offer_completed(player_augment: PlayerAugment, enemy_augment: EnemyAugment)
+signal offer_started(offer_type: OfferType)
+signal offer_completed(offer_type: OfferType)
 
-enum Phase {
+enum OfferType {
 	PLAYER,
 	ENEMY,
 }
@@ -19,9 +19,7 @@ enum Phase {
 @export_range(1, 3, 1) var choices_per_offer := 3
 
 var is_offer_active := false
-var phase := Phase.PLAYER
-var selected_player_augment: PlayerAugment
-var enemy_choices: Array[EnemyAugment] = []
+var active_offer_type := OfferType.PLAYER
 
 
 func _ready() -> void:
@@ -34,15 +32,13 @@ func _ready() -> void:
 	selection_ui.choice_selected.connect(_on_choice_selected)
 
 
-func request_offer() -> bool:
+func request_offer(offer_type: OfferType) -> bool:
 	if is_offer_active:
 		return false
 
 	is_offer_active = true
-	phase = Phase.PLAYER
-	selected_player_augment = null
-	enemy_choices = _pick_enemy_choices()
-	offer_started.emit()
+	active_offer_type = offer_type
+	offer_started.emit(active_offer_type)
 	_start_offer.call_deferred()
 	return true
 
@@ -52,18 +48,27 @@ func _start_offer() -> void:
 	if not is_offer_active or not is_inside_tree():
 		return
 	get_tree().paused = true
-	var player_choices := _pick_player_choices()
-	if player_choices.is_empty():
-		push_error("AugmentOfferController: no valid player augment choices.")
+	var choices: Array
+	var title: String
+	var prompt: String
+	var accent_color: Color
+	if active_offer_type == OfferType.PLAYER:
+		choices = _pick_player_choices()
+		title = "플레이어 강화"
+		prompt = "업그레이드를 하나 고르세요"
+		accent_color = selection_ui.player_accent_color
+	else:
+		choices = _pick_enemy_choices()
+		title = "적 강화"
+		prompt = "다음 위협을 고르세요"
+		accent_color = selection_ui.enemy_accent_color
+
+	if choices.is_empty():
+		push_error("AugmentOfferController: no valid augment choices.")
 		is_offer_active = false
 		get_tree().paused = false
 		return
-	await selection_ui.open_choices(
-		"아군 강화",
-		"업그레이드를 하나 고르세요",
-		player_choices,
-		selection_ui.player_accent_color,
-	)
+	await selection_ui.open_choices(title, prompt, choices, accent_color)
 
 
 func _get_loadout() -> PlayerWeaponLoadout:
@@ -102,28 +107,21 @@ func _is_player_augment_available(augment: PlayerAugment, loadout: PlayerWeaponL
 		PlayerAugmentKind.Kind.UPGRADE_AUXILIARY_SLOT:
 			return loadout != null and loadout.has_upgradable_auxiliary_slot()
 		_:
-			# Weapon grant / unlock cards are not offered — weapons come from drops.
+			# Weapon grant and unlock cards are not offered; weapons come from drops.
 			return false
 	return false
 
 
 func _on_choice_selected(choice: Resource) -> void:
-	match phase:
-		Phase.PLAYER:
+	match active_offer_type:
+		OfferType.PLAYER:
 			var player_augment := choice as PlayerAugment
-			assert(player_augment != null, "Player phase requires a PlayerAugment choice.")
-			selected_player_augment = player_augment
+			assert(player_augment != null, "Player offer requires a PlayerAugment choice.")
 			await _resolve_player_augment(player_augment)
-			phase = Phase.ENEMY
-			await selection_ui.transition_choices(
-				"적 강화",
-				"다음 위협을 고르세요",
-				enemy_choices,
-				selection_ui.enemy_accent_color,
-			)
-		Phase.ENEMY:
+			await _finish_offer(player_augment)
+		OfferType.ENEMY:
 			var enemy_augment := choice as EnemyAugment
-			assert(enemy_augment != null, "Enemy phase requires an EnemyAugment choice.")
+			assert(enemy_augment != null, "Enemy offer requires an EnemyAugment choice.")
 			enemy_registry.add_augment(enemy_augment)
 			await _finish_offer(enemy_augment)
 
@@ -147,11 +145,14 @@ func _resolve_player_augment(player_augment: PlayerAugment) -> void:
 	player_registry.add_augment(player_augment)
 
 
-func _finish_offer(enemy_augment: EnemyAugment) -> void:
-	await selection_ui.close_with_result(selected_player_augment, enemy_augment)
+func _finish_offer(augment: Resource) -> void:
+	var result_title := "플레이어 강화 획득" if active_offer_type == OfferType.PLAYER else "적 위협 강화"
+	var accent_color := selection_ui.player_accent_color if active_offer_type == OfferType.PLAYER else selection_ui.enemy_accent_color
+	await selection_ui.close_with_result(result_title, augment, accent_color)
+	var completed_offer_type := active_offer_type
 	is_offer_active = false
 	get_tree().paused = false
-	offer_completed.emit(selected_player_augment, enemy_augment)
+	offer_completed.emit(completed_offer_type)
 
 
 func _exit_tree() -> void:

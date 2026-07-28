@@ -24,6 +24,8 @@
 | `HurtComponent` | hurt → Stats에서 damage 차감 |
 | `DestroyedComponent` | `no_health` → 이펙트 스폰 + free |
 | `ScoreComponent` | `GameStats.score`에 가산 |
+| `ExperienceDropComponent` | 적 사망 시 경험치 오브 스폰 |
+| `ExperienceCollectorComponent` | 플레이어 XP 수집 반경 제공 |
 
 ## 연출 · 스폰
 
