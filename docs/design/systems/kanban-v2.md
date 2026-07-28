@@ -3,7 +3,7 @@
 > **보드 UI:** [`docs/board/`](../../board/)  
 > **규칙:** `.cursor/rules/kanban-tickets.mdc`
 
-Issues/Projects 없이 `cards.json` + `cards/<id>.md`로 티켓을 관리한다.
+`cards.json` + `cards/<id>.md`로 티켓을 관리한다.
 
 ## 열
 

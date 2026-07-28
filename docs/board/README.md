@@ -1,6 +1,6 @@
 # 백로그 칸반 (GitHub Pages)
 
-Issues / Projects 없이 백로그를 칸반으로 봅니다.
+백로그를 `docs/board/` 칸반으로 봅니다.
 
 ## URL (Pages)
 

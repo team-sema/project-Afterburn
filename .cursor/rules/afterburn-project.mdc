@@ -27,4 +27,4 @@ Godot 종스크롤 슈팅 + 점수 기반 오그먼트 프로토타입 (`mayhem_
 - 작업 전 관련 `docs/spec/`·`docs/design/systems/`를 읽는다.
 - 사용자가 스펙과 다른 구현을 요청하면, 스펙 갱신 여부를 짧게 확인한다.
 - 커밋은 사용자가 요청할 때만 생성한다 (명시 없으면 커밋·푸시 금지).
-- 백로그는 Issues 대신 `docs/board/` 칸반 (`kanban-tickets` rule).
+- 백로그는 `docs/board/` 칸반 (`kanban-tickets` rule).

@@ -55,13 +55,16 @@ AI가 생성한 내용은 **저장소 규칙·시스템 스펙**에 맞게 검�
 
 ### 구조 설명 (한 줄)
 
-> “이슈 트래커 대신 **마크다운 칸반 + 시스템 스펙**을 정본으로 두고, Cursor가 그 정본을 읽고 코드를 쓰는” 구조입니다.
+> “**마크다운 칸반 + 시스템 스펙**을 정본으로 두고, Cursor가 그 정본을 읽고 코드를 쓰는” 구조입니다.
 
 ---
 
-## 4. AI 활용 사례: 칸반 보드 기반 관리
+## 4. 칸반 보드 기반 관리
 
-GitHub Issues/Projects 대신 `docs/board/` 칸반을 쓰고, **에이전트가 티켓을 읽고·갱신**하도록 규칙을 걸었습니다. AI 활용의 대표 예시입니다.
+티켓은 `docs/board/`에 두고, `.cursor/rules`로 에이전트가 카드 열을 읽고·갱신하게 했습니다.  
+프로토콜은 채팅 일회성이 아니라 저장소 룰·스킬에 고정되어 있으며, 열 이동·커밋·스펙 diff로 추적됩니다.
+
+참고: [칸반](https://team-sema.github.io/project-Afterburn/board/) · [스펙](https://team-sema.github.io/project-Afterburn/spec/)
 
 ### 구성
 
@@ -79,7 +82,7 @@ GitHub Issues/Projects 대신 `docs/board/` 칸반을 쓰고, **에이전트가 
 - 구현 범위·AC를 카드·시스템 스펙과 맞춤.
 - `/push` 직전 열을 **`review`** 로 바꾸고 이력 한 줄 추가 (같은 커밋에 포함).
 - `done`으로는 자동 이동하지 않음 → **사람 플레이 검증** 후에만 완료.
-- 보드에서 복사한 **에이전트 프롬프트**를 받으면 `cards.json` 열만 반영 (JSON 수동 커밋 없음).
+- 보드에서 복사한 **에이전트 프롬프트**를 받으면 `cards.json` 열만 반영.
 
 ### 사람이 하는 일
 
@@ -87,21 +90,13 @@ GitHub Issues/Projects 대신 `docs/board/` 칸반을 쓰고, **에이전트가 
 - `review` 카드 플레이 확인 → 보드에서 `done`/`fix`으로 드래그 → **에이전트 프롬프트 복사** → Cursor에 붙여넣기.
 - 2인 협업 시 같은 날 `main` pull, feature는 짧게 유지.
 
-### 왜 AI 활용 사례로 적합한가
-
-- 프롬프트 일회성이 아니라 **저장소에 고정된 협업 프로토콜**.
-- AI가 “무엇을 했는지”가 칸반 열·커밋·스펙 diff로 **추적 가능**.
-- 심사·팀원 모두 Pages에서 진행 상황을 동일하게 볼 수 있음.  
-  - 보드: https://team-sema.github.io/project-Afterburn/board/  
-  - 스펙: https://team-sema.github.io/project-Afterburn/spec/
-
 ### 예시 흐름
 
 1. 사람이 “무기 슬롯 로드아웃” 요청  
 2. Agent: `feature/weapon-slot-loadout` 생성 + 카드 `doing` + 시스템 스펙·Task 작성  
 3. Agent: 스펙 범위 내 코드 구현  
 4. `/push` → 카드 `review` + main 머지  
-5. 사람: 플레이 확인 후 `done` (또는 `fix` → 재작업)
+5. 사람: 플레이 확인 후 보드에서 `done` (또는 `fix`) → 프롬프트 복사로 저장소 반영
 
 ---
 
@@ -160,5 +155,6 @@ MIT 스크립트 사용 시 저작권·허가 고지 유지 (원 LICENSE: Copyri
 
 | 날짜 | 변경 |
 |------|------|
+| 2026-07-28 | §4 칸반: ‘왜 적합한가’ 제거, 본문에 압축 |
 | 2026-07-28 | 보드→에이전트 프롬프트 복사 반영 경로 반영 |
 | 2026-07-28 | 초안 작성 (칸반 AI 사례·Galaxy Defiance 출처 포함) |

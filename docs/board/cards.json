@@ -40,6 +40,14 @@
   ],
   "cards": [
     {
+      "id": "submission-copy-polish",
+      "title": "제출·보드 카피 다듬기",
+      "description": "Issues 대비 문구 제거, AI 문서 §4 압축.",
+      "column": "review",
+      "file": "cards/submission-copy-polish.md",
+      "tags": ["문서", "제출"]
+    },
+    {
       "id": "kanban-agent-prompt-copy",
       "title": "칸반 에이전트 프롬프트 복사",
       "description": "JSON 다운로드 대신 열 diff를 Cursor 프롬프트로 복사해 반영.",

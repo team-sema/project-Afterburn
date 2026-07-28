@@ -5,7 +5,7 @@ alwaysApply: true
 
 # 칸반 티켓 (카드) 관리
 
-개발 단위는 **티켓(카드)** 이다. Issues/Projects 대신 `docs/board/` 칸반을 쓴다.
+개발 단위는 **티켓(카드)** 이다. `docs/board/` 칸반을 쓴다.
 
 정본: [docs/design/systems/kanban-v2.md](docs/design/systems/kanban-v2.md) · 보드: `docs/board/`
 
@@ -90,7 +90,6 @@ Pages 보드에서 드래그한 열은 **브라우저 임시 저장**이다. JSO
 
 ## 하지 않음
 
-- GitHub Issues/Projects로 대체하지 않음.
 - `/push`만으로 `done` 자동 처리 금지.
 - 무관한 다른 카드의 `column`을 마음대로 바꾸지 않음 (이번 slug 티켓·프롬프트에 적힌 카드만).
 - Godot 게임 로직과 칸반 파일을 한 커밋에 섞는 것은 **허용** (같은 feature의 티켓 갱신).
