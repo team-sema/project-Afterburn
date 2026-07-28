@@ -48,7 +48,7 @@ func _collect_main(loadout: PlayerWeaponLoadout, weapon_definition: WeaponDefini
 	var replace := await _wait_bool(confirm_ui.confirmed, confirm_ui.cancelled)
 	get_tree().paused = false
 	if not replace:
-		return false
+		return true
 	loadout.equip_main_weapon(weapon_definition)
 	return true
 

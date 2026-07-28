@@ -37,4 +37,4 @@ func get_attack_rate_multiplier() -> float:
 
 
 func can_upgrade() -> bool:
-	return unlocked and level < MAX_LEVEL
+	return unlocked and not is_empty() and level < MAX_LEVEL

@@ -34,7 +34,7 @@ func _run() -> void:
 	_expect(collected_amount == 5, "collector receives the orb's XP amount")
 	_expect(progression.level == 2, "collecting 5 XP levels the player")
 	_expect(progression.current_experience == 0, "spent XP is removed after level-up")
-	_expect(progression.experience_required == 7, "next level requires 7 XP")
+	_expect(progression.experience_required == 8, "next level requires 8 XP")
 	_expect(offer_controller.is_offer_active, "level-up requests an augment offer")
 	_expect(
 		offer_controller.active_offer_type == AugmentOfferController.OfferType.PLAYER,

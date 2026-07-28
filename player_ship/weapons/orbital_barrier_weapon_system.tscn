@@ -17,6 +17,8 @@ orbit_radius = 18.0
 base_orbit_speed = 2.8
 base_damage = 6
 segment_max_health = 2
+segment_regeneration_time = 3.0
+depleted_alpha = 0.2
 
 [node name="OrbitRoot" type="Node2D" parent="."]
 

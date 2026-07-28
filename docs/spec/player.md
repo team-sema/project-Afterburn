@@ -29,8 +29,11 @@ Move / MoveInput / PositionClamp / WeaponMount(Blaster+Laser) / PlayerAugmentApp
 - 시작 주무기: 블래스터 Lv.1
 - **획득**: 적 드롭 픽업 (`WeaponAcquisitionController`). 오그먼트로 무기 지급하지 않음
 - 동일 무기 픽업 → 해당 슬롯 강화 (최대 Lv.3, 불가 시 아이템 유지)
-- 다른 주무기 → 교체 확인 / 보조 빈칸 자동 장착 / 가득 차면 교체 UI
+- 빈 보조 슬롯은 강화 대상으로 선택할 수 없음
+- 다른 주무기 → 교체 확인. 현재 무기 유지 선택 시 해당 픽업은 소멸
+- 다른 보조무기 → 보조 빈칸 자동 장착 / 가득 차면 교체 UI
 - 무기 교체 시 해당 슬롯 레벨은 1로 리셋. 최종 배율 = 플레이어 공통 × 슬롯
+- 궤도 방벽 조각은 HP가 0이면 반투명·비활성화되고 3초 후 복구
 
 ## PlayerAugmentApplier
 

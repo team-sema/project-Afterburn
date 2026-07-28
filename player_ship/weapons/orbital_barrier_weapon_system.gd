@@ -5,6 +5,8 @@ extends WeaponSystem
 @export var base_orbit_speed := 2.8
 @export var base_damage := 6
 @export var segment_max_health := 2
+@export_range(0.1, 60.0, 0.1) var segment_regeneration_time := 3.0
+@export_range(0.0, 1.0, 0.05) var depleted_alpha := 0.2
 
 @onready var orbit_root: Node2D = $OrbitRoot
 
@@ -96,10 +98,23 @@ func _on_segment_no_health(segment: Node2D) -> void:
 		return
 	_alive_segments.erase(segment)
 	_disable_segment_collision(segment)
-	segment.visible = false
-	segment.queue_free()
-	if _alive_segments.is_empty():
-		set_process(false)
+	segment.modulate.a = depleted_alpha
+	_regenerate_segment(segment)
+
+
+func _regenerate_segment(segment: Node2D) -> void:
+	await get_tree().create_timer(segment_regeneration_time, false).timeout
+	if is_shutdown or segment == null or not is_instance_valid(segment):
+		return
+	var stats := segment.get_node_or_null("StatsComponent") as StatsComponent
+	if stats == null:
+		push_error("OrbitalBarrier segment missing StatsComponent during regeneration.")
+		return
+	stats.health = segment_max_health
+	segment.modulate.a = 1.0
+	_enable_segment_collision(segment)
+	if not _alive_segments.has(segment):
+		_alive_segments.append(segment)
 
 
 func _disable_segment_collision(segment: Node2D) -> void:
@@ -112,3 +127,15 @@ func _disable_segment_collision(segment: Node2D) -> void:
 		hurtbox.set_deferred("monitoring", false)
 		hurtbox.set_deferred("monitorable", false)
 		hurtbox.is_invincible = true
+
+
+func _enable_segment_collision(segment: Node2D) -> void:
+	var hitbox := segment.get_node_or_null("HitboxComponent") as HitboxComponent
+	if hitbox != null:
+		hitbox.set_deferred("monitoring", true)
+		hitbox.set_deferred("monitorable", true)
+	var hurtbox := segment.get_node_or_null("HurtboxComponent") as HurtboxComponent
+	if hurtbox != null:
+		hurtbox.set_deferred("monitoring", false)
+		hurtbox.set_deferred("monitorable", true)
+		hurtbox.is_invincible = false
