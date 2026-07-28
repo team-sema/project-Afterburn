@@ -40,6 +40,14 @@
   ],
   "cards": [
     {
+      "id": "kanban-agent-prompt-copy",
+      "title": "칸반 에이전트 프롬프트 복사",
+      "description": "JSON 다운로드 대신 열 diff를 Cursor 프롬프트로 복사해 반영.",
+      "column": "review",
+      "file": "cards/kanban-agent-prompt-copy.md",
+      "tags": ["문서", "칸반", "워크플로"]
+    },
+    {
       "id": "contest-submission-docs",
       "title": "공모 제출물 문서 (3·4·5) 초안",
       "description": "게임 소개·AI 활용·팀 롤 PDF용 MD 초안. 칸반 AI 사례 포함.",

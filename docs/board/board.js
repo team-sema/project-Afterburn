@@ -3,6 +3,8 @@ const CARDS_URL = "cards.json";
 
 /** @type {{ updated?: string, source?: string, columns: Array<object>, cards: Array<object> }} */
 let boardData = null;
+/** @type {Record<string, string>} card id → column from last fetched repo JSON */
+let remoteColumnsById = {};
 
 const boardEl = document.getElementById("board");
 const metaEl = document.getElementById("meta");
@@ -26,7 +28,7 @@ function toast(message) {
   el.textContent = message;
   el.classList.add("show");
   clearTimeout(toast._t);
-  toast._t = setTimeout(() => el.classList.remove("show"), 1800);
+  toast._t = setTimeout(() => el.classList.remove("show"), 2200);
 }
 
 function cloneData(data) {
@@ -54,21 +56,76 @@ function loadLocal() {
   }
 }
 
-function exportPayload() {
-  return {
-    updated: new Date().toISOString().slice(0, 10),
-    source: boardData.source || "docs/board/cards/*.md",
-    columns: boardData.columns,
-    cards: boardData.cards,
-  };
+function rememberRemote(remote) {
+  remoteColumnsById = Object.fromEntries(
+    (remote.cards || []).map((c) => [c.id, c.column])
+  );
+}
+
+function columnDiffs() {
+  const diffs = [];
+  for (const card of boardData.cards) {
+    const from = remoteColumnsById[card.id];
+    if (from == null) continue;
+    if (from === card.column) continue;
+    diffs.push({
+      id: card.id,
+      title: card.title,
+      from,
+      to: card.column,
+      fromTitle: columnTitle(from),
+      toTitle: columnTitle(card.column),
+    });
+  }
+  return diffs;
+}
+
+function buildAgentPrompt(diffs) {
+  const today = new Date().toISOString().slice(0, 10);
+  const lines = diffs.map(
+    (d) => `- \`${d.id}\` (${d.title}): \`${d.from}\` → \`${d.to}\` (${d.fromTitle} → ${d.toTitle})`
+  );
+
+  return [
+    "칸반 열 반영 요청 (보드 → 저장소)",
+    "",
+    "아래는 GitHub Pages 칸반에서 드래그로 옮긴 열 변경입니다.",
+    "`docs/board/cards.json`의 해당 카드 `column`을 반영하고, `updated`를 오늘 날짜로 갱신하세요.",
+    "`done` / `fix` / `review` 등 이력에 남길 가치가 있으면 `docs/board/cards/<id>.md`에 한 줄 추가하세요.",
+    "칸반 파일만 바뀌면 `main`에서 바로 커밋해도 됩니다. 커밋은 내가 요청할 때만 하세요(지금 요청함).",
+    "무관한 카드는 건드리지 마세요.",
+    "",
+    `날짜: ${today}`,
+    "변경:",
+    ...lines,
+    "",
+    "커밋 메시지 예: `docs: sync kanban columns from board`",
+  ].join("\n");
+}
+
+async function copyAgentPrompt() {
+  const diffs = columnDiffs();
+  if (diffs.length === 0) {
+    toast("저장소와 다른 열 이동이 없습니다");
+    return;
+  }
+  const text = buildAgentPrompt(diffs);
+  try {
+    await navigator.clipboard.writeText(text);
+    toast(`프롬프트 복사 · 변경 ${diffs.length}건 → Cursor에 붙여넣기`);
+  } catch {
+    prompt("Cursor에 붙여넣을 프롬프트:", text);
+  }
 }
 
 function updateMeta(fromLocal) {
   const n = boardData.cards.length;
   const stamp = boardData.updated || "—";
+  const dirty = columnDiffs().length;
+  const dirtyPart = dirty > 0 ? ` · 미반영 ${dirty}` : "";
   metaEl.textContent = fromLocal
-    ? `임시 저장 · ${n}장 · 원본 ${stamp}`
-    : `저장소 JSON · ${n}장 · ${stamp}`;
+    ? `임시 저장 · ${n}장 · 원본 ${stamp}${dirtyPart}`
+    : `저장소 JSON · ${n}장 · ${stamp}${dirtyPart}`;
 }
 
 function cardsInColumn(columnId) {
@@ -313,38 +370,15 @@ function renderMarkdown(src) {
   return html.join("\n");
 }
 
-async function copyJson() {
-  const text = JSON.stringify(exportPayload(), null, 2);
-  try {
-    await navigator.clipboard.writeText(text);
-    toast("JSON을 클립보드에 복사했습니다");
-  } catch {
-    prompt("복사할 JSON:", text);
-  }
-}
-
-function downloadJson() {
-  const blob = new Blob([JSON.stringify(exportPayload(), null, 2)], {
-    type: "application/json",
-  });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "cards.json";
-  a.click();
-  URL.revokeObjectURL(url);
-  toast("cards.json 다운로드");
-}
-
 async function boot() {
   const res = await fetch(CARDS_URL, { cache: "no-store" });
   if (!res.ok) throw new Error(`cards.json load failed: ${res.status}`);
   const remote = await res.json();
+  rememberRemote(remote);
   const local = loadLocal();
 
   if (local) {
     boardData = local;
-    // 원격에만 있는 새 카드/파일 메타를 병합(열 위치는 local 유지)
     const localById = Object.fromEntries(local.cards.map((c) => [c.id, c]));
     boardData.columns = remote.columns;
     boardData.cards = remote.cards.map((remoteCard) => {
@@ -364,12 +398,13 @@ async function boot() {
   render();
 }
 
-document.getElementById("btn-copy").addEventListener("click", copyJson);
-document.getElementById("btn-download").addEventListener("click", downloadJson);
+document.getElementById("btn-prompt").addEventListener("click", copyAgentPrompt);
 document.getElementById("btn-reset").addEventListener("click", async () => {
   clearLocal();
   const res = await fetch(CARDS_URL, { cache: "no-store" });
-  boardData = cloneData(await res.json());
+  const remote = await res.json();
+  rememberRemote(remote);
+  boardData = cloneData(remote);
   updateMeta(false);
   render();
   toast("저장소 JSON으로 되돌렸습니다");

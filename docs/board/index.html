@@ -15,17 +15,17 @@
     <div class="actions">
       <span id="meta" class="meta"></span>
       <button type="button" id="btn-reset" class="btn ghost" title="브라우저 임시 저장을 지우고 저장소 JSON으로 되돌립니다">저장소 기준으로 되돌리기</button>
-      <button type="button" id="btn-copy" class="btn">JSON 복사</button>
-      <button type="button" id="btn-download" class="btn primary">cards.json 저장</button>
+      <button type="button" id="btn-prompt" class="btn primary" title="열 변경을 Cursor에 붙여넣을 프롬프트로 복사">에이전트 프롬프트 복사</button>
       <a class="btn ghost" href="../">문서 홈</a>
     </div>
   </header>
 
   <p class="hint">
     <strong>드래그</strong>로 열을 옮기고, <strong>클릭</strong>하면 MD 상세 팝업이 열립니다.
-    열 이동은 브라우저에만 임시 저장됩니다. 팀에 반영하려면 JSON을 저장해
-    <code>docs/board/cards.json</code>에 커밋하세요. 카드 본문은
-    <code>docs/board/cards/&lt;id&gt;.md</code>와 1:1입니다.
+    열 이동은 브라우저에만 임시 저장됩니다.
+    팀에 반영하려면 <strong>에이전트 프롬프트 복사</strong> → Cursor 채팅에 붙여넣기 → 에이전트가
+    <code>docs/board/cards.json</code>(및 필요 시 카드 MD)을 갱신·커밋합니다.
+    카드 본문은 <code>docs/board/cards/&lt;id&gt;.md</code>와 1:1입니다.
   </p>
 
   <main id="board" class="board" aria-label="칸반 보드"></main>
@@ -34,6 +34,8 @@
     <span>인덱스: <code>cards.json</code></span>
     <span>·</span>
     <span>본문: <code>cards/*.md</code></span>
+    <span>·</span>
+    <span>팀 반영: 프롬프트 복사 → Cursor</span>
   </footer>
 
   <div id="modal" class="modal" hidden>
