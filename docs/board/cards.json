@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-25",
+  "updated": "2026-07-28",
   "source": "docs/board/cards/*.md",
   "columns": [
     {
@@ -39,6 +39,14 @@
     }
   ],
   "cards": [
+    {
+      "id": "contest-submission-docs",
+      "title": "공모 제출물 문서 (3·4·5) 초안",
+      "description": "게임 소개·AI 활용·팀 롤 PDF용 MD 초안. 칸반 AI 사례 포함.",
+      "column": "review",
+      "file": "cards/contest-submission-docs.md",
+      "tags": ["문서", "제출"]
+    },
     {
       "id": "weapon-slot-loadout",
       "title": "무기 획득 및 강화",
