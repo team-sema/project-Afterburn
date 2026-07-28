@@ -52,7 +52,7 @@ Project Afterburn에 (1) Godot 프로젝트 루트 정리, (2) 카테고리 스�
 
 - [x] `project.godot`가 리포 루트에 있다
 - [x] `docs/spec/`에서 카테고리별 MD를 브라우저로 열 수 있다
-- [x] `docs/board/`에서 드래그·JSON 복사/저장·카드 MD 팝업이 동작한다
+- [x] `docs/board/`에서 드래그·카드 MD 팝업·에이전트 프롬프트 복사가 동작한다 (JSON 다운로드 폐기)
 - [x] `.cursor/skills/feature`, `push`와 `tools/*.sh`가 존재한다
 - [x] 칸반 카드 `docs-site-kanban`이 이 feature와 연결된다
 - [ ] GitHub Pages(`/docs`) 활성화 (팀 Settings)
@@ -68,4 +68,5 @@ Project Afterburn에 (1) Godot 프로젝트 루트 정리, (2) 카테고리 스�
 
 | 날짜 | 변경 |
 |------|------|
+| 2026-07-28 | 보드 반영 경로: 에이전트 프롬프트 복사 (JSON 저장 폐기) |
 | 2026-07-22 | 초기 스펙: 루트 승격 + docs 사이트 + 워크플로 이식 |

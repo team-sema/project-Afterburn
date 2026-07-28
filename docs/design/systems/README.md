@@ -8,5 +8,6 @@
 | [docs-site-kanban](docs-site-kanban.md) | docs 사이트 · 칸반 · 워크플로 | review |
 | [weapon-slot-loadout](weapon-slot-loadout.md) | 주/보조 무기 슬롯 무장 | doing |
 | [kanban-v2](kanban-v2.md) | 백로그 칸반 v2 | 운영 |
+| [kanban-agent-prompt-copy](kanban-agent-prompt-copy.md) | 보드→에이전트 프롬프트 복사 | review |
 
 현황 스펙(카테고리): [`docs/spec/`](../../spec/)
