@@ -1,10 +1,10 @@
 [gd_scene format=3 uid="uid://503oqsi4rpuh"]
 
 [ext_resource type="Script" uid="uid://cmey2cic1ef7d" path="res://menus/augment_selection_overlay.gd" id="1_overlay"]
-[ext_resource type="LabelSettings" uid="uid://c0rnshv8jeh2e" path="res://fonts/title_label_settings.tres" id="2_title_settings"]
-[ext_resource type="LabelSettings" uid="uid://x33lbqidu7sv" path="res://fonts/default_label_settings.tres" id="3_label_settings"]
+[ext_resource type="LabelSettings" path="res://fonts/overlay_title_label_settings.tres" id="2_title_settings"]
+[ext_resource type="LabelSettings" path="res://fonts/overlay_default_label_settings.tres" id="3_label_settings"]
 [ext_resource type="FontFile" uid="uid://dhbb73hkpge3y" path="res://fonts/Mulmaru.ttf" id="4_font"]
-[ext_resource type="PackedScene" path="res://menus/augment_breakpoint_intro.tscn" id="5_breakpoint_intro"]
+[ext_resource type="PackedScene" uid="uid://c6x6veg03hm8w" path="res://menus/augment_breakpoint_intro.tscn" id="5_breakpoint_intro"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_panel"]
 bg_color = Color(0.025, 0.055, 0.11, 0.96)
@@ -13,10 +13,10 @@ border_width_top = 1
 border_width_right = 1
 border_width_bottom = 1
 border_color = Color(0.18, 0.78, 1, 0.8)
-corner_radius_top_left = 3
-corner_radius_top_right = 3
-corner_radius_bottom_right = 3
-corner_radius_bottom_left = 3
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
 
 [node name="AugmentSelectionOverlay" type="CanvasLayer" unique_id=1658730483]
 process_mode = 3
@@ -36,15 +36,21 @@ color = Color(0.005, 0.01, 0.03, 0.88)
 [node name="BreakpointIntro" parent="." unique_id=1570162321 instance=ExtResource("5_breakpoint_intro")]
 
 [node name="MarginContainer" type="MarginContainer" parent="." unique_id=1920810318]
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -120.0
+offset_top = -180.0
+offset_right = 120.0
+offset_bottom = 180.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_left = 8
-theme_override_constants/margin_top = 8
-theme_override_constants/margin_right = 8
-theme_override_constants/margin_bottom = 8
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
 
 [node name="PanelContainer" type="PanelContainer" parent="MarginContainer" unique_id=762158450]
 layout_mode = 2
@@ -52,7 +58,7 @@ theme_override_styles/panel = SubResource("StyleBox_panel")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/PanelContainer" unique_id=1371109450]
 layout_mode = 2
-theme_override_constants/separation = 4
+theme_override_constants/separation = 6
 
 [node name="TitleLabel" type="Label" parent="MarginContainer/PanelContainer/VBoxContainer" unique_id=1887388987]
 unique_name_in_owner = true
@@ -70,37 +76,37 @@ horizontal_alignment = 1
 autowrap_mode = 2
 
 [node name="AccentBar" type="ColorRect" parent="MarginContainer/PanelContainer/VBoxContainer" unique_id=2026540378]
-custom_minimum_size = Vector2(0, 2)
+custom_minimum_size = Vector2(0, 3)
 layout_mode = 2
 mouse_filter = 2
 color = Color(0.18, 0.82, 1, 1)
 
 [node name="ChoiceButton1" type="Button" parent="MarginContainer/PanelContainer/VBoxContainer" unique_id=567130545]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 52)
+custom_minimum_size = Vector2(0, 78)
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_fonts/font = ExtResource("4_font")
-theme_override_font_sizes/font_size = 10
+theme_override_font_sizes/font_size = 15
 text = "선택 1"
 autowrap_mode = 2
 
 [node name="ChoiceButton2" type="Button" parent="MarginContainer/PanelContainer/VBoxContainer" unique_id=1842936470]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 52)
+custom_minimum_size = Vector2(0, 78)
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_fonts/font = ExtResource("4_font")
-theme_override_font_sizes/font_size = 10
+theme_override_font_sizes/font_size = 15
 text = "선택 2"
 autowrap_mode = 2
 
 [node name="ChoiceButton3" type="Button" parent="MarginContainer/PanelContainer/VBoxContainer" unique_id=779700868]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 52)
+custom_minimum_size = Vector2(0, 78)
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_fonts/font = ExtResource("4_font")
-theme_override_font_sizes/font_size = 10
+theme_override_font_sizes/font_size = 15
 text = "선택 3"
 autowrap_mode = 2

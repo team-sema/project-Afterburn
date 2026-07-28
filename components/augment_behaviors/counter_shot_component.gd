@@ -61,7 +61,9 @@ func _try_fire() -> void:
 
 
 func _fire_projectiles(target_direction: Vector2) -> void:
-	var projectile_parent := get_tree().current_scene
+	var projectile_parent := get_tree().get_first_node_in_group("gameplay_world")
+	if projectile_parent == null:
+		projectile_parent = get_tree().current_scene
 	if projectile_parent == null:
 		return
 

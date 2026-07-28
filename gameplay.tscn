@@ -1,0 +1,91 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" uid="uid://dpwaj8mjch41h" path="res://world.gd" id="1_world"]
+[ext_resource type="PackedScene" uid="uid://cj6atpgfbbki0" path="res://player_ship/ship.tscn" id="2_ship"]
+[ext_resource type="Resource" uid="uid://qvwx7dbvubh0" path="res://game_stats.tres" id="3_stats"]
+[ext_resource type="PackedScene" uid="uid://da58jpbo01r7q" path="res://effects/space_background.tscn" id="4_background"]
+[ext_resource type="PackedScene" uid="uid://e4v02s4qv8gl" path="res://enemies/enemy_generator.tscn" id="5_generator"]
+[ext_resource type="Script" uid="uid://tgkx11lah8ro" path="res://enemy_augment_registry.gd" id="6_enemy_registry"]
+[ext_resource type="Script" uid="uid://b1vehes3nnrj2" path="res://player_augment_registry.gd" id="7_player_registry"]
+[ext_resource type="Script" uid="uid://bcjr83yghjtmb" path="res://augment_offer_controller.gd" id="8_offer"]
+[ext_resource type="Script" uid="uid://xnvxav21p7tu" path="res://score_augment_offer_trigger.gd" id="9_trigger"]
+[ext_resource type="PackedScene" uid="uid://503oqsi4rpuh" path="res://menus/augment_selection_overlay.tscn" id="10_selection"]
+[ext_resource type="PackedScene" path="res://menus/weapon_slot_selection_overlay.tscn" id="11_slot"]
+[ext_resource type="PackedScene" path="res://menus/weapon_acquire_confirm_overlay.tscn" id="12_confirm"]
+[ext_resource type="Script" path="res://player_ship/weapon_acquisition_controller.gd" id="13_acquisition"]
+[ext_resource type="Script" uid="uid://bj3m8sydgty8w" path="res://resources/player_augments/player_augment.gd" id="14_player_augment"]
+[ext_resource type="Script" uid="uid://be4x07sn0gawv" path="res://resources/enemy_augments/enemy_augment.gd" id="15_enemy_augment"]
+[ext_resource type="Resource" uid="uid://cfjn3mfbhkk5u" path="res://resources/player_augments/player_move_speed_boost_1_2.tres" id="16_player_move"]
+[ext_resource type="Resource" uid="uid://ckajigegymf5n" path="res://resources/player_augments/player_fire_rate_boost_1_2.tres" id="17_player_fire"]
+[ext_resource type="Resource" uid="uid://bx055ywmcy0qr" path="res://resources/player_augments/player_weapon_damage_boost_1_2.tres" id="18_player_damage"]
+[ext_resource type="Resource" uid="uid://dck0gm7gvfvng" path="res://resources/enemy_augments/enemy_health_boost_1_2.tres" id="19_enemy_health"]
+[ext_resource type="Resource" uid="uid://s3405kw20hyh" path="res://resources/enemy_augments/enemy_counter_shot_on_hit.tres" id="20_enemy_counter"]
+[ext_resource type="Resource" uid="uid://bg0yl0s7f0b4p" path="res://resources/enemy_augments/enemy_move_speed_boost_1_2.tres" id="21_enemy_move"]
+[ext_resource type="Resource" path="res://resources/player_augments/weapon/upgrade_main_slot.tres" id="22_up_main"]
+[ext_resource type="Resource" path="res://resources/player_augments/weapon/upgrade_auxiliary_slot.tres" id="23_up_aux"]
+
+[sub_resource type="Environment" id="Environment_neon"]
+background_mode = 3
+glow_enabled = true
+glow_levels/1 = 0.35
+glow_levels/2 = 0.2
+glow_levels/3 = 0.08
+glow_normalized = true
+glow_intensity = 0.45
+glow_strength = 0.65
+glow_bloom = 0.06
+glow_hdr_threshold = 1.05
+glow_hdr_scale = 1.4
+glow_hdr_luminance_cap = 2.0
+
+[node name="Gameplay" type="Node2D" groups=["gameplay_world"]]
+script = ExtResource("1_world")
+game_stats = ExtResource("3_stats")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_neon")
+
+[node name="EnemyAugmentRegistry" type="Node" parent="."]
+script = ExtResource("6_enemy_registry")
+
+[node name="PlayerAugmentRegistry" type="Node" parent="."]
+script = ExtResource("7_player_registry")
+
+[node name="AugmentSelectionOverlay" parent="." instance=ExtResource("10_selection")]
+close_duration = 1.0
+
+[node name="WeaponSlotSelectionOverlay" parent="." instance=ExtResource("11_slot")]
+
+[node name="WeaponAcquireConfirmOverlay" parent="." instance=ExtResource("12_confirm")]
+
+[node name="WeaponAcquisitionController" type="Node" parent="." node_paths=PackedStringArray("ship", "slot_selection_ui", "confirm_ui")]
+script = ExtResource("13_acquisition")
+ship = NodePath("../Ship")
+slot_selection_ui = NodePath("../WeaponSlotSelectionOverlay")
+confirm_ui = NodePath("../WeaponAcquireConfirmOverlay")
+
+[node name="AugmentOfferController" type="Node" parent="." node_paths=PackedStringArray("player_registry", "enemy_registry", "selection_ui", "slot_selection_ui", "ship")]
+script = ExtResource("8_offer")
+player_registry = NodePath("../PlayerAugmentRegistry")
+enemy_registry = NodePath("../EnemyAugmentRegistry")
+selection_ui = NodePath("../AugmentSelectionOverlay")
+slot_selection_ui = NodePath("../WeaponSlotSelectionOverlay")
+ship = NodePath("../Ship")
+player_augment_pool = Array[ExtResource("14_player_augment")]([ExtResource("16_player_move"), ExtResource("17_player_fire"), ExtResource("18_player_damage"), ExtResource("22_up_main"), ExtResource("23_up_aux")])
+enemy_augment_pool = Array[ExtResource("15_enemy_augment")]([ExtResource("19_enemy_health"), ExtResource("20_enemy_counter"), ExtResource("21_enemy_move")])
+
+[node name="ScoreAugmentOfferTrigger" type="Node" parent="." node_paths=PackedStringArray("offer_controller")]
+script = ExtResource("9_trigger")
+game_stats = ExtResource("3_stats")
+offer_controller = NodePath("../AugmentOfferController")
+first_offer_score = 10
+score_interval = 100
+
+[node name="Ship" parent="." node_paths=PackedStringArray("augment_registry") instance=ExtResource("2_ship")]
+position = Vector2(80, 216)
+augment_registry = NodePath("../PlayerAugmentRegistry")
+
+[node name="SpaceBackground" parent="." instance=ExtResource("4_background")]
+
+[node name="EnemyGenerator" parent="." node_paths=PackedStringArray("augment_registry") instance=ExtResource("5_generator")]
+augment_registry = NodePath("../EnemyAugmentRegistry")

@@ -10,28 +10,28 @@ border_width_top = 1
 border_width_right = 1
 border_width_bottom = 1
 border_color = Color(0.18, 0.82, 1, 0.9)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
 shadow_color = Color(0.05, 0.55, 0.85, 0.28)
-shadow_size = 4
+shadow_size = 6
 
 [sub_resource type="LabelSettings" id="LabelSettings_eyebrow"]
 font = ExtResource("2_font")
-font_size = 8
+font_size = 12
 font_color = Color(0.35, 0.88, 1, 0.9)
 
 [sub_resource type="LabelSettings" id="LabelSettings_title"]
 font = ExtResource("2_font")
-font_size = 12
+font_size = 18
 font_color = Color(0.9, 0.98, 1, 1)
-outline_size = 2
+outline_size = 3
 outline_color = Color(0.04, 0.35, 0.55, 0.8)
 
 [sub_resource type="LabelSettings" id="LabelSettings_subtitle"]
 font = ExtResource("2_font")
-font_size = 8
+font_size = 12
 font_color = Color(0.65, 0.82, 0.9, 0.9)
 
 [sub_resource type="Animation" id="Animation_reset"]
@@ -141,20 +141,20 @@ mouse_filter = 2
 
 [node name="BreakpointCard" type="PanelContainer" parent="CenterContainer" unique_id=288702059]
 modulate = Color(1, 1, 1, 0)
-custom_minimum_size = Vector2(144, 84)
+custom_minimum_size = Vector2(216, 126)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBox_card")
 
 [node name="MarginContainer" type="MarginContainer" parent="CenterContainer/BreakpointCard" unique_id=794774445]
 layout_mode = 2
-theme_override_constants/margin_left = 8
-theme_override_constants/margin_top = 7
-theme_override_constants/margin_right = 8
-theme_override_constants/margin_bottom = 7
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 11
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 11
 
 [node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer/BreakpointCard/MarginContainer" unique_id=1061958367]
 layout_mode = 2
-theme_override_constants/separation = 3
+theme_override_constants/separation = 5
 
 [node name="EventLabel" type="Label" parent="CenterContainer/BreakpointCard/MarginContainer/VBoxContainer" unique_id=55440925]
 layout_mode = 2
@@ -170,7 +170,7 @@ label_settings = SubResource("LabelSettings_title")
 horizontal_alignment = 1
 
 [node name="AccentBar" type="ColorRect" parent="CenterContainer/BreakpointCard/MarginContainer/VBoxContainer" unique_id=157634722]
-custom_minimum_size = Vector2(0, 2)
+custom_minimum_size = Vector2(0, 3)
 layout_mode = 2
 mouse_filter = 2
 color = Color(0.18, 0.82, 1, 1)

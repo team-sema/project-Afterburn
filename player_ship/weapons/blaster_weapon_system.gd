@@ -27,13 +27,9 @@ func fire() -> void:
 		muzzle = left_muzzle
 	is_left_firing = not is_left_firing
 
-	var parent_scene := get_tree().current_scene
-	if parent_scene == null:
-		return
-
 	spawner_component.spawn(
 		muzzle.global_position,
-		parent_scene,
+		null,
 		_configure_projectile,
 	)
 	fired.emit()

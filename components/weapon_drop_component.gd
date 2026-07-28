@@ -22,12 +22,15 @@ func _on_no_health() -> void:
 	var definition := drop_table.pick_random()
 	if definition == null:
 		return
-	var parent := get_tree().current_scene
+	var parent := get_tree().get_first_node_in_group("gameplay_world")
+	if parent == null:
+		parent = get_tree().current_scene
 	if parent == null:
 		return
 	var pickup := pickup_scene.instantiate()
 	if pickup == null or not pickup.has_method("setup"):
 		push_error("WeaponDropComponent: pickup scene missing setup().")
 		return
-	parent.add_child(pickup)
-	pickup.call("setup", definition, actor.global_position)
+	var spawn_position := actor.global_position
+	parent.add_child.call_deferred(pickup)
+	pickup.call_deferred("setup", definition, spawn_position)

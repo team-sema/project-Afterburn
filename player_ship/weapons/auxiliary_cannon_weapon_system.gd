@@ -17,12 +17,9 @@ func _ready() -> void:
 func fire() -> void:
 	if is_shutdown:
 		return
-	var parent_scene := get_tree().current_scene
-	if parent_scene == null:
-		return
 	spawner_component.spawn(
 		muzzle.global_position,
-		parent_scene,
+		null,
 		_configure_projectile,
 	)
 	fired.emit()

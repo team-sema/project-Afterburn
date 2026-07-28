@@ -11,16 +11,22 @@ extends Node2D
 # an alternative parent if you so choose.
 func spawn(
 	global_spawn_position: Vector2 = global_position,
-	parent: Node = get_tree().current_scene,
+	parent: Node = null,
 	configure_before_add: Callable = Callable(),
 ) -> Node:
 	assert(scene is PackedScene, "Error: The scene export was never set on this spawner component.")
+	var spawn_parent := parent
+	if spawn_parent == null:
+		spawn_parent = get_tree().get_first_node_in_group("gameplay_world")
+	if spawn_parent == null:
+		spawn_parent = get_tree().current_scene
+	assert(spawn_parent != null, "SpawnerComponent requires a spawn parent.")
 	# Instance the scene
 	var instance = scene.instantiate()
 	if configure_before_add.is_valid():
 		configure_before_add.call(instance)
 	# Add it as a child of the parent
-	parent.add_child(instance)
+	spawn_parent.add_child(instance)
 	# Update the global position of the instance.
 	# (This must be done after adding it as a child)
 	instance.global_position = global_spawn_position
