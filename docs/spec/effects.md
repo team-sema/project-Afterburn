@@ -31,6 +31,10 @@ Nova Drift 풍: **밝은 기하 코어 + 다중 글로우 레이어 + 어두운 
 
 Flash / Scale / Shake — 피격·발사 시 펀치감
 
+## 픽업
+
+- `pickups/experience_orb.tscn` — 사각 **보급 상자** 실루엣 + 황금 글로우(Wide/Tight/Core). 회전하지 않음.
+
 ## 아트 소스
 
 - `assets/svg/` — 현재 네온 벡터

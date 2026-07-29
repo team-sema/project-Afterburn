@@ -30,7 +30,7 @@ chmod +x tools/push-feature.sh tools/merge-feature.sh 2>/dev/null || true
 ./tools/push-feature.sh -m "feat: short description"
 ```
 
-Pass `-y` if the user wants branch deletion after merge.
+Merges to main and **deletes the feature branch by default**. Pass `--no-delete` only if the branch must be kept.
 
 ## Stop Condition (exit 2)
 

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-28",
+  "updated": "2026-07-29",
   "source": "docs/board/cards/*.md",
   "columns": [
     {
@@ -39,6 +39,14 @@
     }
   ],
   "cards": [
+    {
+      "id": "xp-orb-yellow-color",
+      "title": "XP 오브 노란 시인성",
+      "description": "경험치 드롭을 사각 황금 보급상자 비주얼로 변경.",
+      "column": "review",
+      "file": "cards/xp-orb-yellow-color.md",
+      "tags": ["비주얼", "픽업"]
+    },
     {
       "id": "submission-copy-polish",
       "title": "제출·보드 카피 다듬기",

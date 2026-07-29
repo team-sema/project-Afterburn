@@ -16,7 +16,7 @@ disable-model-invocation: true
 
 ```
 /push
-/push -y          # 머지 후 feature 브랜치 삭제
+/push --no-delete   # 머지 후 feature 브랜치 유지 (예외)
 ```
 
 ## 절차 (순서 고정)
@@ -73,7 +73,7 @@ git diff --stat
 ```bash
 chmod +x tools/push-feature.sh tools/merge-feature.sh 2>/dev/null || true
 ./tools/push-feature.sh -m "feat: short description"
-# 삭제까지: ./tools/push-feature.sh -m "..." -y
+# 브랜치 유지가 필요할 때만: ./tools/push-feature.sh -m "..." --no-delete
 ```
 
 ### 5. exit 2 (STOP)일 때

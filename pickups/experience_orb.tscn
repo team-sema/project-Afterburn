@@ -1,29 +1,37 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="Script" path="res://pickups/experience_orb.gd" id="1_script"]
 [ext_resource type="Texture2D" uid="uid://djvqurciuxfie" path="res://assets/svg/radial_glow.svg" id="2_glow"]
-[ext_resource type="Texture2D" path="res://assets/svg/particle_diamond.svg" id="3_core"]
-[ext_resource type="Material" path="res://effects/diffuse_glow_material.tres" id="4_diffuse"]
-[ext_resource type="Material" path="res://effects/core_unshaded_material.tres" id="5_core_material"]
+[ext_resource type="Texture2D" uid="uid://f6hmnhx2tx54" path="res://assets/svg/supply_crate.svg" id="3_crate"]
+[ext_resource type="Texture2D" uid="uid://c0u2idixiwmj0" path="res://assets/svg/particle_square.svg" id="4_square"]
+[ext_resource type="Material" path="res://effects/wide_glow_material.tres" id="5_wide"]
+[ext_resource type="Material" path="res://effects/tight_glow_material.tres" id="6_tight"]
+[ext_resource type="Material" path="res://effects/core_unshaded_material.tres" id="7_core_material"]
 
-[sub_resource type="CircleShape2D" id="CircleShape2D_orb"]
-radius = 5.0
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_orb"]
+size = Vector2(10, 10)
 
 [node name="ExperienceOrb" type="Area2D"]
 z_index = 4
 script = ExtResource("1_script")
 
-[node name="Glow" type="Sprite2D" parent="."]
-self_modulate = Color(0.18, 0.82, 1, 0.6)
-material = ExtResource("4_diffuse")
-scale = Vector2(0.13, 0.13)
+[node name="WideGlow" type="Sprite2D" parent="."]
+self_modulate = Color(1, 0.62, 0.12, 0.42)
+material = ExtResource("5_wide")
+scale = Vector2(0.15, 0.15)
 texture = ExtResource("2_glow")
 
+[node name="TightGlow" type="Sprite2D" parent="."]
+self_modulate = Color(1, 0.78, 0.28, 0.38)
+material = ExtResource("6_tight")
+scale = Vector2(0.42, 0.42)
+texture = ExtResource("4_square")
+
 [node name="Core" type="Sprite2D" parent="."]
-self_modulate = Color(0.85, 1, 1, 1)
-material = ExtResource("5_core_material")
-scale = Vector2(0.18, 0.18)
-texture = ExtResource("3_core")
+self_modulate = Color(1, 0.92, 0.62, 1)
+material = ExtResource("7_core_material")
+scale = Vector2(0.2, 0.2)
+texture = ExtResource("3_crate")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-shape = SubResource("CircleShape2D_orb")
+shape = SubResource("RectangleShape2D_orb")

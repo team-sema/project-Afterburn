@@ -45,7 +45,6 @@ func setup(amount: int, spawn_position: Vector2) -> void:
 func _process(delta: float) -> void:
 	if _state == CollectionState.COLLECTED:
 		return
-	rotation += delta * 2.0
 	match _state:
 		CollectionState.DRIFTING:
 			_process_drift(delta)
