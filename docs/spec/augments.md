@@ -24,7 +24,7 @@
 |----|--------|------|
 | `enemy_health_boost_1_2` | Enemy Reinforcement | HEALTH ×1.2 (이후 스폰) |
 | `enemy_move_speed_boost_1_2` | Accelerated Hostiles | MOVE_SPEED ×1.2 |
-| `enemy_counter_shot_on_hit` | Retaliation Protocol | `CounterShotComponent` 부착 |
+| `enemy_fire_volume_boost` | 포화 사격 | ACTION_RATE ×1.25 + `EnemyFireVolumeBoostComponent` (탄수·스프레드 증가) |
 
 ## 트리거 · 컨트롤러
 
@@ -57,8 +57,8 @@
 
 > `clear_augments()`는 현재 **호출처 없음**. 새 World 인스턴스가 빈 상태로 시작.
 
-## CounterShotComponent
+## EnemyFireVolumeBoostComponent
 
-- `Trigger.ON_HIT`(기본) / `ON_DEATH`
-- 부모 Enemy + TargetingComponent 필요
-- 기본 스프레드 5° · 속도 200
+- 베이스 `EnemyShootComponent`의 `shot_count`에 `extra_shots` 가산(기본 +2)
+- `spread_degrees`를 최소 `min_spread_degrees`(기본 18°)로 보장
+- ACTION_RATE와 함께 위기 오퍼의 “더 많은 탄환” 축

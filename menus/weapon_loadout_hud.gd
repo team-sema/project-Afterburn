@@ -57,7 +57,7 @@ func refresh() -> void:
 		if slot.is_empty():
 			_set_module(module, slot_title, "—", true)
 			continue
-		var weapon_name := slot.equipped_weapon_display_name
+		var weapon_name: String = slot.equipped_weapon_display_name
 		if weapon_name.is_empty():
 			weapon_name = String(slot.equipped_weapon_id)
 		var charges_text := _format_charges(slot.equipped_weapon_instance)
@@ -70,13 +70,13 @@ func refresh() -> void:
 
 
 func _refresh_main_slot_module(loadout: PlayerWeaponLoadout) -> void:
-	var main_slot := loadout.get_main_slot()
+	var main_slot: WeaponSlotState = loadout.get_main_slot()
 	var slot_lv: int = 1 if main_slot == null else main_slot.level
 	var title := "메인 Lv.%d" % slot_lv
 	if main_slot == null or main_slot.is_empty():
 		_set_module(main_module, title, "—", true)
 		return
-	var main_name := main_slot.equipped_weapon_display_name
+	var main_name: String = main_slot.equipped_weapon_display_name
 	if main_name.is_empty():
 		main_name = String(main_slot.equipped_weapon_id)
 	var weapon_lv: int = loadout.get_weapon_level(main_slot.equipped_weapon_id)
@@ -84,12 +84,12 @@ func _refresh_main_slot_module(loadout: PlayerWeaponLoadout) -> void:
 
 
 func _refresh_reserve_slot_module(loadout: PlayerWeaponLoadout) -> void:
-	var reserve_slot := loadout.get_reserve_slot()
+	var reserve_slot: WeaponSlotState = loadout.get_reserve_slot()
 	var title := "예비"
 	if reserve_slot == null or reserve_slot.is_empty():
 		_set_module(reserve_module, title, "—", true)
 		return
-	var weapon_name := reserve_slot.equipped_weapon_display_name
+	var weapon_name: String = reserve_slot.equipped_weapon_display_name
 	if weapon_name.is_empty():
 		weapon_name = String(reserve_slot.equipped_weapon_id)
 	var weapon_lv: int = loadout.get_weapon_level(reserve_slot.equipped_weapon_id)

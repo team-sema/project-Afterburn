@@ -120,10 +120,18 @@
       "tags": ["오그먼트", "플레이어"]
     },
     {
+      "id": "enemy-baseline-fire",
+      "title": "적 기본 사격·포화 위기",
+      "description": "기본 조준사격 + 위기를 탄량 증가로 교체, 이동 속도 소폭 상향.",
+      "column": "review",
+      "file": "cards/enemy-baseline-fire.md",
+      "tags": ["적", "오그먼트"]
+    },
+    {
       "id": "enemy-action-rate-asset",
       "title": "ACTION_RATE 적 오그먼트 에셋",
-      "description": "Factory는 지원하는데 .tres가 없음.",
-      "column": "ready",
+      "description": "enemy_fire_volume_boost로 풀 연결.",
+      "column": "done",
       "file": "cards/enemy-action-rate-asset.md",
       "tags": ["오그먼트", "적"]
     },

@@ -27,7 +27,7 @@ texture = ExtResource("3_2nfdr")
 health = 60
 
 [node name="MoveComponent" parent="." index="2" unique_id=695129192]
-velocity = Vector2(0, 10)
+velocity = Vector2(0, 12)
 
 [node name="VisibleOnScreenNotifier2D" parent="." index="3" unique_id=1344806211]
 rect = Rect2(-10, -7, 20, 14)

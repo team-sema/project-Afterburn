@@ -41,7 +41,7 @@ Hitbox.area_entered
 |----|------|
 | `player_blaster.tscn` | 속도 `(0,-200)` · 히트 시 free |
 | `player_shotgun_pellet.tscn` | 샷건 펠릿 · 부채꼴 · damage **4** |
-| `curve_projectile.tscn` | 적/반격 · `launch(dir, speed)` · Anchor 오실레이션 |
+| `curve_projectile.tscn` | 적 기본 사격 · `launch(dir, speed)` · Anchor 오실레이션 |
 
 ## 점수·난이도 상수
 
