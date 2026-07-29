@@ -5,9 +5,11 @@ signal main_weapon_changed(weapon_definition: WeaponDefinition)
 signal auxiliary_weapon_changed(slot_index: int, weapon_definition: WeaponDefinition)
 signal slot_unlocked(slot_index: int)
 signal slot_upgraded(category: WeaponDefinition.Category, slot_index: int, new_level: int)
+signal weapon_level_changed(weapon_id: StringName, new_level: int)
 signal loadout_changed
 
 const AUX_SLOT_COUNT := 3
+const MAX_WEAPON_LEVEL := WeaponSlotState.MAX_LEVEL
 
 @export var default_main_weapon: WeaponDefinition
 @export var player_path: NodePath
@@ -20,6 +22,11 @@ var _main_slot: WeaponSlotState = WeaponSlotState.new()
 var _aux_slots: Array[WeaponSlotState] = []
 var _global_damage_multiplier := 1.0
 var _global_fire_rate_multiplier := 1.0
+## Per-weapon levels persist across equip swaps for the run.
+var _weapon_levels: Dictionary = {}
+var _weapon_display_names: Dictionary = {}
+## weapon_id -> WeaponDefinition.Category (for owned HUD rows).
+var _weapon_categories: Dictionary = {}
 
 
 func _ready() -> void:
@@ -61,6 +68,80 @@ func get_all_weapon_systems() -> Array[WeaponSystem]:
 	return systems
 
 
+func get_weapon_level(weapon_id: StringName) -> int:
+	if weapon_id == &"":
+		return 1
+	return int(_weapon_levels.get(weapon_id, 1))
+
+
+func get_weapon_display_name(weapon_id: StringName) -> String:
+	if weapon_id == &"":
+		return ""
+	if not _weapon_display_names.has(weapon_id):
+		return String(weapon_id)
+	return str(_weapon_display_names[weapon_id])
+
+
+func has_weapon_progress(weapon_id: StringName) -> bool:
+	return _weapon_levels.has(weapon_id)
+
+
+func get_tracked_weapon_ids() -> Array[StringName]:
+	return _sorted_tracked_ids()
+
+
+func get_tracked_weapon_ids_by_category(category: WeaponDefinition.Category) -> Array[StringName]:
+	var ids: Array[StringName] = []
+	for weapon_id in _sorted_tracked_ids():
+		if get_weapon_category(weapon_id) == category:
+			ids.append(weapon_id)
+	return ids
+
+
+func get_weapon_category(weapon_id: StringName) -> WeaponDefinition.Category:
+	if weapon_id == &"" or not _weapon_categories.has(weapon_id):
+		return WeaponDefinition.Category.MAIN
+	return int(_weapon_categories[weapon_id]) as WeaponDefinition.Category
+
+
+## First MAIN pickup registers Lv.1; later MAIN pickups raise level. Returns true if level increased.
+## Auxiliary pickups must not call this — use refill_auxiliary_weapon / equip instead.
+func note_weapon_pickup(
+	weapon_id: StringName,
+	display_name: String = "",
+	category: WeaponDefinition.Category = WeaponDefinition.Category.MAIN
+) -> bool:
+	if weapon_id == &"":
+		return false
+	if category == WeaponDefinition.Category.AUXILIARY:
+		push_warning("note_weapon_pickup ignored for auxiliary '%s' (consumables have no weapon level)." % String(weapon_id))
+		return false
+	_weapon_categories[weapon_id] = category
+	if display_name != "":
+		_weapon_display_names[weapon_id] = display_name
+	if not _weapon_levels.has(weapon_id):
+		_weapon_levels[weapon_id] = 1
+		weapon_level_changed.emit(weapon_id, 1)
+		_refresh_equipped_weapon_by_id(weapon_id)
+		loadout_changed.emit()
+		return false
+	return upgrade_weapon_level(weapon_id)
+
+
+func upgrade_weapon_level(weapon_id: StringName) -> bool:
+	if weapon_id == &"":
+		return false
+	var level := get_weapon_level(weapon_id)
+	if level >= MAX_WEAPON_LEVEL:
+		return false
+	level += 1
+	_weapon_levels[weapon_id] = level
+	weapon_level_changed.emit(weapon_id, level)
+	_refresh_equipped_weapon_by_id(weapon_id)
+	loadout_changed.emit()
+	return true
+
+
 func equip_main_weapon(weapon_definition: WeaponDefinition) -> void:
 	if weapon_definition == null:
 		push_error("PlayerWeaponLoadout.equip_main_weapon: weapon_definition is null.")
@@ -72,8 +153,12 @@ func equip_main_weapon(weapon_definition: WeaponDefinition) -> void:
 		push_error("PlayerWeaponLoadout.equip_main_weapon: '%s' has no weapon_scene." % String(weapon_definition.id))
 		return
 
+	if not _weapon_levels.has(weapon_definition.id):
+		_weapon_levels[weapon_definition.id] = 1
+	_weapon_display_names[weapon_definition.id] = weapon_definition.display_name
+	_weapon_categories[weapon_definition.id] = WeaponDefinition.Category.MAIN
+
 	_clear_slot_instance(_main_slot)
-	_main_slot.level = 1
 	var instance := _instantiate_weapon(weapon_definition, WeaponDefinition.Category.MAIN, 0, main_weapon_mount)
 	if instance == null:
 		return
@@ -131,8 +216,12 @@ func replace_auxiliary_weapon(slot_index: int, weapon_definition: WeaponDefiniti
 		push_error("PlayerWeaponLoadout.replace_auxiliary_weapon: missing AuxMount for slot %s." % slot_index)
 		return
 
+	# Aux weapons are consumables: no per-weapon level, only slot overclock.
+	_weapon_display_names[weapon_definition.id] = weapon_definition.display_name
+	_weapon_categories[weapon_definition.id] = WeaponDefinition.Category.AUXILIARY
+	_weapon_levels.erase(weapon_definition.id)
+
 	_clear_slot_instance(slot)
-	slot.level = 1
 	var instance := _instantiate_weapon(weapon_definition, WeaponDefinition.Category.AUXILIARY, slot_index, mount)
 	if instance == null:
 		return
@@ -140,9 +229,48 @@ func replace_auxiliary_weapon(slot_index: int, weapon_definition: WeaponDefiniti
 	slot.equipped_weapon_id = weapon_definition.id
 	slot.equipped_weapon_display_name = weapon_definition.display_name
 	slot.equipped_weapon_instance = instance
+	if not instance.depleted.is_connected(_on_auxiliary_weapon_depleted.bind(slot_index)):
+		instance.depleted.connect(_on_auxiliary_weapon_depleted.bind(slot_index))
 	_apply_multipliers_to_weapon(instance, WeaponDefinition.Category.AUXILIARY, slot_index)
 	auxiliary_weapon_changed.emit(slot_index, weapon_definition)
 	loadout_changed.emit()
+
+
+## Same aux pickup restores remaining uses instead of raising a weapon level.
+func refill_auxiliary_weapon(weapon_id: StringName) -> bool:
+	if weapon_id == &"":
+		return false
+	for index in AUX_SLOT_COUNT:
+		var slot := _aux_slots[index]
+		if slot.equipped_weapon_id != weapon_id:
+			continue
+		var instance := slot.equipped_weapon_instance
+		if instance == null or not is_instance_valid(instance):
+			return false
+		instance.refill_consumable()
+		loadout_changed.emit()
+		return true
+	return false
+
+
+func notify_consumable_changed() -> void:
+	loadout_changed.emit()
+
+
+func clear_auxiliary_slot(slot_index: int) -> void:
+	if not _is_valid_aux_index(slot_index):
+		return
+	var slot := _aux_slots[slot_index]
+	if slot.is_empty():
+		return
+	_clear_slot_instance(slot)
+	loadout_changed.emit()
+
+
+func _on_auxiliary_weapon_depleted(slot_index: int) -> void:
+	if not _is_valid_aux_index(slot_index):
+		return
+	call_deferred("clear_auxiliary_slot", slot_index)
 
 
 func unlock_next_auxiliary_slot() -> bool:
@@ -196,14 +324,6 @@ func get_first_empty_auxiliary_slot() -> int:
 		if slot.unlocked and slot.is_empty():
 			return index
 	return -1
-
-
-func upgrade_auxiliary_weapon(weapon_id: StringName) -> bool:
-	for index in AUX_SLOT_COUNT:
-		var slot := _aux_slots[index]
-		if slot.equipped_weapon_id == weapon_id:
-			return upgrade_auxiliary_slot(index)
-	return false
 
 
 func has_auxiliary_weapon(weapon_id: StringName) -> bool:
@@ -262,6 +382,19 @@ func get_slot_attack_rate_multiplier(category: WeaponDefinition.Category, slot_i
 	return slot.get_attack_rate_multiplier()
 
 
+func get_weapon_damage_multiplier(weapon_id: StringName) -> float:
+	# Aux consumables have no weapon level — slot overclock only.
+	if get_weapon_category(weapon_id) == WeaponDefinition.Category.AUXILIARY:
+		return 1.0
+	return _level_damage_multiplier(get_weapon_level(weapon_id))
+
+
+func get_weapon_attack_rate_multiplier(weapon_id: StringName) -> float:
+	if get_weapon_category(weapon_id) == WeaponDefinition.Category.AUXILIARY:
+		return 1.0
+	return _level_attack_rate_multiplier(get_weapon_level(weapon_id))
+
+
 func _instantiate_weapon(
 	weapon_definition: WeaponDefinition,
 	category: WeaponDefinition.Category,
@@ -281,8 +414,9 @@ func _instantiate_weapon(
 
 func _clear_slot_instance(slot: WeaponSlotState) -> void:
 	if slot.equipped_weapon_instance != null and is_instance_valid(slot.equipped_weapon_instance):
-		slot.equipped_weapon_instance.shutdown_weapon()
-		slot.equipped_weapon_instance.queue_free()
+		var instance := slot.equipped_weapon_instance
+		instance.shutdown_weapon()
+		instance.queue_free()
 	slot.equipped_weapon_instance = null
 	slot.equipped_weapon_id = &""
 	slot.equipped_weapon_display_name = ""
@@ -291,10 +425,17 @@ func _clear_slot_instance(slot: WeaponSlotState) -> void:
 func _apply_multipliers_to_weapon(weapon: WeaponSystem, category: WeaponDefinition.Category, slot_index: int) -> void:
 	if weapon == null or not is_instance_valid(weapon):
 		return
+	var slot := _get_slot(category, slot_index)
+	var weapon_id := slot.equipped_weapon_id if slot != null else &""
+	var local_damage := get_slot_damage_multiplier(category, slot_index)
+	var local_rate := get_slot_attack_rate_multiplier(category, slot_index)
+	if category == WeaponDefinition.Category.MAIN:
+		local_damage *= get_weapon_damage_multiplier(weapon_id)
+		local_rate *= get_weapon_attack_rate_multiplier(weapon_id)
 	weapon.set_global_damage_multiplier(_global_damage_multiplier)
 	weapon.set_global_fire_rate_multiplier(_global_fire_rate_multiplier)
-	weapon.set_local_damage_multiplier(get_slot_damage_multiplier(category, slot_index))
-	weapon.set_local_fire_rate_multiplier(get_slot_attack_rate_multiplier(category, slot_index))
+	weapon.set_local_damage_multiplier(local_damage)
+	weapon.set_local_fire_rate_multiplier(local_rate)
 
 
 func _refresh_slot_weapon_multipliers(category: WeaponDefinition.Category, slot_index: int) -> void:
@@ -304,10 +445,46 @@ func _refresh_slot_weapon_multipliers(category: WeaponDefinition.Category, slot_
 	_apply_multipliers_to_weapon(slot.equipped_weapon_instance, category, slot_index)
 
 
+func _sorted_tracked_ids() -> Array[StringName]:
+	var ids: Array[StringName] = []
+	for key in _weapon_levels.keys():
+		ids.append(key as StringName)
+	ids.sort_custom(func(a: StringName, b: StringName) -> bool: return String(a) < String(b))
+	return ids
+
+
+func _refresh_equipped_weapon_by_id(weapon_id: StringName) -> void:
+	if _main_slot.equipped_weapon_id == weapon_id:
+		_refresh_slot_weapon_multipliers(WeaponDefinition.Category.MAIN, 0)
+	for index in AUX_SLOT_COUNT:
+		if _aux_slots[index].equipped_weapon_id == weapon_id:
+			_refresh_slot_weapon_multipliers(WeaponDefinition.Category.AUXILIARY, index)
+
+
 func _refresh_all_weapon_multipliers() -> void:
 	_refresh_slot_weapon_multipliers(WeaponDefinition.Category.MAIN, 0)
 	for index in AUX_SLOT_COUNT:
 		_refresh_slot_weapon_multipliers(WeaponDefinition.Category.AUXILIARY, index)
+
+
+func _level_damage_multiplier(level: int) -> float:
+	match clampi(level, 1, MAX_WEAPON_LEVEL):
+		1:
+			return 1.0
+		2, 3:
+			return 1.2
+		_:
+			return 1.0
+
+
+func _level_attack_rate_multiplier(level: int) -> float:
+	match clampi(level, 1, MAX_WEAPON_LEVEL):
+		1, 2:
+			return 1.0
+		3:
+			return 1.2
+		_:
+			return 1.0
 
 
 func _get_slot(category: WeaponDefinition.Category, slot_index: int) -> WeaponSlotState:

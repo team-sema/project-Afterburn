@@ -1,7 +1,7 @@
 [gd_resource type="Resource" script_class="WeaponDefinition" load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://resources/weapons/weapon_definition.gd" id="1_def"]
-[ext_resource type="PackedScene" path="res://player_ship/weapons/auxiliary_cannon_weapon_system.tscn" id="2_scene"]
+[ext_resource type="PackedScene" path="res://player_ship/weapons/auxiliary_flak_weapon_system.tscn" id="2_scene"]
 
 [resource]
 script = ExtResource("1_def")
@@ -9,4 +9,4 @@ id = &"aux_test_flak"
 display_name = "보조 플랙"
 category = 1
 weapon_scene = ExtResource("2_scene")
-description = "두 번째 테스트용 보조무기."
+description = "주황빛 탄환을 빠른 주기로 발사하는 소모 보조무기."

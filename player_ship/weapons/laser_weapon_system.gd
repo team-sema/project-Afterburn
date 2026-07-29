@@ -1,7 +1,12 @@
 class_name LaserWeaponSystem
 extends WeaponSystem
 
-@onready var ray_cast: RayCast2D = $RayCast2D
+## Piercing beam that always reaches the top of the playfield and damages every
+## enemy hurtbox along its path each tick.
+
+const BEAM_LOCAL_START := Vector2(0, -6)
+const PLAYFIELD_TOP_MARGIN := 8.0
+
 @onready var glow_line: Sprite2D = $GlowLine
 @onready var core_line: Line2D = $CoreLine
 @onready var damage_tick_timer: Timer = $DamageTickTimer
@@ -16,28 +21,21 @@ func _ready() -> void:
 	base_tick_damage = damage_hitbox.damage
 	damage_tick_timer.timeout.connect(apply_damage_tick)
 	_apply_stat_multipliers()
-	_update_beam_endpoint()
+	_update_beam_visual(_full_beam_endpoint())
 
 
 func _physics_process(_delta: float) -> void:
 	if is_shutdown:
 		return
-	_update_beam_endpoint()
+	_update_beam_visual(_full_beam_endpoint())
 
 
 func apply_damage_tick() -> void:
 	if is_shutdown:
 		return
-	_update_beam_endpoint()
-	if not ray_cast.is_colliding():
-		return
-
-	var hurtbox := ray_cast.get_collider() as HurtboxComponent
-	if hurtbox == null or hurtbox.is_invincible:
-		return
-
-	damage_hitbox.damage = maxi(1, roundi(base_tick_damage * get_effective_damage_multiplier()))
-	hurtbox.hurt.emit(damage_hitbox)
+	var endpoint := _full_beam_endpoint()
+	_update_beam_visual(endpoint)
+	_damage_all_along_beam(endpoint)
 
 
 func _apply_stat_multipliers() -> void:
@@ -55,19 +53,51 @@ func _on_weapon_shutdown() -> void:
 			damage_tick_timer.timeout.disconnect(apply_damage_tick)
 
 
-func _update_beam_endpoint() -> void:
-	ray_cast.force_raycast_update()
-	var endpoint := ray_cast.target_position
-	if ray_cast.is_colliding():
-		endpoint = to_local(ray_cast.get_collision_point())
-	_update_glow_beam(endpoint)
+func _full_beam_endpoint() -> Vector2:
+	# Extend upward in local space until we reach the playfield top edge.
+	var top_local := to_local(Vector2(global_position.x, PLAYFIELD_TOP_MARGIN))
+	return Vector2(0.0, minf(BEAM_LOCAL_START.y, top_local.y))
+
+
+func _update_beam_visual(endpoint: Vector2) -> void:
+	core_line.set_point_position(0, BEAM_LOCAL_START)
 	core_line.set_point_position(1, endpoint)
+	_update_glow_beam(endpoint)
 
 
 func _update_glow_beam(endpoint: Vector2) -> void:
-	var start := core_line.get_point_position(0)
-	var direction := endpoint - start
+	var direction := endpoint - BEAM_LOCAL_START
 	var texture_size := glow_line.texture.get_size()
-	glow_line.position = (start + endpoint) * 0.5
+	if texture_size.y <= 0.0:
+		return
+	glow_line.position = (BEAM_LOCAL_START + endpoint) * 0.5
 	glow_line.rotation = direction.angle() - PI * 0.5
 	glow_line.scale.y = direction.length() / texture_size.y
+
+
+func _damage_all_along_beam(endpoint: Vector2) -> void:
+	var space := get_world_2d().direct_space_state
+	if space == null:
+		return
+	var from_global := to_global(BEAM_LOCAL_START)
+	var to_global := to_global(endpoint)
+	var exclude: Array[RID] = []
+	damage_hitbox.damage = maxi(1, roundi(base_tick_damage * get_effective_damage_multiplier()))
+
+	# Walk the ray, damaging every hurtbox without stopping the beam visually.
+	for _i in 32:
+		var query := PhysicsRayQueryParameters2D.create(from_global, to_global)
+		query.collide_with_areas = true
+		query.collide_with_bodies = false
+		query.collision_mask = 2
+		query.exclude = exclude
+		var hit := space.intersect_ray(query)
+		if hit.is_empty():
+			break
+		var collider: Object = hit.get("collider")
+		if collider is CollisionObject2D:
+			exclude.append((collider as CollisionObject2D).get_rid())
+		var hurtbox := collider as HurtboxComponent
+		if hurtbox == null or hurtbox.is_invincible:
+			continue
+		hurtbox.hurt.emit(damage_hitbox)

@@ -1,0 +1,102 @@
+[gd_scene load_steps=14 format=3]
+
+[ext_resource type="Script" path="res://projectiles/aux_flak_bolt.gd" id="1_script"]
+[ext_resource type="Material" path="res://effects/wide_glow_material.tres" id="2_wide"]
+[ext_resource type="Texture2D" uid="uid://c15miu6sde4so" path="res://assets/svg/player_blaster.svg" id="3_tex"]
+[ext_resource type="Material" path="res://effects/tight_glow_material.tres" id="4_tight"]
+[ext_resource type="Material" path="res://effects/core_unshaded_material.tres" id="5_core"]
+[ext_resource type="Material" path="res://effects/additive_unshaded_material.tres" id="6_add"]
+[ext_resource type="Texture2D" uid="uid://bp1d64ncpt4rh" path="res://assets/svg/particle_diamond.svg" id="7_particle"]
+[ext_resource type="Script" uid="uid://dbgfouplndi2j" path="res://components/move_component.gd" id="8_move"]
+[ext_resource type="Script" uid="uid://dx86ewq6s2alh" path="res://components/free_offscreen_component.gd" id="9_free"]
+[ext_resource type="Script" uid="uid://c1yamqkv7l4ue" path="res://components/scale_component.gd" id="10_scale"]
+[ext_resource type="Script" uid="uid://qfpbc4d4ijso" path="res://components/flash_component.gd" id="11_flash"]
+[ext_resource type="Script" uid="uid://cvmjafhyfx5xo" path="res://components/hitbox_component.gd" id="12_hitbox"]
+
+[sub_resource type="Gradient" id="Gradient_trail"]
+colors = PackedColorArray(1, 0.55, 0.12, 0.7, 1, 0.2, 0.05, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture_trail"]
+gradient = SubResource("Gradient_trail")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_trail"]
+particle_flag_disable_z = true
+direction = Vector3(0, 1, 0)
+spread = 10.0
+initial_velocity_min = 6.0
+initial_velocity_max = 12.0
+gravity = Vector3(0, 0, 0)
+scale_min = 0.1
+scale_max = 0.2
+color_ramp = SubResource("GradientTexture_trail")
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_bolt"]
+size = Vector2(5, 9)
+
+[node name="AuxFlakBolt" type="Node2D"]
+script = ExtResource("1_script")
+
+[node name="Sprite2D" type="Node2D" parent="."]
+
+[node name="WideGlow" type="Sprite2D" parent="Sprite2D"]
+self_modulate = Color(1, 0.45, 0.08, 0.18)
+show_behind_parent = true
+texture_filter = 2
+material = ExtResource("2_wide")
+scale = Vector2(0.26, 0.26)
+texture = ExtResource("3_tex")
+
+[node name="TightGlow" type="Sprite2D" parent="Sprite2D"]
+self_modulate = Color(1, 0.62, 0.18, 0.5)
+show_behind_parent = true
+texture_filter = 2
+material = ExtResource("4_tight")
+scale = Vector2(0.16, 0.16)
+texture = ExtResource("3_tex")
+
+[node name="Core" type="Sprite2D" parent="Sprite2D"]
+self_modulate = Color(1, 0.92, 0.55, 1)
+texture_filter = 2
+material = ExtResource("5_core")
+scale = Vector2(0.14, 0.14)
+texture = ExtResource("3_tex")
+
+[node name="Trail" type="GPUParticles2D" parent="Sprite2D"]
+material = ExtResource("6_add")
+position = Vector2(0, 4)
+amount = 16
+texture = ExtResource("7_particle")
+lifetime = 0.2
+visibility_rect = Rect2(-8, -8, 16, 28)
+process_material = SubResource("ParticleProcessMaterial_trail")
+
+[node name="MoveComponent" type="Node" parent="." node_paths=PackedStringArray("actor")]
+script = ExtResource("8_move")
+actor = NodePath("..")
+velocity = Vector2(0, -170)
+
+[node name="FreeOffscreenComponent" type="VisibleOnScreenNotifier2D" parent="." node_paths=PackedStringArray("actor")]
+rect = Rect2(-4, -7, 8, 14)
+script = ExtResource("9_free")
+actor = NodePath("..")
+
+[node name="ScaleComponent" type="Node" parent="." node_paths=PackedStringArray("sprite")]
+script = ExtResource("10_scale")
+sprite = NodePath("../Sprite2D")
+scale_amount = Vector2(1.15, 1.6)
+scale_duration = 0.85
+
+[node name="FlashComponent" type="Node" parent="." node_paths=PackedStringArray("sprite")]
+script = ExtResource("11_flash")
+sprite = NodePath("../Sprite2D/Core")
+flash_duration = 0.1
+
+[node name="HitboxComponent" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 2
+script = ExtResource("12_hitbox")
+damage = 8
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HitboxComponent"]
+position = Vector2(0, 1)
+shape = SubResource("RectangleShape2D_bolt")

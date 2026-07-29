@@ -3,6 +3,9 @@ extends Area2D
 
 signal collected(weapon_definition: WeaponDefinition)
 
+const PLAYER_HURTBOX_LAYER := 1
+const EXPERIENCE_COLLECTOR_LAYER := 1 << 4
+
 @export var drift_speed := 12.0
 @export var lifetime := 12.0
 
@@ -14,7 +17,7 @@ var _age := 0.0
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_PAUSABLE
 	collision_layer = 0
-	collision_mask = 1
+	collision_mask = PLAYER_HURTBOX_LAYER | EXPERIENCE_COLLECTOR_LAYER
 	monitoring = true
 	monitorable = false
 	area_entered.connect(_on_area_entered)
@@ -45,7 +48,7 @@ func _refresh_label() -> void:
 func _on_area_entered(area: Area2D) -> void:
 	if _collecting or weapon_definition == null:
 		return
-	if not _is_player_hurtbox(area):
+	if not _is_valid_collector(area):
 		return
 	_collecting = true
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -66,10 +69,9 @@ func _on_area_entered(area: Area2D) -> void:
 		process_mode = Node.PROCESS_MODE_PAUSABLE
 
 
-func _is_player_hurtbox(area: Area2D) -> bool:
-	var node: Node = area
-	while node != null:
-		if node.is_in_group("player"):
-			return true
-		node = node.get_parent()
-	return false
+func _is_valid_collector(area: Area2D) -> bool:
+	if area.is_in_group("experience_collector"):
+		return true
+	# Only the ship's hit-core hurtbox — not orbital-barrier segments on layer 1.
+	var parent := area.get_parent()
+	return parent != null and parent is PlayerHitPoint

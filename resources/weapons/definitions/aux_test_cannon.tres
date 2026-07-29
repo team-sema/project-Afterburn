@@ -9,4 +9,4 @@ id = &"aux_test_cannon"
 display_name = "보조 캐넌"
 category = 1
 weapon_scene = ExtResource("2_scene")
-description = "일정 간격으로 자동 발사하는 보조무기."
+description = "연두빛 탄환을 자동 발사하는 소모 보조무기. 탄약이 다하면 슬롯에서 사라진다."

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-29",
+  "updated": "2026-07-30",
   "source": "docs/board/cards/*.md",
   "columns": [
     {
@@ -39,6 +39,14 @@
     }
   ],
   "cards": [
+    {
+      "id": "hex-loadout-hud",
+      "title": "육각 모듈 무장 HUD",
+      "description": "오른쪽 STATUS를 주/보조 육각 모듈로 표시. 보조 소모품·유도탄 포함.",
+      "column": "review",
+      "file": "cards/hex-loadout-hud.md",
+      "tags": ["UI", "HUD"]
+    },
     {
       "id": "xp-orb-yellow-color",
       "title": "XP 오브 노란 시인성",

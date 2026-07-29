@@ -5,6 +5,7 @@ extends Node
 @export var actor: Node2D
 @export var orb_scene: PackedScene
 @export_range(1, 1000, 1) var experience_amount := 1
+@export_range(0.0, 1.0, 0.01) var drop_chance := 0.5
 
 
 func _ready() -> void:
@@ -15,6 +16,8 @@ func _ready() -> void:
 
 
 func _on_no_health() -> void:
+	if drop_chance <= 0.0 or randf() > drop_chance:
+		return
 	var parent := get_tree().get_first_node_in_group("gameplay_world")
 	if parent == null:
 		parent = get_tree().current_scene

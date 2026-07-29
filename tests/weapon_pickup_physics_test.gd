@@ -35,26 +35,51 @@ func _run() -> void:
 	_expect(barrier_slot.can_upgrade(), "equipped auxiliary slots can be upgraded")
 
 	var barrier: Node = barrier_slot.equipped_weapon_instance
-	barrier.set("segment_regeneration_time", 0.05)
 	var segment: Node2D = barrier.get_node("OrbitRoot/Segment1") as Node2D
 	var stats: StatsComponent = segment.get_node("StatsComponent") as StatsComponent
 	var hitbox: HitboxComponent = segment.get_node("HitboxComponent") as HitboxComponent
 	var hurtbox: HurtboxComponent = segment.get_node("HurtboxComponent") as HurtboxComponent
 	stats.health = 0
-	_expect(not segment.is_queued_for_deletion(), "depleted barrier segments remain in the scene")
-	_expect(segment.modulate.a < 1.0, "depleted barrier segments become translucent")
-	_expect(hurtbox.is_invincible, "depleted barrier segments disable damage reception")
 	await process_frame
+	_expect(not segment.is_queued_for_deletion(), "depleted barrier segments remain until weapon clears")
+	_expect(not segment.get_node("Core").visible, "depleted barrier segments hide their visuals")
+	_expect(hurtbox.is_invincible, "depleted barrier segments disable damage reception")
 	_expect(not hitbox.monitoring, "depleted barrier segments stop dealing contact damage")
 	_expect(not hurtbox.monitorable, "depleted barrier segments stop blocking attacks")
+	_expect(
+		int(barrier.call("get_consumable_remaining")) < 0,
+		"barrier does not expose charge HUD values",
+	)
+	_expect(_visible_barrier_cores(barrier) == 2, "destroying one segment leaves two visible cores")
 
-	await create_timer(0.1).timeout
+	# Destroy remaining segments → weapon is consumed and slot clears.
+	for child in barrier.get_node("OrbitRoot").get_children():
+		var other_stats := child.get_node_or_null("StatsComponent") as StatsComponent
+		if other_stats != null and other_stats.health > 0:
+			other_stats.health = 0
 	await process_frame
-	_expect(stats.health == 2, "barrier segment health regenerates")
-	_expect(is_equal_approx(segment.modulate.a, 1.0), "regenerated barrier segments become opaque")
-	_expect(not hurtbox.is_invincible, "regenerated barrier segments receive damage again")
-	_expect(hitbox.monitoring, "regenerated barrier segments deal contact damage again")
-	_expect(hurtbox.monitorable, "regenerated barrier segments block attacks again")
+	await process_frame
+	_expect(barrier_slot.is_empty(), "fully destroyed barrier clears the auxiliary slot")
+
+	# Re-equip via another pickup.
+	var pickup2: Area2D = pickup_scene.instantiate() as Area2D
+	gameplay.add_child(pickup2)
+	pickup2.call("setup", weapon_definition, ship.global_position)
+	for _index in 5:
+		await physics_frame
+		await process_frame
+	_expect(loadout.call("has_auxiliary_weapon", &"aux_orbital_barrier"), "barrier can be re-equipped after consume")
+	barrier_slot = loadout.call("get_auxiliary_slot", 0) as WeaponSlotState
+	barrier = barrier_slot.equipped_weapon_instance
+	segment = barrier.get_node("OrbitRoot/Segment1") as Node2D
+	stats = segment.get_node("StatsComponent") as StatsComponent
+	stats.health = 0
+	await process_frame
+	_expect(_visible_barrier_cores(barrier) == 2, "partial damage before refill")
+	loadout.call("refill_auxiliary_weapon", &"aux_orbital_barrier")
+	await process_frame
+	_expect(_visible_barrier_cores(barrier) == 3, "same-weapon pickup restores all barrier segments")
+	_expect(segment.get_node("Core").visible, "refilled segments become visible again")
 
 	var main_pickup: Area2D = pickup_scene.instantiate() as Area2D
 	gameplay.add_child(main_pickup)
@@ -84,3 +109,12 @@ func _run() -> void:
 func _expect(condition: bool, message: String) -> void:
 	if not condition:
 		failures.append(message)
+
+
+func _visible_barrier_cores(barrier: Node) -> int:
+	var count := 0
+	for child in barrier.get_node("OrbitRoot").get_children():
+		var core := child.get_node_or_null("Core") as CanvasItem
+		if core != null and core.visible:
+			count += 1
+	return count

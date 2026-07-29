@@ -2,10 +2,11 @@
 
 [ext_resource type="Script" path="res://player_ship/weapons/auxiliary_cannon_weapon_system.gd" id="1_script"]
 [ext_resource type="Script" path="res://components/spawner_component.gd" id="2_spawner"]
-[ext_resource type="PackedScene" path="res://projectiles/aux_cannon_bolt.tscn" id="3_projectile"]
+[ext_resource type="PackedScene" path="res://projectiles/aux_flak_bolt.tscn" id="3_projectile"]
 
-[node name="AuxiliaryCannonWeaponSystem" type="Node2D"]
+[node name="AuxiliaryFlakWeaponSystem" type="Node2D"]
 script = ExtResource("1_script")
+max_charges = 20
 
 [node name="Muzzle" type="Marker2D" parent="."]
 position = Vector2(0, -8)
@@ -15,5 +16,5 @@ script = ExtResource("2_spawner")
 scene = ExtResource("3_projectile")
 
 [node name="FireRateTimer" type="Timer" parent="."]
-wait_time = 0.8
+wait_time = 0.55
 autostart = true

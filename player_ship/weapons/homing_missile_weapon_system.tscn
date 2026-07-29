@@ -1,19 +1,20 @@
 [gd_scene load_steps=4 format=3]
 
-[ext_resource type="Script" path="res://player_ship/weapons/auxiliary_cannon_weapon_system.gd" id="1_script"]
+[ext_resource type="Script" path="res://player_ship/weapons/homing_missile_weapon_system.gd" id="1_script"]
 [ext_resource type="Script" path="res://components/spawner_component.gd" id="2_spawner"]
-[ext_resource type="PackedScene" path="res://projectiles/aux_cannon_bolt.tscn" id="3_projectile"]
+[ext_resource type="PackedScene" path="res://projectiles/player_homing_missile.tscn" id="3_projectile"]
 
-[node name="AuxiliaryCannonWeaponSystem" type="Node2D"]
+[node name="HomingMissileWeaponSystem" type="Node2D"]
 script = ExtResource("1_script")
+max_charges = 10
 
 [node name="Muzzle" type="Marker2D" parent="."]
-position = Vector2(0, -8)
+position = Vector2(0, -10)
 
 [node name="SpawnerComponent" type="Node2D" parent="."]
 script = ExtResource("2_spawner")
 scene = ExtResource("3_projectile")
 
 [node name="FireRateTimer" type="Timer" parent="."]
-wait_time = 0.8
+wait_time = 1.1
 autostart = true

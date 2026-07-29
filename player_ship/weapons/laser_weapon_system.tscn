@@ -8,12 +8,6 @@
 [node name="LaserWeaponSystem" type="Node2D" unique_id=395281251]
 script = ExtResource("1_laser")
 
-[node name="RayCast2D" type="RayCast2D" parent="." unique_id=872900014]
-target_position = Vector2(0, -260)
-collision_mask = 2
-collide_with_areas = true
-collide_with_bodies = false
-
 [node name="GlowLine" type="Sprite2D" parent="." unique_id=2107826507]
 self_modulate = Color(0.1, 0.75, 1, 0.35)
 z_index = 1
@@ -26,7 +20,7 @@ texture = ExtResource("2_beam")
 [node name="CoreLine" type="Line2D" parent="." unique_id=1816449984]
 z_index = 2
 material = ExtResource("2_additive")
-points = PackedVector2Array(0, -6, 0, -260)
+points = PackedVector2Array(0, -6, 0, -240)
 width = 1.0
 default_color = Color(0.82, 0.98, 1, 0.95)
 begin_cap_mode = 2
