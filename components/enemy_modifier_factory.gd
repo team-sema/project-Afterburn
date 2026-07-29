@@ -66,6 +66,16 @@ func _apply_action_rate_multiplier(enemy: Enemy, multiplier: float) -> void:
 		if node is TimedStateComponent:
 			var timed_state := node as TimedStateComponent
 			timed_state.duration /= multiplier
+	# Shoot component may not have finished _ready yet.
+	call_deferred("_apply_shoot_action_rate", enemy, multiplier)
+
+
+func _apply_shoot_action_rate(enemy: Enemy, multiplier: float) -> void:
+	if enemy == null or not is_instance_valid(enemy):
+		return
+	var shoot := enemy.get_node_or_null("EnemyShootComponent") as EnemyShootComponent
+	if shoot != null:
+		shoot.apply_action_rate_multiplier(multiplier)
 
 
 func _attach_behavior_components(enemy: Enemy, behavior_components: Array[PackedScene]) -> void:

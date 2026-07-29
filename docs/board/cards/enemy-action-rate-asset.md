@@ -1,15 +1,7 @@
 # ACTION_RATE 적 오그먼트 에셋
 
-## 현황
+## 현황 (완료)
 
-`EnemyModifierFactory`는 `EnemyStatModifier.Stat.ACTION_RATE`로 `TimedStateComponent.duration`을 나눈다. 그런데 해당 `.tres`가 풀에 없다.
+`enemy_fire_volume_boost.tres`가 ACTION_RATE ×1.25 + 포화 사격 behavior로 적 풀에 연결됨.
 
-## 목표
-
-- `enemy_*_action_rate_*.tres` 추가
-- World `AugmentOfferController` 적 풀에 등록 (choices ≥ 3 유지)
-
-## 참고
-
-- `components/enemy_modifier_factory.gd`
-- `resources/enemy_augments/`
+`EnemyModifierFactory`는 TimedState duration과 `EnemyShootComponent` 발사 주기에 적용.

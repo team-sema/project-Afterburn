@@ -54,4 +54,6 @@
 | `EnemyModifierFactory` | 스폰 시 적 스탯·행동 컴포넌트 적용 |
 | `EnemyAugmentGrantComponent` | 수동으로 적 오그먼트 grant *(씬 미연결)* |
 | `TargetingComponent` | `"player"` 그룹 타깃 |
-| `CounterShotComponent` | 피격/사망 시 반격 탄 (`augment_behaviors/`) |
+| `EnemyShootComponent` | 적 기본 주기 조준 사격 |
+| `EnemyFireVolumeBoostComponent` | 위기: 탄수·스프레드 증가 (`augment_behaviors/`) |
+| `CounterShotComponent` | 피격/사망 반격 탄 *(풀에서 제외, 레거시)* |

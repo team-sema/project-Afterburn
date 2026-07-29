@@ -19,7 +19,7 @@
 [ext_resource type="Resource" uid="uid://ckajigegymf5n" path="res://resources/player_augments/player_fire_rate_boost_1_2.tres" id="17_player_fire"]
 [ext_resource type="Resource" uid="uid://bx055ywmcy0qr" path="res://resources/player_augments/player_weapon_damage_boost_1_2.tres" id="18_player_damage"]
 [ext_resource type="Resource" uid="uid://dck0gm7gvfvng" path="res://resources/enemy_augments/enemy_health_boost_1_2.tres" id="19_enemy_health"]
-[ext_resource type="Resource" uid="uid://s3405kw20hyh" path="res://resources/enemy_augments/enemy_counter_shot_on_hit.tres" id="20_enemy_counter"]
+[ext_resource type="Resource" path="res://resources/enemy_augments/enemy_fire_volume_boost.tres" id="20_enemy_fire"]
 [ext_resource type="Resource" uid="uid://bg0yl0s7f0b4p" path="res://resources/enemy_augments/enemy_move_speed_boost_1_2.tres" id="21_enemy_move"]
 [ext_resource type="Resource" path="res://resources/player_augments/weapon/upgrade_main_slot.tres" id="22_up_main"]
 [ext_resource type="Resource" path="res://resources/player_augments/weapon/upgrade_auxiliary_slot.tres" id="23_up_aux"]
@@ -72,7 +72,7 @@ selection_ui = NodePath("../AugmentSelectionOverlay")
 slot_selection_ui = NodePath("../WeaponSlotSelectionOverlay")
 ship = NodePath("../Ship")
 player_augment_pool = Array[ExtResource("14_player_augment")]([ExtResource("16_player_move"), ExtResource("17_player_fire"), ExtResource("18_player_damage"), ExtResource("22_up_main"), ExtResource("23_up_aux")])
-enemy_augment_pool = Array[ExtResource("15_enemy_augment")]([ExtResource("19_enemy_health"), ExtResource("20_enemy_counter"), ExtResource("21_enemy_move")])
+enemy_augment_pool = Array[ExtResource("15_enemy_augment")]([ExtResource("19_enemy_health"), ExtResource("20_enemy_fire"), ExtResource("21_enemy_move")])
 
 [node name="AugmentProgressionController" type="Node" parent="." unique_id=1005599848 node_paths=PackedStringArray("offer_controller") groups=["augment_progression"]]
 script = ExtResource("9_progression")

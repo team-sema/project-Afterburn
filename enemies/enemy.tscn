@@ -30,6 +30,7 @@
 [ext_resource type="PackedScene" path="res://pickups/weapon_pickup.tscn" id="27_pickup"]
 [ext_resource type="Script" path="res://components/experience_drop_component.gd" id="28_experience_drop"]
 [ext_resource type="PackedScene" path="res://pickups/experience_orb.tscn" id="29_experience_orb"]
+[ext_resource type="PackedScene" path="res://components/enemy_shoot_component.tscn" id="30_shoot"]
 
 [node name="Enemy" type="Node2D" unique_id=1578043332]
 script = ExtResource("1_3t1x0")
@@ -130,6 +131,8 @@ metadata/_custom_type_script = "uid://bqoa4vrmw2efx"
 
 [node name="TargetingComponent" type="Node" parent="." unique_id=1862215766]
 script = ExtResource("17_targeting")
+
+[node name="EnemyShootComponent" parent="." instance=ExtResource("30_shoot")]
 
 [node name="EnemyModifierFactory" type="Node" parent="." unique_id=1356113284]
 script = ExtResource("24_factory")

@@ -6,7 +6,7 @@
 
 1. **`PlayerAugment.behavior_components`** — 필드만 있고 Applier가 부착하지 않음
 2. **`EnemyAugmentGrantComponent`** — API 완비, 씬 사용 0
-3. **`EnemyStatModifier.ACTION_RATE`** — Factory 지원, `.tres` 에셋 없음
+3. **`EnemyStatModifier.ACTION_RATE`** — `enemy_fire_volume_boost`로 풀 연결됨 (사격 주기 + TimedState)
 4. **물리 레이어 3–4** — 이름만, 탄은 layer 0
 5. **`WeaponSystem` local multiplier / `_apply_stat_multipliers`** — stub
 6. **`clear_augments()`** — 미호출 (씬 리로드에 의존)
@@ -24,7 +24,7 @@
 
 ## 콘텐츠 확장 아이디어
 
-- 오그먼트 풀 확장 (ACTION_RATE, 실드, 멀티샷 등)
+- 오그먼트 풀 확장 (실드, 플레이어 행동 등)
 - 웨이브/보스 대신 점수 구간별 스폰 테이블
 - 플레이어 행동 오그먼트 (대시, 실드, 궤도 드론)
 - 설정/일시정지 메뉴

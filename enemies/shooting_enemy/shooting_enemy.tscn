@@ -52,25 +52,25 @@ metadata/_custom_type_script = "uid://5ebfckwk4w3h"
 [node name="MoveDownState" type="Node" parent="StateMachine" index="0" unique_id=1858093268]
 unique_name_in_owner = true
 script = ExtResource("5_g1k3v")
-duration = 3.0
+duration = 2.5
 metadata/_custom_type_script = "uid://chx8h3aikt6eq"
 
 [node name="MoveComponent" type="Node" parent="StateMachine/MoveDownState" index="0" unique_id=1602550067 node_paths=PackedStringArray("actor")]
 script = ExtResource("6_drofs")
 actor = NodePath("../../..")
-velocity = Vector2(0, 20)
+velocity = Vector2(0, 23)
 metadata/_custom_type_script = "uid://dbgfouplndi2j"
 
 [node name="MoveSideState" type="Node" parent="StateMachine" index="1" unique_id=448758568]
 unique_name_in_owner = true
 script = ExtResource("5_g1k3v")
-duration = 3.0
+duration = 2.5
 
 [node name="MoveLeftOrRightComponent" type="Node" parent="StateMachine/MoveSideState" index="0" unique_id=1447962759 node_paths=PackedStringArray("state", "actor")]
 script = ExtResource("7_icdnh")
 state = NodePath("..")
 actor = NodePath("../../..")
-velocity = Vector2(20, 0)
+velocity = Vector2(23, 0)
 metadata/_custom_type_script = "uid://dbgfouplndi2j"
 
 [node name="BorderBounceComponent" type="Node" parent="StateMachine/MoveSideState" index="1" unique_id=496724204 node_paths=PackedStringArray("actor", "move_component")]
@@ -82,7 +82,7 @@ metadata/_custom_type_script = "uid://dq8pwqawl2q7u"
 [node name="PauseState" type="Node" parent="StateMachine" index="2" unique_id=1120797910]
 unique_name_in_owner = true
 script = ExtResource("5_g1k3v")
-duration = 3.0
+duration = 2.5
 metadata/_custom_type_script = "uid://chx8h3aikt6eq"
 
 [node name="ProjectileSpawnerComponent" type="Node2D" parent="." index="14" unique_id=1943752203]
