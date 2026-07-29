@@ -9,11 +9,13 @@ var unlocked: bool = false
 var level: int = 1
 var equipped_weapon_id: StringName = &""
 var equipped_weapon_display_name: String = ""
+var equipped_weapon_definition: WeaponDefinition = null
 var equipped_weapon_instance: WeaponSystem = null
 
 
+## Empty when no weapon id is assigned (reserve may have no live instance).
 func is_empty() -> bool:
-	return equipped_weapon_id == &"" or equipped_weapon_instance == null
+	return equipped_weapon_id == &""
 
 
 func get_damage_multiplier() -> float:

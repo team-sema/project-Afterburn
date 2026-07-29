@@ -1,0 +1,30 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://player_ship/weapons/shotgun_weapon_system.gd" id="1_script"]
+[ext_resource type="Script" path="res://components/spawner_component.gd" id="2_spawner"]
+[ext_resource type="PackedScene" path="res://projectiles/player_shotgun_pellet.tscn" id="3_pellet"]
+[ext_resource type="AudioStream" uid="uid://dqoje4sxotvw1" path="res://sounds/blaster_sound.wav" id="4_sound"]
+[ext_resource type="Script" uid="uid://bqoa4vrmw2efx" path="res://components/variable_pitch_audio_stream_player.gd" id="5_pitch"]
+
+[node name="ShotgunWeaponSystem" type="Node2D"]
+script = ExtResource("1_script")
+pellet_count = 5
+spread_degrees = 36.0
+pellet_speed = 220.0
+
+[node name="Muzzle" type="Marker2D" parent="."]
+position = Vector2(0, -6)
+
+[node name="SpawnerComponent" type="Node2D" parent="."]
+script = ExtResource("2_spawner")
+scene = ExtResource("3_pellet")
+
+[node name="FireRateTimer" type="Timer" parent="."]
+wait_time = 0.42
+autostart = true
+
+[node name="ShotgunSoundPlayer" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("4_sound")
+bus = &"SFX"
+pitch_scale = 0.72
+script = ExtResource("5_pitch")

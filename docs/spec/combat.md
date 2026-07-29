@@ -19,6 +19,7 @@
 | Enemy Hurtbox | 2 | 0 |
 | Enemy Hitbox (몸) | 0 | 1 |
 | Player Blaster Hitbox | 0 | 2 · damage **10** |
+| Player Shotgun Pellet | 0 | 2 · damage **4** × 5발 |
 | Curve/Counter 탄 | 0 | 1 |
 | Laser RayCast | — | 2 (직접 `hurt.emit`) |
 
@@ -39,6 +40,7 @@ Hitbox.area_entered
 | 씬 | 역할 |
 |----|------|
 | `player_blaster.tscn` | 속도 `(0,-200)` · 히트 시 free |
+| `player_shotgun_pellet.tscn` | 샷건 펠릿 · 부채꼴 · damage **4** |
 | `curve_projectile.tscn` | 적/반격 · `launch(dir, speed)` · Anchor 오실레이션 |
 
 ## 점수·난이도 상수

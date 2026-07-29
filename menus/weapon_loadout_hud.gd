@@ -5,7 +5,9 @@ const HEX_MODULE_SCENE := preload("res://menus/hex_module_frame.tscn")
 
 @export var ship: Node2D
 
-@onready var main_module: HexModuleFrame = $MainModule
+@onready var main_module: HexModuleFrame = $MainRow/MainModule
+@onready var reserve_module: HexModuleFrame = $MainRow/ReserveModule
+@onready var block_new_main_status: Label = $BlockNewMainStatus
 @onready var owned_main_row: HBoxContainer = $OwnedMainRow
 @onready var aux_row: HBoxContainer = $AuxRow
 
@@ -14,6 +16,7 @@ var _aux_modules: Array[HexModuleFrame] = []
 
 func _ready() -> void:
 	_ensure_aux_modules()
+	call_deferred("_bind_acquisition")
 	if ship == null:
 		return
 	var loadout := _get_loadout()
@@ -23,26 +26,26 @@ func _ready() -> void:
 	call_deferred("refresh")
 
 
+func _bind_acquisition() -> void:
+	var controller := _get_acquisition()
+	if controller != null:
+		if not controller.block_unknown_main_pickups_changed.is_connected(_on_block_new_main_changed):
+			controller.block_unknown_main_pickups_changed.connect(_on_block_new_main_changed)
+	_refresh_block_status()
+
+
 func refresh() -> void:
 	var loadout := _get_loadout()
 	if loadout == null:
-		_set_module(main_module, "주무기", "—", true)
+		_set_module(main_module, "메인", "—", true)
+		_set_module(reserve_module, "예비", "—", true)
 		for module in _aux_modules:
 			_set_module(module, "보조", "—", true)
 		_refresh_owned_main(null)
 		return
 
-	var main_slot := loadout.get_main_slot()
-	var main_empty := main_slot == null or main_slot.is_empty()
-	var main_slot_lv: int = 1 if main_slot == null else main_slot.level
-	if main_empty:
-		_set_module(main_module, "주무기 Lv.%d" % main_slot_lv, "—", true)
-	else:
-		var main_name := main_slot.equipped_weapon_display_name
-		if main_name.is_empty():
-			main_name = String(main_slot.equipped_weapon_id)
-		var weapon_lv: int = loadout.get_weapon_level(main_slot.equipped_weapon_id)
-		_set_module(main_module, "주무기 Lv.%d" % main_slot_lv, "%s\nLv.%d" % [main_name, weapon_lv], false)
+	_refresh_main_slot_module(loadout)
+	_refresh_reserve_slot_module(loadout)
 
 	for index in PlayerWeaponLoadout.AUX_SLOT_COUNT:
 		var module := _aux_modules[index]
@@ -64,6 +67,33 @@ func refresh() -> void:
 			_set_module(module, slot_title, "%s\n%s" % [weapon_name, charges_text], false)
 
 	_refresh_owned_main(loadout)
+
+
+func _refresh_main_slot_module(loadout: PlayerWeaponLoadout) -> void:
+	var main_slot := loadout.get_main_slot()
+	var slot_lv: int = 1 if main_slot == null else main_slot.level
+	var title := "메인 Lv.%d" % slot_lv
+	if main_slot == null or main_slot.is_empty():
+		_set_module(main_module, title, "—", true)
+		return
+	var main_name := main_slot.equipped_weapon_display_name
+	if main_name.is_empty():
+		main_name = String(main_slot.equipped_weapon_id)
+	var weapon_lv: int = loadout.get_weapon_level(main_slot.equipped_weapon_id)
+	_set_module(main_module, title, "%s\nLv.%d" % [main_name, weapon_lv], false)
+
+
+func _refresh_reserve_slot_module(loadout: PlayerWeaponLoadout) -> void:
+	var reserve_slot := loadout.get_reserve_slot()
+	var title := "예비"
+	if reserve_slot == null or reserve_slot.is_empty():
+		_set_module(reserve_module, title, "—", true)
+		return
+	var weapon_name := reserve_slot.equipped_weapon_display_name
+	if weapon_name.is_empty():
+		weapon_name = String(reserve_slot.equipped_weapon_id)
+	var weapon_lv: int = loadout.get_weapon_level(reserve_slot.equipped_weapon_id)
+	_set_module(reserve_module, title, "%s\nLv.%d" % [weapon_name, weapon_lv], false)
 
 
 func _refresh_owned_main(loadout: PlayerWeaponLoadout) -> void:
@@ -130,3 +160,20 @@ func _get_loadout() -> PlayerWeaponLoadout:
 	if ship != null and ship.has_method("get_weapon_loadout"):
 		return ship.call("get_weapon_loadout") as PlayerWeaponLoadout
 	return null
+
+
+func _get_acquisition() -> WeaponAcquisitionController:
+	return get_tree().get_first_node_in_group("weapon_acquisition") as WeaponAcquisitionController
+
+
+func _on_block_new_main_changed(_enabled: bool) -> void:
+	_refresh_block_status()
+
+
+func _refresh_block_status() -> void:
+	if block_new_main_status == null:
+		return
+	var controller := _get_acquisition()
+	var enabled := controller != null and controller.block_unknown_main_pickups
+	block_new_main_status.text = "X 새주무기차단: 켬" if enabled else "X 새주무기차단: 끔"
+	block_new_main_status.modulate = Color(1.0, 0.55, 0.45, 1.0) if enabled else Color(0.55, 0.75, 0.9, 0.85)

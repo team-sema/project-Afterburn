@@ -19,6 +19,8 @@ const MAX_WEAPON_LEVEL := WeaponSlotState.MAX_LEVEL
 
 var _player: Node2D
 var _main_slot: WeaponSlotState = WeaponSlotState.new()
+## Standby main-weapon slot: metadata only until swapped into main.
+var _reserve_slot: WeaponSlotState = WeaponSlotState.new()
 var _aux_slots: Array[WeaponSlotState] = []
 var _global_damage_multiplier := 1.0
 var _global_fire_rate_multiplier := 1.0
@@ -39,6 +41,11 @@ func _ready() -> void:
 	_main_slot.unlocked = true
 	_main_slot.level = 1
 
+	_reserve_slot.slot_type = WeaponDefinition.Category.MAIN
+	_reserve_slot.slot_index = 1
+	_reserve_slot.unlocked = true
+	_reserve_slot.level = 1
+
 	_aux_slots.clear()
 	for index in AUX_SLOT_COUNT:
 		var slot := WeaponSlotState.new()
@@ -50,6 +57,14 @@ func _ready() -> void:
 
 	if default_main_weapon != null:
 		equip_main_weapon(default_main_weapon)
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo:
+		var key_event := event as InputEventKey
+		if key_event.keycode == KEY_Z or key_event.physical_keycode == KEY_Z:
+			if swap_main_and_reserve():
+				get_viewport().set_input_as_handled()
 
 
 func set_global_stat_multipliers(damage_multiplier: float, fire_rate_multiplier: float) -> void:
@@ -153,22 +168,67 @@ func equip_main_weapon(weapon_definition: WeaponDefinition) -> void:
 		push_error("PlayerWeaponLoadout.equip_main_weapon: '%s' has no weapon_scene." % String(weapon_definition.id))
 		return
 
-	if not _weapon_levels.has(weapon_definition.id):
-		_weapon_levels[weapon_definition.id] = 1
-	_weapon_display_names[weapon_definition.id] = weapon_definition.display_name
-	_weapon_categories[weapon_definition.id] = WeaponDefinition.Category.MAIN
-
-	_clear_slot_instance(_main_slot)
+	_register_main_definition(weapon_definition)
+	_clear_slot_equipment(_main_slot)
+	_assign_slot_weapon(_main_slot, weapon_definition)
 	var instance := _instantiate_weapon(weapon_definition, WeaponDefinition.Category.MAIN, 0, main_weapon_mount)
 	if instance == null:
+		_clear_slot_equipment(_main_slot)
 		return
 
-	_main_slot.equipped_weapon_id = weapon_definition.id
-	_main_slot.equipped_weapon_display_name = weapon_definition.display_name
 	_main_slot.equipped_weapon_instance = instance
 	_apply_multipliers_to_weapon(instance, WeaponDefinition.Category.MAIN, 0)
 	main_weapon_changed.emit(weapon_definition)
 	loadout_changed.emit()
+
+
+## Stow a main weapon in the reserve slot (no active instance until swapped).
+func equip_reserve_weapon(weapon_definition: WeaponDefinition) -> void:
+	if weapon_definition == null:
+		push_error("PlayerWeaponLoadout.equip_reserve_weapon: weapon_definition is null.")
+		return
+	if weapon_definition.category != WeaponDefinition.Category.MAIN:
+		push_error("PlayerWeaponLoadout.equip_reserve_weapon: '%s' is not a MAIN weapon." % String(weapon_definition.id))
+		return
+	if weapon_definition.weapon_scene == null:
+		push_error("PlayerWeaponLoadout.equip_reserve_weapon: '%s' has no weapon_scene." % String(weapon_definition.id))
+		return
+
+	_register_main_definition(weapon_definition)
+	_clear_slot_equipment(_reserve_slot)
+	_assign_slot_weapon(_reserve_slot, weapon_definition)
+	loadout_changed.emit()
+
+
+## Swap firing main with reserve. No-op if reserve is empty.
+func swap_main_and_reserve() -> bool:
+	if _reserve_slot.is_empty():
+		return false
+	var main_def: WeaponDefinition = _main_slot.equipped_weapon_definition
+	var reserve_def: WeaponDefinition = _reserve_slot.equipped_weapon_definition
+	if reserve_def == null:
+		return false
+
+	_clear_slot_equipment(_main_slot)
+	_clear_slot_equipment(_reserve_slot)
+
+	_assign_slot_weapon(_main_slot, reserve_def)
+	var instance := _instantiate_weapon(reserve_def, WeaponDefinition.Category.MAIN, 0, main_weapon_mount)
+	if instance == null:
+		_clear_slot_equipment(_main_slot)
+		if main_def != null:
+			_assign_slot_weapon(_reserve_slot, main_def)
+		loadout_changed.emit()
+		return false
+	_main_slot.equipped_weapon_instance = instance
+	_apply_multipliers_to_weapon(instance, WeaponDefinition.Category.MAIN, 0)
+	main_weapon_changed.emit(reserve_def)
+
+	if main_def != null:
+		_assign_slot_weapon(_reserve_slot, main_def)
+
+	loadout_changed.emit()
+	return true
 
 
 func equip_auxiliary_weapon(weapon_definition: WeaponDefinition, slot_index: int = -1) -> void:
@@ -221,13 +281,14 @@ func replace_auxiliary_weapon(slot_index: int, weapon_definition: WeaponDefiniti
 	_weapon_categories[weapon_definition.id] = WeaponDefinition.Category.AUXILIARY
 	_weapon_levels.erase(weapon_definition.id)
 
-	_clear_slot_instance(slot)
+	_clear_slot_equipment(slot)
 	var instance := _instantiate_weapon(weapon_definition, WeaponDefinition.Category.AUXILIARY, slot_index, mount)
 	if instance == null:
 		return
 
 	slot.equipped_weapon_id = weapon_definition.id
 	slot.equipped_weapon_display_name = weapon_definition.display_name
+	slot.equipped_weapon_definition = weapon_definition
 	slot.equipped_weapon_instance = instance
 	if not instance.depleted.is_connected(_on_auxiliary_weapon_depleted.bind(slot_index)):
 		instance.depleted.connect(_on_auxiliary_weapon_depleted.bind(slot_index))
@@ -263,7 +324,7 @@ func clear_auxiliary_slot(slot_index: int) -> void:
 	var slot := _aux_slots[slot_index]
 	if slot.is_empty():
 		return
-	_clear_slot_instance(slot)
+	_clear_slot_equipment(slot)
 	loadout_changed.emit()
 
 
@@ -288,6 +349,8 @@ func upgrade_main_slot() -> bool:
 	if not _main_slot.can_upgrade():
 		return false
 	_main_slot.level += 1
+	# Shared overclock for the main-weapon line (firing + reserve).
+	_reserve_slot.level = _main_slot.level
 	_refresh_slot_weapon_multipliers(WeaponDefinition.Category.MAIN, 0)
 	slot_upgraded.emit(WeaponDefinition.Category.MAIN, 0, _main_slot.level)
 	loadout_changed.emit()
@@ -310,6 +373,10 @@ func upgrade_auxiliary_slot(slot_index: int) -> bool:
 
 func get_main_slot() -> WeaponSlotState:
 	return _main_slot
+
+
+func get_reserve_slot() -> WeaponSlotState:
+	return _reserve_slot
 
 
 func get_auxiliary_slot(slot_index: int) -> WeaponSlotState:
@@ -335,6 +402,20 @@ func has_auxiliary_weapon(weapon_id: StringName) -> bool:
 
 func get_main_weapon_id() -> StringName:
 	return _main_slot.equipped_weapon_id
+
+
+func get_reserve_weapon_id() -> StringName:
+	return _reserve_slot.equipped_weapon_id
+
+
+## True if the weapon is in the firing main slot or the reserve slot.
+func has_carried_main_weapon(weapon_id: StringName) -> bool:
+	if weapon_id == &"":
+		return false
+	return (
+		_main_slot.equipped_weapon_id == weapon_id
+		or _reserve_slot.equipped_weapon_id == weapon_id
+	)
 
 
 func has_locked_auxiliary_slot() -> bool:
@@ -395,6 +476,20 @@ func get_weapon_attack_rate_multiplier(weapon_id: StringName) -> float:
 	return _level_attack_rate_multiplier(get_weapon_level(weapon_id))
 
 
+func _register_main_definition(weapon_definition: WeaponDefinition) -> void:
+	if not _weapon_levels.has(weapon_definition.id):
+		_weapon_levels[weapon_definition.id] = 1
+	_weapon_display_names[weapon_definition.id] = weapon_definition.display_name
+	_weapon_categories[weapon_definition.id] = WeaponDefinition.Category.MAIN
+
+
+func _assign_slot_weapon(slot: WeaponSlotState, weapon_definition: WeaponDefinition) -> void:
+	slot.equipped_weapon_id = weapon_definition.id
+	slot.equipped_weapon_display_name = weapon_definition.display_name
+	slot.equipped_weapon_definition = weapon_definition
+	slot.equipped_weapon_instance = null
+
+
 func _instantiate_weapon(
 	weapon_definition: WeaponDefinition,
 	category: WeaponDefinition.Category,
@@ -412,7 +507,7 @@ func _instantiate_weapon(
 	return weapon
 
 
-func _clear_slot_instance(slot: WeaponSlotState) -> void:
+func _clear_slot_equipment(slot: WeaponSlotState) -> void:
 	if slot.equipped_weapon_instance != null and is_instance_valid(slot.equipped_weapon_instance):
 		var instance := slot.equipped_weapon_instance
 		instance.shutdown_weapon()
@@ -420,6 +515,7 @@ func _clear_slot_instance(slot: WeaponSlotState) -> void:
 	slot.equipped_weapon_instance = null
 	slot.equipped_weapon_id = &""
 	slot.equipped_weapon_display_name = ""
+	slot.equipped_weapon_definition = null
 
 
 func _apply_multipliers_to_weapon(weapon: WeaponSystem, category: WeaponDefinition.Category, slot_index: int) -> void:
