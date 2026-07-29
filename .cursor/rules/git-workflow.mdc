@@ -35,7 +35,9 @@ alwaysApply: true
 | 명령 / 스크립트 | 때 |
 |-----------------|-----|
 | `./tools/start-feature.sh <slug>` | 작업 시작 |
-| **`/push`** | 피쳐 완료 (커밋+merge, **일반적으로 이것만**) |
+| **`/push`** | 피쳐 완료 (커밋+merge+**feature 브랜치 삭제**, **일반적으로 이것만**) |
+
+브랜치를 남겨야 할 때만 `--no-delete`.
 
 `origin/main` 신규 커밋 시 **pull 후 중단** → feature에서 `git merge main` → `/push` 재실행.
 

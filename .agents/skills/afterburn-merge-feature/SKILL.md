@@ -18,7 +18,7 @@ chmod +x tools/merge-feature.sh 2>/dev/null || true
 ./tools/merge-feature.sh [options] [feature/branch]
 ```
 
-Pass `-y` to delete the feature branch after merge.
+Deletes the feature branch after merge by default. Pass `--no-delete` to keep it.
 
 ## Stop Condition (exit 2)
 

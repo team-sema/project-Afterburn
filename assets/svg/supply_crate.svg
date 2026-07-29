@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <!-- Supply crate silhouette (white mask for neon modulate) -->
+  <rect x="6" y="6" width="52" height="52" rx="2" ry="2" fill="#fff" fill-opacity="0.22"/>
+  <rect x="6" y="6" width="52" height="52" rx="2" ry="2" fill="none" stroke="#fff" stroke-width="5"/>
+  <rect x="26" y="6" width="12" height="52" fill="#fff"/>
+  <rect x="6" y="26" width="52" height="12" fill="#fff"/>
+  <rect x="14" y="14" width="8" height="8" fill="#fff"/>
+  <rect x="42" y="14" width="8" height="8" fill="#fff"/>
+  <rect x="14" y="42" width="8" height="8" fill="#fff"/>
+  <rect x="42" y="42" width="8" height="8" fill="#fff"/>
+</svg>

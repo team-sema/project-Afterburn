@@ -8,7 +8,7 @@ ROOT="$(git rev-parse --show-toplevel 2>/dev/null)" || {
 }
 cd "$ROOT"
 
-DELETE_BRANCH=0
+DELETE_BRANCH=1
 MSG=""
 FEATURE=""
 
@@ -28,7 +28,8 @@ Usage: tools/push-feature.sh -m "feat: message" [options]
 
 Options:
   -m "message"     필수 (미커밋 변경이 있을 때). 이미 깨끗하면 생략 가능
-  -y, --yes        머지 후 feature 브랜치 삭제
+  -y, --yes        머지 후 feature 브랜치 삭제 (기본)
+  --no-delete      머지 후 feature 브랜치 유지
   -h, --help
 
 Exit codes:
@@ -70,7 +71,11 @@ if [[ -n "$(git status --porcelain)" ]]; then
 fi
 
 MERGE_ARGS=()
-[[ "$DELETE_BRANCH" -eq 1 ]] && MERGE_ARGS+=(-y)
+if [[ "$DELETE_BRANCH" -eq 1 ]]; then
+  MERGE_ARGS+=(-y)
+else
+  MERGE_ARGS+=(--no-delete)
+fi
 MERGE_ARGS+=("$FEATURE")
 
 exec "$(dirname "$0")/merge-feature.sh" "${MERGE_ARGS[@]}"

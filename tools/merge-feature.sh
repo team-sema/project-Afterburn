@@ -8,13 +8,12 @@ ROOT="$(git rev-parse --show-toplevel 2>/dev/null)" || {
 }
 cd "$ROOT"
 
-DELETE_BRANCH=0
+DELETE_BRANCH=1
 FEATURE=""
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    -y|--yes) DELETE_BRANCH=1; shift ;;
-    --delete-branch) DELETE_BRANCH=1; shift ;;
+    -y|--yes|--delete-branch) DELETE_BRANCH=1; shift ;;
     --no-delete) DELETE_BRANCH=0; shift ;;
     -h|--help)
       cat <<'EOF'
@@ -23,12 +22,13 @@ Usage: tools/merge-feature.sh [options] [feature/branch-name]
   현재 브랜치가 feature/* 이면 인자 생략 가능.
 
 Options:
-  -y, --yes         머지 후 로컬·origin feature 브랜치 삭제 (확인 없음)
-  --delete-branch  同上
-  --no-delete       브랜치 유지 (기본)
+  -y, --yes         머지 후 로컬·origin feature 브랜치 삭제 (기본)
+  --delete-branch   同上
+  --no-delete       브랜치 유지
   -h, --help
 
 Flow: fetch → checkout main → pull → merge feature → push main
+  (기본: 머지 후 feature 브랜치 삭제)
 EOF
       exit 0
       ;;
@@ -126,7 +126,8 @@ if [[ "$DELETE_BRANCH" -eq 1 ]]; then
     echo "==> deleted $FEATURE (local)"
   fi
 else
-  echo "==> kept branch $FEATURE (use -y to delete after merge)"
+  echo "==> kept branch $FEATURE (--no-delete)"
 fi
+
 
 echo "done. tell teammate: git checkout main && git pull"
