@@ -40,6 +40,14 @@
   ],
   "cards": [
     {
+      "id": "main-shotgun",
+      "title": "주무기 샷건·메인/예비",
+      "description": "샷건 + 메인/예비 슬롯, Z 스왑, X 새 주무기 차단.",
+      "column": "review",
+      "file": "cards/main-shotgun.md",
+      "tags": ["플레이어", "무기"]
+    },
+    {
       "id": "hex-loadout-hud",
       "title": "육각 모듈 무장 HUD",
       "description": "오른쪽 STATUS를 주/보조 육각 모듈로 표시. 보조 소모품·유도탄 포함.",

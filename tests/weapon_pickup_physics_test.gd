@@ -88,14 +88,12 @@ func _run() -> void:
 	for _index in 5:
 		await physics_frame
 		await process_frame
-	var acquisition_controller: Node = gameplay.get_node("WeaponAcquisitionController")
-	var confirm_ui: CanvasLayer = acquisition_controller.get("confirm_ui") as CanvasLayer
-	_expect(confirm_ui.visible, "different main weapon pickup opens the replacement confirmation")
-	confirm_ui.call("_on_cancel")
-	await process_frame
-	await process_frame
-	_expect(loadout.call("get_main_weapon_id") == &"main_blaster", "declining replacement keeps the current main weapon")
-	_expect(not is_instance_valid(main_pickup), "declined main weapon pickup is removed")
+	_expect(loadout.call("get_main_weapon_id") == &"main_blaster", "new main weapon stays in firing slot")
+	_expect(loadout.call("get_reserve_weapon_id") == &"main_laser", "new main weapon fills the reserve slot")
+	_expect(not is_instance_valid(main_pickup), "main weapon pickup is consumed")
+	_expect(loadout.call("swap_main_and_reserve"), "z-swap exchanges main and reserve")
+	_expect(loadout.call("get_main_weapon_id") == &"main_laser", "swap moves reserve into the firing slot")
+	_expect(loadout.call("get_reserve_weapon_id") == &"main_blaster", "swap stows previous main into reserve")
 
 	if failures.is_empty():
 		print("weapon pickup physics test: PASS")

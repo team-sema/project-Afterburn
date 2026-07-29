@@ -6,6 +6,10 @@ extends Node
 @export var confirm_ui: WeaponAcquireConfirmOverlay
 
 var _busy := false
+## When true, main weapons not already in main/reserve are left on the field.
+var block_unknown_main_pickups := false
+
+signal block_unknown_main_pickups_changed(enabled: bool)
 
 
 func _ready() -> void:
@@ -14,6 +18,21 @@ func _ready() -> void:
 	assert(ship != null, "WeaponAcquisitionController requires ship.")
 	assert(slot_selection_ui != null, "WeaponAcquisitionController requires slot_selection_ui.")
 	assert(confirm_ui != null, "WeaponAcquisitionController requires confirm_ui.")
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo:
+		var key_event := event as InputEventKey
+		if key_event.keycode == KEY_X or key_event.physical_keycode == KEY_X:
+			set_block_unknown_main_pickups(not block_unknown_main_pickups)
+			get_viewport().set_input_as_handled()
+
+
+func set_block_unknown_main_pickups(enabled: bool) -> void:
+	if block_unknown_main_pickups == enabled:
+		return
+	block_unknown_main_pickups = enabled
+	block_unknown_main_pickups_changed.emit(enabled)
 
 
 func try_collect(weapon_definition: WeaponDefinition) -> bool:
@@ -37,6 +56,10 @@ func try_collect(weapon_definition: WeaponDefinition) -> bool:
 
 
 func _collect_main(loadout: PlayerWeaponLoadout, weapon_definition: WeaponDefinition) -> bool:
+	# Locked: ignore mains that are not already in main or reserve.
+	if block_unknown_main_pickups and not loadout.has_carried_main_weapon(weapon_definition.id):
+		return false
+
 	# Field pickups raise that weapon's own level (persists across swaps).
 	loadout.note_weapon_pickup(
 		weapon_definition.id,
@@ -44,22 +67,12 @@ func _collect_main(loadout: PlayerWeaponLoadout, weapon_definition: WeaponDefini
 		weapon_definition.category,
 	)
 
-	if loadout.get_main_weapon_id() == weapon_definition.id:
+	# Already in main or reserve: level only.
+	if loadout.has_carried_main_weapon(weapon_definition.id):
 		return true
 
-	get_tree().paused = true
-	confirm_ui.ask(
-		"주무기 교체",
-		"%s(으)로 교체할까요?\n(무기 Lv.%d)" % [
-			weapon_definition.display_name,
-			loadout.get_weapon_level(weapon_definition.id),
-		],
-	)
-	var replace := await _wait_bool(confirm_ui.confirmed, confirm_ui.cancelled)
-	get_tree().paused = false
-	if not replace:
-		return true
-	loadout.equip_main_weapon(weapon_definition)
+	# New main weapon always replaces the reserve slot (no confirm).
+	loadout.equip_reserve_weapon(weapon_definition)
 	return true
 
 
