@@ -8,6 +8,7 @@
 [ext_resource type="Script" path="res://menus/weapon_loadout_hud.gd" id="6_weapon_hud"]
 [ext_resource type="Script" path="res://world_shell.gd" id="7_world_shell"]
 [ext_resource type="Script" path="res://menus/progression_hud.gd" id="8_progression_hud"]
+[ext_resource type="PackedScene" path="res://menus/hex_module_frame.tscn" id="9_hex_module"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_left_panel"]
 bg_color = Color(0.018, 0.035, 0.075, 1)
@@ -230,7 +231,7 @@ theme_override_constants/separation = 6
 
 [node name="LoadoutTitle" type="Label" parent="Layout/RightPanel/Margin/VBox"]
 layout_mode = 2
-text = "WEAPON LOADOUT"
+text = "STATUS"
 label_settings = ExtResource("4_title_label")
 
 [node name="TitleRule" type="ColorRect" parent="Layout/RightPanel/Margin/VBox"]
@@ -238,10 +239,24 @@ custom_minimum_size = Vector2(0, 2)
 layout_mode = 2
 color = Color(0.1, 0.65, 0.95, 0.85)
 
-[node name="WeaponLoadoutHud" type="Label" parent="Layout/RightPanel/Margin/VBox" node_paths=PackedStringArray("ship")]
+[node name="WeaponLoadoutHud" type="VBoxContainer" parent="Layout/RightPanel/Margin/VBox" node_paths=PackedStringArray("ship")]
 layout_mode = 2
-text = "무장"
-label_settings = ExtResource("3_default_label")
-autowrap_mode = 2
+theme_override_constants/separation = 8
 script = ExtResource("6_weapon_hud")
 ship = NodePath("../../../../Playfield/ViewportContainer/PlayfieldViewport/Gameplay/Ship")
+
+[node name="MainModule" parent="Layout/RightPanel/Margin/VBox/WeaponLoadoutHud" instance=ExtResource("9_hex_module")]
+custom_minimum_size = Vector2(96, 96)
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="OwnedMainRow" type="HBoxContainer" parent="Layout/RightPanel/Margin/VBox/WeaponLoadoutHud"]
+layout_mode = 2
+theme_override_constants/separation = 2
+alignment = 1
+
+[node name="AuxRow" type="HBoxContainer" parent="Layout/RightPanel/Margin/VBox/WeaponLoadoutHud"]
+layout_mode = 2
+theme_override_constants/separation = 4
+alignment = 1
+size_flags_vertical = 3

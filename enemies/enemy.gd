@@ -15,6 +15,7 @@ var augment_registry: EnemyAugmentRegistry
 @onready var hit_sound_player: VariablePitchAudioStreamPlayer = $HitSoundPlayer
 
 func _ready() -> void:
+	add_to_group("enemies")
 	stats_component.no_health.connect(func():
 		score_component.adjust_score()
 	)

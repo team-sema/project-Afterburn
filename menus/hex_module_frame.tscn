@@ -1,0 +1,48 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://menus/hex_module_frame.gd" id="1_script"]
+[ext_resource type="LabelSettings" path="res://fonts/hex_module_label_settings.tres" id="2_label"]
+
+[node name="HexModuleFrame" type="Control"]
+custom_minimum_size = Vector2(72, 72)
+layout_mode = 2
+script = ExtResource("1_script")
+
+[node name="TitleLabel" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -36.0
+offset_top = 6.0
+offset_right = 36.0
+offset_bottom = 20.0
+grow_horizontal = 2
+mouse_filter = 2
+text = "주무기"
+label_settings = ExtResource("2_label")
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="BodyLabel" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -32.0
+offset_top = -6.0
+offset_right = 32.0
+offset_bottom = 22.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+text = "—
+Lv.1"
+label_settings = ExtResource("2_label")
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+clip_text = true

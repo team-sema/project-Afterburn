@@ -2,6 +2,8 @@ class_name WeaponSystem
 extends Node2D
 
 signal fired
+## Aux consumables emit this when fully spent; loadout clears the slot.
+signal depleted
 
 var _global_fire_rate_multiplier := 1.0
 var _local_fire_rate_multiplier := 1.0
@@ -33,6 +35,39 @@ func setup_weapon(
 func shutdown_weapon() -> void:
 	is_shutdown = true
 	_on_weapon_shutdown()
+
+
+## Restore consumable usage (aux pickup of the same weapon).
+func refill_consumable() -> void:
+	if is_shutdown:
+		return
+	_on_refill_consumable()
+
+
+## Remaining uses for HUD. -1 means not a tracked consumable.
+func get_consumable_remaining() -> int:
+	return -1
+
+
+func get_consumable_max() -> int:
+	return -1
+
+
+func _on_refill_consumable() -> void:
+	pass
+
+
+## Subclasses call this when the consumable is fully spent.
+func report_depleted() -> void:
+	if is_shutdown:
+		return
+	depleted.emit()
+
+
+## Subclasses call this when remaining uses change (HUD refresh).
+func report_consumable_changed() -> void:
+	if _loadout != null and _loadout.has_method("notify_consumable_changed"):
+		_loadout.call("notify_consumable_changed")
 
 
 func set_global_fire_rate_multiplier(multiplier: float) -> void:

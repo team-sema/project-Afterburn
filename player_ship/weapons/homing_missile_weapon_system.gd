@@ -1,7 +1,7 @@
-class_name AuxiliaryCannonWeaponSystem
+class_name HomingMissileWeaponSystem
 extends WeaponSystem
 
-@export var max_charges := 24
+@export var max_charges := 10
 
 @onready var muzzle: Marker2D = $Muzzle
 @onready var spawner_component: SpawnerComponent = $SpawnerComponent
@@ -61,6 +61,6 @@ func _on_weapon_shutdown() -> void:
 func _configure_projectile(projectile: Node) -> void:
 	var hitbox := projectile.get_node_or_null("HitboxComponent") as HitboxComponent
 	if hitbox == null:
-		push_error("AuxiliaryCannonWeaponSystem: projectile missing HitboxComponent.")
+		push_error("HomingMissileWeaponSystem: projectile missing HitboxComponent.")
 		return
 	hitbox.damage = maxi(1, roundi(hitbox.damage * get_effective_damage_multiplier()))

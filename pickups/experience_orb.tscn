@@ -9,7 +9,7 @@
 [ext_resource type="Material" path="res://effects/core_unshaded_material.tres" id="7_core_material"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_orb"]
-size = Vector2(10, 10)
+size = Vector2(6, 6)
 
 [node name="ExperienceOrb" type="Area2D"]
 z_index = 4
@@ -18,19 +18,19 @@ script = ExtResource("1_script")
 [node name="WideGlow" type="Sprite2D" parent="."]
 self_modulate = Color(1, 0.62, 0.12, 0.42)
 material = ExtResource("5_wide")
-scale = Vector2(0.15, 0.15)
+scale = Vector2(0.08, 0.08)
 texture = ExtResource("2_glow")
 
 [node name="TightGlow" type="Sprite2D" parent="."]
 self_modulate = Color(1, 0.78, 0.28, 0.38)
 material = ExtResource("6_tight")
-scale = Vector2(0.42, 0.42)
+scale = Vector2(0.22, 0.22)
 texture = ExtResource("4_square")
 
 [node name="Core" type="Sprite2D" parent="."]
 self_modulate = Color(1, 0.92, 0.62, 1)
 material = ExtResource("7_core_material")
-scale = Vector2(0.2, 0.2)
+scale = Vector2(0.1, 0.1)
 texture = ExtResource("3_crate")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]

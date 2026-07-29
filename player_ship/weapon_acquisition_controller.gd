@@ -37,13 +37,23 @@ func try_collect(weapon_definition: WeaponDefinition) -> bool:
 
 
 func _collect_main(loadout: PlayerWeaponLoadout, weapon_definition: WeaponDefinition) -> bool:
+	# Field pickups raise that weapon's own level (persists across swaps).
+	loadout.note_weapon_pickup(
+		weapon_definition.id,
+		weapon_definition.display_name,
+		weapon_definition.category,
+	)
+
 	if loadout.get_main_weapon_id() == weapon_definition.id:
-		return loadout.upgrade_main_slot()
+		return true
 
 	get_tree().paused = true
 	confirm_ui.ask(
 		"주무기 교체",
-		"%s(으)로 교체할까요?" % weapon_definition.display_name,
+		"%s(으)로 교체할까요?\n(무기 Lv.%d)" % [
+			weapon_definition.display_name,
+			loadout.get_weapon_level(weapon_definition.id),
+		],
 	)
 	var replace := await _wait_bool(confirm_ui.confirmed, confirm_ui.cancelled)
 	get_tree().paused = false
@@ -54,8 +64,10 @@ func _collect_main(loadout: PlayerWeaponLoadout, weapon_definition: WeaponDefini
 
 
 func _collect_auxiliary(loadout: PlayerWeaponLoadout, weapon_definition: WeaponDefinition) -> bool:
+	# Already equipped: refill remaining uses (consumable), no weapon level.
 	if loadout.has_auxiliary_weapon(weapon_definition.id):
-		return loadout.upgrade_auxiliary_weapon(weapon_definition.id)
+		loadout.refill_auxiliary_weapon(weapon_definition.id)
+		return true
 
 	var empty := loadout.get_first_empty_auxiliary_slot()
 	if empty >= 0:
@@ -66,7 +78,7 @@ func _collect_auxiliary(loadout: PlayerWeaponLoadout, weapon_definition: WeaponD
 	slot_selection_ui.open_for_replace(
 		loadout,
 		"보조무기 교체",
-		"%s(으)로 교체할 슬롯을 고르세요" % weapon_definition.display_name,
+		"%s(으)로 교체할 슬롯을 고르세요\n(소모품 · 슬롯 레벨 유지)" % weapon_definition.display_name,
 	)
 	var slot_index := await _wait_slot_or_cancel()
 	get_tree().paused = false
