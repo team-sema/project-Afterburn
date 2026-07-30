@@ -1,7 +1,8 @@
-[gd_resource type="Resource" script_class="WeaponDefinition" load_steps=3 format=3]
+[gd_resource type="Resource" script_class="WeaponDefinition" format=3 uid="uid://cjsxqoqtuwyct"]
 
-[ext_resource type="Script" path="res://resources/weapons/weapon_definition.gd" id="1_def"]
+[ext_resource type="Script" uid="uid://cpkr4w0d5rl5t" path="res://resources/weapons/weapon_definition.gd" id="1_def"]
 [ext_resource type="PackedScene" path="res://player_ship/weapons/auxiliary_cannon_weapon_system.tscn" id="2_scene"]
+[ext_resource type="Texture2D" uid="uid://c6sy3i51i2bei" path="res://assets/svg/weapons/weapon_aux_cannon.svg" id="3_icon"]
 
 [resource]
 script = ExtResource("1_def")
@@ -9,4 +10,5 @@ id = &"aux_test_cannon"
 display_name = "보조 캐넌"
 category = 1
 weapon_scene = ExtResource("2_scene")
+icon = ExtResource("3_icon")
 description = "연두빛 탄환을 자동 발사하는 소모 보조무기. 탄약이 다하면 슬롯에서 사라진다."

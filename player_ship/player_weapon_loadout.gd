@@ -29,6 +29,8 @@ var _weapon_levels: Dictionary = {}
 var _weapon_display_names: Dictionary = {}
 ## weapon_id -> WeaponDefinition.Category (for owned HUD rows).
 var _weapon_categories: Dictionary = {}
+## weapon_id -> WeaponDefinition, so HUD rows can reach icons without a live slot.
+var _weapon_definitions: Dictionary = {}
 
 
 func _ready() -> void:
@@ -95,6 +97,19 @@ func get_weapon_display_name(weapon_id: StringName) -> String:
 	if not _weapon_display_names.has(weapon_id):
 		return String(weapon_id)
 	return str(_weapon_display_names[weapon_id])
+
+
+func get_weapon_definition(weapon_id: StringName) -> WeaponDefinition:
+	if weapon_id == &"":
+		return null
+	return _weapon_definitions.get(weapon_id) as WeaponDefinition
+
+
+func get_weapon_icon(weapon_id: StringName) -> Texture2D:
+	var definition := get_weapon_definition(weapon_id)
+	if definition == null:
+		return null
+	return definition.icon
 
 
 func has_weapon_progress(weapon_id: StringName) -> bool:
@@ -279,6 +294,7 @@ func replace_auxiliary_weapon(slot_index: int, weapon_definition: WeaponDefiniti
 	# Aux weapons are consumables: no per-weapon level, only slot overclock.
 	_weapon_display_names[weapon_definition.id] = weapon_definition.display_name
 	_weapon_categories[weapon_definition.id] = WeaponDefinition.Category.AUXILIARY
+	_weapon_definitions[weapon_definition.id] = weapon_definition
 	_weapon_levels.erase(weapon_definition.id)
 
 	_clear_slot_equipment(slot)
@@ -481,6 +497,7 @@ func _register_main_definition(weapon_definition: WeaponDefinition) -> void:
 		_weapon_levels[weapon_definition.id] = 1
 	_weapon_display_names[weapon_definition.id] = weapon_definition.display_name
 	_weapon_categories[weapon_definition.id] = WeaponDefinition.Category.MAIN
+	_weapon_definitions[weapon_definition.id] = weapon_definition
 
 
 func _assign_slot_weapon(slot: WeaponSlotState, weapon_definition: WeaponDefinition) -> void:

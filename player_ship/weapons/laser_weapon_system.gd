@@ -7,6 +7,9 @@ extends WeaponSystem
 const BEAM_LOCAL_START := Vector2(0, -6)
 const PLAYFIELD_TOP_MARGIN := 8.0
 
+@export_range(0.1, 8.0, 0.1) var beam_width_multiplier := 1.0
+@export_range(0.0, 1.0, 0.01) var beam_expand_duration := 0.18
+
 @onready var glow_line: Sprite2D = $GlowLine
 @onready var core_line: Line2D = $CoreLine
 @onready var damage_tick_timer: Timer = $DamageTickTimer
@@ -14,14 +17,20 @@ const PLAYFIELD_TOP_MARGIN := 8.0
 
 var base_tick_interval: float
 var base_tick_damage: int
+var base_core_width: float
+var base_glow_width_scale: float
+var _beam_width_tween: Tween
 
 
 func _ready() -> void:
 	base_tick_interval = damage_tick_timer.wait_time
 	base_tick_damage = damage_hitbox.damage
+	base_core_width = core_line.width
+	base_glow_width_scale = glow_line.scale.x
 	damage_tick_timer.timeout.connect(apply_damage_tick)
 	_apply_stat_multipliers()
 	_update_beam_visual(_full_beam_endpoint())
+	restart_beam_width_animation()
 
 
 func _physics_process(_delta: float) -> void:
@@ -44,13 +53,58 @@ func _apply_stat_multipliers() -> void:
 	damage_tick_timer.wait_time = base_tick_interval / get_effective_fire_rate_multiplier()
 
 
+func set_beam_width_multiplier(multiplier: float) -> void:
+	beam_width_multiplier = maxf(0.1, multiplier)
+	if not is_node_ready():
+		return
+	_stop_beam_width_tween()
+	_apply_target_beam_width()
+
+
+func restart_beam_width_animation() -> void:
+	if not is_node_ready():
+		return
+	_stop_beam_width_tween()
+	core_line.width = 0.0
+	glow_line.scale.x = 0.0
+	if beam_expand_duration <= 0.0:
+		_apply_target_beam_width()
+		return
+
+	_beam_width_tween = create_tween().set_parallel(true)
+	_beam_width_tween.tween_property(
+		core_line,
+		"width",
+		base_core_width * beam_width_multiplier,
+		beam_expand_duration,
+	).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	_beam_width_tween.tween_property(
+		glow_line,
+		"scale:x",
+		base_glow_width_scale * beam_width_multiplier,
+		beam_expand_duration,
+	).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+
+
 func _on_weapon_shutdown() -> void:
+	_stop_beam_width_tween()
 	set_physics_process(false)
 	visible = false
 	if damage_tick_timer != null:
 		damage_tick_timer.stop()
 		if damage_tick_timer.timeout.is_connected(apply_damage_tick):
 			damage_tick_timer.timeout.disconnect(apply_damage_tick)
+
+
+func _apply_target_beam_width() -> void:
+	core_line.width = base_core_width * beam_width_multiplier
+	glow_line.scale.x = base_glow_width_scale * beam_width_multiplier
+
+
+func _stop_beam_width_tween() -> void:
+	if _beam_width_tween != null:
+		_beam_width_tween.kill()
+		_beam_width_tween = null
 
 
 func _full_beam_endpoint() -> Vector2:

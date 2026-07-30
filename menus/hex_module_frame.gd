@@ -4,13 +4,21 @@ extends Control
 ## Flat-top hexagon frame used for loadout status modules.
 
 const BASE_LABEL_SETTINGS := preload("res://fonts/hex_module_label_settings.tres")
+## Flat-top hexagon: half-height and side slope relative to the drawn radius.
+const HEX_HALF_HEIGHT_RATIO := 0.866025
+const HEX_EDGE_SLOPE := 0.577350
 
 @export var fill_color := Color(0.05, 0.12, 0.22, 0.92)
 @export var border_color := Color(0.18, 0.78, 1.0, 0.95)
 @export var border_width := 2.0
+@export var icon_color := Color(0.88, 0.98, 1.0, 1.0):
+	set(value):
+		icon_color = value
+		_apply_icon_modulate()
 @export var dimmed := false:
 	set(value):
 		dimmed = value
+		_apply_icon_modulate()
 		queue_redraw()
 
 var _title_settings: LabelSettings
@@ -21,33 +29,51 @@ func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_title_settings = BASE_LABEL_SETTINGS.duplicate() as LabelSettings
 	_body_settings = BASE_LABEL_SETTINGS.duplicate() as LabelSettings
-	var title_label := get_node_or_null("TitleLabel") as Label
-	var body_label := get_node_or_null("BodyLabel") as Label
+	var title_label := _get_title_label()
+	var body_label := _get_body_label()
+	var icon_rect := _get_icon_rect()
 	if title_label != null:
 		title_label.label_settings = _title_settings
 		title_label.clip_text = true
 		title_label.autowrap_mode = TextServer.AUTOWRAP_OFF
+		title_label.set_anchors_preset(Control.PRESET_TOP_LEFT, false)
 	if body_label != null:
 		body_label.label_settings = _body_settings
 		body_label.clip_text = true
-		body_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		body_label.autowrap_mode = TextServer.AUTOWRAP_OFF
+		body_label.set_anchors_preset(Control.PRESET_TOP_LEFT, false)
+	if icon_rect != null:
+		icon_rect.set_anchors_preset(Control.PRESET_TOP_LEFT, false)
+	_apply_icon_modulate()
 	resized.connect(_on_resized)
-	_on_resized()
+	_layout_children()
 
 
 func set_module_text(title: String, body: String) -> void:
-	var title_label := get_node_or_null("TitleLabel") as Label
-	var body_label := get_node_or_null("BodyLabel") as Label
+	var title_label := _get_title_label()
+	var body_label := _get_body_label()
 	if title_label != null:
 		title_label.text = title
 	if body_label != null:
 		body_label.text = body
+	_layout_children()
+
+
+## The icon carries the weapon identity; pass null for empty or locked modules.
+func set_module_icon(icon: Texture2D) -> void:
+	var icon_rect := _get_icon_rect()
+	if icon_rect == null:
+		return
+	icon_rect.texture = icon
+	icon_rect.visible = icon != null
+	_layout_children()
 
 
 func _on_resized() -> void:
-	var title_label := get_node_or_null("TitleLabel") as Label
-	var body_label := get_node_or_null("BodyLabel") as Label
-	var half_w := size.x * 0.5
+	_layout_children()
+
+
+func _layout_children() -> void:
 	var font_size := clampi(int(size.y * 0.13), 5, 9)
 	if _title_settings != null:
 		_title_settings.font_size = font_size
@@ -55,21 +81,86 @@ func _on_resized() -> void:
 	if _body_settings != null:
 		_body_settings.font_size = font_size
 		_body_settings.line_spacing = -2.0
+
+	var band_height := maxf(9.0, size.y * 0.16)
+	var content_top := size.y * 0.11
+	var content_bottom := size.y * 0.89
+	var icon_top := content_top
+	var icon_bottom := content_bottom
+
+	var title_label := _get_title_label()
 	if title_label != null:
-		var title_h := maxf(10.0, size.y * 0.2)
-		var inset := maxf(3.0, size.x * 0.12)
-		title_label.offset_left = -half_w + inset
-		title_label.offset_right = half_w - inset
-		title_label.offset_top = size.y * 0.12
-		title_label.offset_bottom = title_label.offset_top + title_h
+		_place_text_band(title_label, content_top, content_top + band_height)
+		if not title_label.text.is_empty():
+			icon_top = content_top + band_height
+	var body_label := _get_body_label()
 	if body_label != null:
-		var inset := maxf(4.0, size.x * 0.14)
-		var body_half_h := size.y * 0.2
-		body_label.offset_left = -half_w + inset
-		body_label.offset_right = half_w - inset
-		body_label.offset_top = -body_half_h + size.y * 0.04
-		body_label.offset_bottom = body_half_h + size.y * 0.08
+		_place_text_band(body_label, content_bottom - band_height, content_bottom)
+		if not body_label.text.is_empty():
+			icon_bottom = content_bottom - band_height
+	var icon_rect := _get_icon_rect()
+	if icon_rect != null:
+		_place_icon(icon_rect, icon_top, icon_bottom)
 	queue_redraw()
+
+
+## Measure the hexagon at the band edge nearest the middle, where the label is widest.
+func _place_text_band(label: Label, top: float, bottom: float) -> void:
+	var center := size.y * 0.5
+	var measured := minf(absf(top - center), absf(bottom - center))
+	var half_width := maxf(4.0, _hex_half_width_at(measured) - border_width)
+	label.offset_left = size.x * 0.5 - half_width
+	label.offset_right = size.x * 0.5 + half_width
+	label.offset_top = top
+	label.offset_bottom = maxf(top + 1.0, bottom)
+
+
+## Icons keep their aspect ratio, so reserve the largest centered square whose corners
+## stay inside the slanted sides instead of the full band width.
+func _place_icon(icon_rect: TextureRect, top: float, bottom: float) -> void:
+	var band_center := (top + bottom) * 0.5
+	var distance := absf(band_center - size.y * 0.5)
+	var radius := minf(size.x, size.y) * 0.48 - border_width
+	var half := (radius - HEX_EDGE_SLOPE * distance) / (1.0 + HEX_EDGE_SLOPE)
+	half = maxf(2.0, minf(half, (bottom - top) * 0.5))
+	icon_rect.offset_left = size.x * 0.5 - half
+	icon_rect.offset_right = size.x * 0.5 + half
+	icon_rect.offset_top = band_center - half
+	icon_rect.offset_bottom = band_center + half
+
+
+func _hex_half_width_at(offset_y: float) -> float:
+	var radius := minf(size.x, size.y) * 0.48
+	if absf(offset_y) >= radius * HEX_HALF_HEIGHT_RATIO:
+		return 0.0
+	return radius - HEX_EDGE_SLOPE * absf(offset_y)
+
+
+func _apply_icon_modulate() -> void:
+	var icon_rect := _get_icon_rect()
+	if icon_rect == null:
+		return
+	if dimmed:
+		icon_rect.modulate = Color(
+			icon_color.r * 0.55,
+			icon_color.g * 0.62,
+			icon_color.b * 0.68,
+			icon_color.a * 0.45,
+		)
+		return
+	icon_rect.modulate = icon_color
+
+
+func _get_title_label() -> Label:
+	return get_node_or_null("TitleLabel") as Label
+
+
+func _get_body_label() -> Label:
+	return get_node_or_null("BodyLabel") as Label
+
+
+func _get_icon_rect() -> TextureRect:
+	return get_node_or_null("IconRect") as TextureRect
 
 
 func _draw() -> void:

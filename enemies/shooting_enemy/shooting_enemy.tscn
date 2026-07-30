@@ -30,7 +30,7 @@ texture = ExtResource("3_gb8yh")
 texture = ExtResource("3_gb8yh")
 
 [node name="StatsComponent" parent="." index="1" unique_id=1304120856]
-health = 60
+health = 40
 
 [node name="VisibleOnScreenNotifier2D" parent="." index="3" unique_id=1344806211]
 rect = Rect2(-9, -9, 18, 18)
@@ -43,9 +43,6 @@ shape = SubResource("RectangleShape2D_psv4m")
 
 [node name="ScoreComponent" parent="." index="12" unique_id=1849553207]
 adjust_amount = 20
-
-[node name="EnemyShootComponent" parent="."]
-projectile_scene = ExtResource("10_fv328")
 
 [node name="StateMachine" type="Node" parent="." index="13" unique_id=1578137984]
 unique_name_in_owner = true

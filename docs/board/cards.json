@@ -40,6 +40,14 @@
   ],
   "cards": [
     {
+      "id": "weapon-module-icons",
+      "title": "무기 육각 모듈 아이콘",
+      "description": "무기 이름 텍스트를 벡터 아이콘으로 대체. 육각 모듈은 제목·아이콘·수치 3단.",
+      "column": "doing",
+      "file": "cards/weapon-module-icons.md",
+      "tags": ["UI", "HUD", "비주얼"]
+    },
+    {
       "id": "main-shotgun",
       "title": "주무기 샷건·메인/예비",
       "description": "샷건 + 메인/예비 슬롯, Z 스왑, X 새 주무기 차단.",

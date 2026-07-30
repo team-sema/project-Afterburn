@@ -24,7 +24,7 @@ texture = ExtResource("3_2nfdr")
 texture = ExtResource("3_2nfdr")
 
 [node name="StatsComponent" parent="." index="1" unique_id=1304120856]
-health = 60
+health = 50
 
 [node name="MoveComponent" parent="." index="2" unique_id=695129192]
 velocity = Vector2(0, 12)
@@ -46,3 +46,6 @@ script = ExtResource("4_5442w")
 actor = NodePath("..")
 move_component = NodePath("../MoveComponent")
 metadata/_custom_type_script = "uid://dq8pwqawl2q7u"
+
+[node name="WeaponDropComponent" parent="." index="18"]
+drop_chance = 1.0

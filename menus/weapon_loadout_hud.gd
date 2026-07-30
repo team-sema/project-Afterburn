@@ -57,14 +57,8 @@ func refresh() -> void:
 		if slot.is_empty():
 			_set_module(module, slot_title, "—", true)
 			continue
-		var weapon_name: String = slot.equipped_weapon_display_name
-		if weapon_name.is_empty():
-			weapon_name = String(slot.equipped_weapon_id)
 		var charges_text := _format_charges(slot.equipped_weapon_instance)
-		if charges_text.is_empty():
-			_set_module(module, slot_title, weapon_name, false)
-		else:
-			_set_module(module, slot_title, "%s\n%s" % [weapon_name, charges_text], false)
+		_set_module(module, slot_title, _slot_body(slot, charges_text), false, _slot_icon(slot))
 
 	_refresh_owned_main(loadout)
 
@@ -76,11 +70,8 @@ func _refresh_main_slot_module(loadout: PlayerWeaponLoadout) -> void:
 	if main_slot == null or main_slot.is_empty():
 		_set_module(main_module, title, "—", true)
 		return
-	var main_name: String = main_slot.equipped_weapon_display_name
-	if main_name.is_empty():
-		main_name = String(main_slot.equipped_weapon_id)
 	var weapon_lv: int = loadout.get_weapon_level(main_slot.equipped_weapon_id)
-	_set_module(main_module, title, "%s\nLv.%d" % [main_name, weapon_lv], false)
+	_set_module(main_module, title, _slot_body(main_slot, "Lv.%d" % weapon_lv), false, _slot_icon(main_slot))
 
 
 func _refresh_reserve_slot_module(loadout: PlayerWeaponLoadout) -> void:
@@ -89,11 +80,14 @@ func _refresh_reserve_slot_module(loadout: PlayerWeaponLoadout) -> void:
 	if reserve_slot == null or reserve_slot.is_empty():
 		_set_module(reserve_module, title, "—", true)
 		return
-	var weapon_name: String = reserve_slot.equipped_weapon_display_name
-	if weapon_name.is_empty():
-		weapon_name = String(reserve_slot.equipped_weapon_id)
 	var weapon_lv: int = loadout.get_weapon_level(reserve_slot.equipped_weapon_id)
-	_set_module(reserve_module, title, "%s\nLv.%d" % [weapon_name, weapon_lv], false)
+	_set_module(
+		reserve_module,
+		title,
+		_slot_body(reserve_slot, "Lv.%d" % weapon_lv),
+		false,
+		_slot_icon(reserve_slot),
+	)
 
 
 func _refresh_owned_main(loadout: PlayerWeaponLoadout) -> void:
@@ -103,10 +97,12 @@ func _refresh_owned_main(loadout: PlayerWeaponLoadout) -> void:
 	for weapon_id in loadout.get_tracked_weapon_ids_by_category(WeaponDefinition.Category.MAIN):
 		var module := HEX_MODULE_SCENE.instantiate() as HexModuleFrame
 		module.custom_minimum_size = Vector2(36, 36)
-		var display_name: String = loadout.get_weapon_display_name(weapon_id)
+		var icon: Texture2D = loadout.get_weapon_icon(weapon_id)
 		var level: int = loadout.get_weapon_level(weapon_id)
 		owned_main_row.add_child(module)
-		_set_module(module, _short_name(display_name), "Lv.%d" % level, false)
+		# Owned modules are too small for a title; the icon alone identifies the weapon.
+		var title := "" if icon != null else _short_name(loadout.get_weapon_display_name(weapon_id))
+		_set_module(module, title, "Lv.%d" % level, false, icon)
 
 
 func _format_charges(weapon: WeaponSystem) -> String:
@@ -146,10 +142,35 @@ func _ensure_aux_modules() -> void:
 		_aux_modules.append(module)
 
 
-func _set_module(module: HexModuleFrame, title: String, body: String, dimmed: bool) -> void:
+func _slot_icon(slot: WeaponSlotState) -> Texture2D:
+	if slot == null or slot.equipped_weapon_definition == null:
+		return null
+	return slot.equipped_weapon_definition.icon
+
+
+## The icon carries the weapon identity, so the name only reappears when an icon is missing.
+func _slot_body(slot: WeaponSlotState, meta: String) -> String:
+	if slot == null or _slot_icon(slot) != null:
+		return meta
+	var weapon_name: String = slot.equipped_weapon_display_name
+	if weapon_name.is_empty():
+		weapon_name = String(slot.equipped_weapon_id)
+	if meta.is_empty():
+		return weapon_name
+	return "%s\n%s" % [weapon_name, meta]
+
+
+func _set_module(
+	module: HexModuleFrame,
+	title: String,
+	body: String,
+	dimmed: bool,
+	icon: Texture2D = null,
+) -> void:
 	if module == null:
 		return
 	module.set_module_text(title, body)
+	module.set_module_icon(icon)
 	module.dimmed = dimmed
 	module.border_color = Color(0.45, 0.9, 1.0, 0.95) if not dimmed else Color(0.18, 0.45, 0.6, 0.7)
 	module.fill_color = Color(0.06, 0.18, 0.3, 0.95) if not dimmed else Color(0.03, 0.08, 0.14, 0.7)

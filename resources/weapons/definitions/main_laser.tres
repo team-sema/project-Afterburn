@@ -1,12 +1,13 @@
-[gd_resource type="Resource" script_class="WeaponDefinition" load_steps=3 format=3]
+[gd_resource type="Resource" script_class="WeaponDefinition" format=3 uid="uid://cpn54ll1emgyw"]
 
-[ext_resource type="Script" path="res://resources/weapons/weapon_definition.gd" id="1_def"]
-[ext_resource type="PackedScene" path="res://player_ship/weapons/laser_weapon_system.tscn" id="2_scene"]
+[ext_resource type="Script" uid="uid://cpkr4w0d5rl5t" path="res://resources/weapons/weapon_definition.gd" id="1_def"]
+[ext_resource type="PackedScene" uid="uid://d0nj13ptnmpmp" path="res://player_ship/weapons/laser_weapon_system.tscn" id="2_scene"]
+[ext_resource type="Texture2D" uid="uid://bvhbc0sja5xx" path="res://assets/svg/weapons/weapon_main_laser.svg" id="3_icon"]
 
 [resource]
 script = ExtResource("1_def")
 id = &"main_laser"
 display_name = "레이저"
-category = 0
 weapon_scene = ExtResource("2_scene")
+icon = ExtResource("3_icon")
 description = "연속 빔형 주무기."

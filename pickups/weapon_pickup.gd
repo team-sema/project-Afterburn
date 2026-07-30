@@ -12,6 +12,8 @@ const EXPERIENCE_COLLECTOR_LAYER := 1 << 4
 var weapon_definition: WeaponDefinition
 var _collecting := false
 var _age := 0.0
+var _label: Label
+var _label_host: Control
 
 
 func _ready() -> void:
@@ -21,12 +23,18 @@ func _ready() -> void:
 	monitoring = true
 	monitorable = false
 	area_entered.connect(_on_area_entered)
+	_label = $Label as Label
+	_label_host = get_tree().get_first_node_in_group("weapon_pickup_label_host") as Control
+	if _label_host != null:
+		_label.reparent(_label_host, false)
+		_update_label_position()
 
 
 func setup(definition: WeaponDefinition, spawn_position: Vector2) -> void:
 	weapon_definition = definition
 	global_position = spawn_position
 	_refresh_label()
+	_update_label_position()
 
 
 func _process(delta: float) -> void:
@@ -34,15 +42,31 @@ func _process(delta: float) -> void:
 		return
 	_age += delta
 	global_position.y += drift_speed * delta
+	_update_label_position()
 	if _age >= lifetime:
 		queue_free()
 
 
 func _refresh_label() -> void:
-	var label := get_node_or_null("Label") as Label
-	if label == null or weapon_definition == null:
+	if _label == null:
+		_label = get_node_or_null("Label") as Label
+	if _label == null or weapon_definition == null:
 		return
-	label.text = weapon_definition.display_name
+	_label.text = weapon_definition.display_name
+
+
+func _update_label_position() -> void:
+	if _label_host == null or not is_instance_valid(_label):
+		return
+	var viewport_size := get_viewport_rect().size
+	if viewport_size.x <= 0.0 or viewport_size.y <= 0.0:
+		return
+	var display_position := Vector2(
+		global_position.x / viewport_size.x * _label_host.size.x,
+		global_position.y / viewport_size.y * _label_host.size.y,
+	)
+	_label.position = display_position + Vector2(-60.0, -24.0)
+	_label.size = Vector2(120.0, 20.0)
 
 
 func _on_area_entered(area: Area2D) -> void:
@@ -75,3 +99,8 @@ func _is_valid_collector(area: Area2D) -> bool:
 	# Only the ship's hit-core hurtbox — not orbital-barrier segments on layer 1.
 	var parent := area.get_parent()
 	return parent != null and parent is PlayerHitPoint
+
+
+func _exit_tree() -> void:
+	if is_instance_valid(_label) and _label.get_parent() != self:
+		_label.queue_free()

@@ -38,4 +38,5 @@ Flash / Scale / Shake — 피격·발사 시 펀치감
 ## 아트 소스
 
 - `assets/svg/` — 현재 네온 벡터
+- `assets/svg/weapons/` — 무기 HUD 아이콘 (흰색 마스크, HUD에서 틴트)
 - `assets/*.png` — 튜토 레거시 스프라이트 (공존)

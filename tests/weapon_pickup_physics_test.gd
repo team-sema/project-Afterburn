@@ -26,6 +26,14 @@ func _run() -> void:
 	gameplay.add_child(pickup)
 	var weapon_definition: Resource = load("res://resources/weapons/definitions/aux_orbital_barrier.tres")
 	pickup.call("setup", weapon_definition, ship.global_position)
+	var pickup_label := pickup.get("_label") as Label
+	_expect(pickup_label != null, "weapon pickup creates a name label")
+	_expect(
+		pickup_label.get_parent().is_in_group("weapon_pickup_label_host"),
+		"weapon name renders in the native-resolution playfield UI",
+	)
+	_expect(pickup_label.get_viewport() != pickup.get_viewport(), "weapon name bypasses the pixel viewport")
+	_expect(pickup_label.label_settings == null, "weapon name uses the antialiased default font")
 
 	for _index in 5:
 		await physics_frame
