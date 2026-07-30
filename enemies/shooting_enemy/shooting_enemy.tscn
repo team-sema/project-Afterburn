@@ -90,3 +90,6 @@ unique_name_in_owner = true
 script = ExtResource("9_eya3n")
 scene = ExtResource("10_fv328")
 metadata/_custom_type_script = "uid://fwissbryiv1s"
+
+[node name="EnemyShootComponent" parent="." index="17" node_paths=PackedStringArray("targeting_component")]
+targeting_component = NodePath("../TargetingComponent")

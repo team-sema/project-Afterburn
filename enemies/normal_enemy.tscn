@@ -24,3 +24,8 @@ shape = SubResource("CircleShape2D_b0nf3")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="HitboxComponent" parent_id_path=PackedInt32Array(486674932) index="0" unique_id=568090678]
 shape = SubResource("CircleShape2D_7jo6o")
+
+[node name="EnemyShootComponent" parent="." index="15" unique_id=1768565056]
+fire_interval = 3.0
+projectile_speed = 150.0
+initial_delay = 1.0

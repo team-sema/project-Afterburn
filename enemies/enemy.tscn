@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://bx6ut1btcsa82" path="res://enemies/enemy.gd" id="1_3t1x0"]
 [ext_resource type="Material" path="res://effects/core_unshaded_material.tres" id="1_core_material"]
-[ext_resource type="Material" path="res://effects/diffuse_glow_material.tres" id="1_diffuse_material"]
+[ext_resource type="Material" uid="uid://c75j508nnunik" path="res://effects/diffuse_glow_material.tres" id="1_diffuse_material"]
 [ext_resource type="Texture2D" uid="uid://djvqurciuxfie" path="res://assets/svg/radial_glow.svg" id="1_diffuse_visual"]
 [ext_resource type="Script" uid="uid://dbgfouplndi2j" path="res://components/move_component.gd" id="1_fw1ev"]
 [ext_resource type="Material" path="res://effects/tight_glow_material.tres" id="1_tight_material"]
@@ -25,10 +25,10 @@
 [ext_resource type="AudioStream" uid="uid://cgkwd7l7dft5k" path="res://sounds/hit_sound.wav" id="16_grymm"]
 [ext_resource type="Script" uid="uid://c68y72o52sjpg" path="res://components/targeting_component.gd" id="17_targeting"]
 [ext_resource type="Script" uid="uid://dc07e26n4nnok" path="res://components/enemy_modifier_factory.gd" id="24_factory"]
-[ext_resource type="Script" path="res://components/weapon_drop_component.gd" id="25_drop"]
+[ext_resource type="Script" uid="uid://bc2jhhyefsaj2" path="res://components/weapon_drop_component.gd" id="25_drop"]
 [ext_resource type="Resource" path="res://resources/weapons/default_weapon_drop_table.tres" id="26_drop_table"]
-[ext_resource type="PackedScene" path="res://pickups/weapon_pickup.tscn" id="27_pickup"]
-[ext_resource type="Script" path="res://components/experience_drop_component.gd" id="28_experience_drop"]
+[ext_resource type="PackedScene" uid="uid://t087fb28aj6r" path="res://pickups/weapon_pickup.tscn" id="27_pickup"]
+[ext_resource type="Script" uid="uid://d0hsrh4ssnxvm" path="res://components/experience_drop_component.gd" id="28_experience_drop"]
 [ext_resource type="PackedScene" path="res://pickups/experience_orb.tscn" id="29_experience_orb"]
 [ext_resource type="PackedScene" path="res://components/enemy_shoot_component.tscn" id="30_shoot"]
 
@@ -132,22 +132,21 @@ metadata/_custom_type_script = "uid://bqoa4vrmw2efx"
 [node name="TargetingComponent" type="Node" parent="." unique_id=1862215766]
 script = ExtResource("17_targeting")
 
-[node name="EnemyShootComponent" parent="." instance=ExtResource("30_shoot")]
+[node name="EnemyShootComponent" parent="." unique_id=1768565056 node_paths=PackedStringArray("targeting_component") instance=ExtResource("30_shoot")]
+targeting_component = NodePath("../TargetingComponent")
 
 [node name="EnemyModifierFactory" type="Node" parent="." unique_id=1356113284]
 script = ExtResource("24_factory")
 
-[node name="WeaponDropComponent" type="Node" parent="." node_paths=PackedStringArray("stats_component", "actor")]
+[node name="WeaponDropComponent" type="Node" parent="." unique_id=776926243 node_paths=PackedStringArray("stats_component", "actor")]
 script = ExtResource("25_drop")
 stats_component = NodePath("../StatsComponent")
 actor = NodePath("..")
 drop_table = ExtResource("26_drop_table")
 pickup_scene = ExtResource("27_pickup")
-drop_chance = 0.08
 
-[node name="ExperienceDropComponent" type="Node" parent="." node_paths=PackedStringArray("stats_component", "actor")]
+[node name="ExperienceDropComponent" type="Node" parent="." unique_id=1254377119 node_paths=PackedStringArray("stats_component", "actor")]
 script = ExtResource("28_experience_drop")
 stats_component = NodePath("../StatsComponent")
 actor = NodePath("..")
 orb_scene = ExtResource("29_experience_orb")
-drop_chance = 0.5

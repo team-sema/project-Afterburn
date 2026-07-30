@@ -47,5 +47,11 @@ actor = NodePath("..")
 move_component = NodePath("../MoveComponent")
 metadata/_custom_type_script = "uid://dq8pwqawl2q7u"
 
-[node name="WeaponDropComponent" parent="." index="18"]
+[node name="EnemyShootComponent" parent="." index="16" unique_id=1768565056]
+fire_interval = 3.0
+burst_count = 3
+shot_count = 5
+spread_degrees = 15.0
+
+[node name="WeaponDropComponent" parent="." index="18" unique_id=776926243]
 drop_chance = 1.0

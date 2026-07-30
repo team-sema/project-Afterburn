@@ -7,6 +7,8 @@
 script = ExtResource("1_script")
 projectile_scene = ExtResource("2_projectile")
 fire_interval = 2.0
+burst_count = 1
+burst_interval = 0.15
 projectile_speed = 100.0
 shot_count = 1
 spread_degrees = 0.0
