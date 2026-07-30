@@ -5,6 +5,7 @@ const YELLOW_ENEMY_SCENE: PackedScene = preload("uid://dxo5ywpsobagu")
 const PINK_ENEMY_SCENE: PackedScene = preload("uid://0th6okc5yjpd")
 const KAMIKAZE_ENEMY_SCENE: PackedScene = preload("res://enemies/kamikaze_enemy.tscn")
 const NORMAL_ENEMY_SCRIPT: Script = preload("res://enemies/normal_enemy.gd")
+const KAMIKAZE_ENEMY_SCRIPT: Script = preload("res://enemies/kamikaze_enemy.gd")
 
 @export var game_stats: GameStats
 @export var augment_registry: EnemyAugmentRegistry
@@ -27,6 +28,19 @@ const NORMAL_ENEMY_SCRIPT: Script = preload("res://enemies/normal_enemy.gd")
 @export_range(1.0, 30.0, 0.5) var striker_spawn_time_offset := 11.0
 @export_range(1.0, 30.0, 0.5) var kamikaze_spawn_time_offset := 8.0
 
+@export_group("Awl Formation")
+@export var awl_enemy_scene: PackedScene = KAMIKAZE_ENEMY_SCENE
+## Tip leads downward (+Y). Array length = wing count (default V of 3).
+@export var awl_formation_offsets: Array[Vector2] = [
+	Vector2(-32, -14),
+	Vector2(0, 14),
+	Vector2(32, -14),
+]
+@export_range(0.2, 10.0, 0.05) var awl_descend_duration := 1.4
+@export_range(1.0, 120.0, 1.0) var awl_descend_speed := 42.0
+@export_range(0.2, 10.0, 0.05) var awl_aim_duration := 1.4
+@export_range(40.0, 600.0, 1.0) var awl_charge_speed := 280.0
+
 var margin := 8.0
 
 @onready var spawner_component: SpawnerComponent = $SpawnerComponent
@@ -44,9 +58,7 @@ func _ready() -> void:
 		handle_spawn.bind(YELLOW_ENEMY_SCENE, yellow_enemy_spawn_timer, striker_spawn_time_offset)
 	)
 	pink_enemy_spawn_timer.timeout.connect(handle_spawn.bind(PINK_ENEMY_SCENE, pink_enemy_spawn_timer, 10.0))
-	kamikaze_enemy_spawn_timer.timeout.connect(
-		handle_spawn.bind(KAMIKAZE_ENEMY_SCENE, kamikaze_enemy_spawn_timer, kamikaze_spawn_time_offset)
-	)
+	kamikaze_enemy_spawn_timer.timeout.connect(handle_awl_formation_spawn)
 
 	game_stats.score_changed.connect(func(new_score: int):
 		if new_score > 50:
@@ -115,6 +127,57 @@ func handle_drone_formation_spawn() -> void:
 
 	var spawn_rate := drone_spawn_time_offset / (0.5 + (game_stats.score * 0.01))
 	green_enemy_spawn_timer.start(spawn_rate + randf_range(0.4, 1.2))
+
+
+func handle_awl_formation_spawn() -> void:
+	assert(awl_enemy_scene != null, "awl_enemy_scene must be set.")
+	assert(not awl_formation_offsets.is_empty(), "awl_formation_offsets must not be empty.")
+
+	var half_span := 0.0
+	var half_depth := 0.0
+	for offset in awl_formation_offsets:
+		half_span = maxf(half_span, absf(offset.x))
+		half_depth = maxf(half_depth, absf(offset.y))
+
+	var viewport_width := get_viewport_rect().size.x
+	var min_x := margin + half_span
+	var max_x := viewport_width - margin - half_span
+	if max_x < min_x:
+		max_x = min_x
+
+	var formation_origin := Vector2(randf_range(min_x, max_x), -16.0 - half_depth)
+	var formation_start_time := Time.get_ticks_msec() * 0.001
+	var movement_settings := {
+		"descend_duration": awl_descend_duration,
+		"descend_speed": awl_descend_speed,
+		"aim_duration": awl_aim_duration,
+		"charge_speed": awl_charge_speed,
+	}
+
+	spawner_component.scene = awl_enemy_scene
+	for offset in awl_formation_offsets:
+		var formation_offset := offset as Vector2
+		spawner_component.spawn(
+			formation_origin + formation_offset,
+			null,
+			func(instance: Node) -> void:
+				_inject_enemy_dependencies(instance)
+				assert(
+					instance.get_script() == KAMIKAZE_ENEMY_SCRIPT,
+					"Awl formation requires kamikaze_enemy.gd.",
+				)
+				assert(instance.has_method("setup_formation"), "Awl missing setup_formation.")
+				instance.call(
+					"setup_formation",
+					formation_origin,
+					formation_offset,
+					formation_start_time,
+					movement_settings,
+				),
+		)
+
+	var spawn_rate := kamikaze_spawn_time_offset / (0.5 + (game_stats.score * 0.01))
+	kamikaze_enemy_spawn_timer.start(spawn_rate + randf_range(0.5, 1.5))
 
 
 func _inject_enemy_dependencies(instance: Node) -> void:

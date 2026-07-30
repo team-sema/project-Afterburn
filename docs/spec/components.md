@@ -10,6 +10,8 @@
 | `FormationDiagonalMoveComponent` | 공유 시각 기준 직선 대각 편대 이동 (MoveComponent process off) |
 | `StrikerDivePatrolComponent` | 직하강 → 화면 중앙 비율에서 정지 → 좌우 velocity 패트롤 |
 | `KamikazeAimChargeComponent` | 하강 → 조준(정지) → 락온 돌진 (MoveComponent velocity) |
+| `CasterHoverComponent` | 상단 hover_y 체공 + 좌우 패트롤 |
+| `RadialBarrageShootComponent` | 원형 다연발 링 탄막 |
 
 | `MoveInputComponent` | `ui_*`/WASD → MoveComponent (`MoveStats.speed`) |
 | `MoveStats` | 이동 속도 Resource |

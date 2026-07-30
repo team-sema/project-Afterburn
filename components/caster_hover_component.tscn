@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://components/caster_hover_component.gd" id="1_script"]
+
+[node name="CasterHoverComponent" type="Node"]
+script = ExtResource("1_script")
+hover_y = 56.0
+enter_speed = 48.0
+patrol_speed = 38.0
+edge_margin = 16.0

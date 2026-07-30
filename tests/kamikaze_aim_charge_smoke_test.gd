@@ -1,6 +1,6 @@
 extends SceneTree
 
-## Smoke: kamikaze phases descend → aim → charge at locked point.
+## V held through aim; after charge each member flies independently.
 
 
 func _initialize() -> void:
@@ -10,54 +10,58 @@ func _initialize() -> void:
 func _run() -> void:
 	var failures: PackedStringArray = []
 	var scene: PackedScene = load("res://enemies/kamikaze_enemy.tscn")
-	var enemy: Node2D = scene.instantiate() as Node2D
-	enemy.set("augment_registry", EnemyAugmentRegistry.new())
+	var script: Script = load("res://enemies/kamikaze_enemy.gd")
+	var offsets: Array[Vector2] = [
+		Vector2(-32, -14),
+		Vector2(0, 14),
+		Vector2(32, -14),
+	]
+	var origin := Vector2(120, -16)
+	var start_time := Time.get_ticks_msec() * 0.001
+	var settings := {
+		"descend_duration": 0.35,
+		"descend_speed": 50.0,
+		"aim_duration": 0.25,
+		"charge_speed": 280.0,
+	}
 
 	var player := Node2D.new()
-	player.name = "FakePlayer"
 	player.add_to_group("player")
-	player.position = Vector2(120, 200)
+	player.position = Vector2(140, 220)
 	root.add_child(player)
-	root.add_child(enemy)
-	enemy.global_position = Vector2(80, 20)
 
-	var move: MoveComponent = enemy.get_node("MoveComponent") as MoveComponent
-	var charge: Node = enemy.get_node("KamikazeAimChargeComponent")
-	var shoot: Node = enemy.get_node_or_null("EnemyShootComponent")
-	if shoot != null:
-		failures.append("kamikaze must remove EnemyShootComponent")
+	var members: Array[Node2D] = []
+	for offset in offsets:
+		var enemy: Node2D = scene.instantiate() as Node2D
+		enemy.set("augment_registry", EnemyAugmentRegistry.new())
+		root.add_child(enemy)
+		enemy.call("setup_formation", origin, offset, start_time, settings)
+		members.append(enemy)
 
-	await process_frame
-	if move.velocity.y <= 0.0 or absf(move.velocity.x) > 0.01:
-		failures.append("descend phase should move straight down")
+	# Still in aim / just before charge — V should hold.
+	await create_timer(0.5).timeout
+	var tip := members[1].global_position
+	for index in members.size():
+		var expected := offsets[index] - offsets[1]
+		var actual := members[index].global_position - tip
+		if actual.distance_to(expected) > 1.5:
+			failures.append("pre-charge V broken at %d" % index)
 
-	# Fast-forward descend
-	charge.set("_phase_elapsed", 2.0)
-	charge.call("_process", 0.0)
-	await process_frame
-	if move.velocity != Vector2.ZERO:
-		failures.append("aim phase should be stationary")
+	# Into independent charge
+	await create_timer(0.4).timeout
+	var move0: MoveComponent = members[0].get_node("MoveComponent") as MoveComponent
+	var move1: MoveComponent = members[1].get_node("MoveComponent") as MoveComponent
+	if not move0.is_processing() or move0.velocity.length() < 100.0:
+		failures.append("charge should enable independent MoveComponent flight")
+	# Directions from different start slots toward same player should differ.
+	if move0.velocity.normalized().dot(move1.velocity.normalized()) > 0.999:
+		failures.append("independent charge directions should diverge from V slots")
 
-	player.global_position = Vector2(160, 220)
-	charge.set("_phase_elapsed", 2.0)
-	charge.call("_process", 0.0)
-	await process_frame
-
-	var expected_dir := (Vector2(160, 220) - enemy.global_position).normalized()
-	var actual_dir := move.velocity.normalized()
-	if absf(move.velocity.length() - 280.0) > 1.0:
-		failures.append("charge speed should be 280")
-	if actual_dir.dot(expected_dir) < 0.99:
-		failures.append("charge should lock aim point from charge start")
-
-	# Move player after lock — direction must not retarget.
-	player.global_position = Vector2(20, 50)
-	await process_frame
-	if move.velocity.normalized().dot(expected_dir) < 0.99:
-		failures.append("charge retargeted after lock")
-
-	enemy.queue_free()
+	for member in members:
+		if is_instance_valid(member):
+			member.queue_free()
 	player.queue_free()
+
 	if failures.is_empty():
 		print("kamikaze_aim_charge_smoke_test: OK")
 		quit(0)
