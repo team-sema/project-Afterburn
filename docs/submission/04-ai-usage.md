@@ -47,7 +47,7 @@ AI가 생성한 내용은 **저장소 규칙·시스템 스펙**에 맞게 검�
 
 실제로는 `.cursor/rules/`, `.cursor/skills/`, `.agents/skills/`에 상주합니다. 대표 지시:
 
-1. **스펙 우선** — 동작 변경 시 `docs/design/systems/<slug>.md` → Task → 코드 순. 현황 정본은 `docs/spec/`.
+1. **스펙 우선** — 동작 변경 시 `docs/design/systems/<slug>.md` → Task → 코드 순. 현황 정본 `docs/spec/`은 **같은 feature에서 필수 갱신**(`/push` 통과 조건).
 2. **범위 제한** — `feature/<slug>`에서는 해당 slug 관련 경로만 수정. 무관 리팩터 금지.
 3. **Godot 4.7** — Context7의 `/websites/godotengine_en_4_7` 우선. Godot 3 패턴 금지.
 4. **칸반 연동** — `/feature` 시 카드 생성·`doing`, `/push` 직전 카드 → `review`. `done`은 사람만.

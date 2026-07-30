@@ -35,3 +35,9 @@ unique_name_in_owner = true
 wait_time = 7.0
 one_shot = true
 autostart = true
+
+[node name="BombEnemySpawnTimer" type="Timer" parent="."]
+unique_name_in_owner = true
+wait_time = 11.0
+one_shot = true
+autostart = true

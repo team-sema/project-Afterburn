@@ -1,0 +1,12 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://components/bomb_proximity_fuse_component.gd" id="1_script"]
+
+[node name="BombProximityFuseComponent" type="Node"]
+script = ExtResource("1_script")
+trigger_radius = 72.0
+arm_duration = 2.0
+flash_count = 3
+base_explosion_radius = 40.0
+blast_size_multiplier = 1.5
+blast_damage = 2

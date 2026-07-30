@@ -60,7 +60,7 @@ Project Afterburn에 (1) Godot 프로젝트 루트 정리, (2) 카테고리 스�
 ## 구현 메모
 
 - 보드 UI/CSS는 cat_dice를 Afterburn 네온 톤으로 재스킨
-- `docs/spec/`은 현황 정본, `docs/design/systems/`는 feature 정본
+- `docs/spec/`은 현황 정본(동작 변경 시 **같은 feature에서 필수 갱신**), `docs/design/systems/`는 feature 정본
 
 ---
 

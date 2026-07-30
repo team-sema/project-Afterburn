@@ -41,13 +41,14 @@ Hitbox.area_entered
 |----|------|
 | `player_blaster.tscn` | 속도 `(0,-200)` · 히트 시 free |
 | `player_shotgun_pellet.tscn` | 샷건 펠릿 · 부채꼴 · damage **4** |
-| `curve_projectile.tscn` | 적 기본 사격 · `launch(dir, speed)` · Anchor 오실레이션 |
+| `base_enemy_projectile.tscn` | 적 기본 조준 탄 · `launch(dir, speed)` · 그룹 `enemy_projectiles` |
+| `curve_projectile.tscn` | 레거시 곡선 탄 (Anchor 오실레이션) · 기본 사격에서는 미사용 |
 
 ## 점수·난이도 상수
 
 | 이벤트 | 값 |
 |--------|-----|
-| 첫 오그먼트 오퍼 | 10 |
-| 이후 오퍼 간격 | 100 |
 | Pink 해금 | score > 50 |
-| Green / Yellow / Pink 점수 | 5 / 10 / 20 |
+| Green / Yellow / Pink / Awl / Bomb 점수 | 5 / 10 / 25 / 15 / 20 |
+
+> 플레이어 오그먼트는 **점수 임계가 아니라 XP + C 키**. 적 오그먼트는 플레이 시간 60초 간격.
