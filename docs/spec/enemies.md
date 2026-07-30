@@ -4,37 +4,54 @@
 
 | 코드명 | 씬 | HP | 점수 | 특징 |
 |--------|-----|-----|------|------|
-| Green | `normal_enemy.tscn` | 30 | 5 | 직선 하강 `(0, 46)` · 기본 조준 사격 |
-| Yellow | `moving_enemy.tscn` | 60 | 10 | 랜덤 ±23 X + BorderBounce · 기본 조준 사격 |
-| Pink | `shooting_enemy.tscn` | 60 | 20 | 상태머신(이동) · 더 빠른 기본 조준 사격 |
+| Green / Drone | `normal_enemy.tscn` | 20 | 5 | 편대 대각 하강 · 스폰 offset ~5 |
+| Yellow / Striker | `moving_enemy.tscn` | 50 | 10 | 직하강 → 중앙 정지 → 좌우 패트롤 · 스폰 offset ~11 |
+| Pink | `shooting_enemy.tscn` | 60 | 20 | 상태머신(이동) · 기본 조준 사격 |
+| Awl / Kamikaze | `kamikaze_enemy.tscn` | 70 | 15 | 투사체 없음 · 2s 하강 → 2s 조준 → 블래스터 속도(200)로 락온 돌진 · `enemy_awl.svg` |
 
-베이스 `enemies/enemy.tscn`: 네온 레이어 스프라이트, 전투/VFX 스택, `TargetingComponent`, `EnemyShootComponent`, `EnemyModifierFactory`, 경험치 오브 드롭.
+베이스 `enemies/enemy.tscn`: 네온 레이어, 전투/VFX, `TargetingComponent`, `EnemyShootComponent`, `EnemyModifierFactory`, XP 드롭.
 
 ## Enemy 베이스 동작
 
-- `no_health` → 점수 가산 + 경험치 오브 1개 드롭 + `queue_free` (+ DestroyedComponent 폭발)
-- Hurt → scale / flash / shake / hit SFX
-- 몸 Hitbox가 플레이어 Hurtbox에 닿으면 `queue_free` (카미카제)
-- **기본 사격:** `EnemyShootComponent` — 플레이어 조준, 약 2초 주기(`curve_projectile`, speed 100). Pink는 1.6초·속도 110으로 튜닝.
+- `no_health` → 점수 + XP + `queue_free`
+- Hurt VFX/SFX · 카미카제 Hitbox free
+- **이동:** `Node2D` + `MoveComponent.translate` (CharacterBody/`move_and_slide` 없음). 기본 진행 **+Y**.
 
 ## EnemyGenerator
 
-- 스폰 Y = `-16`, X 랜덤(마진 8)
-- 속도식: `time_offset / (0.5 + score*0.01) + rand(0.25, 0.5)`
-  - Green offset 1 · Yellow 5 · Pink 10
-- 타이머 초기: Green 3s / Yellow 5s / Pink 8s
-- Pink는 시작 시 `PROCESS_MODE_DISABLED`, **score > 50**이면 활성화
-- 스폰 직전 `enemy.augment_registry` 주입
+- **Green:** `handle_drone_formation_spawn` — 오프셋 배열 길이만큼 동시 스폰(기본 5). 공유 origin/start_time/속도·각도
+- Yellow/Pink/Kamikaze: 단발 스폰
+- Inspector(Drone Formation): scene, offsets, `drone_forward_speed`, `drone_dive_angle_degrees`
+- Kamikaze: `kamikaze_spawn_time_offset` (~8), 첫 스폰 ~7s
+- Pink는 score > 50 후 활성화
+
+## Awl 자폭 (Kamikaze)
+
+`KamikazeAimChargeComponent`:
+
+1. **DESCEND** (~2s): `velocity = (0, descend_speed)`
+2. **AIM** (~2s): 정지, Anchor를 플레이어 방향으로 회전
+3. **CHARGE**: 발사 순간의 플레이어 좌표를 고정 → `velocity = dir * 200` (블래스터와 동일)
+
+`EnemyShootComponent`는 `_enter_tree`에서 즉시 제거 (발사 없음).
+
+## Drone 대각 편대
+
+`FormationDiagonalMoveComponent` (사인/Path2D/FormationController 없음):
+
+```
+direction = (sin(angle), cos(angle))  # angle from +Y toward +X
+pos = origin + offset + direction * speed * speed_scale * elapsed
+```
+
+- 기본 `dive_angle_degrees = 10` (좌→우로 내려옴)
+- 활성 시 MoveComponent process off (절대 위치 단일 writer)
+- 편대원 사망해도 타 멤버 수식 불변
 
 ## Pink 상태머신
 
-`MoveDown`(2.5s, Y=23) → `MoveSide`(2.5s, ±X 23 + bounce) → `Pause`(2.5s) → 다시 MoveDown  
-사격은 상태와 독립적으로 `EnemyShootComponent`가 담당.
+`MoveDown` → `MoveSide` → `Pause`. 사격은 `EnemyShootComponent`.
 
 ## EnemyModifierFactory
 
-스폰 `_ready`에서:
-
-1. 로컬 + 레지스트리 `EnemyStatModifier` (HEALTH / MOVE_SPEED / ACTION_RATE)
-2. `behavior_components` 인스턴스 deferred 부착
-3. ACTION_RATE → 모든 `TimedStateComponent.duration` 나눗셈 + `EnemyShootComponent` 발사 주기 단축
+HEALTH / MOVE_SPEED / ACTION_RATE + behavior 부착.

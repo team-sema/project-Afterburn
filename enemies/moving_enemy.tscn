@@ -4,6 +4,7 @@
 [ext_resource type="Script" uid="uid://chfx4jufyxtju" path="res://enemies/moving_enemy.gd" id="2_pj1js"]
 [ext_resource type="Texture2D" uid="uid://cqo8ule6bvype" path="res://assets/svg/enemy_striker.svg" id="3_2nfdr"]
 [ext_resource type="Script" uid="uid://dq8pwqawl2q7u" path="res://components/border_bounce_component.gd" id="4_5442w"]
+[ext_resource type="PackedScene" path="res://components/striker_dive_patrol_component.tscn" id="5_patrol"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_7jo6o"]
 size = Vector2(16, 8)
@@ -27,7 +28,7 @@ texture = ExtResource("3_2nfdr")
 health = 50
 
 [node name="MoveComponent" parent="." index="2" unique_id=695129192]
-velocity = Vector2(0, 12)
+velocity = Vector2(0, 40)
 
 [node name="VisibleOnScreenNotifier2D" parent="." index="3" unique_id=1344806211]
 rect = Rect2(-10, -7, 20, 14)
@@ -55,3 +56,10 @@ spread_degrees = 15.0
 
 [node name="WeaponDropComponent" parent="." index="18" unique_id=776926243]
 drop_chance = 1.0
+
+[node name="StrikerDivePatrolComponent" parent="." index="20" node_paths=PackedStringArray("actor", "move_component") instance=ExtResource("5_patrol")]
+actor = NodePath("..")
+move_component = NodePath("../MoveComponent")
+descend_speed = 40.0
+patrol_speed = 55.0
+stop_viewport_y_ratio = 0.5

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-30",
+  "updated": "2026-07-31",
   "source": "docs/board/cards/*.md",
   "columns": [
     {
@@ -39,6 +39,14 @@
     }
   ],
   "cards": [
+    {
+      "id": "striker-zigzag-formation",
+      "title": "적 편대·Striker·Awl 자폭",
+      "description": "Drone 대각 편대, Striker 하강·패트롤, Awl 조준 돌진.",
+      "column": "review",
+      "file": "cards/striker-zigzag-formation.md",
+      "tags": ["적", "스폰"]
+    },
     {
       "id": "weapon-module-icons",
       "title": "무기 육각 모듈 아이콘",

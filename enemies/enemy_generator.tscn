@@ -13,13 +13,13 @@ script = ExtResource("2_d5nw7")
 
 [node name="GreenEnemySpawnTimer" type="Timer" parent="." unique_id=1919793622]
 unique_name_in_owner = true
-wait_time = 3.0
+wait_time = 4.0
 one_shot = true
 autostart = true
 
 [node name="YellowEnemySpawnTimer" type="Timer" parent="." unique_id=2079851595]
 unique_name_in_owner = true
-wait_time = 5.0
+wait_time = 9.0
 one_shot = true
 autostart = true
 
@@ -27,5 +27,11 @@ autostart = true
 unique_name_in_owner = true
 process_mode = 4
 wait_time = 8.0
+one_shot = true
+autostart = true
+
+[node name="KamikazeEnemySpawnTimer" type="Timer" parent="."]
+unique_name_in_owner = true
+wait_time = 7.0
 one_shot = true
 autostart = true
