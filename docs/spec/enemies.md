@@ -49,7 +49,7 @@
 
 ## Drone 대각 편대
 
-`FormationDiagonalMoveComponent`: 공유 클록 대각 + X ping-pong.
+`FormationDiagonalMoveComponent`: 공유 클록 대각 + X ping-pong. `handle_drone_formation_spawn`은 `add_child` 이후 `setup_formation` 호출(viewport 안전).
 
 ## EnemyModifierFactory
 

@@ -4,6 +4,7 @@
 
 | slug | 제목 | 상태 |
 |------|------|------|
+| [fix-formation-viewport-before-tree](fix-formation-viewport-before-tree.md) | Drone 편대 viewport 트리 가드 | doing |
 | [bomb-proximity-fuse](bomb-proximity-fuse.md) | 폭탄 근접 자폭 | review |
 | [readme-docs-links](readme-docs-links.md) | README 스펙·칸반 링크 | review |
 | [docs-site-kanban](docs-site-kanban.md) | docs 사이트 · 칸반 · 워크플로 | review |

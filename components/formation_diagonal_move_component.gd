@@ -41,7 +41,11 @@ func setup_formation(
 	if move_component != null:
 		move_component.velocity = Vector2.ZERO
 		move_component.set_process(false)
-	_apply_position()
+	# Spawner configure_before_add runs before add_child; viewport needs the tree.
+	if actor != null and actor.is_inside_tree():
+		_apply_position()
+	else:
+		call_deferred("_apply_position")
 
 
 func _process(_delta: float) -> void:
@@ -52,6 +56,8 @@ func _process(_delta: float) -> void:
 
 func _apply_position() -> void:
 	if actor == null or not is_instance_valid(actor):
+		return
+	if not actor.is_inside_tree():
 		return
 	var elapsed := maxf(0.0, (Time.get_ticks_msec() * 0.001) - formation_start_time)
 	var speed_scale := 1.0

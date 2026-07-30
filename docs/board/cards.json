@@ -40,6 +40,14 @@
   ],
   "cards": [
     {
+      "id": "fix-formation-viewport-before-tree",
+      "title": "Drone 편대 viewport 트리 가드",
+      "description": "setup_formation이 add_child 전에 viewport를 읽어내던 에러 수정.",
+      "column": "doing",
+      "file": "cards/fix-formation-viewport-before-tree.md",
+      "tags": ["적", "버그"]
+    },
+    {
       "id": "bomb-proximity-fuse",
       "title": "폭탄 근접 자폭",
       "description": "느린 고체력 폭탄. 근접 시 적색 점멸 후 1.5× 자폭.",

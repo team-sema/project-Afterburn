@@ -36,8 +36,9 @@ func _run() -> void:
 			failures.append("instantiate NormalEnemy failed")
 			break
 		enemy.set("augment_registry", EnemyAugmentRegistry.new())
-		root.add_child(enemy)
+		# Mirrors Spawner configure_before_add: setup may run before add_child.
 		enemy.call("setup_formation", origin, offset, start_time, settings)
+		root.add_child(enemy)
 		var diagonal: Node = enemy.get_node_or_null("FormationDiagonalMoveComponent")
 		if diagonal == null or diagonal.get_script() != diagonal_script:
 			failures.append("missing FormationDiagonalMoveComponent")

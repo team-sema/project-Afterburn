@@ -112,23 +112,23 @@ func handle_drone_formation_spawn() -> void:
 	spawner_component.scene = drone_enemy_scene
 	for offset in drone_formation_offsets:
 		var formation_offset := offset as Vector2
-		spawner_component.spawn(
+		var instance := spawner_component.spawn(
 			formation_origin + formation_offset,
 			null,
-			func(instance: Node) -> void:
-				_inject_enemy_dependencies(instance)
+			func(enemy: Node) -> void:
+				_inject_enemy_dependencies(enemy)
 				assert(
-					instance.get_script() == NORMAL_ENEMY_SCRIPT,
+					enemy.get_script() == NORMAL_ENEMY_SCRIPT,
 					"Drone formation requires normal_enemy.gd.",
-				)
-				assert(instance.has_method("setup_formation"), "Drone missing setup_formation.")
-				instance.call(
-					"setup_formation",
-					formation_origin,
-					formation_offset,
-					formation_start_time,
-					movement_settings,
 				),
+		)
+		assert(instance.has_method("setup_formation"), "Drone missing setup_formation.")
+		instance.call(
+			"setup_formation",
+			formation_origin,
+			formation_offset,
+			formation_start_time,
+			movement_settings,
 		)
 
 	var spawn_rate := drone_spawn_time_offset / (0.5 + (game_stats.score * 0.01))

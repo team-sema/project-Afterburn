@@ -7,7 +7,7 @@
 | 클래스 | 역할 |
 |--------|------|
 | `MoveComponent` | `velocity * velocity_multiplier`를 actor에 `translate` |
-| `FormationDiagonalMoveComponent` | 공유 시각 기준 직선 대각 편대 이동 (MoveComponent process off) |
+| `FormationDiagonalMoveComponent` | 공유 시각 기준 직선 대각 편대 이동 (MoveComponent process off). `setup_formation`은 트리 진입 후(또는 deferred)에 viewport를 읽음 |
 | `StrikerDivePatrolComponent` | 직하강 → 화면 중앙 비율에서 정지 → 좌우 velocity 패트롤 |
 | `KamikazeAimChargeComponent` | 하강 → 조준(정지) → 락온 돌진 (MoveComponent velocity) |
 | `CasterHoverComponent` | 상단 hover_y 체공 + 좌우 패트롤 |
