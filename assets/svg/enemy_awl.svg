@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="80" viewBox="0 0 24 40">
+  <!-- Tip faces +Y (down). White silhouette for neon layers. -->
+  <g fill="#fff">
+    <path d="M12 39 4 18l3-3 5 4 5-4 3 3Z"/>
+    <path d="M7 16 12 1l5 15-2 2h-6Z"/>
+    <path d="M9 18h6l-1 4H10Z"/>
+  </g>
+</svg>

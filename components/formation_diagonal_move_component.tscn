@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://components/formation_diagonal_move_component.gd" id="1_script"]
+
+[node name="FormationDiagonalMoveComponent" type="Node"]
+script = ExtResource("1_script")
+forward_speed = 72.0
+dive_angle_degrees = 50.0

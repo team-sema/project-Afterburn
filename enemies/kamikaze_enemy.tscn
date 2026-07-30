@@ -1,0 +1,52 @@
+[gd_scene format=3 uid="uid://banjmathhvl6g"]
+
+[ext_resource type="PackedScene" uid="uid://psmpwiapllcb" path="res://enemies/enemy.tscn" id="1_enemy"]
+[ext_resource type="Script" path="res://enemies/kamikaze_enemy.gd" id="2_script"]
+[ext_resource type="Texture2D" path="res://assets/svg/enemy_awl.svg" id="3_awl"]
+[ext_resource type="PackedScene" path="res://components/kamikaze_aim_charge_component.tscn" id="4_charge"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_hurt"]
+size = Vector2(10, 18)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_hit"]
+size = Vector2(8, 14)
+
+[node name="KamikazeEnemy" instance=ExtResource("1_enemy")]
+script = ExtResource("2_script")
+
+[node name="WideGlow" parent="Anchor" index="1"]
+texture = ExtResource("3_awl")
+
+[node name="TightGlow" parent="Anchor" index="2"]
+texture = ExtResource("3_awl")
+
+[node name="Core" parent="Anchor" index="3"]
+texture = ExtResource("3_awl")
+
+[node name="StatsComponent" parent="." index="1"]
+health = 70
+
+[node name="MoveComponent" parent="." index="2"]
+velocity = Vector2(0, 42)
+
+[node name="VisibleOnScreenNotifier2D" parent="." index="3"]
+rect = Rect2(-8, -12, 16, 24)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HurtboxComponent" index="0"]
+shape = SubResource("RectangleShape2D_hurt")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HitboxComponent" index="0"]
+shape = SubResource("RectangleShape2D_hit")
+
+[node name="ScoreComponent" parent="." index="12"]
+adjust_amount = 15
+
+[node name="KamikazeAimChargeComponent" parent="." index="20" node_paths=PackedStringArray("actor", "move_component", "targeting_component", "visual_anchor") instance=ExtResource("4_charge")]
+actor = NodePath("..")
+move_component = NodePath("../MoveComponent")
+targeting_component = NodePath("../TargetingComponent")
+visual_anchor = NodePath("../Anchor")
+descend_duration = 1.4
+descend_speed = 42.0
+aim_duration = 1.4
+charge_speed = 280.0
