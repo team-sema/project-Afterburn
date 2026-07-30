@@ -6,8 +6,8 @@
 |--------|-----|-----|------|------|
 | Green / Drone | `normal_enemy.tscn` | 20 | 5 | 편대 대각 하강 · 스폰 offset ~5 |
 | Yellow / Striker | `moving_enemy.tscn` | 50 | 10 | 직하강 → 중앙 정지 → 좌우 패트롤 · 스폰 offset ~11 |
-| Pink | `shooting_enemy.tscn` | 60 | 20 | 상태머신(이동) · 기본 조준 사격 |
-| Awl / Kamikaze | `kamikaze_enemy.tscn` | 70 | 15 | 투사체 없음 · 2s 하강 → 2s 조준 → 블래스터 속도(200)로 락온 돌진 · `enemy_awl.svg` |
+| Pink / Caster | `shooting_enemy.tscn` | 110 | 25 | 상단 체공 · 원형 다연발 탄막(5링×20) · `enemy_caster.svg` |
+| Awl / Kamikaze | `kamikaze_enemy.tscn` | 70 | 15 | 3마리 V로 하강·조준 → 차지 시 V에서 각자 독립 돌진 · 투사체 없음 |
 
 베이스 `enemies/enemy.tscn`: 네온 레이어, 전투/VFX, `TargetingComponent`, `EnemyShootComponent`, `EnemyModifierFactory`, XP 드롭.
 
@@ -19,39 +19,26 @@
 
 ## EnemyGenerator
 
-- **Green:** `handle_drone_formation_spawn` — 오프셋 배열 길이만큼 동시 스폰(기본 5). 공유 origin/start_time/속도·각도
+- **Green:** `handle_drone_formation_spawn` — 오프셋 배열 길이만큼 동시 스폰(기본 5)
 - Yellow/Pink/Kamikaze: 단발 스폰
-- Inspector(Drone Formation): scene, offsets, `drone_forward_speed`, `drone_dive_angle_degrees`
-- Kamikaze: `kamikaze_spawn_time_offset` (~8), 첫 스폰 ~7s
 - Pink는 score > 50 후 활성화
+
+## Caster 상단 체공 · 원형 탄막
+
+- `CasterHoverComponent`: 진입 후 `hover_y`(기본 56)에 고정, 좌우 패트롤만
+- `RadialBarrageShootComponent`: 주기마다 링 5회 × 20발 (링마다 소각 회전), `base_enemy_projectile`
+- 레거시 상태머신 / `EnemyShootComponent`는 `_enter_tree`에서 제거
 
 ## Awl 자폭 (Kamikaze)
 
-`KamikazeAimChargeComponent`:
-
-1. **DESCEND** (~2s): `velocity = (0, descend_speed)`
-2. **AIM** (~2s): 정지, Anchor를 플레이어 방향으로 회전
-3. **CHARGE**: 발사 순간의 플레이어 좌표를 고정 → `velocity = dir * 200` (블래스터와 동일)
-
-`EnemyShootComponent`는 `_enter_tree`에서 즉시 제거 (발사 없음).
+- 스폰: 3마리 V (`handle_awl_formation_spawn`) — 하강·조준 구간만 V 유지
+- **차지 시작 순간** V 슬롯에 스냅한 뒤, 각자 기존처럼 자기 위치→플레이어 락온 방향으로 독립 돌진
+- 투사체 없음
 
 ## Drone 대각 편대
 
-`FormationDiagonalMoveComponent` (사인/Path2D/FormationController 없음):
-
-```
-direction = (sin(angle), cos(angle))  # angle from +Y toward +X
-pos = origin + offset + direction * speed * speed_scale * elapsed
-```
-
-- 기본 `dive_angle_degrees = 10` (좌→우로 내려옴)
-- 활성 시 MoveComponent process off (절대 위치 단일 writer)
-- 편대원 사망해도 타 멤버 수식 불변
-
-## Pink 상태머신
-
-`MoveDown` → `MoveSide` → `Pause`. 사격은 `EnemyShootComponent`.
+`FormationDiagonalMoveComponent`: 공유 클록 대각 + X ping-pong.
 
 ## EnemyModifierFactory
 
-HEALTH / MOVE_SPEED / ACTION_RATE + behavior 부착.
+HEALTH / MOVE_SPEED / ACTION_RATE (+ `EnemyShootComponent` / `RadialBarrageShootComponent` 주기).

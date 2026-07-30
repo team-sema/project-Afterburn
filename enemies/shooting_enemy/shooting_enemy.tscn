@@ -3,13 +3,8 @@
 [ext_resource type="PackedScene" uid="uid://psmpwiapllcb" path="res://enemies/enemy.tscn" id="1_7jykc"]
 [ext_resource type="Script" uid="uid://duumbl2eoy0ot" path="res://enemies/shooting_enemy/shooting_enemy.gd" id="2_bxlr2"]
 [ext_resource type="Texture2D" uid="uid://cjhfuwqq2ffkl" path="res://assets/svg/enemy_caster.svg" id="3_gb8yh"]
-[ext_resource type="Script" uid="uid://5ebfckwk4w3h" path="res://components/state_machine_component.gd" id="4_5bhcg"]
-[ext_resource type="Script" uid="uid://chx8h3aikt6eq" path="res://components/timed_state_componoent.gd" id="5_g1k3v"]
-[ext_resource type="Script" uid="uid://dbgfouplndi2j" path="res://components/move_component.gd" id="6_drofs"]
-[ext_resource type="Script" uid="uid://dv8vl7my0r60w" path="res://components/move_left_or_right_component.gd" id="7_icdnh"]
-[ext_resource type="Script" uid="uid://dq8pwqawl2q7u" path="res://components/border_bounce_component.gd" id="8_7a0ox"]
-[ext_resource type="Script" uid="uid://fwissbryiv1s" path="res://components/spawner_component.gd" id="9_eya3n"]
-[ext_resource type="PackedScene" uid="uid://bok2jkoccksub" path="res://projectiles/curve_projectile.tscn" id="10_fv328"]
+[ext_resource type="PackedScene" path="res://components/caster_hover_component.tscn" id="4_hover"]
+[ext_resource type="PackedScene" path="res://components/radial_barrage_shoot_component.tscn" id="5_barrage"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_7jo6o"]
 size = Vector2(16, 16)
@@ -30,7 +25,10 @@ texture = ExtResource("3_gb8yh")
 texture = ExtResource("3_gb8yh")
 
 [node name="StatsComponent" parent="." index="1" unique_id=1304120856]
-health = 40
+health = 110
+
+[node name="MoveComponent" parent="." index="2"]
+velocity = Vector2(0, 0)
 
 [node name="VisibleOnScreenNotifier2D" parent="." index="3" unique_id=1344806211]
 rect = Rect2(-9, -9, 18, 18)
@@ -42,54 +40,20 @@ shape = SubResource("RectangleShape2D_7jo6o")
 shape = SubResource("RectangleShape2D_psv4m")
 
 [node name="ScoreComponent" parent="." index="12" unique_id=1849553207]
-adjust_amount = 20
+adjust_amount = 25
 
-[node name="StateMachine" type="Node" parent="." index="13" unique_id=1578137984]
-unique_name_in_owner = true
-script = ExtResource("4_5bhcg")
-metadata/_custom_type_script = "uid://5ebfckwk4w3h"
+[node name="CasterHoverComponent" parent="." index="20" node_paths=PackedStringArray("actor", "move_component") instance=ExtResource("4_hover")]
+actor = NodePath("..")
+move_component = NodePath("../MoveComponent")
+hover_y = 56.0
+enter_speed = 48.0
+patrol_speed = 38.0
 
-[node name="MoveDownState" type="Node" parent="StateMachine" index="0" unique_id=1858093268]
-unique_name_in_owner = true
-script = ExtResource("5_g1k3v")
-duration = 2.5
-metadata/_custom_type_script = "uid://chx8h3aikt6eq"
-
-[node name="MoveComponent" type="Node" parent="StateMachine/MoveDownState" index="0" unique_id=1602550067 node_paths=PackedStringArray("actor")]
-script = ExtResource("6_drofs")
-actor = NodePath("../../..")
-velocity = Vector2(0, 23)
-metadata/_custom_type_script = "uid://dbgfouplndi2j"
-
-[node name="MoveSideState" type="Node" parent="StateMachine" index="1" unique_id=448758568]
-unique_name_in_owner = true
-script = ExtResource("5_g1k3v")
-duration = 2.5
-
-[node name="MoveLeftOrRightComponent" type="Node" parent="StateMachine/MoveSideState" index="0" unique_id=1447962759 node_paths=PackedStringArray("state", "actor")]
-script = ExtResource("7_icdnh")
-state = NodePath("..")
-actor = NodePath("../../..")
-velocity = Vector2(23, 0)
-metadata/_custom_type_script = "uid://dbgfouplndi2j"
-
-[node name="BorderBounceComponent" type="Node" parent="StateMachine/MoveSideState" index="1" unique_id=496724204 node_paths=PackedStringArray("actor", "move_component")]
-script = ExtResource("8_7a0ox")
-actor = NodePath("../../..")
-move_component = NodePath("../MoveLeftOrRightComponent")
-metadata/_custom_type_script = "uid://dq8pwqawl2q7u"
-
-[node name="PauseState" type="Node" parent="StateMachine" index="2" unique_id=1120797910]
-unique_name_in_owner = true
-script = ExtResource("5_g1k3v")
-duration = 2.5
-metadata/_custom_type_script = "uid://chx8h3aikt6eq"
-
-[node name="ProjectileSpawnerComponent" type="Node2D" parent="." index="14" unique_id=1943752203]
-unique_name_in_owner = true
-script = ExtResource("9_eya3n")
-scene = ExtResource("10_fv328")
-metadata/_custom_type_script = "uid://fwissbryiv1s"
-
-[node name="EnemyShootComponent" parent="." index="17" node_paths=PackedStringArray("targeting_component")]
-targeting_component = NodePath("../TargetingComponent")
+[node name="RadialBarrageShootComponent" parent="." index="21" instance=ExtResource("5_barrage")]
+pellets_per_ring = 20
+ring_count = 5
+ring_interval = 0.1
+fire_interval = 2.4
+projectile_speed = 95.0
+spin_degrees_per_ring = 7.0
+initial_delay = 1.2

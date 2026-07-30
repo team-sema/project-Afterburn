@@ -76,6 +76,9 @@ func _apply_shoot_action_rate(enemy: Enemy, multiplier: float) -> void:
 	var shoot := enemy.get_node_or_null("EnemyShootComponent") as EnemyShootComponent
 	if shoot != null:
 		shoot.apply_action_rate_multiplier(multiplier)
+	var radial := enemy.get_node_or_null("RadialBarrageShootComponent")
+	if radial != null and radial.has_method("apply_action_rate_multiplier"):
+		radial.call("apply_action_rate_multiplier", multiplier)
 
 
 func _attach_behavior_components(enemy: Enemy, behavior_components: Array[PackedScene]) -> void:

@@ -1,31 +1,17 @@
 class_name PinkEnemy
 extends Enemy
 
-@onready var state_machine: StateMachineComponent = %StateMachine
-
-@onready var move_down_state: TimedStateComponent = %MoveDownState
-@onready var move_side_state: TimedStateComponent = %MoveSideState
-@onready var pause_state: TimedStateComponent = %PauseState
+## Caster: hovers at the top and fires multi-ring circular barrages until death.
 
 
-func _ready() -> void:
-	super()
-
-	move_down_state.state_finished.connect(
-		state_machine.change_state.bind(move_side_state)
-	)
-	move_side_state.state_finished.connect(
-		state_machine.change_state.bind(pause_state)
-	)
-	pause_state.state_finished.connect(
-		state_machine.change_state.bind(move_down_state)
-	)
-
-	state_machine.start(move_down_state)
-	_tune_baseline_fire()
-
-
-func _tune_baseline_fire() -> void:
-	var shoot := get_node_or_null("EnemyShootComponent") as EnemyShootComponent
+func _enter_tree() -> void:
+	# Replace baseline aimed fire + old dive state machine.
+	var shoot := get_node_or_null("EnemyShootComponent")
 	if shoot != null:
-		shoot.configure_baseline(1.6, 110.0)
+		shoot.free()
+	var state_machine := get_node_or_null("StateMachine")
+	if state_machine != null:
+		state_machine.free()
+	var legacy_spawner := get_node_or_null("ProjectileSpawnerComponent")
+	if legacy_spawner != null:
+		legacy_spawner.free()

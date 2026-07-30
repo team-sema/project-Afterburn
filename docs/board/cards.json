@@ -40,6 +40,14 @@
   ],
   "cards": [
     {
+      "id": "caster-top-orb-barrage",
+      "title": "Caster 상단 탄막 · Awl V",
+      "description": "Caster 체공·원형 탄막, Awl 3마리 V 후 독립 돌진.",
+      "column": "review",
+      "file": "cards/caster-top-orb-barrage.md",
+      "tags": ["적", "탄막"]
+    },
+    {
       "id": "striker-zigzag-formation",
       "title": "적 편대·Striker·Awl 자폭",
       "description": "Drone 대각 편대, Striker 하강·패트롤, Awl 조준 돌진.",

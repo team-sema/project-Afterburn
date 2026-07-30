@@ -1,0 +1,15 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://components/radial_barrage_shoot_component.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://projectiles/base_enemy_projectile.tscn" id="2_projectile"]
+
+[node name="RadialBarrageShootComponent" type="Node"]
+script = ExtResource("1_script")
+projectile_scene = ExtResource("2_projectile")
+pellets_per_ring = 20
+ring_count = 5
+ring_interval = 0.1
+fire_interval = 2.4
+projectile_speed = 95.0
+spin_degrees_per_ring = 7.0
+initial_delay = 1.2
