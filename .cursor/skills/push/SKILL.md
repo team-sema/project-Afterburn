@@ -37,7 +37,7 @@ git diff --stat
 
 ### 2. 문서·코드 정합성 (필수 — 스크립트 실행 전)
 
-브랜치명에서 slug 추출: `feature/<slug>` → `docs/design/systems/<slug>.md`, `docs/design/tasks/<slug>-tasks.md`를 읽고 `git diff`와 대조한다. **불일치 시 push 중단**.
+브랜치명에서 slug 추출: `feature/<slug>` → `docs/design/systems/<slug>.md`, `docs/design/tasks/<slug>-tasks.md`, **관련 `docs/spec/*.md`**를 읽고 `git diff`와 대조한다. **불일치 시 push 중단**.
 
 **체크리스트:**
 
@@ -50,6 +50,7 @@ git diff --stat
 | 5 | **수정 금지** 미변경: 오그먼트 오퍼 임계·물리 레이어·스폰 공식 등 (이 feature 스펙에 명시된 범위 외) | 별도 feature로 분리·되돌림 |
 | 6 | 스펙·Task 변경 시 `## 변경 이력` 한 줄 (`docs-and-plans`) | 이력 추가 |
 | 7 | **칸반 티켓** (`kanban-tickets`): slug 카드 `column`=`review`, MD 이력·`cards.json` 갱신 후 **이 커밋에 포함** | 티켓 누락 시 중단 |
+| 8 | **현황 스펙 `docs/spec/` 필수** — 동작·수치·타입·입력·스폰·탄·UI가 바뀌면 관련 카테고리 MD가 **이 커밋/diff에 포함**되고 코드와 모순 없음. 연쇄 문서(`combat` 점수표·`gaps`·`overview` 루프 등)도 같이 맞춤. 순수 리네임·버그픽스·테스트만이면 diff에 스펙 없어도 되나 응답에 **「현황 스펙 해당 없음: …」** 명시 | 스펙 갱신 없이 push 금지 |
 
 **출력:**
 
@@ -57,6 +58,7 @@ git diff --stat
 ### Push 전 정합성
 - slug: <slug>
 - 스펙: docs/design/systems/<slug>.md — (OK / 이슈)
+- 현황 스펙: docs/spec/<관련>.md — (OK · 파일 목록 / 해당 없음: 이유 / 이슈)
 - Task: docs/design/tasks/<slug>-tasks.md — (OK / 없음 / 이슈)
 - AC ↔ 구현: (OK / 이슈 요약)
 - diff 범위: (OK / 이슈)

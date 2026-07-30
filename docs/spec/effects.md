@@ -27,6 +27,10 @@ Nova Drift 풍: **밝은 기하 코어 + 다중 글로우 레이어 + 어두운 
 
 `effects/explosion_effect.tscn` + `neon_explosion.gd` — 색상 지정 가능, `"explode"` 후 free
 
+## 오퍼 재개 버스트
+
+`effects/augment_resume_burst.tscn` — 플레이어 오그먼트 선택 직후 함선 주변 연출. 실제 탄 제거는 `AugmentOfferController`가 `enemy_projectiles` 그룹을 반경 내 `queue_free`.
+
 ## 피드백 컴포넌트
 
 Flash / Scale / Shake — 피격·발사 시 펀치감

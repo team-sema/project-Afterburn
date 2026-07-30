@@ -4,6 +4,7 @@ const GREEN_ENEMY_SCENE: PackedScene = preload("uid://bhw7lkvyjx43v")
 const YELLOW_ENEMY_SCENE: PackedScene = preload("uid://dxo5ywpsobagu")
 const PINK_ENEMY_SCENE: PackedScene = preload("uid://0th6okc5yjpd")
 const KAMIKAZE_ENEMY_SCENE: PackedScene = preload("res://enemies/kamikaze_enemy.tscn")
+const BOMB_ENEMY_SCENE: PackedScene = preload("res://enemies/bomb_enemy.tscn")
 const NORMAL_ENEMY_SCRIPT: Script = preload("res://enemies/normal_enemy.gd")
 const KAMIKAZE_ENEMY_SCRIPT: Script = preload("res://enemies/kamikaze_enemy.gd")
 
@@ -40,6 +41,7 @@ const KAMIKAZE_ENEMY_SCRIPT: Script = preload("res://enemies/kamikaze_enemy.gd")
 @export_range(1.0, 120.0, 1.0) var awl_descend_speed := 42.0
 @export_range(0.2, 10.0, 0.05) var awl_aim_duration := 1.4
 @export_range(40.0, 600.0, 1.0) var awl_charge_speed := 280.0
+@export_range(1.0, 30.0, 0.5) var bomb_spawn_time_offset := 10.0
 
 var margin := 8.0
 
@@ -48,6 +50,7 @@ var margin := 8.0
 @onready var yellow_enemy_spawn_timer: Timer = %YellowEnemySpawnTimer
 @onready var pink_enemy_spawn_timer: Timer = %PinkEnemySpawnTimer
 @onready var kamikaze_enemy_spawn_timer: Timer = %KamikazeEnemySpawnTimer
+@onready var bomb_enemy_spawn_timer: Timer = %BombEnemySpawnTimer
 
 
 func _ready() -> void:
@@ -59,6 +62,9 @@ func _ready() -> void:
 	)
 	pink_enemy_spawn_timer.timeout.connect(handle_spawn.bind(PINK_ENEMY_SCENE, pink_enemy_spawn_timer, 10.0))
 	kamikaze_enemy_spawn_timer.timeout.connect(handle_awl_formation_spawn)
+	bomb_enemy_spawn_timer.timeout.connect(
+		handle_spawn.bind(BOMB_ENEMY_SCENE, bomb_enemy_spawn_timer, bomb_spawn_time_offset)
+	)
 
 	game_stats.score_changed.connect(func(new_score: int):
 		if new_score > 50:

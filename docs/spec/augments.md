@@ -30,7 +30,8 @@
 
 ### AugmentProgressionController
 
-- 플레이어: 경험치 오브 획득 → 요구 경험치 충족 시 PLAYER 오퍼를 큐에 추가
+- 플레이어: 경험치 오브 획득 → 요구량 충족 시 HUD에 `AUGMENT READY [C]` (자동 오퍼 없음)
+- 입력 `open_augment_offer`(**C**): XP ≥ 요구량일 때만 PLAYER 오퍼 오픈 · 성공 시 XP 차감·레벨+1
 - 첫 요구 경험치 `5`, 레벨마다 요구량 `+3`
 - 적: 플레이 시간 `60초`마다 ENEMY 오퍼를 큐에 추가
 - 플레이어/적 이벤트가 겹치면 도달 순서대로 처리
@@ -41,12 +42,14 @@
 - PLAYER와 ENEMY 오퍼는 각각 독립된 단일 선택 단계
 - `choices_per_offer = 3` (풀 크기 ≥ 3 필요)
 - 선택 즉시 해당 registry에 반영한 뒤 UI 종료
+- PLAYER 오퍼 종료 시 함선 기준 `player_resume_clear_radius`(기본 36) 안 `enemy_projectiles` 제거 + resume burst VFX
 
 ### UI
 
 - `AugmentSelectionOverlay` — `open_choices` / `close_with_result`
 - `AugmentBreakpointIntro` — AnimationPlayer `"reveal"`
-- `ProgressionHud` — 플레이어 XP와 다음 적 증강까지의 시간 진행 표시
+- `ProgressionHud` — 플레이어 XP·다음 적 증강 타이머 · 준비 시 `[C]` 힌트
+- `PauseOverlay` (`world_shell`) — ESC 수동 일시정지 (설정 메뉴는 미구현)
 
 ## 레지스트리
 

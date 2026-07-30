@@ -9,7 +9,7 @@
 
 ### 주요 자식
 
-Move / MoveInput / PositionClamp / WeaponMount(Blaster+Laser) / PlayerAugmentApplier / Scale / Stats(**HP 1**) / ExperienceCollector / PlayerHitPoint / Hurt / ExplosionSpawner / Destroyed
+Move / MoveInput / PositionClamp / WeaponMount(Blaster·Laser·Shotgun 등) / PlayerAugmentApplier / Scale / Stats(**HP 1**) / ExperienceCollector / PlayerHitPoint / Hurt / ExplosionSpawner / Destroyed
 
 ## ExperienceCollector
 
@@ -35,6 +35,18 @@ Move / MoveInput / PositionClamp / WeaponMount(Blaster+Laser) / PlayerAugmentApp
 - **슬롯 강화**: 오그먼트 `UPGRADE_*`만. 픽업으로 슬롯 레벨이 오르지 않음
 - 주무기 최종 배율 = 플레이어 공통 × **슬롯** × **무기** / 보조 = 공통 × **슬롯**
 - 궤도 방벽 조각은 피격 시 영구 파괴(재생 없음). 전량 파괴 시 슬롯 소모
+- HUD: `WeaponLoadoutHud` + `HexModuleFrame` · 아이콘은 `assets/svg/weapons/` (`icon_path` on weapon definition)
+
+### 조작 요약 (전투 중)
+
+| 입력 | 동작 |
+|------|------|
+| WASD / 화살 | 이동 |
+| 발사 | 주무기 자동/홀드 (기존 무기 입력) |
+| **Z** | 메인 ↔ 예비 스왑 |
+| **X** | 미보유 주무기 픽업 차단 토글 |
+| **C** | XP 준비 시 플레이어 오그먼트 오픈 |
+| **ESC** | 수동 일시정지 토글 (오퍼 pause와 분리) |
 
 ## PlayerAugmentApplier
 

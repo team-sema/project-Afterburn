@@ -1,0 +1,56 @@
+[gd_scene format=3 uid="uid://cbombenemy0001"]
+
+[ext_resource type="PackedScene" uid="uid://psmpwiapllcb" path="res://enemies/enemy.tscn" id="1_enemy"]
+[ext_resource type="Script" path="res://enemies/bomb_enemy.gd" id="2_script"]
+[ext_resource type="Texture2D" path="res://assets/svg/enemy_bomb.svg" id="3_bomb"]
+[ext_resource type="PackedScene" path="res://components/bomb_proximity_fuse_component.tscn" id="4_fuse"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_hurt"]
+radius = 10.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_hit"]
+radius = 8.0
+
+[node name="BombEnemy" instance=ExtResource("1_enemy")]
+script = ExtResource("2_script")
+
+[node name="WideGlow" parent="Anchor" index="1"]
+texture = ExtResource("3_bomb")
+
+[node name="TightGlow" parent="Anchor" index="2"]
+texture = ExtResource("3_bomb")
+
+[node name="Core" parent="Anchor" index="3"]
+texture = ExtResource("3_bomb")
+
+[node name="StatsComponent" parent="." index="1"]
+health = 140
+
+[node name="MoveComponent" parent="." index="2"]
+velocity = Vector2(0, 16)
+
+[node name="VisibleOnScreenNotifier2D" parent="." index="3"]
+rect = Rect2(-12, -12, 24, 24)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HurtboxComponent" index="0"]
+shape = SubResource("CircleShape2D_hurt")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HitboxComponent" index="0"]
+shape = SubResource("CircleShape2D_hit")
+
+[node name="ScoreComponent" parent="." index="12"]
+adjust_amount = 20
+
+[node name="BombProximityFuseComponent" parent="." index="20" node_paths=PackedStringArray("actor", "move_component", "targeting_component", "stats_component", "visual_anchor", "destroy_effect_spawner") instance=ExtResource("4_fuse")]
+actor = NodePath("..")
+move_component = NodePath("../MoveComponent")
+targeting_component = NodePath("../TargetingComponent")
+stats_component = NodePath("../StatsComponent")
+visual_anchor = NodePath("../Anchor")
+destroy_effect_spawner = NodePath("../SpawnerComponent")
+trigger_radius = 72.0
+arm_duration = 2.0
+flash_count = 3
+base_explosion_radius = 40.0
+blast_size_multiplier = 1.5
+blast_damage = 2

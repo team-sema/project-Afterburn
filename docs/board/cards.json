@@ -40,6 +40,14 @@
   ],
   "cards": [
     {
+      "id": "bomb-proximity-fuse",
+      "title": "폭탄 근접 자폭",
+      "description": "느린 고체력 폭탄. 근접 시 적색 점멸 후 1.5× 자폭.",
+      "column": "review",
+      "file": "cards/bomb-proximity-fuse.md",
+      "tags": ["적"]
+    },
+    {
       "id": "caster-top-orb-barrage",
       "title": "Caster 상단 탄막 · Awl V",
       "description": "Caster 체공·원형 탄막, Awl 3마리 V 후 독립 돌진.",

@@ -21,9 +21,10 @@ git diff --stat
 
 2. If not on `feature/*`, stop and guide to `tools/start-feature.sh`.
 3. If diff does not match slug/request, warn about scope drift.
-4. **Kanban ticket (required before commit):** `kanban-tickets` rule — card → `review`, MD note, bump `updated`, include in commit. Report `티켓: <id> → review`.
-5. Generate commit message (`feat:` / `fix:` / `docs:` / `godot:`).
-6. Run:
+4. **Docs·code gate (required before commit):** system spec + Task vs implementation; **관련 `docs/spec/*.md` must match code** when behavior/numbers/UI change (same commit). Pure rename/bugfix may omit with explicit “현황 스펙 해당 없음” reason. Fail → stop, do not push.
+5. **Kanban ticket (required before commit):** `kanban-tickets` rule — card → `review`, MD note, bump `updated`, include in commit. Report `티켓: <id> → review`.
+6. Generate commit message (`feat:` / `fix:` / `docs:` / `godot:`).
+7. Run:
 
 ```bash
 chmod +x tools/push-feature.sh tools/merge-feature.sh 2>/dev/null || true

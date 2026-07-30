@@ -12,6 +12,7 @@
 | `KamikazeAimChargeComponent` | 하강 → 조준(정지) → 락온 돌진 (MoveComponent velocity) |
 | `CasterHoverComponent` | 상단 hover_y 체공 + 좌우 패트롤 |
 | `RadialBarrageShootComponent` | 원형 다연발 링 탄막 |
+| `BombProximityFuseComponent` | 근접 신관 → 적색 점멸 → 1.5× 자폭(VFX+AOE) |
 
 | `MoveInputComponent` | `ui_*`/WASD → MoveComponent (`MoveStats.speed`) |
 | `MoveStats` | 이동 속도 Resource |
@@ -60,6 +61,6 @@
 | `EnemyModifierFactory` | 스폰 시 적 스탯·행동 컴포넌트 적용 |
 | `EnemyAugmentGrantComponent` | 수동으로 적 오그먼트 grant *(씬 미연결)* |
 | `TargetingComponent` | `"player"` 그룹 타깃 |
-| `EnemyShootComponent` | 적 기본 주기 조준 사격 |
+| `EnemyShootComponent` | 적 기본 조준 사격 · `fire_interval` + **`burst_count`/`burst_interval`** 연발 · 기본 탄 `base_enemy_projectile` |
 | `EnemyFireVolumeBoostComponent` | 위기: 탄수·스프레드 증가 (`augment_behaviors/`) |
 | `CounterShotComponent` | 피격/사망 반격 탄 *(풀에서 제외, 레거시)* |

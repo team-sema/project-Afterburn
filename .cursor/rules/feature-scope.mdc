@@ -11,7 +11,7 @@ alwaysApply: true
 
 - 브랜치 이름 = 작업 범위 (`feature/player-augment-behaviors` → 플레이어 오그먼트 behavior만).
 - **무관한 파일 수정 금지**: 다른 씬·시스템 리팩터, “겸사겸사” 포맷/린트 전체, 타 피쳐 버그 수정.
-- 스펙/`docs/spec` 수정은 **이 피쳐에 필요한 부분만** — 다른 시스템 확정은 별도 브랜치.
+- 스펙/`docs/spec` 수정은 **이 피쳐에 필요한 부분만** — 다른 시스템 확정은 별도 브랜치. 동작이 바뀌면 그 부분의 `docs/spec/` 갱신은 **선택 사항이 아니라 필수** (`/push` 항목 8).
 - 2인: 같은 `.tscn`을 다른 feature에서 동시에 수정하지 않음.
 
 ## Agent (에이전트가 할 일 — 사용자에게 시키지 않음)
@@ -32,10 +32,11 @@ alwaysApply: true
 
 `feature/*` 브랜치에서 사용자가 수정·피드백을 주면(같은 `/feature` 대화 포함), **매번** 아래 순서를 따른다. `/change` 재입력을 요구하지 않는다.
 
-1. **스펙** — `docs/design/systems/<slug>.md` (slug = 브랜치명에서 추론)
-2. **Task/AC** — `docs/design/tasks/<slug>-tasks.md`
-3. **코드**
-4. **미니 Audit** — 스펙 반영 여부·AC 갱신 여부를 응답 말미 3~5줄로 보고
+1. **시스템 스펙** — `docs/design/systems/<slug>.md` (slug = 브랜치명에서 추론)
+2. **현황 스펙** — 관련 `docs/spec/*.md` (동작 변경 시 필수)
+3. **Task/AC** — `docs/design/tasks/<slug>-tasks.md`
+4. **코드**
+5. **미니 Audit** — 시스템·현황 스펙·AC 반영 여부를 응답 말미 3~5줄로 보고
 
 동작·표시·조건이 바뀌면 코드만 고치지 않는다. 순수 버그·오타·리네이밍만 스펙 영향 없을 때 코드만 수정 가능.
 
