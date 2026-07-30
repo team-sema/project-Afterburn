@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="EnemyAugment" format=3]
+[gd_resource type="Resource" script_class="EnemyAugment" format=3 uid="uid://bqh12igupjjb2"]
 
 [ext_resource type="Script" uid="uid://be4x07sn0gawv" path="res://resources/enemy_augments/enemy_augment.gd" id="1_augment"]
 [ext_resource type="Script" uid="uid://bd2vhj2tclcdr" path="res://resources/enemy_augments/enemy_stat_modifier.gd" id="2_modifier"]

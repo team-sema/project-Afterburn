@@ -16,14 +16,14 @@
 [ext_resource type="Script" uid="uid://fwissbryiv1s" path="res://components/spawner_component.gd" id="7_iekxl"]
 [ext_resource type="Script" uid="uid://c1yamqkv7l4ue" path="res://components/scale_component.gd" id="9_le0bn"]
 [ext_resource type="Script" uid="uid://cevdd3xts0btk" path="res://components/stats_component.gd" id="11_lltil"]
-[ext_resource type="PackedScene" path="res://player_ship/player_hit_point.tscn" id="12_hit_point"]
+[ext_resource type="PackedScene" uid="uid://ca7c0uj2pkxwe" path="res://player_ship/player_hit_point.tscn" id="12_hit_point"]
 [ext_resource type="Script" uid="uid://dte0u84j5jjya" path="res://components/hurt_component.gd" id="13_kbeao"]
 [ext_resource type="PackedScene" uid="uid://bwoe7r57jas7q" path="res://effects/explosion_effect.tscn" id="14_a146t"]
 [ext_resource type="Script" uid="uid://c3k4jpus0y6t2" path="res://components/destroyed_component.gd" id="15_gglps"]
 [ext_resource type="Script" uid="uid://pplrd0hkg7ca" path="res://components/player_augment_applier.gd" id="17_player_augment_applier"]
-[ext_resource type="Script" path="res://player_ship/player_weapon_loadout.gd" id="19_loadout"]
+[ext_resource type="Script" uid="uid://cwyxclqy75qn8" path="res://player_ship/player_weapon_loadout.gd" id="19_loadout"]
 [ext_resource type="Resource" path="res://resources/weapons/definitions/main_blaster.tres" id="20_default_main"]
-[ext_resource type="Script" path="res://components/experience_collector_component.gd" id="21_experience_collector"]
+[ext_resource type="Script" uid="uid://dr4bxfbi5xrxk" path="res://components/experience_collector_component.gd" id="21_experience_collector"]
 
 [sub_resource type="Gradient" id="Gradient_engine"]
 offsets = PackedFloat32Array(0, 0.35, 1)
@@ -92,6 +92,7 @@ process_material = SubResource("ParticleProcessMaterial_engine")
 [node name="MoveComponent" type="Node" parent="." unique_id=647428154 node_paths=PackedStringArray("actor")]
 script = ExtResource("2_y3mk2")
 actor = NodePath("..")
+velocity_multiplier = 1.4
 metadata/_custom_type_script = "uid://dbgfouplndi2j"
 
 [node name="MoveInputComponent" type="Node" parent="." unique_id=440981363 node_paths=PackedStringArray("move_component")]
@@ -104,22 +105,22 @@ metadata/_custom_type_script = "uid://4aq784f5i8dm"
 script = ExtResource("5_6u6rn")
 actor = NodePath("..")
 
-[node name="PlayerWeaponLoadout" type="Node2D" parent="."]
+[node name="PlayerWeaponLoadout" type="Node2D" parent="." unique_id=1902364432]
 script = ExtResource("19_loadout")
 default_main_weapon = ExtResource("20_default_main")
 player_path = NodePath("..")
 
-[node name="MainWeaponMount" type="Node2D" parent="PlayerWeaponLoadout"]
+[node name="MainWeaponMount" type="Node2D" parent="PlayerWeaponLoadout" unique_id=635891941]
 
-[node name="AuxiliaryWeaponMounts" type="Node2D" parent="PlayerWeaponLoadout"]
+[node name="AuxiliaryWeaponMounts" type="Node2D" parent="PlayerWeaponLoadout" unique_id=1110237843]
 
-[node name="AuxMount1" type="Node2D" parent="PlayerWeaponLoadout/AuxiliaryWeaponMounts"]
+[node name="AuxMount1" type="Node2D" parent="PlayerWeaponLoadout/AuxiliaryWeaponMounts" unique_id=2139971768]
 position = Vector2(-10, 0)
 
-[node name="AuxMount2" type="Node2D" parent="PlayerWeaponLoadout/AuxiliaryWeaponMounts"]
+[node name="AuxMount2" type="Node2D" parent="PlayerWeaponLoadout/AuxiliaryWeaponMounts" unique_id=1427471876]
 position = Vector2(10, 0)
 
-[node name="AuxMount3" type="Node2D" parent="PlayerWeaponLoadout/AuxiliaryWeaponMounts"]
+[node name="AuxMount3" type="Node2D" parent="PlayerWeaponLoadout/AuxiliaryWeaponMounts" unique_id=1348868154]
 position = Vector2(0, 6)
 
 [node name="PlayerAugmentApplier" type="Node" parent="." unique_id=2001884346 node_paths=PackedStringArray("move_component", "weapon_loadout")]
@@ -130,19 +131,18 @@ weapon_loadout = NodePath("../PlayerWeaponLoadout")
 [node name="ScaleComponent" type="Node" parent="." unique_id=409266105 node_paths=PackedStringArray("sprite")]
 script = ExtResource("9_le0bn")
 sprite = NodePath("../Anchor")
-scale_amount = Vector2(1.25, 1.25)
 scale_duration = 0.3
 
 [node name="StatsComponent" type="Node" parent="." unique_id=337505827]
 script = ExtResource("11_lltil")
 
-[node name="ExperienceCollector" type="Area2D" parent="."]
+[node name="ExperienceCollector" type="Area2D" parent="." unique_id=253560413]
 script = ExtResource("21_experience_collector")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="ExperienceCollector"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ExperienceCollector" unique_id=1152033650]
 shape = SubResource("CircleShape2D_experience_collector")
 
-[node name="PlayerHitPoint" parent="." instance=ExtResource("12_hit_point")]
+[node name="PlayerHitPoint" parent="." unique_id=132587002 instance=ExtResource("12_hit_point")]
 
 [node name="HurtComponent" type="Node" parent="." unique_id=918904643 node_paths=PackedStringArray("stats_component", "hurtbox_component")]
 script = ExtResource("13_kbeao")

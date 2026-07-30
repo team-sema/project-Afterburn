@@ -1,6 +1,8 @@
 class_name AugmentProgressionController
 extends Node
 
+const OPEN_AUGMENT_OFFER_ACTION := &"open_augment_offer"
+
 signal experience_changed(current_experience: int, experience_required: int, level: int)
 signal enemy_augment_progress_changed(elapsed: float, interval: float, next_tier: int)
 
@@ -36,6 +38,8 @@ func _process(delta: float) -> void:
 		enemy_augment_tier += 1
 		pending_offers.append(AugmentOfferController.OfferType.ENEMY)
 	enemy_augment_progress_changed.emit(enemy_augment_elapsed, enemy_augment_interval, enemy_augment_tier + 1)
+	if Input.is_action_just_pressed(OPEN_AUGMENT_OFFER_ACTION):
+		_try_level_up()
 	_try_request_offer()
 
 
@@ -43,13 +47,19 @@ func add_experience(amount: int) -> void:
 	if amount <= 0:
 		return
 	current_experience += amount
-	while current_experience >= experience_required:
-		current_experience -= experience_required
-		level += 1
-		experience_required = base_experience_required + (level - 1) * experience_requirement_growth
-		pending_offers.append(AugmentOfferController.OfferType.PLAYER)
 	experience_changed.emit(current_experience, experience_required, level)
-	_try_request_offer()
+
+
+func _try_level_up() -> void:
+	if current_experience < experience_required:
+		return
+	if not offer_controller.request_offer(AugmentOfferController.OfferType.PLAYER):
+		return
+
+	current_experience -= experience_required
+	level += 1
+	experience_required = base_experience_required + (level - 1) * experience_requirement_growth
+	experience_changed.emit(current_experience, experience_required, level)
 
 
 func _try_request_offer() -> void:

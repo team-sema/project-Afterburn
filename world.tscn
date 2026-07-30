@@ -56,6 +56,7 @@ grow_vertical = 2
 script = ExtResource("7_world_shell")
 
 [node name="Layout" type="HBoxContainer" parent="."]
+process_mode = 1
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -213,6 +214,30 @@ grow_vertical = 2
 mouse_filter = 2
 color = Color(0.1, 0.65, 0.95, 0.85)
 
+[node name="PauseOverlay" type="ColorRect" parent="Layout/Playfield"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.005, 0.01, 0.025, 0.72)
+
+[node name="PauseLabel" type="Label" parent="Layout/Playfield/PauseOverlay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+text = "일시 정지"
+label_settings = ExtResource("4_title_label")
+horizontal_alignment = 1
+vertical_alignment = 1
+
 [node name="RightPanel" type="PanelContainer" parent="Layout"]
 custom_minimum_size = Vector2(200, 0)
 layout_mode = 2
@@ -244,6 +269,13 @@ layout_mode = 2
 theme_override_constants/separation = 8
 script = ExtResource("6_weapon_hud")
 ship = NodePath("../../../../Playfield/ViewportContainer/PlayfieldViewport/Gameplay/Ship")
+
+[node name="MainSwapHint" type="Label" parent="Layout/RightPanel/Margin/VBox/WeaponLoadoutHud"]
+layout_mode = 2
+text = "[Z] MAIN / RESERVE SWAP"
+label_settings = ExtResource("3_default_label")
+theme_override_colors/font_color = Color(0.45, 0.78, 1, 0.9)
+horizontal_alignment = 1
 
 [node name="MainRow" type="HBoxContainer" parent="Layout/RightPanel/Margin/VBox/WeaponLoadoutHud"]
 layout_mode = 2

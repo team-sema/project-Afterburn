@@ -1,6 +1,8 @@
 class_name AugmentOfferController
 extends Node
 
+const AUGMENT_RESUME_BURST_SCENE := preload("res://effects/augment_resume_burst.tscn")
+
 signal offer_started(offer_type: OfferType)
 signal offer_completed(offer_type: OfferType)
 
@@ -17,6 +19,7 @@ enum OfferType {
 @export var player_augment_pool: Array[PlayerAugment] = []
 @export var enemy_augment_pool: Array[EnemyAugment] = []
 @export_range(1, 3, 1) var choices_per_offer := 3
+@export_range(8.0, 120.0, 1.0) var player_resume_clear_radius := 36.0
 
 var is_offer_active := false
 var active_offer_type := OfferType.PLAYER
@@ -151,8 +154,35 @@ func _finish_offer(augment: Resource) -> void:
 	await selection_ui.close_with_result(result_title, augment, accent_color)
 	var completed_offer_type := active_offer_type
 	is_offer_active = false
+	if completed_offer_type == OfferType.PLAYER:
+		_trigger_player_resume_burst()
 	get_tree().paused = false
 	offer_completed.emit(completed_offer_type)
+
+
+func _trigger_player_resume_burst() -> int:
+	if not is_instance_valid(ship):
+		return 0
+	var gameplay_world := get_tree().get_first_node_in_group("gameplay_world") as Node2D
+	if gameplay_world == null:
+		return 0
+
+	var burst := AUGMENT_RESUME_BURST_SCENE.instantiate() as Node2D
+	burst.call("setup", player_resume_clear_radius, selection_ui.player_accent_color)
+	gameplay_world.add_child(burst)
+	burst.global_position = ship.global_position
+
+	var clear_radius_squared := player_resume_clear_radius * player_resume_clear_radius
+	var cleared_count := 0
+	for projectile in get_tree().get_nodes_in_group("enemy_projectiles"):
+		if not projectile is Node2D or not is_instance_valid(projectile):
+			continue
+		var projectile_node := projectile as Node2D
+		if ship.global_position.distance_squared_to(projectile_node.global_position) > clear_radius_squared:
+			continue
+		projectile_node.queue_free()
+		cleared_count += 1
+	return cleared_count
 
 
 func _exit_tree() -> void:

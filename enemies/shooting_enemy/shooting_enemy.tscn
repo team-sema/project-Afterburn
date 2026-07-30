@@ -44,6 +44,9 @@ shape = SubResource("RectangleShape2D_psv4m")
 [node name="ScoreComponent" parent="." index="12" unique_id=1849553207]
 adjust_amount = 20
 
+[node name="EnemyShootComponent" parent="."]
+projectile_scene = ExtResource("10_fv328")
+
 [node name="StateMachine" type="Node" parent="." index="13" unique_id=1578137984]
 unique_name_in_owner = true
 script = ExtResource("4_5bhcg")

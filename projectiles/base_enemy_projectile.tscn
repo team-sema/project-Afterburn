@@ -1,0 +1,102 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://projectiles/base_enemy_projectile.gd" id="1_script"]
+[ext_resource type="Material" path="res://effects/wide_glow_material.tres" id="2_wide_glow"]
+[ext_resource type="Texture2D" uid="uid://c15miu6sde4so" path="res://assets/svg/player_blaster.svg" id="3_projectile"]
+[ext_resource type="Material" path="res://effects/tight_glow_material.tres" id="4_tight_glow"]
+[ext_resource type="Material" path="res://effects/core_unshaded_material.tres" id="5_core"]
+[ext_resource type="Material" path="res://effects/additive_unshaded_material.tres" id="6_additive"]
+[ext_resource type="Texture2D" uid="uid://bp1d64ncpt4rh" path="res://assets/svg/particle_diamond.svg" id="7_particle"]
+[ext_resource type="Script" uid="uid://dbgfouplndi2j" path="res://components/move_component.gd" id="8_move"]
+[ext_resource type="Script" uid="uid://dx86ewq6s2alh" path="res://components/free_offscreen_component.gd" id="9_free_offscreen"]
+[ext_resource type="Script" uid="uid://c1yamqkv7l4ue" path="res://components/scale_component.gd" id="10_scale"]
+[ext_resource type="Script" uid="uid://qfpbc4d4ijso" path="res://components/flash_component.gd" id="11_flash"]
+[ext_resource type="Script" uid="uid://cvmjafhyfx5xo" path="res://components/hitbox_component.gd" id="12_hitbox"]
+
+[sub_resource type="Gradient" id="Gradient_trail"]
+colors = PackedColorArray(1, 0.18, 0.58, 0.65, 0.65, 0.04, 0.3, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture_trail"]
+gradient = SubResource("Gradient_trail")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_trail"]
+particle_flag_disable_z = true
+direction = Vector3(0, 1, 0)
+spread = 6.0
+initial_velocity_min = 8.0
+initial_velocity_max = 14.0
+gravity = Vector3(0, 0, 0)
+scale_min = 0.08
+scale_max = 0.16
+color_ramp = SubResource("GradientTexture_trail")
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_projectile"]
+size = Vector2(4, 8)
+
+[node name="BaseEnemyProjectile" type="Node2D" groups=["enemy_projectiles"]]
+rotation = 3.14159
+script = ExtResource("1_script")
+
+[node name="Sprite2D" type="Node2D" parent="."]
+
+[node name="WideGlow" type="Sprite2D" parent="Sprite2D"]
+self_modulate = Color(1, 0.18, 0.58, 0.12)
+show_behind_parent = true
+texture_filter = 2
+material = ExtResource("2_wide_glow")
+scale = Vector2(0.22, 0.22)
+texture = ExtResource("3_projectile")
+
+[node name="TightGlow" type="Sprite2D" parent="Sprite2D"]
+self_modulate = Color(1, 0.22, 0.62, 0.38)
+show_behind_parent = true
+texture_filter = 2
+material = ExtResource("4_tight_glow")
+scale = Vector2(0.14, 0.14)
+texture = ExtResource("3_projectile")
+
+[node name="Core" type="Sprite2D" parent="Sprite2D"]
+self_modulate = Color(1, 0.94, 0.98, 1)
+texture_filter = 2
+material = ExtResource("5_core")
+scale = Vector2(0.125, 0.125)
+texture = ExtResource("3_projectile")
+
+[node name="Trail" type="GPUParticles2D" parent="Sprite2D"]
+material = ExtResource("6_additive")
+position = Vector2(0, 4)
+amount = 18
+texture = ExtResource("7_particle")
+lifetime = 0.22
+visibility_rect = Rect2(-8, -8, 16, 28)
+process_material = SubResource("ParticleProcessMaterial_trail")
+
+[node name="MoveComponent" type="Node" parent="." node_paths=PackedStringArray("actor")]
+script = ExtResource("8_move")
+actor = NodePath("..")
+velocity = Vector2(0, 100)
+
+[node name="FreeOffscreenComponent" type="VisibleOnScreenNotifier2D" parent="." node_paths=PackedStringArray("actor")]
+rect = Rect2(-4, -7, 8, 14)
+script = ExtResource("9_free_offscreen")
+actor = NodePath("..")
+
+[node name="ScaleComponent" type="Node" parent="." node_paths=PackedStringArray("sprite")]
+script = ExtResource("10_scale")
+sprite = NodePath("../Sprite2D")
+scale_amount = Vector2(1, 1.75)
+scale_duration = 1.0
+
+[node name="FlashComponent" type="Node" parent="." node_paths=PackedStringArray("sprite")]
+script = ExtResource("11_flash")
+sprite = NodePath("../Sprite2D/Core")
+flash_duration = 0.1
+
+[node name="HitboxComponent" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 1
+script = ExtResource("12_hitbox")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HitboxComponent"]
+position = Vector2(0, 1)
+shape = SubResource("RectangleShape2D_projectile")

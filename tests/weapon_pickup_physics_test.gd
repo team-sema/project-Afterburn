@@ -13,6 +13,10 @@ func _run() -> void:
 	root.add_child(world)
 	var gameplay: Node = world.get_node("Layout/Playfield/ViewportContainer/PlayfieldViewport/Gameplay")
 	var ship: Node2D = gameplay.get_node("Ship") as Node2D
+	var weapon_hud: Node = world.get_node("Layout/RightPanel/Margin/VBox/WeaponLoadoutHud")
+	var swap_hint: Label = weapon_hud.get_node("MainSwapHint") as Label
+	_expect(swap_hint.text.contains("[Z]"), "main weapon HUD shows the Z swap hint")
+	_expect(swap_hint.get_index() < weapon_hud.get_node("MainRow").get_index(), "swap hint is above main slots")
 	var loadout: Node = ship.call("get_weapon_loadout")
 	var empty_slot: WeaponSlotState = loadout.call("get_auxiliary_slot", 0) as WeaponSlotState
 	_expect(not empty_slot.can_upgrade(), "empty auxiliary slots cannot be upgraded")

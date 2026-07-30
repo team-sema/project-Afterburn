@@ -1,0 +1,21 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://effects/augment_resume_burst.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://djvqurciuxfie" path="res://assets/svg/radial_glow.svg" id="2_glow"]
+[ext_resource type="Texture2D" uid="uid://dgx4kyuwjq5rw" path="res://assets/svg/ring.svg" id="3_ring"]
+[ext_resource type="Material" path="res://effects/diffuse_glow_material.tres" id="4_diffuse"]
+[ext_resource type="Material" path="res://effects/additive_unshaded_material.tres" id="5_additive"]
+
+[node name="AugmentResumeBurst" type="Node2D"]
+z_index = 20
+script = ExtResource("1_script")
+
+[node name="Glow" type="Sprite2D" parent="."]
+texture_filter = 2
+material = ExtResource("4_diffuse")
+texture = ExtResource("2_glow")
+
+[node name="Ring" type="Sprite2D" parent="."]
+texture_filter = 2
+material = ExtResource("5_additive")
+texture = ExtResource("3_ring")
