@@ -80,6 +80,14 @@
       "tags": ["적", "테스트"]
     },
     {
+      "id": "submission-guide-module-slots",
+      "title": "제출 가이드 문서 모듈 슬롯 반영",
+      "description": "제출용 게임 설명서의 플레이 방법을 함선 모듈 슬롯·선체·실드 규칙에 맞춰 갱신한다.",
+      "column": "review",
+      "file": "cards/submission-guide-module-slots.md",
+      "tags": ["문서", "제출"]
+    },
+    {
       "id": "fix-formation-viewport-before-tree",
       "title": "Drone 편대 viewport 트리 가드",
       "description": "setup_formation이 add_child 전에 viewport를 읽어내던 에러 수정.",
