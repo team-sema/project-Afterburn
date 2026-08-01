@@ -8,5 +8,5 @@
 ## 구현
 
 - `CasterHoverComponent`, `RadialBarrageShootComponent`
-- Awl `setup_formation` + `handle_awl_formation_spawn`
+- Awl `setup_formation` + `AwlFormationSpawnPattern`
 - 2026-07-31 `feature/caster-top-orb-barrage` → main (검증 대기)

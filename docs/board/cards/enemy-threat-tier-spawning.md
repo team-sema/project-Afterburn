@@ -17,4 +17,5 @@
 
 - `EnemySpawnSet` 리소스와 Threat 기반 균등 후보 선택을 추가했다.
 - Tier 1: Drone/Striker, Tier 2: Awl/Bomb, Tier 3: Caster로 구성했다.
+- 편대별 생성·튜닝을 `EnemySpawnPattern` Resource로 분리해 Generator의 Formation별 분기를 제거했다.
 - 2026-08-01 `feature/enemy-threat-tier-spawning` → main (검증 대기)

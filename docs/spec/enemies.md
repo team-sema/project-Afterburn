@@ -20,7 +20,8 @@
 
 ## EnemyGenerator
 
-- `EnemySpawnSet` 리소스가 적 씬, 최소 Threat, 단일/편대 패턴과 편대 오프셋을 정의한다.
+- `EnemySpawnSet` 리소스가 적 씬, 최소 Threat, `EnemySpawnPattern` 리소스를 정의한다.
+- 패턴 리소스가 편대 오프셋과 이동 파라미터 및 생성 동작을 소유한다. 새 Formation은 Generator 분기 없이 새 패턴 Resource로 추가한다.
 - 생성기는 현재 Threat 이하의 스폰 세트만 후보로 선별하고 그중 하나를 균등하게 선택한다.
 - **Green:** Drone 편대 — 오프셋 배열 길이만큼 동시 스폰(기본 5)
 - **Awl:** 3마리 V 편대
@@ -35,7 +36,7 @@
 
 ## Awl 자폭 (Kamikaze)
 
-- 스폰: 3마리 V (`handle_awl_formation_spawn`) — 하강·조준 구간만 V 유지
+- 스폰: `AwlFormationSpawnPattern`이 3마리 V를 구성하며 하강·조준 구간만 편대를 유지
 - **차지 시작 순간** V 슬롯에 스냅한 뒤, 각자 기존처럼 자기 위치→플레이어 락온 방향으로 독립 돌진
 - 투사체 없음
 
@@ -50,7 +51,7 @@
 
 ## Drone 대각 편대
 
-`FormationDiagonalMoveComponent`: 공유 클록 대각 + X ping-pong. `handle_drone_formation_spawn`은 `add_child` 이후 `setup_formation` 호출(viewport 안전).
+`FormationDiagonalMoveComponent`: 공유 클록 대각 + X ping-pong. `DroneFormationSpawnPattern`이 편대 구성과 이동 설정을 주입한다.
 
 ## EnemyModifierFactory
 

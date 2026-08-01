@@ -19,6 +19,14 @@ func _run() -> void:
 
 	_expect(progression.get_threat_level() == 1, "run starts at Threat 1")
 	_expect(generator.current_threat_level == 1, "generator reads the initial Threat level")
+	_expect(
+		not _has_property(generator, &"drone_forward_speed"),
+		"generator has no Drone-specific tuning fields",
+	)
+	_expect(
+		not _has_property(generator, &"awl_descend_duration"),
+		"generator has no Awl-specific tuning fields",
+	)
 	_expect_ids(generator.get_eligible_spawn_sets(1), [&"drone_formation", &"striker"])
 
 	for _index in 20:
@@ -35,6 +43,7 @@ func _run() -> void:
 		&"caster": 1,
 	}
 	for spawn_set in generator.spawn_sets:
+		_expect(spawn_set.spawn_pattern != null, "%s has a spawn pattern" % spawn_set.spawn_id)
 		var before_count := get_nodes_in_group("enemies").size()
 		generator._spawn(spawn_set)
 		var spawned_count := get_nodes_in_group("enemies").size() - before_count
@@ -78,6 +87,13 @@ func _expect_ids(spawn_sets: Array[EnemySpawnSet], expected: Array[StringName]) 
 	actual.sort()
 	expected.sort()
 	_expect(actual == expected, "eligible spawn sets are %s, expected %s" % [actual, expected])
+
+
+func _has_property(object: Object, property_name: StringName) -> bool:
+	for property in object.get_property_list():
+		if StringName(property["name"]) == property_name:
+			return true
+	return false
 
 
 func _expect(condition: bool, message: String) -> void:

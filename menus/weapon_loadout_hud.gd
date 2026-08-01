@@ -49,19 +49,20 @@ func refresh() -> void:
 		var module := _aux_modules[index]
 		var slot := loadout.get_auxiliary_slot(index)
 		if slot == null or not slot.unlocked:
-			_set_module(module, "보조%d" % (index + 1), "잠김", true)
+			_set_module(module, "A%d" % (index + 1), "잠김", true)
 			continue
-		var slot_title := "A%d L%d" % [index + 1, slot.level]
 		if slot.is_empty():
-			_set_module(module, slot_title, "—", true)
+			_set_module(module, "A%d" % (index + 1), "—", true)
 			continue
+		var weapon_level := loadout.get_weapon_level(slot.equipped_weapon_id)
+		var slot_title := "A%d L%d" % [index + 1, weapon_level]
 		var charges_text := _format_charges(slot.equipped_weapon_instance)
 		_set_module(module, slot_title, _slot_body(slot, charges_text), false, _slot_icon(slot))
 
+
 func _refresh_main_slot_module(loadout: PlayerWeaponLoadout) -> void:
 	var main_slot: WeaponSlotState = loadout.get_main_slot()
-	var slot_lv: int = 1 if main_slot == null else main_slot.level
-	var title := "메인 Lv.%d" % slot_lv
+	var title := "메인"
 	if main_slot == null or main_slot.is_empty():
 		_set_module(main_module, title, "—", true)
 		return

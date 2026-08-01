@@ -31,7 +31,7 @@ func open_for_replace(loadout: PlayerWeaponLoadout, title: String, prompt: Strin
 	_open(loadout, title, prompt, true)
 
 
-func open_for_upgrade(loadout: PlayerWeaponLoadout, title: String, prompt: String) -> void:
+func open_for_weapon_upgrade(loadout: PlayerWeaponLoadout, title: String, prompt: String) -> void:
 	_valid_indices = loadout.get_upgradable_auxiliary_indices()
 	_open(loadout, title, prompt, false)
 
@@ -49,8 +49,12 @@ func _open(loadout: PlayerWeaponLoadout, title: String, prompt: String, allow_ca
 			weapon_name = slot.equipped_weapon_display_name
 			if weapon_name.is_empty():
 				weapon_name = String(slot.equipped_weapon_id)
-		var lock_text := "잠김" if slot == null or not slot.unlocked else "Lv.%d" % slot.level
-		button.text = "보조 %d [%s]\n%s" % [index + 1, lock_text, weapon_name]
+		var status_text := "잠김"
+		if slot != null and slot.unlocked:
+			status_text = "비어 있음" if slot.is_empty() else "Lv.%d" % loadout.get_weapon_level(
+				slot.equipped_weapon_id
+			)
+		button.text = "보조 %d [%s]\n%s" % [index + 1, status_text, weapon_name]
 		button.disabled = not _valid_indices.has(index)
 		button.visible = true
 	cancel_button.visible = allow_cancel

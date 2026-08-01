@@ -40,6 +40,14 @@
   ],
   "cards": [
     {
+      "id": "weapon-level-unification",
+      "title": "무기 레벨 단일화",
+      "description": "슬롯 레벨을 제거하고 주·보조무기 모두 무기별 레벨 하나로 강화한다.",
+      "column": "review",
+      "file": "cards/weapon-level-unification.md",
+      "tags": ["무기", "강화", "HUD"]
+    },
+    {
       "id": "enemy-threat-tier-spawning",
       "title": "Threat Tier 기반 적 스폰",
       "description": "적 스폰 단위에 최소 Tier를 부여하고 현재 Threat에 맞는 후보만 선별한다.",
