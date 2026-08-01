@@ -31,7 +31,9 @@ func _run() -> void:
 	var gameplay: Node = world.get_node("Layout/Playfield/ViewportContainer/PlayfieldViewport/Gameplay")
 	var ship: Node2D = gameplay.get_node("Ship") as Node2D
 	var loadout: Node = ship.call("get_weapon_loadout")
-	var weapon_hud: Node = world.get_node("Layout/RightPanel/Margin/VBox/WeaponLoadoutHud")
+	var weapon_hud: Node = world.get_node(
+		"Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud"
+	)
 	for _index in 4:
 		await process_frame
 

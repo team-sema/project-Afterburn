@@ -8,4 +8,6 @@ enum Kind {
 	UNLOCK_AUXILIARY_SLOT,
 	UPGRADE_MAIN_SLOT,
 	UPGRADE_AUXILIARY_SLOT,
+	## 함선 시설 레벨 +1. 대상 시설은 PlayerAugment.facility_id로 지정한다.
+	UPGRADE_FACILITY,
 }

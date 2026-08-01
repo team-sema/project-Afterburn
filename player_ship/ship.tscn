@@ -21,9 +21,11 @@
 [ext_resource type="PackedScene" uid="uid://bwoe7r57jas7q" path="res://effects/explosion_effect.tscn" id="14_a146t"]
 [ext_resource type="Script" uid="uid://c3k4jpus0y6t2" path="res://components/destroyed_component.gd" id="15_gglps"]
 [ext_resource type="Script" uid="uid://pplrd0hkg7ca" path="res://components/player_augment_applier.gd" id="17_player_augment_applier"]
+[ext_resource type="Script" path="res://components/ship_facility_applier.gd" id="18_ship_facility_applier"]
 [ext_resource type="Script" uid="uid://cwyxclqy75qn8" path="res://player_ship/player_weapon_loadout.gd" id="19_loadout"]
 [ext_resource type="Resource" path="res://resources/weapons/definitions/main_blaster.tres" id="20_default_main"]
 [ext_resource type="Script" uid="uid://dr4bxfbi5xrxk" path="res://components/experience_collector_component.gd" id="21_experience_collector"]
+[ext_resource type="Script" path="res://components/shield_component.gd" id="22_shield"]
 
 [sub_resource type="Gradient" id="Gradient_engine"]
 offsets = PackedFloat32Array(0, 0.35, 1)
@@ -128,6 +130,14 @@ script = ExtResource("17_player_augment_applier")
 move_component = NodePath("../MoveComponent")
 weapon_loadout = NodePath("../PlayerWeaponLoadout")
 
+[node name="ShipFacilityApplier" type="Node" parent="." node_paths=PackedStringArray("augment_applier", "weapon_loadout", "stats_component", "shield_component", "experience_collector")]
+script = ExtResource("18_ship_facility_applier")
+augment_applier = NodePath("../PlayerAugmentApplier")
+weapon_loadout = NodePath("../PlayerWeaponLoadout")
+stats_component = NodePath("../StatsComponent")
+shield_component = NodePath("../ShieldComponent")
+experience_collector = NodePath("../ExperienceCollector")
+
 [node name="ScaleComponent" type="Node" parent="." unique_id=409266105 node_paths=PackedStringArray("sprite")]
 script = ExtResource("9_le0bn")
 sprite = NodePath("../Anchor")
@@ -135,6 +145,9 @@ scale_duration = 0.3
 
 [node name="StatsComponent" type="Node" parent="." unique_id=337505827]
 script = ExtResource("11_lltil")
+
+[node name="ShieldComponent" type="Node" parent="."]
+script = ExtResource("22_shield")
 
 [node name="ExperienceCollector" type="Area2D" parent="." unique_id=253560413]
 script = ExtResource("21_experience_collector")
@@ -144,10 +157,11 @@ shape = SubResource("CircleShape2D_experience_collector")
 
 [node name="PlayerHitPoint" parent="." unique_id=132587002 instance=ExtResource("12_hit_point")]
 
-[node name="HurtComponent" type="Node" parent="." unique_id=918904643 node_paths=PackedStringArray("stats_component", "hurtbox_component")]
+[node name="HurtComponent" type="Node" parent="." unique_id=918904643 node_paths=PackedStringArray("stats_component", "hurtbox_component", "shield_component")]
 script = ExtResource("13_kbeao")
 stats_component = NodePath("../StatsComponent")
 hurtbox_component = NodePath("../PlayerHitPoint/HurtboxComponent")
+shield_component = NodePath("../ShieldComponent")
 
 [node name="ExplosionSpawnerComponent" type="Node2D" parent="." unique_id=925069816]
 script = ExtResource("7_iekxl")

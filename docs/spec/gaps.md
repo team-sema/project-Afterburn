@@ -11,16 +11,20 @@
 5. **`WeaponSystem` local multiplier / `_apply_stat_multipliers`** — stub
 6. **`clear_augments()`** — 미호출 (씬 리로드에 의존)
 7. **무기 슬롯** — 메인/예비·샷건·픽업은 있음. 해금 트리·확인 UI 등은 카드 백로그
-8. **오그먼트 풀** — `world.tscn` 하드코드, 추가 시 씬 편집 필요
+8. **오그먼트 풀** — `gameplay.tscn` 하드코드, 추가 시 씬 편집 필요. 가중치 없이 균등 셔플이라 후보가 11장으로 늘며 카드별 등장 확률이 낮아짐
+9. **시설 밸런스 수치** — `level_values`는 전부 플레이스홀더. 기본 최대 선체가 1이라 선체·실드 가산도 1 단위로 잡혀 있음
+10. **궤도 방벽 + 격납고** — 탄약 카운터가 없어(`get_consumable_max()` = -1) 격납고 보너스를 받지 않음. 환산 규칙 미정
+11. **실드 리필 수단** — `ShieldComponent.restore_shield()`를 부르는 곳이 없음. 충전 조건 미정
+12. **우측 패널 세로 여유** — 내용 337 / 가용 340. 항목 추가 전 `ship_facility_upgrade_test`의 fit 검사부터 확인
 
 ## 구조 이슈
 
-9. Enemy `no_health` → `queue_free`와 `DestroyedComponent` **이중 free/이펙트**
-10. 카미카제 Hitbox free가 점수/폭발 순서를 건너뛸 수 있음
-11. 파일명 typo: `timed_state_componoent.gd`
-12. `OnetimeAnimatedEffect` vs `neon_explosion` 이원화
-13. `ResourceStash`가 GameStats 홀더 수준으로 얇음
-14. highscore만 런 간 유지, 오그먼트 레지스트리는 비영속
+11. Enemy `no_health` → `queue_free`와 `DestroyedComponent` **이중 free/이펙트**
+12. 카미카제 Hitbox free가 점수/폭발 순서를 건너뛸 수 있음
+13. 파일명 typo: `timed_state_componoent.gd`
+14. `OnetimeAnimatedEffect` vs `neon_explosion` 이원화
+15. `ResourceStash`가 GameStats 홀더 수준으로 얇음
+16. highscore만 런 간 유지, 오그먼트 레지스트리는 비영속
 
 ## 콘텐츠 확장 아이디어
 

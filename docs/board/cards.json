@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-31",
+  "updated": "2026-08-01",
   "source": "docs/board/cards/*.md",
   "columns": [
     {
@@ -46,6 +46,14 @@
       "column": "doing",
       "file": "cards/fix-formation-viewport-before-tree.md",
       "tags": ["적", "버그"]
+    },
+    {
+      "id": "ship-facility-upgrades",
+      "title": "함선 시설 강화 · 오른쪽 함선 UI",
+      "description": "무기실·격납고·엔진·선체·레이더·실드 6시설로 공통 스탯 강화. 오그먼트 선택으로만 레벨업, 우측 STATUS는 읽기 전용 표시 + 좌측 선체·실드 HUD.",
+      "column": "review",
+      "file": "cards/ship-facility-upgrades.md",
+      "tags": ["플레이어", "UI"]
     },
     {
       "id": "bomb-proximity-fuse",

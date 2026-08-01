@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="PlayerAugment" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://resources/player_augments/player_augment.gd" id="1_aug"]
+[ext_resource type="Texture2D" uid="uid://bouve7lok0f7b" path="res://assets/svg/facilities/facility_hangar.svg" id="2_icon"]
+
+[resource]
+script = ExtResource("1_aug")
+augment_id = &"facility_hangar"
+display_name = "격납고 확장"
+description = "격납고 레벨 +1. 보조무기 최대 탄약 증가."
+augment_type = 6
+icon = ExtResource("2_icon")
+facility_id = &"hangar"

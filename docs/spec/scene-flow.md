@@ -21,9 +21,15 @@ Menu (ui_accept)
 ### 런타임 트리 (요약)
 
 - `WorldEnvironment` — 네온 글로우
-- `EnemyAugmentRegistry` / `PlayerAugmentRegistry`
+- `EnemyAugmentRegistry` / `PlayerAugmentRegistry` / `ShipFacilityRegistry`
 - `AugmentSelectionOverlay` / `AugmentOfferController` / `AugmentProgressionController`
 - `Ship` / `SpaceBackground` / `EnemyGenerator` / `ScoreLabel`
+
+우측 패널(`world.tscn`): `STATUS` → `ShipPanel`(함선 그림 + 시설 칩 6종 + 상세 박스) → `WeaponBox/Margin/WeaponLoadoutHud`
+
+좌측 패널(`world.tscn`): 타이틀 → `SCORE` → `ProgressionHud`(XP·위협 바) → `ShipStatusHud`(선체·실드 바) → `PLAYFIELD`
+
+좌·플레이필드·우 세 패널에 `NeonCornerFrame` 모서리 브래킷 (장식 전용).
 
 ### 라이프사이클
 
