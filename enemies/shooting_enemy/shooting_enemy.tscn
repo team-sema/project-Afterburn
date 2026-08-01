@@ -45,3 +45,4 @@ move_component = NodePath("../MoveComponent")
 
 [node name="RadialBarrageShootComponent" parent="." index="20" unique_id=1609255132 instance=ExtResource("5_barrage")]
 pellets_per_ring = 16
+fire_interval = 4.8
