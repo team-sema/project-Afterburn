@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-01",
+  "updated": "2026-08-02",
   "source": "docs/board/cards/*.md",
   "columns": [
     {
@@ -62,6 +62,38 @@
       "column": "review",
       "file": "cards/enemy-threat-tier-spawning.md",
       "tags": ["적", "스폰", "Threat"]
+    },
+    {
+      "id": "early-enemy-fire-tuning",
+      "title": "초반 적 사격 완화",
+      "description": "Threat 1 Drone·Striker의 사격 주기를 늘리고 탄속을 낮춰 초반 난이도를 완화한다.",
+      "column": "review",
+      "file": "cards/early-enemy-fire-tuning.md",
+      "tags": ["적", "밸런스"]
+    },
+    {
+      "id": "fix-base-enemy-projectile-test",
+      "title": "적 기본 탄 스모크 테스트 최신화",
+      "description": "캐스터 개편 이전 설계를 검사해 상시 실패하던 스모크 테스트를 현재 구조에 맞춘다.",
+      "column": "review",
+      "file": "cards/fix-base-enemy-projectile-test.md",
+      "tags": ["적", "테스트"]
+    },
+    {
+      "id": "submission-guide-module-slots",
+      "title": "제출 가이드 문서 모듈 슬롯 반영",
+      "description": "제출용 게임 설명서의 플레이 방법을 함선 모듈 슬롯·선체·실드 규칙에 맞춰 갱신한다.",
+      "column": "review",
+      "file": "cards/submission-guide-module-slots.md",
+      "tags": ["문서", "제출"]
+    },
+    {
+      "id": "fix-bomb-enemy-scene-uid",
+      "title": "Bomb 씬 uid 정정",
+      "description": "손으로 적은 씬 uid를 Godot 생성 uid로 확정해 에디터를 열 때마다 생기던 변경을 없앤다.",
+      "column": "review",
+      "file": "cards/fix-bomb-enemy-scene-uid.md",
+      "tags": ["적", "정리"]
     },
     {
       "id": "fix-formation-viewport-before-tree",

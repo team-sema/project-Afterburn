@@ -14,5 +14,6 @@
 | [kanban-agent-prompt-copy](kanban-agent-prompt-copy.md) | 보드→에이전트 프롬프트 복사 | review |
 | [ship-facility-upgrades](ship-facility-upgrades.md) | 함선 시설 강화 · 오른쪽 함선 UI | doing |
 | [augment-module-slots](augment-module-slots.md) | 증강 모듈 슬롯 | review |
+| [early-enemy-fire-tuning](early-enemy-fire-tuning.md) | 초반 적 사격 완화 | review |
 
 현황 스펙(카테고리): [`docs/spec/`](../../spec/)

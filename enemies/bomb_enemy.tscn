@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://cbombenemy0001"]
+[gd_scene format=3 uid="uid://dyoidordek441"]
 
 [ext_resource type="PackedScene" uid="uid://psmpwiapllcb" path="res://enemies/enemy.tscn" id="1_enemy"]
 [ext_resource type="Script" path="res://enemies/bomb_enemy.gd" id="2_script"]
