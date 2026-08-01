@@ -103,6 +103,13 @@ func _layout_children() -> void:
 			icon_bottom = content_bottom - band_height
 	var icon_rect := _get_icon_rect()
 	if icon_rect != null:
+		if (
+			icon_rect.visible
+			and title_label != null
+			and not title_label.text.is_empty()
+			and (body_label == null or body_label.text.is_empty())
+		):
+			icon_bottom = content_bottom - band_height
 		_place_icon(icon_rect, icon_top, icon_bottom)
 	queue_redraw()
 

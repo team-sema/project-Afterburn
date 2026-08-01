@@ -4,7 +4,7 @@
 
 [resource]
 script = ExtResource("1_aug")
-augment_id = &"upgrade_main_slot"
-display_name = "주무기 오버클럭"
-description = "주무기 슬롯 레벨을 1 올립니다. (최대 3)"
-augment_type = 4
+augment_id = &"upgrade_auxiliary_weapon"
+display_name = "보조무기 강화"
+description = "장착된 보조무기를 골라 무기 레벨을 1 올립니다. (최대 3)"
+augment_type = 5

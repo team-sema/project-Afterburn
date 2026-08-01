@@ -20,8 +20,10 @@ func _run() -> void:
 	_expect(swap_hint.text.contains("[Z]"), "main weapon HUD shows the Z swap hint")
 	_expect(swap_hint.get_index() < weapon_hud.get_node("MainRow").get_index(), "swap hint is above main slots")
 	var loadout: Node = ship.call("get_weapon_loadout")
-	var empty_slot: WeaponSlotState = loadout.call("get_auxiliary_slot", 0) as WeaponSlotState
-	_expect(not empty_slot.can_upgrade(), "empty auxiliary slots cannot be upgraded")
+	_expect(
+		not loadout.call("can_upgrade_auxiliary_weapon", 0),
+		"empty auxiliary slots have no weapon to upgrade",
+	)
 
 	var pickup_scene: PackedScene = load("res://pickups/weapon_pickup.tscn")
 	var pickup: Area2D = pickup_scene.instantiate() as Area2D
@@ -46,7 +48,10 @@ func _run() -> void:
 		"orbital barrier pickup equips the auxiliary weapon",
 	)
 	var barrier_slot: WeaponSlotState = loadout.call("get_auxiliary_slot", 0) as WeaponSlotState
-	_expect(barrier_slot.can_upgrade(), "equipped auxiliary slots can be upgraded")
+	_expect(
+		loadout.call("can_upgrade_auxiliary_weapon", 0),
+		"equipped auxiliary weapons can be upgraded",
+	)
 
 	var barrier: Node = barrier_slot.equipped_weapon_instance
 	var segment: Node2D = barrier.get_node("OrbitRoot/Segment1") as Node2D

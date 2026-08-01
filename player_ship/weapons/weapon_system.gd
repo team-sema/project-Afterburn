@@ -9,7 +9,7 @@ var _global_fire_rate_multiplier := 1.0
 var _local_fire_rate_multiplier := 1.0
 var _global_damage_multiplier := 1.0
 var _local_damage_multiplier := 1.0
-## Ship facility (weapon room) channel, kept apart from slot/weapon levels.
+## Ship facility (weapon room) channel, kept apart from weapon levels.
 var _facility_damage_multiplier := 1.0
 ## Ship facility (hangar) extra uses for consumables.
 var _consumable_capacity_bonus := 0

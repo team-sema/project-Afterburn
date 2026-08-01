@@ -77,7 +77,7 @@ func _collect_main(loadout: PlayerWeaponLoadout, weapon_definition: WeaponDefini
 
 
 func _collect_auxiliary(loadout: PlayerWeaponLoadout, weapon_definition: WeaponDefinition) -> bool:
-	# Already equipped: refill remaining uses (consumable), no weapon level.
+	# Already equipped: refill remaining uses without changing its weapon level.
 	if loadout.has_auxiliary_weapon(weapon_definition.id):
 		loadout.refill_auxiliary_weapon(weapon_definition.id)
 		return true
@@ -91,7 +91,7 @@ func _collect_auxiliary(loadout: PlayerWeaponLoadout, weapon_definition: WeaponD
 	slot_selection_ui.open_for_replace(
 		loadout,
 		"보조무기 교체",
-		"%s(으)로 교체할 슬롯을 고르세요\n(소모품 · 슬롯 레벨 유지)" % weapon_definition.display_name,
+		"%s(으)로 교체할 슬롯을 고르세요\n(소모품 · 무기 레벨 유지)" % weapon_definition.display_name,
 	)
 	var slot_index := await _wait_slot_or_cancel()
 	get_tree().paused = false

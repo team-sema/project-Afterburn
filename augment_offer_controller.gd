@@ -107,10 +107,10 @@ func _is_player_augment_available(augment: PlayerAugment, loadout: PlayerWeaponL
 	match augment.augment_type:
 		PlayerAugmentKind.Kind.STAT_MULTIPLIER:
 			return true
-		PlayerAugmentKind.Kind.UPGRADE_MAIN_SLOT:
-			return loadout != null and loadout.get_main_slot().can_upgrade()
-		PlayerAugmentKind.Kind.UPGRADE_AUXILIARY_SLOT:
-			return loadout != null and loadout.has_upgradable_auxiliary_slot()
+		PlayerAugmentKind.Kind.UPGRADE_MAIN_WEAPON:
+			return loadout != null and loadout.can_upgrade_equipped_main_weapon()
+		PlayerAugmentKind.Kind.UPGRADE_AUXILIARY_WEAPON:
+			return loadout != null and loadout.has_upgradable_auxiliary_weapon()
 		PlayerAugmentKind.Kind.UPGRADE_FACILITY:
 			# 상한에 닿은 시설은 선택지에서 사라진다.
 			return facility_registry != null and facility_registry.can_upgrade_facility(augment.facility_id)
@@ -139,15 +139,15 @@ func _resolve_player_augment(player_augment: PlayerAugment) -> void:
 	var applier := ship.get_node_or_null("PlayerAugmentApplier") as PlayerAugmentApplier
 	assert(applier != null, "Ship missing PlayerAugmentApplier.")
 
-	if player_augment.augment_type == PlayerAugmentKind.Kind.UPGRADE_AUXILIARY_SLOT:
+	if player_augment.augment_type == PlayerAugmentKind.Kind.UPGRADE_AUXILIARY_WEAPON:
 		selection_ui.hide_choices()
-		slot_selection_ui.open_for_upgrade(
+		slot_selection_ui.open_for_weapon_upgrade(
 			loadout,
-			"보조 오버클럭",
-			"강화할 보조 슬롯을 고르세요",
+			"보조무기 강화",
+			"강화할 보조무기를 고르세요",
 		)
 		var upgrade_index: int = await slot_selection_ui.slot_selected
-		applier.set_pending_auxiliary_slot(upgrade_index)
+		applier.set_pending_auxiliary_weapon_slot(upgrade_index)
 		selection_ui.visible = true
 
 	# 시설 레벨은 레지스트리만 바꾼다. 스탯 재계산과 STATUS UI 갱신은

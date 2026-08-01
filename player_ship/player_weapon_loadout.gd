@@ -4,12 +4,11 @@ extends Node2D
 signal main_weapon_changed(weapon_definition: WeaponDefinition)
 signal auxiliary_weapon_changed(slot_index: int, weapon_definition: WeaponDefinition)
 signal slot_unlocked(slot_index: int)
-signal slot_upgraded(category: WeaponDefinition.Category, slot_index: int, new_level: int)
 signal weapon_level_changed(weapon_id: StringName, new_level: int)
 signal loadout_changed
 
 const AUX_SLOT_COUNT := 3
-const MAX_WEAPON_LEVEL := WeaponSlotState.MAX_LEVEL
+const MAX_WEAPON_LEVEL := 3
 
 @export var default_main_weapon: WeaponDefinition
 @export var player_path: NodePath
@@ -44,12 +43,10 @@ func _ready() -> void:
 	_main_slot.slot_type = WeaponDefinition.Category.MAIN
 	_main_slot.slot_index = 0
 	_main_slot.unlocked = true
-	_main_slot.level = 1
 
 	_reserve_slot.slot_type = WeaponDefinition.Category.MAIN
 	_reserve_slot.slot_index = 1
 	_reserve_slot.unlocked = true
-	_reserve_slot.level = 1
 
 	_aux_slots.clear()
 	for index in AUX_SLOT_COUNT:
@@ -57,7 +54,6 @@ func _ready() -> void:
 		slot.slot_type = WeaponDefinition.Category.AUXILIARY
 		slot.slot_index = index
 		slot.unlocked = true
-		slot.level = 1
 		_aux_slots.append(slot)
 
 	if default_main_weapon != null:
@@ -140,6 +136,10 @@ func has_weapon_progress(weapon_id: StringName) -> bool:
 	return _weapon_levels.has(weapon_id)
 
 
+func can_upgrade_weapon(weapon_id: StringName) -> bool:
+	return weapon_id != &"" and get_weapon_level(weapon_id) < MAX_WEAPON_LEVEL
+
+
 func get_tracked_weapon_ids() -> Array[StringName]:
 	return _sorted_tracked_ids()
 
@@ -168,7 +168,7 @@ func note_weapon_pickup(
 	if weapon_id == &"":
 		return false
 	if category == WeaponDefinition.Category.AUXILIARY:
-		push_warning("note_weapon_pickup ignored for auxiliary '%s' (consumables have no weapon level)." % String(weapon_id))
+		push_warning("note_weapon_pickup ignored for auxiliary '%s' (handled as a consumable pickup)." % String(weapon_id))
 		return false
 	_weapon_categories[weapon_id] = category
 	if display_name != "":
@@ -207,7 +207,7 @@ func equip_main_weapon(weapon_definition: WeaponDefinition) -> void:
 		push_error("PlayerWeaponLoadout.equip_main_weapon: '%s' has no weapon_scene." % String(weapon_definition.id))
 		return
 
-	_register_main_definition(weapon_definition)
+	_register_weapon_definition(weapon_definition)
 	_clear_slot_equipment(_main_slot)
 	_assign_slot_weapon(_main_slot, weapon_definition)
 	var instance := _instantiate_weapon(weapon_definition, WeaponDefinition.Category.MAIN, 0, main_weapon_mount)
@@ -233,7 +233,7 @@ func equip_reserve_weapon(weapon_definition: WeaponDefinition) -> void:
 		push_error("PlayerWeaponLoadout.equip_reserve_weapon: '%s' has no weapon_scene." % String(weapon_definition.id))
 		return
 
-	_register_main_definition(weapon_definition)
+	_register_weapon_definition(weapon_definition)
 	_clear_slot_equipment(_reserve_slot)
 	_assign_slot_weapon(_reserve_slot, weapon_definition)
 	loadout_changed.emit()
@@ -315,11 +315,7 @@ func replace_auxiliary_weapon(slot_index: int, weapon_definition: WeaponDefiniti
 		push_error("PlayerWeaponLoadout.replace_auxiliary_weapon: missing AuxMount for slot %s." % slot_index)
 		return
 
-	# Aux weapons are consumables: no per-weapon level, only slot overclock.
-	_weapon_display_names[weapon_definition.id] = weapon_definition.display_name
-	_weapon_categories[weapon_definition.id] = WeaponDefinition.Category.AUXILIARY
-	_weapon_definitions[weapon_definition.id] = weapon_definition
-	_weapon_levels.erase(weapon_definition.id)
+	_register_weapon_definition(weapon_definition)
 
 	_clear_slot_equipment(slot)
 	var instance := _instantiate_weapon(weapon_definition, WeaponDefinition.Category.AUXILIARY, slot_index, mount)
@@ -385,30 +381,31 @@ func unlock_next_auxiliary_slot() -> bool:
 	return false
 
 
-func upgrade_main_slot() -> bool:
-	if not _main_slot.can_upgrade():
+func upgrade_equipped_main_weapon() -> bool:
+	if _main_slot.is_empty():
 		return false
-	_main_slot.level += 1
-	# Shared overclock for the main-weapon line (firing + reserve).
-	_reserve_slot.level = _main_slot.level
-	_refresh_slot_weapon_multipliers(WeaponDefinition.Category.MAIN, 0)
-	slot_upgraded.emit(WeaponDefinition.Category.MAIN, 0, _main_slot.level)
-	loadout_changed.emit()
-	return true
+	return upgrade_weapon_level(_main_slot.equipped_weapon_id)
 
 
-func upgrade_auxiliary_slot(slot_index: int) -> bool:
+func upgrade_auxiliary_weapon(slot_index: int) -> bool:
 	if not _is_valid_aux_index(slot_index):
-		push_error("PlayerWeaponLoadout.upgrade_auxiliary_slot: invalid slot_index %s." % slot_index)
+		push_error("PlayerWeaponLoadout.upgrade_auxiliary_weapon: invalid slot_index %s." % slot_index)
 		return false
 	var slot := _aux_slots[slot_index]
-	if not slot.can_upgrade():
+	if slot.is_empty():
 		return false
-	slot.level += 1
-	_refresh_slot_weapon_multipliers(WeaponDefinition.Category.AUXILIARY, slot_index)
-	slot_upgraded.emit(WeaponDefinition.Category.AUXILIARY, slot_index, slot.level)
-	loadout_changed.emit()
-	return true
+	return upgrade_weapon_level(slot.equipped_weapon_id)
+
+
+func can_upgrade_equipped_main_weapon() -> bool:
+	return not _main_slot.is_empty() and can_upgrade_weapon(_main_slot.equipped_weapon_id)
+
+
+func can_upgrade_auxiliary_weapon(slot_index: int) -> bool:
+	if not _is_valid_aux_index(slot_index):
+		return false
+	var slot := _aux_slots[slot_index]
+	return not slot.is_empty() and can_upgrade_weapon(slot.equipped_weapon_id)
 
 
 func get_main_slot() -> WeaponSlotState:
@@ -465,9 +462,9 @@ func has_locked_auxiliary_slot() -> bool:
 	return false
 
 
-func has_upgradable_auxiliary_slot() -> bool:
-	for slot in _aux_slots:
-		if slot.can_upgrade():
+func has_upgradable_auxiliary_weapon() -> bool:
+	for index in AUX_SLOT_COUNT:
+		if can_upgrade_auxiliary_weapon(index):
 			return true
 	return false
 
@@ -475,7 +472,7 @@ func has_upgradable_auxiliary_slot() -> bool:
 func get_upgradable_auxiliary_indices() -> Array[int]:
 	var indices: Array[int] = []
 	for index in AUX_SLOT_COUNT:
-		if _aux_slots[index].can_upgrade():
+		if can_upgrade_auxiliary_weapon(index):
 			indices.append(index)
 	return indices
 
@@ -489,38 +486,19 @@ func get_occupied_auxiliary_indices() -> Array[int]:
 	return indices
 
 
-func get_slot_damage_multiplier(category: WeaponDefinition.Category, slot_index: int) -> float:
-	var slot := _get_slot(category, slot_index)
-	if slot == null:
-		return 1.0
-	return slot.get_damage_multiplier()
-
-
-func get_slot_attack_rate_multiplier(category: WeaponDefinition.Category, slot_index: int) -> float:
-	var slot := _get_slot(category, slot_index)
-	if slot == null:
-		return 1.0
-	return slot.get_attack_rate_multiplier()
-
-
 func get_weapon_damage_multiplier(weapon_id: StringName) -> float:
-	# Aux consumables have no weapon level — slot overclock only.
-	if get_weapon_category(weapon_id) == WeaponDefinition.Category.AUXILIARY:
-		return 1.0
 	return _level_damage_multiplier(get_weapon_level(weapon_id))
 
 
 func get_weapon_attack_rate_multiplier(weapon_id: StringName) -> float:
-	if get_weapon_category(weapon_id) == WeaponDefinition.Category.AUXILIARY:
-		return 1.0
 	return _level_attack_rate_multiplier(get_weapon_level(weapon_id))
 
 
-func _register_main_definition(weapon_definition: WeaponDefinition) -> void:
+func _register_weapon_definition(weapon_definition: WeaponDefinition) -> void:
 	if not _weapon_levels.has(weapon_definition.id):
 		_weapon_levels[weapon_definition.id] = 1
 	_weapon_display_names[weapon_definition.id] = weapon_definition.display_name
-	_weapon_categories[weapon_definition.id] = WeaponDefinition.Category.MAIN
+	_weapon_categories[weapon_definition.id] = weapon_definition.category
 	_weapon_definitions[weapon_definition.id] = weapon_definition
 
 
@@ -564,13 +542,11 @@ func _apply_multipliers_to_weapon(weapon: WeaponSystem, category: WeaponDefiniti
 		return
 	var slot := _get_slot(category, slot_index)
 	var weapon_id := slot.equipped_weapon_id if slot != null else &""
-	var local_damage := get_slot_damage_multiplier(category, slot_index)
-	var local_rate := get_slot_attack_rate_multiplier(category, slot_index)
+	var local_damage := get_weapon_damage_multiplier(weapon_id)
+	var local_rate := get_weapon_attack_rate_multiplier(weapon_id)
 	var facility_damage := 1.0
 	var facility_ammo_bonus := 0
 	if category == WeaponDefinition.Category.MAIN:
-		local_damage *= get_weapon_damage_multiplier(weapon_id)
-		local_rate *= get_weapon_attack_rate_multiplier(weapon_id)
 		facility_damage = _facility_main_damage_multiplier
 	else:
 		facility_ammo_bonus = _facility_auxiliary_ammo_bonus

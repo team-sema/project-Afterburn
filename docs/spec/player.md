@@ -29,13 +29,13 @@ Move / MoveInput / PositionClamp / WeaponMount(Blaster·Laser·Shotgun 등) / Pl
 ## 무기 (슬롯 무장)
 
 - `PlayerWeaponLoadout`: 주무기 **메인(발사) + 예비** + 보조 최대 3
-- 시작 주무기: 블래스터가 메인 슬롯 (무기 Lv.1), 예비 빈칸, 슬롯 Lv.1
+- 시작 주무기: 블래스터가 메인 슬롯 (무기 Lv.1), 예비 빈칸
 - 주무기 후보: 블래스터 · 레이저 · **샷건**(부채꼴 5펠릿)
 - **주무기 필드 픽업**: 무기 ID 레벨 상승·보존. 새 무기면 **예비 슬롯 교체**(확인 UI 없음). **X**로 미보유 주무기 픽업 차단 토글
 - **Z**: 메인 ↔ 예비 스왑 (예비 비어 있으면 무시)
-- **보조무기**: 소모품. **자체 레벨 없음**. 동일 픽업 = 사용량 리필, 소진 시 슬롯 제거
-- **슬롯 강화**: 오그먼트 `UPGRADE_*`만. 픽업으로 슬롯 레벨이 오르지 않음
-- 주무기 최종 배율 = 플레이어 공통 × **슬롯** × **무기** × **무기실(시설)** / 보조 = 공통 × **슬롯**
+- **보조무기**: 소모품. 동일 픽업 = 사용량 리필, 소진 시 슬롯 제거. 무기 레벨은 재획득 후에도 보존
+- **무기 강화**: 모든 주·보조무기는 무기 ID별 Lv.1~3 하나만 사용. 주무기 픽업 또는 주/보조 무기 강화 오그먼트로 상승
+- 주무기 최종 배율 = 플레이어 공통 × **무기 레벨** × **무기실(시설)** / 보조 = 공통 × **무기 레벨**
 - 보조 최대 탄약 = 무기 기본(`max_charges`) + **격납고(시설)** 가산
 - 궤도 방벽 조각은 피격 시 영구 파괴(재생 없음). 전량 파괴 시 슬롯 소모
 - HUD: `WeaponLoadoutHud` + `HexModuleFrame` (우측 패널 `WeaponBox` 안) · 아이콘은 `assets/svg/weapons/` (`icon_path` on weapon definition)
@@ -57,7 +57,8 @@ Move / MoveInput / PositionClamp / WeaponMount(Blaster·Laser·Shotgun 등) / Pl
 
 - `MOVE_SPEED` → `MoveComponent.velocity_multiplier` (**씬 기본 배수 × 오그먼트 × 엔진 시설** 합산도 여기서)
 - `FIRE_RATE` / `WEAPON_DAMAGE` → 각 WeaponSystem 전역 배수
-- `UPGRADE_*` → 슬롯 오버클럭 (성능). 장착/해금 타입은 무시
+- `UPGRADE_MAIN_WEAPON` → 현재 장착 주무기 레벨 상승
+- `UPGRADE_AUXILIARY_WEAPON` → 선택한 슬롯에 장착된 보조무기 레벨 상승
 
 > `PlayerAugment.behavior_components`는 **적용하지 않음** (적 쪽만 동작).
 

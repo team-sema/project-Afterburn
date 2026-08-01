@@ -8,7 +8,7 @@ var augment_registry: PlayerAugmentRegistry
 var base_move_speed_multiplier: float
 ## Engine facility bonus. Move speed is composed in one place, so it enters here.
 var facility_move_speed_multiplier := 1.0
-var pending_auxiliary_slot_index := -1
+var pending_auxiliary_weapon_slot_index := -1
 
 
 func _ready() -> void:
@@ -27,8 +27,8 @@ func initialize(registry: PlayerAugmentRegistry) -> void:
 	refresh()
 
 
-func set_pending_auxiliary_slot(slot_index: int) -> void:
-	pending_auxiliary_slot_index = slot_index
+func set_pending_auxiliary_weapon_slot(slot_index: int) -> void:
+	pending_auxiliary_weapon_slot_index = slot_index
 
 
 func set_facility_move_speed_multiplier(multiplier: float) -> void:
@@ -67,11 +67,11 @@ func _on_augment_added(augment: PlayerAugment) -> void:
 	match augment.augment_type:
 		PlayerAugmentKind.Kind.STAT_MULTIPLIER:
 			pass
-		PlayerAugmentKind.Kind.UPGRADE_MAIN_SLOT:
-			weapon_loadout.upgrade_main_slot()
-		PlayerAugmentKind.Kind.UPGRADE_AUXILIARY_SLOT:
-			weapon_loadout.upgrade_auxiliary_slot(pending_auxiliary_slot_index)
-			pending_auxiliary_slot_index = -1
+		PlayerAugmentKind.Kind.UPGRADE_MAIN_WEAPON:
+			weapon_loadout.upgrade_equipped_main_weapon()
+		PlayerAugmentKind.Kind.UPGRADE_AUXILIARY_WEAPON:
+			weapon_loadout.upgrade_auxiliary_weapon(pending_auxiliary_weapon_slot_index)
+			pending_auxiliary_weapon_slot_index = -1
 		PlayerAugmentKind.Kind.UPGRADE_FACILITY:
 			# 시설 레벨은 ShipFacilityRegistry가 갖고, 적용은 ShipFacilityApplier가 한다.
 			pass

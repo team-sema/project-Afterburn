@@ -109,6 +109,16 @@ func _run() -> void:
 		not cannon_body.text.contains(cannon.display_name),
 		"consumable auxiliary module no longer prints the weapon name",
 	)
+	var barrier_icon_center_y := (aux_icon.offset_top + aux_icon.offset_bottom) * 0.5
+	var cannon_icon_center_y := (cannon_icon.offset_top + cannon_icon.offset_bottom) * 0.5
+	_expect(
+		is_equal_approx(barrier_icon_center_y, cannon_icon_center_y),
+		"chargeless auxiliary icon stays vertically aligned with consumable weapon icons",
+	)
+	_expect(
+		is_equal_approx(aux_icon.size.y, cannon_icon.size.y),
+		"chargeless auxiliary icon keeps the common weapon icon size",
+	)
 
 	if failures.is_empty():
 		print("weapon module icons test: PASS")
