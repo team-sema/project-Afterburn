@@ -88,6 +88,14 @@
       "tags": ["문서", "제출"]
     },
     {
+      "id": "fix-bomb-enemy-scene-uid",
+      "title": "Bomb 씬 uid 정정",
+      "description": "손으로 적은 씬 uid를 Godot 생성 uid로 확정해 에디터를 열 때마다 생기던 변경을 없앤다.",
+      "column": "review",
+      "file": "cards/fix-bomb-enemy-scene-uid.md",
+      "tags": ["적", "정리"]
+    },
+    {
       "id": "fix-formation-viewport-before-tree",
       "title": "Drone 편대 viewport 트리 가드",
       "description": "setup_formation이 add_child 전에 viewport를 읽어내던 에러 수정.",
