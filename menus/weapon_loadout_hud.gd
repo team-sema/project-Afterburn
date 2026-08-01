@@ -51,7 +51,7 @@ func refresh() -> void:
 		if slot == null or not slot.unlocked:
 			_set_module(module, "보조%d" % (index + 1), "잠김", true)
 			continue
-		var slot_title := "보조%d Lv.%d" % [index + 1, slot.level]
+		var slot_title := "A%d L%d" % [index + 1, slot.level]
 		if slot.is_empty():
 			_set_module(module, slot_title, "—", true)
 			continue
@@ -111,7 +111,7 @@ func _ensure_aux_modules() -> void:
 	for index in PlayerWeaponLoadout.AUX_SLOT_COUNT:
 		var module := HEX_MODULE_SCENE.instantiate() as HexModuleFrame
 		module.name = "AuxModule%d" % (index + 1)
-		module.custom_minimum_size = Vector2(34, 34)
+		module.custom_minimum_size = Vector2(48, 48)
 		aux_row.add_child(module)
 		_aux_modules.append(module)
 

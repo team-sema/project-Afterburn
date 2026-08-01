@@ -88,9 +88,23 @@ func _run() -> void:
 	await process_frame
 	var cannon_module: HexModuleFrame = weapon_hud.get_node("AuxRow/AuxModule2") as HexModuleFrame
 	var cannon_icon: TextureRect = cannon_module.get_node("IconRect") as TextureRect
+	var cannon_title: Label = cannon_module.get_node("TitleLabel") as Label
 	var cannon_body: Label = cannon_module.get_node("BodyLabel") as Label
 	_expect(cannon_icon.texture == cannon.icon, "consumable auxiliary module shows its icon")
 	_expect(cannon_body.text.contains("/"), "consumable auxiliary module keeps its charge counter")
+	_expect(cannon_module.size.x >= 48.0, "auxiliary module gives the charge counter enough width")
+	_expect(
+		cannon_body.label_settings.font_size >= 9,
+		"auxiliary charge counter uses a legible font size",
+	)
+	_expect(
+		cannon_body.get_minimum_size().x <= cannon_body.size.x + 0.01,
+		"auxiliary charge counter fits without clipping",
+	)
+	_expect(
+		cannon_title.get_minimum_size().x <= cannon_title.size.x + 0.01,
+		"auxiliary slot title fits without clipping",
+	)
 	_expect(
 		not cannon_body.text.contains(cannon.display_name),
 		"consumable auxiliary module no longer prints the weapon name",

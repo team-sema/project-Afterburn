@@ -63,10 +63,14 @@ func _set_augment_ready(is_ready: bool) -> void:
 	experience_label.add_theme_color_override("font_color", _normal_experience_label_color)
 
 
-func _on_enemy_augment_progress_changed(elapsed: float, interval: float, next_tier: int) -> void:
+func _on_enemy_augment_progress_changed(
+	elapsed: float,
+	interval: float,
+	current_threat_level: int,
+) -> void:
 	threat_bar.max_value = maxf(1.0, interval)
 	threat_bar.value = elapsed
 	var remaining_seconds := maxi(0, ceili(interval - elapsed))
 	var minutes := remaining_seconds / 60
 	var seconds := remaining_seconds % 60
-	threat_label.text = "THREAT %02d   %02d:%02d" % [next_tier, minutes, seconds]
+	threat_label.text = "THREAT %02d   %02d:%02d" % [current_threat_level, minutes, seconds]

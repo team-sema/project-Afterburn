@@ -74,15 +74,18 @@ func _on_resized() -> void:
 
 
 func _layout_children() -> void:
-	var font_size := clampi(int(size.y * 0.13), 5, 9)
+	var title_font_size := clampi(int(size.y * 0.13), 5, 9)
+	var body_font_size := clampi(int(size.y * 0.2), 8, 11)
 	if _title_settings != null:
-		_title_settings.font_size = font_size
+		_title_settings.font_size = title_font_size
 		_title_settings.line_spacing = -2.0
 	if _body_settings != null:
-		_body_settings.font_size = font_size
+		_body_settings.font_size = body_font_size
 		_body_settings.line_spacing = -2.0
+		_body_settings.outline_size = 1
+		_body_settings.outline_color = Color(0.01, 0.04, 0.08, 0.95)
 
-	var band_height := maxf(9.0, size.y * 0.16)
+	var band_height := maxf(10.0, size.y * 0.2)
 	var content_top := size.y * 0.11
 	var content_bottom := size.y * 0.89
 	var icon_top := content_top

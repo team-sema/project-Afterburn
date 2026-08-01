@@ -104,5 +104,6 @@ facility_registry = NodePath("../ShipFacilityRegistry")
 
 [node name="SpaceBackground" parent="." unique_id=370541693 instance=ExtResource("4_background")]
 
-[node name="EnemyGenerator" parent="." unique_id=1625416164 node_paths=PackedStringArray("augment_registry") instance=ExtResource("5_generator")]
+[node name="EnemyGenerator" parent="." unique_id=1625416164 node_paths=PackedStringArray("augment_registry", "progression") instance=ExtResource("5_generator")]
 augment_registry = NodePath("../EnemyAugmentRegistry")
+progression = NodePath("../AugmentProgressionController")

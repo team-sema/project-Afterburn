@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="EnemySpawnSet" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://resources/enemy_spawns/enemy_spawn_set.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://enemies/normal_enemy.tscn" id="2_enemy"]
+
+[resource]
+script = ExtResource("1_script")
+spawn_id = &"drone_formation"
+minimum_threat_level = 1
+enemy_scene = ExtResource("2_enemy")
+pattern = 1
+formation_offsets = Array[Vector2]([Vector2(-48, 0), Vector2(-24, 0), Vector2(0, 0), Vector2(24, 0), Vector2(48, 0)])

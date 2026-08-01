@@ -1,43 +1,22 @@
-[gd_scene format=3 uid="uid://e4v02s4qv8gl"]
+[gd_scene load_steps=9 format=3 uid="uid://e4v02s4qv8gl"]
 
-[ext_resource type="Script" uid="uid://b81hx75o63oad" path="res://enemy_generator.gd" id="1_k80ol"]
-[ext_resource type="Script" uid="uid://fwissbryiv1s" path="res://components/spawner_component.gd" id="2_d5nw7"]
-[ext_resource type="Resource" uid="uid://qvwx7dbvubh0" path="res://game_stats.tres" id="2_m4hnj"]
+[ext_resource type="Script" uid="uid://b81hx75o63oad" path="res://enemy_generator.gd" id="1_generator"]
+[ext_resource type="Script" uid="uid://fwissbryiv1s" path="res://components/spawner_component.gd" id="2_spawner"]
+[ext_resource type="Script" path="res://resources/enemy_spawns/enemy_spawn_set.gd" id="3_spawn_set"]
+[ext_resource type="Resource" path="res://resources/enemy_spawns/drone_formation.tres" id="4_drone"]
+[ext_resource type="Resource" path="res://resources/enemy_spawns/striker.tres" id="5_striker"]
+[ext_resource type="Resource" path="res://resources/enemy_spawns/awl_formation.tres" id="6_awl"]
+[ext_resource type="Resource" path="res://resources/enemy_spawns/bomb.tres" id="7_bomb"]
+[ext_resource type="Resource" path="res://resources/enemy_spawns/caster.tres" id="8_caster"]
 
 [node name="EnemyGenerator" type="Node2D" unique_id=755348219]
-script = ExtResource("1_k80ol")
-game_stats = ExtResource("2_m4hnj")
+script = ExtResource("1_generator")
+spawn_sets = Array[ExtResource("3_spawn_set")]([ExtResource("4_drone"), ExtResource("5_striker"), ExtResource("6_awl"), ExtResource("7_bomb"), ExtResource("8_caster")])
 
 [node name="SpawnerComponent" type="Node2D" parent="." unique_id=1844585373]
-script = ExtResource("2_d5nw7")
+script = ExtResource("2_spawner")
 
-[node name="GreenEnemySpawnTimer" type="Timer" parent="." unique_id=1919793622]
+[node name="SpawnTimer" type="Timer" parent="." unique_id=1919793622]
 unique_name_in_owner = true
 wait_time = 4.0
 one_shot = true
-autostart = true
-
-[node name="YellowEnemySpawnTimer" type="Timer" parent="." unique_id=2079851595]
-unique_name_in_owner = true
-wait_time = 9.0
-one_shot = true
-autostart = true
-
-[node name="PinkEnemySpawnTimer" type="Timer" parent="." unique_id=1999505517]
-unique_name_in_owner = true
-process_mode = 4
-wait_time = 8.0
-one_shot = true
-autostart = true
-
-[node name="KamikazeEnemySpawnTimer" type="Timer" parent="."]
-unique_name_in_owner = true
-wait_time = 7.0
-one_shot = true
-autostart = true
-
-[node name="BombEnemySpawnTimer" type="Timer" parent="."]
-unique_name_in_owner = true
-wait_time = 11.0
-one_shot = true
-autostart = true

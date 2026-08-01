@@ -9,6 +9,7 @@
 - [x] `PlayerWeaponLoadout.get_weapon_icon` (보유 주무기 행용)
 - [x] 아이콘 누락 시 이름 폴백
 - [x] `tests/weapon_module_icons_test.gd` 스모크 테스트
+- [x] 보조 모듈 48px + 잔탄 9px/외곽선 + 제목·잔탄 클리핑 테스트
 
 ## Verify
 
