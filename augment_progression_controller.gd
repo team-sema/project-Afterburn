@@ -4,7 +4,8 @@ extends Node
 const OPEN_AUGMENT_OFFER_ACTION := &"open_augment_offer"
 
 signal experience_changed(current_experience: int, experience_required: int, level: int)
-signal enemy_augment_progress_changed(elapsed: float, interval: float, next_tier: int)
+signal enemy_augment_progress_changed(elapsed: float, interval: float, current_threat_level: int)
+signal threat_level_changed(current_level: int)
 
 @export var offer_controller: AugmentOfferController
 @export_range(1, 100000, 1) var base_experience_required := 5
@@ -28,16 +29,25 @@ func _ready() -> void:
 
 func publish_state() -> void:
 	experience_changed.emit(current_experience, experience_required, level)
-	enemy_augment_progress_changed.emit(enemy_augment_elapsed, enemy_augment_interval, enemy_augment_tier + 1)
+	enemy_augment_progress_changed.emit(enemy_augment_elapsed, enemy_augment_interval, get_threat_level())
+	threat_level_changed.emit(get_threat_level())
+
+
+func get_threat_level() -> int:
+	return enemy_augment_tier + 1
 
 
 func _process(delta: float) -> void:
+	var previous_threat_level := get_threat_level()
 	enemy_augment_elapsed += delta
 	while enemy_augment_elapsed >= enemy_augment_interval:
 		enemy_augment_elapsed -= enemy_augment_interval
 		enemy_augment_tier += 1
 		pending_offers.append(AugmentOfferController.OfferType.ENEMY)
-	enemy_augment_progress_changed.emit(enemy_augment_elapsed, enemy_augment_interval, enemy_augment_tier + 1)
+	var current_threat_level := get_threat_level()
+	if current_threat_level != previous_threat_level:
+		threat_level_changed.emit(current_threat_level)
+	enemy_augment_progress_changed.emit(enemy_augment_elapsed, enemy_augment_interval, current_threat_level)
 	if Input.is_action_just_pressed(OPEN_AUGMENT_OFFER_ACTION):
 		_try_level_up()
 	_try_request_offer()

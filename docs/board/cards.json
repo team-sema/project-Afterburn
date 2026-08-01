@@ -40,6 +40,14 @@
   ],
   "cards": [
     {
+      "id": "enemy-threat-tier-spawning",
+      "title": "Threat Tier 기반 적 스폰",
+      "description": "적 스폰 단위에 최소 Tier를 부여하고 현재 Threat에 맞는 후보만 선별한다.",
+      "column": "review",
+      "file": "cards/enemy-threat-tier-spawning.md",
+      "tags": ["적", "스폰", "Threat"]
+    },
+    {
       "id": "fix-formation-viewport-before-tree",
       "title": "Drone 편대 viewport 트리 가드",
       "description": "setup_formation이 add_child 전에 viewport를 읽어내던 에러 수정.",

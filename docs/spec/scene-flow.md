@@ -27,6 +27,8 @@ Menu (ui_accept)
 
 우측 패널(`world.tscn`): `STATUS` → `ShipPanel`(함선 그림 + 시설 칩 6종 + 상세 박스) → `WeaponBox/Margin/WeaponLoadoutHud`
 
+`WeaponLoadoutHud`의 보조 슬롯은 48×48 육각 모듈이며, 발사형 무기의 잔탄을 아이콘 아래 `남은/최대`로 표시한다.
+
 좌측 패널(`world.tscn`): 타이틀 → `SCORE` → `ProgressionHud`(XP·위협 바) → `ShipStatusHud`(선체·실드 바) → `PLAYFIELD`
 
 좌·플레이필드·우 세 패널에 `NeonCornerFrame` 모서리 브래킷 (장식 전용).

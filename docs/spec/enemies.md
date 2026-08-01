@@ -2,13 +2,13 @@
 
 ## 타입 (생성기 기준)
 
-| 코드명 | 씬 | HP | 점수 | 특징 |
-|--------|-----|-----|------|------|
-| Green / Drone | `normal_enemy.tscn` | 20 | 5 | 편대 대각 하강 · 스폰 offset ~5 |
-| Yellow / Striker | `moving_enemy.tscn` | 50 | 10 | 직하강 → 중앙 정지 → 좌우 패트롤 · 스폰 offset ~11 |
-| Pink / Caster | `shooting_enemy.tscn` | 110 | 25 | 상단 체공 · 원형 다연발 탄막(5링×20) · `enemy_caster.svg` |
-| Awl / Kamikaze | `kamikaze_enemy.tscn` | 70 | 15 | 3마리 V로 하강·조준 → 차지 시 V에서 각자 독립 돌진 · 투사체 없음 |
-| Bomb | `bomb_enemy.tscn` | 140 | 20 | 느린 하강 · 고체력 · 근접 시 2초 3회 적색 점멸 후 1.5× 자폭 · `enemy_bomb.svg` |
+| 코드명 | 최소 Threat | 씬 | HP | 점수 | 특징 |
+|--------|-------------|-----|-----|------|------|
+| Green / Drone | 1 | `normal_enemy.tscn` | 20 | 5 | 편대 대각 하강 |
+| Yellow / Striker | 1 | `moving_enemy.tscn` | 50 | 10 | 직하강 → 중앙 정지 → 좌우 패트롤 |
+| Awl / Kamikaze | 2 | `kamikaze_enemy.tscn` | 70 | 15 | 3마리 V로 하강·조준 → 차지 시 V에서 각자 독립 돌진 · 투사체 없음 |
+| Bomb | 2 | `bomb_enemy.tscn` | 140 | 20 | 느린 하강 · 고체력 · 근접 시 2초 3회 적색 점멸 후 1.5× 자폭 · `enemy_bomb.svg` |
+| Pink / Caster | 3 | `shooting_enemy.tscn` | 110 | 25 | 상단 체공 · 원형 다연발 탄막(5링×20) · `enemy_caster.svg` |
 
 베이스 `enemies/enemy.tscn`: 네온 레이어, 전투/VFX, `TargetingComponent`, `EnemyShootComponent`, `EnemyModifierFactory`, XP 드롭.
 
@@ -20,10 +20,11 @@
 
 ## EnemyGenerator
 
-- **Green:** `handle_drone_formation_spawn` — 오프셋 배열 길이만큼 동시 스폰(기본 5)
-- **Awl:** `handle_awl_formation_spawn` — 항상 3마리 V
+- `EnemySpawnSet` 리소스가 적 씬, 최소 Threat, 단일/편대 패턴과 편대 오프셋을 정의한다.
+- 생성기는 현재 Threat 이하의 스폰 세트만 후보로 선별하고 그중 하나를 균등하게 선택한다.
+- **Green:** Drone 편대 — 오프셋 배열 길이만큼 동시 스폰(기본 5)
+- **Awl:** 3마리 V 편대
 - Yellow / Pink / Bomb: 단발 스폰
-- Pink는 score > 50 후 활성화
 - 베이스·Drone·Striker는 `EnemyShootComponent`로 조준 사격 (Striker 예: `burst_count` 3 · `shot_count` 5)
 
 ## Caster 상단 체공 · 원형 탄막
