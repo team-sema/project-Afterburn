@@ -26,7 +26,15 @@
 - **Green:** Drone 편대 — 오프셋 배열 길이만큼 동시 스폰(기본 5)
 - **Awl:** 3마리 V 편대
 - Yellow / Pink / Bomb: 단발 스폰
-- 베이스·Drone·Striker는 `EnemyShootComponent`로 조준 사격 (Striker 예: `burst_count` 3 · `shot_count` 5)
+- 베이스·Drone·Striker는 `EnemyShootComponent`로 조준 사격
+- **초반(Threat 1) 사격 압력** — 투사체를 쏘는 Threat 1 적은 아래 값을 쓴다. Kamikaze·Bomb은 투사체가 없고, Caster는 Threat 3이라 초반 압력에 포함되지 않는다
+
+| 적 | `fire_interval` | 볼리 | 발수 | 탄속 | `initial_delay` |
+|---|---|---|---|---|---|
+| Drone (5기 편대) | 4.5 | 1 | 1 | 105 | 1.5 |
+| Striker | 4.5 | 2 (`burst_interval` 0.15) | 5 (`spread` 15°) | 80 | 1.5 |
+
+- 이후 난이도는 적 오그먼트 `ACTION_RATE`가 `fire_interval`·`burst_interval`을 나눠 올리고, 상위 Threat 적이 합류하며 오른다. 탄속에는 배율이 없다
 
 ## Caster 상단 체공 · 원형 탄막
 

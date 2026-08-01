@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-01",
+  "updated": "2026-08-02",
   "source": "docs/board/cards/*.md",
   "columns": [
     {
@@ -62,6 +62,14 @@
       "column": "review",
       "file": "cards/enemy-threat-tier-spawning.md",
       "tags": ["적", "스폰", "Threat"]
+    },
+    {
+      "id": "early-enemy-fire-tuning",
+      "title": "초반 적 사격 완화",
+      "description": "Threat 1 Drone·Striker의 사격 주기를 늘리고 탄속을 낮춰 초반 난이도를 완화한다.",
+      "column": "review",
+      "file": "cards/early-enemy-fire-tuning.md",
+      "tags": ["적", "밸런스"]
     },
     {
       "id": "fix-formation-viewport-before-tree",

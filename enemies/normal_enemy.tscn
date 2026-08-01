@@ -29,9 +29,9 @@ shape = SubResource("CircleShape2D_b0nf3")
 shape = SubResource("CircleShape2D_7jo6o")
 
 [node name="EnemyShootComponent" parent="." index="15" unique_id=1768565056]
-fire_interval = 3.0
-projectile_speed = 150.0
-initial_delay = 1.0
+fire_interval = 4.5
+projectile_speed = 105.0
+initial_delay = 1.5
 
 [node name="FormationDiagonalMoveComponent" parent="." index="20" node_paths=PackedStringArray("actor", "move_component") instance=ExtResource("3_diagonal")]
 actor = NodePath("..")
