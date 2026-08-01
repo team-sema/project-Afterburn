@@ -58,8 +58,8 @@
 
 | 클래스 | 역할 |
 |--------|------|
-| `PlayerAugmentApplier` | 레지스트리 → 이동/연사/데미지 배수 (엔진 시설 배율도 여기서 합산) |
-| `ShipFacilityApplier` | 시설 레벨 → 주무기 공통 배율·보조 최대 탄약·이동속도·최대 선체·수집 반경·최대 실드 |
+| `PlayerAugmentApplier` | 설치된 모듈 → 이동/연사/데미지 배수와 가역적 무기 레벨 보너스 |
+| `ShipFacilityApplier` | 설치된 시설 효과 모듈 → 주무기 공통 배율·보조 최대 탄약·이동속도·최대 선체·수집 반경·최대 실드 |
 | `EnemyModifierFactory` | 스폰 시 적 스탯·행동 컴포넌트 적용 |
 | `EnemyAugmentGrantComponent` | 수동으로 적 오그먼트 grant *(씬 미연결)* |
 | `TargetingComponent` | `"player"` 그룹 타깃 |

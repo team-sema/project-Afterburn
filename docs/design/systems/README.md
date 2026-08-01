@@ -13,5 +13,6 @@
 | [kanban-v2](kanban-v2.md) | 백로그 칸반 v2 | 운영 |
 | [kanban-agent-prompt-copy](kanban-agent-prompt-copy.md) | 보드→에이전트 프롬프트 복사 | review |
 | [ship-facility-upgrades](ship-facility-upgrades.md) | 함선 시설 강화 · 오른쪽 함선 UI | doing |
+| [augment-module-slots](augment-module-slots.md) | 증강 모듈 슬롯 | review |
 
 현황 스펙(카테고리): [`docs/spec/`](../../spec/)

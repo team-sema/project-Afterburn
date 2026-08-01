@@ -1,8 +1,8 @@
 class_name ShipFacilityDefinition
 extends Resource
 
-## 함선 시설 1종의 정의. 시설은 무기별 고유 성능이 아니라 공통 수치만 강화하므로
-## 효과 종류와 레벨별 효과값 표만 가진다. 밸런스 수치는 이 리소스에서만 관리한다.
+## 함선 부위 1종의 정의. 무기별 고유 성능이 아니라 공통 수치 효과만 제공하므로
+## 효과 종류와 설치 모듈 개수별 누적값만 가진다. 밸런스 수치는 이 리소스에서 관리한다.
 
 enum Effect {
 	## 주무기 공통 공격력 배율 (발사체 수·관통 등 고유 성능과 무관)
@@ -26,9 +26,8 @@ enum Effect {
 @export var effect_summary: String = ""
 ## 시설 UI 아이콘 (흰색 실루엣, UI에서 색을 입힌다)
 @export var icon: Texture2D
-## Lv.1부터의 효과값 표. index 0 = Lv.1이며 무효과값(배율 1.0 / 가산 0)이어야 한다.
-## 표 길이가 곧 현재 상한이며, 항목이 하나뿐이면 강화 불가 상태로 표시된다.
-@export var level_values: PackedFloat32Array = PackedFloat32Array([1.0])
+## index 0은 모듈 0개의 중립값, index 1~3은 설치 개수별 누적 효과값이다.
+@export var module_count_values: PackedFloat32Array = PackedFloat32Array([1.0])
 
 
 ## 배율형 효과는 곱으로, 가산형 효과는 합으로 합산된다.
@@ -52,14 +51,10 @@ func get_neutral_value() -> float:
 	return get_neutral_value_for(effect)
 
 
-func get_max_level() -> int:
-	return maxi(1, level_values.size())
-
-
-func get_value_for_level(level: int) -> float:
-	if level_values.is_empty():
+func get_value_for_module_count(module_count: int) -> float:
+	if module_count_values.is_empty():
 		return get_neutral_value()
-	return level_values[clampi(level - 1, 0, level_values.size() - 1)]
+	return module_count_values[clampi(module_count, 0, module_count_values.size() - 1)]
 
 
 ## UI 표시용 문자열 ("×1.15" / "+4").

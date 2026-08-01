@@ -6,8 +6,8 @@
 [resource]
 script = ExtResource("1_aug")
 augment_id = &"facility_hull"
-display_name = "선체 보강"
-description = "선체 레벨 +1. 최대 선체 증가 (증가분만큼 회복)."
+display_name = "반응 장갑"
+description = "장착 중 최대 선체 내구도가 1 증가합니다."
 augment_type = 6
 icon = ExtResource("2_icon")
 facility_id = &"hull"

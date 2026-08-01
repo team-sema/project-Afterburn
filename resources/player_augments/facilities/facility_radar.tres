@@ -6,8 +6,8 @@
 [resource]
 script = ExtResource("1_aug")
 augment_id = &"facility_radar"
-display_name = "레이더 증폭"
-description = "레이더 레벨 +1. 아이템 획득 범위 증가."
+display_name = "광역 탐지기"
+description = "장착 중 픽업 수집 반경이 15% 증가합니다."
 augment_type = 6
 icon = ExtResource("2_icon")
 facility_id = &"radar"

@@ -1,10 +1,10 @@
 class_name ShipPanel
 extends Control
 
-## 오른쪽 UI의 함선 상태 패널. 시설 레지스트리를 읽어 표시만 하고,
-## 시설 레벨이나 플레이어 스탯은 직접 수정하지 않는다.
+signal facility_selected(facility_id: StringName)
 
-@export var facility_registry: ShipFacilityRegistry
+@export var facility_registry: PlayerAugmentRegistry
+@export var selection_enabled := false
 
 @onready var links: ShipFacilityLinks = %FacilityLinks
 @onready var detail_label: Label = %FacilityDetail
@@ -12,6 +12,8 @@ extends Control
 
 var _modules: Array[ShipFacilityModule] = []
 var _selected_facility_id: StringName = &""
+var _expansion_preview_facility_id: StringName = &""
+var _selection_input_enabled := false
 
 
 func _ready() -> void:
@@ -19,31 +21,63 @@ func _ready() -> void:
 	resized.connect(_refresh_links)
 	_refresh_links()
 	if facility_registry == null:
-		push_warning("ShipPanel: no ShipFacilityRegistry assigned; showing placeholders.")
+		if not selection_enabled:
+			push_warning("ShipPanel: no PlayerAugmentRegistry assigned; showing placeholders.")
 		_show_missing_registry()
 		return
-	if not facility_registry.facility_level_changed.is_connected(_on_facility_level_changed):
-		facility_registry.facility_level_changed.connect(_on_facility_level_changed)
-	# The registry lives in the gameplay subscene, so read levels after it is ready.
+	_bind_registry_signal()
 	call_deferred("refresh")
 
 
 func refresh() -> void:
 	if facility_registry == null:
 		return
-	if _selected_facility_id == &"" and not _modules.is_empty():
-		_selected_facility_id = _modules[0].facility_id
 	for module in _modules:
 		_refresh_module(module)
 	_refresh_detail()
 	_refresh_links()
 
 
-func select_facility(facility_id: StringName) -> void:
-	if _selected_facility_id == facility_id:
-		return
+func set_registry(registry: PlayerAugmentRegistry) -> void:
+	if facility_registry != null and facility_registry.augments_changed.is_connected(refresh):
+		facility_registry.augments_changed.disconnect(refresh)
+	facility_registry = registry
+	_bind_registry_signal()
+	refresh()
+
+
+func set_highlighted_facility(facility_id: StringName) -> void:
 	_selected_facility_id = facility_id
 	refresh()
+
+
+func set_expansion_preview_facility(facility_id: StringName) -> void:
+	_expansion_preview_facility_id = facility_id
+	refresh()
+
+
+func set_selection_input_enabled(enabled: bool) -> void:
+	_selection_input_enabled = enabled
+	refresh()
+
+
+func get_facility_module(facility_id: StringName) -> ShipFacilityModule:
+	for module in _modules:
+		if module.facility_id == facility_id:
+			return module
+	return null
+
+
+func get_selectable_modules() -> Array[ShipFacilityModule]:
+	var selectable: Array[ShipFacilityModule] = []
+	for module in _modules:
+		if module.focus_mode == Control.FOCUS_ALL:
+			selectable.append(module)
+	return selectable
+
+
+func select_facility(facility_id: StringName) -> void:
+	set_highlighted_facility(facility_id)
 
 
 func get_selected_facility_id() -> StringName:
@@ -64,10 +98,9 @@ func _collect_modules() -> void:
 			push_error("ShipPanel: facility module '%s' has no facility_id." % module.name)
 			continue
 		_modules.append(module)
-		if not module.facility_clicked.is_connected(_on_facility_selected):
-			module.facility_clicked.connect(_on_facility_selected)
-		if not module.facility_hovered.is_connected(_on_facility_selected):
-			module.facility_hovered.connect(_on_facility_selected)
+		module.facility_clicked.connect(_on_facility_clicked)
+		module.facility_hovered.connect(_on_facility_hovered)
+		module.facility_focused.connect(_on_facility_focused)
 
 
 func _refresh_links() -> void:
@@ -81,26 +114,21 @@ func _refresh_module(module: ShipFacilityModule) -> void:
 		module.show_unknown_facility()
 		module.is_selected = false
 		return
-	var level := facility_registry.get_facility_level(module.facility_id)
-	var effect_text := definition.format_value(
-		facility_registry.get_facility_effect(module.facility_id)
-	)
 	module.update_state(
 		definition.display_name,
-		level,
-		effect_text,
-		_upgrade_state(module.facility_id),
+		facility_registry.get_facility_slots(module.facility_id),
 		definition.icon,
 	)
+	var can_select_expansion := (
+		selection_enabled
+		and _selection_input_enabled
+		and facility_registry.can_expand_slots(module.facility_id)
+	)
+	module.set_selection_enabled(can_select_expansion)
+	module.set_expansion_preview(
+		can_select_expansion and module.facility_id == _expansion_preview_facility_id
+	)
 	module.is_selected = module.facility_id == _selected_facility_id
-
-
-func _upgrade_state(facility_id: StringName) -> ShipFacilityModule.UpgradeState:
-	if facility_registry.can_upgrade_facility(facility_id):
-		return ShipFacilityModule.UpgradeState.UPGRADABLE
-	if facility_registry.get_max_facility_level(facility_id) <= 1:
-		return ShipFacilityModule.UpgradeState.UNSET
-	return ShipFacilityModule.UpgradeState.MAXED
 
 
 func _refresh_detail() -> void:
@@ -108,32 +136,22 @@ func _refresh_detail() -> void:
 		return
 	var definition := facility_registry.get_facility_definition(_selected_facility_id)
 	if definition == null:
-		detail_label.text = "시설을 선택하세요"
+		detail_label.text = "모듈 카드를 가리키거나 함선 부위를 선택하세요"
 		if detail_icon != null:
 			detail_icon.texture = null
 		return
 	if detail_icon != null:
 		detail_icon.texture = definition.icon
-	var level := facility_registry.get_facility_level(_selected_facility_id)
-	var current_text := definition.format_value(
-		facility_registry.get_facility_effect(_selected_facility_id)
-	)
-	var detail := "%s Lv.%d : %s\n현재 %s" % [
+	var names: PackedStringArray = []
+	for module in facility_registry.get_facility_slots(_selected_facility_id):
+		if module == null:
+			names.append("빈 슬롯")
+		else:
+			names.append((module as PlayerAugmentModuleState).augment.display_name)
+	detail_label.text = "%s · %s" % [
 		definition.display_name,
-		level,
-		definition.effect_summary,
-		current_text,
+		" / ".join(names),
 	]
-	if facility_registry.can_upgrade_facility(_selected_facility_id):
-		var next_text := definition.format_value(
-			facility_registry.get_next_facility_effect(_selected_facility_id)
-		)
-		detail += " → Lv.%d %s" % [level + 1, next_text]
-	elif definition.get_max_level() <= 1:
-		detail += " (강화 수치 미설정)"
-	else:
-		detail += " (최대)"
-	detail_label.text = detail
 
 
 func _show_missing_registry() -> void:
@@ -143,9 +161,25 @@ func _show_missing_registry() -> void:
 		detail_label.text = "시설 데이터 없음"
 
 
-func _on_facility_selected(facility_id: StringName) -> void:
-	select_facility(facility_id)
+func _bind_registry_signal() -> void:
+	if facility_registry != null and not facility_registry.augments_changed.is_connected(refresh):
+		facility_registry.augments_changed.connect(refresh)
 
 
-func _on_facility_level_changed(_facility_id: StringName, _new_level: int) -> void:
-	refresh()
+func _on_facility_clicked(facility_id: StringName) -> void:
+	set_highlighted_facility(facility_id)
+	if selection_enabled and _selection_input_enabled and facility_registry.can_expand_slots(facility_id):
+		facility_selected.emit(facility_id)
+
+
+func _on_facility_hovered(facility_id: StringName) -> void:
+	set_highlighted_facility(facility_id)
+	if selection_enabled and _selection_input_enabled:
+		set_expansion_preview_facility(facility_id)
+
+
+func _on_facility_focused(facility_id: StringName) -> void:
+	if not selection_enabled or not _selection_input_enabled:
+		return
+	set_highlighted_facility(facility_id)
+	set_expansion_preview_facility(facility_id)

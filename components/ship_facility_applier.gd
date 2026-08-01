@@ -1,7 +1,7 @@
 class_name ShipFacilityApplier
 extends Node
 
-## 시설 레벨 → 플레이어 공통 스탯 적용.
+## 장착된 시설 모듈 → 플레이어 공통 스탯 적용.
 ## 시설은 무기 고유 성능을 바꾸지 않으므로 무기 id로 분기하지 않고,
 ## 로드아웃·이동·선체·실드·수집 반경의 공통 입력값만 갱신한다.
 
@@ -14,7 +14,7 @@ signal max_hull_changed(max_hull: int)
 @export var shield_component: ShieldComponent
 @export var experience_collector: ExperienceCollectorComponent
 
-var facility_registry: ShipFacilityRegistry
+var facility_registry: PlayerAugmentRegistry
 ## 시설 적용 전 최대 선체. 선체 시설 보너스와 분리해 둔다.
 var base_max_hull := 1
 ## 시설 적용 전 수집 반경.
@@ -23,15 +23,15 @@ var base_collection_radius := 0.0
 var _applied_max_hull_bonus := 0
 
 
-func initialize(registry: ShipFacilityRegistry) -> void:
-	assert(registry != null, "ShipFacilityApplier requires a ShipFacilityRegistry.")
+func initialize(registry: PlayerAugmentRegistry) -> void:
+	assert(registry != null, "ShipFacilityApplier requires a PlayerAugmentRegistry.")
 	facility_registry = registry
 	if stats_component != null:
 		base_max_hull = maxi(1, stats_component.health)
 	if experience_collector != null:
 		base_collection_radius = experience_collector.collection_radius
-	if not facility_registry.facility_level_changed.is_connected(_on_facility_level_changed):
-		facility_registry.facility_level_changed.connect(_on_facility_level_changed)
+	if not facility_registry.augments_changed.is_connected(refresh):
+		facility_registry.augments_changed.connect(refresh)
 	refresh()
 
 
@@ -95,7 +95,3 @@ func _apply_max_hull(bonus: int) -> void:
 		return
 	stats_component.health = clampi(stats_component.health + delta, 1, get_max_hull())
 	max_hull_changed.emit(get_max_hull())
-
-
-func _on_facility_level_changed(_facility_id: StringName, _new_level: int) -> void:
-	refresh()

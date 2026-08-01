@@ -1,5 +1,7 @@
 # Tasks: ship-facility-upgrades
 
+> 시설 레벨 관련 작업은 [augment-module-slots tasks](augment-module-slots-tasks.md)에서 모듈 슬롯 방식으로 대체됐다.
+
 ## Task 1 — 시설 데이터·상태
 
 - 목적: 레벨별 효과값 표와 런타임 레벨 보관

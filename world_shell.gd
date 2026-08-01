@@ -12,6 +12,7 @@ func _ready() -> void:
 	for overlay_name in [
 		"AugmentSelectionOverlay",
 		"WeaponSlotSelectionOverlay",
+		"AugmentModuleSwapOverlay",
 		"WeaponAcquireConfirmOverlay",
 	]:
 		var overlay := gameplay.get_node(overlay_name) as CanvasLayer

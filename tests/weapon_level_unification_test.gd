@@ -14,7 +14,6 @@ func _run() -> void:
 	var ship := gameplay.get_node("Ship") as Node2D
 	var loadout := ship.call("get_weapon_loadout") as PlayerWeaponLoadout
 	var player_registry := gameplay.get_node("PlayerAugmentRegistry") as PlayerAugmentRegistry
-	var augment_applier := ship.get_node("PlayerAugmentApplier") as PlayerAugmentApplier
 	var weapon_hud := world.get_node(
 		"Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud"
 	)
@@ -30,8 +29,8 @@ func _run() -> void:
 	var main_slot := loadout.get_main_slot()
 	_expect(not _has_property(main_slot, &"level"), "weapon slots no longer carry a level")
 	_expect(loadout.get_weapon_level(&"main_blaster") == 1, "default main weapon starts at Lv.1")
-	player_registry.add_augment(main_upgrade)
-	_expect(loadout.get_weapon_level(&"main_blaster") == 2, "main upgrade raises its weapon level")
+	player_registry.install_augment(main_upgrade, &"main_blaster")
+	_expect(loadout.get_weapon_level(&"main_blaster") == 2, "main module raises its effective level")
 	var blaster := main_slot.equipped_weapon_instance
 	_expect(
 		is_equal_approx(blaster.get_effective_damage_multiplier(), 1.2),
@@ -53,9 +52,8 @@ func _run() -> void:
 	) as WeaponDefinition
 	loadout.equip_auxiliary_weapon(cannon_definition, 0)
 	_expect(loadout.get_weapon_level(&"aux_test_cannon") == 1, "auxiliary weapon starts at Lv.1")
-	augment_applier.set_pending_auxiliary_weapon_slot(0)
-	player_registry.add_augment(auxiliary_upgrade)
-	_expect(loadout.get_weapon_level(&"aux_test_cannon") == 2, "auxiliary upgrade raises weapon level")
+	player_registry.install_augment(auxiliary_upgrade, &"aux_test_cannon")
+	_expect(loadout.get_weapon_level(&"aux_test_cannon") == 2, "auxiliary module raises effective level")
 	var cannon := loadout.get_auxiliary_slot(0).equipped_weapon_instance
 	_expect(
 		is_equal_approx(cannon.get_effective_damage_multiplier(), 1.2),
@@ -94,6 +92,15 @@ func _run() -> void:
 	_expect(main_title.text == "메인", "main slot title has no slot level")
 	_expect(main_body.text == "Lv.2", "main module shows the weapon level once")
 	_expect(aux_title.text == "A1 L3", "auxiliary module shows only its weapon level")
+
+	var hangar_module := load(
+		"res://resources/player_augments/facilities/facility_hangar.tres"
+	) as PlayerAugment
+	player_registry.install_augment(hangar_module, &"", 0)
+	_expect(
+		loadout.get_weapon_level(&"aux_test_cannon") == 2,
+		"replacing the auxiliary upgrade module removes its reversible level bonus",
+	)
 
 	world.queue_free()
 	await process_frame

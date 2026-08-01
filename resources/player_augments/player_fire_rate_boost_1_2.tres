@@ -14,3 +14,4 @@ augment_id = &"player_fire_rate_boost_1_2"
 display_name = "가속 캐패시터"
 description = "공격 속도가 20% 증가합니다."
 stat_modifiers = Array[ExtResource("2_modifier")]([SubResource("Resource_fire_rate_modifier")])
+facility_id = &"weapon_room"

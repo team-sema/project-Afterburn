@@ -40,6 +40,14 @@
   ],
   "cards": [
     {
+      "id": "augment-module-slots",
+      "title": "증강 모듈 슬롯",
+      "description": "증강을 함선 부위별 슬롯에 장착하고, 부위 슬롯 확장과 가득 찬 슬롯 교체를 제공한다.",
+      "column": "review",
+      "file": "cards/augment-module-slots.md",
+      "tags": ["증강", "함선", "UI"]
+    },
+    {
       "id": "weapon-level-unification",
       "title": "무기 레벨 단일화",
       "description": "슬롯 레벨을 제거하고 주·보조무기 모두 무기별 레벨 하나로 강화한다.",

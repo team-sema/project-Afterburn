@@ -28,6 +28,8 @@ var _facility_main_damage_multiplier := 1.0
 var _facility_auxiliary_ammo_bonus := 0
 ## Per-weapon levels persist across equip swaps for the run.
 var _weapon_levels: Dictionary = {}
+## Installed augment modules add reversible levels to their recorded weapon ids.
+var _augment_weapon_level_bonuses: Dictionary = {}
 var _weapon_display_names: Dictionary = {}
 ## weapon_id -> WeaponDefinition.Category (for owned HUD rows).
 var _weapon_categories: Dictionary = {}
@@ -108,7 +110,25 @@ func get_all_weapon_systems() -> Array[WeaponSystem]:
 func get_weapon_level(weapon_id: StringName) -> int:
 	if weapon_id == &"":
 		return 1
+	return clampi(
+		get_base_weapon_level(weapon_id) + int(_augment_weapon_level_bonuses.get(weapon_id, 0)),
+		1,
+		MAX_WEAPON_LEVEL,
+	)
+
+
+func get_base_weapon_level(weapon_id: StringName) -> int:
+	if weapon_id == &"":
+		return 1
 	return int(_weapon_levels.get(weapon_id, 1))
+
+
+func set_augment_weapon_level_bonuses(bonuses: Dictionary) -> void:
+	_augment_weapon_level_bonuses = bonuses.duplicate()
+	for weapon_id in _sorted_tracked_ids():
+		weapon_level_changed.emit(weapon_id, get_weapon_level(weapon_id))
+		_refresh_equipped_weapon_by_id(weapon_id)
+	loadout_changed.emit()
 
 
 func get_weapon_display_name(weapon_id: StringName) -> String:
@@ -185,7 +205,7 @@ func note_weapon_pickup(
 func upgrade_weapon_level(weapon_id: StringName) -> bool:
 	if weapon_id == &"":
 		return false
-	var level := get_weapon_level(weapon_id)
+	var level := get_base_weapon_level(weapon_id)
 	if level >= MAX_WEAPON_LEVEL:
 		return false
 	level += 1

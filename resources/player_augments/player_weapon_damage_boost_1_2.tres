@@ -14,3 +14,4 @@ augment_id = &"player_weapon_damage_boost_1_2"
 display_name = "과충전 탄두"
 description = "장착한 모든 무기의 피해가 20% 증가합니다."
 stat_modifiers = Array[ExtResource("2_modifier")]([SubResource("Resource_weapon_damage_modifier")])
+facility_id = &"weapon_room"

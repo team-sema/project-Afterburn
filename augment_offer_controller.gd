@@ -15,9 +15,8 @@ enum OfferType {
 @export var enemy_registry: EnemyAugmentRegistry
 @export var selection_ui: AugmentSelectionOverlay
 @export var slot_selection_ui: WeaponSlotSelectionOverlay
+@export var module_swap_ui: AugmentModuleSwapOverlay
 @export var ship: Node2D
-## 시설 오그먼트의 상한 판정과 실제 레벨 변경에 쓰는 유일한 상태 출처.
-@export var facility_registry: ShipFacilityRegistry
 @export var player_augment_pool: Array[PlayerAugment] = []
 @export var enemy_augment_pool: Array[EnemyAugment] = []
 @export_range(1, 3, 1) var choices_per_offer := 3
@@ -32,15 +31,17 @@ func _ready() -> void:
 	assert(enemy_registry != null, "AugmentOfferController requires an EnemyAugmentRegistry.")
 	assert(selection_ui != null, "AugmentOfferController requires an AugmentSelectionOverlay.")
 	assert(slot_selection_ui != null, "AugmentOfferController requires a WeaponSlotSelectionOverlay.")
+	assert(module_swap_ui != null, "AugmentOfferController requires an AugmentModuleSwapOverlay.")
 	assert(ship != null, "AugmentOfferController requires a Ship reference.")
 	assert(enemy_augment_pool.size() >= choices_per_offer, "Enemy augment pool is too small for an offer.")
+	selection_ui.configure_player_registry(player_registry)
 	selection_ui.choice_selected.connect(_on_choice_selected)
+	selection_ui.facility_expansion_selected.connect(_on_facility_expansion_selected)
 
 
 func request_offer(offer_type: OfferType) -> bool:
 	if is_offer_active:
 		return false
-
 	is_offer_active = true
 	active_offer_type = offer_type
 	offer_started.emit(active_offer_type)
@@ -57,11 +58,13 @@ func _start_offer() -> void:
 	var title: String
 	var prompt: String
 	var accent_color: Color
+	var show_ship_modules := false
 	if active_offer_type == OfferType.PLAYER:
 		choices = _pick_player_choices()
-		title = "플레이어 강화"
-		prompt = "업그레이드를 하나 고르세요"
+		title = "함선 모듈"
+		prompt = "모듈을 장착하거나 함선 부위의 슬롯을 확장하세요"
 		accent_color = selection_ui.player_accent_color
+		show_ship_modules = true
 	else:
 		choices = _pick_enemy_choices()
 		title = "적 강화"
@@ -73,7 +76,7 @@ func _start_offer() -> void:
 		is_offer_active = false
 		get_tree().paused = false
 		return
-	await selection_ui.open_choices(title, prompt, choices, accent_color)
+	await selection_ui.open_choices(title, prompt, choices, accent_color, show_ship_modules)
 
 
 func _get_loadout() -> PlayerWeaponLoadout:
@@ -102,22 +105,17 @@ func _pick_enemy_choices() -> Array[EnemyAugment]:
 
 
 func _is_player_augment_available(augment: PlayerAugment, loadout: PlayerWeaponLoadout) -> bool:
-	if augment == null:
+	if augment == null or not player_registry.has_facility(augment.facility_id):
 		return false
 	match augment.augment_type:
-		PlayerAugmentKind.Kind.STAT_MULTIPLIER:
-			return true
 		PlayerAugmentKind.Kind.UPGRADE_MAIN_WEAPON:
 			return loadout != null and loadout.can_upgrade_equipped_main_weapon()
 		PlayerAugmentKind.Kind.UPGRADE_AUXILIARY_WEAPON:
 			return loadout != null and loadout.has_upgradable_auxiliary_weapon()
-		PlayerAugmentKind.Kind.UPGRADE_FACILITY:
-			# 상한에 닿은 시설은 선택지에서 사라진다.
-			return facility_registry != null and facility_registry.can_upgrade_facility(augment.facility_id)
+		PlayerAugmentKind.Kind.STAT_MULTIPLIER, PlayerAugmentKind.Kind.FACILITY_EFFECT:
+			return true
 		_:
-			# Weapon grant and unlock cards are not offered; weapons come from drops.
 			return false
-	return false
 
 
 func _on_choice_selected(choice: Resource) -> void:
@@ -125,7 +123,9 @@ func _on_choice_selected(choice: Resource) -> void:
 		OfferType.PLAYER:
 			var player_augment := choice as PlayerAugment
 			assert(player_augment != null, "Player offer requires a PlayerAugment choice.")
-			await _resolve_player_augment(player_augment)
+			if not await _resolve_player_augment(player_augment):
+				selection_ui.resume_choices()
+				return
 			await _finish_offer(player_augment)
 		OfferType.ENEMY:
 			var enemy_augment := choice as EnemyAugment
@@ -134,44 +134,73 @@ func _on_choice_selected(choice: Resource) -> void:
 			await _finish_offer(enemy_augment)
 
 
-func _resolve_player_augment(player_augment: PlayerAugment) -> void:
+func _resolve_player_augment(player_augment: PlayerAugment) -> bool:
+	var target_weapon_id := &""
 	var loadout := _get_loadout()
-	var applier := ship.get_node_or_null("PlayerAugmentApplier") as PlayerAugmentApplier
-	assert(applier != null, "Ship missing PlayerAugmentApplier.")
-
-	if player_augment.augment_type == PlayerAugmentKind.Kind.UPGRADE_AUXILIARY_WEAPON:
-		selection_ui.hide_choices()
+	if player_augment.augment_type == PlayerAugmentKind.Kind.UPGRADE_MAIN_WEAPON:
+		var main_slot := loadout.get_main_slot()
+		target_weapon_id = main_slot.equipped_weapon_id
+	elif player_augment.augment_type == PlayerAugmentKind.Kind.UPGRADE_AUXILIARY_WEAPON:
+		selection_ui.suspend_choices()
 		slot_selection_ui.open_for_weapon_upgrade(
 			loadout,
-			"보조무기 강화",
-			"강화할 보조무기를 고르세요",
+			"보조무기 모듈",
+			"효과를 연결할 보조무기를 고르세요",
 		)
-		var upgrade_index: int = await slot_selection_ui.slot_selected
-		applier.set_pending_auxiliary_weapon_slot(upgrade_index)
-		selection_ui.visible = true
+		var weapon_slot_index: int = await slot_selection_ui.slot_selected
+		target_weapon_id = loadout.get_auxiliary_slot(weapon_slot_index).equipped_weapon_id
 
-	# 시설 레벨은 레지스트리만 바꾼다. 스탯 재계산과 STATUS UI 갱신은
-	# facility_level_changed를 듣는 ShipFacilityApplier·ShipPanel이 알아서 한다.
-	if player_augment.augment_type == PlayerAugmentKind.Kind.UPGRADE_FACILITY:
-		_upgrade_facility(player_augment)
+	var replace_index := -1
+	if not player_registry.has_empty_slot(player_augment.facility_id):
+		selection_ui.suspend_choices()
+		module_swap_ui.open(player_registry, player_augment.facility_id, player_augment)
+		replace_index = await module_swap_ui.selection_finished
+		if replace_index < 0:
+			return false
 
-	player_registry.add_augment(player_augment)
+	var installed_index := player_registry.install_augment(
+		player_augment,
+		target_weapon_id,
+		replace_index,
+	)
+	if installed_index < 0:
+		return false
+	selection_ui.restore_for_result()
+	return true
 
 
-func _upgrade_facility(player_augment: PlayerAugment) -> void:
-	if facility_registry == null:
-		push_error("AugmentOfferController: facility augment offered without a ShipFacilityRegistry.")
+func _on_facility_expansion_selected(facility_id: StringName) -> void:
+	if active_offer_type != OfferType.PLAYER:
 		return
-	for _step in maxi(1, player_augment.facility_level_gain):
-		if not facility_registry.upgrade_facility(player_augment.facility_id):
-			break
+	if not player_registry.expand_slots(facility_id):
+		selection_ui.resume_choices()
+		return
+	var definition := player_registry.get_facility_definition(facility_id)
+	var facility_name := definition.display_name if definition != null else String(facility_id)
+	await selection_ui.close_with_text(
+		"슬롯 확장",
+		"%s 슬롯 %d/%d" % [
+			facility_name,
+			player_registry.get_slot_capacity(facility_id),
+			PlayerAugmentRegistry.MAX_SLOT_CAPACITY,
+		],
+		selection_ui.player_accent_color,
+	)
+	_complete_offer(OfferType.PLAYER)
 
 
 func _finish_offer(augment: Resource) -> void:
-	var result_title := "플레이어 강화 획득" if active_offer_type == OfferType.PLAYER else "적 위협 강화"
-	var accent_color := selection_ui.player_accent_color if active_offer_type == OfferType.PLAYER else selection_ui.enemy_accent_color
+	var result_title := "모듈 장착 완료" if active_offer_type == OfferType.PLAYER else "적 위협 강화"
+	var accent_color := (
+		selection_ui.player_accent_color
+		if active_offer_type == OfferType.PLAYER
+		else selection_ui.enemy_accent_color
+	)
 	await selection_ui.close_with_result(result_title, augment, accent_color)
-	var completed_offer_type := active_offer_type
+	_complete_offer(active_offer_type)
+
+
+func _complete_offer(completed_offer_type: OfferType) -> void:
 	is_offer_active = false
 	if completed_offer_type == OfferType.PLAYER:
 		_trigger_player_resume_burst()
@@ -185,7 +214,6 @@ func _trigger_player_resume_burst() -> int:
 	var gameplay_world := get_tree().get_first_node_in_group("gameplay_world") as Node2D
 	if gameplay_world == null:
 		return 0
-
 	var burst := AUGMENT_RESUME_BURST_SCENE.instantiate() as Node2D
 	burst.call("setup", player_resume_clear_radius, selection_ui.player_accent_color)
 	gameplay_world.add_child(burst)
