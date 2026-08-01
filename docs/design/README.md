@@ -6,6 +6,7 @@
 |------|------|
 | [`systems/`](systems/) | 기능별 시스템 스펙 (`<slug>.md`) |
 | [`tasks/`](tasks/) | 구현 Task (`<slug>-tasks.md`) |
+| [`augment-todo.md`](augment-todo.md) | 증강 아이디어·후보 메모 (미구현) |
 | [`feature-workflow.md`](feature-workflow.md) | `/feature`·`/push` 요약 |
 
 워크플로 상세는 `.cursor/skills/feature`, `.cursor/skills/push`, `.cursor/rules/*`.
