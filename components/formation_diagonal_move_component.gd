@@ -15,7 +15,7 @@ extends Node
 
 var formation_origin := Vector2.ZERO
 var formation_offset := Vector2.ZERO
-var formation_start_time := 0.0
+var formation_elapsed := 0.0
 var _half_span := 48.0
 var _active := false
 
@@ -23,12 +23,11 @@ var _active := false
 func setup_formation(
 	origin: Vector2,
 	offset: Vector2,
-	shared_start_time: float,
 	movement_settings: Dictionary = {},
 ) -> void:
 	formation_origin = origin
 	formation_offset = offset
-	formation_start_time = shared_start_time
+	formation_elapsed = 0.0
 	if movement_settings.has("forward_speed"):
 		forward_speed = float(movement_settings["forward_speed"])
 	if movement_settings.has("dive_angle_degrees"):
@@ -48,9 +47,10 @@ func setup_formation(
 		call_deferred("_apply_position")
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	if not _active:
 		return
+	formation_elapsed += delta
 	_apply_position()
 
 
@@ -59,12 +59,11 @@ func _apply_position() -> void:
 		return
 	if not actor.is_inside_tree():
 		return
-	var elapsed := maxf(0.0, (Time.get_ticks_msec() * 0.001) - formation_start_time)
 	var speed_scale := 1.0
 	if move_component != null:
 		speed_scale = move_component.velocity_multiplier
 	var angle := deg_to_rad(dive_angle_degrees)
-	var distance := forward_speed * speed_scale * elapsed
+	var distance := forward_speed * speed_scale * formation_elapsed
 	var lateral_travel := sin(angle) * distance
 	var forward_travel := cos(angle) * distance
 

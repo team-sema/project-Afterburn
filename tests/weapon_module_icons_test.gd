@@ -71,13 +71,7 @@ func _run() -> void:
 	_expect(reserve_icon.visible, "stowed reserve weapon shows its icon")
 	_expect(reserve_icon.texture == laser.icon, "reserve module uses the stowed weapon's icon")
 
-	var owned_row: HBoxContainer = weapon_hud.get_node("OwnedMainRow") as HBoxContainer
-	_expect(owned_row.get_child_count() >= 2, "owned main row lists tracked main weapons")
-	var owned_module: HexModuleFrame = owned_row.get_child(0) as HexModuleFrame
-	var owned_icon: TextureRect = owned_module.get_node("IconRect") as TextureRect
-	var owned_title: Label = owned_module.get_node("TitleLabel") as Label
-	_expect(owned_icon.visible, "owned main modules show icons")
-	_expect(owned_title.text.is_empty(), "owned main modules drop the shortened name")
+	_expect(not weapon_hud.has_node("OwnedMainRow"), "owned main weapon history row is removed")
 
 	var barrier: WeaponDefinition = load(DEFINITION_PATHS[6]) as WeaponDefinition
 	loadout.call("equip_auxiliary_weapon", barrier, 0)

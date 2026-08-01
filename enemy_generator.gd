@@ -101,7 +101,6 @@ func handle_drone_formation_spawn() -> void:
 	var formation_origin := Vector2(randf_range(min_x, max_x), -16.0)
 	var mid_x := (min_x + max_x) * 0.5
 	var lateral_sign := 1.0 if formation_origin.x <= mid_x else -1.0
-	var formation_start_time := Time.get_ticks_msec() * 0.001
 	var movement_settings := {
 		"forward_speed": drone_forward_speed,
 		"dive_angle_degrees": drone_dive_angle_degrees * lateral_sign,
@@ -127,7 +126,6 @@ func handle_drone_formation_spawn() -> void:
 			"setup_formation",
 			formation_origin,
 			formation_offset,
-			formation_start_time,
 			movement_settings,
 		)
 
@@ -152,7 +150,6 @@ func handle_awl_formation_spawn() -> void:
 		max_x = min_x
 
 	var formation_origin := Vector2(randf_range(min_x, max_x), -16.0 - half_depth)
-	var formation_start_time := Time.get_ticks_msec() * 0.001
 	var movement_settings := {
 		"descend_duration": awl_descend_duration,
 		"descend_speed": awl_descend_speed,
@@ -177,7 +174,6 @@ func handle_awl_formation_spawn() -> void:
 					"setup_formation",
 					formation_origin,
 					formation_offset,
-					formation_start_time,
 					movement_settings,
 				),
 		)

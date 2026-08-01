@@ -16,7 +16,6 @@ func _enter_tree() -> void:
 func setup_formation(
 	origin: Vector2,
 	offset: Vector2,
-	shared_start_time: float,
 	movement_settings: Dictionary = {},
 ) -> void:
 	var charge := get_node_or_null("KamikazeAimChargeComponent")
@@ -25,4 +24,4 @@ func setup_formation(
 		charge.get_script() == KamikazeAimChargeComponentScript,
 		"KamikazeAimChargeComponent script mismatch.",
 	)
-	charge.call("setup_formation", origin, offset, shared_start_time, movement_settings)
+	charge.call("setup_formation", origin, offset, movement_settings)

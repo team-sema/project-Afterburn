@@ -19,7 +19,7 @@ enum Phase { DESCEND, AIM, CHARGE }
 
 var formation_origin := Vector2.ZERO
 var formation_offset := Vector2.ZERO
-var formation_start_time := 0.0
+var formation_elapsed := 0.0
 var _active := false
 var _phase: Phase = Phase.DESCEND
 var _charge_direction := Vector2.DOWN
@@ -28,12 +28,11 @@ var _charge_direction := Vector2.DOWN
 func setup_formation(
 	origin: Vector2,
 	offset: Vector2,
-	shared_start_time: float,
 	movement_settings: Dictionary = {},
 ) -> void:
 	formation_origin = origin
 	formation_offset = offset
-	formation_start_time = shared_start_time
+	formation_elapsed = 0.0
 	if movement_settings.has("descend_duration"):
 		descend_duration = float(movement_settings["descend_duration"])
 	if movement_settings.has("descend_speed"):
@@ -57,7 +56,6 @@ func _ready() -> void:
 		setup_formation(
 			actor.global_position,
 			Vector2.ZERO,
-			Time.get_ticks_msec() * 0.001,
 			{},
 		)
 
@@ -70,16 +68,16 @@ func _process(delta: float) -> void:
 		_face_toward(actor.global_position + _charge_direction)
 		return
 
-	var elapsed := maxf(0.0, (Time.get_ticks_msec() * 0.001) - formation_start_time)
+	formation_elapsed += delta
 	var speed_scale := 1.0
 	if move_component != null:
 		speed_scale = move_component.velocity_multiplier
 
-	if elapsed < descend_duration:
+	if formation_elapsed < descend_duration:
 		_phase = Phase.DESCEND
 		_apply_formation_position()
 		_face_toward(actor.global_position + Vector2.DOWN)
-	elif elapsed < descend_duration + aim_duration:
+	elif formation_elapsed < descend_duration + aim_duration:
 		_phase = Phase.AIM
 		_apply_formation_position()
 		_face_toward(_aim_point())
@@ -88,11 +86,10 @@ func _process(delta: float) -> void:
 
 
 func _apply_formation_position() -> void:
-	var elapsed := maxf(0.0, (Time.get_ticks_msec() * 0.001) - formation_start_time)
 	var speed_scale := 1.0
 	if move_component != null:
 		speed_scale = move_component.velocity_multiplier
-	var descend_elapsed := minf(elapsed, descend_duration)
+	var descend_elapsed := minf(formation_elapsed, descend_duration)
 	var center := formation_origin + Vector2(0.0, descend_speed * speed_scale * descend_elapsed)
 	actor.global_position = center + formation_offset
 

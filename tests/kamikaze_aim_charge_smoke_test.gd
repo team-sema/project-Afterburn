@@ -17,7 +17,6 @@ func _run() -> void:
 		Vector2(32, -14),
 	]
 	var origin := Vector2(120, -16)
-	var start_time := Time.get_ticks_msec() * 0.001
 	var settings := {
 		"descend_duration": 0.35,
 		"descend_speed": 50.0,
@@ -35,8 +34,17 @@ func _run() -> void:
 		var enemy: Node2D = scene.instantiate() as Node2D
 		enemy.set("augment_registry", EnemyAugmentRegistry.new())
 		root.add_child(enemy)
-		enemy.call("setup_formation", origin, offset, start_time, settings)
+		enemy.call("setup_formation", origin, offset, settings)
 		members.append(enemy)
+
+	var paused_position := members[1].global_position
+	paused = true
+	await create_timer(0.25, true).timeout
+	var charge := members[1].get_node("KamikazeAimChargeComponent")
+	charge.call("_process", 0.0)
+	if members[1].global_position.distance_to(paused_position) > 0.1:
+		failures.append("formation phase clock advanced while paused")
+	paused = false
 
 	# Still in aim / just before charge — V should hold.
 	await create_timer(0.5).timeout

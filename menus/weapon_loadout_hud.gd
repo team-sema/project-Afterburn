@@ -8,7 +8,6 @@ const HEX_MODULE_SCENE := preload("res://menus/hex_module_frame.tscn")
 @onready var main_module: HexModuleFrame = $MainRow/MainModule
 @onready var reserve_module: HexModuleFrame = $MainRow/ReserveModule
 @onready var block_new_main_status: Label = $BlockNewMainStatus
-@onready var owned_main_row: HBoxContainer = $OwnedMainRow
 @onready var aux_row: HBoxContainer = $AuxRow
 
 var _aux_modules: Array[HexModuleFrame] = []
@@ -41,7 +40,6 @@ func refresh() -> void:
 		_set_module(reserve_module, "예비", "—", true)
 		for module in _aux_modules:
 			_set_module(module, "보조", "—", true)
-		_refresh_owned_main(null)
 		return
 
 	_refresh_main_slot_module(loadout)
@@ -59,9 +57,6 @@ func refresh() -> void:
 			continue
 		var charges_text := _format_charges(slot.equipped_weapon_instance)
 		_set_module(module, slot_title, _slot_body(slot, charges_text), false, _slot_icon(slot))
-
-	_refresh_owned_main(loadout)
-
 
 func _refresh_main_slot_module(loadout: PlayerWeaponLoadout) -> void:
 	var main_slot: WeaponSlotState = loadout.get_main_slot()
@@ -90,21 +85,6 @@ func _refresh_reserve_slot_module(loadout: PlayerWeaponLoadout) -> void:
 	)
 
 
-func _refresh_owned_main(loadout: PlayerWeaponLoadout) -> void:
-	_clear_row(owned_main_row)
-	if loadout == null or owned_main_row == null:
-		return
-	for weapon_id in loadout.get_tracked_weapon_ids_by_category(WeaponDefinition.Category.MAIN):
-		var module := HEX_MODULE_SCENE.instantiate() as HexModuleFrame
-		module.custom_minimum_size = Vector2(22, 22)
-		var icon: Texture2D = loadout.get_weapon_icon(weapon_id)
-		var level: int = loadout.get_weapon_level(weapon_id)
-		owned_main_row.add_child(module)
-		# Owned modules are too small for a title; the icon alone identifies the weapon.
-		var title := "" if icon != null else _short_name(loadout.get_weapon_display_name(weapon_id))
-		_set_module(module, title, "Lv.%d" % level, false, icon)
-
-
 func _format_charges(weapon: WeaponSystem) -> String:
 	if weapon == null or not is_instance_valid(weapon):
 		return ""
@@ -120,12 +100,6 @@ func _clear_row(row: HBoxContainer) -> void:
 		return
 	for child in row.get_children():
 		child.queue_free()
-
-
-func _short_name(display_name: String) -> String:
-	if display_name.length() <= 3:
-		return display_name
-	return display_name.substr(0, 3)
 
 
 func _ensure_aux_modules() -> void:

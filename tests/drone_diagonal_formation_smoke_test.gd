@@ -14,7 +14,6 @@ func _run() -> void:
 	var scene: PackedScene = load("res://enemies/normal_enemy.tscn")
 
 	var origin := Vector2(80, -16)
-	var start_time := Time.get_ticks_msec() * 0.001
 	var offsets: Array[Vector2] = [
 		Vector2(-48, 0),
 		Vector2(-24, 0),
@@ -37,7 +36,7 @@ func _run() -> void:
 			break
 		enemy.set("augment_registry", EnemyAugmentRegistry.new())
 		# Mirrors Spawner configure_before_add: setup may run before add_child.
-		enemy.call("setup_formation", origin, offset, start_time, settings)
+		enemy.call("setup_formation", origin, offset, settings)
 		root.add_child(enemy)
 		var diagonal: Node = enemy.get_node_or_null("FormationDiagonalMoveComponent")
 		if diagonal == null or diagonal.get_script() != diagonal_script:
@@ -48,6 +47,15 @@ func _run() -> void:
 	await create_timer(0.4).timeout
 
 	if members.size() == 5:
+		var paused_position := members[2].global_position
+		paused = true
+		await create_timer(0.25, true).timeout
+		var diagonal := members[2].get_node("FormationDiagonalMoveComponent")
+		diagonal.call("_process", 0.0)
+		if members[2].global_position.distance_to(paused_position) > 0.1:
+			failures.append("formation clock advanced while paused")
+		paused = false
+
 		var center: Vector2 = members[2].global_position
 		for index in members.size():
 			var expected_dx: float = offsets[index].x - offsets[2].x

@@ -57,9 +57,6 @@ spread_degrees = 15.0
 [node name="WeaponDropComponent" parent="." index="18" unique_id=776926243]
 drop_chance = 1.0
 
-[node name="StrikerDivePatrolComponent" parent="." index="20" node_paths=PackedStringArray("actor", "move_component") instance=ExtResource("5_patrol")]
+[node name="StrikerDivePatrolComponent" parent="." index="20" unique_id=665905732 node_paths=PackedStringArray("actor", "move_component") instance=ExtResource("5_patrol")]
 actor = NodePath("..")
 move_component = NodePath("../MoveComponent")
-descend_speed = 40.0
-patrol_speed = 55.0
-stop_viewport_y_ratio = 0.5

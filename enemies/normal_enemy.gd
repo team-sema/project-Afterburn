@@ -10,7 +10,6 @@ const FormationDiagonalMoveComponentScript := preload(
 func setup_formation(
 	origin: Vector2,
 	offset: Vector2,
-	shared_start_time: float,
 	movement_settings: Dictionary = {},
 ) -> void:
 	var diagonal := get_node_or_null("FormationDiagonalMoveComponent")
@@ -19,4 +18,4 @@ func setup_formation(
 		diagonal.get_script() == FormationDiagonalMoveComponentScript,
 		"FormationDiagonalMoveComponent script mismatch.",
 	)
-	diagonal.call("setup_formation", origin, offset, shared_start_time, movement_settings)
+	diagonal.call("setup_formation", origin, offset, movement_settings)
