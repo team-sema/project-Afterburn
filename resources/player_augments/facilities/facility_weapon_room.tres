@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="PlayerAugment" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://resources/player_augments/player_augment.gd" id="1_aug"]
+[ext_resource type="Texture2D" uid="uid://cg1d7qjv0e5oj" path="res://assets/svg/facilities/facility_weapon_room.svg" id="2_icon"]
+
+[resource]
+script = ExtResource("1_aug")
+augment_id = &"facility_weapon_room"
+display_name = "무기실 증설"
+description = "무기실 레벨 +1. 모든 주무기 공격력 증가."
+augment_type = 6
+icon = ExtResource("2_icon")
+facility_id = &"weapon_room"

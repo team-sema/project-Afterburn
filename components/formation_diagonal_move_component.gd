@@ -53,6 +53,10 @@ func _process(_delta: float) -> void:
 func _apply_position() -> void:
 	if actor == null or not is_instance_valid(actor):
 		return
+	# setup_formation runs from the spawner's configure_before_add callback, so the
+	# drone is still detached on the first call and has no viewport to measure.
+	if not actor.is_inside_tree():
+		return
 	var elapsed := maxf(0.0, (Time.get_ticks_msec() * 0.001) - formation_start_time)
 	var speed_scale := 1.0
 	if move_component != null:

@@ -16,6 +16,8 @@ enum OfferType {
 @export var selection_ui: AugmentSelectionOverlay
 @export var slot_selection_ui: WeaponSlotSelectionOverlay
 @export var ship: Node2D
+## 시설 오그먼트의 상한 판정과 실제 레벨 변경에 쓰는 유일한 상태 출처.
+@export var facility_registry: ShipFacilityRegistry
 @export var player_augment_pool: Array[PlayerAugment] = []
 @export var enemy_augment_pool: Array[EnemyAugment] = []
 @export_range(1, 3, 1) var choices_per_offer := 3
@@ -109,6 +111,9 @@ func _is_player_augment_available(augment: PlayerAugment, loadout: PlayerWeaponL
 			return loadout != null and loadout.get_main_slot().can_upgrade()
 		PlayerAugmentKind.Kind.UPGRADE_AUXILIARY_SLOT:
 			return loadout != null and loadout.has_upgradable_auxiliary_slot()
+		PlayerAugmentKind.Kind.UPGRADE_FACILITY:
+			# 상한에 닿은 시설은 선택지에서 사라진다.
+			return facility_registry != null and facility_registry.can_upgrade_facility(augment.facility_id)
 		_:
 			# Weapon grant and unlock cards are not offered; weapons come from drops.
 			return false
@@ -145,7 +150,21 @@ func _resolve_player_augment(player_augment: PlayerAugment) -> void:
 		applier.set_pending_auxiliary_slot(upgrade_index)
 		selection_ui.visible = true
 
+	# 시설 레벨은 레지스트리만 바꾼다. 스탯 재계산과 STATUS UI 갱신은
+	# facility_level_changed를 듣는 ShipFacilityApplier·ShipPanel이 알아서 한다.
+	if player_augment.augment_type == PlayerAugmentKind.Kind.UPGRADE_FACILITY:
+		_upgrade_facility(player_augment)
+
 	player_registry.add_augment(player_augment)
+
+
+func _upgrade_facility(player_augment: PlayerAugment) -> void:
+	if facility_registry == null:
+		push_error("AugmentOfferController: facility augment offered without a ShipFacilityRegistry.")
+		return
+	for _step in maxi(1, player_augment.facility_level_gain):
+		if not facility_registry.upgrade_facility(player_augment.facility_id):
+			break
 
 
 func _finish_offer(augment: Resource) -> void:

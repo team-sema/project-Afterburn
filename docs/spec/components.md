@@ -28,7 +28,8 @@
 | `StatsComponent` | HP + `health_changed` / `no_health` |
 | `HurtboxComponent` | 피격 Area2D · `hurt(hitbox)` · 무적 시 shape off |
 | `HitboxComponent` | 공격 Area2D · `damage` · `hit_hurtbox` |
-| `HurtComponent` | hurt → Stats에서 damage 차감 |
+| `HurtComponent` | hurt → (실드가 있으면 게이트 판정 먼저) Stats에서 damage 차감 |
+| `ShieldComponent` | 선체와 분리된 실드 자원 · 실드 ≥ 1이면 피해 이벤트 전체 흡수 · `restore_shield` / `add_shield` |
 | `DestroyedComponent` | `no_health` → 이펙트 스폰 + free |
 | `ScoreComponent` | `GameStats.score`에 가산 |
 | `ExperienceDropComponent` | 적 사망 시 경험치 오브 스폰 |
@@ -57,7 +58,8 @@
 
 | 클래스 | 역할 |
 |--------|------|
-| `PlayerAugmentApplier` | 레지스트리 → 이동/연사/데미지 배수 |
+| `PlayerAugmentApplier` | 레지스트리 → 이동/연사/데미지 배수 (엔진 시설 배율도 여기서 합산) |
+| `ShipFacilityApplier` | 시설 레벨 → 주무기 공통 배율·보조 최대 탄약·이동속도·최대 선체·수집 반경·최대 실드 |
 | `EnemyModifierFactory` | 스폰 시 적 스탯·행동 컴포넌트 적용 |
 | `EnemyAugmentGrantComponent` | 수동으로 적 오그먼트 grant *(씬 미연결)* |
 | `TargetingComponent` | `"player"` 그룹 타깃 |
