@@ -29,11 +29,15 @@
 Hitbox.area_entered
   → Hurtbox & not invincible
   → hit_hurtbox + hurtbox.hurt
-  → HurtComponent: stats.health -= damage
+  → HurtComponent
+      → (실드 있고 현재 실드 ≥ 1) 실드가 이벤트 전체 흡수 후 종료
+      → 아니면 stats.health -= damage
   → no_health → 파괴/점수
 ```
 
 레이저는 Area 겹침을 쓰지 않고 RayCast + DamageTickTimer로 `hurt`를 직접 보낸다.
+
+`HurtComponent.shield_component`는 플레이어에만 연결돼 있다(적은 null → 기존 동작). 실드 게이트는 초과 피해를 선체로 넘기지 않으며, **피격 무적시간은 없다** — 같은 프레임의 다른 히트박스는 별개 이벤트다.
 
 ## 탄
 

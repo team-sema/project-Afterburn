@@ -96,7 +96,7 @@ func _refresh_owned_main(loadout: PlayerWeaponLoadout) -> void:
 		return
 	for weapon_id in loadout.get_tracked_weapon_ids_by_category(WeaponDefinition.Category.MAIN):
 		var module := HEX_MODULE_SCENE.instantiate() as HexModuleFrame
-		module.custom_minimum_size = Vector2(36, 36)
+		module.custom_minimum_size = Vector2(22, 22)
 		var icon: Texture2D = loadout.get_weapon_icon(weapon_id)
 		var level: int = loadout.get_weapon_level(weapon_id)
 		owned_main_row.add_child(module)
@@ -137,7 +137,7 @@ func _ensure_aux_modules() -> void:
 	for index in PlayerWeaponLoadout.AUX_SLOT_COUNT:
 		var module := HEX_MODULE_SCENE.instantiate() as HexModuleFrame
 		module.name = "AuxModule%d" % (index + 1)
-		module.custom_minimum_size = Vector2(54, 54)
+		module.custom_minimum_size = Vector2(34, 34)
 		aux_row.add_child(module)
 		_aux_modules.append(module)
 

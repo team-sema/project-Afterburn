@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="ShipFacilityDefinition" format=3]
+
+[ext_resource type="Script" path="res://resources/facilities/ship_facility_definition.gd" id="1_facility"]
+[ext_resource type="Texture2D" uid="uid://yhmbs87uwrk5" path="res://assets/svg/facilities/facility_hull.svg" id="2_icon"]
+
+[resource]
+script = ExtResource("1_facility")
+id = &"hull"
+display_name = "선체"
+effect = 3
+effect_summary = "최대 선체 내구도 증가"
+icon = ExtResource("2_icon")
+level_values = PackedFloat32Array(0, 1, 2, 3)

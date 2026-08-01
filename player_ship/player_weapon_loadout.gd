@@ -24,6 +24,9 @@ var _reserve_slot: WeaponSlotState = WeaponSlotState.new()
 var _aux_slots: Array[WeaponSlotState] = []
 var _global_damage_multiplier := 1.0
 var _global_fire_rate_multiplier := 1.0
+## Ship facility bonuses: weapon room hits main weapons only, hangar hits aux capacity only.
+var _facility_main_damage_multiplier := 1.0
+var _facility_auxiliary_ammo_bonus := 0
 ## Per-weapon levels persist across equip swaps for the run.
 var _weapon_levels: Dictionary = {}
 var _weapon_display_names: Dictionary = {}
@@ -73,6 +76,27 @@ func set_global_stat_multipliers(damage_multiplier: float, fire_rate_multiplier:
 	_global_damage_multiplier = maxf(0.01, damage_multiplier)
 	_global_fire_rate_multiplier = maxf(0.01, fire_rate_multiplier)
 	_refresh_all_weapon_multipliers()
+
+
+## Weapon room bonus. Applies to whichever main weapon is equipped, never to its behaviour.
+func set_facility_main_damage_multiplier(multiplier: float) -> void:
+	_facility_main_damage_multiplier = maxf(0.01, multiplier)
+	_refresh_all_weapon_multipliers()
+
+
+## Hangar bonus. Newly equipped aux weapons start at the raised maximum.
+func set_facility_auxiliary_ammo_bonus(bonus: int) -> void:
+	_facility_auxiliary_ammo_bonus = maxi(0, bonus)
+	for index in AUX_SLOT_COUNT:
+		_refresh_slot_weapon_multipliers(WeaponDefinition.Category.AUXILIARY, index)
+
+
+func get_facility_main_damage_multiplier() -> float:
+	return _facility_main_damage_multiplier
+
+
+func get_facility_auxiliary_ammo_bonus() -> int:
+	return _facility_auxiliary_ammo_bonus
 
 
 func get_all_weapon_systems() -> Array[WeaponSystem]:
@@ -542,13 +566,20 @@ func _apply_multipliers_to_weapon(weapon: WeaponSystem, category: WeaponDefiniti
 	var weapon_id := slot.equipped_weapon_id if slot != null else &""
 	var local_damage := get_slot_damage_multiplier(category, slot_index)
 	var local_rate := get_slot_attack_rate_multiplier(category, slot_index)
+	var facility_damage := 1.0
+	var facility_ammo_bonus := 0
 	if category == WeaponDefinition.Category.MAIN:
 		local_damage *= get_weapon_damage_multiplier(weapon_id)
 		local_rate *= get_weapon_attack_rate_multiplier(weapon_id)
+		facility_damage = _facility_main_damage_multiplier
+	else:
+		facility_ammo_bonus = _facility_auxiliary_ammo_bonus
 	weapon.set_global_damage_multiplier(_global_damage_multiplier)
 	weapon.set_global_fire_rate_multiplier(_global_fire_rate_multiplier)
 	weapon.set_local_damage_multiplier(local_damage)
 	weapon.set_local_fire_rate_multiplier(local_rate)
+	weapon.set_facility_damage_multiplier(facility_damage)
+	weapon.set_consumable_capacity_bonus(facility_ammo_bonus)
 
 
 func _refresh_slot_weapon_multipliers(category: WeaponDefinition.Category, slot_index: int) -> void:

@@ -9,6 +9,9 @@
 [ext_resource type="Script" path="res://world_shell.gd" id="7_world_shell"]
 [ext_resource type="Script" path="res://menus/progression_hud.gd" id="8_progression_hud"]
 [ext_resource type="PackedScene" path="res://menus/hex_module_frame.tscn" id="9_hex_module"]
+[ext_resource type="PackedScene" path="res://menus/ship_panel.tscn" id="10_ship_panel"]
+[ext_resource type="Script" path="res://menus/neon_corner_frame.gd" id="11_corner_frame"]
+[ext_resource type="Script" path="res://menus/ship_status_hud.gd" id="12_ship_status_hud"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_left_panel"]
 bg_color = Color(0.018, 0.035, 0.075, 1)
@@ -19,6 +22,18 @@ border_color = Color(0.1, 0.65, 0.95, 0.85)
 bg_color = Color(0.018, 0.035, 0.075, 1)
 border_width_left = 2
 border_color = Color(0.1, 0.65, 0.95, 0.85)
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_weapon_box"]
+bg_color = Color(0.012, 0.05, 0.1, 0.9)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.14, 0.48, 0.72, 0.75)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_progress_background"]
 bg_color = Color(0.006, 0.015, 0.035, 1)
@@ -41,6 +56,20 @@ corner_radius_bottom_left = 2
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_threat_fill"]
 bg_color = Color(1, 0.18, 0.5, 0.95)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_hull_fill"]
+bg_color = Color(0.2, 1, 0.68, 0.95)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_shield_fill"]
+bg_color = Color(0.6, 0.45, 1, 0.95)
 corner_radius_top_left = 2
 corner_radius_top_right = 2
 corner_radius_bottom_right = 2
@@ -148,6 +177,52 @@ theme_override_styles/fill = SubResource("StyleBox_threat_fill")
 max_value = 60.0
 show_percentage = false
 
+[node name="ShipStatusHud" type="VBoxContainer" parent="Layout/LeftPanel/Margin/VBox" node_paths=PackedStringArray("ship")]
+layout_mode = 2
+theme_override_constants/separation = 3
+script = ExtResource("12_ship_status_hud")
+ship = NodePath("../../../../Playfield/ViewportContainer/PlayfieldViewport/Gameplay/Ship")
+
+[node name="HullLabel" type="Label" parent="Layout/LeftPanel/Margin/VBox/ShipStatusHud"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "HULL   1 / 1"
+label_settings = ExtResource("3_default_label")
+theme_override_colors/font_color = Color(0.35, 1, 0.75, 1)
+
+[node name="HullBar" type="ProgressBar" parent="Layout/LeftPanel/Margin/VBox/ShipStatusHud"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 10)
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/background = SubResource("StyleBox_progress_background")
+theme_override_styles/fill = SubResource("StyleBox_hull_fill")
+max_value = 1.0
+value = 1.0
+show_percentage = false
+
+[node name="ShieldSpacer" type="Control" parent="Layout/LeftPanel/Margin/VBox/ShipStatusHud"]
+custom_minimum_size = Vector2(0, 3)
+layout_mode = 2
+
+[node name="ShieldLabel" type="Label" parent="Layout/LeftPanel/Margin/VBox/ShipStatusHud"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "SHIELD 0 / 0"
+label_settings = ExtResource("3_default_label")
+theme_override_colors/font_color = Color(0.72, 0.62, 1, 1)
+
+[node name="ShieldBar" type="ProgressBar" parent="Layout/LeftPanel/Margin/VBox/ShipStatusHud"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 10)
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/background = SubResource("StyleBox_progress_background")
+theme_override_styles/fill = SubResource("StyleBox_shield_fill")
+max_value = 1.0
+value = 0.0
+show_percentage = false
+
 [node name="FlexibleSpace" type="Control" parent="Layout/LeftPanel/Margin/VBox"]
 layout_mode = 2
 size_flags_vertical = 3
@@ -162,6 +237,11 @@ theme_override_colors/font_color = Color(0.45, 0.78, 1, 1)
 layout_mode = 2
 text = "160 × 240"
 label_settings = ExtResource("3_default_label")
+
+[node name="CornerFrame" type="Control" parent="Layout/LeftPanel"]
+layout_mode = 2
+mouse_filter = 2
+script = ExtResource("11_corner_frame")
 
 [node name="Playfield" type="Control" parent="Layout"]
 custom_minimum_size = Vector2(240, 360)
@@ -214,6 +294,17 @@ grow_vertical = 2
 mouse_filter = 2
 color = Color(0.1, 0.65, 0.95, 0.85)
 
+[node name="CornerFrame" type="Control" parent="Layout/Playfield"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("11_corner_frame")
+inset = 5.0
+
 [node name="WeaponPickupLabels" type="Control" parent="Layout/Playfield" groups=["weapon_pickup_label_host"]]
 clip_contents = true
 layout_mode = 1
@@ -256,13 +347,13 @@ theme_override_styles/panel = SubResource("StyleBox_right_panel")
 [node name="Margin" type="MarginContainer" parent="Layout/RightPanel"]
 layout_mode = 2
 theme_override_constants/margin_left = 18
-theme_override_constants/margin_top = 18
+theme_override_constants/margin_top = 10
 theme_override_constants/margin_right = 18
-theme_override_constants/margin_bottom = 18
+theme_override_constants/margin_bottom = 10
 
 [node name="VBox" type="VBoxContainer" parent="Layout/RightPanel/Margin"]
 layout_mode = 2
-theme_override_constants/separation = 6
+theme_override_constants/separation = 4
 
 [node name="LoadoutTitle" type="Label" parent="Layout/RightPanel/Margin/VBox"]
 layout_mode = 2
@@ -274,47 +365,68 @@ custom_minimum_size = Vector2(0, 2)
 layout_mode = 2
 color = Color(0.1, 0.65, 0.95, 0.85)
 
-[node name="WeaponLoadoutHud" type="VBoxContainer" parent="Layout/RightPanel/Margin/VBox" node_paths=PackedStringArray("ship")]
+[node name="ShipPanel" parent="Layout/RightPanel/Margin/VBox" node_paths=PackedStringArray("facility_registry") instance=ExtResource("10_ship_panel")]
 layout_mode = 2
-theme_override_constants/separation = 8
-script = ExtResource("6_weapon_hud")
-ship = NodePath("../../../../Playfield/ViewportContainer/PlayfieldViewport/Gameplay/Ship")
+facility_registry = NodePath("../../../../Playfield/ViewportContainer/PlayfieldViewport/Gameplay/ShipFacilityRegistry")
 
-[node name="MainSwapHint" type="Label" parent="Layout/RightPanel/Margin/VBox/WeaponLoadoutHud"]
+[node name="WeaponBox" type="PanelContainer" parent="Layout/RightPanel/Margin/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBox_weapon_box")
+
+[node name="Margin" type="MarginContainer" parent="Layout/RightPanel/Margin/VBox/WeaponBox"]
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="WeaponLoadoutHud" type="VBoxContainer" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin" node_paths=PackedStringArray("ship")]
+layout_mode = 2
+theme_override_constants/separation = 4
+script = ExtResource("6_weapon_hud")
+ship = NodePath("../../../../../../Playfield/ViewportContainer/PlayfieldViewport/Gameplay/Ship")
+
+[node name="MainSwapHint" type="Label" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud"]
 layout_mode = 2
 text = "[Z] MAIN / RESERVE SWAP"
 label_settings = ExtResource("3_default_label")
 theme_override_colors/font_color = Color(0.45, 0.78, 1, 0.9)
 horizontal_alignment = 1
 
-[node name="MainRow" type="HBoxContainer" parent="Layout/RightPanel/Margin/VBox/WeaponLoadoutHud"]
+[node name="MainRow" type="HBoxContainer" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud"]
 layout_mode = 2
 theme_override_constants/separation = 6
 alignment = 1
 
-[node name="MainModule" parent="Layout/RightPanel/Margin/VBox/WeaponLoadoutHud/MainRow" instance=ExtResource("9_hex_module")]
-custom_minimum_size = Vector2(88, 88)
+[node name="MainModule" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud/MainRow" instance=ExtResource("9_hex_module")]
+custom_minimum_size = Vector2(56, 56)
 layout_mode = 2
 size_flags_horizontal = 4
 
-[node name="ReserveModule" parent="Layout/RightPanel/Margin/VBox/WeaponLoadoutHud/MainRow" instance=ExtResource("9_hex_module")]
-custom_minimum_size = Vector2(64, 64)
+[node name="ReserveModule" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud/MainRow" instance=ExtResource("9_hex_module")]
+custom_minimum_size = Vector2(44, 44)
 layout_mode = 2
 size_flags_horizontal = 4
 
-[node name="BlockNewMainStatus" type="Label" parent="Layout/RightPanel/Margin/VBox/WeaponLoadoutHud"]
+[node name="BlockNewMainStatus" type="Label" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud"]
 layout_mode = 2
 text = "X 새주무기차단: 끔"
 label_settings = ExtResource("3_default_label")
 horizontal_alignment = 1
 
-[node name="OwnedMainRow" type="HBoxContainer" parent="Layout/RightPanel/Margin/VBox/WeaponLoadoutHud"]
+[node name="OwnedMainRow" type="HBoxContainer" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud"]
 layout_mode = 2
 theme_override_constants/separation = 2
 alignment = 1
 
-[node name="AuxRow" type="HBoxContainer" parent="Layout/RightPanel/Margin/VBox/WeaponLoadoutHud"]
+[node name="AuxRow" type="HBoxContainer" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud"]
 layout_mode = 2
 theme_override_constants/separation = 4
 alignment = 1
 size_flags_vertical = 3
+
+[node name="CornerFrame" type="Control" parent="Layout/RightPanel"]
+layout_mode = 2
+mouse_filter = 2
+script = ExtResource("11_corner_frame")

@@ -1,0 +1,39 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Texture2D" uid="uid://cl128g6v4ouqf" path="res://assets/svg/player_ship.svg" id="1_ship"]
+
+[node name="ShipDiagram" type="Control"]
+custom_minimum_size = Vector2(66, 79)
+layout_mode = 3
+anchors_preset = 0
+mouse_filter = 2
+
+[node name="Glow" type="TextureRect" parent="."]
+self_modulate = Color(0.25, 0.9, 1, 0.28)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -2.0
+offset_top = -2.0
+offset_right = 2.0
+offset_bottom = 2.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("1_ship")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Core" type="TextureRect" parent="."]
+self_modulate = Color(0.92, 1, 1, 1)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("1_ship")
+expand_mode = 1
+stretch_mode = 5

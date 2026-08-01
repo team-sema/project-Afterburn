@@ -23,6 +23,20 @@
 [ext_resource type="Resource" uid="uid://bg0yl0s7f0b4p" path="res://resources/enemy_augments/enemy_move_speed_boost_1_2.tres" id="21_enemy_move"]
 [ext_resource type="Resource" path="res://resources/player_augments/weapon/upgrade_main_slot.tres" id="22_up_main"]
 [ext_resource type="Resource" path="res://resources/player_augments/weapon/upgrade_auxiliary_slot.tres" id="23_up_aux"]
+[ext_resource type="Script" path="res://ship_facility_registry.gd" id="24_facility_registry"]
+[ext_resource type="Script" path="res://resources/facilities/ship_facility_definition.gd" id="25_facility_definition"]
+[ext_resource type="Resource" path="res://resources/facilities/definitions/weapon_room.tres" id="26_weapon_room"]
+[ext_resource type="Resource" path="res://resources/facilities/definitions/hangar.tres" id="27_hangar"]
+[ext_resource type="Resource" path="res://resources/facilities/definitions/engine.tres" id="28_engine"]
+[ext_resource type="Resource" path="res://resources/facilities/definitions/hull.tres" id="29_hull"]
+[ext_resource type="Resource" path="res://resources/facilities/definitions/radar.tres" id="30_radar"]
+[ext_resource type="Resource" path="res://resources/facilities/definitions/shield.tres" id="31_shield"]
+[ext_resource type="Resource" path="res://resources/player_augments/facilities/facility_weapon_room.tres" id="32_aug_weapon_room"]
+[ext_resource type="Resource" path="res://resources/player_augments/facilities/facility_hangar.tres" id="33_aug_hangar"]
+[ext_resource type="Resource" path="res://resources/player_augments/facilities/facility_engine.tres" id="34_aug_engine"]
+[ext_resource type="Resource" path="res://resources/player_augments/facilities/facility_hull.tres" id="35_aug_hull"]
+[ext_resource type="Resource" path="res://resources/player_augments/facilities/facility_radar.tres" id="36_aug_radar"]
+[ext_resource type="Resource" path="res://resources/player_augments/facilities/facility_shield.tres" id="37_aug_shield"]
 
 [sub_resource type="Environment" id="Environment_neon"]
 background_mode = 3
@@ -51,6 +65,10 @@ script = ExtResource("6_enemy_registry")
 [node name="PlayerAugmentRegistry" type="Node" parent="." unique_id=91354280]
 script = ExtResource("7_player_registry")
 
+[node name="ShipFacilityRegistry" type="Node" parent="."]
+script = ExtResource("24_facility_registry")
+facilities = Array[ExtResource("25_facility_definition")]([ExtResource("26_weapon_room"), ExtResource("27_hangar"), ExtResource("28_engine"), ExtResource("29_hull"), ExtResource("30_radar"), ExtResource("31_shield")])
+
 [node name="AugmentSelectionOverlay" parent="." unique_id=657828853 instance=ExtResource("10_selection")]
 close_duration = 1.0
 
@@ -64,23 +82,25 @@ ship = NodePath("../Ship")
 slot_selection_ui = NodePath("../WeaponSlotSelectionOverlay")
 confirm_ui = NodePath("../WeaponAcquireConfirmOverlay")
 
-[node name="AugmentOfferController" type="Node" parent="." unique_id=448779419 node_paths=PackedStringArray("player_registry", "enemy_registry", "selection_ui", "slot_selection_ui", "ship")]
+[node name="AugmentOfferController" type="Node" parent="." unique_id=448779419 node_paths=PackedStringArray("player_registry", "enemy_registry", "selection_ui", "slot_selection_ui", "ship", "facility_registry")]
 script = ExtResource("8_offer")
 player_registry = NodePath("../PlayerAugmentRegistry")
 enemy_registry = NodePath("../EnemyAugmentRegistry")
 selection_ui = NodePath("../AugmentSelectionOverlay")
 slot_selection_ui = NodePath("../WeaponSlotSelectionOverlay")
 ship = NodePath("../Ship")
-player_augment_pool = Array[ExtResource("14_player_augment")]([ExtResource("16_player_move"), ExtResource("17_player_fire"), ExtResource("18_player_damage"), ExtResource("22_up_main"), ExtResource("23_up_aux")])
+facility_registry = NodePath("../ShipFacilityRegistry")
+player_augment_pool = Array[ExtResource("14_player_augment")]([ExtResource("16_player_move"), ExtResource("17_player_fire"), ExtResource("18_player_damage"), ExtResource("22_up_main"), ExtResource("23_up_aux"), ExtResource("32_aug_weapon_room"), ExtResource("33_aug_hangar"), ExtResource("34_aug_engine"), ExtResource("35_aug_hull"), ExtResource("36_aug_radar"), ExtResource("37_aug_shield")])
 enemy_augment_pool = Array[ExtResource("15_enemy_augment")]([ExtResource("19_enemy_health"), ExtResource("20_enemy_fire"), ExtResource("21_enemy_move")])
 
 [node name="AugmentProgressionController" type="Node" parent="." unique_id=1005599848 node_paths=PackedStringArray("offer_controller") groups=["augment_progression"]]
 script = ExtResource("9_progression")
 offer_controller = NodePath("../AugmentOfferController")
 
-[node name="Ship" parent="." unique_id=1048269092 node_paths=PackedStringArray("augment_registry") instance=ExtResource("2_ship")]
+[node name="Ship" parent="." unique_id=1048269092 node_paths=PackedStringArray("augment_registry", "facility_registry") instance=ExtResource("2_ship")]
 position = Vector2(80, 216)
 augment_registry = NodePath("../PlayerAugmentRegistry")
+facility_registry = NodePath("../ShipFacilityRegistry")
 
 [node name="SpaceBackground" parent="." unique_id=370541693 instance=ExtResource("4_background")]
 

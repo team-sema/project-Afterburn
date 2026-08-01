@@ -3,6 +3,8 @@ extends CanvasLayer
 
 signal choice_selected(choice: Resource)
 
+const CHOICE_ICON_MAX_WIDTH := 28
+
 @export var player_accent_color: Color
 @export var enemy_accent_color: Color
 @export_range(0.01, 5.0, 0.01) var open_duration := 0.2
@@ -99,6 +101,9 @@ func _set_choices(choices: Array) -> void:
 
 		var augment := current_choices[index] as Resource
 		button.text = "%s\n%s" % [augment.get("display_name"), augment.get("description")]
+		# 아이콘이 없는 카드(적 강화 등)는 텍스트만 보여준다.
+		button.icon = augment.get("icon") as Texture2D
+		button.add_theme_constant_override("icon_max_width", CHOICE_ICON_MAX_WIDTH)
 		button.visible = true
 
 

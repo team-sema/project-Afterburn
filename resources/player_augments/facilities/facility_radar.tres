@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="PlayerAugment" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://resources/player_augments/player_augment.gd" id="1_aug"]
+[ext_resource type="Texture2D" uid="uid://b2vuklv2q7ax" path="res://assets/svg/facilities/facility_radar.svg" id="2_icon"]
+
+[resource]
+script = ExtResource("1_aug")
+augment_id = &"facility_radar"
+display_name = "레이더 증폭"
+description = "레이더 레벨 +1. 아이템 획득 범위 증가."
+augment_type = 6
+icon = ExtResource("2_icon")
+facility_id = &"radar"
