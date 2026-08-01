@@ -8,7 +8,6 @@ var augment_registry: PlayerAugmentRegistry
 var base_move_speed_multiplier: float
 ## Engine facility bonus. Move speed is composed in one place, so it enters here.
 var facility_move_speed_multiplier := 1.0
-var pending_auxiliary_weapon_slot_index := -1
 
 
 func _ready() -> void:
@@ -20,15 +19,9 @@ func initialize(registry: PlayerAugmentRegistry) -> void:
 	assert(registry != null, "PlayerAugmentApplier requires a PlayerAugmentRegistry.")
 	assert(weapon_loadout != null, "PlayerAugmentApplier requires a PlayerWeaponLoadout.")
 	augment_registry = registry
-	if not augment_registry.augment_added.is_connected(_on_augment_added):
-		augment_registry.augment_added.connect(_on_augment_added)
-	if not augment_registry.augments_cleared.is_connected(refresh):
-		augment_registry.augments_cleared.connect(refresh)
+	if not augment_registry.augments_changed.is_connected(refresh):
+		augment_registry.augments_changed.connect(refresh)
 	refresh()
-
-
-func set_pending_auxiliary_weapon_slot(slot_index: int) -> void:
-	pending_auxiliary_weapon_slot_index = slot_index
 
 
 func set_facility_move_speed_multiplier(multiplier: float) -> void:
@@ -40,9 +33,20 @@ func refresh() -> void:
 	var move_speed_multiplier := 1.0
 	var fire_rate_multiplier := 1.0
 	var weapon_damage_multiplier := 1.0
+	var weapon_level_bonuses: Dictionary = {}
 
 	if augment_registry != null:
-		for augment in augment_registry.get_active_augments():
+		for module in augment_registry.get_installed_modules():
+			var augment := module.augment
+			if augment.augment_type in [
+				PlayerAugmentKind.Kind.UPGRADE_MAIN_WEAPON,
+				PlayerAugmentKind.Kind.UPGRADE_AUXILIARY_WEAPON,
+			]:
+				if module.target_weapon_id != &"":
+					weapon_level_bonuses[module.target_weapon_id] = (
+						int(weapon_level_bonuses.get(module.target_weapon_id, 0)) + 1
+					)
+				continue
 			if augment.augment_type != PlayerAugmentKind.Kind.STAT_MULTIPLIER:
 				continue
 			for modifier in augment.stat_modifiers:
@@ -59,22 +63,4 @@ func refresh() -> void:
 	)
 	if weapon_loadout != null:
 		weapon_loadout.set_global_stat_multipliers(weapon_damage_multiplier, fire_rate_multiplier)
-
-
-func _on_augment_added(augment: PlayerAugment) -> void:
-	if augment == null:
-		return
-	match augment.augment_type:
-		PlayerAugmentKind.Kind.STAT_MULTIPLIER:
-			pass
-		PlayerAugmentKind.Kind.UPGRADE_MAIN_WEAPON:
-			weapon_loadout.upgrade_equipped_main_weapon()
-		PlayerAugmentKind.Kind.UPGRADE_AUXILIARY_WEAPON:
-			weapon_loadout.upgrade_auxiliary_weapon(pending_auxiliary_weapon_slot_index)
-			pending_auxiliary_weapon_slot_index = -1
-		PlayerAugmentKind.Kind.UPGRADE_FACILITY:
-			# 시설 레벨은 ShipFacilityRegistry가 갖고, 적용은 ShipFacilityApplier가 한다.
-			pass
-		_:
-			push_warning("PlayerAugmentApplier: ignored non-performance augment type %s" % augment.augment_type)
-	refresh()
+		weapon_loadout.set_augment_weapon_level_bonuses(weapon_level_bonuses)

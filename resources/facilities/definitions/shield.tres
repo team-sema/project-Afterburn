@@ -10,4 +10,4 @@ display_name = "실드"
 effect = 5
 effect_summary = "최대 실드 증가"
 icon = ExtResource("2_icon")
-level_values = PackedFloat32Array(0, 1, 2, 3)
+module_count_values = PackedFloat32Array(0, 1, 2, 3)

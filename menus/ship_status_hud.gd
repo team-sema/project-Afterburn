@@ -2,7 +2,7 @@ class_name ShipStatusHud
 extends VBoxContainer
 
 ## 전투 중 선체·실드 게이지. 함선의 상태를 읽어 표시만 하고 값을 바꾸지 않는다.
-## STATUS 패널의 시설 레벨 표시와는 다른 정보다 (여기는 현재 자원량).
+## STATUS 패널의 모듈 슬롯 표시와는 다른 정보다 (여기는 현재 자원량).
 
 @export var ship: Node2D
 

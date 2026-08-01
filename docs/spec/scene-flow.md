@@ -21,8 +21,8 @@ Menu (ui_accept)
 ### 런타임 트리 (요약)
 
 - `WorldEnvironment` — 네온 글로우
-- `EnemyAugmentRegistry` / `PlayerAugmentRegistry` / `ShipFacilityRegistry`
-- `AugmentSelectionOverlay` / `AugmentOfferController` / `AugmentProgressionController`
+- `EnemyAugmentRegistry` / `PlayerAugmentRegistry`
+- `AugmentSelectionOverlay` / `AugmentModuleSwapOverlay` / `AugmentOfferController` / `AugmentProgressionController`
 - `Ship` / `SpaceBackground` / `EnemyGenerator` / `ScoreLabel`
 
 우측 패널(`world.tscn`): `STATUS` → `ShipPanel`(함선 그림 + 시설 칩 6종 + 상세 박스) → `WeaponBox/Margin/WeaponLoadoutHud`
@@ -52,7 +52,9 @@ Menu (ui_accept)
 2. XP가 요구량을 채워도 **자동으로 열리지 않음**. `open_augment_offer`(**C**)로 PLAYER 오퍼 요청 · 오퍼 UI가 이미 열려 있으면 XP 미소모
 3. 플레이 시간 60초마다 ENEMY 오퍼를 큐에 추가 (도달 순으로 처리)
 4. `AugmentOfferController.request_offer(type)` → `offer_started(type)` → pause
-5. 해당 타입의 3지선다 선택 → registry 반영 → UI 닫기
-6. **PLAYER 오퍼 종료 직후** 함선 주변 `enemy_projectiles` 제거 + `augment_resume_burst` VFX (`player_resume_clear_radius` 기본 36)
-7. unpause → `offer_completed(type)`
-8. 대기 중인 오퍼가 있으면 deferred로 재요청
+5. PLAYER 오퍼는 상단 3지선다와 하단 함선 UI를 함께 표시하고, 카드 포커스가 대상 부위를 하이라이트
+6. PLAYER 카드 선택 → 빈 슬롯 설치. 가득 찬 부위는 교체 모달 표시. 함선 부위 선택 → 슬롯 용량 +1(최대 3)
+7. ENEMY 오퍼는 기존 3지선다 선택 → registry 반영
+8. **PLAYER 오퍼 종료 직후** 함선 주변 `enemy_projectiles` 제거 + `augment_resume_burst` VFX (`player_resume_clear_radius` 기본 36)
+9. unpause → `offer_completed(type)`
+10. 대기 중인 오퍼가 있으면 deferred로 재요청

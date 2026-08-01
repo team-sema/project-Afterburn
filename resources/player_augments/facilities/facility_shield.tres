@@ -6,8 +6,8 @@
 [resource]
 script = ExtResource("1_aug")
 augment_id = &"facility_shield"
-display_name = "실드 증폭"
-description = "실드 레벨 +1. 최대 실드 증가 (증가분만큼 충전)."
+display_name = "실드 축전기"
+description = "장착 중 최대 실드가 1 증가합니다."
 augment_type = 6
 icon = ExtResource("2_icon")
 facility_id = &"shield"

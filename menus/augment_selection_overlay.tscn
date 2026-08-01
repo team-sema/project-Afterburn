@@ -1,13 +1,14 @@
-[gd_scene format=3 uid="uid://503oqsi4rpuh"]
+[gd_scene load_steps=7 format=3 uid="uid://503oqsi4rpuh"]
 
-[ext_resource type="Script" uid="uid://cmey2cic1ef7d" path="res://menus/augment_selection_overlay.gd" id="1_overlay"]
+[ext_resource type="Script" path="res://menus/augment_selection_overlay.gd" id="1_overlay"]
 [ext_resource type="LabelSettings" path="res://fonts/overlay_title_label_settings.tres" id="2_title_settings"]
 [ext_resource type="LabelSettings" path="res://fonts/overlay_default_label_settings.tres" id="3_label_settings"]
 [ext_resource type="FontFile" uid="uid://dhbb73hkpge3y" path="res://fonts/Mulmaru.ttf" id="4_font"]
 [ext_resource type="PackedScene" uid="uid://c6x6veg03hm8w" path="res://menus/augment_breakpoint_intro.tscn" id="5_breakpoint_intro"]
+[ext_resource type="PackedScene" path="res://menus/ship_panel.tscn" id="6_ship_panel"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_panel"]
-bg_color = Color(0.025, 0.055, 0.11, 0.96)
+bg_color = Color(0.025, 0.055, 0.11, 0.97)
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
@@ -31,7 +32,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.005, 0.01, 0.03, 0.88)
+color = Color(0.005, 0.01, 0.03, 0.9)
 
 [node name="BreakpointIntro" parent="." unique_id=1570162321 instance=ExtResource("5_breakpoint_intro")]
 
@@ -41,15 +42,15 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -120.0
-offset_top = -180.0
-offset_right = 120.0
-offset_bottom = 180.0
+offset_left = -300.0
+offset_top = -170.0
+offset_right = 300.0
+offset_bottom = 170.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_left = 12
+theme_override_constants/margin_left = 14
 theme_override_constants/margin_top = 12
-theme_override_constants/margin_right = 12
+theme_override_constants/margin_right = 14
 theme_override_constants/margin_bottom = 12
 
 [node name="PanelContainer" type="PanelContainer" parent="MarginContainer" unique_id=762158450]
@@ -58,7 +59,7 @@ theme_override_styles/panel = SubResource("StyleBox_panel")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/PanelContainer" unique_id=1371109450]
 layout_mode = 2
-theme_override_constants/separation = 6
+theme_override_constants/separation = 8
 
 [node name="TitleLabel" type="Label" parent="MarginContainer/PanelContainer/VBoxContainer" unique_id=1887388987]
 unique_name_in_owner = true
@@ -70,7 +71,7 @@ horizontal_alignment = 1
 [node name="PromptLabel" type="Label" parent="MarginContainer/PanelContainer/VBoxContainer" unique_id=1056033097]
 unique_name_in_owner = true
 layout_mode = 2
-text = "셋 중 하나를 고르세요"
+text = "모듈을 장착하거나 함선 부위의 슬롯을 확장하세요"
 label_settings = ExtResource("3_label_settings")
 horizontal_alignment = 1
 autowrap_mode = 2
@@ -81,32 +82,57 @@ layout_mode = 2
 mouse_filter = 2
 color = Color(0.18, 0.82, 1, 1)
 
-[node name="ChoiceButton1" type="Button" parent="MarginContainer/PanelContainer/VBoxContainer" unique_id=567130545]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 78)
+[node name="ChoiceRow" type="HBoxContainer" parent="MarginContainer/PanelContainer/VBoxContainer"]
 layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 8
+
+[node name="ChoiceButton1" type="Button" parent="MarginContainer/PanelContainer/VBoxContainer/ChoiceRow" unique_id=567130545]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(180, 88)
+layout_mode = 2
+size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_fonts/font = ExtResource("4_font")
 theme_override_font_sizes/font_size = 15
 text = "선택 1"
 autowrap_mode = 2
 
-[node name="ChoiceButton2" type="Button" parent="MarginContainer/PanelContainer/VBoxContainer" unique_id=1842936470]
+[node name="ChoiceButton2" type="Button" parent="MarginContainer/PanelContainer/VBoxContainer/ChoiceRow" unique_id=1842936470]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 78)
+custom_minimum_size = Vector2(180, 88)
 layout_mode = 2
+size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_fonts/font = ExtResource("4_font")
 theme_override_font_sizes/font_size = 15
 text = "선택 2"
 autowrap_mode = 2
 
-[node name="ChoiceButton3" type="Button" parent="MarginContainer/PanelContainer/VBoxContainer" unique_id=779700868]
+[node name="ChoiceButton3" type="Button" parent="MarginContainer/PanelContainer/VBoxContainer/ChoiceRow" unique_id=779700868]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 78)
+custom_minimum_size = Vector2(180, 88)
 layout_mode = 2
+size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_fonts/font = ExtResource("4_font")
 theme_override_font_sizes/font_size = 15
 text = "선택 3"
 autowrap_mode = 2
+
+[node name="ShipSeparator" type="HSeparator" parent="MarginContainer/PanelContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="SlotActionLabel" type="Label" parent="MarginContainer/PanelContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "함선 부위를 선택하면 빈 슬롯 +1 · 최대 3"
+label_settings = ExtResource("3_label_settings")
+horizontal_alignment = 1
+
+[node name="OfferShipPanel" parent="MarginContainer/PanelContainer/VBoxContainer" instance=ExtResource("6_ship_panel")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 148)
+layout_mode = 2
+selection_enabled = true

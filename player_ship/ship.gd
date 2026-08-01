@@ -1,7 +1,6 @@
 extends Node2D
 
 @export var augment_registry: PlayerAugmentRegistry
-@export var facility_registry: ShipFacilityRegistry
 
 @onready var scale_component: ScaleComponent = $ScaleComponent
 @onready var augment_applier: PlayerAugmentApplier = $PlayerAugmentApplier
@@ -16,10 +15,7 @@ func _ready() -> void:
 	assert(weapon_loadout != null, "Ship requires a PlayerWeaponLoadout.")
 	augment_applier.weapon_loadout = weapon_loadout
 	augment_applier.initialize(augment_registry)
-	if facility_registry != null:
-		facility_applier.initialize(facility_registry)
-	else:
-		push_warning("Ship: no ShipFacilityRegistry injected; facilities stay at Lv.1.")
+	facility_applier.initialize(augment_registry)
 	weapon_loadout.loadout_changed.connect(_on_loadout_changed)
 	_connect_weapon_fired_signals()
 

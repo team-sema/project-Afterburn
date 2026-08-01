@@ -367,7 +367,7 @@ color = Color(0.1, 0.65, 0.95, 0.85)
 
 [node name="ShipPanel" parent="Layout/RightPanel/Margin/VBox" node_paths=PackedStringArray("facility_registry") instance=ExtResource("10_ship_panel")]
 layout_mode = 2
-facility_registry = NodePath("../../../../Playfield/ViewportContainer/PlayfieldViewport/Gameplay/ShipFacilityRegistry")
+facility_registry = NodePath("../../../../Playfield/ViewportContainer/PlayfieldViewport/Gameplay/PlayerAugmentRegistry")
 
 [node name="WeaponBox" type="PanelContainer" parent="Layout/RightPanel/Margin/VBox"]
 layout_mode = 2

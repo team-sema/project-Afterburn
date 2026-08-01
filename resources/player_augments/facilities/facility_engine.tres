@@ -6,8 +6,8 @@
 [resource]
 script = ExtResource("1_aug")
 augment_id = &"facility_engine"
-display_name = "엔진 개량"
-description = "엔진 레벨 +1. 이동속도 증가."
+display_name = "추력 편향기"
+description = "장착 중 이동속도가 10% 증가합니다."
 augment_type = 6
 icon = ExtResource("2_icon")
 facility_id = &"engine"

@@ -10,4 +10,4 @@ display_name = "격납고"
 effect = 1
 effect_summary = "보조무기 최대 탄약 증가"
 icon = ExtResource("2_icon")
-level_values = PackedFloat32Array(0, 4, 8, 12)
+module_count_values = PackedFloat32Array(0, 4, 8, 12)

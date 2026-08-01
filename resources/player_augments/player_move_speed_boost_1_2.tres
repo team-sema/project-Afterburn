@@ -13,3 +13,4 @@ augment_id = &"player_move_speed_boost_1_2"
 display_name = "과충전 추진기"
 description = "이동 속도가 20% 증가합니다."
 stat_modifiers = Array[ExtResource("2_modifier")]([SubResource("Resource_move_speed_modifier")])
+facility_id = &"engine"
