@@ -30,14 +30,20 @@ func _run() -> void:
 	)
 	var shooting_enemy_scene := load("res://enemies/shooting_enemy/shooting_enemy.tscn") as PackedScene
 	var shooting_enemy := shooting_enemy_scene.instantiate() as Node2D
-	var shooting_enemy_fire: Node = shooting_enemy.get_node("EnemyShootComponent")
+	var barrage: Node = shooting_enemy.get_node("RadialBarrageShootComponent")
 	_expect(
-		shooting_enemy_fire.projectile_scene.resource_path == "res://projectiles/curve_projectile.tscn",
-		"shooting enemy keeps its curved projectile",
+		barrage.projectile_scene.resource_path == "res://projectiles/base_enemy_projectile.tscn",
+		"caster barrage reuses the straight base projectile",
+	)
+	root.add_child(shooting_enemy)
+	await process_frame
+	_expect(
+		shooting_enemy.get_node_or_null("EnemyShootComponent") == null,
+		"caster replaces the baseline aimed fire component",
 	)
 	projectile.queue_free()
 	default_shoot.free()
-	shooting_enemy.free()
+	shooting_enemy.queue_free()
 	await process_frame
 
 	if failures.is_empty():

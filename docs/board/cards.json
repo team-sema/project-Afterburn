@@ -72,6 +72,14 @@
       "tags": ["적", "밸런스"]
     },
     {
+      "id": "fix-base-enemy-projectile-test",
+      "title": "적 기본 탄 스모크 테스트 최신화",
+      "description": "캐스터 개편 이전 설계를 검사해 상시 실패하던 스모크 테스트를 현재 구조에 맞춘다.",
+      "column": "review",
+      "file": "cards/fix-base-enemy-projectile-test.md",
+      "tags": ["적", "테스트"]
+    },
+    {
       "id": "fix-formation-viewport-before-tree",
       "title": "Drone 편대 viewport 트리 가드",
       "description": "setup_formation이 add_child 전에 viewport를 읽어내던 에러 수정.",
