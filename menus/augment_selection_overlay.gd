@@ -38,6 +38,7 @@ const FACILITY_GRID := [
 var current_choices: Array = []
 var is_accepting_input := false
 var _showing_ship_modules := false
+var _weapon_loadout: PlayerWeaponLoadout
 
 
 func _ready() -> void:
@@ -51,6 +52,10 @@ func _ready() -> void:
 
 func configure_player_registry(registry: PlayerAugmentRegistry) -> void:
 	offer_ship_panel.set_registry(registry)
+
+
+func configure_weapon_loadout(loadout: PlayerWeaponLoadout) -> void:
+	_weapon_loadout = loadout
 
 
 func open_choices(
@@ -172,8 +177,16 @@ func _set_choices(choices: Array) -> void:
 			button.visible = false
 			continue
 		var augment := current_choices[index] as Resource
-		button.text = "%s\n%s" % [augment.get("display_name"), augment.get("description")]
-		button.icon = augment.get("icon") as Texture2D
+		var player_augment := augment as PlayerAugment
+		if player_augment != null:
+			button.text = "%s\n%s" % [
+				player_augment.get_offer_title(_weapon_loadout),
+				player_augment.get_offer_description(_weapon_loadout),
+			]
+			button.icon = player_augment.get_offer_icon()
+		else:
+			button.text = "%s\n%s" % [augment.get("display_name"), augment.get("description")]
+			button.icon = augment.get("icon") as Texture2D
 		button.add_theme_constant_override("icon_max_width", CHOICE_ICON_MAX_WIDTH)
 		button.visible = true
 

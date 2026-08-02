@@ -1,25 +1,23 @@
 class_name HomingMissileWeaponSystem
 extends WeaponSystem
 
-@export var max_charges := 10
+## Permanent bay weapon — fires on its own timer with no ammo limit.
 
 @onready var muzzle: Marker2D = $Muzzle
 @onready var spawner_component: SpawnerComponent = $SpawnerComponent
 @onready var fire_rate_timer: Timer = $FireRateTimer
 
 var base_fire_wait_time: float
-var _charges: int = 0
 
 
 func _ready() -> void:
-	_charges = get_consumable_max()
 	base_fire_wait_time = fire_rate_timer.wait_time
 	fire_rate_timer.timeout.connect(fire)
 	_apply_stat_multipliers()
 
 
 func fire() -> void:
-	if is_shutdown or _charges <= 0:
+	if is_shutdown:
 		return
 	spawner_component.spawn(
 		muzzle.global_position,
@@ -27,30 +25,6 @@ func fire() -> void:
 		_configure_projectile,
 	)
 	fired.emit()
-	_charges -= 1
-	report_consumable_changed()
-	if _charges <= 0:
-		report_depleted()
-
-
-func get_consumable_remaining() -> int:
-	return _charges
-
-
-func get_consumable_max() -> int:
-	return maxi(1, max_charges + get_consumable_capacity_bonus())
-
-
-func _on_refill_consumable() -> void:
-	_charges = get_consumable_max()
-
-
-## Hangar upgrades grant only the added capacity, never a full refill.
-func _on_consumable_capacity_bonus_changed(delta: int) -> void:
-	if _charges <= 0:
-		return
-	_charges = clampi(_charges + delta, 0, get_consumable_max())
-	report_consumable_changed()
 
 
 func _apply_stat_multipliers() -> void:

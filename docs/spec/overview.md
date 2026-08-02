@@ -2,7 +2,7 @@
 
 > **프로젝트:** Project Afterburn (`mayhem_shmup`)  
 > **엔진:** Godot 4.7 · Mobile 렌더러  
-> **뷰포트:** 160×240 (윈도우 오버라이드 640×960, `canvas_items` stretch)
+> **뷰포트:** 640×360 셸 (윈도우 오버라이드 1280×720, `canvas_items` stretch) · 플레이필드 SubViewport는 중앙 레일
 
 종스크롤 슈팅에 **점수 기반 오그먼트 선택**을 얹은 프로토타입이다. 엔티티는 HeartBeast Galaxy Defiance 계열의 **컴포넌트(커스텀 노드)** 조합으로 구성한다.
 

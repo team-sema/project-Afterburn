@@ -25,8 +25,17 @@ var _title_settings: LabelSettings
 var _body_settings: LabelSettings
 
 
+@export var interactive := false:
+	set(value):
+		interactive = value
+		mouse_filter = Control.MOUSE_FILTER_STOP if interactive else Control.MOUSE_FILTER_IGNORE
+
+signal module_hovered
+signal module_clicked
+
+
 func _ready() -> void:
-	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	mouse_filter = Control.MOUSE_FILTER_STOP if interactive else Control.MOUSE_FILTER_IGNORE
 	_title_settings = BASE_LABEL_SETTINGS.duplicate() as LabelSettings
 	_body_settings = BASE_LABEL_SETTINGS.duplicate() as LabelSettings
 	var title_label := _get_title_label()
@@ -37,16 +46,34 @@ func _ready() -> void:
 		title_label.clip_text = true
 		title_label.autowrap_mode = TextServer.AUTOWRAP_OFF
 		title_label.set_anchors_preset(Control.PRESET_TOP_LEFT, false)
+		title_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	if body_label != null:
 		body_label.label_settings = _body_settings
 		body_label.clip_text = true
 		body_label.autowrap_mode = TextServer.AUTOWRAP_OFF
 		body_label.set_anchors_preset(Control.PRESET_TOP_LEFT, false)
+		body_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	if icon_rect != null:
 		icon_rect.set_anchors_preset(Control.PRESET_TOP_LEFT, false)
+		icon_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_apply_icon_modulate()
 	resized.connect(_on_resized)
 	_layout_children()
+
+
+func _gui_input(event: InputEvent) -> void:
+	if not interactive:
+		return
+	if event is InputEventMouseButton:
+		var mouse := event as InputEventMouseButton
+		if mouse.pressed and mouse.button_index == MOUSE_BUTTON_LEFT:
+			module_clicked.emit()
+			accept_event()
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_MOUSE_ENTER and interactive:
+		module_hovered.emit()
 
 
 func set_module_text(title: String, body: String) -> void:

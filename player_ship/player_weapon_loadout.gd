@@ -1,148 +1,160 @@
 class_name PlayerWeaponLoadout
 extends Node2D
 
-signal main_weapon_changed(weapon_definition: WeaponDefinition)
-signal auxiliary_weapon_changed(slot_index: int, weapon_definition: WeaponDefinition)
-signal slot_unlocked(slot_index: int)
+## Unified weapon bays. Growth is keyed by weapon_id; all equipped weapons fire together.
+
+signal weapon_equipped(weapon_id: StringName, slot_index: int)
+signal weapon_unequipped(weapon_id: StringName, slot_index: int)
 signal weapon_level_changed(weapon_id: StringName, new_level: int)
+signal weapon_trait_changed(weapon_id: StringName, trait_id: StringName, new_rank: int)
+signal weapon_records_changed
+signal weapon_slots_changed
 signal loadout_changed
 
-const AUX_SLOT_COUNT := 3
 const MAX_WEAPON_LEVEL := 3
 
-@export var default_main_weapon: WeaponDefinition
+@export var default_weapon: WeaponDefinition
 @export var player_path: NodePath
+@export_range(1, 8, 1) var max_equipped_weapon_count := 3
+## When picking up a recorded (unequipped) weapon into an empty bay, also raise level by 1.
+@export var raise_level_on_reacquire_recorded := false
 
-@onready var main_weapon_mount: Node2D = $MainWeaponMount
-@onready var auxiliary_weapon_mounts: Node2D = $AuxiliaryWeaponMounts
+@onready var weapon_mounts_root: Node2D = $WeaponMounts
 
 var _player: Node2D
-var _main_slot: WeaponSlotState = WeaponSlotState.new()
-## Standby main-weapon slot: metadata only until swapped into main.
-var _reserve_slot: WeaponSlotState = WeaponSlotState.new()
-var _aux_slots: Array[WeaponSlotState] = []
+var _bays: Array[WeaponSlotState] = []
+var _mounts: Array[Node2D] = []
+## weapon_id -> WeaponProgressState
+var _progress: Dictionary = {}
 var _global_damage_multiplier := 1.0
 var _global_fire_rate_multiplier := 1.0
-## Ship facility bonuses: weapon room hits main weapons only, hangar hits aux capacity only.
-var _facility_main_damage_multiplier := 1.0
-var _facility_auxiliary_ammo_bonus := 0
-## Per-weapon levels persist across equip swaps for the run.
-var _weapon_levels: Dictionary = {}
-## Installed augment modules add reversible levels to their recorded weapon ids.
-var _augment_weapon_level_bonuses: Dictionary = {}
-var _weapon_display_names: Dictionary = {}
-## weapon_id -> WeaponDefinition.Category (for owned HUD rows).
-var _weapon_categories: Dictionary = {}
-## weapon_id -> WeaponDefinition, so HUD rows can reach icons without a live slot.
-var _weapon_definitions: Dictionary = {}
+var _facility_damage_multiplier := 1.0
 
 
 func _ready() -> void:
 	_player = get_node_or_null(player_path) as Node2D
 	if _player == null:
 		_player = get_parent() as Node2D
+	_ensure_bays_and_mounts()
+	if default_weapon != null:
+		equip_weapon(default_weapon)
 
-	_main_slot.slot_type = WeaponDefinition.Category.MAIN
-	_main_slot.slot_index = 0
-	_main_slot.unlocked = true
 
-	_reserve_slot.slot_type = WeaponDefinition.Category.MAIN
-	_reserve_slot.slot_index = 1
-	_reserve_slot.unlocked = true
-
-	_aux_slots.clear()
-	for index in AUX_SLOT_COUNT:
+func _ensure_bays_and_mounts() -> void:
+	assert(weapon_mounts_root != null, "PlayerWeaponLoadout requires WeaponMounts.")
+	var count := maxi(1, max_equipped_weapon_count)
+	while _mounts.size() < count:
+		var mount := Node2D.new()
+		mount.name = "WeaponMount%d" % (_mounts.size() + 1)
+		weapon_mounts_root.add_child(mount)
+		_mounts.append(mount)
+	while _bays.size() < count:
 		var slot := WeaponSlotState.new()
-		slot.slot_type = WeaponDefinition.Category.AUXILIARY
-		slot.slot_index = index
-		slot.unlocked = true
-		_aux_slots.append(slot)
-
-	if default_main_weapon != null:
-		equip_main_weapon(default_main_weapon)
-
-
-func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventKey and event.pressed and not event.echo:
-		var key_event := event as InputEventKey
-		if key_event.keycode == KEY_Z or key_event.physical_keycode == KEY_Z:
-			if swap_main_and_reserve():
-				get_viewport().set_input_as_handled()
+		slot.slot_index = _bays.size()
+		_bays.append(slot)
+	# Shrink only empty trailing bays if count lowered at runtime (rare).
+	while _bays.size() > count:
+		var last: WeaponSlotState = _bays[_bays.size() - 1]
+		if not last.is_empty():
+			break
+		_bays.pop_back()
 
 
-func set_global_stat_multipliers(damage_multiplier: float, fire_rate_multiplier: float) -> void:
-	_global_damage_multiplier = maxf(0.01, damage_multiplier)
-	_global_fire_rate_multiplier = maxf(0.01, fire_rate_multiplier)
-	_refresh_all_weapon_multipliers()
+func get_max_equipped_weapon_count() -> int:
+	return maxi(1, max_equipped_weapon_count)
 
 
-## Weapon room bonus. Applies to whichever main weapon is equipped, never to its behaviour.
-func set_facility_main_damage_multiplier(multiplier: float) -> void:
-	_facility_main_damage_multiplier = maxf(0.01, multiplier)
-	_refresh_all_weapon_multipliers()
+func get_equipped_weapons() -> Array[WeaponDefinition]:
+	var result: Array[WeaponDefinition] = []
+	for bay in _bays:
+		if bay.is_empty() or bay.equipped_weapon_definition == null:
+			continue
+		result.append(bay.equipped_weapon_definition)
+	return result
 
 
-## Hangar bonus. Newly equipped aux weapons start at the raised maximum.
-func set_facility_auxiliary_ammo_bonus(bonus: int) -> void:
-	_facility_auxiliary_ammo_bonus = maxi(0, bonus)
-	for index in AUX_SLOT_COUNT:
-		_refresh_slot_weapon_multipliers(WeaponDefinition.Category.AUXILIARY, index)
+func get_equipped_weapon_ids() -> Array[StringName]:
+	var ids: Array[StringName] = []
+	for bay in _bays:
+		if bay.is_empty():
+			continue
+		ids.append(bay.equipped_weapon_id)
+	return ids
 
 
-func get_facility_main_damage_multiplier() -> float:
-	return _facility_main_damage_multiplier
+func get_bay(slot_index: int) -> WeaponSlotState:
+	if slot_index < 0 or slot_index >= _bays.size():
+		return null
+	return _bays[slot_index]
 
 
-func get_facility_auxiliary_ammo_bonus() -> int:
-	return _facility_auxiliary_ammo_bonus
+func get_first_empty_bay() -> int:
+	for index in _bays.size():
+		if _bays[index].is_empty():
+			return index
+	return -1
 
 
-func get_all_weapon_systems() -> Array[WeaponSystem]:
-	var systems: Array[WeaponSystem] = []
-	if _main_slot.equipped_weapon_instance != null and is_instance_valid(_main_slot.equipped_weapon_instance):
-		systems.append(_main_slot.equipped_weapon_instance)
-	for slot in _aux_slots:
-		if slot.equipped_weapon_instance != null and is_instance_valid(slot.equipped_weapon_instance):
-			systems.append(slot.equipped_weapon_instance)
-	return systems
+func is_weapon_equipped(weapon_id: StringName) -> bool:
+	return find_equipped_slot(weapon_id) >= 0
+
+
+func find_equipped_slot(weapon_id: StringName) -> int:
+	if weapon_id == &"":
+		return -1
+	for index in _bays.size():
+		if _bays[index].equipped_weapon_id == weapon_id:
+			return index
+	return -1
+
+
+func has_empty_bay() -> bool:
+	return get_first_empty_bay() >= 0
+
+
+func is_bays_full() -> bool:
+	return get_first_empty_bay() < 0
+
+
+func get_weapon_state(weapon_id: StringName) -> WeaponProgressState:
+	if weapon_id == &"":
+		return null
+	return _progress.get(weapon_id) as WeaponProgressState
 
 
 func get_weapon_level(weapon_id: StringName) -> int:
-	if weapon_id == &"":
+	var state := get_weapon_state(weapon_id)
+	if state == null:
 		return 1
-	return clampi(
-		get_base_weapon_level(weapon_id) + int(_augment_weapon_level_bonuses.get(weapon_id, 0)),
-		1,
-		MAX_WEAPON_LEVEL,
-	)
+	return clampi(state.level, 1, MAX_WEAPON_LEVEL)
 
 
 func get_base_weapon_level(weapon_id: StringName) -> int:
-	if weapon_id == &"":
-		return 1
-	return int(_weapon_levels.get(weapon_id, 1))
+	return get_weapon_level(weapon_id)
 
 
-func set_augment_weapon_level_bonuses(bonuses: Dictionary) -> void:
-	_augment_weapon_level_bonuses = bonuses.duplicate()
-	for weapon_id in _sorted_tracked_ids():
-		weapon_level_changed.emit(weapon_id, get_weapon_level(weapon_id))
-		_refresh_equipped_weapon_by_id(weapon_id)
-	loadout_changed.emit()
-
-
-func get_weapon_display_name(weapon_id: StringName) -> String:
-	if weapon_id == &"":
-		return ""
-	if not _weapon_display_names.has(weapon_id):
-		return String(weapon_id)
-	return str(_weapon_display_names[weapon_id])
+func get_weapon_traits(weapon_id: StringName) -> Dictionary:
+	var state := get_weapon_state(weapon_id)
+	if state == null:
+		return {}
+	return state.trait_ranks.duplicate()
 
 
 func get_weapon_definition(weapon_id: StringName) -> WeaponDefinition:
-	if weapon_id == &"":
-		return null
-	return _weapon_definitions.get(weapon_id) as WeaponDefinition
+	var state := get_weapon_state(weapon_id)
+	if state != null and state.definition != null:
+		return state.definition
+	for bay in _bays:
+		if bay.equipped_weapon_id == weapon_id:
+			return bay.equipped_weapon_definition
+	return null
+
+
+func get_weapon_display_name(weapon_id: StringName) -> String:
+	var definition := get_weapon_definition(weapon_id)
+	if definition != null:
+		return definition.display_name
+	return String(weapon_id)
 
 
 func get_weapon_icon(weapon_id: StringName) -> Texture2D:
@@ -153,357 +165,184 @@ func get_weapon_icon(weapon_id: StringName) -> Texture2D:
 
 
 func has_weapon_progress(weapon_id: StringName) -> bool:
-	return _weapon_levels.has(weapon_id)
+	return _progress.has(weapon_id)
 
 
-func can_upgrade_weapon(weapon_id: StringName) -> bool:
-	return weapon_id != &"" and get_weapon_level(weapon_id) < MAX_WEAPON_LEVEL
+func get_recorded_weapons() -> Array[WeaponProgressState]:
+	var recorded: Array[WeaponProgressState] = []
+	for weapon_id in _sorted_tracked_ids():
+		if is_weapon_equipped(weapon_id):
+			continue
+		var state := get_weapon_state(weapon_id)
+		if state != null:
+			recorded.append(state)
+	return recorded
 
 
 func get_tracked_weapon_ids() -> Array[StringName]:
 	return _sorted_tracked_ids()
 
 
-func get_tracked_weapon_ids_by_category(category: WeaponDefinition.Category) -> Array[StringName]:
-	var ids: Array[StringName] = []
-	for weapon_id in _sorted_tracked_ids():
-		if get_weapon_category(weapon_id) == category:
-			ids.append(weapon_id)
-	return ids
+func can_upgrade_weapon(weapon_id: StringName) -> bool:
+	return weapon_id != &"" and get_weapon_level(weapon_id) < MAX_WEAPON_LEVEL
 
 
-func get_weapon_category(weapon_id: StringName) -> WeaponDefinition.Category:
-	if weapon_id == &"" or not _weapon_categories.has(weapon_id):
-		return WeaponDefinition.Category.MAIN
-	return int(_weapon_categories[weapon_id]) as WeaponDefinition.Category
+func set_global_stat_multipliers(damage_multiplier: float, fire_rate_multiplier: float) -> void:
+	_global_damage_multiplier = maxf(0.01, damage_multiplier)
+	_global_fire_rate_multiplier = maxf(0.01, fire_rate_multiplier)
+	_refresh_all_weapon_multipliers()
 
 
-## First MAIN pickup registers Lv.1; later MAIN pickups raise level. Returns true if level increased.
-## Auxiliary pickups must not call this — use refill_auxiliary_weapon / equip instead.
-func note_weapon_pickup(
-	weapon_id: StringName,
-	display_name: String = "",
-	category: WeaponDefinition.Category = WeaponDefinition.Category.MAIN
-) -> bool:
-	if weapon_id == &"":
-		return false
-	if category == WeaponDefinition.Category.AUXILIARY:
-		push_warning("note_weapon_pickup ignored for auxiliary '%s' (handled as a consumable pickup)." % String(weapon_id))
-		return false
-	_weapon_categories[weapon_id] = category
-	if display_name != "":
-		_weapon_display_names[weapon_id] = display_name
-	if not _weapon_levels.has(weapon_id):
-		_weapon_levels[weapon_id] = 1
-		weapon_level_changed.emit(weapon_id, 1)
-		_refresh_equipped_weapon_by_id(weapon_id)
-		loadout_changed.emit()
-		return false
-	return upgrade_weapon_level(weapon_id)
+## Weapon room: applies to every equipped weapon.
+func set_facility_damage_multiplier(multiplier: float) -> void:
+	_facility_damage_multiplier = maxf(0.01, multiplier)
+	_refresh_all_weapon_multipliers()
+
+
+## Compatibility alias used by older facility applier call sites during migration.
+func set_facility_main_damage_multiplier(multiplier: float) -> void:
+	set_facility_damage_multiplier(multiplier)
+
+
+func get_facility_damage_multiplier() -> float:
+	return _facility_damage_multiplier
+
+
+func get_facility_main_damage_multiplier() -> float:
+	return get_facility_damage_multiplier()
+
+
+func get_all_weapon_systems() -> Array[WeaponSystem]:
+	var systems: Array[WeaponSystem] = []
+	for bay in _bays:
+		if bay.equipped_weapon_instance != null and is_instance_valid(bay.equipped_weapon_instance):
+			systems.append(bay.equipped_weapon_instance)
+	return systems
 
 
 func upgrade_weapon_level(weapon_id: StringName) -> bool:
-	if weapon_id == &"":
+	if weapon_id == &"" or not _progress.has(weapon_id):
 		return false
-	var level := get_base_weapon_level(weapon_id)
-	if level >= MAX_WEAPON_LEVEL:
+	var state := get_weapon_state(weapon_id)
+	if state.level >= MAX_WEAPON_LEVEL:
 		return false
-	level += 1
-	_weapon_levels[weapon_id] = level
-	weapon_level_changed.emit(weapon_id, level)
+	state.level += 1
+	weapon_level_changed.emit(weapon_id, state.level)
 	_refresh_equipped_weapon_by_id(weapon_id)
 	loadout_changed.emit()
 	return true
 
 
-func equip_main_weapon(weapon_definition: WeaponDefinition) -> void:
-	if weapon_definition == null:
-		push_error("PlayerWeaponLoadout.equip_main_weapon: weapon_definition is null.")
-		return
-	if weapon_definition.category != WeaponDefinition.Category.MAIN:
-		push_error("PlayerWeaponLoadout.equip_main_weapon: '%s' is not a MAIN weapon." % String(weapon_definition.id))
-		return
-	if weapon_definition.weapon_scene == null:
-		push_error("PlayerWeaponLoadout.equip_main_weapon: '%s' has no weapon_scene." % String(weapon_definition.id))
-		return
-
-	_register_weapon_definition(weapon_definition)
-	_clear_slot_equipment(_main_slot)
-	_assign_slot_weapon(_main_slot, weapon_definition)
-	var instance := _instantiate_weapon(weapon_definition, WeaponDefinition.Category.MAIN, 0, main_weapon_mount)
-	if instance == null:
-		_clear_slot_equipment(_main_slot)
-		return
-
-	_main_slot.equipped_weapon_instance = instance
-	_apply_multipliers_to_weapon(instance, WeaponDefinition.Category.MAIN, 0)
-	main_weapon_changed.emit(weapon_definition)
+func add_or_upgrade_weapon_trait(weapon_id: StringName, trait_id: StringName, rank_increase: int = 1) -> int:
+	if weapon_id == &"" or trait_id == &"" or rank_increase == 0:
+		return -1
+	var state := _ensure_progress(weapon_id, null)
+	var new_rank := state.get_trait_rank(trait_id) + rank_increase
+	state.set_trait_rank(trait_id, new_rank)
+	weapon_trait_changed.emit(weapon_id, trait_id, new_rank)
+	weapon_records_changed.emit()
 	loadout_changed.emit()
+	return new_rank
 
 
-## Stow a main weapon in the reserve slot (no active instance until swapped).
-func equip_reserve_weapon(weapon_definition: WeaponDefinition) -> void:
+## Augment offer: ensure progress and equip into an empty bay.
+## Returns true if equipped (or already equipped). False if bays are full (caller runs replace UI).
+## Restore keeps existing level/traits; brand-new uses starting_level. Never auto +1 on restore.
+func offer_equip_weapon(weapon_definition: WeaponDefinition, starting_level: int = 1) -> bool:
+	if weapon_definition == null or weapon_definition.id == &"":
+		return false
+	if is_weapon_equipped(weapon_definition.id):
+		return true
+	var existed := has_weapon_progress(weapon_definition.id)
+	var state := _ensure_progress(weapon_definition.id, weapon_definition)
+	if not existed:
+		state.level = clampi(starting_level, 1, MAX_WEAPON_LEVEL)
+		weapon_level_changed.emit(weapon_definition.id, state.level)
+	var empty := get_first_empty_bay()
+	if empty < 0:
+		return false
+	return equip_weapon(weapon_definition, empty)
+
+
+## Replace an equipped bay with a weapon from an augment offer (records the old weapon).
+func request_replace_equipped(slot_index: int, weapon_definition: WeaponDefinition, starting_level: int = 1) -> bool:
 	if weapon_definition == null:
-		push_error("PlayerWeaponLoadout.equip_reserve_weapon: weapon_definition is null.")
-		return
-	if weapon_definition.category != WeaponDefinition.Category.MAIN:
-		push_error("PlayerWeaponLoadout.equip_reserve_weapon: '%s' is not a MAIN weapon." % String(weapon_definition.id))
-		return
-	if weapon_definition.weapon_scene == null:
-		push_error("PlayerWeaponLoadout.equip_reserve_weapon: '%s' has no weapon_scene." % String(weapon_definition.id))
-		return
-
-	_register_weapon_definition(weapon_definition)
-	_clear_slot_equipment(_reserve_slot)
-	_assign_slot_weapon(_reserve_slot, weapon_definition)
-	loadout_changed.emit()
-
-
-## Swap firing main with reserve. No-op if reserve is empty.
-func swap_main_and_reserve() -> bool:
-	if _reserve_slot.is_empty():
 		return false
-	var main_def: WeaponDefinition = _main_slot.equipped_weapon_definition
-	var reserve_def: WeaponDefinition = _reserve_slot.equipped_weapon_definition
-	if reserve_def == null:
+	if slot_index < 0 or slot_index >= _bays.size():
+		return false
+	if is_weapon_equipped(weapon_definition.id) and find_equipped_slot(weapon_definition.id) != slot_index:
+		return false
+	var existed := has_weapon_progress(weapon_definition.id)
+	var state := _ensure_progress(weapon_definition.id, weapon_definition)
+	if not existed:
+		state.level = clampi(starting_level, 1, MAX_WEAPON_LEVEL)
+		weapon_level_changed.emit(weapon_definition.id, state.level)
+	unequip_weapon_at(slot_index)
+	return equip_weapon(weapon_definition, slot_index)
+
+
+## Legacy field-pickup API — field drops are disabled; always fails.
+func try_acquire_weapon(_weapon_definition: WeaponDefinition) -> bool:
+	return false
+
+
+func equip_weapon(weapon_definition: WeaponDefinition, slot_index: int = -1) -> bool:
+	if weapon_definition == null or weapon_definition.weapon_scene == null:
+		push_error("PlayerWeaponLoadout.equip_weapon: invalid definition.")
+		return false
+	_ensure_bays_and_mounts()
+	var target := slot_index
+	if target < 0:
+		target = get_first_empty_bay()
+	if target < 0 or target >= _bays.size():
+		push_error("PlayerWeaponLoadout.equip_weapon: no empty bay.")
+		return false
+	if is_weapon_equipped(weapon_definition.id):
+		push_error("PlayerWeaponLoadout.equip_weapon: '%s' already equipped." % String(weapon_definition.id))
 		return false
 
-	_clear_slot_equipment(_main_slot)
-	_clear_slot_equipment(_reserve_slot)
+	var bay := _bays[target]
+	if not bay.is_empty():
+		unequip_weapon_at(target)
 
-	_assign_slot_weapon(_main_slot, reserve_def)
-	var instance := _instantiate_weapon(reserve_def, WeaponDefinition.Category.MAIN, 0, main_weapon_mount)
+	_ensure_progress(weapon_definition.id, weapon_definition)
+	var mount := _mounts[target]
+	var instance := _instantiate_weapon(weapon_definition, target, mount)
 	if instance == null:
-		_clear_slot_equipment(_main_slot)
-		if main_def != null:
-			_assign_slot_weapon(_reserve_slot, main_def)
-		loadout_changed.emit()
 		return false
-	_main_slot.equipped_weapon_instance = instance
-	_apply_multipliers_to_weapon(instance, WeaponDefinition.Category.MAIN, 0)
-	main_weapon_changed.emit(reserve_def)
 
-	if main_def != null:
-		_assign_slot_weapon(_reserve_slot, main_def)
-
+	bay.equipped_weapon_id = weapon_definition.id
+	bay.equipped_weapon_display_name = weapon_definition.display_name
+	bay.equipped_weapon_definition = weapon_definition
+	bay.equipped_weapon_instance = instance
+	_apply_multipliers_to_weapon(instance, weapon_definition.id)
+	weapon_equipped.emit(weapon_definition.id, target)
+	weapon_slots_changed.emit()
+	weapon_records_changed.emit()
 	loadout_changed.emit()
 	return true
 
 
-func equip_auxiliary_weapon(weapon_definition: WeaponDefinition, slot_index: int = -1) -> void:
-	if weapon_definition == null:
-		push_error("PlayerWeaponLoadout.equip_auxiliary_weapon: weapon_definition is null.")
-		return
-	if weapon_definition.category != WeaponDefinition.Category.AUXILIARY:
-		push_error("PlayerWeaponLoadout.equip_auxiliary_weapon: '%s' is not AUXILIARY." % String(weapon_definition.id))
-		return
-	if has_auxiliary_weapon(weapon_definition.id):
-		push_error("PlayerWeaponLoadout.equip_auxiliary_weapon: '%s' already equipped." % String(weapon_definition.id))
-		return
-
-	var target_index := slot_index
-	if target_index < 0:
-		target_index = get_first_empty_auxiliary_slot()
-	if target_index < 0:
-		push_error("PlayerWeaponLoadout.equip_auxiliary_weapon: no empty unlocked auxiliary slot.")
-		return
-	replace_auxiliary_weapon(target_index, weapon_definition)
+func unequip_weapon(weapon_id: StringName) -> bool:
+	var index := find_equipped_slot(weapon_id)
+	if index < 0:
+		return false
+	return unequip_weapon_at(index)
 
 
-func replace_auxiliary_weapon(slot_index: int, weapon_definition: WeaponDefinition) -> void:
-	if not _is_valid_aux_index(slot_index):
-		push_error("PlayerWeaponLoadout.replace_auxiliary_weapon: invalid slot_index %s." % slot_index)
-		return
-	if weapon_definition == null or weapon_definition.category != WeaponDefinition.Category.AUXILIARY:
-		push_error("PlayerWeaponLoadout.replace_auxiliary_weapon: invalid weapon_definition.")
-		return
-	if weapon_definition.weapon_scene == null:
-		push_error("PlayerWeaponLoadout.replace_auxiliary_weapon: missing weapon_scene.")
-		return
-
-	var slot := _aux_slots[slot_index]
-	if not slot.unlocked:
-		push_error("PlayerWeaponLoadout.replace_auxiliary_weapon: slot %s is locked." % slot_index)
-		return
-
-	if has_auxiliary_weapon(weapon_definition.id) and slot.equipped_weapon_id != weapon_definition.id:
-		push_error("PlayerWeaponLoadout.replace_auxiliary_weapon: '%s' already in another slot." % String(weapon_definition.id))
-		return
-
-	var mount := _get_aux_mount(slot_index)
-	if mount == null:
-		push_error("PlayerWeaponLoadout.replace_auxiliary_weapon: missing AuxMount for slot %s." % slot_index)
-		return
-
-	_register_weapon_definition(weapon_definition)
-
-	_clear_slot_equipment(slot)
-	var instance := _instantiate_weapon(weapon_definition, WeaponDefinition.Category.AUXILIARY, slot_index, mount)
-	if instance == null:
-		return
-
-	slot.equipped_weapon_id = weapon_definition.id
-	slot.equipped_weapon_display_name = weapon_definition.display_name
-	slot.equipped_weapon_definition = weapon_definition
-	slot.equipped_weapon_instance = instance
-	if not instance.depleted.is_connected(_on_auxiliary_weapon_depleted.bind(slot_index)):
-		instance.depleted.connect(_on_auxiliary_weapon_depleted.bind(slot_index))
-	_apply_multipliers_to_weapon(instance, WeaponDefinition.Category.AUXILIARY, slot_index)
-	auxiliary_weapon_changed.emit(slot_index, weapon_definition)
+func unequip_weapon_at(slot_index: int) -> bool:
+	if slot_index < 0 or slot_index >= _bays.size():
+		return false
+	var bay := _bays[slot_index]
+	if bay.is_empty():
+		return false
+	var weapon_id := bay.equipped_weapon_id
+	_clear_bay(bay)
+	weapon_unequipped.emit(weapon_id, slot_index)
+	weapon_slots_changed.emit()
+	weapon_records_changed.emit()
 	loadout_changed.emit()
-
-
-## Same aux pickup restores remaining uses instead of raising a weapon level.
-func refill_auxiliary_weapon(weapon_id: StringName) -> bool:
-	if weapon_id == &"":
-		return false
-	for index in AUX_SLOT_COUNT:
-		var slot := _aux_slots[index]
-		if slot.equipped_weapon_id != weapon_id:
-			continue
-		var instance := slot.equipped_weapon_instance
-		if instance == null or not is_instance_valid(instance):
-			return false
-		instance.refill_consumable()
-		loadout_changed.emit()
-		return true
-	return false
-
-
-func notify_consumable_changed() -> void:
-	loadout_changed.emit()
-
-
-func clear_auxiliary_slot(slot_index: int) -> void:
-	if not _is_valid_aux_index(slot_index):
-		return
-	var slot := _aux_slots[slot_index]
-	if slot.is_empty():
-		return
-	_clear_slot_equipment(slot)
-	loadout_changed.emit()
-
-
-func _on_auxiliary_weapon_depleted(slot_index: int) -> void:
-	if not _is_valid_aux_index(slot_index):
-		return
-	call_deferred("clear_auxiliary_slot", slot_index)
-
-
-func unlock_next_auxiliary_slot() -> bool:
-	for index in AUX_SLOT_COUNT:
-		var slot := _aux_slots[index]
-		if not slot.unlocked:
-			slot.unlocked = true
-			slot_unlocked.emit(index)
-			loadout_changed.emit()
-			return true
-	return false
-
-
-func upgrade_equipped_main_weapon() -> bool:
-	if _main_slot.is_empty():
-		return false
-	return upgrade_weapon_level(_main_slot.equipped_weapon_id)
-
-
-func upgrade_auxiliary_weapon(slot_index: int) -> bool:
-	if not _is_valid_aux_index(slot_index):
-		push_error("PlayerWeaponLoadout.upgrade_auxiliary_weapon: invalid slot_index %s." % slot_index)
-		return false
-	var slot := _aux_slots[slot_index]
-	if slot.is_empty():
-		return false
-	return upgrade_weapon_level(slot.equipped_weapon_id)
-
-
-func can_upgrade_equipped_main_weapon() -> bool:
-	return not _main_slot.is_empty() and can_upgrade_weapon(_main_slot.equipped_weapon_id)
-
-
-func can_upgrade_auxiliary_weapon(slot_index: int) -> bool:
-	if not _is_valid_aux_index(slot_index):
-		return false
-	var slot := _aux_slots[slot_index]
-	return not slot.is_empty() and can_upgrade_weapon(slot.equipped_weapon_id)
-
-
-func get_main_slot() -> WeaponSlotState:
-	return _main_slot
-
-
-func get_reserve_slot() -> WeaponSlotState:
-	return _reserve_slot
-
-
-func get_auxiliary_slot(slot_index: int) -> WeaponSlotState:
-	if not _is_valid_aux_index(slot_index):
-		return null
-	return _aux_slots[slot_index]
-
-
-func get_first_empty_auxiliary_slot() -> int:
-	for index in AUX_SLOT_COUNT:
-		var slot := _aux_slots[index]
-		if slot.unlocked and slot.is_empty():
-			return index
-	return -1
-
-
-func has_auxiliary_weapon(weapon_id: StringName) -> bool:
-	for slot in _aux_slots:
-		if slot.equipped_weapon_id == weapon_id:
-			return true
-	return false
-
-
-func get_main_weapon_id() -> StringName:
-	return _main_slot.equipped_weapon_id
-
-
-func get_reserve_weapon_id() -> StringName:
-	return _reserve_slot.equipped_weapon_id
-
-
-## True if the weapon is in the firing main slot or the reserve slot.
-func has_carried_main_weapon(weapon_id: StringName) -> bool:
-	if weapon_id == &"":
-		return false
-	return (
-		_main_slot.equipped_weapon_id == weapon_id
-		or _reserve_slot.equipped_weapon_id == weapon_id
-	)
-
-
-func has_locked_auxiliary_slot() -> bool:
-	for slot in _aux_slots:
-		if not slot.unlocked:
-			return true
-	return false
-
-
-func has_upgradable_auxiliary_weapon() -> bool:
-	for index in AUX_SLOT_COUNT:
-		if can_upgrade_auxiliary_weapon(index):
-			return true
-	return false
-
-
-func get_upgradable_auxiliary_indices() -> Array[int]:
-	var indices: Array[int] = []
-	for index in AUX_SLOT_COUNT:
-		if can_upgrade_auxiliary_weapon(index):
-			indices.append(index)
-	return indices
-
-
-func get_occupied_auxiliary_indices() -> Array[int]:
-	var indices: Array[int] = []
-	for index in AUX_SLOT_COUNT:
-		var slot := _aux_slots[index]
-		if slot.unlocked and not slot.is_empty():
-			indices.append(index)
-	return indices
+	return true
 
 
 func get_weapon_damage_multiplier(weapon_id: StringName) -> float:
@@ -514,24 +353,21 @@ func get_weapon_attack_rate_multiplier(weapon_id: StringName) -> float:
 	return _level_attack_rate_multiplier(get_weapon_level(weapon_id))
 
 
-func _register_weapon_definition(weapon_definition: WeaponDefinition) -> void:
-	if not _weapon_levels.has(weapon_definition.id):
-		_weapon_levels[weapon_definition.id] = 1
-	_weapon_display_names[weapon_definition.id] = weapon_definition.display_name
-	_weapon_categories[weapon_definition.id] = weapon_definition.category
-	_weapon_definitions[weapon_definition.id] = weapon_definition
-
-
-func _assign_slot_weapon(slot: WeaponSlotState, weapon_definition: WeaponDefinition) -> void:
-	slot.equipped_weapon_id = weapon_definition.id
-	slot.equipped_weapon_display_name = weapon_definition.display_name
-	slot.equipped_weapon_definition = weapon_definition
-	slot.equipped_weapon_instance = null
+func _ensure_progress(weapon_id: StringName, definition: WeaponDefinition) -> WeaponProgressState:
+	var state := get_weapon_state(weapon_id)
+	if state == null:
+		state = WeaponProgressState.new()
+		state.weapon_id = weapon_id
+		state.level = 1
+		_progress[weapon_id] = state
+		weapon_level_changed.emit(weapon_id, 1)
+	if definition != null:
+		state.definition = definition
+	return state
 
 
 func _instantiate_weapon(
 	weapon_definition: WeaponDefinition,
-	category: WeaponDefinition.Category,
 	slot_index: int,
 	mount: Node,
 ) -> WeaponSystem:
@@ -542,69 +378,53 @@ func _instantiate_weapon(
 		node.queue_free()
 		return null
 	mount.add_child(weapon)
-	weapon.setup_weapon(_player, self, category, slot_index)
+	weapon.setup_weapon(_player, self, slot_index)
 	return weapon
 
 
-func _clear_slot_equipment(slot: WeaponSlotState) -> void:
-	if slot.equipped_weapon_instance != null and is_instance_valid(slot.equipped_weapon_instance):
-		var instance := slot.equipped_weapon_instance
+func _clear_bay(bay: WeaponSlotState) -> void:
+	if bay.equipped_weapon_instance != null and is_instance_valid(bay.equipped_weapon_instance):
+		var instance := bay.equipped_weapon_instance
 		instance.shutdown_weapon()
 		instance.queue_free()
-	slot.equipped_weapon_instance = null
-	slot.equipped_weapon_id = &""
-	slot.equipped_weapon_display_name = ""
-	slot.equipped_weapon_definition = null
+	bay.equipped_weapon_instance = null
+	bay.equipped_weapon_id = &""
+	bay.equipped_weapon_display_name = ""
+	bay.equipped_weapon_definition = null
 
 
-func _apply_multipliers_to_weapon(weapon: WeaponSystem, category: WeaponDefinition.Category, slot_index: int) -> void:
+func _apply_multipliers_to_weapon(weapon: WeaponSystem, weapon_id: StringName) -> void:
 	if weapon == null or not is_instance_valid(weapon):
 		return
-	var slot := _get_slot(category, slot_index)
-	var weapon_id := slot.equipped_weapon_id if slot != null else &""
-	var local_damage := get_weapon_damage_multiplier(weapon_id)
-	var local_rate := get_weapon_attack_rate_multiplier(weapon_id)
-	var facility_damage := 1.0
-	var facility_ammo_bonus := 0
-	if category == WeaponDefinition.Category.MAIN:
-		facility_damage = _facility_main_damage_multiplier
-	else:
-		facility_ammo_bonus = _facility_auxiliary_ammo_bonus
 	weapon.set_global_damage_multiplier(_global_damage_multiplier)
 	weapon.set_global_fire_rate_multiplier(_global_fire_rate_multiplier)
-	weapon.set_local_damage_multiplier(local_damage)
-	weapon.set_local_fire_rate_multiplier(local_rate)
-	weapon.set_facility_damage_multiplier(facility_damage)
-	weapon.set_consumable_capacity_bonus(facility_ammo_bonus)
+	weapon.set_local_damage_multiplier(get_weapon_damage_multiplier(weapon_id))
+	weapon.set_local_fire_rate_multiplier(get_weapon_attack_rate_multiplier(weapon_id))
+	weapon.set_facility_damage_multiplier(_facility_damage_multiplier)
+	weapon.set_consumable_capacity_bonus(0)
 
 
-func _refresh_slot_weapon_multipliers(category: WeaponDefinition.Category, slot_index: int) -> void:
-	var slot := _get_slot(category, slot_index)
-	if slot == null or slot.equipped_weapon_instance == null:
+func _refresh_equipped_weapon_by_id(weapon_id: StringName) -> void:
+	var index := find_equipped_slot(weapon_id)
+	if index < 0:
 		return
-	_apply_multipliers_to_weapon(slot.equipped_weapon_instance, category, slot_index)
+	var bay := _bays[index]
+	_apply_multipliers_to_weapon(bay.equipped_weapon_instance, weapon_id)
+
+
+func _refresh_all_weapon_multipliers() -> void:
+	for bay in _bays:
+		if bay.is_empty():
+			continue
+		_apply_multipliers_to_weapon(bay.equipped_weapon_instance, bay.equipped_weapon_id)
 
 
 func _sorted_tracked_ids() -> Array[StringName]:
 	var ids: Array[StringName] = []
-	for key in _weapon_levels.keys():
+	for key in _progress.keys():
 		ids.append(key as StringName)
 	ids.sort_custom(func(a: StringName, b: StringName) -> bool: return String(a) < String(b))
 	return ids
-
-
-func _refresh_equipped_weapon_by_id(weapon_id: StringName) -> void:
-	if _main_slot.equipped_weapon_id == weapon_id:
-		_refresh_slot_weapon_multipliers(WeaponDefinition.Category.MAIN, 0)
-	for index in AUX_SLOT_COUNT:
-		if _aux_slots[index].equipped_weapon_id == weapon_id:
-			_refresh_slot_weapon_multipliers(WeaponDefinition.Category.AUXILIARY, index)
-
-
-func _refresh_all_weapon_multipliers() -> void:
-	_refresh_slot_weapon_multipliers(WeaponDefinition.Category.MAIN, 0)
-	for index in AUX_SLOT_COUNT:
-		_refresh_slot_weapon_multipliers(WeaponDefinition.Category.AUXILIARY, index)
 
 
 func _level_damage_multiplier(level: int) -> float:
@@ -625,24 +445,3 @@ func _level_attack_rate_multiplier(level: int) -> float:
 			return 1.2
 		_:
 			return 1.0
-
-
-func _get_slot(category: WeaponDefinition.Category, slot_index: int) -> WeaponSlotState:
-	match category:
-		WeaponDefinition.Category.MAIN:
-			return _main_slot
-		WeaponDefinition.Category.AUXILIARY:
-			if _is_valid_aux_index(slot_index):
-				return _aux_slots[slot_index]
-	return null
-
-
-func _is_valid_aux_index(slot_index: int) -> bool:
-	return slot_index >= 0 and slot_index < AUX_SLOT_COUNT
-
-
-func _get_aux_mount(slot_index: int) -> Node2D:
-	if auxiliary_weapon_mounts == null:
-		return null
-	var mount_name := "AuxMount%d" % (slot_index + 1)
-	return auxiliary_weapon_mounts.get_node_or_null(mount_name) as Node2D

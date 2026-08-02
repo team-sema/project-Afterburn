@@ -65,6 +65,8 @@ func _check_initial_slots(registry: PlayerAugmentRegistry, panel: ShipPanel) -> 
 
 func _check_pool_targets(offer: AugmentOfferController, registry: PlayerAugmentRegistry) -> void:
 	for augment in offer.player_augment_pool:
+		if PlayerAugmentKind.is_weapon_offer(augment.augment_type):
+			continue
 		_expect(augment.facility_id != &"", "%s declares a target facility" % augment.augment_id)
 		_expect(
 			registry.has_facility(augment.facility_id),
@@ -142,10 +144,12 @@ func _check_facility_effect_modules(
 	registry.install_augment(radar)
 	registry.install_augment(shield_module)
 	_expect(
-		is_equal_approx(loadout.get_facility_main_damage_multiplier(), 1.15),
-		"weapon-room module applies main weapon damage",
+		is_equal_approx(loadout.get_facility_damage_multiplier(), 1.15),
+		"weapon-room module applies equipped weapon damage",
 	)
-	_expect(loadout.get_facility_auxiliary_ammo_bonus() == 4, "hangar module adds auxiliary ammo")
+	var hangar_def := load("res://resources/facilities/definitions/hangar.tres") as ShipFacilityDefinition
+	_expect(hangar_def.effect_summary.contains("미정"), "hangar effect summary is undecided")
+	_expect(is_equal_approx(hangar_def.get_value_for_module_count(1), 0.0), "hangar module values are inert")
 	_expect(applier.get_max_hull() == base_hull + 1, "hull module increases maximum hull")
 	_expect(stats.health == applier.get_max_hull(), "maximum hull increase also raises current hull")
 	_expect(
@@ -165,10 +169,10 @@ func _check_replacement(registry: PlayerAugmentRegistry, loadout: PlayerWeaponLo
 	)
 	_expect(registry.install_augment(damage_module, &"", 0) == 0, "replacement installs incoming module")
 	_expect(
-		is_equal_approx(loadout.get_facility_main_damage_multiplier(), 1.0),
-		"replacing facility module removes its main-only effect",
+		is_equal_approx(loadout.get_facility_damage_multiplier(), 1.0),
+		"replacing facility module removes its weapon-room effect",
 	)
-	var main_weapon := loadout.get_main_slot().equipped_weapon_instance
+	var main_weapon := loadout.get_all_weapon_systems()[0]
 	_expect(
 		is_equal_approx(main_weapon.get_effective_damage_multiplier(), 1.2),
 		"replacement stat module applies its global weapon damage effect",
@@ -305,13 +309,35 @@ func _check_swap_overlay(
 
 
 func _check_right_panel_fits(world: Control) -> void:
+	var layout := world.get_node("Layout") as Control
+	var left := world.get_node("Layout/LeftPanel") as Control
+	var play := world.get_node("Layout/Playfield") as Control
 	var right_panel := world.get_node("Layout/RightPanel") as Control
 	var margin := world.get_node("Layout/RightPanel/Margin") as MarginContainer
 	var box := world.get_node("Layout/RightPanel/Margin/VBox") as VBoxContainer
-	var available := right_panel.size.y - float(
+	# Compare against the shell viewport, not the panel's inflated size after overflow.
+	var shell := layout.size
+	var margin_y := float(
 		margin.get_theme_constant("margin_top") + margin.get_theme_constant("margin_bottom")
 	)
-	_expect(box.get_combined_minimum_size().y <= available, "ship and weapon panels fit the right rail")
+	var margin_x := float(
+		margin.get_theme_constant("margin_left") + margin.get_theme_constant("margin_right")
+	)
+	_expect(shell.y >= 360.0 - 0.5, "world shell keeps 360px height")
+	_expect(
+		box.get_combined_minimum_size().y <= shell.y - margin_y + 0.5,
+		"ship and weapon panels fit the right rail height",
+	)
+	_expect(
+		box.get_combined_minimum_size().x <= right_panel.custom_minimum_size.x - margin_x + 0.5
+		or box.get_combined_minimum_size().x <= 200.0 - margin_x + 0.5,
+		"weapon bay clusters fit the 200px right rail width",
+	)
+	_expect(
+		left.size.x + play.size.x + right_panel.size.x <= shell.x + 1.0,
+		"left + playfield + right fit 640px shell width",
+	)
+	_expect(right_panel.size.y <= shell.y + 0.5, "right rail does not overflow shell height")
 
 
 func _expect(condition: bool, message: String) -> void:

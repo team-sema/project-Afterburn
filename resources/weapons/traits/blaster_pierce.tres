@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="WeaponTraitDefinition" format=3]
+
+[ext_resource type="Script" path="res://resources/weapons/weapon_trait_definition.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+trait_id = &"blaster_pierce"
+display_name = "블래스터 관통"
+description = "블래스터 탄환이 적을 관통합니다. (전투 효과 스캐폴드)"
+target_weapon_id = &"main_blaster"
+next_rank_hint = "관통 대상 수 증가"

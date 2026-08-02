@@ -14,8 +14,8 @@ enum OfferType {
 @export var player_registry: PlayerAugmentRegistry
 @export var enemy_registry: EnemyAugmentRegistry
 @export var selection_ui: AugmentSelectionOverlay
-@export var slot_selection_ui: WeaponSlotSelectionOverlay
 @export var module_swap_ui: AugmentModuleSwapOverlay
+@export var weapon_slot_ui: WeaponSlotSelectionOverlay
 @export var ship: Node2D
 @export var player_augment_pool: Array[PlayerAugment] = []
 @export var enemy_augment_pool: Array[EnemyAugment] = []
@@ -30,11 +30,11 @@ func _ready() -> void:
 	assert(player_registry != null, "AugmentOfferController requires a PlayerAugmentRegistry.")
 	assert(enemy_registry != null, "AugmentOfferController requires an EnemyAugmentRegistry.")
 	assert(selection_ui != null, "AugmentOfferController requires an AugmentSelectionOverlay.")
-	assert(slot_selection_ui != null, "AugmentOfferController requires a WeaponSlotSelectionOverlay.")
 	assert(module_swap_ui != null, "AugmentOfferController requires an AugmentModuleSwapOverlay.")
 	assert(ship != null, "AugmentOfferController requires a Ship reference.")
 	assert(enemy_augment_pool.size() >= choices_per_offer, "Enemy augment pool is too small for an offer.")
 	selection_ui.configure_player_registry(player_registry)
+	selection_ui.configure_weapon_loadout(_get_loadout())
 	selection_ui.choice_selected.connect(_on_choice_selected)
 	selection_ui.facility_expansion_selected.connect(_on_facility_expansion_selected)
 
@@ -60,9 +60,10 @@ func _start_offer() -> void:
 	var accent_color: Color
 	var show_ship_modules := false
 	if active_offer_type == OfferType.PLAYER:
+		selection_ui.configure_weapon_loadout(_get_loadout())
 		choices = _pick_player_choices()
 		title = "함선 모듈"
-		prompt = "모듈을 장착하거나 함선 부위의 슬롯을 확장하세요"
+		prompt = "무기·특성·시설 모듈을 선택하거나 함선 부위의 슬롯을 확장하세요"
 		accent_color = selection_ui.player_accent_color
 		show_ship_modules = true
 	else:
@@ -91,10 +92,7 @@ func _pick_player_choices() -> Array[PlayerAugment]:
 	for augment in player_augment_pool:
 		if _is_player_augment_available(augment, loadout):
 			valid.append(augment)
-	valid.shuffle()
-	if valid.size() > choices_per_offer:
-		valid.resize(choices_per_offer)
-	return valid
+	return _pick_weighted(valid, choices_per_offer)
 
 
 func _pick_enemy_choices() -> Array[EnemyAugment]:
@@ -104,16 +102,56 @@ func _pick_enemy_choices() -> Array[EnemyAugment]:
 	return choices
 
 
+func _pick_weighted(pool: Array[PlayerAugment], count: int) -> Array[PlayerAugment]:
+	var remaining: Array[PlayerAugment] = pool.duplicate()
+	var picked: Array[PlayerAugment] = []
+	while not remaining.is_empty() and picked.size() < count:
+		var total := 0.0
+		for augment in remaining:
+			total += maxf(0.0, augment.offer_weight)
+		if total <= 0.0:
+			remaining.shuffle()
+			while not remaining.is_empty() and picked.size() < count:
+				picked.append(remaining.pop_back())
+			break
+		var roll := randf() * total
+		var cursor := 0.0
+		var chosen_index := remaining.size() - 1
+		for index in remaining.size():
+			cursor += maxf(0.0, remaining[index].offer_weight)
+			if roll <= cursor:
+				chosen_index = index
+				break
+		picked.append(remaining[chosen_index])
+		remaining.remove_at(chosen_index)
+	return picked
+
+
 func _is_player_augment_available(augment: PlayerAugment, loadout: PlayerWeaponLoadout) -> bool:
-	if augment == null or not player_registry.has_facility(augment.facility_id):
+	if augment == null:
 		return false
 	match augment.augment_type:
-		PlayerAugmentKind.Kind.UPGRADE_MAIN_WEAPON:
-			return loadout != null and loadout.can_upgrade_equipped_main_weapon()
-		PlayerAugmentKind.Kind.UPGRADE_AUXILIARY_WEAPON:
-			return loadout != null and loadout.has_upgradable_auxiliary_weapon()
+		PlayerAugmentKind.Kind.WEAPON_ACQUIRE:
+			if loadout == null or augment.weapon_definition == null:
+				return false
+			var weapon_id := augment.get_weapon_id()
+			# Already equipped → use WEAPON_LEVEL cards instead.
+			return not loadout.is_weapon_equipped(weapon_id)
+		PlayerAugmentKind.Kind.WEAPON_LEVEL:
+			if loadout == null:
+				return false
+			var weapon_id := augment.get_weapon_id()
+			if weapon_id == &"" or not loadout.has_weapon_progress(weapon_id):
+				return false
+			return loadout.can_upgrade_weapon(weapon_id)
+		PlayerAugmentKind.Kind.WEAPON_TRAIT:
+			if loadout == null or augment.trait_id == &"":
+				return false
+			if augment.target_weapon_id != &"":
+				return loadout.is_weapon_equipped(augment.target_weapon_id)
+			return not loadout.get_equipped_weapon_ids().is_empty()
 		PlayerAugmentKind.Kind.STAT_MULTIPLIER, PlayerAugmentKind.Kind.FACILITY_EFFECT:
-			return true
+			return augment.facility_id != &"" and player_registry.has_facility(augment.facility_id)
 		_:
 			return false
 
@@ -135,21 +173,84 @@ func _on_choice_selected(choice: Resource) -> void:
 
 
 func _resolve_player_augment(player_augment: PlayerAugment) -> bool:
-	var target_weapon_id := &""
 	var loadout := _get_loadout()
-	if player_augment.augment_type == PlayerAugmentKind.Kind.UPGRADE_MAIN_WEAPON:
-		var main_slot := loadout.get_main_slot()
-		target_weapon_id = main_slot.equipped_weapon_id
-	elif player_augment.augment_type == PlayerAugmentKind.Kind.UPGRADE_AUXILIARY_WEAPON:
-		selection_ui.suspend_choices()
-		slot_selection_ui.open_for_weapon_upgrade(
-			loadout,
-			"보조무기 모듈",
-			"효과를 연결할 보조무기를 고르세요",
-		)
-		var weapon_slot_index: int = await slot_selection_ui.slot_selected
-		target_weapon_id = loadout.get_auxiliary_slot(weapon_slot_index).equipped_weapon_id
+	match player_augment.augment_type:
+		PlayerAugmentKind.Kind.WEAPON_ACQUIRE:
+			return await _resolve_weapon_acquire(player_augment, loadout)
+		PlayerAugmentKind.Kind.WEAPON_LEVEL:
+			return _resolve_weapon_level(player_augment, loadout)
+		PlayerAugmentKind.Kind.WEAPON_TRAIT:
+			return _resolve_weapon_trait(player_augment, loadout)
+		PlayerAugmentKind.Kind.STAT_MULTIPLIER, PlayerAugmentKind.Kind.FACILITY_EFFECT:
+			return await _resolve_facility_module(player_augment)
+		_:
+			return false
 
+
+func _resolve_weapon_acquire(player_augment: PlayerAugment, loadout: PlayerWeaponLoadout) -> bool:
+	if loadout == null or player_augment.weapon_definition == null:
+		return false
+	var definition := player_augment.weapon_definition
+	var starting_level := player_augment.starting_weapon_level
+	if loadout.offer_equip_weapon(definition, starting_level):
+		selection_ui.restore_for_result()
+		return true
+	if weapon_slot_ui == null:
+		push_error("AugmentOfferController: weapon_slot_ui required when bays are full.")
+		return false
+	selection_ui.suspend_choices()
+	weapon_slot_ui.open_for_replace(
+		loadout,
+		"무기 교체",
+		"%s 을(를) 장착할 베이를 선택하세요" % definition.display_name,
+		definition,
+	)
+	var slot_index: int = await weapon_slot_ui.selection_finished
+	if slot_index < 0:
+		return false
+	if not loadout.request_replace_equipped(slot_index, definition, starting_level):
+		return false
+	selection_ui.restore_for_result()
+	return true
+
+
+func _resolve_weapon_level(player_augment: PlayerAugment, loadout: PlayerWeaponLoadout) -> bool:
+	if loadout == null:
+		return false
+	var weapon_id := player_augment.get_weapon_id()
+	if not loadout.upgrade_weapon_level(weapon_id):
+		return false
+	selection_ui.restore_for_result()
+	return true
+
+
+func _resolve_weapon_trait(player_augment: PlayerAugment, loadout: PlayerWeaponLoadout) -> bool:
+	if loadout == null:
+		return false
+	var target_weapon_id := player_augment.target_weapon_id
+	if target_weapon_id == &"":
+		var equipped := loadout.get_equipped_weapon_ids()
+		if equipped.is_empty():
+			return false
+		target_weapon_id = equipped[0]
+	elif not loadout.is_weapon_equipped(target_weapon_id):
+		return false
+	var trait_id := player_augment.trait_id
+	if trait_id == &"" and player_augment.trait_definition != null:
+		trait_id = player_augment.trait_definition.trait_id
+	if trait_id == &"":
+		return false
+	if loadout.add_or_upgrade_weapon_trait(
+		target_weapon_id,
+		trait_id,
+		player_augment.trait_rank_increase,
+	) < 0:
+		return false
+	selection_ui.restore_for_result()
+	return true
+
+
+func _resolve_facility_module(player_augment: PlayerAugment) -> bool:
 	var replace_index := -1
 	if not player_registry.has_empty_slot(player_augment.facility_id):
 		selection_ui.suspend_choices()
@@ -160,7 +261,7 @@ func _resolve_player_augment(player_augment: PlayerAugment) -> bool:
 
 	var installed_index := player_registry.install_augment(
 		player_augment,
-		target_weapon_id,
+		player_augment.target_weapon_id,
 		replace_index,
 	)
 	if installed_index < 0:
@@ -196,7 +297,11 @@ func _finish_offer(augment: Resource) -> void:
 		if active_offer_type == OfferType.PLAYER
 		else selection_ui.enemy_accent_color
 	)
-	await selection_ui.close_with_result(result_title, augment, accent_color)
+	var summary := str(augment.get("display_name"))
+	var player_augment := augment as PlayerAugment
+	if player_augment != null:
+		summary = player_augment.get_offer_title(_get_loadout()).replace("\n", " · ")
+	await selection_ui.close_with_text(result_title, summary, accent_color)
 	_complete_offer(active_offer_type)
 
 
@@ -215,23 +320,8 @@ func _trigger_player_resume_burst() -> int:
 	if gameplay_world == null:
 		return 0
 	var burst := AUGMENT_RESUME_BURST_SCENE.instantiate() as Node2D
-	burst.call("setup", player_resume_clear_radius, selection_ui.player_accent_color)
 	gameplay_world.add_child(burst)
 	burst.global_position = ship.global_position
-
-	var clear_radius_squared := player_resume_clear_radius * player_resume_clear_radius
-	var cleared_count := 0
-	for projectile in get_tree().get_nodes_in_group("enemy_projectiles"):
-		if not projectile is Node2D or not is_instance_valid(projectile):
-			continue
-		var projectile_node := projectile as Node2D
-		if ship.global_position.distance_squared_to(projectile_node.global_position) > clear_radius_squared:
-			continue
-		projectile_node.queue_free()
-		cleared_count += 1
-	return cleared_count
-
-
-func _exit_tree() -> void:
-	if is_offer_active:
-		get_tree().paused = false
+	if burst.has_method("play"):
+		return int(burst.call("play", player_resume_clear_radius))
+	return 0

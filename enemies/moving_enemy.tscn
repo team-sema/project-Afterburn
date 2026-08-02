@@ -57,7 +57,7 @@ spread_degrees = 15.0
 initial_delay = 1.5
 
 [node name="WeaponDropComponent" parent="." index="18" unique_id=776926243]
-drop_chance = 1.0
+enabled = false
 
 [node name="StrikerDivePatrolComponent" parent="." index="20" unique_id=665905732 node_paths=PackedStringArray("actor", "move_component") instance=ExtResource("5_patrol")]
 actor = NodePath("..")

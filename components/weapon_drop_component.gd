@@ -1,14 +1,21 @@
 class_name WeaponDropComponent
 extends Node
 
+## Field weapon drops are retired. Keep the component for scene compatibility;
+## it does nothing unless explicitly re-enabled.
+
 @export var stats_component: StatsComponent
 @export var actor: Node2D
 @export var drop_table: WeaponDropTable
 @export var pickup_scene: PackedScene
 @export_range(0.0, 1.0, 0.01) var drop_chance := 0.08
+## Weapons are offered through augments; leave false.
+@export var enabled := false
 
 
 func _ready() -> void:
+	if not enabled:
+		return
 	assert(stats_component != null, "WeaponDropComponent requires StatsComponent.")
 	assert(actor != null, "WeaponDropComponent requires actor Node2D.")
 	assert(drop_table != null, "WeaponDropComponent requires WeaponDropTable.")
@@ -17,6 +24,8 @@ func _ready() -> void:
 
 
 func _on_no_health() -> void:
+	if not enabled:
+		return
 	if drop_chance <= 0.0 or randf() > drop_chance:
 		return
 	var definition := drop_table.pick_random()

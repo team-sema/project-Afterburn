@@ -33,19 +33,12 @@ func refresh() -> void:
 	var move_speed_multiplier := 1.0
 	var fire_rate_multiplier := 1.0
 	var weapon_damage_multiplier := 1.0
-	var weapon_level_bonuses: Dictionary = {}
 
 	if augment_registry != null:
 		for module in augment_registry.get_installed_modules():
 			var augment := module.augment
-			if augment.augment_type in [
-				PlayerAugmentKind.Kind.UPGRADE_MAIN_WEAPON,
-				PlayerAugmentKind.Kind.UPGRADE_AUXILIARY_WEAPON,
-			]:
-				if module.target_weapon_id != &"":
-					weapon_level_bonuses[module.target_weapon_id] = (
-						int(weapon_level_bonuses.get(module.target_weapon_id, 0)) + 1
-					)
+			if augment.augment_type == PlayerAugmentKind.Kind.WEAPON_TRAIT:
+				# Trait ranks are applied at install time onto weapon progress; nothing to stack here.
 				continue
 			if augment.augment_type != PlayerAugmentKind.Kind.STAT_MULTIPLIER:
 				continue
@@ -63,4 +56,3 @@ func refresh() -> void:
 	)
 	if weapon_loadout != null:
 		weapon_loadout.set_global_stat_multipliers(weapon_damage_multiplier, fire_rate_multiplier)
-		weapon_loadout.set_augment_weapon_level_bonuses(weapon_level_bonuses)

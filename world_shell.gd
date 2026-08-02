@@ -13,7 +13,6 @@ func _ready() -> void:
 		"AugmentSelectionOverlay",
 		"WeaponSlotSelectionOverlay",
 		"AugmentModuleSwapOverlay",
-		"WeaponAcquireConfirmOverlay",
 	]:
 		var overlay := gameplay.get_node(overlay_name) as CanvasLayer
 		assert(overlay != null, "World shell requires %s." % overlay_name)

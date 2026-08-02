@@ -1,11 +1,14 @@
 class_name ExperienceDropComponent
 extends Node
 
+## Per-enemy XP orb drop. Tune frequency via drop_chance; keep experience_amount for value.
+
 @export var stats_component: StatsComponent
 @export var actor: Node2D
 @export var orb_scene: PackedScene
 @export_range(1, 1000, 1) var experience_amount := 1
-@export_range(0.0, 1.0, 0.01) var drop_chance := 0.5
+## Temporary bump after removing weapon drops (was 0.5). Tunable in the inspector / scene.
+@export_range(0.0, 1.0, 0.01) var drop_chance := 0.62
 
 
 func _ready() -> void:

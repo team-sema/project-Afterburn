@@ -109,21 +109,11 @@ actor = NodePath("..")
 
 [node name="PlayerWeaponLoadout" type="Node2D" parent="." unique_id=1902364432]
 script = ExtResource("19_loadout")
-default_main_weapon = ExtResource("20_default_main")
+default_weapon = ExtResource("20_default_main")
 player_path = NodePath("..")
+max_equipped_weapon_count = 3
 
-[node name="MainWeaponMount" type="Node2D" parent="PlayerWeaponLoadout" unique_id=635891941]
-
-[node name="AuxiliaryWeaponMounts" type="Node2D" parent="PlayerWeaponLoadout" unique_id=1110237843]
-
-[node name="AuxMount1" type="Node2D" parent="PlayerWeaponLoadout/AuxiliaryWeaponMounts" unique_id=2139971768]
-position = Vector2(-10, 0)
-
-[node name="AuxMount2" type="Node2D" parent="PlayerWeaponLoadout/AuxiliaryWeaponMounts" unique_id=1427471876]
-position = Vector2(10, 0)
-
-[node name="AuxMount3" type="Node2D" parent="PlayerWeaponLoadout/AuxiliaryWeaponMounts" unique_id=1348868154]
-position = Vector2(0, 6)
+[node name="WeaponMounts" type="Node2D" parent="PlayerWeaponLoadout" unique_id=1110237843]
 
 [node name="PlayerAugmentApplier" type="Node" parent="." unique_id=2001884346 node_paths=PackedStringArray("move_component", "weapon_loadout")]
 script = ExtResource("17_player_augment_applier")
