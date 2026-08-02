@@ -64,6 +64,14 @@
       "tags": ["적", "스폰", "Threat"]
     },
     {
+      "id": "project-godot-47",
+      "title": "프로젝트 Godot 4.7 버전 표기",
+      "description": "project.godot features를 4.7로 올려 에디터 버전 경고를 없앤다.",
+      "column": "review",
+      "file": "cards/project-godot-47.md",
+      "tags": ["도구", "정리"]
+    },
+    {
       "id": "early-enemy-fire-tuning",
       "title": "초반 적 사격 완화",
       "description": "Threat 1 Drone·Striker의 사격 주기를 늘리고 탄속을 낮춰 초반 난이도를 완화한다.",
