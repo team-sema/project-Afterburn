@@ -7,7 +7,7 @@
 script = ExtResource("1_aug")
 augment_id = &"facility_weapon_room"
 display_name = "집속 조준기"
-description = "장착 중 모든 주무기 공격력이 15% 증가합니다."
+description = "장착 중 모든 무기 공격력이 15% 증가합니다."
 augment_type = 6
 icon = ExtResource("2_icon")
 facility_id = &"weapon_room"

@@ -3,8 +3,15 @@ extends RefCounted
 
 enum Kind {
 	STAT_MULTIPLIER = 0,
-	UPGRADE_MAIN_WEAPON = 4,
-	UPGRADE_AUXILIARY_WEAPON = 5,
-	## 장착 중 해당 함선 시설의 효과값을 한 단계 제공한다.
+	## Offer a weapon definition: new progress + equip, or restore from records.
+	WEAPON_ACQUIRE = 1,
+	## Raise weapon_id level by 1 (equipped or recorded).
+	WEAPON_LEVEL = 2,
+	## Weapon-specific trait module (rank / attach). Does not raise weapon level.
+	WEAPON_TRAIT = 3,
 	FACILITY_EFFECT = 6,
 }
+
+
+static func is_weapon_offer(kind: Kind) -> bool:
+	return kind in [Kind.WEAPON_ACQUIRE, Kind.WEAPON_LEVEL, Kind.WEAPON_TRAIT]

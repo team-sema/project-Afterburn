@@ -57,12 +57,10 @@ func refresh() -> void:
 		return
 
 	if weapon_loadout != null:
-		weapon_loadout.set_facility_main_damage_multiplier(
+		weapon_loadout.set_facility_damage_multiplier(
 			facility_registry.get_effect_total(ShipFacilityDefinition.Effect.MAIN_WEAPON_DAMAGE)
 		)
-		weapon_loadout.set_facility_auxiliary_ammo_bonus(
-			roundi(facility_registry.get_effect_total(ShipFacilityDefinition.Effect.AUXILIARY_MAX_AMMO))
-		)
+		# Hangar ammo bonus removed; hangar effect is TBD (do not invent a replacement).
 
 	if augment_applier != null:
 		augment_applier.set_facility_move_speed_multiplier(

@@ -11,7 +11,6 @@
 [ext_resource type="Script" uid="uid://cut5htbmjig2q" path="res://augment_progression_controller.gd" id="9_progression"]
 [ext_resource type="PackedScene" uid="uid://503oqsi4rpuh" path="res://menus/augment_selection_overlay.tscn" id="10_selection"]
 [ext_resource type="PackedScene" path="res://menus/weapon_slot_selection_overlay.tscn" id="11_slot"]
-[ext_resource type="PackedScene" path="res://menus/weapon_acquire_confirm_overlay.tscn" id="12_confirm"]
 [ext_resource type="Script" uid="uid://biixpb4vb0k2r" path="res://player_ship/weapon_acquisition_controller.gd" id="13_acquisition"]
 [ext_resource type="Script" uid="uid://bj3m8sydgty8w" path="res://resources/player_augments/player_augment.gd" id="14_player_augment"]
 [ext_resource type="Script" uid="uid://be4x07sn0gawv" path="res://resources/enemy_augments/enemy_augment.gd" id="15_enemy_augment"]
@@ -21,8 +20,6 @@
 [ext_resource type="Resource" uid="uid://dck0gm7gvfvng" path="res://resources/enemy_augments/enemy_health_boost_1_2.tres" id="19_enemy_health"]
 [ext_resource type="Resource" uid="uid://bqh12igupjjb2" path="res://resources/enemy_augments/enemy_fire_volume_boost.tres" id="20_enemy_fire"]
 [ext_resource type="Resource" uid="uid://bg0yl0s7f0b4p" path="res://resources/enemy_augments/enemy_move_speed_boost_1_2.tres" id="21_enemy_move"]
-[ext_resource type="Resource" path="res://resources/player_augments/weapon/upgrade_main_weapon.tres" id="22_up_main"]
-[ext_resource type="Resource" path="res://resources/player_augments/weapon/upgrade_auxiliary_weapon.tres" id="23_up_aux"]
 [ext_resource type="Script" path="res://resources/facilities/ship_facility_definition.gd" id="25_facility_definition"]
 [ext_resource type="Resource" path="res://resources/facilities/definitions/weapon_room.tres" id="26_weapon_room"]
 [ext_resource type="Resource" path="res://resources/facilities/definitions/hangar.tres" id="27_hangar"]
@@ -37,6 +34,22 @@
 [ext_resource type="Resource" path="res://resources/player_augments/facilities/facility_radar.tres" id="36_aug_radar"]
 [ext_resource type="Resource" path="res://resources/player_augments/facilities/facility_shield.tres" id="37_aug_shield"]
 [ext_resource type="PackedScene" path="res://menus/augment_module_swap_overlay.tscn" id="38_module_swap"]
+[ext_resource type="Resource" path="res://resources/player_augments/weapon/acquire_main_blaster.tres" id="40_acq_blaster"]
+[ext_resource type="Resource" path="res://resources/player_augments/weapon/acquire_main_laser.tres" id="41_acq_laser"]
+[ext_resource type="Resource" path="res://resources/player_augments/weapon/acquire_main_shotgun.tres" id="42_acq_shotgun"]
+[ext_resource type="Resource" path="res://resources/player_augments/weapon/acquire_aux_test_cannon.tres" id="43_acq_cannon"]
+[ext_resource type="Resource" path="res://resources/player_augments/weapon/acquire_aux_test_flak.tres" id="44_acq_flak"]
+[ext_resource type="Resource" path="res://resources/player_augments/weapon/acquire_aux_homing_missile.tres" id="45_acq_missile"]
+[ext_resource type="Resource" path="res://resources/player_augments/weapon/acquire_aux_orbital_barrier.tres" id="46_acq_barrier"]
+[ext_resource type="Resource" path="res://resources/player_augments/weapon/level_main_blaster.tres" id="50_lv_blaster"]
+[ext_resource type="Resource" path="res://resources/player_augments/weapon/level_main_laser.tres" id="51_lv_laser"]
+[ext_resource type="Resource" path="res://resources/player_augments/weapon/level_main_shotgun.tres" id="52_lv_shotgun"]
+[ext_resource type="Resource" path="res://resources/player_augments/weapon/level_aux_test_cannon.tres" id="53_lv_cannon"]
+[ext_resource type="Resource" path="res://resources/player_augments/weapon/level_aux_test_flak.tres" id="54_lv_flak"]
+[ext_resource type="Resource" path="res://resources/player_augments/weapon/level_aux_homing_missile.tres" id="55_lv_missile"]
+[ext_resource type="Resource" path="res://resources/player_augments/weapon/level_aux_orbital_barrier.tres" id="56_lv_barrier"]
+[ext_resource type="Resource" path="res://resources/player_augments/weapon/trait_blaster_pierce.tres" id="60_tr_pierce"]
+[ext_resource type="Resource" path="res://resources/player_augments/weapon/trait_laser_fork.tres" id="61_tr_fork"]
 
 [sub_resource type="Environment" id="Environment_neon"]
 background_mode = 3
@@ -73,23 +86,19 @@ close_duration = 1.0
 
 [node name="AugmentModuleSwapOverlay" parent="." instance=ExtResource("38_module_swap")]
 
-[node name="WeaponAcquireConfirmOverlay" parent="." unique_id=178168302 instance=ExtResource("12_confirm")]
-
-[node name="WeaponAcquisitionController" type="Node" parent="." unique_id=1868555056 node_paths=PackedStringArray("ship", "slot_selection_ui", "confirm_ui")]
+[node name="WeaponAcquisitionController" type="Node" parent="." unique_id=1868555056 node_paths=PackedStringArray("ship")]
 script = ExtResource("13_acquisition")
 ship = NodePath("../Ship")
-slot_selection_ui = NodePath("../WeaponSlotSelectionOverlay")
-confirm_ui = NodePath("../WeaponAcquireConfirmOverlay")
 
-[node name="AugmentOfferController" type="Node" parent="." unique_id=448779419 node_paths=PackedStringArray("player_registry", "enemy_registry", "selection_ui", "slot_selection_ui", "module_swap_ui", "ship")]
+[node name="AugmentOfferController" type="Node" parent="." unique_id=448779419 node_paths=PackedStringArray("player_registry", "enemy_registry", "selection_ui", "module_swap_ui", "weapon_slot_ui", "ship")]
 script = ExtResource("8_offer")
 player_registry = NodePath("../PlayerAugmentRegistry")
 enemy_registry = NodePath("../EnemyAugmentRegistry")
 selection_ui = NodePath("../AugmentSelectionOverlay")
-slot_selection_ui = NodePath("../WeaponSlotSelectionOverlay")
 module_swap_ui = NodePath("../AugmentModuleSwapOverlay")
+weapon_slot_ui = NodePath("../WeaponSlotSelectionOverlay")
 ship = NodePath("../Ship")
-player_augment_pool = Array[ExtResource("14_player_augment")]([ExtResource("16_player_move"), ExtResource("17_player_fire"), ExtResource("18_player_damage"), ExtResource("22_up_main"), ExtResource("23_up_aux"), ExtResource("32_aug_weapon_room"), ExtResource("33_aug_hangar"), ExtResource("34_aug_engine"), ExtResource("35_aug_hull"), ExtResource("36_aug_radar"), ExtResource("37_aug_shield")])
+player_augment_pool = Array[ExtResource("14_player_augment")]([ExtResource("16_player_move"), ExtResource("17_player_fire"), ExtResource("18_player_damage"), ExtResource("32_aug_weapon_room"), ExtResource("33_aug_hangar"), ExtResource("34_aug_engine"), ExtResource("35_aug_hull"), ExtResource("36_aug_radar"), ExtResource("37_aug_shield"), ExtResource("40_acq_blaster"), ExtResource("41_acq_laser"), ExtResource("42_acq_shotgun"), ExtResource("43_acq_cannon"), ExtResource("44_acq_flak"), ExtResource("45_acq_missile"), ExtResource("46_acq_barrier"), ExtResource("50_lv_blaster"), ExtResource("51_lv_laser"), ExtResource("52_lv_shotgun"), ExtResource("53_lv_cannon"), ExtResource("54_lv_flak"), ExtResource("55_lv_missile"), ExtResource("56_lv_barrier"), ExtResource("60_tr_pierce"), ExtResource("61_tr_fork")])
 enemy_augment_pool = Array[ExtResource("15_enemy_augment")]([ExtResource("19_enemy_health"), ExtResource("20_enemy_fire"), ExtResource("21_enemy_move")])
 
 [node name="AugmentProgressionController" type="Node" parent="." unique_id=1005599848 node_paths=PackedStringArray("offer_controller") groups=["augment_progression"]]

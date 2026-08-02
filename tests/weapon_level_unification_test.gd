@@ -13,94 +13,61 @@ func _run() -> void:
 	var gameplay := world.get_node("Layout/Playfield/ViewportContainer/PlayfieldViewport/Gameplay")
 	var ship := gameplay.get_node("Ship") as Node2D
 	var loadout := ship.call("get_weapon_loadout") as PlayerWeaponLoadout
-	var player_registry := gameplay.get_node("PlayerAugmentRegistry") as PlayerAugmentRegistry
 	var weapon_hud := world.get_node(
 		"Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud"
 	)
-	var main_upgrade := load(
-		"res://resources/player_augments/weapon/upgrade_main_weapon.tres"
-	) as PlayerAugment
-	var auxiliary_upgrade := load(
-		"res://resources/player_augments/weapon/upgrade_auxiliary_weapon.tres"
-	) as PlayerAugment
 	for _index in 4:
 		await process_frame
 
-	var main_slot := loadout.get_main_slot()
-	_expect(not _has_property(main_slot, &"level"), "weapon slots no longer carry a level")
-	_expect(loadout.get_weapon_level(&"main_blaster") == 1, "default main weapon starts at Lv.1")
-	player_registry.install_augment(main_upgrade, &"main_blaster")
-	_expect(loadout.get_weapon_level(&"main_blaster") == 2, "main module raises its effective level")
-	var blaster := main_slot.equipped_weapon_instance
+	_expect(loadout.get_weapon_level(&"main_blaster") == 1, "default weapon starts at Lv.1")
+	_expect(loadout.is_weapon_equipped(&"main_blaster"), "blaster starts equipped")
+	_expect(loadout.upgrade_weapon_level(&"main_blaster"), "level up works")
+	_expect(loadout.get_weapon_level(&"main_blaster") == 2, "blaster reaches Lv.2")
+	var blaster := loadout.get_all_weapon_systems()[0]
 	_expect(
 		is_equal_approx(blaster.get_effective_damage_multiplier(), 1.2),
-		"Lv.2 main weapon receives the unified damage multiplier",
+		"Lv.2 weapon receives damage multiplier",
 	)
 
-	var laser_definition := load(
-		"res://resources/weapons/definitions/main_laser.tres"
-	) as WeaponDefinition
-	loadout.equip_reserve_weapon(laser_definition)
-	_expect(loadout.get_weapon_level(&"main_laser") == 1, "reserve weapon keeps its own level")
-	_expect(loadout.swap_main_and_reserve(), "main and reserve weapons swap")
-	_expect(loadout.upgrade_equipped_main_weapon(), "newly equipped main weapon upgrades")
-	_expect(loadout.get_weapon_level(&"main_laser") == 2, "main augment targets the active weapon")
-	_expect(loadout.get_weapon_level(&"main_blaster") == 2, "stowed weapon keeps its prior level")
+	var laser := load("res://resources/weapons/definitions/main_laser.tres") as WeaponDefinition
+	_expect(loadout.offer_equip_weapon(laser), "laser equips into an empty bay")
+	_expect(loadout.get_weapon_level(&"main_laser") == 1, "new weapon starts at Lv.1")
+	_expect(loadout.get_equipped_weapon_ids().size() == 2, "two weapons fire together")
 
-	var cannon_definition := load(
-		"res://resources/weapons/definitions/aux_test_cannon.tres"
-	) as WeaponDefinition
-	loadout.equip_auxiliary_weapon(cannon_definition, 0)
-	_expect(loadout.get_weapon_level(&"aux_test_cannon") == 1, "auxiliary weapon starts at Lv.1")
-	player_registry.install_augment(auxiliary_upgrade, &"aux_test_cannon")
-	_expect(loadout.get_weapon_level(&"aux_test_cannon") == 2, "auxiliary module raises effective level")
-	var cannon := loadout.get_auxiliary_slot(0).equipped_weapon_instance
-	_expect(
-		is_equal_approx(cannon.get_effective_damage_multiplier(), 1.2),
-		"Lv.2 auxiliary weapon receives the unified damage multiplier",
-	)
+	_expect(loadout.unequip_weapon(&"main_laser"), "laser can move to records")
+	_expect(not loadout.is_weapon_equipped(&"main_laser"), "laser is recorded not equipped")
+	_expect(loadout.get_recorded_weapons().size() == 1, "recorded weapons list includes laser")
+	_expect(loadout.get_weapon_level(&"main_laser") == 1, "recorded level is preserved")
 
-	loadout.clear_auxiliary_slot(0)
-	loadout.equip_auxiliary_weapon(cannon_definition, 0)
+	_expect(loadout.offer_equip_weapon(laser), "recorded laser re-equips with saved level")
+	_expect(loadout.get_weapon_level(&"main_laser") == 1, "reacquire default does not auto +1")
+	loadout.upgrade_weapon_level(&"main_laser")
+	loadout.upgrade_weapon_level(&"main_laser")
+	_expect(loadout.get_weapon_level(&"main_laser") == 3, "laser reaches max level")
+	_expect(not loadout.can_upgrade_weapon(&"main_laser"), "Lv.3 is maxed")
+
+	var cannon := load("res://resources/weapons/definitions/aux_test_cannon.tres") as WeaponDefinition
+	_expect(loadout.offer_equip_weapon(cannon), "third bay accepts cannon")
+	_expect(loadout.is_bays_full(), "default three bays are full")
 	_expect(
-		loadout.get_weapon_level(&"aux_test_cannon") == 2,
-		"auxiliary weapon level survives removal and re-equip",
-	)
-	cannon = loadout.get_auxiliary_slot(0).equipped_weapon_instance
-	_expect(
-		is_equal_approx(cannon.get_effective_damage_multiplier(), 1.2),
-		"re-equipped auxiliary weapon restores its level multiplier",
-	)
-	_expect(loadout.upgrade_auxiliary_weapon(0), "auxiliary weapon reaches Lv.3")
-	_expect(not loadout.can_upgrade_auxiliary_weapon(0), "Lv.3 auxiliary weapon is maxed")
-	_expect(
-		is_equal_approx(cannon.get_effective_fire_rate_multiplier(), 1.2),
-		"Lv.3 auxiliary weapon receives the unified fire-rate multiplier",
-	)
-	_expect(
-		loadout.get_tracked_weapon_ids_by_category(WeaponDefinition.Category.AUXILIARY).has(
-			&"aux_test_cannon"
+		not loadout.offer_equip_weapon(
+			load("res://resources/weapons/definitions/main_shotgun.tres") as WeaponDefinition
 		),
-		"auxiliary progress uses the shared weapon-level registry",
+		"full bays leave new offers needing replace",
+	)
+
+	loadout.add_or_upgrade_weapon_trait(&"main_blaster", &"pierce_stub", 1)
+	_expect(
+		int(loadout.get_weapon_traits(&"main_blaster").get(&"pierce_stub", 0)) == 1,
+		"trait ranks are stored on weapon_id",
 	)
 
 	weapon_hud.call("refresh")
 	await process_frame
-	var main_title := weapon_hud.get_node("MainRow/MainModule/TitleLabel") as Label
-	var main_body := weapon_hud.get_node("MainRow/MainModule/BodyLabel") as Label
-	var aux_title := weapon_hud.get_node("AuxRow/AuxModule1/TitleLabel") as Label
-	_expect(main_title.text == "메인", "main slot title has no slot level")
-	_expect(main_body.text == "Lv.2", "main module shows the weapon level once")
-	_expect(aux_title.text == "A1 L3", "auxiliary module shows only its weapon level")
-
-	var hangar_module := load(
-		"res://resources/player_augments/facilities/facility_hangar.tres"
-	) as PlayerAugment
-	player_registry.install_augment(hangar_module, &"", 0)
-	_expect(
-		loadout.get_weapon_level(&"aux_test_cannon") == 2,
-		"replacing the auxiliary upgrade module removes its reversible level bonus",
-	)
+	_expect(weapon_hud.has_node("%BayRow"), "STATUS HUD has bay row")
+	_expect(weapon_hud.has_node("%RecordsScroll"), "STATUS HUD has records scroll")
+	_expect(not weapon_hud.has_node("MainSwapHint"), "Z swap hint is removed")
+	_expect(not weapon_hud.has_node("BlockNewMainStatus"), "X block status is removed")
 
 	world.queue_free()
 	await process_frame
@@ -111,13 +78,6 @@ func _run() -> void:
 	for failure in failures:
 		push_error("weapon level unification test: %s" % failure)
 	quit(1)
-
-
-func _has_property(object: Object, property_name: StringName) -> bool:
-	for property in object.get_property_list():
-		if StringName(property["name"]) == property_name:
-			return true
-	return false
 
 
 func _expect(condition: bool, message: String) -> void:

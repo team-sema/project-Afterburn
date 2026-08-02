@@ -64,6 +64,22 @@
       "tags": ["적", "스폰", "Threat"]
     },
     {
+      "id": "unified-weapon-system",
+      "title": "통합 무기 시스템 · STATUS 무기 UI",
+      "description": "주/보조 구분을 없애고 통합 장착 베이·weapon_id 성장·코어+특성 육각 UI로 개편한다.",
+      "column": "review",
+      "file": "cards/unified-weapon-system.md",
+      "tags": ["무기", "UI"]
+    },
+    {
+      "id": "weapon-augment-acquisition",
+      "title": "무기 증강 획득 · 필드 드롭 제거",
+      "description": "필드 무기 드롭을 제거하고 무기 획득·레벨·특성·복원을 증강 선택으로 처리한다.",
+      "column": "review",
+      "file": "cards/weapon-augment-acquisition.md",
+      "tags": ["무기", "오그먼트"]
+    },
+    {
       "id": "project-godot-47",
       "title": "프로젝트 Godot 4.7 버전 표기",
       "description": "project.godot features를 4.7로 올려 에디터 버전 경고를 없앤다.",

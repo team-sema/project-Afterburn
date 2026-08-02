@@ -8,7 +8,6 @@
 script = ExtResource("1_def")
 id = &"aux_homing_missile"
 display_name = "유도탄"
-category = 1
 weapon_scene = ExtResource("2_scene")
 icon = ExtResource("3_icon")
-description = "가까운 적을 추적하는 분홍 유도탄. 탄약 소진 시 슬롯에서 사라진다."
+description = "가까운 적을 추적하는 분홍 유도탄."

@@ -30,94 +30,37 @@ func _run() -> void:
 	root.add_child(world)
 	var gameplay: Node = world.get_node("Layout/Playfield/ViewportContainer/PlayfieldViewport/Gameplay")
 	var ship: Node2D = gameplay.get_node("Ship") as Node2D
-	var loadout: Node = ship.call("get_weapon_loadout")
+	var loadout: PlayerWeaponLoadout = ship.call("get_weapon_loadout") as PlayerWeaponLoadout
 	var weapon_hud: Node = world.get_node(
 		"Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud"
 	)
 	for _index in 4:
 		await process_frame
 
-	var blaster: WeaponDefinition = load(DEFINITION_PATHS[0]) as WeaponDefinition
-	var main_module: HexModuleFrame = weapon_hud.get_node("MainRow/MainModule") as HexModuleFrame
-	var main_icon: TextureRect = main_module.get_node("IconRect") as TextureRect
-	var main_title: Label = main_module.get_node("TitleLabel") as Label
-	var main_body: Label = main_module.get_node("BodyLabel") as Label
-
-	_expect(main_icon.visible, "equipped main module shows its icon")
-	_expect(main_icon.texture == blaster.icon, "main module uses the equipped weapon's icon")
-	_expect(main_body.text == "Lv.1", "main module body carries only the weapon level")
-	_expect(
-		not main_body.text.contains(blaster.display_name),
-		"main module no longer prints the weapon name",
-	)
-	_expect(main_title.text.contains("메인"), "main module keeps its slot title")
-	_expect(
-		main_icon.offset_top >= main_title.offset_bottom - 0.01,
-		"icon sits below the slot title",
-	)
-	_expect(
-		main_icon.offset_bottom <= main_body.offset_top + 0.01,
-		"icon sits above the level text",
-	)
-	_expect(_fits_hexagon(main_module, main_icon), "icon stays inside the hexagon outline")
-
-	var reserve_module: HexModuleFrame = weapon_hud.get_node("MainRow/ReserveModule") as HexModuleFrame
-	var reserve_icon: TextureRect = reserve_module.get_node("IconRect") as TextureRect
-	_expect(not reserve_icon.visible, "empty reserve module shows no icon")
+	weapon_hud.call("refresh")
+	await process_frame
+	var bay_row: HBoxContainer = weapon_hud.get_node("%BayRow") as HBoxContainer
+	_expect(bay_row.get_child_count() == loadout.get_max_equipped_weapon_count(), "bay count matches setting")
+	var first_cluster := bay_row.get_child(0) as WeaponCoreCluster
+	_expect(first_cluster != null, "bay row hosts weapon core clusters")
+	_expect(first_cluster.weapon_id == &"main_blaster", "first bay shows starting blaster")
 
 	var laser: WeaponDefinition = load(DEFINITION_PATHS[1]) as WeaponDefinition
-	loadout.call("equip_reserve_weapon", laser)
+	loadout.equip_weapon(laser)
 	await process_frame
-	_expect(reserve_icon.visible, "stowed reserve weapon shows its icon")
-	_expect(reserve_icon.texture == laser.icon, "reserve module uses the stowed weapon's icon")
-
-	_expect(not weapon_hud.has_node("OwnedMainRow"), "owned main weapon history row is removed")
-
-	var barrier: WeaponDefinition = load(DEFINITION_PATHS[6]) as WeaponDefinition
-	loadout.call("equip_auxiliary_weapon", barrier, 0)
+	weapon_hud.call("refresh")
 	await process_frame
-	var aux_module: HexModuleFrame = weapon_hud.get_node("AuxRow/AuxModule1") as HexModuleFrame
-	var aux_icon: TextureRect = aux_module.get_node("IconRect") as TextureRect
-	var aux_body: Label = aux_module.get_node("BodyLabel") as Label
-	_expect(aux_icon.visible, "equipped auxiliary module shows its icon")
-	_expect(aux_icon.texture == barrier.icon, "auxiliary module uses the equipped weapon's icon")
-	_expect(aux_body.text.is_empty(), "chargeless auxiliary weapons leave the body text empty")
+	_expect(bay_row.get_child(1).weapon_id == &"main_laser", "second bay shows laser icon cluster")
 
-	var cannon: WeaponDefinition = load(DEFINITION_PATHS[3]) as WeaponDefinition
-	loadout.call("equip_auxiliary_weapon", cannon, 1)
+	loadout.unequip_weapon(&"main_laser")
 	await process_frame
-	var cannon_module: HexModuleFrame = weapon_hud.get_node("AuxRow/AuxModule2") as HexModuleFrame
-	var cannon_icon: TextureRect = cannon_module.get_node("IconRect") as TextureRect
-	var cannon_title: Label = cannon_module.get_node("TitleLabel") as Label
-	var cannon_body: Label = cannon_module.get_node("BodyLabel") as Label
-	_expect(cannon_icon.texture == cannon.icon, "consumable auxiliary module shows its icon")
-	_expect(cannon_body.text.contains("/"), "consumable auxiliary module keeps its charge counter")
-	_expect(cannon_module.size.x >= 48.0, "auxiliary module gives the charge counter enough width")
+	weapon_hud.call("refresh")
+	await process_frame
+	var records_row: HBoxContainer = weapon_hud.get_node("%RecordsRow") as HBoxContainer
+	_expect(records_row.get_child_count() == 1, "unequipped weapon appears in records")
 	_expect(
-		cannon_body.label_settings.font_size >= 9,
-		"auxiliary charge counter uses a legible font size",
-	)
-	_expect(
-		cannon_body.get_minimum_size().x <= cannon_body.size.x + 0.01,
-		"auxiliary charge counter fits without clipping",
-	)
-	_expect(
-		cannon_title.get_minimum_size().x <= cannon_title.size.x + 0.01,
-		"auxiliary slot title fits without clipping",
-	)
-	_expect(
-		not cannon_body.text.contains(cannon.display_name),
-		"consumable auxiliary module no longer prints the weapon name",
-	)
-	var barrier_icon_center_y := (aux_icon.offset_top + aux_icon.offset_bottom) * 0.5
-	var cannon_icon_center_y := (cannon_icon.offset_top + cannon_icon.offset_bottom) * 0.5
-	_expect(
-		is_equal_approx(barrier_icon_center_y, cannon_icon_center_y),
-		"chargeless auxiliary icon stays vertically aligned with consumable weapon icons",
-	)
-	_expect(
-		is_equal_approx(aux_icon.size.y, cannon_icon.size.y),
-		"chargeless auxiliary icon keeps the common weapon icon size",
+		(records_row.get_child(0) as WeaponCoreCluster).is_record,
+		"record cluster is marked as record",
 	)
 
 	if failures.is_empty():
@@ -132,21 +75,3 @@ func _run() -> void:
 func _expect(condition: bool, message: String) -> void:
 	if not condition:
 		failures.append(message)
-
-
-## Every icon corner must be inside the flat-top hexagon the frame draws.
-func _fits_hexagon(module: HexModuleFrame, icon: TextureRect) -> bool:
-	var radius: float = minf(module.size.x, module.size.y) * 0.48
-	var center := module.size * 0.5
-	for corner in [
-		Vector2(icon.offset_left, icon.offset_top),
-		Vector2(icon.offset_right, icon.offset_top),
-		Vector2(icon.offset_left, icon.offset_bottom),
-		Vector2(icon.offset_right, icon.offset_bottom),
-	]:
-		var offset: Vector2 = corner - center
-		if absf(offset.y) > radius * 0.866025 + 0.01:
-			return false
-		if absf(offset.x) > radius - 0.577350 * absf(offset.y) + 0.01:
-			return false
-	return true

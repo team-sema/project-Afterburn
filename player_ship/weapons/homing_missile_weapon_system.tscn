@@ -6,7 +6,6 @@
 
 [node name="HomingMissileWeaponSystem" type="Node2D"]
 script = ExtResource("1_script")
-max_charges = 10
 
 [node name="Muzzle" type="Marker2D" parent="."]
 position = Vector2(0, -10)

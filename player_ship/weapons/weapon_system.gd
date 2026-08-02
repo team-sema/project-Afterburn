@@ -2,7 +2,7 @@ class_name WeaponSystem
 extends Node2D
 
 signal fired
-## Aux consumables emit this when fully spent; loadout clears the slot.
+## Legacy no-op path; ammo depletion no longer unequips weapons.
 signal depleted
 
 var _global_fire_rate_multiplier := 1.0
@@ -11,12 +11,11 @@ var _global_damage_multiplier := 1.0
 var _local_damage_multiplier := 1.0
 ## Ship facility (weapon room) channel, kept apart from weapon levels.
 var _facility_damage_multiplier := 1.0
-## Ship facility (hangar) extra uses for consumables.
+## Deprecated hangar ammo bonus (always 0 under unified weapons).
 var _consumable_capacity_bonus := 0
 
 var _player: Node = null
 var _loadout: Node = null
-var _weapon_category: int = 0
 var _slot_index: int = 0
 ## True after shutdown_weapon(); subclasses may read this.
 var is_shutdown := false
@@ -25,12 +24,10 @@ var is_shutdown := false
 func setup_weapon(
 	player: Node,
 	loadout: Node,
-	category: int,
 	slot_index: int,
 ) -> void:
 	_player = player
 	_loadout = loadout
-	_weapon_category = category
 	_slot_index = slot_index
 	is_shutdown = false
 	_on_weapon_setup()
@@ -41,7 +38,7 @@ func shutdown_weapon() -> void:
 	_on_weapon_shutdown()
 
 
-## Restore consumable usage (aux pickup of the same weapon).
+## Legacy hook; unified weapons do not consume ammo slots.
 func refill_consumable() -> void:
 	if is_shutdown:
 		return
@@ -61,7 +58,7 @@ func _on_refill_consumable() -> void:
 	pass
 
 
-## Subclasses call this when the consumable is fully spent.
+## Subclasses may still emit; loadout no longer clears bays on deplete.
 func report_depleted() -> void:
 	if is_shutdown:
 		return

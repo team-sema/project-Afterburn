@@ -305,16 +305,6 @@ mouse_filter = 2
 script = ExtResource("11_corner_frame")
 inset = 5.0
 
-[node name="WeaponPickupLabels" type="Control" parent="Layout/Playfield" groups=["weapon_pickup_label_host"]]
-clip_contents = true
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-
 [node name="PauseOverlay" type="ColorRect" parent="Layout/Playfield"]
 unique_name_in_owner = true
 visible = false
@@ -346,10 +336,10 @@ theme_override_styles/panel = SubResource("StyleBox_right_panel")
 
 [node name="Margin" type="MarginContainer" parent="Layout/RightPanel"]
 layout_mode = 2
-theme_override_constants/margin_left = 18
-theme_override_constants/margin_top = 10
-theme_override_constants/margin_right = 18
-theme_override_constants/margin_bottom = 10
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 8
 
 [node name="VBox" type="VBoxContainer" parent="Layout/RightPanel/Margin"]
 layout_mode = 2
@@ -376,49 +366,58 @@ theme_override_styles/panel = SubResource("StyleBox_weapon_box")
 
 [node name="Margin" type="MarginContainer" parent="Layout/RightPanel/Margin/VBox/WeaponBox"]
 layout_mode = 2
-theme_override_constants/margin_left = 4
-theme_override_constants/margin_top = 4
-theme_override_constants/margin_right = 4
-theme_override_constants/margin_bottom = 4
+theme_override_constants/margin_left = 2
+theme_override_constants/margin_top = 2
+theme_override_constants/margin_right = 2
+theme_override_constants/margin_bottom = 2
 
 [node name="WeaponLoadoutHud" type="VBoxContainer" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin" node_paths=PackedStringArray("ship")]
 layout_mode = 2
-theme_override_constants/separation = 4
+theme_override_constants/separation = 2
 script = ExtResource("6_weapon_hud")
 ship = NodePath("../../../../../../Playfield/ViewportContainer/PlayfieldViewport/Gameplay/Ship")
 
-[node name="MainSwapHint" type="Label" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud"]
+[node name="BayTitle" type="Label" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud"]
+unique_name_in_owner = true
 layout_mode = 2
-text = "[Z] MAIN / RESERVE SWAP"
+text = "장착 베이"
 label_settings = ExtResource("3_default_label")
-theme_override_colors/font_color = Color(0.45, 0.78, 1, 0.9)
+theme_override_colors/font_color = Color(0.55, 0.85, 1, 0.9)
 horizontal_alignment = 1
 
-[node name="MainRow" type="HBoxContainer" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud"]
+[node name="BayRow" type="HBoxContainer" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud"]
+unique_name_in_owner = true
 layout_mode = 2
-theme_override_constants/separation = 6
+theme_override_constants/separation = 1
 alignment = 1
 
-[node name="MainModule" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud/MainRow" instance=ExtResource("9_hex_module")]
-custom_minimum_size = Vector2(56, 56)
+[node name="RecordsTitle" type="Label" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud"]
 layout_mode = 2
-size_flags_horizontal = 4
-
-[node name="ReserveModule" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud/MainRow" instance=ExtResource("9_hex_module")]
-custom_minimum_size = Vector2(44, 44)
-layout_mode = 2
-size_flags_horizontal = 4
-
-[node name="BlockNewMainStatus" type="Label" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud"]
-layout_mode = 2
-text = "X 새주무기차단: 끔"
+text = "무기 기록"
 label_settings = ExtResource("3_default_label")
+theme_override_colors/font_color = Color(0.45, 0.65, 0.8, 0.85)
 horizontal_alignment = 1
 
-[node name="AuxRow" type="HBoxContainer" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud"]
+[node name="RecordsScroll" type="ScrollContainer" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
-theme_override_constants/separation = 4
-alignment = 1
+size_flags_vertical = 3
+horizontal_scroll_mode = 1
+vertical_scroll_mode = 0
+
+[node name="RecordsRow" type="HBoxContainer" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud/RecordsScroll"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="WeaponDetail" type="Label" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+text = "무기 또는 특성을 선택하세요"
+label_settings = ExtResource("3_default_label")
+autowrap_mode = 3
 size_flags_vertical = 3
 
 [node name="CornerFrame" type="Control" parent="Layout/RightPanel"]

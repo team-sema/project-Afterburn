@@ -6,8 +6,8 @@
 [resource]
 script = ExtResource("1_aug")
 augment_id = &"facility_hangar"
-display_name = "탄약 적재대"
-description = "장착 중 보조무기 최대 탄약이 4 증가합니다."
+display_name = "격납고 확장"
+description = "격납고 모듈 슬롯을 채웁니다. 효과는 아직 미정입니다."
 augment_type = 6
 icon = ExtResource("2_icon")
 facility_id = &"hangar"

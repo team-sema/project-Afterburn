@@ -58,8 +58,8 @@
 
 | 클래스 | 역할 |
 |--------|------|
-| `PlayerAugmentApplier` | 설치된 모듈 → 이동/연사/데미지 배수와 가역적 무기 레벨 보너스 |
-| `ShipFacilityApplier` | 설치된 시설 효과 모듈 → 주무기 공통 배율·보조 최대 탄약·이동속도·최대 선체·수집 반경·최대 실드 |
+| `PlayerAugmentApplier` | 설치된 모듈 → 이동/연사/데미지 배수. `WEAPON_TRAIT`는 loadout trait API로 전달(전투 효과 스캐폴드) |
+| `ShipFacilityApplier` | 설치된 시설 효과 모듈 → **장착 무기 공통 피해**·이동속도·최대 선체·수집 반경·최대 실드 (격납고 탄약 경로 없음) |
 | `EnemyModifierFactory` | 스폰 시 적 스탯·행동 컴포넌트 적용 |
 | `EnemyAugmentGrantComponent` | 수동으로 적 오그먼트 grant *(씬 미연결)* |
 | `TargetingComponent` | `"player"` 그룹 타깃 |

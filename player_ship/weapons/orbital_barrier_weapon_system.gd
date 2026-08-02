@@ -157,10 +157,7 @@ func _on_segment_no_health(segment: Node2D) -> void:
 	_alive_segments.erase(segment)
 	_disable_segment_collision(segment)
 	_set_segment_visuals(segment, false)
-	report_consumable_changed()
-	# Consumable: destroyed segments stay gone until a refill pickup.
-	if _alive_segments.is_empty():
-		report_depleted()
+	# Segments may die in combat; the weapon stays equipped (no ammo / no auto-unequip).
 
 
 func _set_segment_visuals(segment: Node2D, active: bool) -> void:

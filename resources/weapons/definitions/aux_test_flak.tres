@@ -8,7 +8,6 @@
 script = ExtResource("1_def")
 id = &"aux_test_flak"
 display_name = "보조 플랙"
-category = 1
 weapon_scene = ExtResource("2_scene")
 icon = ExtResource("3_icon")
-description = "주황빛 탄환을 빠른 주기로 발사하는 소모 보조무기."
+description = "주황빛 탄환을 빠른 주기로 발사하는 무기."
