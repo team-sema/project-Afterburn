@@ -16,6 +16,7 @@
 | [augment-module-slots](augment-module-slots.md) | 증강 모듈 슬롯 | review |
 | [early-enemy-fire-tuning](early-enemy-fire-tuning.md) | 초반 적 사격 완화 | review |
 | [unified-weapon-system](unified-weapon-system.md) | 통합 무기 시스템 · STATUS 무기 UI | doing |
-| [weapon-augment-acquisition](weapon-augment-acquisition.md) | 무기 증강 획득 · 필드 드롭 제거 | doing |
+| [weapon-augment-acquisition](weapon-augment-acquisition.md) | 무기 증강 획득 · 필드 드롭 제거 | review |
+| [weapon-replace-delete-reroll](weapon-replace-delete-reroll.md) | 무기 교체 삭제 · 증강 리롤 | doing |
 
 현황 스펙(카테고리): [`docs/spec/`](../../spec/)

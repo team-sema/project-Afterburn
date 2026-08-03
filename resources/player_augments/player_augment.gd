@@ -36,12 +36,7 @@ func get_weapon_id() -> StringName:
 func get_offer_title(loadout: PlayerWeaponLoadout = null) -> String:
 	match augment_type:
 		PlayerAugmentKind.Kind.WEAPON_ACQUIRE:
-			var weapon_name := _weapon_display_name()
-			if loadout != null and loadout.has_weapon_progress(get_weapon_id()) \
-					and not loadout.is_weapon_equipped(get_weapon_id()):
-				var level := loadout.get_weapon_level(get_weapon_id())
-				return "병기 모듈 복원\n%s Lv.%d" % [weapon_name, level]
-			return "신규 병기 모듈\n%s" % weapon_name
+			return "신규 병기 모듈\n%s" % _weapon_display_name()
 		PlayerAugmentKind.Kind.WEAPON_LEVEL:
 			var weapon_name := _weapon_display_name()
 			if loadout != null and loadout.has_weapon_progress(get_weapon_id()):
@@ -59,10 +54,6 @@ func get_offer_title(loadout: PlayerWeaponLoadout = null) -> String:
 func get_offer_description(loadout: PlayerWeaponLoadout = null) -> String:
 	match augment_type:
 		PlayerAugmentKind.Kind.WEAPON_ACQUIRE:
-			if loadout != null and loadout.has_weapon_progress(get_weapon_id()) \
-					and not loadout.is_weapon_equipped(get_weapon_id()):
-				var traits := loadout.get_weapon_traits(get_weapon_id())
-				return "기록된 특성 모듈 %d개를 함께 복원합니다." % traits.size()
 			if weapon_definition != null and weapon_definition.description != "":
 				return weapon_definition.description
 			return description

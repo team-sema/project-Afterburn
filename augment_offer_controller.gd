@@ -5,6 +5,8 @@ const AUGMENT_RESUME_BURST_SCENE := preload("res://effects/augment_resume_burst.
 
 signal offer_started(offer_type: OfferType)
 signal offer_completed(offer_type: OfferType)
+signal reroll_count_changed(remaining: int)
+signal augment_candidates_changed
 
 enum OfferType {
 	PLAYER,
@@ -21,9 +23,14 @@ enum OfferType {
 @export var enemy_augment_pool: Array[EnemyAugment] = []
 @export_range(1, 3, 1) var choices_per_offer := 3
 @export_range(8.0, 120.0, 1.0) var player_resume_clear_radius := 36.0
+## Run-wide reroll budget (temporary balance; tune via export only).
+@export_range(0, 20, 1) var max_reroll_count := 2
 
 var is_offer_active := false
 var active_offer_type := OfferType.PLAYER
+var remaining_reroll_count := 0
+var _current_player_choices: Array[PlayerAugment] = []
+var _awaiting_final_choice := false
 
 
 func _ready() -> void:
@@ -33,10 +40,12 @@ func _ready() -> void:
 	assert(module_swap_ui != null, "AugmentOfferController requires an AugmentModuleSwapOverlay.")
 	assert(ship != null, "AugmentOfferController requires a Ship reference.")
 	assert(enemy_augment_pool.size() >= choices_per_offer, "Enemy augment pool is too small for an offer.")
+	remaining_reroll_count = max_reroll_count
 	selection_ui.configure_player_registry(player_registry)
 	selection_ui.configure_weapon_loadout(_get_loadout())
 	selection_ui.choice_selected.connect(_on_choice_selected)
 	selection_ui.facility_expansion_selected.connect(_on_facility_expansion_selected)
+	selection_ui.reroll_requested.connect(_on_reroll_requested)
 
 
 func request_offer(offer_type: OfferType) -> bool:
@@ -61,16 +70,21 @@ func _start_offer() -> void:
 	var show_ship_modules := false
 	if active_offer_type == OfferType.PLAYER:
 		selection_ui.configure_weapon_loadout(_get_loadout())
-		choices = _pick_player_choices()
+		_current_player_choices = _pick_player_choices()
+		choices = _current_player_choices
 		title = "함선 모듈"
 		prompt = "무기·특성·시설 모듈을 선택하거나 함선 부위의 슬롯을 확장하세요"
 		accent_color = selection_ui.player_accent_color
 		show_ship_modules = true
+		_awaiting_final_choice = true
+		selection_ui.set_reroll_state(remaining_reroll_count, remaining_reroll_count > 0)
 	else:
 		choices = _pick_enemy_choices()
 		title = "적 강화"
 		prompt = "다음 위협을 고르세요"
 		accent_color = selection_ui.enemy_accent_color
+		_awaiting_final_choice = false
+		selection_ui.set_reroll_state(-1, false)
 
 	if choices.is_empty():
 		push_error("AugmentOfferController: no valid augment choices.")
@@ -141,7 +155,7 @@ func _is_player_augment_available(augment: PlayerAugment, loadout: PlayerWeaponL
 			if loadout == null:
 				return false
 			var weapon_id := augment.get_weapon_id()
-			if weapon_id == &"" or not loadout.has_weapon_progress(weapon_id):
+			if weapon_id == &"" or not loadout.is_weapon_equipped(weapon_id):
 				return false
 			return loadout.can_upgrade_weapon(weapon_id)
 		PlayerAugmentKind.Kind.WEAPON_TRAIT:
@@ -202,7 +216,7 @@ func _resolve_weapon_acquire(player_augment: PlayerAugment, loadout: PlayerWeapo
 	weapon_slot_ui.open_for_replace(
 		loadout,
 		"무기 교체",
-		"%s 을(를) 장착할 베이를 선택하세요" % definition.display_name,
+		"교체할 병기 모듈을 선택하세요.\n교체하면 해당 레벨과 특성이 모두 사라집니다.",
 		definition,
 	)
 	var slot_index: int = await weapon_slot_ui.selection_finished
@@ -307,10 +321,52 @@ func _finish_offer(augment: Resource) -> void:
 
 func _complete_offer(completed_offer_type: OfferType) -> void:
 	is_offer_active = false
+	_awaiting_final_choice = false
+	_current_player_choices.clear()
 	if completed_offer_type == OfferType.PLAYER:
 		_trigger_player_resume_burst()
 	get_tree().paused = false
 	offer_completed.emit(completed_offer_type)
+
+
+func _on_reroll_requested() -> void:
+	if not is_offer_active or not _awaiting_final_choice:
+		return
+	if active_offer_type != OfferType.PLAYER:
+		return
+	if remaining_reroll_count <= 0:
+		selection_ui.set_reroll_state(0, false)
+		return
+	remaining_reroll_count -= 1
+	reroll_count_changed.emit(remaining_reroll_count)
+	var previous_ids := _choice_id_set(_current_player_choices)
+	var next_choices := _pick_player_choices()
+	if (
+		_choice_id_set(next_choices) == previous_ids
+		and _count_available_player_augments() > choices_per_offer
+	):
+		next_choices = _pick_player_choices()
+	_current_player_choices = next_choices
+	augment_candidates_changed.emit()
+	selection_ui.refresh_choices(_current_player_choices)
+	selection_ui.set_reroll_state(remaining_reroll_count, remaining_reroll_count > 0)
+
+
+func _choice_id_set(choices: Array[PlayerAugment]) -> Dictionary:
+	var ids := {}
+	for choice in choices:
+		if choice != null:
+			ids[choice.augment_id] = true
+	return ids
+
+
+func _count_available_player_augments() -> int:
+	var loadout := _get_loadout()
+	var count := 0
+	for augment in player_augment_pool:
+		if _is_player_augment_available(augment, loadout):
+			count += 1
+	return count
 
 
 func _trigger_player_resume_burst() -> int:

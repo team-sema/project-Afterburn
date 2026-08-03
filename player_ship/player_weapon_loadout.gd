@@ -5,9 +5,9 @@ extends Node2D
 
 signal weapon_equipped(weapon_id: StringName, slot_index: int)
 signal weapon_unequipped(weapon_id: StringName, slot_index: int)
+signal weapon_replaced(removed_weapon_id: StringName, new_weapon_id: StringName, slot_index: int)
 signal weapon_level_changed(weapon_id: StringName, new_level: int)
 signal weapon_trait_changed(weapon_id: StringName, trait_id: StringName, new_rank: int)
-signal weapon_records_changed
 signal weapon_slots_changed
 signal loadout_changed
 
@@ -16,8 +16,6 @@ const MAX_WEAPON_LEVEL := 3
 @export var default_weapon: WeaponDefinition
 @export var player_path: NodePath
 @export_range(1, 8, 1) var max_equipped_weapon_count := 3
-## When picking up a recorded (unequipped) weapon into an empty bay, also raise level by 1.
-@export var raise_level_on_reacquire_recorded := false
 
 @onready var weapon_mounts_root: Node2D = $WeaponMounts
 
@@ -169,14 +167,28 @@ func has_weapon_progress(weapon_id: StringName) -> bool:
 
 
 func get_recorded_weapons() -> Array[WeaponProgressState]:
-	var recorded: Array[WeaponProgressState] = []
-	for weapon_id in _sorted_tracked_ids():
-		if is_weapon_equipped(weapon_id):
-			continue
-		var state := get_weapon_state(weapon_id)
-		if state != null:
-			recorded.append(state)
-	return recorded
+	## Deprecated: growth is not preserved for unequipped weapons.
+	return []
+
+
+func clear_weapon_progress(weapon_id: StringName) -> void:
+	if weapon_id == &"" or not _progress.has(weapon_id):
+		return
+	_progress.erase(weapon_id)
+	loadout_changed.emit()
+
+
+func _reset_weapon_progress(weapon_definition: WeaponDefinition, starting_level: int) -> WeaponProgressState:
+	assert(weapon_definition != null)
+	clear_weapon_progress(weapon_definition.id)
+	var state := WeaponProgressState.new()
+	state.weapon_id = weapon_definition.id
+	state.level = clampi(starting_level, 1, MAX_WEAPON_LEVEL)
+	state.definition = weapon_definition
+	state.trait_ranks = {}
+	_progress[weapon_definition.id] = state
+	weapon_level_changed.emit(weapon_definition.id, state.level)
+	return state
 
 
 func get_tracked_weapon_ids() -> Array[StringName]:
@@ -240,31 +252,25 @@ func add_or_upgrade_weapon_trait(weapon_id: StringName, trait_id: StringName, ra
 	var new_rank := state.get_trait_rank(trait_id) + rank_increase
 	state.set_trait_rank(trait_id, new_rank)
 	weapon_trait_changed.emit(weapon_id, trait_id, new_rank)
-	weapon_records_changed.emit()
 	loadout_changed.emit()
 	return new_rank
 
 
-## Augment offer: ensure progress and equip into an empty bay.
-## Returns true if equipped (or already equipped). False if bays are full (caller runs replace UI).
-## Restore keeps existing level/traits; brand-new uses starting_level. Never auto +1 on restore.
+## Augment offer: equip into an empty bay at starting_level with no traits.
+## Re-acquiring after replace always starts fresh (no restore).
 func offer_equip_weapon(weapon_definition: WeaponDefinition, starting_level: int = 1) -> bool:
 	if weapon_definition == null or weapon_definition.id == &"":
 		return false
 	if is_weapon_equipped(weapon_definition.id):
 		return true
-	var existed := has_weapon_progress(weapon_definition.id)
-	var state := _ensure_progress(weapon_definition.id, weapon_definition)
-	if not existed:
-		state.level = clampi(starting_level, 1, MAX_WEAPON_LEVEL)
-		weapon_level_changed.emit(weapon_definition.id, state.level)
 	var empty := get_first_empty_bay()
 	if empty < 0:
 		return false
+	_reset_weapon_progress(weapon_definition, starting_level)
 	return equip_weapon(weapon_definition, empty)
 
 
-## Replace an equipped bay with a weapon from an augment offer (records the old weapon).
+## Replace an equipped bay. Deletes the removed weapon's level and traits permanently.
 func request_replace_equipped(slot_index: int, weapon_definition: WeaponDefinition, starting_level: int = 1) -> bool:
 	if weapon_definition == null:
 		return false
@@ -272,13 +278,15 @@ func request_replace_equipped(slot_index: int, weapon_definition: WeaponDefiniti
 		return false
 	if is_weapon_equipped(weapon_definition.id) and find_equipped_slot(weapon_definition.id) != slot_index:
 		return false
-	var existed := has_weapon_progress(weapon_definition.id)
-	var state := _ensure_progress(weapon_definition.id, weapon_definition)
-	if not existed:
-		state.level = clampi(starting_level, 1, MAX_WEAPON_LEVEL)
-		weapon_level_changed.emit(weapon_definition.id, state.level)
+	var bay := _bays[slot_index]
+	var removed_id := bay.equipped_weapon_id
 	unequip_weapon_at(slot_index)
-	return equip_weapon(weapon_definition, slot_index)
+	# unequip already cleared removed progress
+	_reset_weapon_progress(weapon_definition, starting_level)
+	if not equip_weapon(weapon_definition, slot_index):
+		return false
+	weapon_replaced.emit(removed_id, weapon_definition.id, slot_index)
+	return true
 
 
 ## Legacy field-pickup API — field drops are disabled; always fails.
@@ -318,7 +326,6 @@ func equip_weapon(weapon_definition: WeaponDefinition, slot_index: int = -1) -> 
 	_apply_multipliers_to_weapon(instance, weapon_definition.id)
 	weapon_equipped.emit(weapon_definition.id, target)
 	weapon_slots_changed.emit()
-	weapon_records_changed.emit()
 	loadout_changed.emit()
 	return true
 
@@ -338,9 +345,9 @@ func unequip_weapon_at(slot_index: int) -> bool:
 		return false
 	var weapon_id := bay.equipped_weapon_id
 	_clear_bay(bay)
+	clear_weapon_progress(weapon_id)
 	weapon_unequipped.emit(weapon_id, slot_index)
 	weapon_slots_changed.emit()
-	weapon_records_changed.emit()
 	loadout_changed.emit()
 	return true
 
