@@ -18,5 +18,6 @@
 | [unified-weapon-system](unified-weapon-system.md) | 통합 무기 시스템 · STATUS 무기 UI | doing |
 | [weapon-augment-acquisition](weapon-augment-acquisition.md) | 무기 증강 획득 · 필드 드롭 제거 | review |
 | [weapon-replace-delete-reroll](weapon-replace-delete-reroll.md) | 무기 교체 삭제 · 증강 리롤 | doing |
+| [weapon-status-focus-detail](weapon-status-focus-detail.md) | 무기 STATUS 포커스 디테일 | review |
 
 현황 스펙(카테고리): [`docs/spec/`](../../spec/)

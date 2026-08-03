@@ -25,9 +25,9 @@ Menu (ui_accept)
 - `AugmentSelectionOverlay` / `AugmentModuleSwapOverlay` / `AugmentOfferController` / `AugmentProgressionController`
 - `Ship` / `SpaceBackground` / `EnemyGenerator` / `ScoreLabel`
 
-우측 패널(`world.tscn`): `STATUS` → `ShipPanel`(함선 그림 + 시설 칩 6종 + 상세 박스) → `WeaponBox/Margin/WeaponLoadoutHud`
+우측 패널(`world.tscn`): `STATUS` → `ShipPanel`(함선 그림 + 시설 칩 6종 + `시설명 : 슬롯` 한 줄) → `WeaponBox/Margin/WeaponLoadoutHud`
 
-`WeaponLoadoutHud`의 보조 슬롯은 48×48 육각 모듈이며, 발사형 무기의 잔탄을 아이콘 아래 `남은/최대`로 표시한다.
+`WeaponLoadoutHud`: **무기 모듈** → 장착 베이(동일 크기 헥스 가로 나열, 클릭 포커스) → **좌우 2열**(`선택된 무기` | `장착된 모듈` 2×2). 탄약·주/보조 구분 없음.
 
 좌측 패널(`world.tscn`): 타이틀 → `SCORE` → `ProgressionHud`(XP·위협 바) → `ShipStatusHud`(선체·실드 바) → `PLAYFIELD`
 

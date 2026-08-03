@@ -36,6 +36,7 @@ signal module_clicked
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP if interactive else Control.MOUSE_FILTER_IGNORE
+	clip_contents = false
 	_title_settings = BASE_LABEL_SETTINGS.duplicate() as LabelSettings
 	_body_settings = BASE_LABEL_SETTINGS.duplicate() as LabelSettings
 	var title_label := _get_title_label()
@@ -47,18 +48,35 @@ func _ready() -> void:
 		title_label.autowrap_mode = TextServer.AUTOWRAP_OFF
 		title_label.set_anchors_preset(Control.PRESET_TOP_LEFT, false)
 		title_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		title_label.text = ""
 	if body_label != null:
 		body_label.label_settings = _body_settings
 		body_label.clip_text = true
 		body_label.autowrap_mode = TextServer.AUTOWRAP_OFF
 		body_label.set_anchors_preset(Control.PRESET_TOP_LEFT, false)
 		body_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		body_label.text = ""
 	if icon_rect != null:
 		icon_rect.set_anchors_preset(Control.PRESET_TOP_LEFT, false)
 		icon_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_apply_icon_modulate()
 	resized.connect(_on_resized)
 	_layout_children()
+
+
+func _get_minimum_size() -> Vector2:
+	# Ignore child label text width so small hex modules stay square in tight STATUS rails.
+	if custom_minimum_size != Vector2.ZERO:
+		return custom_minimum_size
+	return Vector2(24, 24)
+
+
+func apply_fixed_size(side: float) -> void:
+	var square := Vector2(side, side)
+	custom_minimum_size = square
+	size = square
+	_layout_children()
+	queue_redraw()
 
 
 func _gui_input(event: InputEvent) -> void:
@@ -101,8 +119,8 @@ func _on_resized() -> void:
 
 
 func _layout_children() -> void:
-	var title_font_size := clampi(int(size.y * 0.13), 5, 9)
-	var body_font_size := clampi(int(size.y * 0.2), 8, 11)
+	var title_font_size := clampi(int(size.y * 0.13), 4, 9)
+	var body_font_size := clampi(int(size.y * 0.2), 5, 11)
 	if _title_settings != null:
 		_title_settings.font_size = title_font_size
 		_title_settings.line_spacing = -2.0
@@ -157,7 +175,7 @@ func _place_text_band(label: Label, top: float, bottom: float) -> void:
 func _place_icon(icon_rect: TextureRect, top: float, bottom: float) -> void:
 	var band_center := (top + bottom) * 0.5
 	var distance := absf(band_center - size.y * 0.5)
-	var radius := minf(size.x, size.y) * 0.48 - border_width
+	var radius := _hex_radius(minf(size.x, size.y))
 	var half := (radius - HEX_EDGE_SLOPE * distance) / (1.0 + HEX_EDGE_SLOPE)
 	half = maxf(2.0, minf(half, (bottom - top) * 0.5))
 	icon_rect.offset_left = size.x * 0.5 - half
@@ -167,7 +185,7 @@ func _place_icon(icon_rect: TextureRect, top: float, bottom: float) -> void:
 
 
 func _hex_half_width_at(offset_y: float) -> float:
-	var radius := minf(size.x, size.y) * 0.48
+	var radius := _hex_radius(minf(size.x, size.y))
 	if absf(offset_y) >= radius * HEX_HALF_HEIGHT_RATIO:
 		return 0.0
 	return radius - HEX_EDGE_SLOPE * absf(offset_y)
@@ -201,29 +219,41 @@ func _get_icon_rect() -> TextureRect:
 
 
 func _draw() -> void:
-	var hex := _hex_points(size)
+	var side := minf(size.x, size.y)
+	if side < 4.0:
+		return
+	# Draw in a centered square so parent stretch cannot turn the hex into a tall rectangle.
+	var origin := (size - Vector2(side, side)) * 0.5
+	var hex := _hex_points(Vector2(side, side))
 	if hex.size() < 6:
 		return
+	for index in hex.size():
+		hex[index] = hex[index] + origin
 	var fill := fill_color
 	var border := border_color
 	if dimmed:
 		fill = Color(fill.r, fill.g, fill.b, fill.a * 0.45)
 		border = Color(border.r, border.g, border.b, border.a * 0.4)
 	draw_colored_polygon(hex, fill)
-	for index in 6:
-		var a := hex[index]
-		var b := hex[(index + 1) % 6]
-		draw_line(a, b, border, border_width, true)
+	var outline := hex.duplicate()
+	outline.append(hex[0])
+	draw_polyline(outline, border, border_width, true)
+
+
+func _hex_radius(side: float) -> float:
+	# Flat-top height is 2R; keep stroke fully inside the control so edges are not clipped.
+	return maxf(2.0, side * 0.5 - border_width - 1.0)
 
 
 func _hex_points(rect_size: Vector2) -> PackedVector2Array:
-	var radius := minf(rect_size.x, rect_size.y) * 0.48
-	if radius < 4.0:
+	var side := minf(rect_size.x, rect_size.y)
+	var radius := _hex_radius(side)
+	if radius < 2.0:
 		return PackedVector2Array()
 	var center := rect_size * 0.5
 	var points := PackedVector2Array()
-	# Flat-top hexagon.
+	# Flat-top hexagon (vertex offset -30°).
 	for index in 6:
-		var angle := TAU * float(index) / 6.0
+		var angle := TAU * float(index) / 6.0 - PI / 6.0
 		points.append(center + Vector2(cos(angle), sin(angle)) * radius)
 	return points

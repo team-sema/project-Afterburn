@@ -337,13 +337,13 @@ theme_override_styles/panel = SubResource("StyleBox_right_panel")
 [node name="Margin" type="MarginContainer" parent="Layout/RightPanel"]
 layout_mode = 2
 theme_override_constants/margin_left = 10
-theme_override_constants/margin_top = 8
+theme_override_constants/margin_top = 4
 theme_override_constants/margin_right = 10
-theme_override_constants/margin_bottom = 8
+theme_override_constants/margin_bottom = 4
 
 [node name="VBox" type="VBoxContainer" parent="Layout/RightPanel/Margin"]
 layout_mode = 2
-theme_override_constants/separation = 4
+theme_override_constants/separation = 2
 
 [node name="LoadoutTitle" type="Label" parent="Layout/RightPanel/Margin/VBox"]
 layout_mode = 2
@@ -356,10 +356,14 @@ layout_mode = 2
 color = Color(0.1, 0.65, 0.95, 0.85)
 
 [node name="ShipPanel" parent="Layout/RightPanel/Margin/VBox" node_paths=PackedStringArray("facility_registry") instance=ExtResource("10_ship_panel")]
+clip_contents = true
+custom_minimum_size = Vector2(0, 126)
 layout_mode = 2
+mouse_filter = 2
 facility_registry = NodePath("../../../../Playfield/ViewportContainer/PlayfieldViewport/Gameplay/PlayerAugmentRegistry")
 
 [node name="WeaponBox" type="PanelContainer" parent="Layout/RightPanel/Margin/VBox"]
+clip_contents = false
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_styles/panel = SubResource("StyleBox_weapon_box")
@@ -380,25 +384,100 @@ ship = NodePath("../../../../../../Playfield/ViewportContainer/PlayfieldViewport
 [node name="BayTitle" type="Label" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud"]
 unique_name_in_owner = true
 layout_mode = 2
-text = "장착 베이"
+text = "무기 모듈"
 label_settings = ExtResource("3_default_label")
 theme_override_colors/font_color = Color(0.55, 0.85, 1, 0.9)
-horizontal_alignment = 1
+horizontal_alignment = 0
+
+[node name="BaySubtitle" type="Label" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "장착 베이"
+label_settings = ExtResource("3_default_label")
+theme_override_colors/font_color = Color(0.45, 0.75, 0.9, 0.85)
 
 [node name="BayRow" type="HBoxContainer" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_constants/separation = 1
+theme_override_constants/separation = 8
 alignment = 1
+size_flags_horizontal = 3
 
-[node name="WeaponDetail" type="Label" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud"]
+[node name="DetailColumns" type="HBoxContainer" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 28)
 layout_mode = 2
-text = "무기 또는 특성을 선택하세요"
+theme_override_constants/separation = 6
+size_flags_horizontal = 3
+
+[node name="SelectedCol" type="VBoxContainer" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud/DetailColumns"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 2
+
+[node name="SelectedWeaponTitle" type="Label" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud/DetailColumns/SelectedCol"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "선택된 무기"
+label_settings = ExtResource("3_default_label")
+theme_override_colors/font_color = Color(0.55, 0.85, 1, 0.9)
+
+[node name="SelectedWeaponRow" type="VBoxContainer" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud/DetailColumns/SelectedCol"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="SelectedWeaponIcon" type="TextureRect" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud/DetailColumns/SelectedCol/SelectedWeaponRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(28, 28)
+layout_mode = 2
+size_flags_horizontal = 0
+expand_mode = 1
+stretch_mode = 5
+modulate = Color(0.7, 0.95, 1, 1)
+
+[node name="SelectedWeaponName" type="Label" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud/DetailColumns/SelectedCol/SelectedWeaponRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "무기를 선택하세요"
+label_settings = ExtResource("3_default_label")
+clip_text = true
+autowrap_mode = 3
+
+[node name="ModulesCol" type="VBoxContainer" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud/DetailColumns"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 1.35
+theme_override_constants/separation = 2
+
+[node name="EquippedModulesTitle" type="Label" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud/DetailColumns/ModulesCol"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "장착된 모듈"
+label_settings = ExtResource("3_default_label")
+theme_override_colors/font_color = Color(0.55, 0.85, 1, 0.9)
+
+[node name="ModulesGrid" type="GridContainer" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud/DetailColumns/ModulesCol"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/h_separation = 3
+theme_override_constants/v_separation = 3
+columns = 2
+
+[node name="TraitDetail" type="Label" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
 label_settings = ExtResource("3_default_label")
 autowrap_mode = 3
-size_flags_vertical = 3
+
+[node name="WeaponDetailFooter" type="Label" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "모듈은 무기의 성능을 강화합니다."
+label_settings = ExtResource("3_default_label")
+theme_override_colors/font_color = Color(0.45, 0.7, 0.85, 0.75)
+autowrap_mode = 3
 
 [node name="CornerFrame" type="Control" parent="Layout/RightPanel"]
 layout_mode = 2

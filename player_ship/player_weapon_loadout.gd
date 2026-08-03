@@ -155,6 +155,41 @@ func get_weapon_display_name(weapon_id: StringName) -> String:
 	return String(weapon_id)
 
 
+func get_trait_definition(trait_id: StringName) -> WeaponTraitDefinition:
+	if trait_id == &"":
+		return null
+	var path := "res://resources/weapons/traits/%s.tres" % String(trait_id)
+	if ResourceLoader.exists(path):
+		return load(path) as WeaponTraitDefinition
+	# Common id aliases used by augment resources (e.g. blaster_pierce).
+	var dir := DirAccess.open("res://resources/weapons/traits")
+	if dir == null:
+		return null
+	dir.list_dir_begin()
+	var file_name := dir.get_next()
+	while file_name != "":
+		if not dir.current_is_dir() and file_name.ends_with(".tres"):
+			var candidate := load("res://resources/weapons/traits/%s" % file_name) as WeaponTraitDefinition
+			if candidate != null and candidate.trait_id == trait_id:
+				return candidate
+		file_name = dir.get_next()
+	return null
+
+
+func get_trait_display_name(trait_id: StringName) -> String:
+	var definition := get_trait_definition(trait_id)
+	if definition != null and definition.display_name != "":
+		return definition.display_name
+	return String(trait_id)
+
+
+func get_trait_icon(trait_id: StringName) -> Texture2D:
+	var definition := get_trait_definition(trait_id)
+	if definition == null:
+		return null
+	return definition.icon
+
+
 func get_weapon_icon(weapon_id: StringName) -> Texture2D:
 	var definition := get_weapon_definition(weapon_id)
 	if definition == null:

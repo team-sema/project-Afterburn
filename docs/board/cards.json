@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-03",
+  "updated": "2026-08-04",
   "source": "docs/board/cards/*.md",
   "columns": [
     {
@@ -86,6 +86,14 @@
       "column": "review",
       "file": "cards/weapon-replace-delete-reroll.md",
       "tags": ["무기", "오그먼트", "UI"]
+    },
+    {
+      "id": "weapon-status-focus-detail",
+      "title": "무기 STATUS 포커스 디테일",
+      "description": "장착 무기 포커스 시 헥스 강조와 선택/모듈 디테일 패널을 표시한다.",
+      "column": "review",
+      "file": "cards/weapon-status-focus-detail.md",
+      "tags": ["무기", "UI", "STATUS"]
     },
     {
       "id": "project-godot-47",
