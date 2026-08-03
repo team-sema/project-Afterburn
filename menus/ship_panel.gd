@@ -17,6 +17,9 @@ var _selection_input_enabled := false
 
 
 func _ready() -> void:
+	# Empty panel area must not steal mouse from the weapon UI below.
+	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	clip_contents = true
 	_collect_modules()
 	resized.connect(_refresh_links)
 	_refresh_links()
@@ -32,10 +35,22 @@ func _ready() -> void:
 func refresh() -> void:
 	if facility_registry == null:
 		return
+	_ensure_default_selection()
 	for module in _modules:
 		_refresh_module(module)
 	_refresh_detail()
 	_refresh_links()
+
+
+func _ensure_default_selection() -> void:
+	# Mockup always shows a facility line (e.g. "엔진 : 빈 슬롯"), never blank prompt.
+	if _selected_facility_id != &"":
+		if facility_registry.get_facility_definition(_selected_facility_id) != null:
+			return
+	for module in _modules:
+		if facility_registry.get_facility_definition(module.facility_id) != null:
+			_selected_facility_id = module.facility_id
+			return
 
 
 func set_registry(registry: PlayerAugmentRegistry) -> void:
@@ -134,21 +149,23 @@ func _refresh_module(module: ShipFacilityModule) -> void:
 func _refresh_detail() -> void:
 	if detail_label == null:
 		return
+	if detail_icon != null:
+		detail_icon.texture = null
+		detail_icon.visible = false
 	var definition := facility_registry.get_facility_definition(_selected_facility_id)
 	if definition == null:
-		detail_label.text = "모듈 카드를 가리키거나 함선 부위를 선택하세요"
-		if detail_icon != null:
-			detail_icon.texture = null
+		detail_label.text = ""
 		return
-	if detail_icon != null:
-		detail_icon.texture = definition.icon
+	# Mockup: plain line under the facility grid — "엔진 : 빈 슬롯"
 	var names: PackedStringArray = []
 	for module in facility_registry.get_facility_slots(_selected_facility_id):
 		if module == null:
 			names.append("빈 슬롯")
 		else:
 			names.append((module as PlayerAugmentModuleState).augment.display_name)
-	detail_label.text = "%s · %s" % [
+	if names.is_empty():
+		names.append("빈 슬롯")
+	detail_label.text = "%s : %s" % [
 		definition.display_name,
 		" / ".join(names),
 	]

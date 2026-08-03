@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://menus/ship_panel.gd" id="1_script"]
 [ext_resource type="PackedScene" path="res://menus/ship_diagram.tscn" id="2_diagram"]
@@ -6,27 +6,16 @@
 [ext_resource type="LabelSettings" path="res://fonts/ship_panel_detail_label_settings.tres" id="4_label"]
 [ext_resource type="Script" path="res://menus/ship_facility_links.gd" id="5_links"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBox_detail"]
-bg_color = Color(0.02, 0.08, 0.15, 0.92)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.16, 0.5, 0.72, 0.8)
-corner_radius_top_left = 3
-corner_radius_top_right = 3
-corner_radius_bottom_right = 3
-corner_radius_bottom_left = 3
-
 [node name="ShipPanel" type="Control"]
-custom_minimum_size = Vector2(0, 148)
+clip_contents = true
+custom_minimum_size = Vector2(0, 126)
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 1
+mouse_filter = 2
 script = ExtResource("1_script")
 
 [node name="ShipDiagram" parent="." instance=ExtResource("2_diagram")]
@@ -35,10 +24,10 @@ layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = -19.0
-offset_top = 18.0
-offset_right = 19.0
-offset_bottom = 97.0
+offset_left = -18.0
+offset_top = 6.0
+offset_right = 18.0
+offset_bottom = 70.0
 grow_horizontal = 2
 
 [node name="FacilityLinks" type="Control" parent="." node_paths=PackedStringArray("ship_diagram")]
@@ -53,93 +42,28 @@ mouse_filter = 2
 script = ExtResource("5_links")
 ship_diagram = NodePath("../ShipDiagram")
 
-[node name="WeaponRoom" parent="." instance=ExtResource("3_module")]
-layout_mode = 1
-anchors_preset = 0
-offset_right = 62.0
-offset_bottom = 36.0
-facility_id = &"weapon_room"
-hardpoint = Vector2(0.06, 0.36)
-
-[node name="Hangar" parent="." instance=ExtResource("3_module")]
-layout_mode = 1
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -62.0
-offset_top = 0.0
-offset_right = 0.0
-offset_bottom = 36.0
-grow_horizontal = 0
-facility_id = &"hangar"
-hardpoint = Vector2(0.94, 0.36)
-
-[node name="Engine" parent="." instance=ExtResource("3_module")]
-layout_mode = 1
-anchors_preset = 0
-offset_top = 40.0
-offset_right = 62.0
-offset_bottom = 76.0
-facility_id = &"engine"
-hardpoint = Vector2(0.31, 0.56)
-
-[node name="Hull" parent="." instance=ExtResource("3_module")]
-layout_mode = 1
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -62.0
-offset_top = 40.0
-offset_right = 0.0
-offset_bottom = 76.0
-grow_horizontal = 0
-facility_id = &"hull"
-hardpoint = Vector2(0.69, 0.56)
-
-[node name="Radar" parent="." instance=ExtResource("3_module")]
-layout_mode = 1
-anchors_preset = 0
-offset_top = 80.0
-offset_right = 62.0
-offset_bottom = 116.0
-facility_id = &"radar"
-hardpoint = Vector2(0.21, 0.75)
-
-[node name="Shield" parent="." instance=ExtResource("3_module")]
-layout_mode = 1
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -62.0
-offset_top = 80.0
-offset_right = 0.0
-offset_bottom = 116.0
-grow_horizontal = 0
-facility_id = &"shield"
-hardpoint = Vector2(0.79, 0.75)
-
-[node name="DetailBox" type="Panel" parent="."]
+[node name="DetailBox" type="Control" parent="."]
 layout_mode = 1
 anchors_preset = 12
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = -30.0
+offset_top = -14.0
 grow_horizontal = 2
 grow_vertical = 0
 mouse_filter = 2
-theme_override_styles/panel = SubResource("StyleBox_detail")
 
 [node name="FacilityDetailIcon" type="TextureRect" parent="DetailBox"]
 unique_name_in_owner = true
+visible = false
 self_modulate = Color(0.55, 0.9, 1, 1)
 layout_mode = 1
 anchors_preset = 4
 anchor_top = 0.5
 anchor_bottom = 0.5
-offset_left = 5.0
+offset_left = 0.0
 offset_top = -6.0
-offset_right = 17.0
+offset_right = 12.0
 offset_bottom = 6.0
 grow_vertical = 2
 mouse_filter = 2
@@ -152,13 +76,78 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 21.0
-offset_top = 2.0
-offset_right = -4.0
-offset_bottom = -2.0
+offset_left = 2.0
+offset_top = 0.0
+offset_right = -2.0
+offset_bottom = 0.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 label_settings = ExtResource("4_label")
 vertical_alignment = 1
 autowrap_mode = 2
+
+[node name="WeaponRoom" parent="." instance=ExtResource("3_module")]
+layout_mode = 1
+anchors_preset = 0
+offset_right = 62.0
+offset_bottom = 36.0
+facility_id = &"weapon_room"
+hardpoint = Vector2(0.06, 0.28)
+
+[node name="Hangar" parent="." instance=ExtResource("3_module")]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -62.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 36.0
+grow_horizontal = 0
+facility_id = &"hangar"
+hardpoint = Vector2(0.94, 0.28)
+
+[node name="Engine" parent="." instance=ExtResource("3_module")]
+layout_mode = 1
+anchors_preset = 0
+offset_top = 38.0
+offset_right = 62.0
+offset_bottom = 74.0
+facility_id = &"engine"
+hardpoint = Vector2(0.31, 0.48)
+
+[node name="Hull" parent="." instance=ExtResource("3_module")]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -62.0
+offset_top = 38.0
+offset_right = 0.0
+offset_bottom = 74.0
+grow_horizontal = 0
+facility_id = &"hull"
+hardpoint = Vector2(0.69, 0.48)
+
+[node name="Radar" parent="." instance=ExtResource("3_module")]
+layout_mode = 1
+anchors_preset = 0
+offset_top = 76.0
+offset_right = 62.0
+offset_bottom = 112.0
+facility_id = &"radar"
+hardpoint = Vector2(0.21, 0.68)
+
+[node name="Shield" parent="." instance=ExtResource("3_module")]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -62.0
+offset_top = 76.0
+offset_right = 0.0
+offset_bottom = 112.0
+grow_horizontal = 0
+facility_id = &"shield"
+hardpoint = Vector2(0.79, 0.68)

@@ -34,7 +34,7 @@ Move / MoveInput / PositionClamp / WeaponMount(Blaster·Laser·Shotgun 등) / Pl
 - 빈 베이면 신규 자동 장착. 만석이면 증강 화면에서 교체 → **피교체 무기 성장(레벨·특성) 완전 삭제**
 - 같은 무기를 다시 얻으면 기본 레벨·특성 없음으로 시작. **기록/복원 없음**
 - 무기실: 전 장착 무기 피해. 격납고: 효과 미정
-- HUD: `WeaponLoadoutHud` — 장착 베이 코어(+특성 위성)·상세 패널 (기록 영역 없음)
+- HUD: `WeaponLoadoutHud` — **무기 모듈**/장착 베이(동일 크기 헥스 가로 나열) + 하단 좌우(`선택된 무기` | `장착된 모듈`)
 - 증강 리롤: `AugmentOfferController.max_reroll_count`(임시 기본 2) · 런당 `remaining_reroll_count`
 
 ### 조작 요약 (전투 중)
@@ -53,7 +53,7 @@ Move / MoveInput / PositionClamp / WeaponMount(Blaster·Laser·Shotgun 등) / Pl
 - `MOVE_SPEED` → `MoveComponent.velocity_multiplier` (**씬 기본 배수 × 스탯 모듈 × 엔진 모듈 효과** 합산도 여기서)
 - `FIRE_RATE` / `WEAPON_DAMAGE` → 각 WeaponSystem 전역 배수
 - `WEAPON_TRAIT` → 설치 시 `PlayerWeaponLoadout.add_or_upgrade_weapon_trait` (전투 효과 스캐폴드)
-- 무기 레벨은 필드 픽업만 올린다 (오그먼트로 레벨업하지 않음)
+- 무기 레벨·특성은 증강 선택으로만 성장 (필드 픽업 없음)
 
 > `PlayerAugment.behavior_components`는 **적용하지 않음** (적 쪽만 동작).
 
