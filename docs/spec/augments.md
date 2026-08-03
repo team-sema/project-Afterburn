@@ -17,9 +17,10 @@
 - 스탯 모듈 3종 (시설 슬롯 소모)
 - 시설 효과 모듈 6종
 - 무기 획득(`WEAPON_ACQUIRE`) 7종 · 레벨(`WEAPON_LEVEL`) 7종 · 특성 스캐폴드 2종
-- 카드 표시는 `get_offer_title` / `get_offer_description`으로 신규·복원·레벨·특성을 구분
+- 카드 표시는 `get_offer_title` / `get_offer_description`으로 신규·레벨·특성을 구분 (기록 복원 없음)
 - 가중치: `offer_weight`(기본 1.0). 범주별 확정 %는 데이터에서만 조정
 - 무기 전용 Kind는 **함선 시설 슬롯을 소모하지 않음**
+- **리롤:** `max_reroll_count`(임시 기본 2), 런 `remaining_reroll_count`. 선택 전만. [R]/버튼. 직전 세트와 완전 동일하면 1회 재추첨
 
 ### 적
 
@@ -41,9 +42,9 @@
 ### AugmentOfferController
 
 - PLAYER 선택지: 풀 필터 + `offer_weight` 비가중 추출
-- `WEAPON_ACQUIRE` 만석 시 `WeaponSlotSelectionOverlay`로 교체 베이 선택(취소 시 카드 선택으로 복귀)
-- `WEAPON_LEVEL` / `WEAPON_TRAIT` → `PlayerWeaponLoadout`
-- `STAT_MULTIPLIER` / `FACILITY_EFFECT` → 시설 슬롯 설치(가득 차면 모듈 교체 오버레이)
+- `WEAPON_ACQUIRE` 만석 시 `WeaponSlotSelectionOverlay`로 교체 베이 선택(취소 시 카드 선택으로 복귀). **확정 시 피교체 무기 성장 삭제**
+- `WEAPON_LEVEL` / `WEAPON_TRAIT` → 장착 중 무기만 (`PlayerWeaponLoadout`)
+- PLAYER 리롤 → 후보 전체 재생성 (효과 미적용)
 
 ### UI
 

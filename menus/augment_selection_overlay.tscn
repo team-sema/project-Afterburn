@@ -120,6 +120,26 @@ theme_override_font_sizes/font_size = 15
 text = "선택 3"
 autowrap_mode = 2
 
+[node name="RerollRow" type="HBoxContainer" parent="MarginContainer/PanelContainer/VBoxContainer"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 8
+
+[node name="RerollLabel" type="Label" parent="MarginContainer/PanelContainer/VBoxContainer/RerollRow"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "[R] 리롤 · 남은 횟수 2"
+label_settings = ExtResource("3_label_settings")
+horizontal_alignment = 1
+
+[node name="RerollButton" type="Button" parent="MarginContainer/PanelContainer/VBoxContainer/RerollRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(100, 28)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_font")
+theme_override_font_sizes/font_size = 13
+text = "리롤 (2)"
+
 [node name="ShipSeparator" type="HSeparator" parent="MarginContainer/PanelContainer/VBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2

@@ -24,18 +24,18 @@ Move / MoveInput / PositionClamp / WeaponMount(Blaster·Laser·Shotgun 등) / Pl
 - Hurtbox CollisionShape + 비주얼 스케일
 - 플레이어 Hurtbox 위치 (기본 **layer 1** `player_hurtbox`)
 
-## 무기 (통합 장착 베이)
+# 무기 (통합 장착 베이)
 
 - `PlayerWeaponLoadout`: `max_equipped_weapon_count`(기본 3)개의 장착 베이. 주/보조·메인/예비 구분 없음
 - 시작: 블래스터가 베이 0 (무기 Lv.1)
 - 장착된 무기는 각자 쿨다운으로 **동시에** 작동. 탄약·소진 삭제 없음
-- 성장은 `weapon_id`별 중앙 상태(`WeaponProgressState`: level, trait_ranks)
-- **무기 획득·레벨·특성·기록 복원**은 레벨업 **증강 선택**으로만 처리 (필드 무기 드롭 없음)
-- 빈 베이면 신규/복원 자동 장착. 만석이면 증강 화면에서 교체 대상 선택 → 기존 무기는 기록 보존
-- 기록 복원 시 레벨을 추가로 올리지 않음. 레벨+1은 `WEAPON_LEVEL` 증강만
-- 무기실: 전 장착 무기 피해. 격납고: 효과 미정. Z/X·필드 교체 UI 없음
-- 궤도 방벽 조각은 피격 시 파괴될 수 있으나 슬롯은 유지
-- HUD: `WeaponLoadoutHud` — 장착 베이 코어 육각(+특성 위성)·기록 스크롤·상세 패널
+- 성장은 `weapon_id`별 중앙 상태(`WeaponProgressState`: level, trait_ranks). **장착 중인 무기만** 보유
+- **무기 획득·레벨·특성**은 레벨업 **증강 선택**으로만 처리 (필드 무기 드롭 없음)
+- 빈 베이면 신규 자동 장착. 만석이면 증강 화면에서 교체 → **피교체 무기 성장(레벨·특성) 완전 삭제**
+- 같은 무기를 다시 얻으면 기본 레벨·특성 없음으로 시작. **기록/복원 없음**
+- 무기실: 전 장착 무기 피해. 격납고: 효과 미정
+- HUD: `WeaponLoadoutHud` — 장착 베이 코어(+특성 위성)·상세 패널 (기록 영역 없음)
+- 증강 리롤: `AugmentOfferController.max_reroll_count`(임시 기본 2) · 런당 `remaining_reroll_count`
 
 ### 조작 요약 (전투 중)
 

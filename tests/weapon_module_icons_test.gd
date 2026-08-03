@@ -56,12 +56,9 @@ func _run() -> void:
 	await process_frame
 	weapon_hud.call("refresh")
 	await process_frame
-	var records_row: HBoxContainer = weapon_hud.get_node("%RecordsRow") as HBoxContainer
-	_expect(records_row.get_child_count() == 1, "unequipped weapon appears in records")
-	_expect(
-		(records_row.get_child(0) as WeaponCoreCluster).is_record,
-		"record cluster is marked as record",
-	)
+	_expect(not loadout.has_weapon_progress(&"main_laser"), "unequip deletes weapon growth")
+	_expect(not weapon_hud.has_node("%RecordsScroll"), "no records UI")
+	_expect(bay_row.get_child(1).weapon_id == &"", "second bay empty after unequip")
 
 	if failures.is_empty():
 		print("weapon module icons test: PASS")

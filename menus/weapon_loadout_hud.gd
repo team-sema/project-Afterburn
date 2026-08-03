@@ -1,17 +1,14 @@
 class_name WeaponLoadoutHud
 extends VBoxContainer
 
-## Equipped weapon bays + recorded growth clusters + detail strip.
+## Equipped weapon bay clusters + detail strip. No weapon records.
 
 @export var ship: Node2D
 
 @onready var bay_row: HBoxContainer = %BayRow
-@onready var records_scroll: ScrollContainer = %RecordsScroll
-@onready var records_row: HBoxContainer = %RecordsRow
 @onready var detail_label: Label = %WeaponDetail
 
 var _bay_clusters: Array[WeaponCoreCluster] = []
-var _record_clusters: Array[WeaponCoreCluster] = []
 
 
 func _ready() -> void:
@@ -21,7 +18,6 @@ func _ready() -> void:
 	if loadout == null:
 		return
 	loadout.loadout_changed.connect(refresh)
-	loadout.weapon_records_changed.connect(refresh)
 	call_deferred("refresh")
 
 
@@ -29,15 +25,11 @@ func refresh() -> void:
 	var loadout := _get_loadout()
 	if loadout == null:
 		_clear_container(bay_row)
-		_clear_container(records_row)
 		_bay_clusters.clear()
-		_record_clusters.clear()
 		if detail_label != null:
 			detail_label.text = "무기 상태 없음"
 		return
-
 	_rebuild_bays(loadout)
-	_rebuild_records(loadout)
 
 
 func _rebuild_bays(loadout: PlayerWeaponLoadout) -> void:
@@ -45,7 +37,7 @@ func _rebuild_bays(loadout: PlayerWeaponLoadout) -> void:
 	_bay_clusters.clear()
 	var count := loadout.get_max_equipped_weapon_count()
 	for index in count:
-		var cluster := _make_cluster(true)
+		var cluster := _make_cluster()
 		bay_row.add_child(cluster)
 		_bay_clusters.append(cluster)
 		var bay := loadout.get_bay(index)
@@ -62,39 +54,17 @@ func _rebuild_bays(loadout: PlayerWeaponLoadout) -> void:
 		)
 
 
-func _rebuild_records(loadout: PlayerWeaponLoadout) -> void:
-	_clear_container(records_row)
-	_record_clusters.clear()
-	for state in loadout.get_recorded_weapons():
-		var cluster := _make_cluster(false)
-		records_row.add_child(cluster)
-		_record_clusters.append(cluster)
-		cluster.bind_weapon(
-			state.weapon_id,
-			loadout.get_weapon_icon(state.weapon_id),
-			state.level,
-			state.trait_ranks,
-			true,
-			false,
-		)
-
-
-func _make_cluster(for_bay: bool) -> WeaponCoreCluster:
+func _make_cluster() -> WeaponCoreCluster:
 	var cluster := WeaponCoreCluster.new()
-	if for_bay:
-		cluster.core_size = Vector2(34, 34)
-		cluster.trait_size = Vector2(14, 14)
-		cluster.orbit_radius = 18.0
-	else:
-		cluster.core_size = Vector2(26, 26)
-		cluster.trait_size = Vector2(12, 12)
-		cluster.orbit_radius = 14.0
+	cluster.core_size = Vector2(34, 34)
+	cluster.trait_size = Vector2(14, 14)
+	cluster.orbit_radius = 18.0
 	cluster.core_selected.connect(_on_core_selected)
 	cluster.trait_selected.connect(_on_trait_selected)
 	return cluster
 
 
-func _on_core_selected(weapon_id: StringName, is_record: bool) -> void:
+func _on_core_selected(weapon_id: StringName, _is_record: bool) -> void:
 	var loadout := _get_loadout()
 	if loadout == null or detail_label == null:
 		return
@@ -102,7 +72,7 @@ func _on_core_selected(weapon_id: StringName, is_record: bool) -> void:
 		detail_label.text = "빈 장착 베이"
 		return
 	var definition := loadout.get_weapon_definition(weapon_id)
-	var name := loadout.get_weapon_display_name(weapon_id)
+	var weapon_name := loadout.get_weapon_display_name(weapon_id)
 	var level := loadout.get_weapon_level(weapon_id)
 	var traits := loadout.get_weapon_traits(weapon_id)
 	var attack := ""
@@ -110,26 +80,20 @@ func _on_core_selected(weapon_id: StringName, is_record: bool) -> void:
 		attack = definition.attack_summary
 	elif definition != null:
 		attack = definition.description
-	var trait_line := _format_traits(traits)
-	if is_record:
-		detail_label.text = "%s · 미장착\nLv.%d · 필드에서 같은 무기를 다시 획득하면 복원됨\n%s\n%s" % [
-			name,
-			level,
-			attack,
-			trait_line,
-		]
-	else:
-		detail_label.text = "%s · 장착 중\nLv.%d\n%s\n%s" % [name, level, attack, trait_line]
+	detail_label.text = "%s · 장착 중\nLv.%d\n%s\n%s" % [
+		weapon_name,
+		level,
+		attack,
+		_format_traits(traits),
+	]
 
 
-func _on_trait_selected(weapon_id: StringName, trait_id: StringName, is_record: bool) -> void:
+func _on_trait_selected(weapon_id: StringName, trait_id: StringName, _is_record: bool) -> void:
 	var loadout := _get_loadout()
 	if loadout == null or detail_label == null:
 		return
 	var rank := int(loadout.get_weapon_traits(weapon_id).get(trait_id, 0))
-	var prefix := "기록" if is_record else "장착"
-	detail_label.text = "%s 특성 · %s\n단계 %d\n전투 효과는 아직 연결되지 않음" % [
-		prefix,
+	detail_label.text = "특성 · %s\n단계 %d\n전투 효과는 아직 연결되지 않음" % [
 		String(trait_id),
 		rank,
 	]

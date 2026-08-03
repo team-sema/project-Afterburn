@@ -3,6 +3,7 @@ extends CanvasLayer
 
 signal choice_selected(choice: Resource)
 signal facility_expansion_selected(facility_id: StringName)
+signal reroll_requested
 
 const CHOICE_ICON_MAX_WIDTH := 28
 const FACILITY_GRID := [
@@ -34,11 +35,14 @@ const FACILITY_GRID := [
 	%ChoiceButton2,
 	%ChoiceButton3,
 ]
+@onready var reroll_button: Button = get_node_or_null("%RerollButton") as Button
+@onready var reroll_label: Label = get_node_or_null("%RerollLabel") as Label
 
 var current_choices: Array = []
 var is_accepting_input := false
 var _showing_ship_modules := false
 var _weapon_loadout: PlayerWeaponLoadout
+var _reroll_enabled := false
 
 
 func _ready() -> void:
@@ -47,6 +51,8 @@ func _ready() -> void:
 		choice_buttons[index].focus_entered.connect(_highlight_choice.bind(index))
 		choice_buttons[index].mouse_entered.connect(_highlight_choice.bind(index))
 	offer_ship_panel.facility_selected.connect(_on_facility_selected)
+	if reroll_button != null:
+		reroll_button.pressed.connect(_on_reroll_pressed)
 	visible = false
 
 
@@ -124,6 +130,38 @@ func resume_choices() -> void:
 	_set_input_enabled(true)
 	choice_buttons[0].grab_focus()
 	_highlight_choice(0)
+
+
+func refresh_choices(choices: Array) -> void:
+	_set_choices(choices)
+	_set_choice_buttons_visible(true)
+	if is_accepting_input and not choice_buttons.is_empty():
+		choice_buttons[0].grab_focus()
+		_highlight_choice(0)
+
+
+func set_reroll_state(remaining: int, enabled: bool) -> void:
+	## Pass remaining < 0 to hide the reroll row (enemy offers).
+	var show_row := remaining >= 0
+	_reroll_enabled = show_row and enabled and remaining > 0
+	if reroll_label != null:
+		reroll_label.visible = show_row
+		if show_row:
+			reroll_label.text = "[R] 리롤 · 남은 횟수 %d" % maxi(0, remaining)
+			reroll_label.modulate = (
+				Color(1, 1, 1, 1) if _reroll_enabled else Color(0.55, 0.55, 0.6, 0.85)
+			)
+	if reroll_button != null:
+		reroll_button.visible = show_row
+		reroll_button.disabled = not _reroll_enabled
+		if show_row:
+			reroll_button.text = "리롤 (%d)" % maxi(0, remaining)
+
+
+func _on_reroll_pressed() -> void:
+	if not is_accepting_input or not _reroll_enabled:
+		return
+	reroll_requested.emit()
 
 
 func restore_for_result() -> void:
@@ -232,6 +270,8 @@ func _set_input_enabled(enabled: bool) -> void:
 	for button in choice_buttons:
 		button.disabled = not enabled
 	offer_ship_panel.set_selection_input_enabled(enabled and _showing_ship_modules)
+	if reroll_button != null:
+		reroll_button.disabled = not enabled or not _reroll_enabled
 	if enabled:
 		_configure_focus_navigation()
 
@@ -350,3 +390,13 @@ func _wait(duration: float) -> void:
 
 func _create_pause_tween() -> Tween:
 	return create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if not is_accepting_input or not _reroll_enabled or not visible:
+		return
+	if event is InputEventKey and event.pressed and not event.echo:
+		var key := event as InputEventKey
+		if key.keycode == KEY_R or key.physical_keycode == KEY_R:
+			_on_reroll_pressed()
+			get_viewport().set_input_as_handled()

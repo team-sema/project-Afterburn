@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-02",
+  "updated": "2026-08-03",
   "source": "docs/board/cards/*.md",
   "columns": [
     {
@@ -78,6 +78,14 @@
       "column": "review",
       "file": "cards/weapon-augment-acquisition.md",
       "tags": ["무기", "오그먼트"]
+    },
+    {
+      "id": "weapon-replace-delete-reroll",
+      "title": "무기 교체 삭제 · 증강 리롤",
+      "description": "교체 시 무기 성장을 삭제하고 기록/복원을 제거하며 증강 리롤을 추가한다.",
+      "column": "review",
+      "file": "cards/weapon-replace-delete-reroll.md",
+      "tags": ["무기", "오그먼트", "UI"]
     },
     {
       "id": "project-godot-47",

@@ -3,9 +3,9 @@ extends RefCounted
 
 enum Kind {
 	STAT_MULTIPLIER = 0,
-	## Offer a weapon definition: new progress + equip, or restore from records.
+	## New weapon equip (always fresh level/traits; no restore).
 	WEAPON_ACQUIRE = 1,
-	## Raise weapon_id level by 1 (equipped or recorded).
+	## Raise equipped weapon_id level by 1.
 	WEAPON_LEVEL = 2,
 	## Weapon-specific trait module (rank / attach). Does not raise weapon level.
 	WEAPON_TRAIT = 3,
