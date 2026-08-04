@@ -1,6 +1,10 @@
 class_name BlasterWeaponSystem
 extends WeaponSystem
 
+@export_range(0.02, 10.0, 0.01) var base_fire_interval := 0.15
+@export_range(1, 200, 1) var base_damage := 10
+@export_range(1.0, 600.0, 1.0) var projectile_speed := 200.0
+
 @onready var left_muzzle: Marker2D = $LeftMuzzle
 @onready var right_muzzle: Marker2D = $RightMuzzle
 @onready var spawner_component: SpawnerComponent = $SpawnerComponent
@@ -8,13 +12,12 @@ extends WeaponSystem
 @onready var blaster_sound_player: VariablePitchAudioStreamPlayer = $BlasterSoundPlayer
 
 var is_left_firing := false
-var base_fire_wait_time: float
 
 
 func _ready() -> void:
-	base_fire_wait_time = fire_rate_timer.wait_time
 	fire_rate_timer.timeout.connect(fire)
 	_apply_stat_multipliers()
+	fire_rate_timer.start()
 
 
 func fire() -> void:
@@ -38,7 +41,7 @@ func fire() -> void:
 func _apply_stat_multipliers() -> void:
 	if not is_node_ready():
 		return
-	fire_rate_timer.wait_time = base_fire_wait_time / get_effective_fire_rate_multiplier()
+	fire_rate_timer.wait_time = base_fire_interval / get_effective_fire_rate_multiplier()
 
 
 func _on_weapon_shutdown() -> void:
@@ -51,4 +54,7 @@ func _on_weapon_shutdown() -> void:
 func _configure_projectile(projectile: Node) -> void:
 	var hitbox := projectile.get_node_or_null("HitboxComponent") as HitboxComponent
 	assert(hitbox != null, "Blaster projectile requires a HitboxComponent.")
-	hitbox.damage = maxi(1, roundi(hitbox.damage * get_effective_damage_multiplier()))
+	hitbox.damage = maxi(1, roundi(base_damage * get_effective_damage_multiplier()))
+	var move := projectile.get_node_or_null("MoveComponent") as MoveComponent
+	assert(move != null, "Blaster projectile requires a MoveComponent.")
+	move.velocity = Vector2.UP * projectile_speed

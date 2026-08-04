@@ -1,6 +1,6 @@
 [gd_scene load_steps=14 format=3]
 
-[ext_resource type="Script" path="res://projectiles/aux_flak_bolt.gd" id="1_script"]
+[ext_resource type="Script" path="res://projectiles/aux_cannon_bolt.gd" id="1_script"]
 [ext_resource type="Material" path="res://effects/wide_glow_material.tres" id="2_wide"]
 [ext_resource type="Texture2D" uid="uid://c15miu6sde4so" path="res://assets/svg/player_blaster.svg" id="3_tex"]
 [ext_resource type="Material" path="res://effects/tight_glow_material.tres" id="4_tight"]
@@ -73,7 +73,6 @@ process_material = SubResource("ParticleProcessMaterial_trail")
 [node name="MoveComponent" type="Node" parent="." node_paths=PackedStringArray("actor")]
 script = ExtResource("8_move")
 actor = NodePath("..")
-velocity = Vector2(0, -190)
 
 [node name="FreeOffscreenComponent" type="VisibleOnScreenNotifier2D" parent="." node_paths=PackedStringArray("actor")]
 rect = Rect2(-4, -7, 8, 14)
@@ -95,7 +94,6 @@ flash_duration = 0.1
 collision_layer = 0
 collision_mask = 2
 script = ExtResource("12_hitbox")
-damage = 9
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="HitboxComponent"]
 position = Vector2(0, 1)

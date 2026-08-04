@@ -1,0 +1,23 @@
+[gd_scene format=3 uid="uid://b7x6c1avhk30g"]
+
+[ext_resource type="Script" uid="uid://drtq587i7drfm" path="res://player_ship/weapons/plasma_bomb_weapon_system.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://fwissbryiv1s" path="res://components/spawner_component.gd" id="2_spawner"]
+[ext_resource type="PackedScene" path="res://projectiles/plasma_bomb_projectile.tscn" id="3_projectile"]
+
+[node name="PlasmaBombWeaponSystem" type="Node2D" unique_id=1081493868]
+script = ExtResource("1_script")
+base_fire_interval = 1.2
+base_damage = 32
+projectile_speed = 66.0
+fuse_time = 1.0
+blast_radius = 32.0
+damage_radius_margin = 0.0
+
+[node name="Muzzle" type="Marker2D" parent="." unique_id=487536443]
+position = Vector2(0, -10)
+
+[node name="SpawnerComponent" type="Node2D" parent="." unique_id=1759215163]
+script = ExtResource("2_spawner")
+scene = ExtResource("3_projectile")
+
+[node name="FireRateTimer" type="Timer" parent="." unique_id=920240251]

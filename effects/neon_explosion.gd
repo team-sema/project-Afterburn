@@ -1,5 +1,9 @@
 extends Node2D
 
+## ring.svg draws a radius-47 circle and the explode animation peaks at 0.23 scale.
+const RING_SOURCE_RADIUS := 47.0
+const RING_PEAK_SCALE := 0.23
+
 @export var effect_color := Color("ff3f8f")
 
 @onready var animation_player: AnimationPlayer = $AnimationPlayer
@@ -16,6 +20,16 @@ func set_effect_color(color: Color) -> void:
 	effect_color = color
 	if is_node_ready():
 		_apply_effect_color()
+
+
+func set_effect_radius(radius: float) -> void:
+	var source_peak_radius := RING_SOURCE_RADIUS * RING_PEAK_SCALE
+	var radius_scale := maxf(0.0, radius) / source_peak_radius
+	scale = Vector2.ONE * radius_scale
+
+
+func get_effect_radius() -> float:
+	return RING_SOURCE_RADIUS * RING_PEAK_SCALE * absf(scale.x)
 
 
 func _apply_effect_color() -> void:

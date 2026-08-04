@@ -34,8 +34,6 @@ radius = 4.0
 
 [node name="PlayerHomingMissile" type="Node2D"]
 script = ExtResource("1_script")
-speed = 150.0
-turn_rate = 5.5
 
 [node name="Sprite2D" type="Node2D" parent="."]
 
@@ -91,7 +89,6 @@ flash_duration = 0.08
 collision_layer = 0
 collision_mask = 2
 script = ExtResource("11_hitbox")
-damage = 14
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="HitboxComponent"]
 shape = SubResource("CircleShape2D_missile")

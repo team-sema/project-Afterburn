@@ -1,9 +1,6 @@
 class_name PlayerHomingMissile
 extends Node2D
 
-@export var speed := 150.0
-@export var turn_rate := 5.5
-@export var retarget_interval := 0.15
 @export var enemy_group: StringName = &"enemies"
 
 @onready var hitbox_component: HitboxComponent = $HitboxComponent
@@ -13,6 +10,19 @@ extends Node2D
 var _velocity := Vector2(0, -1)
 var _target: Node2D
 var _retarget_cooldown := 0.0
+var speed := 0.0
+var turn_rate := 0.0
+var retarget_interval := 0.0
+
+
+func configure_motion(
+	configured_speed: float,
+	configured_turn_rate: float,
+	configured_retarget_interval: float,
+) -> void:
+	speed = maxf(1.0, configured_speed)
+	turn_rate = maxf(0.1, configured_turn_rate)
+	retarget_interval = maxf(0.02, configured_retarget_interval)
 
 
 func _ready() -> void:

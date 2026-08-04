@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ftlgt08l1l0h"
-path="res://.godot/imported/weapon_aux_flak.svg-3af68cfd9e8122494380663ca4caa175.ctex"
+uid="uid://dj7s045pab0js"
+path="res://.godot/imported/weapon_plasma_bomb.svg-cc5ae237806d12120315244ed25ec2df.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/svg/weapons/weapon_aux_flak.svg"
-dest_files=["res://.godot/imported/weapon_aux_flak.svg-3af68cfd9e8122494380663ca4caa175.ctex"]
+source_file="res://assets/svg/weapons/weapon_plasma_bomb.svg"
+dest_files=["res://.godot/imported/weapon_plasma_bomb.svg-cc5ae237806d12120315244ed25ec2df.ctex"]
 
 [params]
 
