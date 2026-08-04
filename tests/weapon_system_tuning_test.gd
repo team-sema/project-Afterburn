@@ -35,7 +35,6 @@ func _run() -> void:
 	world.add_child(laser)
 	var barrier := load("res://player_ship/weapons/orbital_barrier_weapon_system.tscn").instantiate() as OrbitalBarrierWeaponSystem
 	barrier.base_damage = 11
-	barrier.segment_max_health = 3
 	world.add_child(barrier)
 	await process_frame
 
@@ -59,8 +58,12 @@ func _run() -> void:
 			"orbital barrier system owns segment damage",
 		)
 		_expect(
-			(segment.get_node("StatsComponent") as StatsComponent).health == 3,
-			"orbital barrier system owns segment health",
+			segment.get_node_or_null("StatsComponent") == null,
+			"orbital barrier segments have no HP/StatsComponent",
+		)
+		_expect(
+			segment.get_node_or_null("HurtboxComponent") != null,
+			"orbital barrier segments keep HurtboxComponent to absorb bullets",
 		)
 
 	world.queue_free()

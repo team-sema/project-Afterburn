@@ -1,12 +1,10 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://player_ship/weapons/orbital_barrier_weapon_system.gd" id="1_script"]
 [ext_resource type="Script" path="res://components/hitbox_component.gd" id="2_hitbox"]
 [ext_resource type="Texture2D" uid="uid://djvqurciuxfie" path="res://assets/svg/radial_glow.svg" id="3_glow"]
 [ext_resource type="Material" path="res://effects/tight_glow_material.tres" id="4_mat"]
 [ext_resource type="Script" path="res://components/hurtbox_component.gd" id="5_hurtbox"]
-[ext_resource type="Script" path="res://components/stats_component.gd" id="6_stats"]
-[ext_resource type="Script" path="res://components/hurt_component.gd" id="7_hurt"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_seg"]
 radius = 4.0
@@ -16,7 +14,6 @@ script = ExtResource("1_script")
 orbit_radius = 22.0
 base_orbit_speed = 2.8
 base_damage = 6
-segment_max_health = 1
 
 [node name="OrbitRoot" type="Node2D" parent="."]
 
@@ -51,14 +48,6 @@ script = ExtResource("5_hurtbox")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="OrbitRoot/Segment1/HurtboxComponent"]
 shape = SubResource("CircleShape2D_seg")
 
-[node name="StatsComponent" type="Node" parent="OrbitRoot/Segment1"]
-script = ExtResource("6_stats")
-
-[node name="HurtComponent" type="Node" parent="OrbitRoot/Segment1" node_paths=PackedStringArray("stats_component", "hurtbox_component")]
-script = ExtResource("7_hurt")
-stats_component = NodePath("../StatsComponent")
-hurtbox_component = NodePath("../HurtboxComponent")
-
 [node name="Segment2" type="Node2D" parent="OrbitRoot"]
 
 [node name="Glow" type="Sprite2D" parent="OrbitRoot/Segment2"]
@@ -90,14 +79,6 @@ script = ExtResource("5_hurtbox")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="OrbitRoot/Segment2/HurtboxComponent"]
 shape = SubResource("CircleShape2D_seg")
 
-[node name="StatsComponent" type="Node" parent="OrbitRoot/Segment2"]
-script = ExtResource("6_stats")
-
-[node name="HurtComponent" type="Node" parent="OrbitRoot/Segment2" node_paths=PackedStringArray("stats_component", "hurtbox_component")]
-script = ExtResource("7_hurt")
-stats_component = NodePath("../StatsComponent")
-hurtbox_component = NodePath("../HurtboxComponent")
-
 [node name="Segment3" type="Node2D" parent="OrbitRoot"]
 
 [node name="Glow" type="Sprite2D" parent="OrbitRoot/Segment3"]
@@ -128,11 +109,3 @@ script = ExtResource("5_hurtbox")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="OrbitRoot/Segment3/HurtboxComponent"]
 shape = SubResource("CircleShape2D_seg")
-
-[node name="StatsComponent" type="Node" parent="OrbitRoot/Segment3"]
-script = ExtResource("6_stats")
-
-[node name="HurtComponent" type="Node" parent="OrbitRoot/Segment3" node_paths=PackedStringArray("stats_component", "hurtbox_component")]
-script = ExtResource("7_hurt")
-stats_component = NodePath("../StatsComponent")
-hurtbox_component = NodePath("../HurtboxComponent")

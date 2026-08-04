@@ -1,0 +1,42 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://menus/weapon_core_cluster.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://menus/hex_module_frame.tscn" id="2_hex"]
+[ext_resource type="LabelSettings" path="res://fonts/hex_module_label_settings.tres" id="3_label"]
+
+[node name="WeaponCoreCluster" type="Control"]
+clip_contents = false
+custom_minimum_size = Vector2(42, 42)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+script = ExtResource("1_script")
+
+[node name="Core" parent="." instance=ExtResource("2_hex")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(38, 38)
+layout_mode = 0
+offset_left = 2.0
+offset_top = 2.0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Templates" type="Control" parent="."]
+layout_mode = 0
+mouse_filter = 2
+
+[node name="TraitHexTemplate" parent="Templates" instance=ExtResource("2_hex")]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(14, 14)
+layout_mode = 0
+offset_right = 14.0
+offset_bottom = 14.0
+
+[node name="TraitCaptionTemplate" type="Label" parent="Templates"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+mouse_filter = 2
+label_settings = ExtResource("3_label")
+horizontal_alignment = 1

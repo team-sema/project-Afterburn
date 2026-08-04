@@ -10,4 +10,4 @@ id = &"aux_orbital_barrier"
 display_name = "궤도 방벽"
 weapon_scene = ExtResource("2_scene")
 icon = ExtResource("3_icon")
-description = "플레이어 주변을 돌며 적에게 피해를 주고, 피격 시 조각이 영구 파괴되는 방어막."
+description = "주변을 돌며 탄막을 막고 적에게 접촉 피해를 준다."

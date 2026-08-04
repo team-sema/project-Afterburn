@@ -20,19 +20,19 @@ const CATEGORIES = [
   {
     id: "player",
     title: "플레이어",
-    desc: "함선 · 무기 · Applier",
+    desc: "함선 · 통합 무기 목록 · 시설 슬롯",
     file: "player.md",
   },
   {
     id: "enemies",
     title: "적",
-    desc: "타입 · 생성기 · 수정자",
+    desc: "타입 · 생성기 · Threat",
     file: "enemies.md",
   },
   {
     id: "augments",
     title: "오그먼트",
-    desc: "리소스 · 오퍼 · 레지스트리",
+    desc: "플레이어·적 풀 목록 · 오퍼",
     file: "augments.md",
   },
   {

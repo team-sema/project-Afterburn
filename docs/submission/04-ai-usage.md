@@ -92,9 +92,9 @@ AI가 생성한 내용은 **저장소 규칙·시스템 스펙**에 맞게 검�
 
 ### 예시 흐름
 
-1. 사람이 “무기 슬롯 로드아웃” 요청  
-2. Agent: `feature/weapon-slot-loadout` 생성 + 카드 `doing` + 시스템 스펙·Task 작성  
-3. Agent: 스펙 범위 내 코드 구현  
+1. 사람이 “통합 무기 STATUS 디테일” 요청  
+2. Agent: `feature/weapon-status-focus-detail` 생성 + 카드 `doing` + 시스템 스펙·Task 작성  
+3. Agent: 스펙 범위 내 코드 구현 · `docs/spec/` 현황 동기화  
 4. `/push` → 카드 `review` + main 머지  
 5. 사람: 플레이 확인 후 보드에서 `done` (또는 `fix`) → 프롬프트 복사로 저장소 반영
 

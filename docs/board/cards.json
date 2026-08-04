@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-04",
+  "updated": "2026-08-05",
   "source": "docs/board/cards/*.md",
   "columns": [
     {
@@ -40,6 +40,22 @@
   ],
   "cards": [
     {
+      "id": "status-ui-templates",
+      "title": "STATUS HUD UI 템플릿",
+      "description": "런타임 무기 헥스를 에디터 템플릿 플레이스홀더로 복제한다.",
+      "column": "review",
+      "file": "cards/status-ui-templates.md",
+      "tags": ["UI", "STATUS"]
+    },
+    {
+      "id": "weapon-status-hover",
+      "title": "무기 STATUS 호버 포커스",
+      "description": "장착 베이 호버만으로도 하단 무기 디테일을 전환한다.",
+      "column": "review",
+      "file": "cards/weapon-status-hover.md",
+      "tags": ["무기", "UI", "STATUS"]
+    },
+    {
       "id": "godot-editor-updates",
       "title": "Godot 에디터 리소스 동기화",
       "description": "에디터에서 갱신된 월드·함선 UI·플라즈마 리소스를 현재 런타임 상태와 일치시켜 저장한다.",
@@ -58,18 +74,10 @@
     {
       "id": "augment-module-slots",
       "title": "증강 모듈 슬롯",
-      "description": "증강을 함선 부위별 슬롯에 장착하고, 부위 슬롯 확장과 가득 찬 슬롯 교체를 제공한다.",
+      "description": "스탯·시설 모듈을 함선 부위 슬롯에 장착. 무기 Kind는 슬롯 비소모.",
       "column": "review",
       "file": "cards/augment-module-slots.md",
       "tags": ["증강", "함선", "UI"]
-    },
-    {
-      "id": "weapon-level-unification",
-      "title": "무기 레벨 단일화",
-      "description": "슬롯 레벨을 제거하고 주·보조무기 모두 무기별 레벨 하나로 강화한다.",
-      "column": "review",
-      "file": "cards/weapon-level-unification.md",
-      "tags": ["무기", "강화", "HUD"]
     },
     {
       "id": "enemy-threat-tier-spawning",
@@ -82,7 +90,7 @@
     {
       "id": "unified-weapon-system",
       "title": "통합 무기 시스템 · STATUS 무기 UI",
-      "description": "주/보조 구분을 없애고 통합 장착 베이·weapon_id 성장·코어+특성 육각 UI로 개편한다.",
+      "description": "통합 장착 베이·동시 사격·weapon_id 성장. 교체 시 성장 삭제.",
       "column": "review",
       "file": "cards/unified-weapon-system.md",
       "tags": ["무기", "UI"]
@@ -90,7 +98,7 @@
     {
       "id": "weapon-augment-acquisition",
       "title": "무기 증강 획득 · 필드 드롭 제거",
-      "description": "필드 무기 드롭을 제거하고 무기 획득·레벨·특성·복원을 증강 선택으로 처리한다.",
+      "description": "필드 무기 드롭 제거. 획득·레벨·특성은 증강 선택만.",
       "column": "review",
       "file": "cards/weapon-augment-acquisition.md",
       "tags": ["무기", "오그먼트"]
@@ -98,7 +106,7 @@
     {
       "id": "weapon-replace-delete-reroll",
       "title": "무기 교체 삭제 · 증강 리롤",
-      "description": "교체 시 무기 성장을 삭제하고 기록/복원을 제거하며 증강 리롤을 추가한다.",
+      "description": "교체 시 무기 성장 삭제. 증강 리롤 추가.",
       "column": "review",
       "file": "cards/weapon-replace-delete-reroll.md",
       "tags": ["무기", "오그먼트", "UI"]
@@ -106,7 +114,7 @@
     {
       "id": "weapon-status-focus-detail",
       "title": "무기 STATUS 포커스 디테일",
-      "description": "장착 무기 포커스 시 헥스 강조와 선택/모듈 디테일 패널을 표시한다.",
+      "description": "동일 크기 베이 행 + 선택/모듈 디테일 패널.",
       "column": "review",
       "file": "cards/weapon-status-focus-detail.md",
       "tags": ["무기", "UI", "STATUS"]
@@ -136,14 +144,6 @@
       "tags": ["적", "테스트"]
     },
     {
-      "id": "submission-guide-module-slots",
-      "title": "제출 가이드 문서 모듈 슬롯 반영",
-      "description": "제출용 게임 설명서의 플레이 방법을 함선 모듈 슬롯·선체·실드 규칙에 맞춰 갱신한다.",
-      "column": "review",
-      "file": "cards/submission-guide-module-slots.md",
-      "tags": ["문서", "제출"]
-    },
-    {
       "id": "fix-bomb-enemy-scene-uid",
       "title": "Bomb 씬 uid 정정",
       "description": "손으로 적은 씬 uid를 Godot 생성 uid로 확정해 에디터를 열 때마다 생기던 변경을 없앤다.",
@@ -158,14 +158,6 @@
       "column": "doing",
       "file": "cards/fix-formation-viewport-before-tree.md",
       "tags": ["적", "버그"]
-    },
-    {
-      "id": "ship-facility-upgrades",
-      "title": "함선 시설 강화 · 오른쪽 함선 UI",
-      "description": "무기실·격납고·엔진·선체·레이더·실드 6시설로 공통 스탯 강화. 오그먼트 선택으로만 레벨업, 우측 STATUS는 읽기 전용 표시 + 좌측 선체·실드 HUD.",
-      "column": "review",
-      "file": "cards/ship-facility-upgrades.md",
-      "tags": ["플레이어", "UI"]
     },
     {
       "id": "bomb-proximity-fuse",
@@ -192,36 +184,12 @@
       "tags": ["적", "스폰"]
     },
     {
-      "id": "weapon-module-icons",
-      "title": "무기 육각 모듈 아이콘",
-      "description": "무기 이름 텍스트를 벡터 아이콘으로 대체. 육각 모듈은 제목·아이콘·수치 3단.",
-      "column": "doing",
-      "file": "cards/weapon-module-icons.md",
-      "tags": ["UI", "HUD", "비주얼"]
-    },
-    {
       "id": "plasma-bomb",
       "title": "플라즈마 폭탄 · WeaponSystem 튜닝 통합",
-      "description": "보조 플랙을 플라즈마 폭탄으로 교체하고 모든 무기의 전투 설정을 각 WeaponSystem 루트로 통일한다.",
+      "description": "플라즈마 폭탄 추가. 전투 설정은 각 WeaponSystem 루트.",
       "column": "review",
       "file": "cards/plasma-bomb.md",
       "tags": ["무기", "투사체", "범위 피해"]
-    },
-    {
-      "id": "main-shotgun",
-      "title": "주무기 샷건·메인/예비",
-      "description": "샷건 + 메인/예비 슬롯, Z 스왑, X 새 주무기 차단.",
-      "column": "review",
-      "file": "cards/main-shotgun.md",
-      "tags": ["플레이어", "무기"]
-    },
-    {
-      "id": "hex-loadout-hud",
-      "title": "육각 모듈 무장 HUD",
-      "description": "오른쪽 STATUS를 주/보조 육각 모듈로 표시. 보조 소모품·유도탄 포함.",
-      "column": "review",
-      "file": "cards/hex-loadout-hud.md",
-      "tags": ["UI", "HUD"]
     },
     {
       "id": "xp-orb-yellow-color",
@@ -254,14 +222,6 @@
       "column": "review",
       "file": "cards/contest-submission-docs.md",
       "tags": ["문서", "제출"]
-    },
-    {
-      "id": "weapon-slot-loadout",
-      "title": "무기 획득 및 강화",
-      "description": "드롭으로 주/보조 획득·동일무기 강화. 오그먼트는 성능만.",
-      "column": "review",
-      "file": "cards/weapon-slot-loadout.md",
-      "tags": ["플레이어", "무기", "드롭"]
     },
     {
       "id": "readme-docs-links",
@@ -336,17 +296,9 @@
       "tags": ["적", "리팩터"]
     },
     {
-      "id": "weapon-unlock-flow",
-      "title": "무기 해금·교체 플로우",
-      "description": "Blaster+Laser 상시 → 선택/해금.",
-      "column": "ideas",
-      "file": "cards/weapon-unlock-flow.md",
-      "tags": ["플레이어", "후보"]
-    },
-    {
       "id": "augment-pool-data-driven",
       "title": "오그먼트 풀 데이터 드리븐화",
-      "description": "world.tscn 하드코드 풀을 Resource/Registry로.",
+      "description": "gameplay.tscn 하드코드 풀을 Resource/Registry로.",
       "column": "ideas",
       "file": "cards/augment-pool-data-driven.md",
       "tags": ["오그먼트", "장기"]
@@ -376,25 +328,9 @@
       "tags": ["코어", "완료"]
     },
     {
-      "id": "score-augment-offer",
-      "title": "점수 기반 오그먼트 오퍼",
-      "description": "10점 첫 오퍼 · 이후 100점 간격 · pause UI.",
-      "column": "done",
-      "file": "cards/score-augment-offer.md",
-      "tags": ["오그먼트", "완료"]
-    },
-    {
-      "id": "player-dual-weapons",
-      "title": "Blaster + Laser 이중 무기",
-      "description": "연사 탄과 연속 빔 동시 장착.",
-      "column": "done",
-      "file": "cards/player-dual-weapons.md",
-      "tags": ["플레이어", "완료"]
-    },
-    {
       "id": "enemy-generator-types",
-      "title": "적 3종 + 생성기",
-      "description": "Green/Yellow/Pink · 점수 스케일 스폰.",
+      "title": "적 타입 + 생성기",
+      "description": "다중 적 타입 · Threat/점수 스케일 스폰.",
       "column": "done",
       "file": "cards/enemy-generator-types.md",
       "tags": ["적", "완료"]
