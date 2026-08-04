@@ -83,7 +83,7 @@ func open_choices(
 	backdrop.modulate.a = 0.0
 	var backdrop_tween := _create_pause_tween()
 	backdrop_tween.tween_property(backdrop, "modulate:a", 1.0, open_duration)
-	await breakpoint_intro.play_intro()
+	await breakpoint_intro.play_intro(accent_color)
 
 	choice_container.visible = true
 	title_label.text = title

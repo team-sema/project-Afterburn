@@ -51,7 +51,7 @@ Menu (ui_accept)
 1. 적 사망 시 경험치 오브 드롭 → 플레이어 접촉 시 경험치 획득
 2. XP가 요구량을 채워도 **자동으로 열리지 않음**. `open_augment_offer`(**C**)로 PLAYER 오퍼 요청 · 오퍼 UI가 이미 열려 있으면 XP 미소모
 3. 플레이 시간 60초마다 ENEMY 오퍼를 큐에 추가 (도달 순으로 처리)
-4. `AugmentOfferController.request_offer(type)` → `offer_started(type)` → pause
+4. `AugmentOfferController.request_offer(type)` → `offer_started(type)` → pause. 강화 분기점 인트로는 PLAYER 청색 / ENEMY 적색 테마로 구분
 5. PLAYER 오퍼는 상단 3지선다와 하단 함선 UI를 함께 표시하고, 카드 포커스가 대상 부위를 하이라이트
 6. PLAYER 카드 선택 → 빈 슬롯 설치. 가득 찬 부위는 교체 모달 표시. 함선 부위 선택 → 슬롯 용량 +1(최대 3)
 7. ENEMY 오퍼는 기존 3지선다 선택 → registry 반영

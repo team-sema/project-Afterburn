@@ -40,6 +40,14 @@
   ],
   "cards": [
     {
+      "id": "augment-branch-ui",
+      "title": "증강 분기점 UI 다듬기",
+      "description": "플레이어와 적 증강 진입을 색상 테마로 명확히 구분하고 자잘한 증강 UI를 정리한다.",
+      "column": "review",
+      "file": "cards/augment-branch-ui.md",
+      "tags": ["증강", "UI", "비주얼"]
+    },
+    {
       "id": "augment-module-slots",
       "title": "증강 모듈 슬롯",
       "description": "증강을 함선 부위별 슬롯에 장착하고, 부위 슬롯 확장과 가득 찬 슬롯 교체를 제공한다.",
