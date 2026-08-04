@@ -1,0 +1,316 @@
+[gd_scene load_steps=29 format=3]
+
+[ext_resource type="Script" path="res://weapon_test/weapon_test_lab.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://player_ship/ship.tscn" id="2_ship"]
+[ext_resource type="PackedScene" path="res://effects/space_background.tscn" id="3_background"]
+[ext_resource type="Script" path="res://enemy_augment_registry.gd" id="4_enemy_registry"]
+[ext_resource type="Script" path="res://player_augment_registry.gd" id="5_player_registry"]
+[ext_resource type="LabelSettings" path="res://fonts/default_label_settings.tres" id="6_default_label"]
+[ext_resource type="LabelSettings" path="res://fonts/title_label_settings.tres" id="7_title_label"]
+[ext_resource type="Script" path="res://menus/neon_corner_frame.gd" id="8_corner_frame"]
+[ext_resource type="Script" path="res://resources/facilities/ship_facility_definition.gd" id="9_facility_definition"]
+[ext_resource type="Resource" path="res://resources/facilities/definitions/weapon_room.tres" id="10_weapon_room"]
+[ext_resource type="Resource" path="res://resources/facilities/definitions/hangar.tres" id="11_hangar"]
+[ext_resource type="Resource" path="res://resources/facilities/definitions/engine.tres" id="12_engine"]
+[ext_resource type="Resource" path="res://resources/facilities/definitions/hull.tres" id="13_hull"]
+[ext_resource type="Resource" path="res://resources/facilities/definitions/radar.tres" id="14_radar"]
+[ext_resource type="Resource" path="res://resources/facilities/definitions/shield.tres" id="15_shield"]
+[ext_resource type="Resource" path="res://resources/enemy_spawns/drone_formation.tres" id="16_drone"]
+[ext_resource type="Resource" path="res://resources/enemy_spawns/striker.tres" id="17_striker"]
+[ext_resource type="Resource" path="res://resources/enemy_spawns/awl_formation.tres" id="18_awl"]
+[ext_resource type="Resource" path="res://resources/enemy_spawns/bomb.tres" id="19_bomb"]
+[ext_resource type="Resource" path="res://resources/enemy_spawns/caster.tres" id="20_caster"]
+[ext_resource type="Resource" path="res://resources/weapons/definitions/main_blaster.tres" id="21_blaster"]
+[ext_resource type="Resource" path="res://resources/weapons/definitions/main_laser.tres" id="22_laser"]
+[ext_resource type="Resource" path="res://resources/weapons/definitions/main_shotgun.tres" id="23_shotgun"]
+[ext_resource type="Resource" path="res://resources/weapons/definitions/aux_test_cannon.tres" id="24_cannon"]
+[ext_resource type="Resource" path="res://resources/weapons/definitions/aux_test_flak.tres" id="25_flak"]
+[ext_resource type="Resource" path="res://resources/weapons/definitions/aux_homing_missile.tres" id="26_missile"]
+[ext_resource type="Resource" path="res://resources/weapons/definitions/aux_orbital_barrier.tres" id="27_barrier"]
+
+[sub_resource type="Environment" id="Environment_neon"]
+background_mode = 3
+glow_enabled = true
+glow_levels/1 = 0.35
+glow_levels/2 = 0.2
+glow_levels/3 = 0.08
+glow_normalized = true
+glow_intensity = 0.45
+glow_strength = 0.65
+glow_bloom = 0.06
+glow_hdr_threshold = 1.05
+glow_hdr_scale = 1.4
+glow_hdr_luminance_cap = 2.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_left_panel"]
+bg_color = Color(0.018, 0.035, 0.075, 1)
+border_width_right = 2
+border_color = Color(1, 0.18, 0.45, 0.85)
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_right_panel"]
+bg_color = Color(0.018, 0.035, 0.075, 1)
+border_width_left = 2
+border_color = Color(0.1, 0.65, 0.95, 0.85)
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_control_box"]
+bg_color = Color(0.012, 0.05, 0.1, 0.9)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.14, 0.48, 0.72, 0.75)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[node name="WeaponTestLab" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+enemy_spawn_sets = Array[EnemySpawnSet]([ExtResource("16_drone"), ExtResource("17_striker"), ExtResource("18_awl"), ExtResource("19_bomb"), ExtResource("20_caster")])
+weapon_definitions = Array[WeaponDefinition]([ExtResource("21_blaster"), ExtResource("22_laser"), ExtResource("23_shotgun"), ExtResource("24_cannon"), ExtResource("25_flak"), ExtResource("26_missile"), ExtResource("27_barrier")])
+
+[node name="Layout" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 0
+
+[node name="LeftPanel" type="PanelContainer" parent="Layout"]
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBox_left_panel")
+
+[node name="Margin" type="MarginContainer" parent="Layout/LeftPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 12
+
+[node name="VBox" type="VBoxContainer" parent="Layout/LeftPanel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Eyebrow" type="Label" parent="Layout/LeftPanel/Margin/VBox"]
+layout_mode = 2
+text = "TARGET CONTROL"
+label_settings = ExtResource("6_default_label")
+theme_override_colors/font_color = Color(1, 0.35, 0.58, 1)
+
+[node name="Title" type="Label" parent="Layout/LeftPanel/Margin/VBox"]
+layout_mode = 2
+text = "적 스폰"
+label_settings = ExtResource("7_title_label")
+
+[node name="Rule" type="ColorRect" parent="Layout/LeftPanel/Margin/VBox"]
+custom_minimum_size = Vector2(0, 2)
+layout_mode = 2
+color = Color(1, 0.18, 0.45, 0.85)
+
+[node name="SpawnCountRow" type="HBoxContainer" parent="Layout/LeftPanel/Margin/VBox"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Layout/LeftPanel/Margin/VBox/SpawnCountRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "스폰 횟수"
+label_settings = ExtResource("6_default_label")
+
+[node name="SpawnCount" type="SpinBox" parent="Layout/LeftPanel/Margin/VBox/SpawnCountRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(64, 0)
+layout_mode = 2
+min_value = 1.0
+max_value = 10.0
+value = 1.0
+allow_greater = false
+allow_lesser = false
+
+[node name="EnemyButtons" type="VBoxContainer" parent="Layout/LeftPanel/Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Spacer" type="Control" parent="Layout/LeftPanel/Margin/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="TargetCount" type="Label" parent="Layout/LeftPanel/Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "활성 표적  00"
+label_settings = ExtResource("6_default_label")
+theme_override_colors/font_color = Color(1, 0.55, 0.7, 1)
+
+[node name="ClearTargetsButton" type="Button" parent="Layout/LeftPanel/Margin/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+text = "표적 / 적 탄환 정리"
+
+[node name="CornerFrame" type="Control" parent="Layout/LeftPanel"]
+layout_mode = 2
+mouse_filter = 2
+script = ExtResource("8_corner_frame")
+
+[node name="Playfield" type="Control" parent="Layout"]
+custom_minimum_size = Vector2(240, 360)
+layout_mode = 2
+
+[node name="ViewportContainer" type="SubViewportContainer" parent="Layout/Playfield"]
+texture_filter = 1
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+stretch = true
+
+[node name="PlayfieldViewport" type="SubViewport" parent="Layout/Playfield/ViewportContainer"]
+use_hdr_2d = true
+size = Vector2i(160, 240)
+render_target_update_mode = 4
+
+[node name="WeaponTestGameplay" type="Node2D" parent="Layout/Playfield/ViewportContainer/PlayfieldViewport" groups=["gameplay_world"]]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="Layout/Playfield/ViewportContainer/PlayfieldViewport/WeaponTestGameplay"]
+environment = SubResource("Environment_neon")
+
+[node name="EnemyAugmentRegistry" type="Node" parent="Layout/Playfield/ViewportContainer/PlayfieldViewport/WeaponTestGameplay"]
+script = ExtResource("4_enemy_registry")
+
+[node name="PlayerAugmentRegistry" type="Node" parent="Layout/Playfield/ViewportContainer/PlayfieldViewport/WeaponTestGameplay"]
+script = ExtResource("5_player_registry")
+facilities = Array[ExtResource("9_facility_definition")]([ExtResource("10_weapon_room"), ExtResource("11_hangar"), ExtResource("12_engine"), ExtResource("13_hull"), ExtResource("14_radar"), ExtResource("15_shield")])
+
+[node name="Ship" parent="Layout/Playfield/ViewportContainer/PlayfieldViewport/WeaponTestGameplay" node_paths=PackedStringArray("augment_registry") instance=ExtResource("2_ship")]
+position = Vector2(80, 196)
+augment_registry = NodePath("../PlayerAugmentRegistry")
+
+[node name="SpaceBackground" parent="Layout/Playfield/ViewportContainer/PlayfieldViewport/WeaponTestGameplay" instance=ExtResource("3_background")]
+
+[node name="ModeBadge" type="PanelContainer" parent="Layout/Playfield"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 48.0
+offset_top = 8.0
+offset_right = -48.0
+offset_bottom = 34.0
+grow_horizontal = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBox_control_box")
+
+[node name="Label" type="Label" parent="Layout/Playfield/ModeBadge"]
+layout_mode = 2
+text = "WEAPON TEST  ·  INVINCIBLE"
+label_settings = ExtResource("6_default_label")
+theme_override_colors/font_color = Color(0.5, 0.9, 1, 0.95)
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CornerFrame" type="Control" parent="Layout/Playfield"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("8_corner_frame")
+inset = 5.0
+
+[node name="RightPanel" type="PanelContainer" parent="Layout"]
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBox_right_panel")
+
+[node name="Margin" type="MarginContainer" parent="Layout/RightPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 10
+
+[node name="VBox" type="VBoxContainer" parent="Layout/RightPanel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="Eyebrow" type="Label" parent="Layout/RightPanel/Margin/VBox"]
+layout_mode = 2
+text = "LOADOUT CONTROL"
+label_settings = ExtResource("6_default_label")
+theme_override_colors/font_color = Color(0.35, 0.82, 1, 1)
+
+[node name="Title" type="Label" parent="Layout/RightPanel/Margin/VBox"]
+layout_mode = 2
+text = "장비 선택"
+label_settings = ExtResource("7_title_label")
+
+[node name="Rule" type="ColorRect" parent="Layout/RightPanel/Margin/VBox"]
+custom_minimum_size = Vector2(0, 2)
+layout_mode = 2
+color = Color(0.1, 0.65, 0.95, 0.85)
+
+[node name="SelectedSlotLabel" type="Label" parent="Layout/RightPanel/Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "선택 슬롯 1"
+label_settings = ExtResource("6_default_label")
+theme_override_colors/font_color = Color(0.55, 0.88, 1, 1)
+
+[node name="SlotButtons" type="HBoxContainer" parent="Layout/RightPanel/Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 3
+
+[node name="WeaponScroll" type="ScrollContainer" parent="Layout/RightPanel/Margin/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="WeaponButtons" type="VBoxContainer" parent="Layout/RightPanel/Margin/VBox/WeaponScroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 3
+
+[node name="ActionRow" type="HBoxContainer" parent="Layout/RightPanel/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="LevelButton" type="Button" parent="Layout/RightPanel/Margin/VBox/ActionRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "레벨 +"
+
+[node name="UnequipButton" type="Button" parent="Layout/RightPanel/Margin/VBox/ActionRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "슬롯 비우기"
+
+[node name="Hint" type="Label" parent="Layout/RightPanel/Margin/VBox"]
+layout_mode = 2
+text = "슬롯 선택 → 무기 선택\nWASD / 방향키로 기체 이동"
+label_settings = ExtResource("6_default_label")
+theme_override_colors/font_color = Color(0.45, 0.7, 0.85, 0.8)
+autowrap_mode = 3
+
+[node name="CornerFrame" type="Control" parent="Layout/RightPanel"]
+layout_mode = 2
+mouse_filter = 2
+script = ExtResource("8_corner_frame")
