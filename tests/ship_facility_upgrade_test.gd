@@ -220,6 +220,16 @@ func _check_offer_layout(selection_ui: AugmentSelectionOverlay) -> void:
 	)
 	button_1.grab_focus()
 	await process_frame
+	var viewport_height := selection_ui.get_viewport().get_visible_rect().size.y
+	_expect(
+		selection_ui.choice_container.global_position.y >= -0.5,
+		"player offer title stays inside the top of the viewport",
+	)
+	_expect(
+		selection_ui.choice_container.global_position.y + selection_ui.choice_container.size.y
+		<= viewport_height + 0.5,
+		"player offer panel stays inside the bottom of the viewport",
+	)
 	paused = true
 	await _press_action(&"ui_down")
 	_expect(root.gui_get_focus_owner() == weapon_room, "ui_down moves focus from card to ship part")

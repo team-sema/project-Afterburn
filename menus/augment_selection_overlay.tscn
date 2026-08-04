@@ -43,15 +43,15 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -300.0
-offset_top = -170.0
+offset_top = -180.0
 offset_right = 300.0
-offset_bottom = 170.0
+offset_bottom = 180.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/margin_left = 14
-theme_override_constants/margin_top = 12
+theme_override_constants/margin_top = 10
 theme_override_constants/margin_right = 14
-theme_override_constants/margin_bottom = 12
+theme_override_constants/margin_bottom = 10
 
 [node name="PanelContainer" type="PanelContainer" parent="MarginContainer" unique_id=762158450]
 layout_mode = 2
@@ -59,7 +59,7 @@ theme_override_styles/panel = SubResource("StyleBox_panel")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/PanelContainer" unique_id=1371109450]
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 5
 
 [node name="TitleLabel" type="Label" parent="MarginContainer/PanelContainer/VBoxContainer" unique_id=1887388987]
 unique_name_in_owner = true
@@ -153,6 +153,6 @@ horizontal_alignment = 1
 
 [node name="OfferShipPanel" parent="MarginContainer/PanelContainer/VBoxContainer" instance=ExtResource("6_ship_panel")]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 148)
+custom_minimum_size = Vector2(0, 126)
 layout_mode = 2
 selection_enabled = true
