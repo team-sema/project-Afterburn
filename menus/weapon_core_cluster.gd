@@ -1,16 +1,15 @@
 class_name WeaponCoreCluster
 extends Control
 
-## Weapon hex core + optional trait satellites (mockup focus bay).
-
-const HEX_MODULE_SCENE := preload("res://menus/hex_module_frame.tscn")
-const LABEL_SETTINGS := preload("res://fonts/hex_module_label_settings.tres")
+## Weapon hex core + optional trait satellites.
+## Edit size/layout in weapon_core_cluster.tscn (Core + Templates/*).
 
 signal core_selected(weapon_id: StringName, is_record: bool)
+signal core_hovered(weapon_id: StringName, is_record: bool)
 signal trait_selected(weapon_id: StringName, trait_id: StringName, is_record: bool)
 
-var slot_size := Vector2(48, 48)
-var core_size := Vector2(40, 40)
+var slot_size := Vector2(42, 42)
+var core_size := Vector2(38, 38)
 var trait_size := Vector2(14, 14)
 var orbit_radius := 24.0
 var show_outer_frame := false
@@ -18,13 +17,18 @@ var show_outer_frame := false
 var weapon_id: StringName = &""
 var is_record := false
 var is_focused := false
-var _core: HexModuleFrame
+
+@onready var _core: HexModuleFrame = %Core
+@onready var _trait_hex_template: HexModuleFrame = %TraitHexTemplate
+@onready var _trait_caption_template: Label = %TraitCaptionTemplate
+
 var _traits: Array[HexModuleFrame] = []
 var _trait_labels: Array[Label] = []
 var _bound_traits: Dictionary = {}
 var _bound_labels: Dictionary = {}
 var _bound_icons: Dictionary = {}
 var _show_traits := false
+var _signals_bound := false
 
 
 func _ready() -> void:
@@ -32,8 +36,15 @@ func _ready() -> void:
 	size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	clip_contents = false
+	if custom_minimum_size != Vector2.ZERO:
+		slot_size = custom_minimum_size
+	if _trait_hex_template != null:
+		_trait_hex_template.visible = false
+		trait_size = _trait_hex_template.custom_minimum_size
+	if _trait_caption_template != null:
+		_trait_caption_template.visible = false
+	_bind_core_signals()
 	apply_slot_size(slot_size.x, show_outer_frame)
-	_ensure_core()
 	_sync_core_rect()
 
 
@@ -46,14 +57,16 @@ func apply_slot_size(side: float, p_show_outer_frame: bool = false) -> void:
 	side = clampf(side, 20.0, 96.0)
 	slot_size = Vector2(side, side)
 	if show_outer_frame:
-		# Room for orbiting trait satellites around the core.
 		core_size = Vector2(side * 0.48, side * 0.48)
 		trait_size = Vector2(maxi(12.0, side * 0.22), maxi(12.0, side * 0.22))
 		orbit_radius = side * 0.36
 	else:
-		# Compact bay / focus-without-traits: core fills most of the slot.
 		core_size = Vector2(side * 0.9, side * 0.9)
-		trait_size = Vector2(maxi(8.0, side * 0.28), maxi(8.0, side * 0.28))
+		if _trait_hex_template != null and _trait_hex_template.custom_minimum_size.x > 0.0:
+			var template_side := _trait_hex_template.custom_minimum_size.x
+			trait_size = Vector2(template_side, template_side)
+		else:
+			trait_size = Vector2(maxi(8.0, side * 0.28), maxi(8.0, side * 0.28))
 		orbit_radius = side * 0.2
 	custom_minimum_size = slot_size
 	size = slot_size
@@ -88,7 +101,9 @@ func bind_weapon(
 	_bound_labels = trait_labels.duplicate()
 	_bound_icons = trait_icons.duplicate()
 	_show_traits = show_traits and p_weapon_id != &""
-	_ensure_core()
+	_bind_core_signals()
+	if _core == null:
+		return
 	custom_minimum_size = slot_size
 	size = slot_size
 	_core.visible = true
@@ -115,16 +130,16 @@ func bind_weapon(
 	queue_redraw()
 
 
-func _ensure_core() -> void:
-	if _core != null:
+func _bind_core_signals() -> void:
+	if _core == null:
+		_core = get_node_or_null("%Core") as HexModuleFrame
+	if _core == null:
 		return
-	_core = HEX_MODULE_SCENE.instantiate() as HexModuleFrame
-	_core.name = "Core"
-	_core.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT, Control.PRESET_MODE_MINSIZE)
-	_core.apply_fixed_size(core_size.x)
-	_core.interactive = true
-	add_child(_core)
-	_core.module_clicked.connect(_on_core_click)
+	if not _core.module_hovered.is_connected(_on_core_hover):
+		_core.module_hovered.connect(_on_core_hover)
+	if not _core.module_clicked.is_connected(_on_core_click):
+		_core.module_clicked.connect(_on_core_click)
+	_signals_bound = true
 
 
 func _sync_core_rect() -> void:
@@ -140,10 +155,11 @@ func _notification(what: int) -> void:
 		_sync_core_rect()
 		_layout_traits()
 		queue_redraw()
+	elif what == NOTIFICATION_MOUSE_ENTER:
+		_emit_core_hover()
 
 
 func _gui_input(event: InputEvent) -> void:
-	# Click-only bay focus — hover must not rebuild the whole STATUS row.
 	if event is InputEventMouseButton:
 		var mouse := event as InputEventMouseButton
 		if mouse.pressed and mouse.button_index == MOUSE_BUTTON_LEFT:
@@ -153,6 +169,8 @@ func _gui_input(event: InputEvent) -> void:
 
 func _rebuild_traits() -> void:
 	_clear_traits()
+	if _trait_hex_template == null:
+		return
 	var ids: Array[StringName] = []
 	for key in _bound_traits.keys():
 		if int(_bound_traits[key]) > 0:
@@ -160,7 +178,8 @@ func _rebuild_traits() -> void:
 	ids.sort_custom(func(a: StringName, b: StringName) -> bool: return String(a) < String(b))
 	for index in ids.size():
 		var trait_id := ids[index]
-		var satellite := HEX_MODULE_SCENE.instantiate() as HexModuleFrame
+		var satellite := _trait_hex_template.duplicate() as HexModuleFrame
+		satellite.visible = true
 		satellite.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT, Control.PRESET_MODE_MINSIZE)
 		satellite.apply_fixed_size(trait_size.x)
 		satellite.interactive = true
@@ -177,13 +196,16 @@ func _rebuild_traits() -> void:
 		satellite.module_clicked.connect(func() -> void: trait_selected.emit(weapon_id, captured, is_record))
 		_traits.append(satellite)
 
-		var caption := Label.new()
-		caption.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		caption.label_settings = LABEL_SETTINGS.duplicate() as LabelSettings
-		caption.label_settings.font_size = 7
+		var caption: Label
+		if _trait_caption_template != null:
+			caption = _trait_caption_template.duplicate() as Label
+		else:
+			caption = Label.new()
+			caption.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		caption.visible = true
 		caption.text = str(_bound_labels.get(trait_id, ""))
 		caption.modulate = Color(0.82, 0.95, 1.0, 0.95)
-		caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		add_child(caption)
 		_trait_labels.append(caption)
 	_layout_traits()
@@ -252,5 +274,15 @@ func _draw() -> void:
 	draw_polyline(outline, Color(0.25, 0.85, 1.0, 0.5), 1.25, true)
 
 
+func _on_core_hover() -> void:
+	_emit_core_hover()
+
+
 func _on_core_click() -> void:
 	core_selected.emit(weapon_id, is_record)
+
+
+func _emit_core_hover() -> void:
+	if weapon_id == &"":
+		return
+	core_hovered.emit(weapon_id, is_record)

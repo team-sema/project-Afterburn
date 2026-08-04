@@ -155,6 +155,13 @@ func get_weapon_display_name(weapon_id: StringName) -> String:
 	return String(weapon_id)
 
 
+func get_weapon_description(weapon_id: StringName) -> String:
+	var definition := get_weapon_definition(weapon_id)
+	if definition != null:
+		return definition.description
+	return ""
+
+
 func get_trait_definition(trait_id: StringName) -> WeaponTraitDefinition:
 	if trait_id == &"":
 		return null
@@ -183,11 +190,21 @@ func get_trait_display_name(trait_id: StringName) -> String:
 	return String(trait_id)
 
 
+func get_trait_description(trait_id: StringName) -> String:
+	var definition := get_trait_definition(trait_id)
+	if definition != null:
+		return definition.description
+	return ""
+
+
 func get_trait_icon(trait_id: StringName) -> Texture2D:
 	var definition := get_trait_definition(trait_id)
 	if definition == null:
 		return null
-	return definition.icon
+	if definition.icon != null:
+		return definition.icon
+	# Trait SVGs are optional — fall back to the target weapon icon so STATUS isn't blank.
+	return get_weapon_icon(definition.target_weapon_id)
 
 
 func get_weapon_icon(weapon_id: StringName) -> Texture2D:

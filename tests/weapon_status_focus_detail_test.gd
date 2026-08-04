@@ -26,8 +26,11 @@ func _run() -> void:
 	_expect(weapon_hud.get_node("%SelectedWeaponTitle") != null, "selected weapon title exists")
 	_expect(weapon_hud.get_node("%ModulesGrid") != null, "modules grid exists")
 	_expect(weapon_hud.get_node("%SelectedWeaponName") != null, "selected weapon name exists")
+	_expect(weapon_hud.get_node("%DetailRule") != null, "detail rule line exists")
 	var name_label: Label = weapon_hud.get_node("%SelectedWeaponName") as Label
 	_expect(name_label.text.contains("블래스터") or name_label.text.contains("Lv."), "auto-focuses starting weapon detail")
+	var footer: Label = weapon_hud.get_node("%WeaponDetailFooter") as Label
+	_expect(footer.text.contains("블래스터") or footer.text.contains("발사"), "footer shows selected weapon description")
 
 	loadout.add_or_upgrade_weapon_trait(&"main_blaster", &"blaster_pierce", 1)
 	await process_frame
@@ -35,17 +38,13 @@ func _run() -> void:
 	await process_frame
 	var grid: GridContainer = weapon_hud.get_node("%ModulesGrid") as GridContainer
 	_expect(grid.get_child_count() == 4, "module grid keeps four slots")
-	var first_card := grid.get_child(0) as Control
-	_expect(first_card != null, "first module card exists")
-	var hex_nodes := first_card.find_children("*", "HexModuleFrame", true, false)
-	_expect(not hex_nodes.is_empty(), "module card uses HexModuleFrame")
-	var found_pierce := false
-	for node in first_card.find_children("*", "Label", true, false):
-		var label := node as Label
-		if label != null and label.text.contains("관통"):
-			found_pierce = true
-			break
-	_expect(found_pierce, "pierce trait shows display name")
+	var first_hex := grid.get_child(0) as HexModuleFrame
+	_expect(first_hex != null, "equipped module is a bare HexModuleFrame")
+	_expect(loadout.get_trait_icon(&"blaster_pierce") != null, "blaster pierce has a visible icon for STATUS")
+	first_hex.module_hovered.emit()
+	await process_frame
+	footer = weapon_hud.get_node("%WeaponDetailFooter") as Label
+	_expect(footer.text.contains("관통"), "hovering module hex shows full trait name in description")
 
 	var laser: WeaponDefinition = load("res://resources/weapons/definitions/main_laser.tres") as WeaponDefinition
 	loadout.equip_weapon(laser)
@@ -62,16 +61,21 @@ func _run() -> void:
 			break
 	_expect(laser_cluster != null, "laser bay appears in equal row")
 	_expect(
-		(bay_row.get_child(0) as Control).get_combined_minimum_size()
-		== laser_cluster.get_combined_minimum_size(),
-		"bay hexes share the same size",
+		is_equal_approx(
+			laser_cluster.slot_size.x,
+			weapon_hud.get_node("%BaySlotTemplate").custom_minimum_size.x
+		),
+		"bay hex matches BaySlotTemplate size",
 	)
-	laser_cluster.core_selected.emit(laser_cluster.weapon_id, false)
-	await process_frame
-	weapon_hud.refresh()
+	_expect(weapon_hud.get_node("%SelectedWeaponHex") != null, "selected weapon uses scene placeholder hex")
+	_expect(weapon_hud.get_node("%ModuleHexTemplate") != null, "module hex template placeholder exists")
+	laser_cluster.core_hovered.emit(laser_cluster.weapon_id, false)
 	await process_frame
 	name_label = weapon_hud.get_node("%SelectedWeaponName") as Label
-	_expect(name_label.text.contains("레이저") or name_label.text.contains("Lv."), "focusing bay updates selected weapon")
+	_expect(name_label.text.contains("레이저") or name_label.text.contains("Lv."), "hovering bay updates selected weapon")
+	_expect(laser_cluster.is_focused, "hovered bay is marked focused without row rebuild")
+	footer = weapon_hud.get_node("%WeaponDetailFooter") as Label
+	_expect(footer.text.contains("레이저") or footer.text.contains("빔"), "footer follows hovered weapon description")
 
 	var ship_panel: ShipPanel = world.get_node("Layout/RightPanel/Margin/VBox/ShipPanel") as ShipPanel
 	_expect(ship_panel.get_detail_text().contains(" : "), "facility detail shows name : slots by default")

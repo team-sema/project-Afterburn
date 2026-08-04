@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://biklivgjp6cup"]
+[gd_scene load_steps=21 format=3 uid="uid://biklivgjp6cup"]
 
 [ext_resource type="PackedScene" uid="uid://ndsn1d66d5g3" path="res://gameplay.tscn" id="1_gameplay"]
 [ext_resource type="Resource" uid="uid://qvwx7dbvubh0" path="res://game_stats.tres" id="2_stats"]
@@ -11,6 +11,8 @@
 [ext_resource type="PackedScene" path="res://menus/ship_panel.tscn" id="10_ship_panel"]
 [ext_resource type="Script" uid="uid://r8a6m4303af1" path="res://menus/neon_corner_frame.gd" id="11_corner_frame"]
 [ext_resource type="Script" uid="uid://ceh34fj2jywfo" path="res://menus/ship_status_hud.gd" id="12_ship_status_hud"]
+[ext_resource type="PackedScene" path="res://menus/weapon_core_cluster.tscn" id="13_bay_cluster"]
+[ext_resource type="PackedScene" path="res://menus/hex_module_frame.tscn" id="14_hex"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_left_panel"]
 bg_color = Color(0.018, 0.035, 0.075, 1)
@@ -334,13 +336,13 @@ theme_override_styles/panel = SubResource("StyleBox_right_panel")
 [node name="Margin" type="MarginContainer" parent="Layout/RightPanel" unique_id=210576496]
 layout_mode = 2
 theme_override_constants/margin_left = 10
-theme_override_constants/margin_top = 4
+theme_override_constants/margin_top = 8
 theme_override_constants/margin_right = 10
-theme_override_constants/margin_bottom = 4
+theme_override_constants/margin_bottom = 8
 
 [node name="VBox" type="VBoxContainer" parent="Layout/RightPanel/Margin" unique_id=1328936483]
 layout_mode = 2
-theme_override_constants/separation = 2
+theme_override_constants/separation = 6
 
 [node name="LoadoutTitle" type="Label" parent="Layout/RightPanel/Margin/VBox" unique_id=1979278927]
 layout_mode = 2
@@ -363,14 +365,15 @@ theme_override_styles/panel = SubResource("StyleBox_weapon_box")
 
 [node name="Margin" type="MarginContainer" parent="Layout/RightPanel/Margin/VBox/WeaponBox" unique_id=665550503]
 layout_mode = 2
-theme_override_constants/margin_left = 2
-theme_override_constants/margin_top = 2
-theme_override_constants/margin_right = 2
-theme_override_constants/margin_bottom = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
 
 [node name="WeaponLoadoutHud" type="VBoxContainer" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin" unique_id=1257734690 node_paths=PackedStringArray("ship")]
 layout_mode = 2
-theme_override_constants/separation = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 5
 script = ExtResource("6_weapon_hud")
 ship = NodePath("../../../../../../Playfield/ViewportContainer/PlayfieldViewport/Gameplay/Ship")
 
@@ -383,17 +386,24 @@ label_settings = ExtResource("3_default_label")
 
 [node name="BaySubtitle" type="Label" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud" unique_id=1715945432]
 unique_name_in_owner = true
+visible = false
 layout_mode = 2
 theme_override_colors/font_color = Color(0.45, 0.75, 0.9, 0.85)
-text = "장착 베이"
+text = "슬롯"
 label_settings = ExtResource("3_default_label")
 
 [node name="BayRow" type="HBoxContainer" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud" unique_id=1303015167]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/separation = 8
+theme_override_constants/separation = 6
 alignment = 1
+
+[node name="BayDetailSpacer" type="Control" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud" unique_id=1888001001]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 8)
+layout_mode = 2
+mouse_filter = 2
 
 [node name="DetailColumns" type="HBoxContainer" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud" unique_id=1093745424]
 unique_name_in_owner = true
@@ -419,12 +429,19 @@ theme_override_constants/separation = 2
 
 [node name="SelectedWeaponIcon" type="TextureRect" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud/DetailColumns/SelectedCol/SelectedWeaponRow" unique_id=845517552]
 unique_name_in_owner = true
+visible = false
 modulate = Color(0.7, 0.95, 1, 1)
-custom_minimum_size = Vector2(28, 28)
+custom_minimum_size = Vector2(42, 42)
 layout_mode = 2
 size_flags_horizontal = 0
 expand_mode = 1
 stretch_mode = 5
+
+[node name="SelectedWeaponHex" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud/DetailColumns/SelectedCol/SelectedWeaponRow" instance=ExtResource("14_hex")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(42, 42)
+layout_mode = 2
+size_flags_horizontal = 0
 
 [node name="SelectedWeaponName" type="Label" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud/DetailColumns/SelectedCol/SelectedWeaponRow" unique_id=237567968]
 unique_name_in_owner = true
@@ -451,10 +468,16 @@ label_settings = ExtResource("3_default_label")
 [node name="ModulesGrid" type="GridContainer" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud/DetailColumns/ModulesCol" unique_id=1886907067]
 unique_name_in_owner = true
 layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/h_separation = 3
-theme_override_constants/v_separation = 3
-columns = 2
+size_flags_horizontal = 0
+theme_override_constants/h_separation = 4
+theme_override_constants/v_separation = 4
+columns = 4
+
+[node name="DetailRule" type="ColorRect" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud" unique_id=1888001002]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 1)
+layout_mode = 2
+color = Color(0.1, 0.65, 0.95, 0.55)
 
 [node name="TraitDetail" type="Label" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud" unique_id=566296909]
 unique_name_in_owner = true
@@ -466,10 +489,32 @@ autowrap_mode = 3
 [node name="WeaponDetailFooter" type="Label" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud" unique_id=77695922]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0.45, 0.7, 0.85, 0.75)
-text = "모듈은 무기의 성능을 강화합니다."
+theme_override_colors/font_color = Color(0.72, 0.9, 1, 0.92)
+text = ""
 label_settings = ExtResource("3_default_label")
 autowrap_mode = 3
+
+[node name="HudTemplates" type="Control" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 0)
+size_flags_vertical = 0
+mouse_filter = 2
+
+[node name="BaySlotTemplate" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud/HudTemplates" instance=ExtResource("13_bay_cluster")]
+unique_name_in_owner = true
+visible = true
+layout_mode = 0
+offset_right = 42.0
+offset_bottom = 42.0
+
+[node name="ModuleHexTemplate" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud/HudTemplates" instance=ExtResource("14_hex")]
+unique_name_in_owner = true
+visible = true
+custom_minimum_size = Vector2(22, 22)
+layout_mode = 0
+offset_left = 48.0
+offset_right = 70.0
+offset_bottom = 22.0
 
 [node name="CornerFrame" type="Control" parent="Layout/RightPanel" unique_id=354929349]
 layout_mode = 2

@@ -14,21 +14,68 @@
 
 ### 플레이어
 
-- 스탯 모듈 3종 (시설 슬롯 소모)
-- 시설 효과 모듈 6종
-- 무기 획득(`WEAPON_ACQUIRE`) 7종 · 레벨(`WEAPON_LEVEL`) 7종 · 특성 스캐폴드 2종
-- 카드 표시는 `get_offer_title` / `get_offer_description`으로 신규·레벨·특성을 구분 (기록 복원 없음)
+- 총 **25종**: 스탯 3 + 시설 효과 6 + 무기 획득 7 + 무기 레벨 7 + 무기 특성 2
+- 카드 표시는 `get_offer_title` / `get_offer_description`으로 신규·레벨·특성을 구분
 - 가중치: `offer_weight`(기본 1.0). 범주별 확정 %는 데이터에서만 조정
 - 무기 전용 Kind는 **함선 시설 슬롯을 소모하지 않음**
 - **리롤:** `max_reroll_count`(임시 기본 2), 런 `remaining_reroll_count`. 선택 전만. [R]/버튼. 직전 세트와 완전 동일하면 1회 재추첨
+
+#### 스탯 모듈 3종
+
+| ID | 표시명 | 대상 시설 | 효과 |
+|----|--------|-----------|------|
+| `player_move_speed_boost_1_2` | 과충전 추진기 | 엔진 | 이동속도 ×1.2 |
+| `player_fire_rate_boost_1_2` | 가속 캐패시터 | 무기실 | 공격속도 ×1.2 |
+| `player_weapon_damage_boost_1_2` | 과충전 탄두 | 무기실 | 장착한 모든 무기 피해 ×1.2 |
+
+#### 시설 효과 모듈 6종
+
+| ID | 표시명 | 대상 시설 | 1개 설치 효과 |
+|----|--------|-----------|---------------|
+| `facility_weapon_room` | 집속 조준기 | 무기실 | 장착 무기 공통 공격력 ×1.15 |
+| `facility_hangar` | 격납고 확장 | 격납고 | 효과 미정 (현재 0) |
+| `facility_engine` | 추력 편향기 | 엔진 | 이동속도 ×1.1 |
+| `facility_hull` | 반응 장갑 | 선체 | 최대 선체 +1 |
+| `facility_radar` | 광역 탐지기 | 레이더 | 픽업 수집 반경 ×1.15 |
+| `facility_shield` | 실드 축전기 | 실드 | 최대 실드 +1 |
+
+#### 무기 획득·레벨 7종씩
+
+| 무기 ID | 표시명 | 획득 카드 ID | 레벨 카드 ID |
+|---------|--------|--------------|--------------|
+| `main_blaster` | 블래스터 | `acquire_main_blaster` | `level_main_blaster` |
+| `main_laser` | 레이저 | `acquire_main_laser` | `level_main_laser` |
+| `main_shotgun` | 샷건 | `acquire_main_shotgun` | `level_main_shotgun` |
+| `aux_test_cannon` | 보조 캐넌 | `acquire_aux_test_cannon` | `level_aux_test_cannon` |
+| `plasma_bomb` | 플라즈마 폭탄 | `acquire_plasma_bomb` | `level_plasma_bomb` |
+| `aux_homing_missile` | 유도탄 | `acquire_aux_homing_missile` | `level_aux_homing_missile` |
+| `aux_orbital_barrier` | 궤도 방벽 | `acquire_aux_orbital_barrier` | `level_aux_orbital_barrier` |
+
+- 획득 카드는 Lv.1 신규 장착, 레벨 카드는 해당 무기가 장착 중일 때만 등장하며 최대 Lv.3
+- 각 카드의 현재 `offer_weight`는 1.0
+
+#### 무기 특성 2종
+
+| 카드 ID | 표시명 | 대상 무기 | trait ID | 현재 상태 |
+|---------|--------|-----------|----------|-----------|
+| `trait_blaster_pierce` | 블래스터 관통 | 블래스터 | `blaster_pierce` | 관통 특성 스캐폴드 |
+| `trait_laser_fork` | 레이저 분기 | 레이저 | `laser_fork` | 분기 특성 스캐폴드 |
 
 ### 적
 
 | ID | 표시명 | 효과 |
 |----|--------|------|
-| `enemy_health_boost_1_2` | Enemy Reinforcement | HEALTH ×1.2 (이후 스폰) |
-| `enemy_move_speed_boost_1_2` | Accelerated Hostiles | MOVE_SPEED ×1.2 |
-| `enemy_fire_volume_boost` | 포화 사격 | ACTION_RATE ×1.25 + `EnemyFireVolumeBoostComponent` (탄수·스프레드 증가) |
+| `enemy_health_boost_1_2` | 적 증원 | 이후 스폰 적 HEALTH ×1.2 |
+| `enemy_move_speed_boost_1_2` | 가속 적대 | 이후 스폰 적 MOVE_SPEED ×1.2 |
+| `enemy_fire_volume_boost` | 포화 사격 | ACTION_RATE ×1.25 + 추가 탄 2발 + 최소 스프레드 18° |
+
+`gameplay.tscn`의 적 증강 풀에는 위 **3종만** 등록되어 있다.
+
+### 풀 미등록 리소스
+
+| ID | 표시명 | 상태 |
+|----|--------|------|
+| `enemy_counter_shot_on_hit` | 보복 프로토콜 | 리소스는 존재하지만 Gameplay 적 증강 풀에는 미등록 |
 
 ## 트리거 · 컨트롤러
 

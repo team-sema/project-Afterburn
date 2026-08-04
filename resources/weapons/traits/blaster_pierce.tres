@@ -1,11 +1,13 @@
-[gd_resource type="Resource" script_class="WeaponTraitDefinition" format=3]
+[gd_resource type="Resource" script_class="WeaponTraitDefinition" load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://resources/weapons/weapon_trait_definition.gd" id="1_def"]
+[ext_resource type="Texture2D" uid="uid://dm8icgxvcdity" path="res://assets/svg/weapons/weapon_main_blaster.svg" id="2_icon"]
 
 [resource]
 script = ExtResource("1_def")
 trait_id = &"blaster_pierce"
 display_name = "블래스터 관통"
 description = "블래스터 탄환이 적을 관통합니다. (전투 효과 스캐폴드)"
+icon = ExtResource("2_icon")
 target_weapon_id = &"main_blaster"
 next_rank_hint = "관통 대상 수 증가"
