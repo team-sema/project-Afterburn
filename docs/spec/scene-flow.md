@@ -29,7 +29,7 @@ Menu (ui_accept)
 
 `WeaponLoadoutHud`: **무기 모듈** → 장착 베이(동일 크기 헥스 가로 나열, 클릭 포커스) → **좌우 2열**(`선택된 무기` | `장착된 모듈` 2×2). 탄약·주/보조 구분 없음.
 
-좌측 패널(`world.tscn`): 타이틀 → `SCORE` → `ProgressionHud`(XP·위협 바) → `ShipStatusHud`(선체·실드 바) → `PLAYFIELD`
+좌측 패널(`world.tscn`): 타이틀 → `SCORE` → `ProgressionHud`(XP·위협 바) → `ShipStatusHud`(선체·실드 바) → `PLAYFIELD`(`240 × 360`)
 
 좌·플레이필드·우 세 패널에 `NeonCornerFrame` 모서리 브래킷 (장식 전용).
 
