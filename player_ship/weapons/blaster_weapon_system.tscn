@@ -8,6 +8,9 @@
 
 [node name="BlasterWeaponSystem" type="Node2D" unique_id=2042985464]
 script = ExtResource("1_0erch")
+base_fire_interval = 0.15
+base_damage = 10
+projectile_speed = 200.0
 
 [node name="LeftMuzzle" type="Marker2D" parent="." unique_id=1864647179]
 position = Vector2(-5, -5)
@@ -20,8 +23,6 @@ script = ExtResource("2_pi7xe")
 scene = ExtResource("3_0erch")
 
 [node name="FireRateTimer" type="Timer" parent="." unique_id=434099209]
-wait_time = 0.15
-autostart = true
 
 [node name="BlasterSoundPlayer" type="AudioStreamPlayer" parent="." unique_id=2083092559]
 stream = ExtResource("4_0erch")

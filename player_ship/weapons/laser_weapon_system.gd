@@ -9,26 +9,26 @@ const PLAYFIELD_TOP_MARGIN := 8.0
 
 @export_range(0.1, 8.0, 0.1) var beam_width_multiplier := 1.0
 @export_range(0.0, 1.0, 0.01) var beam_expand_duration := 0.18
+@export_range(0.02, 10.0, 0.01) var base_tick_interval := 0.1
+@export_range(1, 200, 1) var base_tick_damage := 3
 
 @onready var glow_line: Sprite2D = $GlowLine
 @onready var core_line: Line2D = $CoreLine
 @onready var damage_tick_timer: Timer = $DamageTickTimer
 @onready var damage_hitbox: HitboxComponent = $DamageHitbox
 
-var base_tick_interval: float
-var base_tick_damage: int
 var base_core_width: float
 var base_glow_width_scale: float
 var _beam_width_tween: Tween
 
 
 func _ready() -> void:
-	base_tick_interval = damage_tick_timer.wait_time
-	base_tick_damage = damage_hitbox.damage
 	base_core_width = core_line.width
 	base_glow_width_scale = glow_line.scale.x
+	damage_hitbox.damage = base_tick_damage
 	damage_tick_timer.timeout.connect(apply_damage_tick)
 	_apply_stat_multipliers()
+	damage_tick_timer.start()
 	_update_beam_visual(_full_beam_endpoint())
 	restart_beam_width_animation()
 

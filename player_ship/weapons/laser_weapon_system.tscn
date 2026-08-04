@@ -7,6 +7,10 @@
 
 [node name="LaserWeaponSystem" type="Node2D" unique_id=395281251]
 script = ExtResource("1_laser")
+beam_width_multiplier = 1.0
+beam_expand_duration = 0.18
+base_tick_interval = 0.1
+base_tick_damage = 3
 
 [node name="GlowLine" type="Sprite2D" parent="." unique_id=2107826507]
 self_modulate = Color(0.1, 0.75, 1, 0.35)
@@ -29,12 +33,9 @@ antialiased = true
 
 [node name="DamageTickTimer" type="Timer" parent="." unique_id=1475382514]
 process_callback = 0
-wait_time = 0.1
-autostart = true
 
 [node name="DamageHitbox" type="Area2D" parent="." unique_id=568910206]
 collision_layer = 0
 collision_mask = 0
 script = ExtResource("3_hitbox")
-damage = 3
 metadata/_custom_type_script = "uid://cvmjafhyfx5xo"

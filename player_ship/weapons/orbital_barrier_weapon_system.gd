@@ -12,13 +12,11 @@ extends WeaponSystem
 
 @onready var orbit_root: Node2D = $OrbitRoot
 
-var _base_damages: Array[int] = []
 var _alive_segments: Array[Node2D] = []
 var _segment_max_count := 0
 
 
 func _ready() -> void:
-	_cache_base_damages()
 	_layout_segments()
 	_wire_segments()
 	_apply_stat_multipliers()
@@ -60,24 +58,11 @@ func _apply_stat_multipliers() -> void:
 	if not is_node_ready():
 		return
 	var damage_mult := get_effective_damage_multiplier()
-	var index := 0
 	for child in orbit_root.get_children():
 		var hitbox := child.get_node_or_null("HitboxComponent") as HitboxComponent
 		if hitbox == null:
 			continue
-		var base := base_damage
-		if index < _base_damages.size():
-			base = _base_damages[index]
-		hitbox.damage = maxi(1, roundi(base * damage_mult))
-		index += 1
-
-
-func _cache_base_damages() -> void:
-	_base_damages.clear()
-	for child in orbit_root.get_children():
-		var hitbox := child.get_node_or_null("HitboxComponent") as HitboxComponent
-		if hitbox != null:
-			_base_damages.append(hitbox.damage)
+		hitbox.damage = maxi(1, roundi(base_damage * damage_mult))
 
 
 func _layout_segments() -> void:

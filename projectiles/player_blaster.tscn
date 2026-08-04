@@ -73,7 +73,6 @@ process_material = SubResource("ParticleProcessMaterial_trail")
 [node name="MoveComponent" type="Node" parent="." unique_id=1113830471 node_paths=PackedStringArray("actor")]
 script = ExtResource("8_1yfn5")
 actor = NodePath("..")
-velocity = Vector2(0, -200)
 metadata/_custom_type_script = "uid://dbgfouplndi2j"
 
 [node name="FreeOffscreenComponent" type="VisibleOnScreenNotifier2D" parent="." unique_id=1707925684 node_paths=PackedStringArray("actor")]
@@ -98,7 +97,6 @@ flash_duration = 0.1
 collision_layer = 0
 collision_mask = 2
 script = ExtResource("12_vsug7")
-damage = 10
 metadata/_custom_type_script = "uid://cvmjafhyfx5xo"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="HitboxComponent" unique_id=1963005471]

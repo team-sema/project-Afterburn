@@ -38,14 +38,14 @@
 [ext_resource type="Resource" path="res://resources/player_augments/weapon/acquire_main_laser.tres" id="41_acq_laser"]
 [ext_resource type="Resource" path="res://resources/player_augments/weapon/acquire_main_shotgun.tres" id="42_acq_shotgun"]
 [ext_resource type="Resource" path="res://resources/player_augments/weapon/acquire_aux_test_cannon.tres" id="43_acq_cannon"]
-[ext_resource type="Resource" path="res://resources/player_augments/weapon/acquire_aux_test_flak.tres" id="44_acq_flak"]
+[ext_resource type="Resource" path="res://resources/player_augments/weapon/acquire_plasma_bomb.tres" id="44_acq_plasma"]
 [ext_resource type="Resource" path="res://resources/player_augments/weapon/acquire_aux_homing_missile.tres" id="45_acq_missile"]
 [ext_resource type="Resource" path="res://resources/player_augments/weapon/acquire_aux_orbital_barrier.tres" id="46_acq_barrier"]
 [ext_resource type="Resource" path="res://resources/player_augments/weapon/level_main_blaster.tres" id="50_lv_blaster"]
 [ext_resource type="Resource" path="res://resources/player_augments/weapon/level_main_laser.tres" id="51_lv_laser"]
 [ext_resource type="Resource" path="res://resources/player_augments/weapon/level_main_shotgun.tres" id="52_lv_shotgun"]
 [ext_resource type="Resource" path="res://resources/player_augments/weapon/level_aux_test_cannon.tres" id="53_lv_cannon"]
-[ext_resource type="Resource" path="res://resources/player_augments/weapon/level_aux_test_flak.tres" id="54_lv_flak"]
+[ext_resource type="Resource" path="res://resources/player_augments/weapon/level_plasma_bomb.tres" id="54_lv_plasma"]
 [ext_resource type="Resource" path="res://resources/player_augments/weapon/level_aux_homing_missile.tres" id="55_lv_missile"]
 [ext_resource type="Resource" path="res://resources/player_augments/weapon/level_aux_orbital_barrier.tres" id="56_lv_barrier"]
 [ext_resource type="Resource" path="res://resources/player_augments/weapon/trait_blaster_pierce.tres" id="60_tr_pierce"]
@@ -98,7 +98,7 @@ selection_ui = NodePath("../AugmentSelectionOverlay")
 module_swap_ui = NodePath("../AugmentModuleSwapOverlay")
 weapon_slot_ui = NodePath("../WeaponSlotSelectionOverlay")
 ship = NodePath("../Ship")
-player_augment_pool = Array[ExtResource("14_player_augment")]([ExtResource("16_player_move"), ExtResource("17_player_fire"), ExtResource("18_player_damage"), ExtResource("32_aug_weapon_room"), ExtResource("33_aug_hangar"), ExtResource("34_aug_engine"), ExtResource("35_aug_hull"), ExtResource("36_aug_radar"), ExtResource("37_aug_shield"), ExtResource("40_acq_blaster"), ExtResource("41_acq_laser"), ExtResource("42_acq_shotgun"), ExtResource("43_acq_cannon"), ExtResource("44_acq_flak"), ExtResource("45_acq_missile"), ExtResource("46_acq_barrier"), ExtResource("50_lv_blaster"), ExtResource("51_lv_laser"), ExtResource("52_lv_shotgun"), ExtResource("53_lv_cannon"), ExtResource("54_lv_flak"), ExtResource("55_lv_missile"), ExtResource("56_lv_barrier"), ExtResource("60_tr_pierce"), ExtResource("61_tr_fork")])
+player_augment_pool = Array[ExtResource("14_player_augment")]([ExtResource("16_player_move"), ExtResource("17_player_fire"), ExtResource("18_player_damage"), ExtResource("32_aug_weapon_room"), ExtResource("33_aug_hangar"), ExtResource("34_aug_engine"), ExtResource("35_aug_hull"), ExtResource("36_aug_radar"), ExtResource("37_aug_shield"), ExtResource("40_acq_blaster"), ExtResource("41_acq_laser"), ExtResource("42_acq_shotgun"), ExtResource("43_acq_cannon"), ExtResource("44_acq_plasma"), ExtResource("45_acq_missile"), ExtResource("46_acq_barrier"), ExtResource("50_lv_blaster"), ExtResource("51_lv_laser"), ExtResource("52_lv_shotgun"), ExtResource("53_lv_cannon"), ExtResource("54_lv_plasma"), ExtResource("55_lv_missile"), ExtResource("56_lv_barrier"), ExtResource("60_tr_pierce"), ExtResource("61_tr_fork")])
 enemy_augment_pool = Array[ExtResource("15_enemy_augment")]([ExtResource("19_enemy_health"), ExtResource("20_enemy_fire"), ExtResource("21_enemy_move")])
 
 [node name="AugmentProgressionController" type="Node" parent="." unique_id=1005599848 node_paths=PackedStringArray("offer_controller") groups=["augment_progression"]]

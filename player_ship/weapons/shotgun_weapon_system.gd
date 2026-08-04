@@ -1,22 +1,21 @@
 class_name ShotgunWeaponSystem
 extends WeaponSystem
 
-@export var pellet_count := 5
+@export_range(0.02, 10.0, 0.01) var base_fire_interval := 0.42
+@export_range(1, 200, 1) var base_damage := 4
+@export_range(1, 32, 1) var pellet_count := 5
 @export_range(5.0, 90.0, 1.0) var spread_degrees := 36.0
-@export var pellet_speed := 220.0
+@export_range(1.0, 600.0, 1.0) var pellet_speed := 220.0
 
 @onready var muzzle: Marker2D = $Muzzle
 @onready var spawner_component: SpawnerComponent = $SpawnerComponent
 @onready var fire_rate_timer: Timer = $FireRateTimer
 @onready var sound_player: VariablePitchAudioStreamPlayer = $ShotgunSoundPlayer
 
-var base_fire_wait_time: float
-
-
 func _ready() -> void:
-	base_fire_wait_time = fire_rate_timer.wait_time
 	fire_rate_timer.timeout.connect(fire)
 	_apply_stat_multipliers()
+	fire_rate_timer.start()
 
 
 func fire() -> void:
@@ -45,7 +44,7 @@ func _pellet_direction(index: int, count: int) -> Vector2:
 func _apply_stat_multipliers() -> void:
 	if not is_node_ready():
 		return
-	fire_rate_timer.wait_time = base_fire_wait_time / get_effective_fire_rate_multiplier()
+	fire_rate_timer.wait_time = base_fire_interval / get_effective_fire_rate_multiplier()
 
 
 func _on_weapon_shutdown() -> void:
@@ -60,7 +59,7 @@ func _configure_projectile(projectile: Node, direction: Vector2) -> void:
 	if hitbox == null:
 		push_error("ShotgunWeaponSystem: projectile missing HitboxComponent.")
 		return
-	hitbox.damage = maxi(1, roundi(hitbox.damage * get_effective_damage_multiplier()))
+	hitbox.damage = maxi(1, roundi(base_damage * get_effective_damage_multiplier()))
 	var move := projectile.get_node_or_null("MoveComponent") as MoveComponent
 	if move == null:
 		push_error("ShotgunWeaponSystem: projectile missing MoveComponent.")

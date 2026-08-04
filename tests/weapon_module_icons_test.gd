@@ -5,7 +5,7 @@ const DEFINITION_PATHS: PackedStringArray = [
 	"res://resources/weapons/definitions/main_laser.tres",
 	"res://resources/weapons/definitions/main_shotgun.tres",
 	"res://resources/weapons/definitions/aux_test_cannon.tres",
-	"res://resources/weapons/definitions/aux_test_flak.tres",
+	"res://resources/weapons/definitions/plasma_bomb.tres",
 	"res://resources/weapons/definitions/aux_homing_missile.tres",
 	"res://resources/weapons/definitions/aux_orbital_barrier.tres",
 ]

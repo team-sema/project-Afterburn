@@ -8,6 +8,8 @@
 
 [node name="ShotgunWeaponSystem" type="Node2D"]
 script = ExtResource("1_script")
+base_fire_interval = 0.42
+base_damage = 4
 pellet_count = 5
 spread_degrees = 36.0
 pellet_speed = 220.0
@@ -20,8 +22,6 @@ script = ExtResource("2_spawner")
 scene = ExtResource("3_pellet")
 
 [node name="FireRateTimer" type="Timer" parent="."]
-wait_time = 0.42
-autostart = true
 
 [node name="ShotgunSoundPlayer" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("4_sound")

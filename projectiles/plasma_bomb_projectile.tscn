@@ -1,0 +1,74 @@
+[gd_scene load_steps=14 format=3]
+
+[ext_resource type="Script" path="res://projectiles/plasma_bomb_projectile.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://effects/explosion_effect.tscn" id="2_explosion"]
+[ext_resource type="Texture2D" path="res://assets/svg/weapons/weapon_plasma_bomb.svg" id="3_bomb"]
+[ext_resource type="Texture2D" uid="uid://djvqurciuxfie" path="res://assets/svg/radial_glow.svg" id="4_glow"]
+[ext_resource type="Texture2D" uid="uid://dgx4kyuwjq5rw" path="res://assets/svg/ring.svg" id="5_ring"]
+[ext_resource type="Texture2D" uid="uid://bp1d64ncpt4rh" path="res://assets/svg/particle_diamond.svg" id="6_particle"]
+[ext_resource type="Material" path="res://effects/wide_glow_material.tres" id="7_wide"]
+[ext_resource type="Material" path="res://effects/tight_glow_material.tres" id="8_tight"]
+[ext_resource type="Material" path="res://effects/core_unshaded_material.tres" id="9_core"]
+[ext_resource type="Material" path="res://effects/additive_unshaded_material.tres" id="10_add"]
+
+[sub_resource type="Gradient" id="Gradient_trail"]
+offsets = PackedFloat32Array(0, 0.45, 1)
+colors = PackedColorArray(0.3, 0.95, 1, 0.8, 0.7, 0.25, 1, 0.55, 0.2, 0.05, 0.7, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture_trail"]
+gradient = SubResource("Gradient_trail")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_trail"]
+particle_flag_disable_z = true
+direction = Vector3(0, 1, 0)
+spread = 24.0
+initial_velocity_min = 5.0
+initial_velocity_max = 13.0
+gravity = Vector3(0, 0, 0)
+scale_min = 0.08
+scale_max = 0.2
+color_ramp = SubResource("GradientTexture_trail")
+
+[node name="PlasmaBombProjectile" type="Node2D"]
+script = ExtResource("1_script")
+explosion_effect_scene = ExtResource("2_explosion")
+
+[node name="Visual" type="Node2D" parent="."]
+
+[node name="WideGlow" type="Sprite2D" parent="Visual"]
+self_modulate = Color(0.25, 0.85, 1, 0.22)
+show_behind_parent = true
+material = ExtResource("7_wide")
+scale = Vector2(0.18, 0.18)
+texture = ExtResource("4_glow")
+
+[node name="TightGlow" type="Sprite2D" parent="Visual"]
+self_modulate = Color(0.65, 0.25, 1, 0.7)
+show_behind_parent = true
+material = ExtResource("8_tight")
+scale = Vector2(0.16, 0.16)
+texture = ExtResource("4_glow")
+
+[node name="Core" type="Sprite2D" parent="Visual"]
+self_modulate = Color(0.85, 0.98, 1, 1)
+material = ExtResource("9_core")
+scale = Vector2(0.22, 0.22)
+texture = ExtResource("3_bomb")
+
+[node name="FuseRing" type="Sprite2D" parent="Visual"]
+self_modulate = Color(0.35, 0.9, 1, 0.9)
+material = ExtResource("10_add")
+scale = Vector2(0.085, 0.085)
+texture = ExtResource("5_ring")
+
+[node name="Trail" type="GPUParticles2D" parent="."]
+material = ExtResource("10_add")
+position = Vector2(0, 6)
+amount = 20
+texture = ExtResource("6_particle")
+lifetime = 0.45
+visibility_rect = Rect2(-12, -12, 24, 36)
+process_material = SubResource("ParticleProcessMaterial_trail")
+
+[node name="FuseTimer" type="Timer" parent="."]
+one_shot = true

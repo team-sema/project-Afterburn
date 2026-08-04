@@ -184,6 +184,14 @@
       "tags": ["UI", "HUD", "비주얼"]
     },
     {
+      "id": "plasma-bomb",
+      "title": "플라즈마 폭탄 · WeaponSystem 튜닝 통합",
+      "description": "보조 플랙을 플라즈마 폭탄으로 교체하고 모든 무기의 전투 설정을 각 WeaponSystem 루트로 통일한다.",
+      "column": "review",
+      "file": "cards/plasma-bomb.md",
+      "tags": ["무기", "투사체", "범위 피해"]
+    },
+    {
       "id": "main-shotgun",
       "title": "주무기 샷건·메인/예비",
       "description": "샷건 + 메인/예비 슬롯, Z 스왑, X 새 주무기 차단.",

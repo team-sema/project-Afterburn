@@ -1,11 +1,12 @@
-class_name AuxiliaryCannonWeaponSystem
+class_name PlasmaBombWeaponSystem
 extends WeaponSystem
 
-@export_range(0.02, 10.0, 0.01) var base_fire_interval := 0.8
-@export_range(1, 200, 1) var base_damage := 9
-@export_range(1.0, 600.0, 1.0) var projectile_speed := 190.0
-
-## Permanent bay weapon — fires on its own timer with no ammo limit.
+@export_range(0.02, 10.0, 0.01) var base_fire_interval := 2.2
+@export_range(1, 200, 1) var base_damage := 24
+@export_range(1.0, 200.0, 1.0) var projectile_speed := 38.0
+@export_range(0.05, 10.0, 0.05) var fuse_time := 1.25
+@export_range(4.0, 120.0, 1.0) var blast_radius := 34.0
+@export_range(0.0, 64.0, 1.0) var damage_radius_margin := 0.0
 
 @onready var muzzle: Marker2D = $Muzzle
 @onready var spawner_component: SpawnerComponent = $SpawnerComponent
@@ -42,13 +43,14 @@ func _on_weapon_shutdown() -> void:
 
 
 func _configure_projectile(projectile: Node) -> void:
-	var hitbox := projectile.get_node_or_null("HitboxComponent") as HitboxComponent
-	if hitbox == null:
-		push_error("AuxiliaryCannonWeaponSystem: projectile missing HitboxComponent.")
+	if not projectile.has_method("configure_bomb"):
+		push_error("PlasmaBombWeaponSystem: projectile missing configure_bomb().")
 		return
-	hitbox.damage = maxi(1, roundi(base_damage * get_effective_damage_multiplier()))
-	var move := projectile.get_node_or_null("MoveComponent") as MoveComponent
-	if move == null:
-		push_error("AuxiliaryCannonWeaponSystem: projectile missing MoveComponent.")
-		return
-	move.velocity = Vector2.UP * projectile_speed
+	projectile.call(
+		"configure_bomb",
+		projectile_speed,
+		fuse_time,
+		blast_radius,
+		damage_radius_margin,
+		maxi(1, roundi(base_damage * get_effective_damage_multiplier())),
+	)
