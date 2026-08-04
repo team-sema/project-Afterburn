@@ -1,8 +1,8 @@
-[gd_resource type="Resource" script_class="WeaponDefinition" format=3]
+[gd_resource type="Resource" script_class="WeaponDefinition" format=3 uid="uid://c6ivjjlwgdgb"]
 
 [ext_resource type="Script" uid="uid://cpkr4w0d5rl5t" path="res://resources/weapons/weapon_definition.gd" id="1_def"]
-[ext_resource type="PackedScene" path="res://player_ship/weapons/plasma_bomb_weapon_system.tscn" id="2_scene"]
-[ext_resource type="Texture2D" path="res://assets/svg/weapons/weapon_plasma_bomb.svg" id="3_icon"]
+[ext_resource type="PackedScene" uid="uid://b7x6c1avhk30g" path="res://player_ship/weapons/plasma_bomb_weapon_system.tscn" id="2_scene"]
+[ext_resource type="Texture2D" uid="uid://dj7s045pab0js" path="res://assets/svg/weapons/weapon_plasma_bomb.svg" id="3_icon"]
 
 [resource]
 script = ExtResource("1_def")

@@ -40,6 +40,14 @@
   ],
   "cards": [
     {
+      "id": "godot-editor-updates",
+      "title": "Godot 에디터 리소스 동기화",
+      "description": "에디터에서 갱신된 월드·함선 UI·플라즈마 리소스를 현재 런타임 상태와 일치시켜 저장한다.",
+      "column": "review",
+      "file": "cards/godot-editor-updates.md",
+      "tags": ["Godot", "리소스", "UI"]
+    },
+    {
       "id": "augment-branch-ui",
       "title": "증강 분기점 UI 다듬기",
       "description": "플레이어와 적 증강 진입을 색상 테마로 명확히 구분하고 자잘한 증강 UI를 정리한다.",
