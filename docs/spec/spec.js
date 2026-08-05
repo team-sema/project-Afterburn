@@ -14,31 +14,31 @@ const CATEGORIES = [
   {
     id: "components",
     title: "컴포넌트",
-    desc: "재사용 커스텀 노드",
+    desc: "재사용 노드 · 시설 버프/부스터",
     file: "components.md",
   },
   {
     id: "player",
     title: "플레이어",
-    desc: "함선 · 무기 목록·기본 수치 · 시설 슬롯",
+    desc: "함선 · 무기 7 · 시설 12 · 실드 버퍼/재생",
     file: "player.md",
   },
   {
     id: "enemies",
     title: "적",
-    desc: "타입 · 생성기 · Threat",
+    desc: "타입 · 생성기 · Threat · is_boss",
     file: "enemies.md",
   },
   {
     id: "augments",
     title: "오그먼트",
-    desc: "플레이어·적 풀 목록 · 오퍼",
+    desc: "풀 54 · 시설 12 · trait 28 · 오퍼",
     file: "augments.md",
   },
   {
     id: "combat",
     title: "전투",
-    desc: "레이어 · 탄 · 점수 상수",
+    desc: "레이어 · 피격=1 · 실드 버퍼 · 점수",
     file: "combat.md",
   },
   {

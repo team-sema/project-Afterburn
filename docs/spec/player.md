@@ -9,7 +9,7 @@
 
 ### 주요 자식
 
-Move / MoveInput / PositionClamp / WeaponMount(Blaster·Laser·Shotgun 등) / PlayerAugmentApplier / **ShipFacilityApplier** / Scale / Stats(**기본 HP 1**) / ExperienceCollector / PlayerHitPoint / Hurt / ExplosionSpawner / Destroyed
+Move / MoveInput / PositionClamp / WeaponMount(Blaster·Laser·Shotgun 등) / PlayerAugmentApplier / **ShipFacilityApplier** / **ShipCombatBuffController** / **EngineBoostComponent** / Scale / Stats(**기본 HP 1**) / Shield(**시작 최대 1**) / ExperienceCollector / PlayerHitPoint / Hurt / ExplosionSpawner / Destroyed
 
 ## ExperienceCollector
 
@@ -33,7 +33,7 @@ Move / MoveInput / PositionClamp / WeaponMount(Blaster·Laser·Shotgun 등) / Pl
 - **무기 획득·레벨·특성**은 레벨업 **증강 선택**으로만 처리 (필드 무기 드롭 없음)
 - 빈 베이면 신규 자동 장착. 만석이면 증강 화면에서 교체 → **피교체 무기 성장(레벨·특성) 완전 삭제**
 - 같은 무기를 다시 얻으면 기본 레벨·특성 없음으로 시작 (교체로 뺀 성장은 보존하지 않음)
-- 무기실: 전 장착 무기 피해. 격납고: 효과 미정
+- 무기실: 집속 조준기(공통 피해) · 대형 표적 해석기(보스 피해). 동력로(`hangar`): 과충전·비상 출력
 - HUD: `WeaponLoadoutHud` — 동일 크기 장착 베이 헥스 가로 행. 템플릿(`%BaySlotTemplate` · `%ModuleHexTemplate` · `%SelectedWeaponHex`) 복제. 호버/클릭 포커스 → 하단 `선택된 무기` | `장착된 모듈` + 설명(전투 수치는 인게임 비표시)
 - 증강 리롤: `AugmentOfferController.max_reroll_count`(임시 기본 2) · 런당 `remaining_reroll_count`
 
@@ -44,10 +44,10 @@ Move / MoveInput / PositionClamp / WeaponMount(Blaster·Laser·Shotgun 등) / Pl
 | `main_blaster` | 블래스터 | 좌우 교대 발사형. 시작 시 베이 0에 Lv.1 장착 |
 | `main_laser` | 레이저 | 연속 빔형 |
 | `main_shotgun` | 샷건 | 부채꼴 다중 펠릿 근거리 화력 |
-| `aux_test_cannon` | 보조 캐넌 | 연두빛 탄환 자동 발사 |
+| `aux_test_cannon` | 보조 캐넌 | **공전 포드**에서 최근접 적 방향으로 발사 (`orbit_radius`/`orbit_speed` 데이터) |
 | `plasma_bomb` | 플라즈마 폭탄 | 지연 폭발·범위 피해 |
 | `aux_homing_missile` | 유도탄 | 가까운 적을 추적 |
-| `aux_orbital_barrier` | 궤도 방벽 | 주변을 돌며 탄막 소멸 + 적 접촉 피해(**적당 1회만**). HP 없음 |
+| `aux_orbital_barrier` | 궤도 방벽 | 주변을 돌며 탄막 소멸 + 적 접촉 피해(**적당 1회**, 일부 trait는 재타격 쿨). 기본 길이 `segment_arc_length≈11.33`(구 34의 1/3). HP 없음 |
 
 ### 기본 전투 수치 (WeaponSystem 씬 · Lv.1 · 배율 1.0)
 
@@ -61,7 +61,7 @@ Move / MoveInput / PositionClamp / WeaponMount(Blaster·Laser·Shotgun 등) / Pl
 | 보조 캐넌 | 피해 9 · 간격 0.8초 · 탄속 190 |
 | 플라즈마 폭탄 | 피해 32 · 간격 1.2초 · 탄속 66 · 신관 1.0초 · 반경 32 |
 | 유도탄 | 피해 14 · 간격 1.1초 · 탄속 150 · 선회 5.5 · 재탐색 0.15초 |
-| 궤도 방벽 | 접촉피해 6(**같은 적에게 1회만**) · 반경 22 · 회전 2.8 |
+| 궤도 방벽 | 접촉피해 6(**같은 적에게 1회만**, trait에 따라 재타격 쿨) · 반경 22 · 회전 2.8 · **길이 ≈11.33** |
 
 - 위 7종 모두 `WEAPON_ACQUIRE` / `WEAPON_LEVEL` 카드가 Gameplay 플레이어 증강 풀에 등록되어 있다
 - 무기 정의 파일이 존재하더라도 `gameplay.tscn`의 획득 풀에 없으면 현재 플레이 가능한 무기 목록에 포함하지 않는다
@@ -73,6 +73,7 @@ Move / MoveInput / PositionClamp / WeaponMount(Blaster·Laser·Shotgun 등) / Pl
 | WASD / 화살 | 이동 |
 | 발사 | 장착 무기 자동 사격 |
 | **C** | XP 준비 시 플레이어 오그먼트 오픈 |
+| **Shift** (`engine_boost`) | 비상 부스터 모듈 장착 시에만 · 0.8초 ×2.5 이동 · CD 7초 |
 | **ESC** | 수동 일시정지 토글 (오퍼 pause와 분리) |
 
 ## PlayerAugmentApplier
@@ -88,29 +89,26 @@ Move / MoveInput / PositionClamp / WeaponMount(Blaster·Laser·Shotgun 등) / Pl
 
 ## 함선 부위와 모듈 슬롯 (`PlayerAugmentRegistry` / `ShipFacilityApplier`)
 
-**부위 슬롯에 들어가는 플레이어 모듈은 `FACILITY_EFFECT`만이다.** 각 부위 효과는 시설 정의 1종이 담당하며, 같은 스탯을 별도 스탯 모듈로 이중 적용하지 않는다.
-무기 획득·레벨·특성 증강은 시설 슬롯을 소모하지 않는다.
+**부위 슬롯에 들어가는 플레이어 모듈은 `FACILITY_EFFECT`만이다.** 효과는 카드의 `FacilityModuleEffect`로 정의되며, 동일 Kind는 배율 곱·가산 합으로 중첩한다.
+무기 획득·레벨·특성 증강은 시설 슬롯을 소모하지 않는다. 모듈 목록·수치는 [`augments.md`](augments.md) 「시설 효과 모듈 12종」이 정본.
 
-| id | 이름 | 효과 |
-|----|------|------|
-| `weapon_room` | 무기실 | 집속 조준기 — **장착 무기 공통 공격력** |
-| `hangar` | 격납고 | 슬롯/UI 유지 · **효과 미정** |
-| `engine` | 엔진 | 추력 편향기 — 이동속도 |
-| `hull` | 선체 | 반응 장갑 — 최대 선체 가산 |
-| `radar` | 레이더 | 광역 탐지기 — 픽업 수집 반경 |
-| `shield` | 실드 | 실드 축전기 — 최대 실드 가산 |
+| id | 이름(표시) | 담당 모듈 예 |
+|----|------------|--------------|
+| `weapon_room` | 무기실 | 집속 조준기 · 대형 표적 해석기 |
+| `hangar` | **동력로** | 과충전 반응로 · 비상 출력 장치 |
+| `engine` | 엔진 | 추력 편향기 · 비상 부스터(Shift) |
+| `hull` | 선체 | 반응 장갑 · 충격 분산 골격 |
+| `radar` | 레이더 | 광역 탐지기 · 전투 데이터 분석기 |
+| `shield` | 실드 | 실드 축전기 · 급속 재충전기 |
 
 - 모든 부위는 빈 슬롯 1개로 시작하며, 플레이어 오퍼 하나를 소비해 최대 3개까지 확장할 수 있다
 - 증강 선택 시 빈 슬롯에 설치한다. 슬롯이 가득 찼으면 교체 창에서 기존 모듈 하나를 선택하며, 취소하면 오퍼로 돌아간다
-- 동일 모듈의 중복 설치와 효과 중첩을 허용한다
-- `FACILITY_EFFECT` 모듈의 누적 수치는 `resources/facilities/definitions/*.tres`의 `module_count_values`를 사용한다. index 0은 0개 설치의 중립값이고 index 1~3이 설치 개수별 누적값이다
-- 격납고: 슬롯·카드는 유지하되 **전투 효과 미정**
-- 선체: `StatsComponent`에 최대 체력 필드가 없어 `ShipFacilityApplier`가 최대 선체 = `기본 + 선체 가산`(최소 1)을 들고 있고, 최대치 증가분만큼 현재 선체도 함께 증가. 그 밖의 회복 수단 없음
-- 레이더: 수집 반경 = `ExperienceCollector` 기본 반경(36) × 레이더 배율. **경험치 오브 등 필드 픽업**만 해당. 증강 무기 등장 확률과 무관
-
-- 실드: `ShieldComponent`가 보유. **시작 최대·현재 실드 1** (`base_max_shield`). 최대 = `기본(1) + 실드 가산`, 최대치 증가분만큼 현재 실드도 충전. **버퍼 HP**: 피해는 실드를 먼저 깎고 남는 양만 선체로. **자동 재생**: 현재 < 최대이면 즉시 소형 충전 게이지가 차고(`regen_charge_duration`, 기본 30초), 꽉 차면 `restore_shield(1)`. 피격 시 게이지만 리셋 후 바로 재충전. 충전 중 칸은 아직 방어력 없음
-- 전투 중 `ShipPanel`은 읽기 전용이다. 플레이어 증강 오퍼 안의 `ShipPanel`만 확장 가능한 부위를 선택할 수 있다
-- 슬롯은 숫자 카운터 대신 둥근 사각 프레임으로 표시하며, 설치 모듈의 `icon`을 프레임 안에 그린다
+- 동일 모듈의 중복 설치와 효과 중첩을 허용한다 (Kind별 곱/합)
+- 선체: `ShipFacilityApplier`가 최대 선체 = `기본 + MAX_HULL_ADD`(최소 1). 최대치 증가분만큼 현재 선체도 함께 증가
+- 레이더: 수집 반경 = 기본 36 × `PICKUP_RANGE_MULT`. XP 획득 = 드롭량 × `XP_GAIN_MULT`
+- 실드: 아래 「선체 · 실드」
+- 전투 중 `ShipPanel`은 읽기 전용. 플레이어 증강 오퍼 안의 `ShipPanel`만 확장 부위 선택 가능
+- 슬롯은 둥근 사각 프레임 + 모듈 `icon`
 
 ## 플레이어 증강 오퍼
 
@@ -127,6 +125,7 @@ Move / MoveInput / PositionClamp / WeaponMount(Blaster·Laser·Shotgun 등) / Pl
 - `ShieldComponent`(함선 자식): `get_current_shield()` / `get_max_shield()` / `get_charge_progress()` / `add_shield(amount)`(최대치 +, 현재도 같은 양 상승) / `restore_shield(amount)`(현재만 충전, 최대 이내) / `notify_hit()` / `absorb_damage(damage) -> int`(실드에 먼저 적용 후 **선체로 넘길 남은 피해** 반환), 시그널 `shield_changed(current, max)` · `shield_absorbed(absorbed)` · `charge_changed(progress)`
 - **플레이어 피격 피해는 이벤트당 항상 1.** `HurtComponent`가 `player` 그룹이면 hitbox.damage와 무관하게 1로 적용한다. (폭탄 자폭 등 소스 수치도 1로 맞춤)
 - **실드 버퍼**: `HurtComponent`가 피격마다 `notify_hit()` 후 `absorb_damage()`를 부른다. 실드가 있는 만큼만 흡수하고 초과분은 선체 HP에서 차감한다. 피해가 항상 1이므로 실드 1이면 그 한 방은 실드만 깎인다.
-- **실드 재생**: 현재 < 최대면 충전 게이지 진행. 완료 시 +1. 피격 시 게이지 리셋 후 즉시 재개. 최대면 게이지 0·숨김
-- 무적시간은 여전히 **없다**. 한 프레임에 여러 히트박스가 겹치면 각각 별개 이벤트로 처리된다
-- HUD: 좌측 패널 `ShipStatusHud`가 `HULL 현재/최대`(민트)·`SHIELD 현재/최대`(보라)·실드 바 아래 충전 게이지(`ShieldChargeBar`, 미만일 때만)를 표시. 함선 파괴 시 `—`
+- **실드 재생**: 현재 < 최대면 충전 게이지 진행(`regen_charge_duration` 기본 30초 · 급속 재충전기로 속도 ×2). 완료 시 +1. 피격 시 게이지 리셋 후 즉시 재개. 최대면 게이지 0·숨김
+- **충격 분산 골격** 장착 시 선체 피격 후 0.6초 무적(추가 피격으로 타이머 연장 안 함). 기본 무적시간은 없음
+- 한 프레임에 여러 히트박스가 겹치면 각각 별개 이벤트(각 1 피해)
+- HUD: 좌측 `ShipStatusHud` — `HULL` · `SHIELD` · 실드 바 아래 `ShieldChargeBar`(미만일 때만). 함선 파괴 시 `—`

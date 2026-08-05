@@ -29,7 +29,7 @@ Menu (ui_accept)
 
 `WeaponLoadoutHud`: 템플릿 복제 슬롯/모듈 헥스 → 좌우(`선택된 무기` | `장착된 모듈`) → 가로선+설명. 호버/클릭 포커스.
 
-좌측 패널(`world.tscn`): 타이틀 → `SCORE` → `ProgressionHud`(XP·위협 바) → `ShipStatusHud`(선체·실드 바) → `PLAYFIELD`(`240 × 360`)
+좌측 패널(`world.tscn`): 타이틀 → `SCORE` → `ProgressionHud`(XP·위협 바) → `ShipStatusHud`(선체·실드 바 · 실드 미만 시 `ShieldChargeBar`) → `PLAYFIELD`(`240 × 360`)
 
 좌·플레이필드·우 세 패널에 `NeonCornerFrame` 모서리 브래킷 (장식 전용).
 
@@ -52,8 +52,8 @@ Menu (ui_accept)
 2. XP가 요구량을 채워도 **자동으로 열리지 않음**. `open_augment_offer`(**C**)로 PLAYER 오퍼 요청 · 오퍼 UI가 이미 열려 있으면 XP 미소모
 3. 플레이 시간 60초마다 ENEMY 오퍼를 큐에 추가 (도달 순으로 처리)
 4. `AugmentOfferController.request_offer(type)` → `offer_started(type)` → pause. 강화 분기점 인트로는 PLAYER 청색 / ENEMY 적색 테마로 구분
-5. PLAYER 오퍼는 상단 3지선다와 하단 함선 UI를 함께 표시. 스탯·시설 카드 포커스가 대상 부위를 하이라이트
-6. 스탯·시설 카드 → 빈 슬롯 설치(가득 차면 교체 모달). 무기 Kind → 로드아웃에 직접 적용(만석 획득은 베이 교체 UI). 함선 부위 선택 → 슬롯 용량 +1(최대 3)
+5. PLAYER 오퍼는 상단 3지선다와 하단 함선 UI를 함께 표시. `FACILITY_EFFECT` 카드 포커스·호버가 대상 부위를 하이라이트
+6. 시설 카드 → 빈 슬롯 설치(가득 차면 교체 모달). 무기 Kind(획득·레벨·특성) → 로드아웃에 직접 적용(만석 획득은 베이 교체 UI). 함선 부위 선택 → 슬롯 용량 +1(최대 3)
 7. ENEMY 오퍼는 기존 3지선다 선택 → registry 반영
 8. **PLAYER 오퍼 종료 직후** 함선 주변 `enemy_projectiles` 제거 + `augment_resume_burst` VFX (`player_resume_clear_radius` 기본 36)
 9. unpause → `offer_completed(type)`
