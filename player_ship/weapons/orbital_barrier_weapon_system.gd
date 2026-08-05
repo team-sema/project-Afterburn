@@ -14,14 +14,6 @@ extends WeaponSystem
 var _segments: Array[Node2D] = []
 
 
-func get_status_stat_line() -> String:
-	return "접촉피해 %d · 반경 %s · 회전 %s" % [
-		_status_damage(base_damage),
-		_status_num(orbit_radius, 0),
-		_status_num(base_orbit_speed * get_effective_fire_rate_multiplier()),
-	]
-
-
 func _ready() -> void:
 	_layout_segments()
 	_wire_segments()
