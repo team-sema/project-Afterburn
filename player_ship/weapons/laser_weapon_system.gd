@@ -22,6 +22,13 @@ var base_glow_width_scale: float
 var _beam_width_tween: Tween
 
 
+func get_status_stat_line() -> String:
+	return "틱피해 %d · 틱 %s초" % [
+		_status_damage(base_tick_damage),
+		_status_num(_status_interval(base_tick_interval)),
+	]
+
+
 func _ready() -> void:
 	base_core_width = core_line.width
 	base_glow_width_scale = glow_line.scale.x

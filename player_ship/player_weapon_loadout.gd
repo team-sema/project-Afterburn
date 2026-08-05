@@ -162,6 +162,25 @@ func get_weapon_description(weapon_id: StringName) -> String:
 	return ""
 
 
+func get_weapon_stat_summary(weapon_id: StringName) -> String:
+	var system := get_weapon_system(weapon_id)
+	if system != null:
+		return system.get_status_stat_line()
+	return ""
+
+
+func get_weapon_system(weapon_id: StringName) -> WeaponSystem:
+	if weapon_id == &"":
+		return null
+	for bay in _bays:
+		if bay.equipped_weapon_id != weapon_id:
+			continue
+		var instance := bay.equipped_weapon_instance as WeaponSystem
+		if instance != null and is_instance_valid(instance):
+			return instance
+	return null
+
+
 func get_trait_definition(trait_id: StringName) -> WeaponTraitDefinition:
 	if trait_id == &"":
 		return null

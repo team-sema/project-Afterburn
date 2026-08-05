@@ -67,7 +67,7 @@ func _ready() -> void:
 		trait_detail.custom_minimum_size = Vector2.ZERO
 	if detail_footer != null:
 		detail_footer.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		detail_footer.max_lines_visible = 3
+		detail_footer.max_lines_visible = 4
 		detail_footer.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	_prepare_templates()
 	_ensure_selected_hex()
@@ -274,10 +274,13 @@ func _show_weapon_description(loadout: PlayerWeaponLoadout) -> void:
 	var name := loadout.get_weapon_display_name(_focused_weapon_id)
 	var level := loadout.get_weapon_level(_focused_weapon_id)
 	var body := loadout.get_weapon_description(_focused_weapon_id)
-	if body == "":
-		_set_description("%s Lv.%d" % [name, level])
-	else:
-		_set_description("%s Lv.%d\n%s" % [name, level, body])
+	var stats := loadout.get_weapon_stat_summary(_focused_weapon_id)
+	var lines: PackedStringArray = ["%s Lv.%d" % [name, level]]
+	if body != "":
+		lines.append(body)
+	if stats != "":
+		lines.append(stats)
+	_set_description("\n".join(lines))
 
 
 func _show_trait_description(loadout: PlayerWeaponLoadout, trait_id: StringName) -> void:
