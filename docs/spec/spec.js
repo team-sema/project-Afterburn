@@ -20,7 +20,7 @@ const CATEGORIES = [
   {
     id: "player",
     title: "플레이어",
-    desc: "함선 · 통합 무기 목록 · 시설 슬롯",
+    desc: "함선 · 무기 목록·기본 수치 · 시설 슬롯",
     file: "player.md",
   },
   {

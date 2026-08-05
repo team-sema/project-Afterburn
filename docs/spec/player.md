@@ -34,7 +34,7 @@ Move / MoveInput / PositionClamp / WeaponMount(Blaster·Laser·Shotgun 등) / Pl
 - 빈 베이면 신규 자동 장착. 만석이면 증강 화면에서 교체 → **피교체 무기 성장(레벨·특성) 완전 삭제**
 - 같은 무기를 다시 얻으면 기본 레벨·특성 없음으로 시작 (교체로 뺀 성장은 보존하지 않음)
 - 무기실: 전 장착 무기 피해. 격납고: 효과 미정
-- HUD: `WeaponLoadoutHud` — 동일 크기 장착 베이 헥스 가로 행. 템플릿(`%BaySlotTemplate` · `%ModuleHexTemplate` · `%SelectedWeaponHex`) 복제. 호버/클릭 포커스 → 하단 `선택된 무기` | `장착된 모듈` + 설명·**실효 수치 한 줄**(`WeaponSystem.get_status_stat_line`)
+- HUD: `WeaponLoadoutHud` — 동일 크기 장착 베이 헥스 가로 행. 템플릿(`%BaySlotTemplate` · `%ModuleHexTemplate` · `%SelectedWeaponHex`) 복제. 호버/클릭 포커스 → 하단 `선택된 무기` | `장착된 모듈` + 설명(전투 수치는 인게임 비표시)
 - 증강 리롤: `AugmentOfferController.max_reroll_count`(임시 기본 2) · 런당 `remaining_reroll_count`
 
 ## 현재 무기 목록 (`gameplay.tscn` 획득 풀)
@@ -48,6 +48,20 @@ Move / MoveInput / PositionClamp / WeaponMount(Blaster·Laser·Shotgun 등) / Pl
 | `plasma_bomb` | 플라즈마 폭탄 | 지연 폭발·범위 피해 |
 | `aux_homing_missile` | 유도탄 | 가까운 적을 추적 |
 | `aux_orbital_barrier` | 궤도 방벽 | 주변을 돌며 탄막 소멸 + 적 접촉 피해. HP 없음 |
+
+### 기본 전투 수치 (WeaponSystem 씬 · Lv.1 · 배율 1.0)
+
+정본은 각 `player_ship/weapons/*_weapon_system.tscn` 익스포트. 레벨·시설·스탯 모듈이 곱해지면 실효값은 달라진다. **인게임 STATUS에는 표시하지 않는다.**
+
+| 무기 | 핵심 수치 |
+|------|-----------|
+| 블래스터 | 피해 10 · 간격 0.15초 · 탄속 200 |
+| 레이저 | 틱피해 3 · 틱 0.1초 |
+| 샷건 | 펠릿 피해 4 × 5발 · 간격 0.42초 · 확산 36° · 펠릿 속 220 |
+| 보조 캐넌 | 피해 9 · 간격 0.8초 · 탄속 190 |
+| 플라즈마 폭탄 | 피해 32 · 간격 1.2초 · 탄속 66 · 신관 1.0초 · 반경 32 |
+| 유도탄 | 피해 14 · 간격 1.1초 · 탄속 150 · 선회 5.5 · 재탐색 0.15초 |
+| 궤도 방벽 | 접촉피해 6 · 반경 22 · 회전 2.8 |
 
 - 위 7종 모두 `WEAPON_ACQUIRE` / `WEAPON_LEVEL` 카드가 Gameplay 플레이어 증강 풀에 등록되어 있다
 - 무기 정의 파일이 존재하더라도 `gameplay.tscn`의 획득 풀에 없으면 현재 플레이 가능한 무기 목록에 포함하지 않는다

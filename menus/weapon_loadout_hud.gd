@@ -274,13 +274,10 @@ func _show_weapon_description(loadout: PlayerWeaponLoadout) -> void:
 	var name := loadout.get_weapon_display_name(_focused_weapon_id)
 	var level := loadout.get_weapon_level(_focused_weapon_id)
 	var body := loadout.get_weapon_description(_focused_weapon_id)
-	var stats := loadout.get_weapon_stat_summary(_focused_weapon_id)
-	var lines: PackedStringArray = ["%s Lv.%d" % [name, level]]
-	if body != "":
-		lines.append(body)
-	if stats != "":
-		lines.append(stats)
-	_set_description("\n".join(lines))
+	if body == "":
+		_set_description("%s Lv.%d" % [name, level])
+	else:
+		_set_description("%s Lv.%d\n%s" % [name, level, body])
 
 
 func _show_trait_description(loadout: PlayerWeaponLoadout, trait_id: StringName) -> void:

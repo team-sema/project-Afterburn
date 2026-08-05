@@ -40,12 +40,12 @@
   ],
   "cards": [
     {
-      "id": "weapon-status-stats",
-      "title": "STATUS 무기 수치 표시",
-      "description": "포커스 무기의 실효 전투 수치를 STATUS 하단에 표시한다.",
+      "id": "weapon-stats-spec-only",
+      "title": "무기 수치는 스펙만",
+      "description": "STATUS 인게임 수치 줄을 제거하고 기본 전투값은 docs/spec/player.md에만 둔다.",
       "column": "review",
-      "file": "cards/weapon-status-stats.md",
-      "tags": ["무기", "UI", "STATUS"]
+      "file": "cards/weapon-stats-spec-only.md",
+      "tags": ["무기", "문서", "STATUS"]
     },
     {
       "id": "status-ui-templates",

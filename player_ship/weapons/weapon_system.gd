@@ -127,27 +127,6 @@ func get_effective_damage_multiplier() -> float:
 	return _global_damage_multiplier * _local_damage_multiplier * _facility_damage_multiplier
 
 
-## One-line combat stats for STATUS HUD. Subclasses override.
-func get_status_stat_line() -> String:
-	return ""
-
-
-func _status_damage(base_damage: int) -> int:
-	return maxi(1, roundi(float(base_damage) * get_effective_damage_multiplier()))
-
-
-func _status_interval(base_interval: float) -> float:
-	return base_interval / maxf(0.001, get_effective_fire_rate_multiplier())
-
-
-func _status_num(value: float, places: int = 2) -> String:
-	var scale := pow(10.0, float(places))
-	var rounded := roundf(value * scale) / scale
-	if is_equal_approx(rounded, roundf(rounded)):
-		return str(int(roundf(rounded)))
-	return ("%." + str(places) + "f") % rounded
-
-
 func _apply_stat_multipliers() -> void:
 	pass
 
