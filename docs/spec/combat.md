@@ -30,14 +30,15 @@ Hitbox.area_entered
   → Hurtbox & not invincible
   → hit_hurtbox + hurtbox.hurt
   → HurtComponent
-      → (실드 있고 현재 실드 ≥ 1) 실드가 이벤트 전체 흡수 후 종료
-      → 아니면 stats.health -= damage
+      → (player) incoming = 1
+      → notify_hit (실드 충전 게이지 리셋)
+      → 실드에 먼저 피해 적용, 남은 피해만 stats.health -= remaining
   → no_health → 파괴/점수
 ```
 
 레이저는 Area 겹침을 쓰지 않고 RayCast + DamageTickTimer로 `hurt`를 직접 보낸다.
 
-`HurtComponent.shield_component`는 플레이어에만 연결돼 있다(적은 null → 기존 동작). 실드 게이트는 초과 피해를 선체로 넘기지 않으며, **피격 무적시간은 없다** — 같은 프레임의 다른 히트박스는 별개 이벤트다.
+`HurtComponent.shield_component`는 플레이어에만 연결돼 있다(적은 null → 기존 동작). **플레이어가 맞는 피해는 항상 1.** 실드는 버퍼 HP라 실드 0일 때만 선체가 깎인다. 기본 피격 무적시간은 없다(충격 분산 골격 모듈만 예외) — 같은 프레임의 다른 히트박스는 별개 이벤트다.
 
 ## 탄
 

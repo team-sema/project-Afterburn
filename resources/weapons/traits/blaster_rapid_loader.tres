@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponTraitDefinition" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://resources/weapons/weapon_trait_definition.gd" id="1_def"]
+[ext_resource type="Texture2D" uid="uid://dm8icgxvcdity" path="res://assets/svg/weapons/weapon_main_blaster.svg" id="2_icon"]
+
+[resource]
+script = ExtResource("1_def")
+trait_id = &"blaster_rapid_loader"
+display_name = "고속 급탄기"
+description = "연사 간격 ×0.72, 피해 ×0.95."
+icon = ExtResource("2_icon")
+target_weapon_id = &"main_blaster"
+next_rank_hint = "연사 속도 추가 증가"
+params = {
+"fire_interval_mult": 0.72,
+"damage_mult": 0.95,
+}

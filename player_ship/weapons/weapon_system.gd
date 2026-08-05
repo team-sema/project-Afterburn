@@ -11,12 +11,18 @@ var _global_damage_multiplier := 1.0
 var _local_damage_multiplier := 1.0
 ## Ship facility (weapon room) channel, kept apart from weapon levels.
 var _facility_damage_multiplier := 1.0
+## Temporary overcharge / emergency facility buffs.
+var _temp_damage_multiplier := 1.0
+## Extra multiplier when the hit target is a boss enemy.
+var _boss_damage_multiplier := 1.0
 ## Deprecated hangar ammo bonus (always 0 under unified weapons).
 var _consumable_capacity_bonus := 0
 
-var _player: Node = null
-var _loadout: Node = null
+## Bound at setup (private — subclasses must use getters / connect helpers).
+var _player_node: Node = null
+var _loadout_node: Node = null
 var _slot_index: int = 0
+var _bound_weapon_id: StringName = &""
 ## True after shutdown_weapon(); subclasses may read this.
 var is_shutdown := false
 
@@ -24,13 +30,75 @@ var is_shutdown := false
 func setup_weapon(
 	player: Node,
 	loadout: Node,
-	slot_index: int,
+	p_slot_index: int,
+	p_weapon_id: StringName = &"",
 ) -> void:
-	_player = player
-	_loadout = loadout
-	_slot_index = slot_index
+	_player_node = player
+	_loadout_node = loadout
+	_slot_index = p_slot_index
+	_bound_weapon_id = p_weapon_id
 	is_shutdown = false
 	_on_weapon_setup()
+
+
+func get_weapon_id() -> StringName:
+	return _bound_weapon_id
+
+
+func get_player_actor() -> Node:
+	return _player_node
+
+
+func get_loadout() -> Node:
+	return _loadout_node
+
+
+func connect_weapon_trait_changed(callback: Callable) -> void:
+	if _loadout_node == null or not _loadout_node.has_signal(&"weapon_trait_changed"):
+		return
+	if not _loadout_node.is_connected(&"weapon_trait_changed", callback):
+		_loadout_node.connect(&"weapon_trait_changed", callback)
+
+
+func disconnect_weapon_trait_changed(callback: Callable) -> void:
+	if _loadout_node == null or not _loadout_node.has_signal(&"weapon_trait_changed"):
+		return
+	if _loadout_node.is_connected(&"weapon_trait_changed", callback):
+		_loadout_node.disconnect(&"weapon_trait_changed", callback)
+
+
+func get_trait_rank(trait_id: StringName) -> int:
+	if _loadout_node == null or _bound_weapon_id == &"" or trait_id == &"":
+		return 0
+	if not _loadout_node.has_method("get_weapon_traits"):
+		return 0
+	var ranks: Dictionary = _loadout_node.call("get_weapon_traits", _bound_weapon_id)
+	return int(ranks.get(trait_id, 0))
+
+
+func has_trait(trait_id: StringName) -> bool:
+	return get_trait_rank(trait_id) > 0
+
+
+func get_trait_param(trait_id: StringName, key: StringName, default_value: Variant = null) -> Variant:
+	if not has_trait(trait_id):
+		return default_value
+	var definition := _load_trait_definition(trait_id)
+	if definition == null:
+		return default_value
+	if definition.params.has(key):
+		return definition.params[key]
+	var string_key := String(key)
+	if definition.params.has(string_key):
+		return definition.params[string_key]
+	return default_value
+
+
+func _load_trait_definition(trait_id: StringName) -> WeaponTraitDefinition:
+	var path := "res://resources/weapons/traits/%s.tres" % String(trait_id)
+	if not ResourceLoader.exists(path):
+		return null
+	return load(path) as WeaponTraitDefinition
 
 
 func shutdown_weapon() -> void:
@@ -67,8 +135,8 @@ func report_depleted() -> void:
 
 ## Subclasses call this when remaining uses change (HUD refresh).
 func report_consumable_changed() -> void:
-	if _loadout != null and _loadout.has_method("notify_consumable_changed"):
-		_loadout.call("notify_consumable_changed")
+	if _loadout_node != null and _loadout_node.has_method("notify_consumable_changed"):
+		_loadout_node.call("notify_consumable_changed")
 
 
 func set_global_fire_rate_multiplier(multiplier: float) -> void:
@@ -101,6 +169,18 @@ func set_facility_damage_multiplier(multiplier: float) -> void:
 	_apply_stat_multipliers()
 
 
+func set_temp_damage_multiplier(multiplier: float) -> void:
+	assert(multiplier > 0.0, "Temp damage multiplier must be greater than zero.")
+	_temp_damage_multiplier = multiplier
+	_apply_stat_multipliers()
+
+
+func set_boss_damage_multiplier(multiplier: float) -> void:
+	assert(multiplier > 0.0, "Boss damage multiplier must be greater than zero.")
+	_boss_damage_multiplier = multiplier
+	_apply_stat_multipliers()
+
+
 ## Hangar bonus. Only consumables react; the base weapon ignores it.
 func set_consumable_capacity_bonus(bonus: int) -> void:
 	var clamped_bonus := maxi(0, bonus)
@@ -124,7 +204,23 @@ func get_effective_fire_rate_multiplier() -> float:
 
 
 func get_effective_damage_multiplier() -> float:
-	return _global_damage_multiplier * _local_damage_multiplier * _facility_damage_multiplier
+	return (
+		_global_damage_multiplier
+		* _local_damage_multiplier
+		* _facility_damage_multiplier
+		* _temp_damage_multiplier
+	)
+
+
+func resolve_hit_damage(base_damage: int, hurtbox: HurtboxComponent = null) -> int:
+	var mult := get_effective_damage_multiplier()
+	if hurtbox != null and not is_equal_approx(_boss_damage_multiplier, 1.0):
+		var node: Node = hurtbox.get_parent()
+		while node != null and not (node is Enemy):
+			node = node.get_parent()
+		if node is Enemy and (node as Enemy).is_boss:
+			mult *= _boss_damage_multiplier
+	return maxi(1, roundi(base_damage * mult))
 
 
 func _apply_stat_multipliers() -> void:

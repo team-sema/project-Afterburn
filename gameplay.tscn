@@ -25,11 +25,17 @@
 [ext_resource type="Resource" path="res://resources/facilities/definitions/radar.tres" id="30_radar"]
 [ext_resource type="Resource" path="res://resources/facilities/definitions/shield.tres" id="31_shield"]
 [ext_resource type="Resource" path="res://resources/player_augments/facilities/facility_weapon_room.tres" id="32_aug_weapon_room"]
+[ext_resource type="Resource" path="res://resources/player_augments/facilities/facility_weapon_room_boss.tres" id="32b_aug_weapon_boss"]
 [ext_resource type="Resource" path="res://resources/player_augments/facilities/facility_hangar.tres" id="33_aug_hangar"]
+[ext_resource type="Resource" path="res://resources/player_augments/facilities/facility_reactor_emergency.tres" id="33b_aug_reactor_emergency"]
 [ext_resource type="Resource" path="res://resources/player_augments/facilities/facility_engine.tres" id="34_aug_engine"]
+[ext_resource type="Resource" path="res://resources/player_augments/facilities/facility_engine_boost.tres" id="34b_aug_engine_boost"]
 [ext_resource type="Resource" path="res://resources/player_augments/facilities/facility_hull.tres" id="35_aug_hull"]
+[ext_resource type="Resource" path="res://resources/player_augments/facilities/facility_hull_iframe.tres" id="35b_aug_hull_iframe"]
 [ext_resource type="Resource" path="res://resources/player_augments/facilities/facility_radar.tres" id="36_aug_radar"]
+[ext_resource type="Resource" path="res://resources/player_augments/facilities/facility_radar_xp.tres" id="36b_aug_radar_xp"]
 [ext_resource type="Resource" path="res://resources/player_augments/facilities/facility_shield.tres" id="37_aug_shield"]
+[ext_resource type="Resource" path="res://resources/player_augments/facilities/facility_shield_charge.tres" id="37b_aug_shield_charge"]
 [ext_resource type="PackedScene" path="res://menus/augment_module_swap_overlay.tscn" id="38_module_swap"]
 [ext_resource type="Resource" path="res://resources/player_augments/weapon/acquire_main_blaster.tres" id="40_acq_blaster"]
 [ext_resource type="Resource" path="res://resources/player_augments/weapon/acquire_main_laser.tres" id="41_acq_laser"]
@@ -45,8 +51,34 @@
 [ext_resource type="Resource" path="res://resources/player_augments/weapon/level_plasma_bomb.tres" id="54_lv_plasma"]
 [ext_resource type="Resource" path="res://resources/player_augments/weapon/level_aux_homing_missile.tres" id="55_lv_missile"]
 [ext_resource type="Resource" path="res://resources/player_augments/weapon/level_aux_orbital_barrier.tres" id="56_lv_barrier"]
-[ext_resource type="Resource" path="res://resources/player_augments/weapon/trait_blaster_pierce.tres" id="60_tr_pierce"]
-[ext_resource type="Resource" path="res://resources/player_augments/weapon/trait_laser_fork.tres" id="61_tr_fork"]
+[ext_resource type="Resource" path="res://resources/player_augments/weapon/trait_blaster_rapid_loader.tres" id="60_tr_blaster_rapid"]
+[ext_resource type="Resource" path="res://resources/player_augments/weapon/trait_blaster_sync_trigger.tres" id="60b_tr_blaster_sync"]
+[ext_resource type="Resource" path="res://resources/player_augments/weapon/trait_blaster_accel_ap.tres" id="60c_tr_blaster_ap"]
+[ext_resource type="Resource" path="res://resources/player_augments/weapon/trait_blaster_ricochet.tres" id="60d_tr_blaster_ricochet"]
+[ext_resource type="Resource" path="res://resources/player_augments/weapon/trait_laser_wide_lens.tres" id="61_tr_laser_wide"]
+[ext_resource type="Resource" path="res://resources/player_augments/weapon/trait_laser_heat_stack.tres" id="61b_tr_laser_heat"]
+[ext_resource type="Resource" path="res://resources/player_augments/weapon/trait_laser_refract.tres" id="61c_tr_laser_refract"]
+[ext_resource type="Resource" path="res://resources/player_augments/weapon/trait_laser_pulse.tres" id="61d_tr_laser_pulse"]
+[ext_resource type="Resource" path="res://resources/player_augments/weapon/trait_shotgun_expanded_shell.tres" id="62_tr_shotgun_shell"]
+[ext_resource type="Resource" path="res://resources/player_augments/weapon/trait_shotgun_choke.tres" id="62b_tr_shotgun_choke"]
+[ext_resource type="Resource" path="res://resources/player_augments/weapon/trait_shotgun_cut_barrel.tres" id="62c_tr_shotgun_cut"]
+[ext_resource type="Resource" path="res://resources/player_augments/weapon/trait_shotgun_burst_device.tres" id="62d_tr_shotgun_burst"]
+[ext_resource type="Resource" path="res://resources/player_augments/weapon/trait_aux_heavy_barrel.tres" id="63_tr_aux_heavy"]
+[ext_resource type="Resource" path="res://resources/player_augments/weapon/trait_aux_auto_loader.tres" id="63b_tr_aux_auto"]
+[ext_resource type="Resource" path="res://resources/player_augments/weapon/trait_aux_he_shell.tres" id="63c_tr_aux_he"]
+[ext_resource type="Resource" path="res://resources/player_augments/weapon/trait_aux_hv_ap.tres" id="63d_tr_aux_hv"]
+[ext_resource type="Resource" path="res://resources/player_augments/weapon/trait_plasma_expand.tres" id="64_tr_plasma_expand"]
+[ext_resource type="Resource" path="res://resources/player_augments/weapon/trait_plasma_cluster.tres" id="64b_tr_plasma_cluster"]
+[ext_resource type="Resource" path="res://resources/player_augments/weapon/trait_plasma_field.tres" id="64c_tr_plasma_field"]
+[ext_resource type="Resource" path="res://resources/player_augments/weapon/trait_plasma_gravity.tres" id="64d_tr_plasma_gravity"]
+[ext_resource type="Resource" path="res://resources/player_augments/weapon/trait_missile_multi_rack.tres" id="65_tr_missile_rack"]
+[ext_resource type="Resource" path="res://resources/player_augments/weapon/trait_missile_high_mobility.tres" id="65b_tr_missile_mobility"]
+[ext_resource type="Resource" path="res://resources/player_augments/weapon/trait_missile_proximity.tres" id="65c_tr_missile_prox"]
+[ext_resource type="Resource" path="res://resources/player_augments/weapon/trait_missile_terminal.tres" id="65d_tr_missile_term"]
+[ext_resource type="Resource" path="res://resources/player_augments/weapon/trait_barrier_multi.tres" id="66_tr_barrier_multi"]
+[ext_resource type="Resource" path="res://resources/player_augments/weapon/trait_barrier_fast_orbit.tres" id="66b_tr_barrier_fast"]
+[ext_resource type="Resource" path="res://resources/player_augments/weapon/trait_barrier_expand_axis.tres" id="66c_tr_barrier_expand"]
+[ext_resource type="Resource" path="res://resources/player_augments/weapon/trait_barrier_repulse.tres" id="66d_tr_barrier_repulse"]
 
 [sub_resource type="Environment" id="Environment_neon"]
 background_mode = 3
@@ -95,7 +127,7 @@ selection_ui = NodePath("../AugmentSelectionOverlay")
 module_swap_ui = NodePath("../AugmentModuleSwapOverlay")
 weapon_slot_ui = NodePath("../WeaponSlotSelectionOverlay")
 ship = NodePath("../Ship")
-player_augment_pool = Array[ExtResource("14_player_augment")]([ExtResource("32_aug_weapon_room"), ExtResource("33_aug_hangar"), ExtResource("34_aug_engine"), ExtResource("35_aug_hull"), ExtResource("36_aug_radar"), ExtResource("37_aug_shield"), ExtResource("40_acq_blaster"), ExtResource("41_acq_laser"), ExtResource("42_acq_shotgun"), ExtResource("43_acq_cannon"), ExtResource("44_acq_plasma"), ExtResource("45_acq_missile"), ExtResource("46_acq_barrier"), ExtResource("50_lv_blaster"), ExtResource("51_lv_laser"), ExtResource("52_lv_shotgun"), ExtResource("53_lv_cannon"), ExtResource("54_lv_plasma"), ExtResource("55_lv_missile"), ExtResource("56_lv_barrier"), ExtResource("60_tr_pierce"), ExtResource("61_tr_fork")])
+player_augment_pool = Array[ExtResource("14_player_augment")]([ExtResource("32_aug_weapon_room"), ExtResource("32b_aug_weapon_boss"), ExtResource("33_aug_hangar"), ExtResource("33b_aug_reactor_emergency"), ExtResource("34_aug_engine"), ExtResource("34b_aug_engine_boost"), ExtResource("35_aug_hull"), ExtResource("35b_aug_hull_iframe"), ExtResource("36_aug_radar"), ExtResource("36b_aug_radar_xp"), ExtResource("37_aug_shield"), ExtResource("37b_aug_shield_charge"), ExtResource("40_acq_blaster"), ExtResource("41_acq_laser"), ExtResource("42_acq_shotgun"), ExtResource("43_acq_cannon"), ExtResource("44_acq_plasma"), ExtResource("45_acq_missile"), ExtResource("46_acq_barrier"), ExtResource("50_lv_blaster"), ExtResource("51_lv_laser"), ExtResource("52_lv_shotgun"), ExtResource("53_lv_cannon"), ExtResource("54_lv_plasma"), ExtResource("55_lv_missile"), ExtResource("56_lv_barrier"), ExtResource("60_tr_blaster_rapid"), ExtResource("60b_tr_blaster_sync"), ExtResource("60c_tr_blaster_ap"), ExtResource("60d_tr_blaster_ricochet"), ExtResource("61_tr_laser_wide"), ExtResource("61b_tr_laser_heat"), ExtResource("61c_tr_laser_refract"), ExtResource("61d_tr_laser_pulse"), ExtResource("62_tr_shotgun_shell"), ExtResource("62b_tr_shotgun_choke"), ExtResource("62c_tr_shotgun_cut"), ExtResource("62d_tr_shotgun_burst"), ExtResource("63_tr_aux_heavy"), ExtResource("63b_tr_aux_auto"), ExtResource("63c_tr_aux_he"), ExtResource("63d_tr_aux_hv"), ExtResource("64_tr_plasma_expand"), ExtResource("64b_tr_plasma_cluster"), ExtResource("64c_tr_plasma_field"), ExtResource("64d_tr_plasma_gravity"), ExtResource("65_tr_missile_rack"), ExtResource("65b_tr_missile_mobility"), ExtResource("65c_tr_missile_prox"), ExtResource("65d_tr_missile_term"), ExtResource("66_tr_barrier_multi"), ExtResource("66b_tr_barrier_fast"), ExtResource("66c_tr_barrier_expand"), ExtResource("66d_tr_barrier_repulse")])
 enemy_augment_pool = Array[ExtResource("15_enemy_augment")]([ExtResource("19_enemy_health"), ExtResource("20_enemy_fire"), ExtResource("21_enemy_move")])
 
 [node name="AugmentProgressionController" type="Node" parent="." unique_id=1005599848 node_paths=PackedStringArray("offer_controller") groups=["augment_progression"]]

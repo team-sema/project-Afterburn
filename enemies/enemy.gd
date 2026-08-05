@@ -3,6 +3,17 @@ extends Node2D
 
 var augment_registry: EnemyAugmentRegistry
 
+## When true, boss-damage facility modules apply extra multiplier via WeaponSystem.resolve_hit_damage.
+@export var is_boss := false:
+	set(value):
+		is_boss = value
+		if not is_inside_tree():
+			return
+		if value:
+			add_to_group("bosses")
+		elif is_in_group("bosses"):
+			remove_from_group("bosses")
+
 @onready var stats_component: StatsComponent = $StatsComponent
 @onready var move_component: MoveComponent = $MoveComponent
 @onready var scale_component: ScaleComponent = $ScaleComponent
@@ -16,6 +27,8 @@ var augment_registry: EnemyAugmentRegistry
 
 func _ready() -> void:
 	add_to_group("enemies")
+	if is_boss:
+		add_to_group("bosses")
 	stats_component.no_health.connect(func():
 		score_component.adjust_score()
 	)

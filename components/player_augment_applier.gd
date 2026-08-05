@@ -8,6 +8,8 @@ var augment_registry: PlayerAugmentRegistry
 var base_move_speed_multiplier: float
 ## Engine facility bonus. Move speed is composed in one place, so it enters here.
 var facility_move_speed_multiplier := 1.0
+## Temporary ENGINE_BOOST surge from EngineBoostComponent.
+var boost_move_speed_multiplier := 1.0
 
 
 func _ready() -> void:
@@ -26,6 +28,11 @@ func initialize(registry: PlayerAugmentRegistry) -> void:
 
 func set_facility_move_speed_multiplier(multiplier: float) -> void:
 	facility_move_speed_multiplier = maxf(0.01, multiplier)
+	refresh()
+
+
+func set_boost_move_speed_multiplier(multiplier: float) -> void:
+	boost_move_speed_multiplier = maxf(0.01, multiplier)
 	refresh()
 
 
@@ -52,7 +59,10 @@ func refresh() -> void:
 						weapon_damage_multiplier *= modifier.multiplier
 
 	move_component.velocity_multiplier = (
-		base_move_speed_multiplier * move_speed_multiplier * facility_move_speed_multiplier
+		base_move_speed_multiplier
+		* move_speed_multiplier
+		* facility_move_speed_multiplier
+		* boost_move_speed_multiplier
 	)
 	if weapon_loadout != null:
 		weapon_loadout.set_global_stat_multipliers(weapon_damage_multiplier, fire_rate_multiplier)

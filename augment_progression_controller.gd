@@ -18,6 +18,8 @@ var experience_required := 0
 var enemy_augment_elapsed := 0.0
 var enemy_augment_tier := 0
 var pending_offers: Array[AugmentOfferController.OfferType] = []
+## Facility XP_GAIN_MULT product. Applied in add_experience.
+var experience_gain_multiplier := 1.0
 
 
 func _ready() -> void:
@@ -56,7 +58,8 @@ func _process(delta: float) -> void:
 func add_experience(amount: int) -> void:
 	if amount <= 0:
 		return
-	current_experience += amount
+	var gained := maxi(1, roundi(amount * maxf(0.01, experience_gain_multiplier)))
+	current_experience += gained
 	experience_changed.emit(current_experience, experience_required, level)
 
 

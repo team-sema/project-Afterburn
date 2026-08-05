@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="WeaponTraitDefinition" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://resources/weapons/weapon_trait_definition.gd" id="1_def"]
+[ext_resource type="Texture2D" uid="uid://dj7s045pab0js" path="res://assets/svg/weapons/weapon_plasma_bomb.svg" id="2_icon"]
+
+[resource]
+script = ExtResource("1_def")
+trait_id = &"plasma_field"
+display_name = "잔류 장"
+description = "피해 ×0.95, 3초 잔류장(최대 보너스 ×1.0)."
+icon = ExtResource("2_icon")
+target_weapon_id = &"plasma_bomb"
+next_rank_hint = "잔류장 지속 증가"
+params = {
+"damage_mult": 0.95,
+"field_duration": 3,
+"field_max_bonus_mult": 1,
+}

@@ -1,13 +1,15 @@
-[gd_resource type="Resource" script_class="PlayerAugment" load_steps=3 format=3]
+[gd_resource type="Resource" script_class="PlayerAugment" load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://resources/player_augments/player_augment.gd" id="1_aug"]
 [ext_resource type="Texture2D" uid="uid://bouve7lok0f7b" path="res://assets/svg/facilities/facility_hangar.svg" id="2_icon"]
+[ext_resource type="Resource" path="res://resources/facilities/effects/periodic_damage_1_4.tres" id="3_effect"]
 
 [resource]
 script = ExtResource("1_aug")
 augment_id = &"facility_hangar"
-display_name = "격납고 확장"
-description = "격납고 모듈 슬롯을 채웁니다. 효과는 아직 미정입니다."
+display_name = "과충전 반응로"
+description = "20초마다 5초간 무기 공격력이 40% 증가합니다."
 augment_type = 6
 icon = ExtResource("2_icon")
 facility_id = &"hangar"
+facility_module_effect = ExtResource("3_effect")

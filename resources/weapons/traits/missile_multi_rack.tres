@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponTraitDefinition" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://resources/weapons/weapon_trait_definition.gd" id="1_def"]
+[ext_resource type="Texture2D" uid="uid://dil5ki5jurkbf" path="res://assets/svg/weapons/weapon_aux_homing_missile.svg" id="2_icon"]
+
+[resource]
+script = ExtResource("1_def")
+trait_id = &"missile_multi_rack"
+display_name = "다중 런처"
+description = "미사일 +1발, 피해 ×0.9."
+icon = ExtResource("2_icon")
+target_weapon_id = &"aux_homing_missile"
+next_rank_hint = "발사 수 증가"
+params = {
+"count_bonus": 1,
+"damage_mult": 0.9,
+}

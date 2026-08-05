@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="PlayerAugment" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://resources/player_augments/player_augment.gd" id="1_aug"]
+[ext_resource type="Resource" path="res://resources/weapons/definitions/aux_orbital_barrier.tres" id="2_weapon"]
+[ext_resource type="Resource" path="res://resources/weapons/traits/barrier_fast_orbit.tres" id="3_trait"]
+
+[resource]
+script = ExtResource("1_aug")
+augment_id = &"trait_barrier_fast_orbit"
+display_name = "고속 궤도"
+description = "공전 ×1.5, 재타격 쿨다운 ×0.7, 피해 ×0.95."
+augment_type = 3
+offer_weight = 1.0
+weapon_definition = ExtResource("2_weapon")
+target_weapon_id = &"aux_orbital_barrier"
+trait_id = &"barrier_fast_orbit"
+trait_rank_increase = 1
+trait_definition = ExtResource("3_trait")

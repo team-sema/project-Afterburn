@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="WeaponTraitDefinition" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://resources/weapons/weapon_trait_definition.gd" id="1_def"]
+[ext_resource type="Texture2D" uid="uid://bhsri7kh1kskh" path="res://assets/svg/weapons/weapon_main_shotgun.svg" id="2_icon"]
+
+[resource]
+script = ExtResource("1_def")
+trait_id = &"shotgun_burst_device"
+display_name = "버스트 장치"
+description = "3발마다 추가 발사(딜레이 0.12초, 피해 ×0.9)."
+icon = ExtResource("2_icon")
+target_weapon_id = &"main_shotgun"
+next_rank_hint = "버스트 주기 단축"
+params = {
+"every_nth": 3,
+"delay": 0.12,
+"extra_damage_mult": 0.9,
+}

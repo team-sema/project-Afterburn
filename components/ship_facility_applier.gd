@@ -2,8 +2,7 @@ class_name ShipFacilityApplier
 extends Node
 
 ## 장착된 시설 모듈 → 플레이어 공통 스탯 적용.
-## 시설은 무기 고유 성능을 바꾸지 않으므로 무기 id로 분기하지 않고,
-## 로드아웃·이동·선체·실드·수집 반경의 공통 입력값만 갱신한다.
+## FacilityModuleEffect Kind별로 합산·곱산하고, 무기 고유 성능은 건드리지 않는다.
 
 ## 선체 최대치가 바뀔 때 (HUD 갱신용). 현재 선체는 StatsComponent.health_changed로 본다.
 signal max_hull_changed(max_hull: int)
@@ -13,6 +12,9 @@ signal max_hull_changed(max_hull: int)
 @export var stats_component: StatsComponent
 @export var shield_component: ShieldComponent
 @export var experience_collector: ExperienceCollectorComponent
+@export var progression_controller: AugmentProgressionController
+@export var combat_buff_controller: ShipCombatBuffController
+@export var engine_boost_component: EngineBoostComponent
 
 var facility_registry: PlayerAugmentRegistry
 ## 시설 적용 전 최대 선체. 선체 시설 보너스와 분리해 둔다.
@@ -32,6 +34,10 @@ func initialize(registry: PlayerAugmentRegistry) -> void:
 		base_collection_radius = experience_collector.collection_radius
 	if not facility_registry.augments_changed.is_connected(refresh):
 		facility_registry.augments_changed.connect(refresh)
+	if combat_buff_controller != null:
+		combat_buff_controller.initialize(facility_registry)
+	if engine_boost_component != null:
+		engine_boost_component.initialize(facility_registry)
 	refresh()
 
 
@@ -58,27 +64,48 @@ func refresh() -> void:
 
 	if weapon_loadout != null:
 		weapon_loadout.set_facility_damage_multiplier(
-			facility_registry.get_effect_total(ShipFacilityDefinition.Effect.MAIN_WEAPON_DAMAGE)
+			facility_registry.get_module_effect_product(FacilityModuleEffect.Kind.WEAPON_DAMAGE_MULT)
 		)
-		# Hangar ammo bonus removed; hangar effect is TBD (do not invent a replacement).
+		weapon_loadout.set_boss_damage_multiplier(
+			facility_registry.get_module_effect_product(FacilityModuleEffect.Kind.BOSS_DAMAGE_MULT)
+		)
 
 	if augment_applier != null:
 		augment_applier.set_facility_move_speed_multiplier(
-			facility_registry.get_effect_total(ShipFacilityDefinition.Effect.MOVE_SPEED)
+			facility_registry.get_module_effect_product(FacilityModuleEffect.Kind.MOVE_SPEED_MULT)
 		)
 
 	if experience_collector != null:
 		experience_collector.collection_radius = (
 			base_collection_radius
-			* facility_registry.get_effect_total(ShipFacilityDefinition.Effect.PICKUP_RANGE)
+			* facility_registry.get_module_effect_product(FacilityModuleEffect.Kind.PICKUP_RANGE_MULT)
+		)
+
+	if progression_controller == null and is_inside_tree():
+		var nodes := get_tree().get_nodes_in_group("augment_progression")
+		if not nodes.is_empty():
+			progression_controller = nodes[0] as AugmentProgressionController
+	if progression_controller != null:
+		progression_controller.experience_gain_multiplier = (
+			facility_registry.get_module_effect_product(FacilityModuleEffect.Kind.XP_GAIN_MULT)
 		)
 
 	if shield_component != null:
 		shield_component.set_facility_bonus(
-			roundi(facility_registry.get_effect_total(ShipFacilityDefinition.Effect.MAX_SHIELD))
+			roundi(facility_registry.get_module_effect_sum(FacilityModuleEffect.Kind.MAX_SHIELD_ADD))
+		)
+		shield_component.set_charge_speed_multiplier(
+			facility_registry.get_module_effect_product(
+				FacilityModuleEffect.Kind.SHIELD_CHARGE_SPEED_MULT
+			)
 		)
 
-	_apply_max_hull(roundi(facility_registry.get_effect_total(ShipFacilityDefinition.Effect.MAX_HULL)))
+	_apply_max_hull(roundi(facility_registry.get_module_effect_sum(FacilityModuleEffect.Kind.MAX_HULL_ADD)))
+
+	if combat_buff_controller != null:
+		combat_buff_controller.refresh_from_registry()
+	if engine_boost_component != null:
+		engine_boost_component.refresh_from_registry()
 
 
 ## StatsComponent에는 최대 체력 개념이 없어, 늘어난 최대치만큼만 현재 선체를 함께 올린다.

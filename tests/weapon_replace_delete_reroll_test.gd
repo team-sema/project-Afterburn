@@ -27,9 +27,9 @@ func _run() -> void:
 	var laser := load("res://resources/weapons/definitions/main_laser.tres") as WeaponDefinition
 	_expect(loadout.offer_equip_weapon(laser, 1), "laser equips")
 	loadout.upgrade_weapon_level(&"main_laser")
-	loadout.add_or_upgrade_weapon_trait(&"main_laser", &"laser_fork", 1)
+	loadout.add_or_upgrade_weapon_trait(&"main_laser", &"laser_refract", 1)
 	_expect(loadout.get_weapon_level(&"main_laser") == 2, "laser leveled")
-	_expect(int(loadout.get_weapon_traits(&"main_laser")[&"laser_fork"]) == 1, "laser has trait")
+	_expect(int(loadout.get_weapon_traits(&"main_laser")[&"laser_refract"]) == 1, "laser has trait")
 
 	var shotgun := load("res://resources/weapons/definitions/main_shotgun.tres") as WeaponDefinition
 	var cannon := load("res://resources/weapons/definitions/aux_test_cannon.tres") as WeaponDefinition

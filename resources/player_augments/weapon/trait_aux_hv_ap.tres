@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="PlayerAugment" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://resources/player_augments/player_augment.gd" id="1_aug"]
+[ext_resource type="Resource" path="res://resources/weapons/definitions/aux_test_cannon.tres" id="2_weapon"]
+[ext_resource type="Resource" path="res://resources/weapons/traits/aux_hv_ap.tres" id="3_trait"]
+
+[resource]
+script = ExtResource("1_aug")
+augment_id = &"trait_aux_hv_ap"
+display_name = "고속 철갑"
+description = "피해 ×1.1, 탄속 ×1.6, 관통 +3(감쇠 0.9)."
+augment_type = 3
+offer_weight = 1.0
+weapon_definition = ExtResource("2_weapon")
+target_weapon_id = &"aux_test_cannon"
+trait_id = &"aux_hv_ap"
+trait_rank_increase = 1
+trait_definition = ExtResource("3_trait")

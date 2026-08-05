@@ -5,7 +5,10 @@
 
 | slug | 제목 | 상태 |
 |------|------|------|
+| [facility-weapon-modules](facility-weapon-modules.md) | 시설 모듈 FacilityModuleEffect · 12종 | review |
 | [status-ui-templates](status-ui-templates.md) | STATUS HUD UI 템플릿 플레이스홀더 | doing |
+| [shield-base-one](shield-base-one.md) | 시작 실드 1 | review |
+| [shield-regen](shield-regen.md) | 실드 재생 · 충전 UI | review |
 | [orbital-barrier-one-hit](orbital-barrier-one-hit.md) | 궤도 방벽 적당 1회 피해 | review |
 | [facility-own-effects](facility-own-effects.md) | 시설이 효과 담당 · 스탯 모듈 제거 | review |
 | [weapon-stats-spec-only](weapon-stats-spec-only.md) | 무기 수치는 스펙만 (STATUS 비표시) | review |

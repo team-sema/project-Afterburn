@@ -5,9 +5,14 @@
 
 [resource]
 script = ExtResource("1_def")
-trait_id = &"blaster_pierce"
-display_name = "블래스터 관통"
-description = "블래스터 탄환이 적을 관통합니다. (전투 효과 스캐폴드)"
+trait_id = &"blaster_ricochet"
+display_name = "도탄 탄자"
+description = "최대 2회 도탄. 1회차 ×0.7, 2회차 ×0.4."
 icon = ExtResource("2_icon")
 target_weapon_id = &"main_blaster"
-next_rank_hint = "관통 대상 수 증가"
+next_rank_hint = "도탄 횟수 증가"
+params = {
+"max_bounces": 2,
+"bounce1_damage_mult": 0.7,
+"bounce2_damage_mult": 0.4,
+}

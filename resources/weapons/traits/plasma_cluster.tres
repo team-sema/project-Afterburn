@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="WeaponTraitDefinition" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://resources/weapons/weapon_trait_definition.gd" id="1_def"]
+[ext_resource type="Texture2D" uid="uid://dj7s045pab0js" path="res://assets/svg/weapons/weapon_plasma_bomb.svg" id="2_icon"]
+
+[resource]
+script = ExtResource("1_def")
+trait_id = &"plasma_cluster"
+display_name = "클러스터"
+description = "주 피해 ×0.9, 폭발 시 소형 폭탄 3개(×0.4)."
+icon = ExtResource("2_icon")
+target_weapon_id = &"plasma_bomb"
+next_rank_hint = "클러스터 수 증가"
+params = {
+"damage_mult": 0.9,
+"cluster_count": 3,
+"cluster_damage_mult": 0.4,
+}

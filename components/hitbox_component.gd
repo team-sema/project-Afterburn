@@ -4,6 +4,8 @@ extends Area2D
 
 # Export the damage amount this hitbox deals
 @export var damage: int = 1
+## Optional (hurtbox) -> int. Used for boss-aware / pierce-decay damage at hit time.
+var damage_resolver: Callable
 
 # Create a signal for when the hitbox hits a hurtbox
 signal hit_hurtbox(hurtbox)
@@ -17,6 +19,8 @@ func _on_hurtbox_entered(hurtbox: HurtboxComponent):
 	if not hurtbox is HurtboxComponent: return
 	# Make sure the hurtbox isn't invincible
 	if hurtbox.is_invincible: return
+	if damage_resolver.is_valid():
+		damage = int(damage_resolver.call(hurtbox))
 	# Signal out that we hit a hurtbox (this is useful for destroying projectiles when they hit something)
 	hit_hurtbox.emit(hurtbox)
 	# Have the hurtbox signal out that it was hit

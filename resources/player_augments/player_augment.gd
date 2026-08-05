@@ -10,6 +10,8 @@ extends Resource
 @export var behavior_components: Array[PackedScene] = []
 ## Ship facility slot target. Unused for pure weapon offers (ACQUIRE/LEVEL/TRAIT).
 @export var facility_id: StringName
+## Per-module facility effect. Preferred over ShipFacilityDefinition curves when set.
+@export var facility_module_effect: FacilityModuleEffect
 ## Relative pick weight inside the offer pool (data-tunable; not a fixed design %).
 @export_range(0.0, 100.0, 0.01) var offer_weight := 1.0
 

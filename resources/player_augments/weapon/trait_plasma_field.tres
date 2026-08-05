@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="PlayerAugment" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://resources/player_augments/player_augment.gd" id="1_aug"]
+[ext_resource type="Resource" path="res://resources/weapons/definitions/plasma_bomb.tres" id="2_weapon"]
+[ext_resource type="Resource" path="res://resources/weapons/traits/plasma_field.tres" id="3_trait"]
+
+[resource]
+script = ExtResource("1_aug")
+augment_id = &"trait_plasma_field"
+display_name = "잔류 장"
+description = "피해 ×0.95, 3초 잔류장(최대 보너스 ×1.0)."
+augment_type = 3
+offer_weight = 1.0
+weapon_definition = ExtResource("2_weapon")
+target_weapon_id = &"plasma_bomb"
+trait_id = &"plasma_field"
+trait_rank_increase = 1
+trait_definition = ExtResource("3_trait")

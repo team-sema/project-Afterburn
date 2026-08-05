@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="PlayerAugment" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://resources/player_augments/player_augment.gd" id="1_aug"]
+[ext_resource type="Resource" path="res://resources/weapons/definitions/aux_orbital_barrier.tres" id="2_weapon"]
+[ext_resource type="Resource" path="res://resources/weapons/traits/barrier_multi.tres" id="3_trait"]
+
+[resource]
+script = ExtResource("1_aug")
+augment_id = &"trait_barrier_multi"
+display_name = "다중 방벽"
+description = "세그먼트 +1, 피해 ×0.9."
+augment_type = 3
+offer_weight = 1.0
+weapon_definition = ExtResource("2_weapon")
+target_weapon_id = &"aux_orbital_barrier"
+trait_id = &"barrier_multi"
+trait_rank_increase = 1
+trait_definition = ExtResource("3_trait")

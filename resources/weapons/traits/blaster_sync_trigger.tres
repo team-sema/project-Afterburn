@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="WeaponTraitDefinition" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://resources/weapons/weapon_trait_definition.gd" id="1_def"]
+[ext_resource type="Texture2D" uid="uid://dm8icgxvcdity" path="res://assets/svg/weapons/weapon_main_blaster.svg" id="2_icon"]
+
+[resource]
+script = ExtResource("1_def")
+trait_id = &"blaster_sync_trigger"
+display_name = "동기화 방아쇠"
+description = "좌우 동시 발사. 피해 ×0.85, 연사 간격 ×1.15."
+icon = ExtResource("2_icon")
+target_weapon_id = &"main_blaster"
+next_rank_hint = "동시 발사 안정화"
+params = {
+"simultaneous": true,
+"damage_mult": 0.85,
+"fire_interval_mult": 1.15,
+}

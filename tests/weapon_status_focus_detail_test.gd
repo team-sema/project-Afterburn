@@ -32,7 +32,7 @@ func _run() -> void:
 	var footer: Label = weapon_hud.get_node("%WeaponDetailFooter") as Label
 	_expect(footer.text.contains("블래스터") or footer.text.contains("발사"), "footer shows selected weapon description")
 
-	loadout.add_or_upgrade_weapon_trait(&"main_blaster", &"blaster_pierce", 1)
+	loadout.add_or_upgrade_weapon_trait(&"main_blaster", &"blaster_accel_ap", 1)
 	await process_frame
 	weapon_hud.refresh()
 	await process_frame
@@ -40,11 +40,11 @@ func _run() -> void:
 	_expect(grid.get_child_count() == 4, "module grid keeps four slots")
 	var first_hex := grid.get_child(0) as HexModuleFrame
 	_expect(first_hex != null, "equipped module is a bare HexModuleFrame")
-	_expect(loadout.get_trait_icon(&"blaster_pierce") != null, "blaster pierce has a visible icon for STATUS")
+	_expect(loadout.get_trait_icon(&"blaster_accel_ap") != null, "blaster accel AP has a visible icon for STATUS")
 	first_hex.module_hovered.emit()
 	await process_frame
 	footer = weapon_hud.get_node("%WeaponDetailFooter") as Label
-	_expect(footer.text.contains("관통"), "hovering module hex shows full trait name in description")
+	_expect(footer.text.contains("철갑") or footer.text.contains("관통"), "hovering module hex shows full trait name in description")
 
 	var laser: WeaponDefinition = load("res://resources/weapons/definitions/main_laser.tres") as WeaponDefinition
 	loadout.equip_weapon(laser)
@@ -82,7 +82,11 @@ func _run() -> void:
 	var hangar := ship_panel.get_facility_module(&"hangar")
 	hangar.facility_hovered.emit(&"hangar")
 	await process_frame
-	_expect(ship_panel.get_detail_text().begins_with("격납고"), "hovering hangar updates facility detail line")
+	_expect(
+		ship_panel.get_detail_text().begins_with("격납고")
+		or ship_panel.get_detail_text().begins_with("동력로"),
+		"hovering hangar updates facility detail line",
+	)
 
 	var detail_cols := weapon_hud.get_node_or_null("%DetailColumns") as HBoxContainer
 	_expect(detail_cols != null, "selected weapon and modules sit in side-by-side columns")

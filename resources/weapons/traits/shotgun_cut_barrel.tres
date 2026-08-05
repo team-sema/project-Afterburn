@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="WeaponTraitDefinition" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://resources/weapons/weapon_trait_definition.gd" id="1_def"]
+[ext_resource type="Texture2D" uid="uid://bhsri7kh1kskh" path="res://assets/svg/weapons/weapon_main_shotgun.svg" id="2_icon"]
+
+[resource]
+script = ExtResource("1_def")
+trait_id = &"shotgun_cut_barrel"
+display_name = "단축 총열"
+description = "스프레드 ×1.5, 근거리 피해 ×1.8, 사거리 ×0.85."
+icon = ExtResource("2_icon")
+target_weapon_id = &"main_shotgun"
+next_rank_hint = "근거리 피해 증가"
+params = {
+"spread_mult": 1.5,
+"close_damage_mult": 1.8,
+"range_mult": 0.85,
+"close_range_px": 80,
+}

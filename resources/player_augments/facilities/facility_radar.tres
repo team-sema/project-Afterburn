@@ -1,13 +1,15 @@
-[gd_resource type="Resource" script_class="PlayerAugment" load_steps=3 format=3]
+[gd_resource type="Resource" script_class="PlayerAugment" load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://resources/player_augments/player_augment.gd" id="1_aug"]
 [ext_resource type="Texture2D" uid="uid://b2vuklv2q7ax" path="res://assets/svg/facilities/facility_radar.svg" id="2_icon"]
+[ext_resource type="Resource" path="res://resources/facilities/effects/pickup_range_1_5.tres" id="3_effect"]
 
 [resource]
 script = ExtResource("1_aug")
 augment_id = &"facility_radar"
 display_name = "광역 탐지기"
-description = "장착 중 픽업 수집 반경이 15% 증가합니다."
+description = "장착 중 픽업 수집 반경이 50% 증가합니다."
 augment_type = 6
 icon = ExtResource("2_icon")
 facility_id = &"radar"
+facility_module_effect = ExtResource("3_effect")

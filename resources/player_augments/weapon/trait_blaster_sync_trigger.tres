@@ -2,17 +2,17 @@
 
 [ext_resource type="Script" path="res://resources/player_augments/player_augment.gd" id="1_aug"]
 [ext_resource type="Resource" path="res://resources/weapons/definitions/main_blaster.tres" id="2_weapon"]
-[ext_resource type="Resource" path="res://resources/weapons/traits/blaster_pierce.tres" id="3_trait"]
+[ext_resource type="Resource" path="res://resources/weapons/traits/blaster_sync_trigger.tres" id="3_trait"]
 
 [resource]
 script = ExtResource("1_aug")
-augment_id = &"trait_blaster_pierce"
-display_name = "블래스터 관통"
-description = "블래스터 탄환이 적을 관통합니다. (전투 효과 스캐폴드)"
+augment_id = &"trait_blaster_sync_trigger"
+display_name = "동기화 방아쇠"
+description = "좌우 동시 발사. 피해 ×0.85, 연사 간격 ×1.15."
 augment_type = 3
 offer_weight = 1.0
 weapon_definition = ExtResource("2_weapon")
 target_weapon_id = &"main_blaster"
-trait_id = &"blaster_pierce"
+trait_id = &"blaster_sync_trigger"
 trait_rank_increase = 1
 trait_definition = ExtResource("3_trait")

@@ -13,18 +13,17 @@
 7. **무기 베이 UX** — 증강 획득·교체(성장 삭제)·리롤. 특성 전투·격납고 효과·유형 가중치 %·리롤 최종 횟수는 미정/임시
 8. **오그먼트 풀** — `gameplay.tscn` 하드코드 + `offer_weight`. 가중치 밸런스 미정
 9. **부위 모듈 밸런스 수치** — `module_count_values`는 전부 플레이스홀더. 기본 최대 선체가 1이라 선체·실드 가산도 1 단위로 잡혀 있음
-10. **격납고 효과** — 대체 효과 미정. `WEAPON_TRAIT` 전투 효과도 스캐폴드만
-11. **실드 리필 수단** — `ShieldComponent.restore_shield()`를 부르는 곳이 없음. 충전 조건 미정
-12. **우측 패널 세로 여유** — 항목 추가 전 동적 fit 검사를 먼저 확인
+10. **격납고 효과** — 대체 **1순위 후보: 동력로** (주기/피격 과부하). 상세 [`docs/design/augment-todo.md`](../design/augment-todo.md).
+11. **우측 패널 세로 여유** — 항목 추가 전 동적 fit 검사를 먼저 확인
 
 ## 구조 이슈
 
-13. Enemy `no_health` → `queue_free`와 `DestroyedComponent` **이중 free/이펙트**
-14. 카미카제 Hitbox free가 점수/폭발 순서를 건너뛸 수 있음
-15. 파일명 typo: `timed_state_componoent.gd`
-16. `OnetimeAnimatedEffect` vs `neon_explosion` 이원화
-17. `ResourceStash`가 GameStats 홀더 수준으로 얇음
-18. highscore만 런 간 유지, 오그먼트 레지스트리는 비영속
+12. Enemy `no_health` → `queue_free`와 `DestroyedComponent` **이중 free/이펙트**
+13. 카미카제 Hitbox free가 점수/폭발 순서를 건너뛸 수 있음
+14. 파일명 typo: `timed_state_componoent.gd`
+15. `OnetimeAnimatedEffect` vs `neon_explosion` 이원화
+16. `ResourceStash`가 GameStats 홀더 수준으로 얇음
+17. highscore만 런 간 유지, 오그먼트 레지스트리는 비영속
 
 ## 콘텐츠 확장 아이디어
 

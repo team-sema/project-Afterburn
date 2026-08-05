@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-05",
+  "updated": "2026-08-06",
   "source": "docs/board/cards/*.md",
   "columns": [
     {
@@ -39,6 +39,38 @@
     }
   ],
   "cards": [
+    {
+      "id": "facility-weapon-modules",
+      "title": "시설 모듈 효과",
+      "description": "FacilityModuleEffect 12종 · 과충전/부스터/보스피해 등 부위 모듈.",
+      "column": "review",
+      "file": "cards/facility-weapon-modules.md",
+      "tags": ["함선", "오그먼트", "밸런스"]
+    },
+    {
+      "id": "shield-base-one",
+      "title": "시작 실드 1",
+      "description": "런 시작 시 실드 최대·현재를 1로 둔다.",
+      "column": "review",
+      "file": "cards/shield-base-one.md",
+      "tags": ["플레이어", "실드"]
+    },
+    {
+      "id": "shield-regen",
+      "title": "실드 재생 · 충전 UI",
+      "description": "실드가 깎이면 즉시 소형 게이지가 차고, 꽉 차면 +1. 피격 시 리셋 후 바로 재충전.",
+      "column": "review",
+      "file": "cards/shield-regen.md",
+      "tags": ["플레이어", "UI", "실드"]
+    },
+    {
+      "id": "power-core-facility",
+      "title": "동력로 (격납고 대체)",
+      "description": "격납고를 동력로로 바꿔 주기/피격 과부하 효과를 담당한다.",
+      "column": "review",
+      "file": "cards/power-core-facility.md",
+      "tags": ["함선", "밸런스", "오그먼트"]
+    },
     {
       "id": "orbital-barrier-one-hit",
       "title": "궤도 방벽 적당 1회 피해",

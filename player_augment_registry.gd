@@ -135,7 +135,55 @@ func clear_augments() -> void:
 	augments_changed.emit()
 
 
+func get_module_effects_of_kind(kind: FacilityModuleEffect.Kind) -> Array[FacilityModuleEffect]:
+	var effects: Array[FacilityModuleEffect] = []
+	for module in get_installed_modules():
+		var effect := module.augment.facility_module_effect
+		if effect != null and effect.kind == kind:
+			effects.append(effect)
+	return effects
+
+
+func has_module_effect_kind(kind: FacilityModuleEffect.Kind) -> bool:
+	return not get_module_effects_of_kind(kind).is_empty()
+
+
+func get_first_module_effect(kind: FacilityModuleEffect.Kind) -> FacilityModuleEffect:
+	var effects := get_module_effects_of_kind(kind)
+	if effects.is_empty():
+		return null
+	return effects[0]
+
+
+## Product of primaries for multiplier kinds (neutral 1.0 when none installed).
+func get_module_effect_product(kind: FacilityModuleEffect.Kind) -> float:
+	var total := 1.0
+	var found := false
+	for effect in get_module_effects_of_kind(kind):
+		found = true
+		total *= effect.primary
+	return total if found else FacilityModuleEffect.get_neutral_primary_for(kind)
+
+
+## Sum of primaries for additive kinds (neutral 0.0 when none installed).
+func get_module_effect_sum(kind: FacilityModuleEffect.Kind) -> float:
+	var total := 0.0
+	for effect in get_module_effects_of_kind(kind):
+		total += effect.primary
+	return total
+
+
+## Legacy facility-definition totals. Prefer module effects when any are installed
+## for the mapped Kind; otherwise fall back to ShipFacilityDefinition curves.
 func get_effect_total(effect: ShipFacilityDefinition.Effect) -> float:
+	var kind := _effect_to_module_kind(effect)
+	if kind >= 0:
+		var module_kind := kind as FacilityModuleEffect.Kind
+		if has_module_effect_kind(module_kind):
+			if FacilityModuleEffect.is_multiplier_kind(module_kind):
+				return get_module_effect_product(module_kind)
+			return get_module_effect_sum(module_kind)
+
 	var total := ShipFacilityDefinition.get_neutral_value_for(effect)
 	for definition in get_facility_definitions():
 		if definition.effect != effect:
@@ -153,3 +201,20 @@ func get_effect_total(effect: ShipFacilityDefinition.Effect) -> float:
 		else:
 			total += value
 	return total
+
+
+func _effect_to_module_kind(effect: ShipFacilityDefinition.Effect) -> int:
+	match effect:
+		ShipFacilityDefinition.Effect.MAIN_WEAPON_DAMAGE:
+			return FacilityModuleEffect.Kind.WEAPON_DAMAGE_MULT
+		ShipFacilityDefinition.Effect.MOVE_SPEED:
+			return FacilityModuleEffect.Kind.MOVE_SPEED_MULT
+		ShipFacilityDefinition.Effect.MAX_HULL:
+			return FacilityModuleEffect.Kind.MAX_HULL_ADD
+		ShipFacilityDefinition.Effect.PICKUP_RANGE:
+			return FacilityModuleEffect.Kind.PICKUP_RANGE_MULT
+		ShipFacilityDefinition.Effect.MAX_SHIELD:
+			return FacilityModuleEffect.Kind.MAX_SHIELD_ADD
+		_:
+			return -1
+

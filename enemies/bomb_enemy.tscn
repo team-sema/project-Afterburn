@@ -53,4 +53,4 @@ arm_duration = 2.0
 flash_count = 3
 base_explosion_radius = 40.0
 blast_size_multiplier = 1.5
-blast_damage = 2
+blast_damage = 1

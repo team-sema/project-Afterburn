@@ -54,7 +54,7 @@
 
 - 느린 하강 `(0, 16)`, HP 140
 - 플레이어가 `trigger_radius`(72) 안이면 정지 → **2초간 빨간 점멸 3회** → 자폭
-- 폭발 VFX scale **1.5×**, 피해 반경 `base_explosion_radius(40) * 1.5`
+- 폭발 VFX scale **1.5×**, 피해 반경 `base_explosion_radius(40) * 1.5`, `blast_damage` **1** (플레이어 피격은 이벤트당 항상 1)
 - 투사체 없음
 
 ## Drone 대각 편대
