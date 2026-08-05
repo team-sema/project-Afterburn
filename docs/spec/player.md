@@ -47,7 +47,7 @@ Move / MoveInput / PositionClamp / WeaponMount(Blaster·Laser·Shotgun 등) / Pl
 | `aux_test_cannon` | 보조 캐넌 | 연두빛 탄환 자동 발사 |
 | `plasma_bomb` | 플라즈마 폭탄 | 지연 폭발·범위 피해 |
 | `aux_homing_missile` | 유도탄 | 가까운 적을 추적 |
-| `aux_orbital_barrier` | 궤도 방벽 | 주변을 돌며 탄막 소멸 + 적 접촉 피해. HP 없음 |
+| `aux_orbital_barrier` | 궤도 방벽 | 주변을 돌며 탄막 소멸 + 적 접촉 피해(**적당 1회만**). HP 없음 |
 
 ### 기본 전투 수치 (WeaponSystem 씬 · Lv.1 · 배율 1.0)
 
@@ -61,7 +61,7 @@ Move / MoveInput / PositionClamp / WeaponMount(Blaster·Laser·Shotgun 등) / Pl
 | 보조 캐넌 | 피해 9 · 간격 0.8초 · 탄속 190 |
 | 플라즈마 폭탄 | 피해 32 · 간격 1.2초 · 탄속 66 · 신관 1.0초 · 반경 32 |
 | 유도탄 | 피해 14 · 간격 1.1초 · 탄속 150 · 선회 5.5 · 재탐색 0.15초 |
-| 궤도 방벽 | 접촉피해 6 · 반경 22 · 회전 2.8 |
+| 궤도 방벽 | 접촉피해 6(**같은 적에게 1회만**) · 반경 22 · 회전 2.8 |
 
 - 위 7종 모두 `WEAPON_ACQUIRE` / `WEAPON_LEVEL` 카드가 Gameplay 플레이어 증강 풀에 등록되어 있다
 - 무기 정의 파일이 존재하더라도 `gameplay.tscn`의 획득 풀에 없으면 현재 플레이 가능한 무기 목록에 포함하지 않는다

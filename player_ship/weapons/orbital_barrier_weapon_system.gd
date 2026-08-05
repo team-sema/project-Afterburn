@@ -12,6 +12,8 @@ extends WeaponSystem
 @onready var orbit_root: Node2D = $OrbitRoot
 
 var _segments: Array[Node2D] = []
+## Enemies already struck once by this barrier instance (id → Node).
+var _struck_targets: Dictionary = {}
 
 
 func _ready() -> void:
@@ -30,6 +32,7 @@ func _process(delta: float) -> void:
 
 func _on_weapon_setup() -> void:
 	set_process(true)
+	_struck_targets.clear()
 	_apply_stat_multipliers()
 	for segment in _segments:
 		_enable_segment_collision(segment)
@@ -37,6 +40,7 @@ func _on_weapon_setup() -> void:
 
 func _on_weapon_shutdown() -> void:
 	set_process(false)
+	_struck_targets.clear()
 	for segment in _segments:
 		_disable_segment_collision(segment)
 
@@ -112,9 +116,54 @@ func _wire_segments() -> void:
 		if hitbox == null or hurtbox == null:
 			push_error("OrbitalBarrier segment missing HitboxComponent/HurtboxComponent.")
 			continue
-		# Hitbox damages enemies. Hurtbox has no HP — enemy bullets hit it and self-destroy.
+		# Replace default per-enter damage with one-hit-per-enemy handling.
+		var default_hit := Callable(hitbox, "_on_hurtbox_entered")
+		if hitbox.area_entered.is_connected(default_hit):
+			hitbox.area_entered.disconnect(default_hit)
+		if not hitbox.area_entered.is_connected(_on_barrier_hitbox_entered.bind(hitbox)):
+			hitbox.area_entered.connect(_on_barrier_hitbox_entered.bind(hitbox))
 		_enable_segment_collision(segment)
 		_segments.append(segment)
+
+
+func _on_barrier_hitbox_entered(hurtbox: Area2D, hitbox: HitboxComponent) -> void:
+	if not hurtbox is HurtboxComponent:
+		return
+	var enemy_hurtbox := hurtbox as HurtboxComponent
+	if enemy_hurtbox.is_invincible:
+		return
+	var target := _strike_target_from_hurtbox(enemy_hurtbox)
+	if target == null:
+		return
+	if _has_struck(target):
+		return
+	_mark_struck(target)
+	hitbox.hit_hurtbox.emit(enemy_hurtbox)
+	enemy_hurtbox.hurt.emit(hitbox)
+
+
+func _strike_target_from_hurtbox(hurtbox: HurtboxComponent) -> Node:
+	var parent := hurtbox.get_parent()
+	if parent != null:
+		return parent
+	return hurtbox
+
+
+func _has_struck(target: Node) -> bool:
+	if target == null or not is_instance_valid(target):
+		return false
+	var id := target.get_instance_id()
+	if not _struck_targets.has(id):
+		return false
+	var stored: Variant = _struck_targets[id]
+	if stored != target or not is_instance_valid(stored):
+		_struck_targets.erase(id)
+		return false
+	return true
+
+
+func _mark_struck(target: Node) -> void:
+	_struck_targets[target.get_instance_id()] = target
 
 
 func _disable_segment_collision(segment: Node2D) -> void:

@@ -40,6 +40,14 @@
   ],
   "cards": [
     {
+      "id": "orbital-barrier-one-hit",
+      "title": "궤도 방벽 적당 1회 피해",
+      "description": "방벽 접촉 피해를 적마다 1회로 제한해 재진입 연속 피해를 막는다.",
+      "column": "review",
+      "file": "cards/orbital-barrier-one-hit.md",
+      "tags": ["무기", "밸런스"]
+    },
+    {
       "id": "facility-own-effects",
       "title": "시설이 효과 담당",
       "description": "스탯 모듈을 제거하고 부위 효과는 시설 효과 모듈만 담당한다.",
