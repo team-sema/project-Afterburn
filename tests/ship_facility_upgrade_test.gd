@@ -80,34 +80,31 @@ func _check_engine_modules(
 	panel: ShipPanel,
 ) -> void:
 	var base_speed := move_component.velocity_multiplier
-	var speed_module := load(
-		"res://resources/player_augments/player_move_speed_boost_1_2.tres"
-	) as PlayerAugment
 	var engine_module := load(
 		"res://resources/player_augments/facilities/facility_engine.tres"
 	) as PlayerAugment
-	_expect(registry.install_augment(speed_module) == 0, "first engine module fills the default slot")
+	_expect(registry.install_augment(engine_module) == 0, "first engine module fills the default slot")
 	_expect(
-		is_equal_approx(move_component.velocity_multiplier, base_speed * 1.2),
-		"installed stat module applies its movement multiplier",
+		is_equal_approx(move_component.velocity_multiplier, base_speed * 1.1),
+		"engine facility module applies its movement multiplier",
 	)
 	_expect(registry.install_augment(engine_module) == -1, "full facility rejects install without replacement")
 	_expect(registry.expand_slots(&"engine"), "engine expands to two slots")
-	_expect(registry.install_augment(engine_module) == 1, "expanded empty slot accepts a module")
+	_expect(registry.install_augment(engine_module) == 1, "expanded empty slot accepts a second module")
 	var engine_chip := panel.get_facility_module(&"engine")
 	_expect(
 		engine_chip.get_slot_icon(1) == engine_module.icon,
 		"installed augment icon is exposed by its visual slot",
 	)
 	_expect(
-		is_equal_approx(move_component.velocity_multiplier, base_speed * 1.2 * 1.1),
-		"stat and facility effect modules compose",
+		is_equal_approx(move_component.velocity_multiplier, base_speed * 1.2),
+		"two engine modules use the facility stack curve (×1.2)",
 	)
 	_expect(registry.install_augment(engine_module, &"", 0) == 0, "occupied slot can be replaced")
-	_expect(registry.get_stack_count(speed_module.augment_id) == 0, "replaced stat module leaves active set")
+	_expect(registry.get_stack_count(engine_module.augment_id) == 2, "replacement keeps two engine modules")
 	_expect(
 		is_equal_approx(move_component.velocity_multiplier, base_speed * 1.2),
-		"replacing a module removes its effect and recomputes remaining modules",
+		"replacing with the same facility module keeps the stack curve",
 	)
 	_expect(registry.expand_slots(&"engine"), "engine expands to the maximum three slots")
 	_expect(not registry.expand_slots(&"engine"), "facility cannot expand beyond three slots")
@@ -160,23 +157,24 @@ func _check_facility_effect_modules(
 
 
 func _check_replacement(registry: PlayerAugmentRegistry, loadout: PlayerWeaponLoadout) -> void:
-	var damage_module := load(
-		"res://resources/player_augments/player_weapon_damage_boost_1_2.tres"
+	var engine := load(
+		"res://resources/player_augments/facilities/facility_engine.tres"
+	) as PlayerAugment
+	# weapon_room already has one facility_weapon_room from _check_facility_effect_modules
+	var weapon_room := load(
+		"res://resources/player_augments/facilities/facility_weapon_room.tres"
 	) as PlayerAugment
 	_expect(
-		registry.install_augment(damage_module) == -1,
+		registry.install_augment(weapon_room) == -1,
 		"full weapon room requires an explicit replacement index",
 	)
-	_expect(registry.install_augment(damage_module, &"", 0) == 0, "replacement installs incoming module")
+	_expect(registry.install_augment(weapon_room, &"", 0) == 0, "replacement installs incoming module")
 	_expect(
-		is_equal_approx(loadout.get_facility_damage_multiplier(), 1.0),
-		"replacing facility module removes its weapon-room effect",
+		is_equal_approx(loadout.get_facility_damage_multiplier(), 1.15),
+		"replacing with the same weapon-room facility module keeps its damage curve",
 	)
-	var main_weapon := loadout.get_all_weapon_systems()[0]
-	_expect(
-		is_equal_approx(main_weapon.get_effective_damage_multiplier(), 1.2),
-		"replacement stat module applies its global weapon damage effect",
-	)
+	_expect(registry.get_installed_count(&"weapon_room") == 1, "weapon room still has one module after replace")
+	_expect(engine != null, "engine facility module resource loads")
 
 
 func _check_offer_layout(selection_ui: AugmentSelectionOverlay) -> void:
@@ -188,10 +186,10 @@ func _check_offer_layout(selection_ui: AugmentSelectionOverlay) -> void:
 	_expect(button_1.get_parent() == button_3.get_parent(), "three augment choices share one horizontal row")
 	_expect(ship_panel is ShipPanel, "player offer embeds the ship part UI below choices")
 	var fire_rate := load(
-		"res://resources/player_augments/player_fire_rate_boost_1_2.tres"
+		"res://resources/player_augments/facilities/facility_weapon_room.tres"
 	) as PlayerAugment
 	var move_speed := load(
-		"res://resources/player_augments/player_move_speed_boost_1_2.tres"
+		"res://resources/player_augments/facilities/facility_engine.tres"
 	) as PlayerAugment
 	selection_ui._set_choices([fire_rate, move_speed])
 	selection_ui._showing_ship_modules = true

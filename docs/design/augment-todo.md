@@ -3,7 +3,7 @@
 구현 후보·밸런스 메모를 쌓는 **아이디어 보드**다.  
 확정된 동작은 `/feature`로 `docs/design/systems/<slug>.md` + Task를 만들고, 들어간 뒤에는 [`docs/spec/augments.md`](../spec/augments.md)가 정본이다.
 
-현재 오퍼 풀(플레이어 **25** / 적 **3**)은 [`docs/spec/augments.md`](../spec/augments.md)·`gameplay.tscn`이 정본이다. 여기 항목은 **아직 풀에 없는 후보**를 우선 적는다.
+현재 오퍼 풀(플레이어 **22** / 적 **3**)은 [`docs/spec/augments.md`](../spec/augments.md)·`gameplay.tscn`이 정본이다. 여기 항목은 **아직 풀에 없는 후보**를 우선 적는다.
 
 ## 상태
 

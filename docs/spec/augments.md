@@ -6,27 +6,20 @@
 |------|------|
 | `PlayerAugment` | 공통 필드 + `augment_type`, `offer_weight`, 무기 필드(`weapon_definition`, `starting_weapon_level`, `trait_*`) |
 | `EnemyAugment` | `augment_id`, `display_name`, `description`, `stat_modifiers[]`, `behavior_components[]` |
-| `PlayerStatModifier.Stat` | `MOVE_SPEED`, `FIRE_RATE`, `WEAPON_DAMAGE` |
+| `PlayerStatModifier.Stat` | `MOVE_SPEED`, `FIRE_RATE`, `WEAPON_DAMAGE` (코드 enum 잔여 · **플레이어 오퍼 풀 미사용**) |
 | `EnemyStatModifier.Stat` | `HEALTH`, `MOVE_SPEED`, `ACTION_RATE` |
-| `PlayerAugmentKind` | `STAT_MULTIPLIER`, `WEAPON_ACQUIRE`, `WEAPON_LEVEL`, `WEAPON_TRAIT`, `FACILITY_EFFECT` |
+| `PlayerAugmentKind` | `FACILITY_EFFECT`, `WEAPON_ACQUIRE`, `WEAPON_LEVEL`, `WEAPON_TRAIT` (+ enum에 `STAT_MULTIPLIER` 잔여·풀 미사용) |
 
 ## 현재 풀 (Gameplay 익스포트)
 
 ### 플레이어
 
-- 총 **25종**: 스탯 3 + 시설 효과 6 + 무기 획득 7 + 무기 레벨 7 + 무기 특성 2
+- 총 **22종**: 시설 효과 6 + 무기 획득 7 + 무기 레벨 7 + 무기 특성 2
+- **함선 부위 슬롯 모듈은 `FACILITY_EFFECT`만.** 부위별 효과는 해당 시설 정의(`module_count_values`)가 담당한다. 동일 스탯을 별도 스탯 모듈로 이중 적용하지 않는다.
 - 카드 표시는 `get_offer_title` / `get_offer_description`으로 신규·레벨·특성을 구분
 - 가중치: `offer_weight`(기본 1.0). 범주별 확정 %는 데이터에서만 조정
 - 무기 전용 Kind는 **함선 시설 슬롯을 소모하지 않음**
 - **리롤:** `max_reroll_count`(임시 기본 2), 런 `remaining_reroll_count`. 선택 전만. [R]/버튼. 직전 세트와 완전 동일하면 1회 재추첨
-
-#### 스탯 모듈 3종
-
-| ID | 표시명 | 대상 시설 | 효과 |
-|----|--------|-----------|------|
-| `player_move_speed_boost_1_2` | 과충전 추진기 | 엔진 | 이동속도 ×1.2 |
-| `player_fire_rate_boost_1_2` | 가속 캐패시터 | 무기실 | 공격속도 ×1.2 |
-| `player_weapon_damage_boost_1_2` | 과충전 탄두 | 무기실 | 장착한 모든 무기 피해 ×1.2 |
 
 #### 시설 효과 모듈 6종
 
@@ -38,6 +31,8 @@
 | `facility_hull` | 반응 장갑 | 선체 | 최대 선체 +1 |
 | `facility_radar` | 광역 탐지기 | 레이더 | 픽업 수집 반경 ×1.15 |
 | `facility_shield` | 실드 축전기 | 실드 | 최대 실드 +1 |
+
+동일 시설에 모듈을 더 끼우면 `resources/facilities/definitions/*.tres`의 누적 곡선(최대 3개)을 따른다. 예: 엔진 1/2/3개 → ×1.1 / ×1.2 / ×1.3.
 
 #### 무기 획득·레벨 7종씩
 
@@ -107,4 +102,4 @@
 
 ## 레지스트리
 
-`PlayerAugmentRegistry`는 부위별 슬롯 용량과 `PlayerAugmentModuleState`를 함께 보유한다. 무기 전용 증강은 여기 설치하지 않는다.
+`PlayerAugmentRegistry`는 부위별 슬롯 용량과 `PlayerAugmentModuleState`를 함께 보유한다. 슬롯에는 `FACILITY_EFFECT`만 설치한다. 무기 전용 증강은 여기 설치하지 않는다.
