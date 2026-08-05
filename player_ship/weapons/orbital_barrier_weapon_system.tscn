@@ -14,6 +14,7 @@ script = ExtResource("1_script")
 orbit_radius = 22.0
 base_orbit_speed = 2.8
 base_damage = 6
+segment_arc_length = 11.33
 
 [node name="OrbitRoot" type="Node2D" parent="."]
 

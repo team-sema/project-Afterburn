@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="WeaponTraitDefinition" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://resources/weapons/weapon_trait_definition.gd" id="1_def"]
+[ext_resource type="Texture2D" uid="uid://c6sy3i51i2bei" path="res://assets/svg/weapons/weapon_aux_cannon.svg" id="2_icon"]
+
+[resource]
+script = ExtResource("1_def")
+trait_id = &"aux_heavy_barrel"
+display_name = "중포신"
+description = "피해 ×1.8, 탄체 크기 ×1.3, 연사 간격 ×1.2."
+icon = ExtResource("2_icon")
+target_weapon_id = &"aux_test_cannon"
+next_rank_hint = "피해 추가 증가"
+params = {
+"damage_mult": 1.8,
+"size_mult": 1.3,
+"fire_interval_mult": 1.2,
+}

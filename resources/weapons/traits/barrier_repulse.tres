@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="WeaponTraitDefinition" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://resources/weapons/weapon_trait_definition.gd" id="1_def"]
+[ext_resource type="Texture2D" uid="uid://b2rg3bjif8bql" path="res://assets/svg/weapons/weapon_aux_orbital_barrier.svg" id="2_icon"]
+
+[resource]
+script = ExtResource("1_def")
+trait_id = &"barrier_repulse"
+display_name = "반발 충격"
+description = "타격 시 넉백 + 충격 피해 ×0.4, 재타격 쿨다운 ×0.85."
+icon = ExtResource("2_icon")
+target_weapon_id = &"aux_orbital_barrier"
+next_rank_hint = "넉백 강화"
+params = {
+"knockback_strength": 140,
+"shock_damage_mult": 0.4,
+"rehit_cooldown_mult": 0.85,
+}

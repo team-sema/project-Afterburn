@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="PlayerAugment" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://resources/player_augments/player_augment.gd" id="1_aug"]
+[ext_resource type="Resource" path="res://resources/weapons/definitions/main_shotgun.tres" id="2_weapon"]
+[ext_resource type="Resource" path="res://resources/weapons/traits/shotgun_expanded_shell.tres" id="3_trait"]
+
+[resource]
+script = ExtResource("1_aug")
+augment_id = &"trait_shotgun_expanded_shell"
+display_name = "확장 산탄"
+description = "펠릿 +4, 피해 ×0.85."
+augment_type = 3
+offer_weight = 1.0
+weapon_definition = ExtResource("2_weapon")
+target_weapon_id = &"main_shotgun"
+trait_id = &"shotgun_expanded_shell"
+trait_rank_increase = 1
+trait_definition = ExtResource("3_trait")

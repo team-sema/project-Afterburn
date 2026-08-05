@@ -28,8 +28,8 @@
 | `StatsComponent` | HP + `health_changed` / `no_health` |
 | `HurtboxComponent` | 피격 Area2D · `hurt(hitbox)` · 무적 시 shape off |
 | `HitboxComponent` | 공격 Area2D · `damage` · `hit_hurtbox` |
-| `HurtComponent` | hurt → (실드가 있으면 게이트 판정 먼저) Stats에서 damage 차감 |
-| `ShieldComponent` | 선체와 분리된 실드 자원 · 실드 ≥ 1이면 피해 이벤트 전체 흡수 · `restore_shield` / `add_shield` |
+| `HurtComponent` | hurt → (player면 피해 1) → `notify_hit()` → 실드 먼저 차감 → 남은 피해만 Stats 차감 |
+| `ShieldComponent` | 버퍼 HP · **시작 최대 1** · 피해는 실드 우선·초과분은 선체 · 미만 시 충전 게이지 → `restore_shield(1)` · `notify_hit` 시 게이지 리셋 |
 | `DestroyedComponent` | `no_health` → 이펙트 스폰 + free |
 | `ScoreComponent` | `GameStats.score`에 가산 |
 | `ExperienceDropComponent` | 적 사망 시 경험치 오브 스폰 |
@@ -58,7 +58,7 @@
 
 | 클래스 | 역할 |
 |--------|------|
-| `PlayerAugmentApplier` | 설치된 모듈 → 이동/연사/데미지 배수. `WEAPON_TRAIT`는 loadout trait API로 전달(전투 효과 스캐폴드) |
+| `PlayerAugmentApplier` | 설치된 모듈 → 이동/연사/데미지 배수. `WEAPON_TRAIT`는 loadout trait API로 전달(무기 스크립트가 전투 적용) |
 | `ShipFacilityApplier` | 설치된 시설 효과 모듈 → **장착 무기 공통 피해**·이동속도·최대 선체·수집 반경·최대 실드 (격납고는 효과 미정) |
 | `EnemyModifierFactory` | 스폰 시 적 스탯·행동 컴포넌트 적용 |
 | `EnemyAugmentGrantComponent` | 수동으로 적 오그먼트 grant *(씬 미연결)* |

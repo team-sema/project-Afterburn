@@ -72,7 +72,11 @@ func _run() -> void:
 	var configured_projectile := PROJECTILE_SCENE.instantiate() as PlasmaBombProjectile
 	weapon_system.set_global_damage_multiplier(1.5)
 	weapon_system.call("_configure_projectile", configured_projectile)
-	_expect(configured_projectile.blast_damage == 36, "weapon damage multiplier scales blast damage")
+	_expect(configured_projectile.blast_damage == 24, "configure stores trait-adjusted base damage")
+	_expect(
+		weapon_system.resolve_hit_damage(configured_projectile.blast_damage) == 36,
+		"weapon damage multiplier scales blast damage",
+	)
 	configured_projectile.free()
 	weapon_system.free()
 

@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="WeaponTraitDefinition" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://resources/weapons/weapon_trait_definition.gd" id="1_def"]
+[ext_resource type="Texture2D" uid="uid://c6sy3i51i2bei" path="res://assets/svg/weapons/weapon_aux_cannon.svg" id="2_icon"]
+
+[resource]
+script = ExtResource("1_def")
+trait_id = &"aux_he_shell"
+display_name = "고폭 탄두"
+description = "직격 ×0.95 + 반경 28 AOE(×0.8)."
+icon = ExtResource("2_icon")
+target_weapon_id = &"aux_test_cannon"
+next_rank_hint = "AOE 반경 증가"
+params = {
+"direct_damage_mult": 0.95,
+"aoe_damage_mult": 0.8,
+"aoe_radius": 28,
+}

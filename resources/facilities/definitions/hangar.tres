@@ -6,8 +6,8 @@
 [resource]
 script = ExtResource("1_facility")
 id = &"hangar"
-display_name = "격납고"
+display_name = "동력로"
 effect = 1
-effect_summary = "효과 미정"
+effect_summary = "주기·피격 과부하 공격력 버프"
 icon = ExtResource("2_icon")
 module_count_values = PackedFloat32Array(0, 0, 0, 0)

@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="FacilityModuleEffect" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/facilities/facility_module_effect.gd" id="1_effect"]
+
+[resource]
+script = ExtResource("1_effect")
+kind = 5
+primary = 2.5
+secondary = 0.8
+tertiary = 7.0

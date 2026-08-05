@@ -49,12 +49,21 @@
 - 획득 카드는 Lv.1 신규 장착, 레벨 카드는 해당 무기가 장착 중일 때만 등장하며 최대 Lv.3
 - 각 카드의 현재 `offer_weight`는 1.0
 
-#### 무기 특성 2종
+#### 무기 특성 28종
 
-| 카드 ID | 표시명 | 대상 무기 | trait ID | 현재 상태 |
-|---------|--------|-----------|----------|-----------|
-| `trait_blaster_pierce` | 블래스터 관통 | 블래스터 | `blaster_pierce` | 관통 특성 스캐폴드 |
-| `trait_laser_fork` | 레이저 분기 | 레이저 | `laser_fork` | 분기 특성 스캐폴드 |
+무기별 `WeaponTraitDefinition.params` + 해당 `*WeaponSystem` 전투 로직. 구 `trait_blaster_pierce` / `trait_laser_fork`는 제거·대체됨.
+
+| 무기 | trait IDs |
+|------|-----------|
+| 블래스터 | `blaster_rapid_loader`, `blaster_sync_trigger`, `blaster_accel_ap`, `blaster_ricochet` |
+| 레이저 | `laser_wide_lens`, `laser_heat_stack`, `laser_refract`, `laser_pulse` |
+| 샷건 | `shotgun_expanded_shell`, `shotgun_choke`, `shotgun_cut_barrel`, `shotgun_burst_device` |
+| 보조 캐넌 | `aux_heavy_barrel`, `aux_auto_loader`, `aux_he_shell`, `aux_hv_ap` |
+| 플라즈마 | `plasma_expand`, `plasma_cluster`, `plasma_field`, `plasma_gravity` |
+| 유도탄 | `missile_multi_rack`, `missile_high_mobility`, `missile_proximity`, `missile_terminal` |
+| 궤도 방벽 | `barrier_multi`, `barrier_fast_orbit`, `barrier_expand_axis`, `barrier_repulse` |
+
+카드 ID는 `trait_<trait_id>` (예: `trait_blaster_rapid_loader`). 모두 `gameplay.tscn` 풀 등록.
 
 ### 적
 

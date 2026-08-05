@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="WeaponTraitDefinition" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://resources/weapons/weapon_trait_definition.gd" id="1_def"]
+[ext_resource type="Texture2D" uid="uid://bvhbc0sja5xx" path="res://assets/svg/weapons/weapon_main_laser.svg" id="2_icon"]
+
+[resource]
+script = ExtResource("1_def")
+trait_id = &"laser_refract"
+display_name = "굴절 빔"
+description = "주 히트에서 최근접 다른 적으로 2차 광선(피해 ×0.55)."
+icon = ExtResource("2_icon")
+target_weapon_id = &"main_laser"
+next_rank_hint = "굴절 피해 증가"
+params = {
+"fork_damage_mult": 0.55,
+}

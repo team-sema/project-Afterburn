@@ -5,9 +5,14 @@
 
 [resource]
 script = ExtResource("1_def")
-trait_id = &"laser_fork"
-display_name = "레이저 분기"
-description = "레이저가 추가 방향으로 분기됩니다. (전투 효과 스캐폴드)"
+trait_id = &"laser_heat_stack"
+display_name = "열 축적"
+description = "동일 적 지속 피격 시 0.5초마다 +15% 피해(최대 +90%)."
 icon = ExtResource("2_icon")
 target_weapon_id = &"main_laser"
-next_rank_hint = "분기 수 증가"
+next_rank_hint = "축적 상한 증가"
+params = {
+"stack_interval": 0.5,
+"stack_bonus": 0.15,
+"max_bonus": 0.9,
+}

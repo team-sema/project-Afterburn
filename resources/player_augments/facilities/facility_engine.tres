@@ -1,13 +1,15 @@
-[gd_resource type="Resource" script_class="PlayerAugment" load_steps=3 format=3]
+[gd_resource type="Resource" script_class="PlayerAugment" load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://resources/player_augments/player_augment.gd" id="1_aug"]
 [ext_resource type="Texture2D" uid="uid://bbc8qrob0ils1" path="res://assets/svg/facilities/facility_engine.svg" id="2_icon"]
+[ext_resource type="Resource" path="res://resources/facilities/effects/move_speed_1_25.tres" id="3_effect"]
 
 [resource]
 script = ExtResource("1_aug")
 augment_id = &"facility_engine"
 display_name = "추력 편향기"
-description = "장착 중 이동속도가 10% 증가합니다."
+description = "장착 중 이동속도가 25% 증가합니다."
 augment_type = 6
 icon = ExtResource("2_icon")
 facility_id = &"engine"
+facility_module_effect = ExtResource("3_effect")

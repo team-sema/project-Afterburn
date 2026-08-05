@@ -81,7 +81,7 @@ Move / MoveInput / PositionClamp / WeaponMount(Blaster·Laser·Shotgun 등) / Pl
 
 - 이동속도 = 씬 기본 × **엔진 시설 효과** (`ShipFacilityApplier` → `facility_move_speed_multiplier`)
 - `FIRE_RATE` / `WEAPON_DAMAGE` 전역 배율은 시설·무기 레벨 경로로만 갱신 (별도 스탯 모듈 오퍼 없음)
-- `WEAPON_TRAIT` → 설치 시 `PlayerWeaponLoadout.add_or_upgrade_weapon_trait` (전투 효과 스캐폴드)
+- `WEAPON_TRAIT` → 설치 시 `PlayerWeaponLoadout.add_or_upgrade_weapon_trait`; 각 `WeaponSystem`이 `has_trait`/`get_trait_param`으로 전투 효과 적용
 - 무기 레벨·특성은 증강 선택으로만 성장 (필드 픽업 없음)
 
 > `PlayerAugment.behavior_components`는 **적용하지 않음** (적 쪽만 동작).
@@ -108,7 +108,7 @@ Move / MoveInput / PositionClamp / WeaponMount(Blaster·Laser·Shotgun 등) / Pl
 - 선체: `StatsComponent`에 최대 체력 필드가 없어 `ShipFacilityApplier`가 최대 선체 = `기본 + 선체 가산`(최소 1)을 들고 있고, 최대치 증가분만큼 현재 선체도 함께 증가. 그 밖의 회복 수단 없음
 - 레이더: 수집 반경 = `ExperienceCollector` 기본 반경(36) × 레이더 배율. **경험치 오브 등 필드 픽업**만 해당. 증강 무기 등장 확률과 무관
 
-- 실드: `ShieldComponent`가 보유. 최대 실드 = `기본(0) + 실드 가산`, 최대치 증가분만큼 현재 실드도 충전. 리필을 부르는 곳은 아직 없음
+- 실드: `ShieldComponent`가 보유. **시작 최대·현재 실드 1** (`base_max_shield`). 최대 = `기본(1) + 실드 가산`, 최대치 증가분만큼 현재 실드도 충전. **버퍼 HP**: 피해는 실드를 먼저 깎고 남는 양만 선체로. **자동 재생**: 현재 < 최대이면 즉시 소형 충전 게이지가 차고(`regen_charge_duration`, 기본 30초), 꽉 차면 `restore_shield(1)`. 피격 시 게이지만 리셋 후 바로 재충전. 충전 중 칸은 아직 방어력 없음
 - 전투 중 `ShipPanel`은 읽기 전용이다. 플레이어 증강 오퍼 안의 `ShipPanel`만 확장 가능한 부위를 선택할 수 있다
 - 슬롯은 숫자 카운터 대신 둥근 사각 프레임으로 표시하며, 설치 모듈의 `icon`을 프레임 안에 그린다
 
@@ -124,7 +124,9 @@ Move / MoveInput / PositionClamp / WeaponMount(Blaster·Laser·Shotgun 등) / Pl
 
 ## 선체 · 실드
 
-- `ShieldComponent`(함선 자식): `get_current_shield()` / `get_max_shield()` / `add_shield(amount)`(최대치 +, 현재도 같은 양 상승) / `restore_shield(amount)`(현재만 충전, 최대 이내) / `absorb_damage(damage)`, 시그널 `shield_changed(current, max)` · `shield_absorbed(damage)`
-- **실드 게이트**: `HurtComponent`가 체력을 깎기 전에 `absorb_damage()`를 부른다. 현재 실드 ≥ 1이면 그 피해 이벤트 전체를 막고(실드 = `max(0, 실드 − 피해)`) 선체는 그대로. 실드 0일 때만 선체가 깎인다
+- `ShieldComponent`(함선 자식): `get_current_shield()` / `get_max_shield()` / `get_charge_progress()` / `add_shield(amount)`(최대치 +, 현재도 같은 양 상승) / `restore_shield(amount)`(현재만 충전, 최대 이내) / `notify_hit()` / `absorb_damage(damage) -> int`(실드에 먼저 적용 후 **선체로 넘길 남은 피해** 반환), 시그널 `shield_changed(current, max)` · `shield_absorbed(absorbed)` · `charge_changed(progress)`
+- **플레이어 피격 피해는 이벤트당 항상 1.** `HurtComponent`가 `player` 그룹이면 hitbox.damage와 무관하게 1로 적용한다. (폭탄 자폭 등 소스 수치도 1로 맞춤)
+- **실드 버퍼**: `HurtComponent`가 피격마다 `notify_hit()` 후 `absorb_damage()`를 부른다. 실드가 있는 만큼만 흡수하고 초과분은 선체 HP에서 차감한다. 피해가 항상 1이므로 실드 1이면 그 한 방은 실드만 깎인다.
+- **실드 재생**: 현재 < 최대면 충전 게이지 진행. 완료 시 +1. 피격 시 게이지 리셋 후 즉시 재개. 최대면 게이지 0·숨김
 - 무적시간은 여전히 **없다**. 한 프레임에 여러 히트박스가 겹치면 각각 별개 이벤트로 처리된다
-- HUD: 좌측 패널 `ShipStatusHud`가 `HULL 현재/최대`(민트)·`SHIELD 현재/최대`(보라)를 표시. 함선 파괴 시 `—`
+- HUD: 좌측 패널 `ShipStatusHud`가 `HULL 현재/최대`(민트)·`SHIELD 현재/최대`(보라)·실드 바 아래 충전 게이지(`ShieldChargeBar`, 미만일 때만)를 표시. 함선 파괴 시 `—`

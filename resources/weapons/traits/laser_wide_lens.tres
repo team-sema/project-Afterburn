@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponTraitDefinition" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://resources/weapons/weapon_trait_definition.gd" id="1_def"]
+[ext_resource type="Texture2D" uid="uid://bvhbc0sja5xx" path="res://assets/svg/weapons/weapon_main_laser.svg" id="2_icon"]
+
+[resource]
+script = ExtResource("1_def")
+trait_id = &"laser_wide_lens"
+display_name = "광각 렌즈"
+description = "빔 폭 ×1.8, 피해 ×0.9."
+icon = ExtResource("2_icon")
+target_weapon_id = &"main_laser"
+next_rank_hint = "빔 폭 추가 증가"
+params = {
+"width_mult": 1.8,
+"damage_mult": 0.9,
+}

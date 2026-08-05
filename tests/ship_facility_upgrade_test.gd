@@ -85,7 +85,7 @@ func _check_engine_modules(
 	) as PlayerAugment
 	_expect(registry.install_augment(engine_module) == 0, "first engine module fills the default slot")
 	_expect(
-		is_equal_approx(move_component.velocity_multiplier, base_speed * 1.1),
+		is_equal_approx(move_component.velocity_multiplier, base_speed * 1.25),
 		"engine facility module applies its movement multiplier",
 	)
 	_expect(registry.install_augment(engine_module) == -1, "full facility rejects install without replacement")
@@ -97,14 +97,14 @@ func _check_engine_modules(
 		"installed augment icon is exposed by its visual slot",
 	)
 	_expect(
-		is_equal_approx(move_component.velocity_multiplier, base_speed * 1.2),
-		"two engine modules use the facility stack curve (×1.2)",
+		is_equal_approx(move_component.velocity_multiplier, base_speed * 1.25 * 1.25),
+		"two engine modules multiply move-speed module effects (×1.25²)",
 	)
 	_expect(registry.install_augment(engine_module, &"", 0) == 0, "occupied slot can be replaced")
 	_expect(registry.get_stack_count(engine_module.augment_id) == 2, "replacement keeps two engine modules")
 	_expect(
-		is_equal_approx(move_component.velocity_multiplier, base_speed * 1.2),
-		"replacing with the same facility module keeps the stack curve",
+		is_equal_approx(move_component.velocity_multiplier, base_speed * 1.25 * 1.25),
+		"replacing with the same facility module keeps the product stack",
 	)
 	_expect(registry.expand_slots(&"engine"), "engine expands to the maximum three slots")
 	_expect(not registry.expand_slots(&"engine"), "facility cannot expand beyond three slots")
@@ -145,15 +145,17 @@ func _check_facility_effect_modules(
 		"weapon-room module applies equipped weapon damage",
 	)
 	var hangar_def := load("res://resources/facilities/definitions/hangar.tres") as ShipFacilityDefinition
-	_expect(hangar_def.effect_summary.contains("미정"), "hangar effect summary is undecided")
-	_expect(is_equal_approx(hangar_def.get_value_for_module_count(1), 0.0), "hangar module values are inert")
+	_expect(hangar_def.display_name == "동력로", "hangar facility display is renamed to 동력로")
+	_expect(hangar.display_name.contains("과충전"), "hangar module is the periodic overcharge reactor")
+	_expect(is_equal_approx(hangar_def.get_value_for_module_count(1), 0.0), "hangar definition curve stays inert")
 	_expect(applier.get_max_hull() == base_hull + 1, "hull module increases maximum hull")
 	_expect(stats.health == applier.get_max_hull(), "maximum hull increase also raises current hull")
 	_expect(
-		is_equal_approx(applier.get_collection_radius(), base_radius * 1.15),
+		is_equal_approx(applier.get_collection_radius(), base_radius * 1.5),
 		"radar module increases collection radius",
 	)
-	_expect(shield.get_max_shield() == 1, "shield module increases maximum shield")
+	_expect(shield.get_max_shield() == 2, "shield module adds +1 on top of base max 1")
+	_expect(shield.get_current_shield() == 2, "max increase also raises current shield")
 
 
 func _check_replacement(registry: PlayerAugmentRegistry, loadout: PlayerWeaponLoadout) -> void:
@@ -312,7 +314,7 @@ func _check_swap_overlay(
 	swap_ui.open(registry, &"weapon_room", incoming)
 	var first_button := swap_ui.get_node("MarginContainer/VBoxContainer/SlotButton1") as Button
 	_expect(swap_ui.visible, "full facility opens the module replacement window")
-	_expect(first_button.text.contains("과충전 탄두"), "replacement window identifies installed module")
+	_expect(first_button.text.contains("집속 조준기"), "replacement window identifies installed module")
 	swap_ui.close()
 
 

@@ -27,6 +27,8 @@ var _progress: Dictionary = {}
 var _global_damage_multiplier := 1.0
 var _global_fire_rate_multiplier := 1.0
 var _facility_damage_multiplier := 1.0
+var _temp_damage_multiplier := 1.0
+var _boss_damage_multiplier := 1.0
 
 
 func _ready() -> void:
@@ -263,6 +265,16 @@ func set_facility_damage_multiplier(multiplier: float) -> void:
 	_refresh_all_weapon_multipliers()
 
 
+func set_temp_damage_multiplier(multiplier: float) -> void:
+	_temp_damage_multiplier = maxf(0.01, multiplier)
+	_refresh_all_weapon_multipliers()
+
+
+func set_boss_damage_multiplier(multiplier: float) -> void:
+	_boss_damage_multiplier = maxf(0.01, multiplier)
+	_refresh_all_weapon_multipliers()
+
+
 ## Compatibility alias used by older facility applier call sites during migration.
 func set_facility_main_damage_multiplier(multiplier: float) -> void:
 	set_facility_damage_multiplier(multiplier)
@@ -270,6 +282,14 @@ func set_facility_main_damage_multiplier(multiplier: float) -> void:
 
 func get_facility_damage_multiplier() -> float:
 	return _facility_damage_multiplier
+
+
+func get_temp_damage_multiplier() -> float:
+	return _temp_damage_multiplier
+
+
+func get_boss_damage_multiplier() -> float:
+	return _boss_damage_multiplier
 
 
 func get_facility_main_damage_multiplier() -> float:
@@ -437,7 +457,7 @@ func _instantiate_weapon(
 		node.queue_free()
 		return null
 	mount.add_child(weapon)
-	weapon.setup_weapon(_player, self, slot_index)
+	weapon.setup_weapon(_player, self, slot_index, weapon_definition.id)
 	return weapon
 
 
@@ -460,6 +480,8 @@ func _apply_multipliers_to_weapon(weapon: WeaponSystem, weapon_id: StringName) -
 	weapon.set_local_damage_multiplier(get_weapon_damage_multiplier(weapon_id))
 	weapon.set_local_fire_rate_multiplier(get_weapon_attack_rate_multiplier(weapon_id))
 	weapon.set_facility_damage_multiplier(_facility_damage_multiplier)
+	weapon.set_temp_damage_multiplier(_temp_damage_multiplier)
+	weapon.set_boss_damage_multiplier(_boss_damage_multiplier)
 	weapon.set_consumable_capacity_bonus(0)
 
 

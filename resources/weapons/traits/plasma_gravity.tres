@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="WeaponTraitDefinition" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://resources/weapons/weapon_trait_definition.gd" id="1_def"]
+[ext_resource type="Texture2D" uid="uid://dj7s045pab0js" path="res://assets/svg/weapons/weapon_plasma_bomb.svg" id="2_icon"]
+
+[resource]
+script = ExtResource("1_def")
+trait_id = &"plasma_gravity"
+display_name = "중력 수축"
+description = "폭발 시 적 흡인, 피해 ×1.35, 반경 ×0.9."
+icon = ExtResource("2_icon")
+target_weapon_id = &"plasma_bomb"
+next_rank_hint = "흡인력 증가"
+params = {
+"pull_strength": 90,
+"damage_mult": 1.35,
+"radius_mult": 0.9,
+}

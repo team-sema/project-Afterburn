@@ -1,4 +1,4 @@
-[gd_scene load_steps=21 format=3 uid="uid://biklivgjp6cup"]
+[gd_scene load_steps=22 format=3 uid="uid://biklivgjp6cup"]
 
 [ext_resource type="PackedScene" uid="uid://ndsn1d66d5g3" path="res://gameplay.tscn" id="1_gameplay"]
 [ext_resource type="Resource" uid="uid://qvwx7dbvubh0" path="res://game_stats.tres" id="2_stats"]
@@ -54,6 +54,13 @@ corner_radius_bottom_left = 2
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_shield_fill"]
 bg_color = Color(0.6, 0.45, 1, 0.95)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_shield_charge_fill"]
+bg_color = Color(0.72, 0.62, 1, 0.75)
 corner_radius_top_left = 2
 corner_radius_top_right = 2
 corner_radius_bottom_right = 2
@@ -223,6 +230,17 @@ theme_override_styles/background = SubResource("StyleBox_progress_background")
 theme_override_styles/fill = SubResource("StyleBox_shield_fill")
 max_value = 1.0
 show_percentage = false
+
+[node name="ShieldChargeBar" type="ProgressBar" parent="Layout/LeftPanel/Margin/VBox/ShipStatusHud"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 4)
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/background = SubResource("StyleBox_progress_background")
+theme_override_styles/fill = SubResource("StyleBox_shield_charge_fill")
+max_value = 1.0
+show_percentage = false
+visible = false
 
 [node name="FlexibleSpace" type="Control" parent="Layout/LeftPanel/Margin/VBox" unique_id=794592989]
 layout_mode = 2

@@ -26,6 +26,8 @@
 [ext_resource type="Resource" path="res://resources/weapons/definitions/main_blaster.tres" id="20_default_main"]
 [ext_resource type="Script" uid="uid://dr4bxfbi5xrxk" path="res://components/experience_collector_component.gd" id="21_experience_collector"]
 [ext_resource type="Script" path="res://components/shield_component.gd" id="22_shield"]
+[ext_resource type="Script" path="res://components/ship_combat_buff_controller.gd" id="23_combat_buff"]
+[ext_resource type="Script" path="res://components/engine_boost_component.gd" id="24_engine_boost"]
 
 [sub_resource type="Gradient" id="Gradient_engine"]
 offsets = PackedFloat32Array(0, 0.35, 1)
@@ -120,13 +122,24 @@ script = ExtResource("17_player_augment_applier")
 move_component = NodePath("../MoveComponent")
 weapon_loadout = NodePath("../PlayerWeaponLoadout")
 
-[node name="ShipFacilityApplier" type="Node" parent="." node_paths=PackedStringArray("augment_applier", "weapon_loadout", "stats_component", "shield_component", "experience_collector")]
+[node name="ShipCombatBuffController" type="Node" parent="." node_paths=PackedStringArray("weapon_loadout", "stats_component")]
+script = ExtResource("23_combat_buff")
+weapon_loadout = NodePath("../PlayerWeaponLoadout")
+stats_component = NodePath("../StatsComponent")
+
+[node name="EngineBoostComponent" type="Node" parent="." node_paths=PackedStringArray("augment_applier")]
+script = ExtResource("24_engine_boost")
+augment_applier = NodePath("../PlayerAugmentApplier")
+
+[node name="ShipFacilityApplier" type="Node" parent="." node_paths=PackedStringArray("augment_applier", "weapon_loadout", "stats_component", "shield_component", "experience_collector", "combat_buff_controller", "engine_boost_component")]
 script = ExtResource("18_ship_facility_applier")
 augment_applier = NodePath("../PlayerAugmentApplier")
 weapon_loadout = NodePath("../PlayerWeaponLoadout")
 stats_component = NodePath("../StatsComponent")
 shield_component = NodePath("../ShieldComponent")
 experience_collector = NodePath("../ExperienceCollector")
+combat_buff_controller = NodePath("../ShipCombatBuffController")
+engine_boost_component = NodePath("../EngineBoostComponent")
 
 [node name="ScaleComponent" type="Node" parent="." unique_id=409266105 node_paths=PackedStringArray("sprite")]
 script = ExtResource("9_le0bn")
@@ -147,11 +160,12 @@ shape = SubResource("CircleShape2D_experience_collector")
 
 [node name="PlayerHitPoint" parent="." unique_id=132587002 instance=ExtResource("12_hit_point")]
 
-[node name="HurtComponent" type="Node" parent="." unique_id=918904643 node_paths=PackedStringArray("stats_component", "hurtbox_component", "shield_component")]
+[node name="HurtComponent" type="Node" parent="." unique_id=918904643 node_paths=PackedStringArray("stats_component", "hurtbox_component", "shield_component", "combat_buff_controller")]
 script = ExtResource("13_kbeao")
 stats_component = NodePath("../StatsComponent")
 hurtbox_component = NodePath("../PlayerHitPoint/HurtboxComponent")
 shield_component = NodePath("../ShieldComponent")
+combat_buff_controller = NodePath("../ShipCombatBuffController")
 
 [node name="ExplosionSpawnerComponent" type="Node2D" parent="." unique_id=925069816]
 script = ExtResource("7_iekxl")

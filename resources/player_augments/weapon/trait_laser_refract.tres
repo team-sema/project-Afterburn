@@ -2,17 +2,17 @@
 
 [ext_resource type="Script" path="res://resources/player_augments/player_augment.gd" id="1_aug"]
 [ext_resource type="Resource" path="res://resources/weapons/definitions/main_laser.tres" id="2_weapon"]
-[ext_resource type="Resource" path="res://resources/weapons/traits/laser_fork.tres" id="3_trait"]
+[ext_resource type="Resource" path="res://resources/weapons/traits/laser_refract.tres" id="3_trait"]
 
 [resource]
 script = ExtResource("1_aug")
-augment_id = &"trait_laser_fork"
-display_name = "레이저 분기"
-description = "레이저가 추가 방향으로 분기됩니다. (전투 효과 스캐폴드)"
+augment_id = &"trait_laser_refract"
+display_name = "굴절 빔"
+description = "주 히트에서 최근접 다른 적으로 2차 광선(피해 ×0.55)."
 augment_type = 3
 offer_weight = 1.0
 weapon_definition = ExtResource("2_weapon")
 target_weapon_id = &"main_laser"
-trait_id = &"laser_fork"
+trait_id = &"laser_refract"
 trait_rank_increase = 1
 trait_definition = ExtResource("3_trait")

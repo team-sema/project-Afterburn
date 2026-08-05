@@ -10,6 +10,7 @@ extends VBoxContainer
 @onready var hull_bar: ProgressBar = %HullBar
 @onready var shield_label: Label = %ShieldLabel
 @onready var shield_bar: ProgressBar = %ShieldBar
+@onready var shield_charge_bar: ProgressBar = %ShieldChargeBar
 
 var _stats: StatsComponent
 var _shield: ShieldComponent
@@ -32,6 +33,8 @@ func _bind_ship() -> void:
 		_stats.health_changed.connect(_refresh_hull)
 	if _shield != null and not _shield.shield_changed.is_connected(_on_shield_changed):
 		_shield.shield_changed.connect(_on_shield_changed)
+	if _shield != null and not _shield.charge_changed.is_connected(_on_charge_changed):
+		_shield.charge_changed.connect(_on_charge_changed)
 	if _facility_applier != null and not _facility_applier.max_hull_changed.is_connected(_on_max_hull_changed):
 		_facility_applier.max_hull_changed.connect(_on_max_hull_changed)
 	ship.tree_exited.connect(_show_offline)
@@ -41,6 +44,7 @@ func _bind_ship() -> void:
 func refresh() -> void:
 	_refresh_hull()
 	_refresh_shield()
+	_refresh_charge()
 
 
 func _refresh_hull() -> void:
@@ -58,6 +62,21 @@ func _refresh_shield() -> void:
 	shield_bar.max_value = maxi(1, maximum)
 	shield_bar.value = current
 	shield_label.text = "SHIELD %d / %d" % [current, maximum]
+	_refresh_charge()
+
+
+func _refresh_charge() -> void:
+	if shield_charge_bar == null:
+		return
+	if _shield == null:
+		shield_charge_bar.visible = false
+		shield_charge_bar.value = 0.0
+		return
+	var progress := _shield.get_charge_progress()
+	var show_charge := _shield.get_max_shield() > 0 and _shield.get_current_shield() < _shield.get_max_shield()
+	shield_charge_bar.visible = show_charge
+	shield_charge_bar.max_value = 1.0
+	shield_charge_bar.value = progress if show_charge else 0.0
 
 
 func _get_max_hull() -> int:
@@ -70,6 +89,10 @@ func _on_shield_changed(_current_shield: int, _max_shield: int) -> void:
 	_refresh_shield()
 
 
+func _on_charge_changed(_progress: float) -> void:
+	_refresh_charge()
+
+
 func _on_max_hull_changed(_max_hull: int) -> void:
 	_refresh_hull()
 
@@ -80,5 +103,8 @@ func _show_offline() -> void:
 	_facility_applier = null
 	hull_bar.value = 0
 	shield_bar.value = 0
+	if shield_charge_bar != null:
+		shield_charge_bar.value = 0
+		shield_charge_bar.visible = false
 	hull_label.text = "HULL   —"
 	shield_label.text = "SHIELD —"

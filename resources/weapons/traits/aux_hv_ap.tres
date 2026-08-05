@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="WeaponTraitDefinition" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://resources/weapons/weapon_trait_definition.gd" id="1_def"]
+[ext_resource type="Texture2D" uid="uid://c6sy3i51i2bei" path="res://assets/svg/weapons/weapon_aux_cannon.svg" id="2_icon"]
+
+[resource]
+script = ExtResource("1_def")
+trait_id = &"aux_hv_ap"
+display_name = "고속 철갑"
+description = "피해 ×1.1, 탄속 ×1.6, 관통 +3(감쇠 0.9)."
+icon = ExtResource("2_icon")
+target_weapon_id = &"aux_test_cannon"
+next_rank_hint = "관통 수 증가"
+params = {
+"damage_mult": 1.1,
+"speed_mult": 1.6,
+"pierce_bonus": 3,
+"pierce_falloff": 0.9,
+}
