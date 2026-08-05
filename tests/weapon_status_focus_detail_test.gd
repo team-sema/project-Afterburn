@@ -31,6 +31,7 @@ func _run() -> void:
 	_expect(name_label.text.contains("블래스터") or name_label.text.contains("Lv."), "auto-focuses starting weapon detail")
 	var footer: Label = weapon_hud.get_node("%WeaponDetailFooter") as Label
 	_expect(footer.text.contains("블래스터") or footer.text.contains("발사"), "footer shows selected weapon description")
+	_expect(footer.text.contains("피해") and footer.text.contains("간격"), "footer shows selected weapon combat stats")
 
 	loadout.add_or_upgrade_weapon_trait(&"main_blaster", &"blaster_pierce", 1)
 	await process_frame
@@ -45,6 +46,7 @@ func _run() -> void:
 	await process_frame
 	footer = weapon_hud.get_node("%WeaponDetailFooter") as Label
 	_expect(footer.text.contains("관통"), "hovering module hex shows full trait name in description")
+	_expect(not footer.text.contains("피해"), "trait hover hides weapon combat stats")
 
 	var laser: WeaponDefinition = load("res://resources/weapons/definitions/main_laser.tres") as WeaponDefinition
 	loadout.equip_weapon(laser)
@@ -76,6 +78,7 @@ func _run() -> void:
 	_expect(laser_cluster.is_focused, "hovered bay is marked focused without row rebuild")
 	footer = weapon_hud.get_node("%WeaponDetailFooter") as Label
 	_expect(footer.text.contains("레이저") or footer.text.contains("빔"), "footer follows hovered weapon description")
+	_expect(footer.text.contains("틱피해") or footer.text.contains("틱"), "footer shows laser combat stats on hover")
 
 	var ship_panel: ShipPanel = world.get_node("Layout/RightPanel/Margin/VBox/ShipPanel") as ShipPanel
 	_expect(ship_panel.get_detail_text().contains(" : "), "facility detail shows name : slots by default")

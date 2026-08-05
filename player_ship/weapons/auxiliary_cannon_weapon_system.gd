@@ -11,6 +11,14 @@ extends WeaponSystem
 @onready var spawner_component: SpawnerComponent = $SpawnerComponent
 @onready var fire_rate_timer: Timer = $FireRateTimer
 
+func get_status_stat_line() -> String:
+	return "피해 %d · 간격 %s초 · 탄속 %s" % [
+		_status_damage(base_damage),
+		_status_num(_status_interval(base_fire_interval)),
+		_status_num(projectile_speed, 0),
+	]
+
+
 func _ready() -> void:
 	fire_rate_timer.timeout.connect(fire)
 	_apply_stat_multipliers()

@@ -40,6 +40,14 @@
   ],
   "cards": [
     {
+      "id": "weapon-status-stats",
+      "title": "STATUS 무기 수치 표시",
+      "description": "포커스 무기의 실효 전투 수치를 STATUS 하단에 표시한다.",
+      "column": "review",
+      "file": "cards/weapon-status-stats.md",
+      "tags": ["무기", "UI", "STATUS"]
+    },
+    {
       "id": "status-ui-templates",
       "title": "STATUS HUD UI 템플릿",
       "description": "런타임 무기 헥스를 에디터 템플릿 플레이스홀더로 복제한다.",

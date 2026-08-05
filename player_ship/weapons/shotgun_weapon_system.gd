@@ -12,6 +12,15 @@ extends WeaponSystem
 @onready var fire_rate_timer: Timer = $FireRateTimer
 @onready var sound_player: VariablePitchAudioStreamPlayer = $ShotgunSoundPlayer
 
+func get_status_stat_line() -> String:
+	return "피해 %d · 펠릿 %d · 간격 %s초 · 확산 %s°" % [
+		_status_damage(base_damage),
+		pellet_count,
+		_status_num(_status_interval(base_fire_interval)),
+		_status_num(spread_degrees, 0),
+	]
+
+
 func _ready() -> void:
 	fire_rate_timer.timeout.connect(fire)
 	_apply_stat_multipliers()

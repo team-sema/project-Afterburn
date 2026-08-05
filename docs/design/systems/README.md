@@ -7,6 +7,7 @@
 |------|------|------|
 | [status-ui-templates](status-ui-templates.md) | STATUS HUD UI 템플릿 플레이스홀더 | doing |
 | [weapon-status-focus-detail](weapon-status-focus-detail.md) | 무기 STATUS 포커스 디테일 | review |
+| [weapon-status-stats](weapon-status-stats.md) | STATUS 무기 실효 수치 표시 | review |
 | [weapon-replace-delete-reroll](weapon-replace-delete-reroll.md) | 무기 교체 삭제 · 증강 리롤 | review |
 | [weapon-augment-acquisition](weapon-augment-acquisition.md) | 무기 증강 획득 · 필드 드롭 제거 | review |
 | [unified-weapon-system](unified-weapon-system.md) | 통합 무기 시스템 · STATUS 무기 UI | review |
