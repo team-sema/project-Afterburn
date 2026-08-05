@@ -40,6 +40,14 @@
   ],
   "cards": [
     {
+      "id": "docs-spec-viewer-sync",
+      "title": "웹 스펙 뷰어 동기화",
+      "description": "facility-weapon-modules 이후 현황을 docs/spec에 반영해 웹 뷰어에서 보이게.",
+      "column": "review",
+      "file": "cards/docs-spec-viewer-sync.md",
+      "tags": ["문서", "스펙"]
+    },
+    {
       "id": "facility-weapon-modules",
       "title": "시설 모듈 효과",
       "description": "FacilityModuleEffect 12종 · 과충전/부스터/보스피해 등 부위 모듈.",

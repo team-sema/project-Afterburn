@@ -58,8 +58,10 @@
 
 | 클래스 | 역할 |
 |--------|------|
-| `PlayerAugmentApplier` | 설치된 모듈 → 이동/연사/데미지 배수. `WEAPON_TRAIT`는 loadout trait API로 전달(무기 스크립트가 전투 적용) |
-| `ShipFacilityApplier` | 설치된 시설 효과 모듈 → **장착 무기 공통 피해**·이동속도·최대 선체·수집 반경·최대 실드 (격납고는 효과 미정) |
+| `PlayerAugmentApplier` | 설치된 모듈 → 이동 배수(+부스터) · 전역 연사/피해(레거시 STAT). `WEAPON_TRAIT`는 loadout trait API |
+| `ShipFacilityApplier` | `FacilityModuleEffect` Kind 합산 → 무기 피해·보스 피해·이동·선체·수집·실드·XP·충전속도 · 버프/부스터 컨트롤러 refresh |
+| `ShipCombatBuffController` | 과충전(주기) · 비상 출력(선체 피격) → temp 피해 배율 |
+| `EngineBoostComponent` | `engine_boost`(Shift) 액티브 이속 버프 · 쿨다운 시그널 |
 | `EnemyModifierFactory` | 스폰 시 적 스탯·행동 컴포넌트 적용 |
 | `EnemyAugmentGrantComponent` | 수동으로 적 오그먼트 grant *(씬 미연결)* |
 | `TargetingComponent` | `"player"` 그룹 타깃 |
