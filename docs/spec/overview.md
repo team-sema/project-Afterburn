@@ -58,9 +58,9 @@ Pages 스펙 브라우저(`docs/spec/index.html` · `spec.js`의 `CATEGORIES`)�
 | 개요 | `overview.md` | 루프 · 씬 · Autoload · 폴더 |
 | 씬 플로우 | `scene-flow.md` | 메뉴·World·오퍼·STATUS 패널 |
 | 컴포넌트 | `components.md` | 재사용 커스텀 노드 |
-| 플레이어 | `player.md` | 함선 · **무기 7종·기본 전투 수치** · 시설 슬롯 · HUD |
+| 플레이어 | `player.md` | 함선 · 무기 7종·기본 수치 · **시설 효과 슬롯** · HUD |
 | 적 | `enemies.md` | 타입 · 생성기 · Threat |
-| 오그먼트 | `augments.md` | **플레이어 25·적 3 풀** · Kind · 리롤 |
+| 오그먼트 | `augments.md` | **플레이어 22·적 3 풀** · Kind · 리롤 |
 | 전투 | `combat.md` | 레이어 · 탄 · 점수 |
 | 이펙트 | `effects.md` | 네온 · 배경 · 폭발 |
 | 갭 | `gaps.md` | 미연결 · 백로그 후보 |

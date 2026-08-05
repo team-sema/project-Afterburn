@@ -51,7 +51,7 @@ Move / MoveInput / PositionClamp / WeaponMount(Blaster·Laser·Shotgun 등) / Pl
 
 ### 기본 전투 수치 (WeaponSystem 씬 · Lv.1 · 배율 1.0)
 
-정본은 각 `player_ship/weapons/*_weapon_system.tscn` 익스포트. 레벨·시설·스탯 모듈이 곱해지면 실효값은 달라진다. **인게임 STATUS에는 표시하지 않는다.**
+정본은 각 `player_ship/weapons/*_weapon_system.tscn` 익스포트. 레벨·시설 배율이 곱해지면 실효값은 달라진다. **인게임 STATUS에는 표시하지 않는다.**
 
 | 무기 | 핵심 수치 |
 |------|-----------|
@@ -77,10 +77,10 @@ Move / MoveInput / PositionClamp / WeaponMount(Blaster·Laser·Shotgun 등) / Pl
 
 ## PlayerAugmentApplier
 
-`PlayerAugmentRegistry.augments_changed` / `refresh()` 시 설치된 모듈 전체를 다시 계산한다.
+`PlayerAugmentRegistry.augments_changed` / `refresh()` 시 재계산한다.
 
-- `MOVE_SPEED` → `MoveComponent.velocity_multiplier` (**씬 기본 배수 × 스탯 모듈 × 엔진 모듈 효과** 합산도 여기서)
-- `FIRE_RATE` / `WEAPON_DAMAGE` → 각 WeaponSystem 전역 배수
+- 이동속도 = 씬 기본 × **엔진 시설 효과** (`ShipFacilityApplier` → `facility_move_speed_multiplier`)
+- `FIRE_RATE` / `WEAPON_DAMAGE` 전역 배율은 시설·무기 레벨 경로로만 갱신 (별도 스탯 모듈 오퍼 없음)
 - `WEAPON_TRAIT` → 설치 시 `PlayerWeaponLoadout.add_or_upgrade_weapon_trait` (전투 효과 스캐폴드)
 - 무기 레벨·특성은 증강 선택으로만 성장 (필드 픽업 없음)
 
@@ -88,17 +88,17 @@ Move / MoveInput / PositionClamp / WeaponMount(Blaster·Laser·Shotgun 등) / Pl
 
 ## 함선 부위와 모듈 슬롯 (`PlayerAugmentRegistry` / `ShipFacilityApplier`)
 
-시설·스탯 모듈은 아래 함선 부위 하나를 대상으로 하며 그 부위의 모듈 슬롯 하나를 차지한다.
+**부위 슬롯에 들어가는 플레이어 모듈은 `FACILITY_EFFECT`만이다.** 각 부위 효과는 시설 정의 1종이 담당하며, 같은 스탯을 별도 스탯 모듈로 이중 적용하지 않는다.
 무기 획득·레벨·특성 증강은 시설 슬롯을 소모하지 않는다.
 
 | id | 이름 | 효과 |
 |----|------|------|
-| `weapon_room` | 무기실 | 연사·공격력 스탯 모듈, **장착 무기 공통 공격력** 모듈 |
+| `weapon_room` | 무기실 | 집속 조준기 — **장착 무기 공통 공격력** |
 | `hangar` | 격납고 | 슬롯/UI 유지 · **효과 미정** |
-| `engine` | 엔진 | 이동속도 모듈 |
-| `hull` | 선체 | 최대 선체 내구도 가산 모듈 |
-| `radar` | 레이더 | 픽업 수집 반경 모듈 |
-| `shield` | 실드 | 최대 실드 가산 모듈 |
+| `engine` | 엔진 | 추력 편향기 — 이동속도 |
+| `hull` | 선체 | 반응 장갑 — 최대 선체 가산 |
+| `radar` | 레이더 | 광역 탐지기 — 픽업 수집 반경 |
+| `shield` | 실드 | 실드 축전기 — 최대 실드 가산 |
 
 - 모든 부위는 빈 슬롯 1개로 시작하며, 플레이어 오퍼 하나를 소비해 최대 3개까지 확장할 수 있다
 - 증강 선택 시 빈 슬롯에 설치한다. 슬롯이 가득 찼으면 교체 창에서 기존 모듈 하나를 선택하며, 취소하면 오퍼로 돌아간다
@@ -115,11 +115,11 @@ Move / MoveInput / PositionClamp / WeaponMount(Blaster·Laser·Shotgun 등) / Pl
 ## 플레이어 증강 오퍼
 
 - 화면 상단에 증강 3개, 구분선 아래에 함선 부위 UI를 표시한다
-- `STAT_MULTIPLIER` / `FACILITY_EFFECT` 카드 포커스·호버는 대상 `facility_id` 부위를 하이라이트한다. 무기 Kind 카드는 시설 하이라이트를 강제하지 않는다
+- `STAT_MULTIPLIER`는 플레이어 오퍼 풀에 없다. `FACILITY_EFFECT` 카드 포커스·호버만 대상 `facility_id` 부위를 하이라이트한다. 무기 Kind 카드는 시설 하이라이트를 강제하지 않는다
 - 카드 대신 확장 가능한 함선 부위를 선택하면 해당 부위의 빈 슬롯을 1개 늘리고 오퍼를 종료한다
 - 확장 부위에 키보드 포커스 또는 마우스 호버가 들어오면 추가될 다음 슬롯이 점멸한다
 - 카드 3개와 확장 가능한 부위 6개는 방향키·Tab으로 이동하고 `ui_accept`로 선택할 수 있다
-- 스탯·시설 모듈 리소스만 유효한 `facility_id`를 가진다. 무기 Kind는 시설 슬롯에 설치되지 않는다
+- 시설 모듈 리소스만 유효한 `facility_id`를 가지며 슬롯에 설치된다. 무기 Kind는 시설 슬롯에 설치되지 않는다
 - 적 증강 오퍼는 함선 UI 없이 기존 3지선다를 유지한다
 
 ## 선체 · 실드

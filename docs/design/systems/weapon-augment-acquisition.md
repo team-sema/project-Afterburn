@@ -8,7 +8,7 @@
 
 1. 적 `WeaponDropComponent`는 드롭하지 않는다(비활성). 필드 `WeaponPickup` 생성·획득 경로를 런에서 쓰지 않는다.
 2. XP 드롭은 `ExperienceDropComponent.drop_chance`(데이터/익스포트)로만 조정. 적별 `experience_amount`는 유지.
-3. 증강 Kind: `WEAPON_ACQUIRE` / `WEAPON_LEVEL` / `WEAPON_TRAIT` / `FACILITY_EFFECT` / `STAT_MULTIPLIER`. 가중치 `offer_weight`(데이터).
+3. 증강 Kind: `WEAPON_ACQUIRE` / `WEAPON_LEVEL` / `WEAPON_TRAIT` / `FACILITY_EFFECT`. 가중치 `offer_weight`(데이터).
 4. `WEAPON_ACQUIRE`: 미장착이면 빈 베이 신규 장착(Lv.1). 만석이면 증강 안 교체 UI. 교체 시 피교체 무기 성장 삭제.
 5. `WEAPON_LEVEL`: **장착 중** 무기만 대상, weapon_id 레벨 +1 (최대 3). 가역 모듈이 아니다.
 6. `WEAPON_TRAIT`: 장착 중 무기만, 시설 슬롯 소모 없음. 전투 효과는 스캐폴드(상태·UI).

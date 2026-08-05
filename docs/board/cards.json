@@ -40,6 +40,14 @@
   ],
   "cards": [
     {
+      "id": "facility-own-effects",
+      "title": "시설이 효과 담당",
+      "description": "스탯 모듈을 제거하고 부위 효과는 시설 효과 모듈만 담당한다.",
+      "column": "review",
+      "file": "cards/facility-own-effects.md",
+      "tags": ["오그먼트", "함선"]
+    },
+    {
       "id": "weapon-stats-spec-only",
       "title": "무기 수치는 스펙만",
       "description": "STATUS 인게임 수치 줄을 제거하고 기본 전투값은 docs/spec/player.md에만 둔다.",
@@ -82,7 +90,7 @@
     {
       "id": "augment-module-slots",
       "title": "증강 모듈 슬롯",
-      "description": "스탯·시설 모듈을 함선 부위 슬롯에 장착. 무기 Kind는 슬롯 비소모.",
+      "description": "시설 효과 모듈을 함선 부위 슬롯에 장착. 무기 Kind는 슬롯 비소모.",
       "column": "review",
       "file": "cards/augment-module-slots.md",
       "tags": ["증강", "함선", "UI"]
