@@ -250,7 +250,7 @@ theme_override_styles/panel = SubResource("StyleBox_control_box")
 
 [node name="Label" type="Label" parent="Layout/Playfield/ModeBadge"]
 layout_mode = 2
-text = "WEAPON TEST  ·  INVINCIBLE"
+text = "AUGMENT TEST LAB  ·  C PLAYER / V ENEMY"
 label_settings = ExtResource("6_default_label")
 theme_override_colors/font_color = Color(0.5, 0.9, 1, 0.95)
 horizontal_alignment = 1
@@ -381,7 +381,7 @@ text = "슬롯 비우기"
 [node name="Hint" type="Label" parent="Layout/RightPanel/Margin/VBox"]
 visible = false
 layout_mode = 2
-text = "슬롯 선택 → 무기 선택\nWASD / 방향키로 기체 이동"
+text = "C 플레이어 증강 · V 적 증강\n슬롯 선택 → 무기 선택"
 label_settings = ExtResource("6_default_label")
 theme_override_colors/font_color = Color(0.45, 0.7, 0.85, 0.8)
 autowrap_mode = 3
