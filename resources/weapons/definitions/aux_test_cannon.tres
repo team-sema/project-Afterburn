@@ -10,4 +10,4 @@ id = &"aux_test_cannon"
 display_name = "보조 캐넌"
 weapon_scene = ExtResource("2_scene")
 icon = ExtResource("3_icon")
-description = "연두빛 탄환을 자동 발사하는 무기."
+description = "좌우 옵션 드론이 전방으로 보조탄을 발사하는 무기."

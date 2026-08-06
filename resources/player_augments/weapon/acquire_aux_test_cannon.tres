@@ -7,7 +7,7 @@
 script = ExtResource("1_aug")
 augment_id = &"acquire_aux_test_cannon"
 display_name = "보조 캐넌"
-description = "보조 캐넌 병기 모듈을 획득합니다."
+description = "좌우 옵션 드론 2기로 구성된 보조 캐넌을 획득합니다."
 augment_type = 1
 offer_weight = 1.0
 weapon_definition = ExtResource("2_weapon")
