@@ -1,6 +1,6 @@
-[gd_resource type="Resource" script_class="WeaponTraitDefinition" load_steps=3 format=3]
+[gd_resource type="Resource" script_class="WeaponTraitDefinition" format=3 uid="uid://cbsvbdk0ytsvn"]
 
-[ext_resource type="Script" path="res://resources/weapons/weapon_trait_definition.gd" id="1_def"]
+[ext_resource type="Script" uid="uid://dggpfusbxuib7" path="res://resources/weapons/weapon_trait_definition.gd" id="1_def"]
 [ext_resource type="Texture2D" uid="uid://bhsri7kh1kskh" path="res://assets/svg/weapons/weapon_main_shotgun.svg" id="2_icon"]
 
 [resource]
@@ -12,7 +12,7 @@ icon = ExtResource("2_icon")
 target_weapon_id = &"main_shotgun"
 next_rank_hint = "집탄 추가 강화"
 params = {
-"spread_mult": 0.5,
-"range_mult": 1.4,
+"lifetime_mult": 1.4,
 "speed_mult": 1.2,
+"spread_mult": 0.5
 }

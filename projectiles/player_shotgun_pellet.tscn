@@ -58,7 +58,7 @@ texture = ExtResource("3_tex")
 self_modulate = Color(1, 0.95, 0.7, 1)
 texture_filter = 2
 material = ExtResource("5_core")
-scale = Vector2(0.08, 0.08)
+scale = Vector2(0.25, 0.08)
 texture = ExtResource("3_tex")
 
 [node name="Trail" type="GPUParticles2D" parent="Sprite2D"]

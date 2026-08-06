@@ -224,6 +224,14 @@
       "tags": ["적", "버그"]
     },
     {
+      "id": "shotgun-moving-projectile-visibility",
+      "title": "이동 중 샷건 탄환 비표시 분석",
+      "description": "플레이어 이동 중 샷건 발사 시 펠릿이 보이지 않는 현상의 재현 조건과 원인을 조사한다.",
+      "column": "review",
+      "file": "cards/shotgun-moving-projectile-visibility.md",
+      "tags": ["무기", "투사체", "버그"]
+    },
+    {
       "id": "bomb-proximity-fuse",
       "title": "폭탄 근접 자폭",
       "description": "느린 고체력 폭탄. 근접 시 적색 점멸 후 1.5× 자폭.",

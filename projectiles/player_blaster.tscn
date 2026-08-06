@@ -58,7 +58,7 @@ texture = ExtResource("3_dwj7u")
 self_modulate = Color(0.94, 1, 1, 1)
 texture_filter = 2
 material = ExtResource("5_44pb5")
-scale = Vector2(0.125, 0.125)
+scale = Vector2(0.25, 0.125)
 texture = ExtResource("3_dwj7u")
 
 [node name="Trail" type="GPUParticles2D" parent="Sprite2D" unique_id=1200037974]

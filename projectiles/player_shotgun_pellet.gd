@@ -7,11 +7,10 @@ extends Node2D
 var _weapon: WeaponSystem
 var _base_damage := 1
 var _origin := Vector2.ZERO
-var _max_range := 280.0
+var _max_lifetime := 1.27
 var _close_damage_mult := 1.0
 var _close_range_px := 80.0
-var _traveled := 0.0
-var _last_pos := Vector2.ZERO
+var _age := 0.0
 var _pending_configure := false
 
 
@@ -19,14 +18,14 @@ func configure_shotgun_combat(
 	weapon: WeaponSystem,
 	base_damage: int,
 	origin: Vector2,
-	max_range: float,
+	max_lifetime: float,
 	close_damage_mult: float,
 	close_range_px: float,
 ) -> void:
 	_weapon = weapon
 	_base_damage = maxi(1, base_damage)
 	_origin = origin
-	_max_range = maxf(16.0, max_range)
+	_max_lifetime = maxf(0.05, max_lifetime)
 	_close_damage_mult = maxf(1.0, close_damage_mult)
 	_close_range_px = maxf(1.0, close_range_px)
 	_pending_configure = true
@@ -38,15 +37,13 @@ func _ready() -> void:
 	scale_component.tween_scale()
 	flash_component.flash()
 	hitbox_component.hit_hurtbox.connect(queue_free.unbind(1))
-	_last_pos = global_position
 	if _pending_configure or _weapon != null:
 		_apply_damage_resolver()
 
 
-func _process(_delta: float) -> void:
-	_traveled += global_position.distance_to(_last_pos)
-	_last_pos = global_position
-	if _traveled >= _max_range:
+func _process(delta: float) -> void:
+	_age += delta
+	if _age >= _max_lifetime:
 		queue_free()
 
 

@@ -1,6 +1,6 @@
-[gd_resource type="Resource" script_class="WeaponTraitDefinition" load_steps=3 format=3]
+[gd_resource type="Resource" script_class="WeaponTraitDefinition" format=3 uid="uid://cp6fe2tm2fqyi"]
 
-[ext_resource type="Script" path="res://resources/weapons/weapon_trait_definition.gd" id="1_def"]
+[ext_resource type="Script" uid="uid://dggpfusbxuib7" path="res://resources/weapons/weapon_trait_definition.gd" id="1_def"]
 [ext_resource type="Texture2D" uid="uid://dj7s045pab0js" path="res://assets/svg/weapons/weapon_plasma_bomb.svg" id="2_icon"]
 
 [resource]
@@ -12,8 +12,8 @@ icon = ExtResource("2_icon")
 target_weapon_id = &"plasma_bomb"
 next_rank_hint = "흡인력 증가"
 params = {
-"pull_strength": 240,
-"pull_radius_mult": 1.6,
 "damage_mult": 1.35,
-"radius_mult": 0.9,
+"pull_radius_mult": 1.6,
+"pull_strength": 240,
+"radius_mult": 0.9
 }
