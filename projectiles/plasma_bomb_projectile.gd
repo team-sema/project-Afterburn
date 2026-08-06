@@ -15,12 +15,14 @@ const ENEMY_HURTBOX_MASK := 1 << 1
 var _elapsed := 0.0
 var _detonated := false
 var flight_speed := 0.0
+var flight_direction := Vector2.UP
 var fuse_time := 0.0
 var blast_radius := 0.0
 var damage_radius_margin := 0.0
 var blast_damage := 0
 
-var _weapon: WeaponSystem
+var _damage_multiplier := 1.0
+var _boss_damage_multiplier := 1.0
 var _cluster_count := 0
 var _cluster_damage_mult := 0.4
 var _field_duration := 0.0
@@ -51,12 +53,25 @@ func configure_plasma_traits(
 	field_max_bonus_mult: float,
 	pull_strength: float,
 ) -> void:
-	_weapon = weapon
+	if weapon != null and is_instance_valid(weapon):
+		configure_damage_snapshot(
+			weapon.get_effective_damage_multiplier(),
+			weapon.get_boss_damage_multiplier(),
+		)
 	_cluster_count = maxi(0, cluster_count)
 	_cluster_damage_mult = maxf(0.0, cluster_damage_mult)
 	_field_duration = maxf(0.0, field_duration)
 	_field_max_bonus_mult = maxf(0.0, field_max_bonus_mult)
 	_pull_strength = maxf(0.0, pull_strength)
+
+
+func configure_damage_snapshot(damage_multiplier: float, boss_damage_multiplier: float) -> void:
+	_damage_multiplier = maxf(0.01, damage_multiplier)
+	_boss_damage_multiplier = maxf(0.01, boss_damage_multiplier)
+
+
+func set_flight_direction(direction: Vector2) -> void:
+	flight_direction = direction.normalized() if not direction.is_zero_approx() else Vector2.UP
 
 
 func mark_as_cluster_child() -> void:
@@ -81,7 +96,7 @@ func _process(delta: float) -> void:
 	if _detonated:
 		return
 	_elapsed += delta
-	global_position.y -= flight_speed * delta
+	global_position += flight_direction * flight_speed * delta
 	visual.rotation += delta * 1.4
 	var pulse := 1.0 + sin(_elapsed * TAU * 3.0) * 0.08
 	visual.scale = Vector2.ONE * pulse
@@ -129,15 +144,23 @@ func _deal_blast_damage(damage: int) -> int:
 		if hurtbox.is_invincible or hit_hurtboxes.has(hurtbox.get_instance_id()):
 			continue
 		hit_hurtboxes[hurtbox.get_instance_id()] = true
-		if _weapon != null:
-			hitbox.damage = _weapon.resolve_hit_damage(damage, hurtbox)
-		else:
-			hitbox.damage = damage
+		hitbox.damage = _resolve_hit_damage(damage, hurtbox)
 		hitbox.hit_hurtbox.emit(hurtbox)
 		hurtbox.hurt.emit(hitbox)
 	var hit_count := hit_hurtboxes.size()
 	hitbox.free()
 	return hit_count
+
+
+func _resolve_hit_damage(damage: int, hurtbox: HurtboxComponent = null) -> int:
+	var multiplier := _damage_multiplier
+	if hurtbox != null and not is_equal_approx(_boss_damage_multiplier, 1.0):
+		var node: Node = hurtbox.get_parent()
+		while node != null and not (node is Enemy):
+			node = node.get_parent()
+		if node is Enemy and (node as Enemy).is_boss:
+			multiplier *= _boss_damage_multiplier
+	return maxi(1, roundi(float(damage) * multiplier))
 
 
 func _apply_gravity_pull() -> void:
@@ -170,11 +193,10 @@ func _spawn_clusters() -> void:
 		return
 	for index in _cluster_count:
 		var angle := TAU * float(index) / float(_cluster_count) - PI * 0.5
+		var direction := Vector2(cos(angle), sin(angle))
 		var child := scene.instantiate() as PlasmaBombProjectile
 		if child == null:
 			continue
-		parent.add_child(child)
-		child.global_position = global_position + Vector2(cos(angle), sin(angle)) * 10.0
 		child.configure_bomb(
 			flight_speed * 0.7,
 			0.35,
@@ -183,8 +205,10 @@ func _spawn_clusters() -> void:
 			maxi(1, roundi(float(blast_damage) * _cluster_damage_mult)),
 		)
 		child.mark_as_cluster_child()
-		if _weapon != null:
-			child.configure_plasma_traits(_weapon, 0, 0.0, 0.0, 0.0, 0.0)
+		child.set_flight_direction(direction)
+		child.configure_damage_snapshot(_damage_multiplier, _boss_damage_multiplier)
+		parent.add_child(child)
+		child.global_position = global_position + direction * 10.0
 
 
 func _spawn_residual_field() -> void:
@@ -196,16 +220,17 @@ func _spawn_residual_field() -> void:
 	var field_script := load("res://projectiles/plasma_residual_field.gd") as Script
 	var field := Node2D.new()
 	field.set_script(field_script)
-	parent.add_child(field)
-	field.global_position = global_position
 	field.call(
 		"configure",
 		_field_duration,
 		get_damage_radius() * 0.85,
 		blast_damage,
 		_field_max_bonus_mult,
-		_weapon,
+		_damage_multiplier,
+		_boss_damage_multiplier,
 	)
+	parent.add_child(field)
+	field.global_position = global_position
 
 
 func _spawn_explosion_effect() -> void:
