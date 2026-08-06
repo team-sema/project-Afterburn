@@ -40,6 +40,14 @@
   ],
   "cards": [
     {
+      "id": "support-cannon-drones",
+      "title": "보조 캐넌 옵션 드론 개편",
+      "description": "유도 캐넌을 플레이어 좌우에서 전방 사격하는 옵션 드론 무기로 개편하고 모듈로 기체 수를 확장한다.",
+      "column": "review",
+      "file": "cards/support-cannon-drones.md",
+      "tags": ["무기", "드론", "오그먼트"]
+    },
+    {
       "id": "docs-consistency-audit",
       "title": "문서 정합성 감사",
       "description": "구조 검토에서 나온 규칙·스펙·보드 모순 정리 (점수→XP 트리거, 풀 수, 열 불일치, headless 경로, 구조 부채 기록).",

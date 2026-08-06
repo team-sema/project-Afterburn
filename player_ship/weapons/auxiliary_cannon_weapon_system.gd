@@ -4,22 +4,26 @@ extends WeaponSystem
 @export_range(0.02, 10.0, 0.01) var base_fire_interval := 0.8
 @export_range(1, 200, 1) var base_damage := 9
 @export_range(1.0, 600.0, 1.0) var projectile_speed := 190.0
-@export_range(8.0, 80.0, 1.0) var orbit_radius := 28.0
-@export_range(0.2, 8.0, 0.05) var orbit_speed := 2.2
-@export_range(1, 4, 1) var pod_count := 1
+@export_range(2, 8, 2) var base_drone_count := 2
+@export_range(8.0, 48.0, 1.0) var drone_side_offset := 18.0
+@export_range(4.0, 24.0, 1.0) var drone_pair_spacing := 11.0
+@export_range(-16.0, 16.0, 1.0) var drone_pair_vertical_spacing := 5.0
+@export_range(20.0, 400.0, 1.0) var drone_follow_speed := 100.0
+@export_range(0.0, 100.0, 1.0) var drone_distance_speed_gain_percent := 15.0
+@export_range(0.0, 200.0, 1.0) var drone_max_distance_speed_bonus := 50.0
 
-## Permanent bay weapon — fires from orbiting pods toward the nearest enemy.
+## Permanent bay weapon — fixed support drones fire straight ahead.
 
-@onready var muzzle: Marker2D = $Muzzle
+@onready var support_drone_template: Node2D = $SupportDroneTemplate
 @onready var spawner_component: SpawnerComponent = $SpawnerComponent
 @onready var fire_rate_timer: Timer = $FireRateTimer
 
-var _pods: Array[Marker2D] = []
-var _orbit_angle := 0.0
+var _support_drones: Array[Node2D] = []
 
 
 func _ready() -> void:
-	_ensure_pods()
+	support_drone_template.visible = false
+	_ensure_support_drones()
 	fire_rate_timer.timeout.connect(fire)
 	_apply_stat_multipliers()
 	fire_rate_timer.start()
@@ -27,40 +31,48 @@ func _ready() -> void:
 
 func _on_weapon_setup() -> void:
 	connect_weapon_trait_changed(_on_weapon_trait_changed)
-	_ensure_pods()
+	_ensure_support_drones()
 	_apply_stat_multipliers()
 
 
 func _on_weapon_trait_changed(changed_weapon_id: StringName, _trait_id: StringName, _new_rank: int) -> void:
 	if changed_weapon_id != get_weapon_id():
 		return
+	_ensure_support_drones()
 	_apply_stat_multipliers()
 
 
 func _process(delta: float) -> void:
 	if is_shutdown:
 		return
-	_orbit_angle += orbit_speed * delta
-	_layout_pods()
+	for index in _support_drones.size():
+		var drone := _support_drones[index]
+		var target := _get_drone_target(index)
+		var player_distance := drone.global_position.distance_to(global_position)
+		var distance_speed_bonus := minf(
+			player_distance * drone_distance_speed_gain_percent / 100.0,
+			drone_max_distance_speed_bonus,
+		)
+		var follow_speed := drone_follow_speed + distance_speed_bonus
+		drone.global_position = drone.global_position.move_toward(
+			target,
+			follow_speed * delta,
+		)
 
 
 func fire() -> void:
 	if is_shutdown:
 		return
-	_ensure_pods()
-	var target := _nearest_enemy()
-	for pod in _pods:
-		var direction := Vector2.UP
-		if target != null:
-			direction = pod.global_position.direction_to(target.global_position)
-			if direction.length_squared() < 0.0001:
-				direction = Vector2.UP
-		else:
-			direction = Vector2.UP.rotated(_orbit_angle)
+	_ensure_support_drones()
+	for drone in _support_drones:
+		var muzzle := drone.get_node_or_null("Muzzle") as Marker2D
+		if muzzle == null:
+			push_error("AuxiliaryCannonWeaponSystem: support drone missing Muzzle.")
+			continue
 		spawner_component.spawn(
-			pod.global_position,
+			muzzle.global_position,
 			null,
-			func(projectile: Node) -> void: _configure_projectile(projectile, direction.normalized()),
+			func(projectile: Node) -> void: _configure_projectile(projectile),
 		)
 	fired.emit()
 
@@ -69,7 +81,6 @@ func _apply_stat_multipliers() -> void:
 	if not is_node_ready():
 		return
 	var interval := base_fire_interval / get_effective_fire_rate_multiplier()
-	interval *= float(get_trait_param(&"aux_heavy_barrel", &"fire_interval_mult", 1.0))
 	interval *= float(get_trait_param(&"aux_auto_loader", &"fire_interval_mult", 1.0))
 	fire_rate_timer.wait_time = maxf(0.02, interval)
 
@@ -82,48 +93,57 @@ func _on_weapon_shutdown() -> void:
 			fire_rate_timer.timeout.disconnect(fire)
 
 
-func _ensure_pods() -> void:
-	var desired := maxi(1, pod_count)
-	while _pods.size() < desired:
-		var pod := Marker2D.new()
-		pod.name = "CannonPod%d" % (_pods.size() + 1)
-		add_child(pod)
-		_pods.append(pod)
-	while _pods.size() > desired:
-		var extra := _pods.pop_back() as Marker2D
+func get_support_drone_count() -> int:
+	return _support_drones.size()
+
+
+func get_support_drone_positions() -> Array[Vector2]:
+	var positions: Array[Vector2] = []
+	for drone in _support_drones:
+		positions.append(drone.global_position)
+	return positions
+
+
+func _ensure_support_drones() -> void:
+	if support_drone_template == null:
+		return
+	var desired := _get_desired_drone_count()
+	while _support_drones.size() < desired:
+		var drone := support_drone_template.duplicate() as Node2D
+		drone.name = "SupportDrone%d" % (_support_drones.size() + 1)
+		drone.visible = true
+		add_child(drone)
+		drone.top_level = true
+		_support_drones.append(drone)
+		drone.global_position = _get_drone_target(_support_drones.size() - 1)
+	while _support_drones.size() > desired:
+		var extra := _support_drones.pop_back() as Node2D
 		if is_instance_valid(extra):
 			extra.queue_free()
-	# Prefer scene-authored Muzzle as first pod anchor when only one pod exists.
-	if desired == 1 and muzzle != null and _pods.size() == 1:
-		pass
-	_layout_pods()
 
 
-func _layout_pods() -> void:
-	var count := _pods.size()
-	if count == 0:
-		return
-	for index in count:
-		var angle := _orbit_angle + TAU * float(index) / float(count)
-		_pods[index].position = Vector2(cos(angle), sin(angle)) * orbit_radius
+func _get_desired_drone_count() -> int:
+	var desired := maxi(2, base_drone_count)
+	desired += int(get_trait_param(&"aux_heavy_barrel", &"drone_count_bonus", 0))
+	if desired % 2 != 0:
+		desired += 1
+	return desired
 
 
-func _nearest_enemy() -> Node2D:
-	var best: Node2D = null
-	var best_dist := INF
-	var origin := global_position
-	for node in get_tree().get_nodes_in_group("enemies"):
-		var enemy := node as Node2D
-		if enemy == null or not is_instance_valid(enemy):
-			continue
-		var dist := origin.distance_squared_to(enemy.global_position)
-		if dist < best_dist:
-			best_dist = dist
-			best = enemy
-	return best
+func _get_drone_target(index: int) -> Vector2:
+	return to_global(_get_drone_offset(index))
 
 
-func _configure_projectile(projectile: Node, direction: Vector2) -> void:
+func _get_drone_offset(index: int) -> Vector2:
+	var pair_index := floori(float(index) / 2.0)
+	var side := -1.0 if index % 2 == 0 else 1.0
+	return Vector2(
+		side * (drone_side_offset + drone_pair_spacing * pair_index),
+		drone_pair_vertical_spacing * pair_index,
+	)
+
+
+func _configure_projectile(projectile: Node, direction: Vector2 = Vector2.UP) -> void:
 	var hitbox := projectile.get_node_or_null("HitboxComponent") as HitboxComponent
 	if hitbox == null:
 		push_error("AuxiliaryCannonWeaponSystem: projectile missing HitboxComponent.")
@@ -133,9 +153,12 @@ func _configure_projectile(projectile: Node, direction: Vector2) -> void:
 		push_error("AuxiliaryCannonWeaponSystem: projectile missing MoveComponent.")
 		return
 
+	var shot_direction := direction.normalized()
+	if shot_direction.length_squared() < 0.0001:
+		shot_direction = Vector2.UP
 	var speed := projectile_speed * float(get_trait_param(&"aux_hv_ap", &"speed_mult", 1.0))
-	move.velocity = direction * speed
-	projectile.rotation = direction.angle() + PI * 0.5
+	move.velocity = shot_direction * speed
+	projectile.rotation = shot_direction.angle() + PI * 0.5
 
 	var damage_mult := 1.0
 	damage_mult *= float(get_trait_param(&"aux_heavy_barrel", &"damage_mult", 1.0))
@@ -145,7 +168,6 @@ func _configure_projectile(projectile: Node, direction: Vector2) -> void:
 		damage_mult *= float(get_trait_param(&"aux_he_shell", &"direct_damage_mult", 0.95))
 
 	var base := maxi(1, roundi(base_damage * damage_mult))
-	var size_mult := float(get_trait_param(&"aux_heavy_barrel", &"size_mult", 1.0))
 	var pierce_bonus := int(get_trait_param(&"aux_hv_ap", &"pierce_bonus", 0))
 	var pierce_falloff := float(get_trait_param(&"aux_hv_ap", &"pierce_falloff", 1.0))
 	var aoe_radius := 0.0
@@ -161,7 +183,7 @@ func _configure_projectile(projectile: Node, direction: Vector2) -> void:
 			base,
 			pierce_bonus,
 			pierce_falloff,
-			size_mult,
+			1.0,
 			aoe_radius,
 			aoe_mult,
 		)

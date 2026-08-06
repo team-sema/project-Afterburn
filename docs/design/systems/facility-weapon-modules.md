@@ -54,7 +54,7 @@
 | Blaster | rapid / sync / accel_ap / ricochet | 연사·동시발사·관통·도탄 |
 | Laser | wide / heat / refract / pulse | 폭·열스택·굴절·펄스(오프 시 빔 페이드아웃) |
 | Shotgun | expanded / choke / cut / burst | 펠릿·집탄·근거리·버스트 |
-| Aux cannon | heavy / auto / he / hv_ap | 피해·연사·AOE·관통 + 궤도 포드 사격 |
+| Aux cannon | formation(`aux_heavy_barrel` 호환 ID) / auto / he / hv_ap | 드론 증설·연사·AOE·관통 + 옵션 드론 전방 사격 |
 | Plasma | expand / cluster / field / gravity | 반경·클러스터·잔류장·흡인 |
 | Missile | multi / mobility / proximity / terminal | 다발·탄속·AOE·비행시간 보너스 |
 | Barrier | multi / fast / expand / repulse | 세그먼트·재타격 쿨·크기·넉백 |
