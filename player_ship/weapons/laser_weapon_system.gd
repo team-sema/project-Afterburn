@@ -14,6 +14,7 @@ const PLAYFIELD_TOP_MARGIN := 8.0
 
 @onready var glow_line: Sprite2D = $GlowLine
 @onready var core_line: Line2D = $CoreLine
+@onready var refract_vfx = $RefractVfx
 @onready var damage_tick_timer: Timer = $DamageTickTimer
 @onready var damage_hitbox: HitboxComponent = $DamageHitbox
 
@@ -50,6 +51,7 @@ func _on_weapon_setup() -> void:
 	_pulse_on = true
 	_pulse_elapsed = 0.0
 	_pulse_beam_alpha = 1.0
+	refract_vfx.clear_segments()
 	_apply_stat_multipliers()
 	_apply_pulse_beam_alpha()
 	restart_beam_width_animation()
@@ -128,6 +130,7 @@ func restart_beam_width_animation() -> void:
 func _on_weapon_shutdown() -> void:
 	disconnect_weapon_trait_changed(_on_weapon_trait_changed)
 	_stop_beam_width_tween()
+	refract_vfx.clear_segments()
 	set_physics_process(false)
 	visible = false
 	if damage_tick_timer != null:
@@ -237,12 +240,12 @@ func _damage_all_along_beam(endpoint: Vector2) -> void:
 	if space == null:
 		return
 	var from_global := to_global(BEAM_LOCAL_START)
-	var to_global := to_global(endpoint)
+	var endpoint_global := to_global(endpoint)
 	var exclude: Array[RID] = []
 	var primary_hits: Array[Dictionary] = []
 
 	for _i in 32:
-		var query := PhysicsRayQueryParameters2D.create(from_global, to_global)
+		var query := PhysicsRayQueryParameters2D.create(from_global, endpoint_global)
 		query.collide_with_areas = true
 		query.collide_with_bodies = false
 		query.collision_mask = 2
@@ -289,6 +292,12 @@ func _apply_refract(primary_hits: Array[Dictionary]) -> void:
 		if hurtbox == null or hurtbox.is_invincible:
 			continue
 		_apply_beam_hit(hurtbox, fork_mult)
+		_show_refract_visual(origin, hurtbox.global_position)
+
+
+func _show_refract_visual(from_global: Vector2, target_global: Vector2) -> void:
+	if refract_vfx != null:
+		refract_vfx.flash_segment(from_global, target_global)
 
 
 func _nearest_other_enemy(origin: Vector2, exclude: Node, also_exclude: Array[Node]) -> Node2D:
