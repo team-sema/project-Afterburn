@@ -40,6 +40,14 @@
   ],
   "cards": [
     {
+      "id": "docs-consistency-audit",
+      "title": "문서 정합성 감사",
+      "description": "구조 검토에서 나온 규칙·스펙·보드 모순 정리 (점수→XP 트리거, 풀 수, 열 불일치, headless 경로, 구조 부채 기록).",
+      "column": "review",
+      "file": "cards/docs-consistency-audit.md",
+      "tags": ["문서", "스펙", "칸반"]
+    },
+    {
       "id": "laser-pulse-fade-out",
       "title": "레이저 펄스 페이드아웃",
       "description": "laser_pulse OFF 시 빔 알파를 짧게 페이드아웃해 끊김을 완화.",
@@ -227,7 +235,7 @@
       "id": "fix-formation-viewport-before-tree",
       "title": "Drone 편대 viewport 트리 가드",
       "description": "setup_formation이 add_child 전에 viewport를 읽어내던 에러 수정.",
-      "column": "doing",
+      "column": "review",
       "file": "cards/fix-formation-viewport-before-tree.md",
       "tags": ["적", "버그"]
     },
