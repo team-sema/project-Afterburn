@@ -4,7 +4,7 @@
 
 | 타입 | 필드 |
 |------|------|
-| `PlayerAugment` | 공통 필드 + `augment_type`, `offer_weight`, `facility_id`, `facility_module_effect`, 무기 필드(`weapon_definition`, `trait_*`) |
+| `PlayerAugment` | 공통 필드 + `augment_type`, `offer_weight`, `module_tags`(`facility_id` fallback), `facility_module_effect`, 무기 필드(`weapon_definition`, `trait_*`) |
 | `FacilityModuleEffect` | `kind` + `primary` / `secondary` / `tertiary` (시설 모듈 효과 페이로드) |
 | `WeaponTraitDefinition` | `trait_id`, `target_weapon_id`, `max_rank`(기본 3), `params`(Lv.I), `rank_overrides`(Lv.II·III) |
 | `EnemyAugment` | 공통 필드 + `icon`, `max_stacks`, `stat_modifiers[]`, `behavior_components[]`, `target_spawn_id`, `additional_spawn_count` |
@@ -17,7 +17,7 @@
 ### 플레이어
 
 - 총 **48종**: 시설 효과 **13** + 무기 획득 7 + 무기 모듈 **28**
-- **함선 부위 슬롯 모듈은 `FACILITY_EFFECT`만.** 각 카드의 `facility_module_effect`(`FacilityModuleEffect`)가 효과를 정의한다. 동일 Kind는 primary **곱**(배율) / **합**(가산).
+- **범용 시설 슬롯 모듈은 `FACILITY_EFFECT`만.** 각 카드의 `facility_module_effect`(`FacilityModuleEffect`)가 효과를 정의한다. 동일 Kind는 primary **곱**(배율) / **합**(가산).
 - 카드 표시는 `get_offer_title` / `get_offer_description`으로 신규 무기·모듈 강화를 구분
 - 가중치: `offer_weight`(기본 1.0)
 - 무기 전용 Kind는 **함선 시설 슬롯을 소모하지 않음**
@@ -25,7 +25,7 @@
 
 #### 시설 효과 모듈 13종
 
-`facility_id` `hangar`는 UI 표시명 **동력로**. 슬롯 키는 호환을 위해 `hangar` 유지.
+primary tag `hangar`는 UI 표시명 **동력로**. tag 키와 기존 아이콘은 호환을 위해 `hangar` 유지.
 
 | ID | 표시명 | 부위 | Kind · 수치 |
 |----|--------|------|-------------|
@@ -139,12 +139,12 @@
 ### UI
 
 - `AugmentSelectionOverlay` — 상단 카드 3개 + 선택 Kind에 따라 전환되는 하단 적용 대상 UI
-  - `FACILITY_EFFECT` 포커스: 함선 부위 UI와 대상 `facility_id` 하이라이트
+  - `FACILITY_EFFECT` 포커스: 함선 tag UI와 primary tag 하이라이트
   - `WEAPON_ACQUIRE` 포커스: 현재 병기 배치와 신규 배치/교체 안내
   - `WEAPON_TRAIT` 포커스: 대상 병기 슬롯·현재/다음 모듈 레벨 미리보기
   - 적 그룹 증강: `EnemyAugment.icon`에 지정된 적 SVG를 카드 아이콘으로 표시
 - `WeaponSlotSelectionOverlay` — 만석 시 무기 베이 교체
-- `AugmentModuleSwapOverlay` — 시설 모듈 교체
+- `AugmentModuleSwapOverlay` — 최대 15개 범용 슬롯의 시설 모듈 교체
 - `ProgressionHud` — XP · `[C]` 힌트
 
 ### 통합 증강 테스트 랩
@@ -154,7 +154,7 @@
 - `V` 목록은 실제 런의 3장 무작위 오퍼 대신 적 증강 리소스 전체를 스크롤 목록으로 연다.
 - 목록 행은 아이콘 원본 크기에 영향받지 않는 고정 높이 텍스트 카드로 표시한다.
 - PLAYER 시설 13종과 ENEMY 7종(게임플레이 풀 미등록 `enemy_counter_shot_on_hit` 포함)을 직접 선택해 랩의 레지스트리에 적용한다.
-- 시설 슬롯 확장·교체는 테스트 편의를 위해 랩이 자동 처리한다. Gameplay의 XP/60초 트리거와 후보 필터는 바꾸지 않는다.
+- 범용 슬롯 확장·교체는 테스트 편의를 위해 랩이 자동 처리한다. Gameplay의 XP/60초 트리거와 후보 필터는 바꾸지 않는다.
 
 ## 필드 드롭
 
@@ -163,4 +163,4 @@
 
 ## 레지스트리
 
-`PlayerAugmentRegistry`는 부위별 슬롯 용량과 `PlayerAugmentModuleState`를 함께 보유한다. 슬롯에는 `FACILITY_EFFECT`만 설치한다. `get_module_effect_product` / `get_module_effect_sum`으로 Kind별 합산.
+`PlayerAugmentRegistry`는 시작 5칸·최대 15칸의 범용 슬롯 배열과 `PlayerAugmentModuleState`를 보유한다. 슬롯에는 `FACILITY_EFFECT`만 설치한다. `get_modules_with_tag`로 분류를 조회하고 `get_module_effect_product` / `get_module_effect_sum`으로 Kind별 합산한다.

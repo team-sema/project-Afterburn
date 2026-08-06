@@ -223,12 +223,9 @@ func _draw() -> void:
 	if side < 4.0:
 		return
 	# Draw in a centered square so parent stretch cannot turn the hex into a tall rectangle.
-	var origin := (size - Vector2(side, side)) * 0.5
-	var hex := _hex_points(Vector2(side, side))
+	var hex := get_hex_polygon()
 	if hex.size() < 6:
 		return
-	for index in hex.size():
-		hex[index] = hex[index] + origin
 	var fill := fill_color
 	var border := border_color
 	if dimmed:
@@ -240,9 +237,20 @@ func _draw() -> void:
 	draw_polyline(outline, border, border_width, true)
 
 
+func get_hex_polygon() -> PackedVector2Array:
+	var side := minf(size.x, size.y)
+	if side < 4.0:
+		return PackedVector2Array()
+	var origin := (size - Vector2(side, side)) * 0.5
+	var hex := _hex_points(Vector2(side, side))
+	for index in hex.size():
+		hex[index] = hex[index] + origin
+	return hex
+
+
 func _hex_radius(side: float) -> float:
-	# Flat-top height is 2R; keep stroke fully inside the control so edges are not clipped.
-	return maxf(2.0, side * 0.5 - border_width - 1.0)
+	# Keep geometry stable when focus changes border width so tiled hexes do not open gaps.
+	return maxf(2.0, side * 0.5 - 3.0)
 
 
 func _hex_points(rect_size: Vector2) -> PackedVector2Array:
@@ -252,8 +260,8 @@ func _hex_points(rect_size: Vector2) -> PackedVector2Array:
 		return PackedVector2Array()
 	var center := rect_size * 0.5
 	var points := PackedVector2Array()
-	# Flat-top hexagon (vertex offset -30°).
+	# Flat-top hexagon.
 	for index in 6:
-		var angle := TAU * float(index) / 6.0 - PI / 6.0
+		var angle := TAU * float(index) / 6.0
 		points.append(center + Vector2(cos(angle), sin(angle)) * radius)
 	return points

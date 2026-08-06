@@ -25,9 +25,9 @@ Menu (ui_accept)
 - `AugmentSelectionOverlay` / `AugmentModuleSwapOverlay` / `AugmentOfferController` / `AugmentProgressionController`
 - `Ship` / `SpaceBackground` / `EnemyGenerator` / `ScoreLabel`
 
-우측 패널(`world.tscn`): `STATUS` → `ShipPanel`(함선 그림 + 시설 칩 6종 + `시설명 : 슬롯` 한 줄) → `WeaponBox/Margin/WeaponLoadoutHud`
+우측 패널(`world.tscn`): `STATUS` → `ShipPanel`(5×3 범용 육각 슬롯 벌집 + 슬롯 호버 상세) → `WeaponBox/Margin/WeaponLoadoutHud`
 
-`WeaponLoadoutHud`: 템플릿 복제 슬롯/모듈 헥스 → 좌우(`선택된 무기` | `장착된 모듈`) → 가로선+고정 2줄 설명. 호버/클릭 포커스. 설명 초과분은 말줄임하며 우측 레일 크기를 변경하지 않는다.
+`WeaponLoadoutHud`: 템플릿 복제 48px 무기 베이·28px 장착 모듈 flat-top 헥스를 변이 맞닿는 벌집으로 배치 → 좌우(`선택된 무기` | `장착된 모듈`) → 가로선+고정 2줄 설명. 호버/클릭 포커스. 설명 초과분은 말줄임하며 우측 레일 크기를 변경하지 않는다.
 
 좌측 패널(`world.tscn`): 타이틀 → `SCORE` → `ProgressionHud`(XP·위협 바) → `ShipStatusHud`(선체·실드 바 · 실드 미만 시 `ShieldChargeBar`) → `PLAYFIELD`(`240 × 360`)
 
@@ -52,8 +52,8 @@ Menu (ui_accept)
 2. XP가 요구량을 채워도 **자동으로 열리지 않음**. `open_augment_offer`(**C**)로 PLAYER 오퍼 요청 · 오퍼 UI가 이미 열려 있으면 XP 미소모
 3. 플레이 시간 60초마다 ENEMY 오퍼를 큐에 추가 (도달 순으로 처리)
 4. `AugmentOfferController.request_offer(type)` → `offer_started(type)` → pause. 강화 분기점 인트로는 PLAYER 청색 / ENEMY 적색 테마로 구분
-5. PLAYER 오퍼는 상단 3지선다와 하단 적용 대상 UI를 함께 표시. `FACILITY_EFFECT`는 함선 부위와 대상 하이라이트, 무기 Kind는 병기 배치·모듈 레벨 미리보기를 표시
-6. 시설 카드 → 빈 슬롯 설치(가득 차면 교체 모달). 무기 Kind(획득·모듈 강화) → 로드아웃에 직접 적용(만석 획득은 베이 교체 UI). 함선 부위 선택 → 슬롯 용량 +1(최대 3)
+5. PLAYER 오퍼는 상단 3지선다와 하단 적용 대상 UI를 함께 표시. `FACILITY_EFFECT`는 범용 육각 슬롯과 같은 tag의 장착 칸 하이라이트, 무기 Kind는 병기 배치·모듈 레벨 미리보기를 표시
+6. 시설 카드 → 범용 빈 슬롯 설치(가득 차면 전체 슬롯 교체 모달). 무기 Kind(획득·모듈 강화) → 로드아웃에 직접 적용(만석 획득은 베이 교체 UI). `범용 슬롯 +1` 포커스/호버 → 다음 육각 칸 점멸, 선택 → 용량 +1(시작 5, 최대 15)
 7. ENEMY 오퍼는 기존 3지선다 선택 → registry 반영
 8. **PLAYER 오퍼 종료 직후** 함선 주변 `enemy_projectiles` 제거 + `augment_resume_burst` VFX (`player_resume_clear_radius` 기본 36)
 9. unpause → `offer_completed(type)`

@@ -44,7 +44,7 @@ func _ready() -> void:
 	selection_ui.configure_player_registry(player_registry)
 	selection_ui.configure_weapon_loadout(_get_loadout())
 	selection_ui.choice_selected.connect(_on_choice_selected)
-	selection_ui.facility_expansion_selected.connect(_on_facility_expansion_selected)
+	selection_ui.universal_slot_expansion_selected.connect(_on_universal_slot_expansion_selected)
 	selection_ui.reroll_requested.connect(_on_reroll_requested)
 
 
@@ -168,8 +168,9 @@ func _is_player_augment_available(augment: PlayerAugment, loadout: PlayerWeaponL
 					return false
 				target_weapon_id = equipped[0]
 			return loadout.can_upgrade_weapon_trait(target_weapon_id, augment.trait_id)
-		PlayerAugmentKind.Kind.STAT_MULTIPLIER, PlayerAugmentKind.Kind.FACILITY_EFFECT:
-			return augment.facility_id != &"" and player_registry.has_facility(augment.facility_id)
+		PlayerAugmentKind.Kind.FACILITY_EFFECT:
+			var primary_tag := augment.get_primary_module_tag()
+			return primary_tag != &"" and player_registry.has_facility(primary_tag)
 		_:
 			return false
 
@@ -257,9 +258,9 @@ func _resolve_weapon_trait(player_augment: PlayerAugment, loadout: PlayerWeaponL
 
 func _resolve_facility_module(player_augment: PlayerAugment) -> bool:
 	var replace_index := -1
-	if not player_registry.has_empty_slot(player_augment.facility_id):
+	if not player_registry.has_empty_slot():
 		selection_ui.suspend_choices()
-		module_swap_ui.open(player_registry, player_augment.facility_id, player_augment)
+		module_swap_ui.open(player_registry, player_augment)
 		replace_index = await module_swap_ui.selection_finished
 		if replace_index < 0:
 			return false
@@ -275,19 +276,16 @@ func _resolve_facility_module(player_augment: PlayerAugment) -> bool:
 	return true
 
 
-func _on_facility_expansion_selected(facility_id: StringName) -> void:
+func _on_universal_slot_expansion_selected() -> void:
 	if active_offer_type != OfferType.PLAYER:
 		return
-	if not player_registry.expand_slots(facility_id):
+	if not player_registry.expand_slots():
 		selection_ui.resume_choices()
 		return
-	var definition := player_registry.get_facility_definition(facility_id)
-	var facility_name := definition.display_name if definition != null else String(facility_id)
 	await selection_ui.close_with_text(
 		"슬롯 확장",
-		"%s 슬롯 %d/%d" % [
-			facility_name,
-			player_registry.get_slot_capacity(facility_id),
+		"범용 슬롯 %d/%d" % [
+			player_registry.get_slot_capacity(),
 			PlayerAugmentRegistry.MAX_SLOT_CAPACITY,
 		],
 		selection_ui.player_accent_color,

@@ -36,10 +36,16 @@ func _run() -> void:
 	await process_frame
 	weapon_hud.refresh()
 	await process_frame
-	var grid: GridContainer = weapon_hud.get_node("%ModulesGrid") as GridContainer
+	var grid: HexHoneycombContainer = weapon_hud.get_node("%ModulesGrid") as HexHoneycombContainer
 	_expect(grid.get_child_count() == 4, "module grid keeps four slots")
+	_expect(is_equal_approx(grid.hex_side, 28.0), "equipped module hexes use the enlarged 28px size")
 	var first_hex := grid.get_child(0) as HexModuleFrame
+	var second_hex := grid.get_child(1) as HexModuleFrame
 	_expect(first_hex != null, "equipped module is a bare HexModuleFrame")
+	_expect(
+		_hexes_share_edge(first_hex, second_hex),
+		"equipped module hexes share a honeycomb edge without gaps",
+	)
 	_expect(loadout.get_trait_icon(&"blaster_accel_ap") != null, "blaster accel AP has a visible icon for STATUS")
 	first_hex.module_hovered.emit()
 	await process_frame
@@ -51,8 +57,15 @@ func _run() -> void:
 	await process_frame
 	weapon_hud.refresh()
 	await process_frame
-	var bay_row: HBoxContainer = weapon_hud.get_node("%BayRow") as HBoxContainer
+	var bay_row: HexHoneycombContainer = weapon_hud.get_node("%BayRow") as HexHoneycombContainer
 	_expect(bay_row.get_child_count() == loadout.get_max_equipped_weapon_count(), "bay row lists every slot equally")
+	_expect(is_equal_approx(bay_row.hex_side, 48.0), "weapon bay hexes use the enlarged 48px size")
+	var first_bay := bay_row.get_child(0) as WeaponCoreCluster
+	var second_bay := bay_row.get_child(1) as WeaponCoreCluster
+	_expect(
+		_hexes_share_edge(first_bay.get_node("%Core") as HexModuleFrame, second_bay.get_node("%Core") as HexModuleFrame),
+		"weapon bay hexes share a honeycomb edge without gaps",
+	)
 	var laser_cluster: WeaponCoreCluster = null
 	for child in bay_row.get_children():
 		var cluster := child as WeaponCoreCluster
@@ -78,15 +91,17 @@ func _run() -> void:
 	_expect(footer.text.contains("레이저") or footer.text.contains("빔"), "footer follows hovered weapon description")
 
 	var ship_panel: ShipPanel = world.get_node("Layout/RightPanel/Margin/VBox/ShipPanel") as ShipPanel
-	_expect(ship_panel.get_detail_text().contains(" : "), "facility detail shows name : slots by default")
-	var hangar := ship_panel.get_facility_module(&"hangar")
-	hangar.facility_hovered.emit(&"hangar")
+	_expect(
+		ship_panel.get_detail_text().contains("범용 슬롯 0/5"),
+		"facility detail shows universal slot usage by default",
+	)
+	ship_panel.slot_rack.slot_hovered.emit(0)
 	await process_frame
 	_expect(
-		ship_panel.get_detail_text().begins_with("격납고")
-		or ship_panel.get_detail_text().begins_with("동력로"),
-		"hovering hangar updates facility detail line",
+		ship_panel.get_detail_text().contains("슬롯 1 · 빈 슬롯"),
+		"hovering an empty hex updates its slot detail",
 	)
+	ship_panel.slot_rack.slot_hover_exited.emit()
 
 	var detail_cols := weapon_hud.get_node_or_null("%DetailColumns") as HBoxContainer
 	_expect(detail_cols != null, "selected weapon and modules sit in side-by-side columns")
@@ -137,3 +152,18 @@ func _run() -> void:
 func _expect(condition: bool, message: String) -> void:
 	if not condition:
 		failures.append(message)
+
+
+func _hexes_share_edge(first: HexModuleFrame, second: HexModuleFrame) -> bool:
+	if first == null or second == null:
+		return false
+	var first_polygon := first.get_hex_polygon()
+	var second_polygon := second.get_hex_polygon()
+	if first_polygon.size() != 6 or second_polygon.size() != 6:
+		return false
+	var first_origin := first.get_global_transform_with_canvas().origin
+	var second_origin := second.get_global_transform_with_canvas().origin
+	return (
+		(first_origin + first_polygon[0]).is_equal_approx(second_origin + second_polygon[4])
+		and (first_origin + first_polygon[1]).is_equal_approx(second_origin + second_polygon[3])
+	)

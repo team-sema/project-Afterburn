@@ -12,4 +12,5 @@ description = "실드 충전 속도가 2배가 됩니다."
 augment_type = 6
 icon = ExtResource("2_icon")
 facility_id = &"shield"
+module_tags = Array[StringName]([&"shield"])
 facility_module_effect = ExtResource("3_effect")

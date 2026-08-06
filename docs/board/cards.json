@@ -40,6 +40,14 @@
   ],
   "cards": [
     {
+      "id": "unified-module-slots",
+      "title": "범용 모듈 슬롯 통합",
+      "description": "시설별 슬롯을 시작 5칸·최대 15칸의 5×3 육각 벌집으로 통합하고 기존 시설 구분을 tag로 유지한다.",
+      "column": "review",
+      "file": "cards/unified-module-slots.md",
+      "tags": ["시설", "모듈", "슬롯", "시너지"]
+    },
+    {
       "id": "weapon-module-levels",
       "title": "무기 모듈 레벨 개편",
       "description": "무기 자체 레벨을 제거하고 각 무기 특성 모듈을 Lv.1~3 성장 구조로 전환한다.",

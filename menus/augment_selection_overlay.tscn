@@ -145,18 +145,18 @@ text = "리롤 (2)"
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="SlotActionLabel" type="Label" parent="MarginContainer/PanelContainer/VBoxContainer"]
+[node name="SlotActionLabel" type="Button" parent="MarginContainer/PanelContainer/VBoxContainer"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 28)
 layout_mode = 2
-text = "함선 부위를 선택하면 빈 슬롯 +1 · 최대 3"
-label_settings = ExtResource("3_label_settings")
-horizontal_alignment = 1
+theme_override_fonts/font = ExtResource("4_font")
+theme_override_font_sizes/font_size = 13
+text = "범용 슬롯 0/5 · [+1]"
 
 [node name="OfferShipPanel" parent="MarginContainer/PanelContainer/VBoxContainer" instance=ExtResource("6_ship_panel")]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 126)
+custom_minimum_size = Vector2(0, 112)
 layout_mode = 2
-selection_enabled = true
 
 [node name="OfferWeaponPreview" parent="MarginContainer/PanelContainer/VBoxContainer" instance=ExtResource("7_weapon_preview")]
 unique_name_in_owner = true

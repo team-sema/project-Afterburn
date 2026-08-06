@@ -118,8 +118,7 @@ func _test_world_modules() -> void:
 		"radar pickup ×1.5 (got %.2f base %.2f)" % [collector.collection_radius, base_radius]
 	)
 
-	# Expand shield slot then install charge module (default capacity 1, radar already filled radar).
-	registry.expand_slots(&"shield")
+	# Different tags share the same universal starting pool.
 	var charge := load("res://resources/player_augments/facilities/facility_shield_charge.tres") as PlayerAugment
 	registry.install_augment(charge)
 	await process_frame

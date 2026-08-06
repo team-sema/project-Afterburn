@@ -12,4 +12,5 @@ description = "장착 중 픽업 수집 반경이 50% 증가합니다."
 augment_type = 6
 icon = ExtResource("2_icon")
 facility_id = &"radar"
+module_tags = Array[StringName]([&"radar"])
 facility_module_effect = ExtResource("3_effect")

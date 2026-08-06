@@ -34,7 +34,7 @@ Move / MoveInput / PositionClamp / WeaponMount(Blaster·Laser·Shotgun 등) / Pl
 - 빈 베이면 신규 자동 장착. 만석이면 증강 화면에서 교체 → **피교체 무기 모듈 레벨 완전 삭제**
 - 같은 무기를 다시 얻으면 모듈 없음으로 시작 (교체로 뺀 모듈은 보존하지 않음)
 - 무기실: 집속 조준기(공통 피해) · 사격 통제 장치(공통 공속) · 대형 표적 해석기(보스 피해)
-- HUD: `WeaponLoadoutHud` — 동일 크기 장착 베이 헥스 가로 행. 템플릿(`%BaySlotTemplate` · `%ModuleHexTemplate` · `%SelectedWeaponHex`) 복제. 호버/클릭 포커스 → 하단 `선택된 무기` | `장착된 모듈` + 설명(전투 수치는 인게임 비표시). 설명은 고정 2줄·말줄임이며 우측 레일의 최소 크기를 늘리지 않는다
+- HUD: `WeaponLoadoutHud` — 48px 장착 베이와 28px 장착 모듈 flat-top 헥스를 변이 맞닿는 벌집으로 배치한다. 템플릿(`%BaySlotTemplate` · `%ModuleHexTemplate` · `%SelectedWeaponHex`) 복제. 호버/클릭 포커스 → 하단 `선택된 무기` | `장착된 모듈` + 설명(전투 수치는 인게임 비표시). 설명은 고정 2줄·말줄임이며 우측 레일의 최소 크기를 늘리지 않는다
 - 증강 리롤: `AugmentOfferController.max_reroll_count`(임시 기본 2) · 런당 `remaining_reroll_count`
 
 ## 현재 무기 목록 (`gameplay.tscn` 획득 풀)
@@ -87,10 +87,10 @@ Move / MoveInput / PositionClamp / WeaponMount(Blaster·Laser·Shotgun 등) / Pl
 
 > `PlayerAugment.behavior_components`는 **적용하지 않음** (적 쪽만 동작).
 
-## 함선 부위와 모듈 슬롯 (`PlayerAugmentRegistry` / `ShipFacilityApplier`)
+## 범용 모듈 슬롯과 tag (`PlayerAugmentRegistry` / `ShipFacilityApplier`)
 
-**부위 슬롯에 들어가는 플레이어 모듈은 `FACILITY_EFFECT`만이다.** 효과는 카드의 `FacilityModuleEffect`로 정의되며, 동일 Kind는 배율 곱·가산 합으로 중첩한다.
-무기 획득·전용 모듈 증강은 시설 슬롯을 소모하지 않는다. 모듈 목록·수치는 [`augments.md`](augments.md) 「시설 효과 모듈 13종」이 정본.
+**범용 슬롯에 들어가는 플레이어 모듈은 `FACILITY_EFFECT`만이다.** 효과는 카드의 `FacilityModuleEffect`로 정의되며, 동일 Kind는 배율 곱·가산 합으로 중첩한다.
+무기 획득·전용 모듈 증강은 범용 시설 슬롯을 소모하지 않는다. 모듈 목록·수치는 [`augments.md`](augments.md) 「시설 효과 모듈 13종」이 정본.
 
 | id | 이름(표시) | 담당 모듈 예 |
 |----|------------|--------------|
@@ -101,24 +101,27 @@ Move / MoveInput / PositionClamp / WeaponMount(Blaster·Laser·Shotgun 등) / Pl
 | `radar` | 레이더 | 광역 탐지기 · 전투 데이터 분석기 |
 | `shield` | 실드 | 실드 축전기 · 급속 재충전기 |
 
-- 모든 부위는 빈 슬롯 1개로 시작하며, 플레이어 오퍼 하나를 소비해 최대 3개까지 확장할 수 있다
-- 증강 선택 시 빈 슬롯에 설치한다. 슬롯이 가득 찼으면 교체 창에서 기존 모듈 하나를 선택하며, 취소하면 오퍼로 돌아간다
+- 시설별 슬롯은 없다. 모든 시설 모듈은 시작 5칸·최대 15칸의 범용 슬롯 풀을 공유한다
+- 플레이어 오퍼 하나를 소비하면 범용 슬롯이 1칸 확장된다
+- 증강 선택 시 첫 빈 범용 슬롯에 설치한다. 풀이 가득 찼으면 교체 창에서 tag와 관계없이 기존 모듈 하나를 선택하며, 취소하면 오퍼로 돌아간다
 - 동일 모듈의 중복 설치와 효과 중첩을 허용한다 (Kind별 곱/합)
+- `weapon_room`·`hangar`·`engine`·`hull`·`radar`·`shield`는 장착 제한이 아니라 모듈 `module_tags`다. 기존 표시명·아이콘을 유지하며 이후 시너지 조회에 사용한다
 - 선체: `ShipFacilityApplier`가 최대 선체 = `기본 + MAX_HULL_ADD`(최소 1). 최대치 증가분만큼 현재 선체도 함께 증가
 - 레이더: 수집 반경 = 기본 36 × `PICKUP_RANGE_MULT`. XP 획득 = 드롭량 × `XP_GAIN_MULT`
 - 실드: 아래 「선체 · 실드」
-- 전투 중 `ShipPanel`은 읽기 전용. 플레이어 증강 오퍼 안의 `ShipPanel`만 확장 부위 선택 가능
-- 슬롯은 둥근 사각 프레임 + 모듈 `icon`
+- 전투 중 `ShipPanel`은 읽기 전용이며 무기실·엔진 등 별도 시설 타일과 선체 연결선은 표시하지 않는다
+- 범용 슬롯 랙은 28px 폭의 flat-top 육각형으로 최대 15칸을 5열×3행 벌집으로 표시한다. 열은 반 칸씩 세로로 어긋나며 모든 변이 빈틈없이 맞물린다
+- 현재 용량 밖 슬롯은 숨긴다. 빈 슬롯은 빈 육각 프레임, 장착 슬롯은 당분간 primary tag의 기존 시설 아이콘을 표시한다
+- 슬롯 호버 상세는 슬롯 번호·tag 표시명·실제 모듈명을 표시하고, 기본 상세는 장착/용량과 빈 슬롯 수를 표시한다
 
 ## 플레이어 증강 오퍼
 
 - 화면 상단에 증강 3개, 구분선 아래에 현재 카드 Kind의 적용 대상 UI를 표시한다
-- `STAT_MULTIPLIER`는 플레이어 오퍼 풀에 없다. `FACILITY_EFFECT` 카드 포커스·호버만 대상 `facility_id` 부위를 하이라이트한다. 무기 Kind 카드는 시설 하이라이트를 강제하지 않는다
+- `STAT_MULTIPLIER`는 플레이어 오퍼 풀에 없다. `FACILITY_EFFECT` 카드 포커스·호버는 같은 primary module tag의 장착 슬롯 외곽선을 강조한다. 무기 Kind 카드는 시설 tag 강조를 강제하지 않는다
 - 무기 Kind 카드 포커스 시 함선 부위 UI 대신 현재 병기 배치를 표시한다. 신규 획득은 빈 슬롯/교체 안내, 모듈은 대상 병기와 현재→다음 레벨을 강조한다
-- 카드 대신 확장 가능한 함선 부위를 선택하면 해당 부위의 빈 슬롯을 1개 늘리고 오퍼를 종료한다
-- 확장 부위에 키보드 포커스 또는 마우스 호버가 들어오면 추가될 다음 슬롯이 점멸한다
-- 카드 3개와 확장 가능한 부위 6개는 방향키·Tab으로 이동하고 `ui_accept`로 선택할 수 있다
-- 시설 모듈 리소스만 유효한 `facility_id`를 가지며 슬롯에 설치된다. 무기 Kind는 시설 슬롯에 설치되지 않는다
+- `범용 슬롯 +1`에 포커스·호버하면 다음 육각 슬롯 한 칸이 일시정지 중에도 점멸한다. 선택하면 용량을 1개 늘리고 오퍼를 종료한다 (최대 15)
+- 카드 3개와 범용 확장 버튼은 방향키·Tab으로 이동하고 `ui_accept`로 선택할 수 있다
+- 시설 모듈 리소스만 유효한 primary module tag를 가지며 범용 슬롯에 설치된다. 무기 Kind는 시설 슬롯에 설치되지 않는다
 - 적 증강 오퍼는 함선 UI 없이 기존 3지선다를 유지한다
 
 ## 선체 · 실드

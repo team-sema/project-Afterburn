@@ -13,4 +13,5 @@ description = "선체 피격 무적시간이 1초 증가합니다. (이미 무�
 augment_type = 6
 icon = ExtResource("2_icon")
 facility_id = &"hull"
+module_tags = Array[StringName]([&"hull"])
 facility_module_effect = ExtResource("3_effect")
