@@ -10,7 +10,7 @@ func _initialize() -> void:
 
 
 func _run() -> void:
-	var lab := LAB_SCENE.instantiate()
+	var lab := LAB_SCENE.instantiate() as WeaponTestLab
 	root.add_child(lab)
 	await process_frame
 	await process_frame
@@ -40,11 +40,83 @@ func _run() -> void:
 	_expect(enemy_buttons.get_child_count() == 5, "all five enemy spawn controls are present")
 	_expect(weapon_buttons.get_child_count() == 7, "all seven weapon controls are present")
 	_expect(trait_buttons.get_child_count() == 4, "default blaster exposes its four traits")
+	_expect(lab.get_player_augment_count() == 12, "all 12 facility augments are discovered")
+	_expect(
+		lab.get_enemy_augment_count() == 7,
+		"all seven enemy augments include the gameplay-unregistered resource",
+	)
 
 	var gameplay := lab.get_node("Layout/Playfield/ViewportContainer/PlayfieldViewport/WeaponTestGameplay")
 	var ship := gameplay.get_node("Ship")
 	var loadout := ship.get_weapon_loadout() as PlayerWeaponLoadout
+	var player_registry := gameplay.get_node("PlayerAugmentRegistry") as PlayerAugmentRegistry
+	var enemy_registry := gameplay.get_node("EnemyAugmentRegistry") as EnemyAugmentRegistry
 	_expect(loadout.get_equipped_weapon_ids() == [&"main_blaster"], "test ship starts with the default blaster")
+
+	var player_level_events := [0]
+	lab.player_level_up_simulated.connect(func(_level: int) -> void: player_level_events[0] += 1)
+	var player_key := InputEventKey.new()
+	player_key.pressed = true
+	player_key.physical_keycode = KEY_C
+	lab._unhandled_key_input(player_key)
+	_expect(player_level_events[0] == 1, "C simulates one player level-up event")
+	_expect(lab.is_augment_picker_open(), "C opens the player augment picker")
+	var player_augment_buttons := lab.find_children("Player_*", "Button", true, false)
+	_expect(player_augment_buttons.size() == 12, "player picker renders one row per facility augment")
+	for node in player_augment_buttons:
+		var augment_button := node as Button
+		_expect(
+			augment_button.icon == null and augment_button.get_combined_minimum_size().y <= 50.0,
+			"%s keeps a compact icon-independent row height" % augment_button.name,
+		)
+	_expect(
+		lab.find_child("Player_trait_laser_pulse", true, false) == null,
+		"player picker excludes weapon augments handled by the loadout panel",
+	)
+	var engine_augment_button := lab.find_child("Player_facility_engine", true, false) as Button
+	_expect(engine_augment_button != null, "player picker includes facility augments")
+	if engine_augment_button != null:
+		engine_augment_button.pressed.emit()
+	_expect(
+		player_registry.get_stack_count(&"facility_engine") == 1,
+		"player picker installs the selected augment",
+	)
+	_expect(not lab.is_augment_picker_open(), "player picker closes after a successful choice")
+
+	var enemy_events := [0]
+	lab.enemy_augment_event_simulated.connect(func(_tier: int) -> void: enemy_events[0] += 1)
+	var enemy_key := InputEventKey.new()
+	enemy_key.pressed = true
+	enemy_key.physical_keycode = KEY_V
+	lab._unhandled_key_input(enemy_key)
+	_expect(enemy_events[0] == 1, "V simulates one enemy augment event")
+	_expect(lab.is_augment_picker_open(), "V opens the enemy augment picker")
+	var counter_shot_button := (
+		lab.find_child("Enemy_enemy_counter_shot_on_hit", true, false) as Button
+	)
+	_expect(counter_shot_button != null, "enemy picker includes the unregistered counter-shot augment")
+	if counter_shot_button != null:
+		counter_shot_button.pressed.emit()
+	_expect(
+		enemy_registry.get_stack_count(&"enemy_counter_shot_on_hit") == 1,
+		"enemy picker applies the selected augment",
+	)
+	_expect(not lab.is_augment_picker_open(), "enemy picker closes after a successful choice")
+	lab.open_enemy_augment_picker()
+	var drone_reinforcement_button := (
+		lab.find_child("Enemy_enemy_drone_formation_reinforcement", true, false) as Button
+	)
+	_expect(drone_reinforcement_button != null, "enemy picker includes spawn-count augments")
+	if drone_reinforcement_button != null:
+		drone_reinforcement_button.pressed.emit()
+	(enemy_buttons.get_node("Enemy_drone_formation/Spawn_drone_formation") as Button).pressed.emit()
+	await process_frame
+	_expect(
+		_count_descendants_in_group(gameplay, &"enemies") == 6,
+		"drone reinforcement adds one enemy to the five-drone lab formation",
+	)
+	(lab.get_node("%ClearTargetsButton") as Button).pressed.emit()
+	await process_frame
 
 	(enemy_buttons.get_node("Enemy_striker/Spawn_striker") as Button).pressed.emit()
 	await process_frame

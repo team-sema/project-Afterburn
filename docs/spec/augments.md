@@ -146,6 +146,15 @@
 - `AugmentModuleSwapOverlay` — 시설 모듈 교체
 - `ProgressionHud` — XP · `[C]` 힌트
 
+### 통합 증강 테스트 랩
+
+- `weapon_test/weapon_test_lab.tscn`에서 `C`는 PLAYER, `V`는 ENEMY 강화 이벤트를 모의 발생시킨다.
+- `C` 목록은 시설 증강 12종만 표시한다. 무기 획득·레벨·특성은 기존 랩 오른쪽 무기 UI가 담당한다.
+- `V` 목록은 실제 런의 3장 무작위 오퍼 대신 적 증강 리소스 전체를 스크롤 목록으로 연다.
+- 목록 행은 아이콘 원본 크기에 영향받지 않는 고정 높이 텍스트 카드로 표시한다.
+- PLAYER 시설 12종과 ENEMY 7종(게임플레이 풀 미등록 `enemy_counter_shot_on_hit` 포함)을 직접 선택해 랩의 레지스트리에 적용한다.
+- 시설 슬롯 확장·교체는 테스트 편의를 위해 랩이 자동 처리한다. Gameplay의 XP/60초 트리거와 후보 필터는 바꾸지 않는다.
+
 ## 필드 드롭
 
 - 무기 필드 드롭 **비활성** (`WeaponDropComponent.enabled = false`)

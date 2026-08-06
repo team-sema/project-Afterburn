@@ -432,6 +432,14 @@
       "tags": ["비주얼", "완료"]
     },
     {
+      "id": "augment-test-lab",
+      "title": "통합 증강 테스트 랩",
+      "description": "C/V로 강화 이벤트를 모의하고 플레이어 시설 12종·적 7종을 스크롤 목록에서 직접 적용한다.",
+      "column": "review",
+      "file": "cards/augment-test-lab.md",
+      "tags": ["증강", "테스트", "도구"]
+    },
+    {
       "id": "weapon-test-lab-augments",
       "title": "무기 테스트장 증강·지속 스폰",
       "description": "선택 무기의 특성을 직접 적용하고 적 유형별 반복 스폰을 제어하는 테스트 도구.",

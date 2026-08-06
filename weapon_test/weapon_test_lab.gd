@@ -1,12 +1,26 @@
 class_name WeaponTestLab
 extends Control
 
+signal player_level_up_simulated(level: int)
+signal enemy_augment_event_simulated(tier: int)
+
 const ENEMY_LABELS := {
 	&"drone_formation": "드론 편대",
 	&"striker": "스트라이커",
 	&"awl_formation": "송곳 편대",
 	&"bomb": "폭탄",
 	&"caster": "캐스터",
+}
+const PLAYER_AUGMENT_DIRECTORY := "res://resources/player_augments"
+const ENEMY_AUGMENT_DIRECTORY := "res://resources/enemy_augments"
+const PLAYER_AUGMENT_KINDS: Array[PlayerAugmentKind.Kind] = [
+	PlayerAugmentKind.Kind.FACILITY_EFFECT,
+	PlayerAugmentKind.Kind.STAT_MULTIPLIER,
+]
+
+enum AugmentTestMode {
+	PLAYER,
+	ENEMY,
 }
 
 @export var enemy_spawn_sets: Array[EnemySpawnSet] = []
@@ -15,6 +29,7 @@ const ENEMY_LABELS := {
 @onready var gameplay: Node2D = $Layout/Playfield/ViewportContainer/PlayfieldViewport/WeaponTestGameplay
 @onready var ship: Node2D = gameplay.get_node("Ship") as Node2D
 @onready var enemy_registry: EnemyAugmentRegistry = gameplay.get_node("EnemyAugmentRegistry") as EnemyAugmentRegistry
+@onready var player_registry: PlayerAugmentRegistry = gameplay.get_node("PlayerAugmentRegistry") as PlayerAugmentRegistry
 @onready var enemy_buttons: VBoxContainer = %EnemyButtons
 @onready var weapon_buttons: VBoxContainer = %WeaponButtons
 @onready var spawn_count: SpinBox = %SpawnCount
@@ -39,6 +54,16 @@ var _trait_button_by_id: Dictionary = {}
 var _displayed_trait_weapon_id: StringName = &""
 var _continuous_spawn_sets: Dictionary = {}
 var _continuous_spawn_enabled := false
+var _player_augment_pool: Array[PlayerAugment] = []
+var _enemy_augment_pool: Array[EnemyAugment] = []
+var _augment_overlay: ColorRect
+var _augment_list: VBoxContainer
+var _augment_title: Label
+var _augment_prompt: Label
+var _augment_result: Label
+var _augment_mode := AugmentTestMode.PLAYER
+var _simulated_player_level := 0
+var _simulated_enemy_tier := 0
 
 
 func _ready() -> void:
@@ -50,6 +75,8 @@ func _ready() -> void:
 	_build_enemy_buttons()
 	_build_slot_buttons()
 	_build_weapon_buttons()
+	_load_augment_resources()
+	_build_augment_overlay()
 	%ClearTargetsButton.pressed.connect(_clear_targets)
 	continuous_spawn_button.toggled.connect(_set_continuous_spawn)
 	continuous_spawn_interval.value_changed.connect(_on_continuous_spawn_interval_changed)
@@ -60,6 +87,297 @@ func _ready() -> void:
 	_loadout.loadout_changed.connect(_refresh_loadout_ui)
 	_refresh_loadout_ui()
 	_refresh_target_count()
+
+
+func _unhandled_key_input(event: InputEvent) -> void:
+	var key_event := event as InputEventKey
+	if key_event == null or not key_event.pressed or key_event.echo:
+		return
+	var key := key_event.physical_keycode
+	if key == KEY_NONE:
+		key = key_event.keycode
+	match key:
+		KEY_C:
+			open_player_augment_picker()
+			get_viewport().set_input_as_handled()
+		KEY_V:
+			open_enemy_augment_picker()
+			get_viewport().set_input_as_handled()
+		KEY_ESCAPE:
+			if is_augment_picker_open():
+				close_augment_picker()
+				get_viewport().set_input_as_handled()
+
+
+func open_player_augment_picker() -> void:
+	_simulated_player_level += 1
+	player_level_up_simulated.emit(_simulated_player_level)
+	_open_augment_picker(AugmentTestMode.PLAYER)
+
+
+func open_enemy_augment_picker() -> void:
+	_simulated_enemy_tier += 1
+	enemy_augment_event_simulated.emit(_simulated_enemy_tier)
+	_open_augment_picker(AugmentTestMode.ENEMY)
+
+
+func close_augment_picker() -> void:
+	if _augment_overlay != null:
+		_augment_overlay.hide()
+
+
+func is_augment_picker_open() -> bool:
+	return _augment_overlay != null and _augment_overlay.visible
+
+
+func get_player_augment_count() -> int:
+	return _player_augment_pool.size()
+
+
+func get_enemy_augment_count() -> int:
+	return _enemy_augment_pool.size()
+
+
+func _load_augment_resources() -> void:
+	_collect_augment_resources(PLAYER_AUGMENT_DIRECTORY)
+	_collect_augment_resources(ENEMY_AUGMENT_DIRECTORY)
+	_player_augment_pool.sort_custom(
+		func(a: PlayerAugment, b: PlayerAugment) -> bool:
+			if a.augment_type != b.augment_type:
+				return a.augment_type < b.augment_type
+			return String(a.augment_id) < String(b.augment_id)
+	)
+	_enemy_augment_pool.sort_custom(
+		func(a: EnemyAugment, b: EnemyAugment) -> bool:
+			return String(a.augment_id) < String(b.augment_id)
+	)
+
+
+func _collect_augment_resources(directory_path: String) -> void:
+	var directory := DirAccess.open(directory_path)
+	if directory == null:
+		push_error("WeaponTestLab: cannot open augment directory '%s'." % directory_path)
+		return
+	directory.list_dir_begin()
+	var file_name := directory.get_next()
+	while file_name != "":
+		if not file_name.begins_with("."):
+			var resource_path := directory_path.path_join(file_name)
+			if directory.current_is_dir():
+				_collect_augment_resources(resource_path)
+			elif file_name.ends_with(".tres"):
+				var resource := load(resource_path)
+				if resource is PlayerAugment:
+					var player_augment := resource as PlayerAugment
+					if player_augment.augment_type in PLAYER_AUGMENT_KINDS:
+						_player_augment_pool.append(player_augment)
+				elif resource is EnemyAugment:
+					_enemy_augment_pool.append(resource as EnemyAugment)
+		file_name = directory.get_next()
+	directory.list_dir_end()
+
+
+func _build_augment_overlay() -> void:
+	_augment_overlay = ColorRect.new()
+	_augment_overlay.name = "AugmentTestOverlay"
+	_augment_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_augment_overlay.color = Color(0.0, 0.01, 0.035, 0.92)
+	_augment_overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+	_augment_overlay.z_index = 100
+	_augment_overlay.hide()
+	add_child(_augment_overlay)
+
+	var panel := PanelContainer.new()
+	panel.name = "PickerPanel"
+	panel.set_anchors_preset(Control.PRESET_CENTER)
+	panel.position = Vector2(-250, -166)
+	panel.size = Vector2(500, 332)
+	panel.add_theme_stylebox_override(
+		"panel",
+		_button_style(Color(0.2, 0.9, 1.0, 1.0), 0.98, 0.9),
+	)
+	_augment_overlay.add_child(panel)
+
+	var margin := MarginContainer.new()
+	margin.add_theme_constant_override("margin_left", 12)
+	margin.add_theme_constant_override("margin_top", 10)
+	margin.add_theme_constant_override("margin_right", 12)
+	margin.add_theme_constant_override("margin_bottom", 10)
+	panel.add_child(margin)
+
+	var content := VBoxContainer.new()
+	content.add_theme_constant_override("separation", 6)
+	margin.add_child(content)
+
+	var header := HBoxContainer.new()
+	content.add_child(header)
+	_augment_title = Label.new()
+	_augment_title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_augment_title.label_settings = preload("res://fonts/title_label_settings.tres")
+	header.add_child(_augment_title)
+	var close_button := Button.new()
+	close_button.name = "CloseButton"
+	close_button.text = "닫기 [Esc]"
+	close_button.pressed.connect(close_augment_picker)
+	header.add_child(close_button)
+
+	_augment_prompt = Label.new()
+	_augment_prompt.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	content.add_child(_augment_prompt)
+
+	var scroll := ScrollContainer.new()
+	scroll.name = "AugmentScroll"
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	content.add_child(scroll)
+	_augment_list = VBoxContainer.new()
+	_augment_list.name = "AugmentList"
+	_augment_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_augment_list.add_theme_constant_override("separation", 4)
+	scroll.add_child(_augment_list)
+
+	_augment_result = Label.new()
+	_augment_result.name = "Result"
+	_augment_result.add_theme_color_override("font_color", Color(1.0, 0.65, 0.8))
+	content.add_child(_augment_result)
+
+
+func _open_augment_picker(mode: AugmentTestMode) -> void:
+	_augment_mode = mode
+	_augment_result.text = ""
+	if mode == AugmentTestMode.PLAYER:
+		_augment_title.text = "PLAYER LEVEL UP  ·  %02d" % _simulated_player_level
+		_augment_prompt.text = "C · 시설 증강 중 하나를 선택해 즉시 적용"
+	else:
+		_augment_title.text = "ENEMY AUGMENT  ·  THREAT %02d" % _simulated_enemy_tier
+		_augment_prompt.text = "V · 모든 적 증강 중 하나를 선택해 이후 스폰에 적용"
+	_rebuild_augment_list()
+	_augment_overlay.show()
+
+
+func _rebuild_augment_list() -> void:
+	for child in _augment_list.get_children():
+		_augment_list.remove_child(child)
+		child.queue_free()
+	if _augment_mode == AugmentTestMode.PLAYER:
+		for kind in PLAYER_AUGMENT_KINDS:
+			var kind_augments: Array[PlayerAugment] = []
+			for augment in _player_augment_pool:
+				if augment.augment_type == kind:
+					kind_augments.append(augment)
+			if kind_augments.is_empty():
+				continue
+			_add_augment_section(_player_augment_kind_label(kind), Color(0.25, 0.85, 1.0))
+			for augment in kind_augments:
+				_add_player_augment_button(augment)
+	else:
+		_add_augment_section("ENEMY AUGMENTS", Color(1.0, 0.28, 0.55))
+		for augment in _enemy_augment_pool:
+			_add_enemy_augment_button(augment)
+
+
+func _add_augment_section(title: String, accent: Color) -> void:
+	var label := Label.new()
+	label.text = title
+	label.add_theme_color_override("font_color", accent)
+	_augment_list.add_child(label)
+
+
+func _add_player_augment_button(augment: PlayerAugment) -> void:
+	var button := _create_augment_button(
+		augment.get_offer_title(_loadout).replace("\n", " · "),
+		String(augment.augment_id),
+		augment.get_offer_description(_loadout),
+		Color(0.2, 0.82, 1.0),
+	)
+	button.name = "Player_%s" % String(augment.augment_id)
+	button.pressed.connect(_on_player_augment_selected.bind(augment))
+	_augment_list.add_child(button)
+
+
+func _add_enemy_augment_button(augment: EnemyAugment) -> void:
+	var stack_count := enemy_registry.get_stack_count(augment.augment_id)
+	var suffix := " · STACK %d" % stack_count if stack_count > 0 else ""
+	var button := _create_augment_button(
+		augment.display_name + suffix,
+		String(augment.augment_id),
+		augment.description,
+		Color(1.0, 0.28, 0.55),
+	)
+	button.name = "Enemy_%s" % String(augment.augment_id)
+	button.disabled = not enemy_registry.can_add_augment(augment)
+	if button.disabled:
+		button.tooltip_text = "%s\n\n최대 스택에 도달했습니다." % augment.description
+	button.pressed.connect(_on_enemy_augment_selected.bind(augment))
+	_augment_list.add_child(button)
+
+
+func _create_augment_button(
+	title: String,
+	augment_id: String,
+	description: String,
+	accent: Color,
+) -> Button:
+	var button := Button.new()
+	button.custom_minimum_size = Vector2(0, 50)
+	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	button.text = "%s  [%s]\n%s" % [title, augment_id, description.replace("\n", " ")]
+	button.tooltip_text = description
+	button.clip_text = true
+	button.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	button.autowrap_mode = TextServer.AUTOWRAP_OFF
+	_style_button(button, accent)
+	return button
+
+
+func _on_player_augment_selected(augment: PlayerAugment) -> void:
+	if not _apply_player_augment(augment):
+		_augment_result.text = "적용 실패 · 현재 상태를 확인하세요."
+		return
+	_refresh_loadout_ui()
+	_update_mode_badge("PLAYER Lv.%d · %s" % [_simulated_player_level, augment.display_name])
+	close_augment_picker()
+
+
+func _on_enemy_augment_selected(augment: EnemyAugment) -> void:
+	if not enemy_registry.can_add_augment(augment):
+		_augment_result.text = "적용 실패 · 최대 스택입니다."
+		_rebuild_augment_list()
+		return
+	enemy_registry.add_augment(augment)
+	_update_mode_badge("THREAT %d · %s" % [_simulated_enemy_tier, augment.display_name])
+	close_augment_picker()
+
+
+func _apply_player_augment(augment: PlayerAugment) -> bool:
+	match augment.augment_type:
+		PlayerAugmentKind.Kind.STAT_MULTIPLIER, PlayerAugmentKind.Kind.FACILITY_EFFECT:
+			if not player_registry.has_facility(augment.facility_id):
+				return false
+			var replace_index := -1
+			if not player_registry.has_empty_slot(augment.facility_id):
+				if player_registry.can_expand_slots(augment.facility_id):
+					player_registry.expand_slots(augment.facility_id)
+				else:
+					replace_index = 0
+			return player_registry.install_augment(augment, &"", replace_index) >= 0
+		_:
+			return false
+
+
+func _player_augment_kind_label(kind: PlayerAugmentKind.Kind) -> String:
+	match kind:
+		PlayerAugmentKind.Kind.FACILITY_EFFECT:
+			return "FACILITY MODULES"
+		PlayerAugmentKind.Kind.STAT_MULTIPLIER:
+			return "LEGACY STAT"
+		_:
+			return "OTHER"
+
+
+func _update_mode_badge(status: String) -> void:
+	var badge := $Layout/Playfield/ModeBadge/Label as Label
+	badge.text = "AUGMENT TEST LAB  ·  %s" % status
 
 
 func _build_enemy_buttons() -> void:
@@ -155,7 +473,11 @@ func _button_style(accent: Color, background_alpha: float, border_alpha: float) 
 func _spawn_batches(spawn_set: EnemySpawnSet) -> void:
 	var batch_count := maxi(1, roundi(spawn_count.value))
 	for batch_index in batch_count:
-		spawn_set.spawn(gameplay.get_viewport_rect(), Callable(self, "_spawn_enemy"))
+		spawn_set.spawn(
+			gameplay.get_viewport_rect(),
+			Callable(self, "_spawn_enemy"),
+			enemy_registry.get_additional_spawn_count(spawn_set.spawn_id),
+		)
 	_refresh_target_count()
 
 
