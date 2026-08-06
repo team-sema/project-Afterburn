@@ -7,7 +7,7 @@
 script = ExtResource("1_def")
 trait_id = &"laser_pulse"
 display_name = "펄스 발진"
-description = "0.7초 ON / 0.35초 OFF. ON 중 피해 ×2."
+description = "0.7초 ON / 0.35초 OFF. ON 중 피해 ×2. OFF 전환 시 빔이 짧게 페이드 아웃."
 icon = ExtResource("2_icon")
 target_weapon_id = &"main_laser"
 next_rank_hint = "ON 구간 연장"
@@ -15,4 +15,6 @@ params = {
 "on_duration": 0.7,
 "off_duration": 0.35,
 "active_damage_mult": 2,
+"fade_out_duration": 0.12,
+"fade_in_duration": 0.05,
 }

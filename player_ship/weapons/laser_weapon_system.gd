@@ -19,21 +19,28 @@ const PLAYFIELD_TOP_MARGIN := 8.0
 
 var base_core_width: float
 var base_glow_width_scale: float
+var _base_core_alpha: float
+var _base_glow_alpha: float
 var _beam_width_tween: Tween
 ## enemy instance id -> {stacks: int, last_time: float}
 var _heat_stacks: Dictionary = {}
 var _pulse_on := true
 var _pulse_elapsed := 0.0
+## 0..1 visual intensity for pulse fade (damage still uses `_pulse_on`).
+var _pulse_beam_alpha := 1.0
 
 
 func _ready() -> void:
 	base_core_width = core_line.width
 	base_glow_width_scale = glow_line.scale.x
+	_base_core_alpha = core_line.default_color.a
+	_base_glow_alpha = glow_line.self_modulate.a
 	damage_hitbox.damage = base_tick_damage
 	damage_tick_timer.timeout.connect(apply_damage_tick)
 	_apply_stat_multipliers()
 	damage_tick_timer.start()
 	_update_beam_visual(_full_beam_endpoint())
+	_apply_pulse_beam_alpha()
 	restart_beam_width_animation()
 
 
@@ -42,7 +49,9 @@ func _on_weapon_setup() -> void:
 	_heat_stacks.clear()
 	_pulse_on = true
 	_pulse_elapsed = 0.0
+	_pulse_beam_alpha = 1.0
 	_apply_stat_multipliers()
+	_apply_pulse_beam_alpha()
 	restart_beam_width_animation()
 
 
@@ -58,7 +67,7 @@ func _physics_process(delta: float) -> void:
 		return
 	_update_pulse(delta)
 	_update_beam_visual(_full_beam_endpoint())
-	_update_beam_visibility()
+	_apply_pulse_beam_alpha()
 
 
 func apply_damage_tick() -> void:
@@ -157,20 +166,39 @@ func _update_glow_beam(endpoint: Vector2) -> void:
 func _update_pulse(delta: float) -> void:
 	if not has_trait(&"laser_pulse"):
 		_pulse_on = true
+		_pulse_beam_alpha = 1.0
 		return
 	var on_duration := float(get_trait_param(&"laser_pulse", &"on_duration", 0.7))
 	var off_duration := float(get_trait_param(&"laser_pulse", &"off_duration", 0.35))
+	var fade_out := float(get_trait_param(&"laser_pulse", &"fade_out_duration", 0.12))
+	var fade_in := float(get_trait_param(&"laser_pulse", &"fade_in_duration", 0.05))
 	_pulse_elapsed += delta
 	var period := on_duration if _pulse_on else off_duration
 	if _pulse_elapsed >= period:
 		_pulse_elapsed = 0.0
 		_pulse_on = not _pulse_on
+	var target := 1.0 if _pulse_on else 0.0
+	if target > _pulse_beam_alpha:
+		_pulse_beam_alpha = (
+			1.0 if fade_in <= 0.0
+			else move_toward(_pulse_beam_alpha, 1.0, delta / fade_in)
+		)
+	elif target < _pulse_beam_alpha:
+		_pulse_beam_alpha = (
+			0.0 if fade_out <= 0.0
+			else move_toward(_pulse_beam_alpha, 0.0, delta / fade_out)
+		)
 
 
-func _update_beam_visibility() -> void:
-	var show_beam := true
-	if has_trait(&"laser_pulse"):
-		show_beam = _pulse_on
+func _apply_pulse_beam_alpha() -> void:
+	var intensity := clampf(_pulse_beam_alpha, 0.0, 1.0)
+	var core_color := core_line.default_color
+	core_color.a = _base_core_alpha * intensity
+	core_line.default_color = core_color
+	var glow_mod := glow_line.self_modulate
+	glow_mod.a = _base_glow_alpha * intensity
+	glow_line.self_modulate = glow_mod
+	var show_beam := intensity > 0.001
 	core_line.visible = show_beam
 	glow_line.visible = show_beam
 

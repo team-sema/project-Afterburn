@@ -40,6 +40,14 @@
   ],
   "cards": [
     {
+      "id": "laser-pulse-fade-out",
+      "title": "레이저 펄스 페이드아웃",
+      "description": "laser_pulse OFF 시 빔 알파를 짧게 페이드아웃해 끊김을 완화.",
+      "column": "review",
+      "file": "cards/laser-pulse-fade-out.md",
+      "tags": ["무기", "VFX"]
+    },
+    {
       "id": "docs-spec-viewer-sync",
       "title": "웹 스펙 뷰어 동기화",
       "description": "facility-weapon-modules 이후 현황을 docs/spec에 반영해 웹 뷰어에서 보이게.",
