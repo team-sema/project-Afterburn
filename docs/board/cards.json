@@ -430,6 +430,14 @@
       "column": "review",
       "file": "cards/weapon-trait-enemy-motion-audit.md",
       "tags": ["무기", "증강", "적", "UI"]
+    },
+    {
+      "id": "enemy-augment-expansion",
+      "title": "적 증강 확장",
+      "description": "적 증강의 one-time·중첩 정책을 데이터로 정의하고 제안 후보에 반영한다.",
+      "column": "review",
+      "file": "cards/enemy-augment-expansion.md",
+      "tags": ["적", "증강", "밸런스"]
     }
   ]
 }

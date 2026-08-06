@@ -62,13 +62,21 @@ func _schedule_next_spawn() -> void:
 
 
 func _spawn(spawn_set: EnemySpawnSet) -> void:
-	spawn_set.spawn(get_viewport_rect(), Callable(self, "_spawn_enemy"))
+	var additional_count := augment_registry.get_additional_spawn_count(spawn_set.spawn_id)
+	var spawn_enemy := func(
+		enemy_scene: PackedScene,
+		spawn_position: Vector2,
+		configure: Callable,
+	) -> Node:
+		return _spawn_enemy(enemy_scene, spawn_position, configure, spawn_set.spawn_id)
+	spawn_set.spawn(get_viewport_rect(), spawn_enemy, additional_count)
 
 
 func _spawn_enemy(
 	enemy_scene: PackedScene,
 	spawn_position: Vector2,
 	configure: Callable,
+	spawn_id: StringName = &"",
 ) -> Node:
 	spawner_component.scene = enemy_scene
 	return spawner_component.spawn(
@@ -76,6 +84,7 @@ func _spawn_enemy(
 		null,
 		func(instance: Node) -> void:
 			_inject_enemy_dependencies(instance)
+			(instance as Enemy).spawn_id = spawn_id
 			if configure.is_valid():
 				configure.call(instance),
 	)

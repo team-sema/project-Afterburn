@@ -11,9 +11,9 @@ func is_available_at(threat_level: int) -> bool:
 	return minimum_threat_level <= threat_level
 
 
-func spawn(viewport_rect: Rect2, spawn_enemy: Callable) -> void:
+func spawn(viewport_rect: Rect2, spawn_enemy: Callable, additional_count: int = 0) -> void:
 	assert(spawn_pattern != null, "EnemySpawnSet requires an EnemySpawnPattern.")
-	spawn_pattern.spawn(enemy_scene, viewport_rect, spawn_enemy)
+	spawn_pattern.spawn(enemy_scene, viewport_rect, spawn_enemy, additional_count)
 
 
 func validate() -> void:

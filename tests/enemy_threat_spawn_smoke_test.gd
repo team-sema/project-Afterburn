@@ -1,5 +1,10 @@
 extends SceneTree
 
+const DRONE_REINFORCEMENT := preload(
+	"res://resources/enemy_augments/enemy_drone_formation_reinforcement.tres"
+)
+const BOMB_FAST_FUSE := preload("res://resources/enemy_augments/enemy_bomb_fast_fuse.tres")
+
 var failures: PackedStringArray = []
 
 
@@ -52,6 +57,31 @@ func _run() -> void:
 			"%s spawns %d enemies" % [spawn_set.spawn_id, expected_spawn_counts[spawn_set.spawn_id]],
 		)
 
+	var augment_registry := gameplay.get_node("EnemyAugmentRegistry") as EnemyAugmentRegistry
+	augment_registry.add_augment(DRONE_REINFORCEMENT)
+	var drone_spawn_set := _find_spawn_set(generator.spawn_sets, &"drone_formation")
+	var before_reinforced_count := get_nodes_in_group("enemies").size()
+	generator._spawn(drone_spawn_set)
+	var reinforced_count := get_nodes_in_group("enemies").size() - before_reinforced_count
+	_expect(reinforced_count == 6, "drone reinforcement increases formation from 5 to 6")
+
+	augment_registry.add_augment(BOMB_FAST_FUSE)
+	var bomb_spawn_set := _find_spawn_set(generator.spawn_sets, &"bomb")
+	var existing_enemy_ids := _get_enemy_ids()
+	generator._spawn(bomb_spawn_set)
+	var augmented_bomb := _find_new_enemy(existing_enemy_ids)
+	await process_frame
+	_expect(is_instance_valid(augmented_bomb), "bomb augment test spawns a Bomb enemy")
+	if is_instance_valid(augmented_bomb):
+		_expect(augmented_bomb.spawn_id == &"bomb", "generator injects the Bomb spawn id")
+		var bomb_fuse := augmented_bomb.get_node("BombProximityFuseComponent")
+		var actual_arm_duration := float(bomb_fuse.get("arm_duration"))
+		_expect(
+			is_equal_approx(actual_arm_duration, 2.0 / 1.5),
+			"bomb fast fuse reduces arming from 2.0s to about 1.33s (got %.3f)"
+			% actual_arm_duration,
+		)
+
 	progression._process(60.0)
 	_expect(generator.current_threat_level == 2, "generator follows Threat 2")
 	_expect_ids(
@@ -87,6 +117,27 @@ func _expect_ids(spawn_sets: Array[EnemySpawnSet], expected: Array[StringName]) 
 	actual.sort()
 	expected.sort()
 	_expect(actual == expected, "eligible spawn sets are %s, expected %s" % [actual, expected])
+
+
+func _find_spawn_set(spawn_sets: Array[EnemySpawnSet], spawn_id: StringName) -> EnemySpawnSet:
+	for spawn_set in spawn_sets:
+		if spawn_set.spawn_id == spawn_id:
+			return spawn_set
+	return null
+
+
+func _get_enemy_ids() -> Dictionary:
+	var ids := {}
+	for enemy in get_nodes_in_group("enemies"):
+		ids[enemy.get_instance_id()] = true
+	return ids
+
+
+func _find_new_enemy(existing_ids: Dictionary) -> Enemy:
+	for enemy in get_nodes_in_group("enemies"):
+		if not existing_ids.has(enemy.get_instance_id()):
+			return enemy as Enemy
+	return null
 
 
 func _has_property(object: Object, property_name: StringName) -> bool:

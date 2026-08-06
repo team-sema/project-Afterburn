@@ -9,6 +9,7 @@ func spawn(
 	enemy_scene: PackedScene,
 	viewport_rect: Rect2,
 	spawn_enemy: Callable,
+	_additional_count: int = 0,
 ) -> void:
 	var min_x := viewport_rect.position.x + edge_margin
 	var max_x := maxf(min_x, viewport_rect.end.x - edge_margin)

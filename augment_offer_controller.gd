@@ -110,10 +110,17 @@ func _pick_player_choices() -> Array[PlayerAugment]:
 
 
 func _pick_enemy_choices() -> Array[EnemyAugment]:
-	var choices := enemy_augment_pool.duplicate()
+	var choices: Array[EnemyAugment] = []
+	for augment in enemy_augment_pool:
+		if _is_enemy_augment_available(augment):
+			choices.append(augment)
 	choices.shuffle()
-	choices.resize(choices_per_offer)
+	choices.resize(mini(choices.size(), choices_per_offer))
 	return choices
+
+
+func _is_enemy_augment_available(augment: EnemyAugment) -> bool:
+	return augment != null and enemy_registry.can_add_augment(augment)
 
 
 func _pick_weighted(pool: Array[PlayerAugment], count: int) -> Array[PlayerAugment]:
