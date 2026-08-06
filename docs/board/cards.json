@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-06",
+  "updated": "2026-08-07",
   "source": "docs/board/cards/*.md",
   "columns": [
     {
@@ -39,6 +39,14 @@
     }
   ],
   "cards": [
+    {
+      "id": "augment-selection-carousel",
+      "title": "증강 선택 캐러셀 UI",
+      "description": "우측 STATUS UI를 결과 미리보기에 재활용하고 중앙의 3장 캐러셀에서 포커스 이동·단일 카드 리롤을 제공한다.",
+      "column": "review",
+      "file": "cards/augment-selection-carousel.md",
+      "tags": ["증강", "UI", "STATUS", "비주얼"]
+    },
     {
       "id": "unified-module-slots",
       "title": "범용 모듈 슬롯 통합",

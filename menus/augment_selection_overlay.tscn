@@ -1,15 +1,13 @@
-[gd_scene load_steps=8 format=3 uid="uid://503oqsi4rpuh"]
+[gd_scene format=3 uid="uid://503oqsi4rpuh"]
 
-[ext_resource type="Script" path="res://menus/augment_selection_overlay.gd" id="1_overlay"]
+[ext_resource type="Script" uid="uid://cmey2cic1ef7d" path="res://menus/augment_selection_overlay.gd" id="1_overlay"]
 [ext_resource type="LabelSettings" path="res://fonts/overlay_title_label_settings.tres" id="2_title_settings"]
 [ext_resource type="LabelSettings" path="res://fonts/overlay_default_label_settings.tres" id="3_label_settings"]
 [ext_resource type="FontFile" uid="uid://dhbb73hkpge3y" path="res://fonts/Mulmaru.ttf" id="4_font"]
 [ext_resource type="PackedScene" uid="uid://c6x6veg03hm8w" path="res://menus/augment_breakpoint_intro.tscn" id="5_breakpoint_intro"]
-[ext_resource type="PackedScene" path="res://menus/ship_panel.tscn" id="6_ship_panel"]
-[ext_resource type="PackedScene" path="res://menus/augment_weapon_preview.tscn" id="7_weapon_preview"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_panel"]
-bg_color = Color(0.025, 0.055, 0.11, 0.97)
+bg_color = Color(0.025, 0.055, 0.11, 0.84)
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
@@ -19,6 +17,58 @@ corner_radius_top_left = 5
 corner_radius_top_right = 5
 corner_radius_bottom_right = 5
 corner_radius_bottom_left = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_card"]
+content_margin_left = 9.0
+content_margin_top = 8.0
+content_margin_right = 9.0
+content_margin_bottom = 8.0
+bg_color = Color(0.025, 0.075, 0.14, 0.98)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.2, 0.68, 0.9, 0.78)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0.02, 0.55, 0.85, 0.2)
+shadow_size = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_card_pressed"]
+content_margin_left = 9.0
+content_margin_top = 8.0
+content_margin_right = 9.0
+content_margin_bottom = 8.0
+bg_color = Color(0.07, 0.18, 0.28, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.65, 0.98, 1, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_card_hover"]
+content_margin_left = 9.0
+content_margin_top = 8.0
+content_margin_right = 9.0
+content_margin_bottom = 8.0
+bg_color = Color(0.04, 0.12, 0.21, 0.99)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.32, 0.88, 1, 0.95)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0.05, 0.65, 0.95, 0.32)
+shadow_size = 6
 
 [node name="AugmentSelectionOverlay" type="CanvasLayer" unique_id=1658730483]
 process_mode = 3
@@ -33,7 +83,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.005, 0.01, 0.03, 0.9)
+color = Color(0.005, 0.01, 0.03, 0.16)
 
 [node name="BreakpointIntro" parent="." unique_id=1570162321 instance=ExtResource("5_breakpoint_intro")]
 
@@ -43,16 +93,16 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -300.0
-offset_top = -180.0
-offset_right = 300.0
-offset_bottom = 180.0
+offset_left = -118.0
+offset_top = -170.0
+offset_right = 118.0
+offset_bottom = 170.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_left = 14
-theme_override_constants/margin_top = 10
-theme_override_constants/margin_right = 14
-theme_override_constants/margin_bottom = 10
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
 
 [node name="PanelContainer" type="PanelContainer" parent="MarginContainer" unique_id=762158450]
 layout_mode = 2
@@ -71,8 +121,8 @@ horizontal_alignment = 1
 
 [node name="PromptLabel" type="Label" parent="MarginContainer/PanelContainer/VBoxContainer" unique_id=1056033097]
 unique_name_in_owner = true
+visible = false
 layout_mode = 2
-text = "모듈을 장착하거나 함선 부위의 슬롯을 확장하세요"
 label_settings = ExtResource("3_label_settings")
 horizontal_alignment = 1
 autowrap_mode = 2
@@ -83,83 +133,80 @@ layout_mode = 2
 mouse_filter = 2
 color = Color(0.18, 0.82, 1, 1)
 
-[node name="ChoiceRow" type="HBoxContainer" parent="MarginContainer/PanelContainer/VBoxContainer"]
-layout_mode = 2
-size_flags_vertical = 3
-theme_override_constants/separation = 8
-
-[node name="ChoiceButton1" type="Button" parent="MarginContainer/PanelContainer/VBoxContainer/ChoiceRow" unique_id=567130545]
+[node name="ChoiceCarousel" type="Control" parent="MarginContainer/PanelContainer/VBoxContainer" unique_id=1217082527]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(180, 88)
+custom_minimum_size = Vector2(0, 202)
 layout_mode = 2
-size_flags_horizontal = 3
 size_flags_vertical = 3
+mouse_filter = 2
+
+[node name="ChoiceButton1" type="Button" parent="MarginContainer/PanelContainer/VBoxContainer/ChoiceCarousel" unique_id=567130545]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(156, 188)
+layout_mode = 0
+offset_top = 4.0
+offset_right = 156.0
+offset_bottom = 192.0
 theme_override_fonts/font = ExtResource("4_font")
-theme_override_font_sizes/font_size = 15
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBox_card")
+theme_override_styles/pressed = SubResource("StyleBox_card_pressed")
+theme_override_styles/hover = SubResource("StyleBox_card_hover")
+theme_override_styles/focus = SubResource("StyleBox_card_hover")
 text = "선택 1"
 autowrap_mode = 2
 
-[node name="ChoiceButton2" type="Button" parent="MarginContainer/PanelContainer/VBoxContainer/ChoiceRow" unique_id=1842936470]
+[node name="ChoiceButton2" type="Button" parent="MarginContainer/PanelContainer/VBoxContainer/ChoiceCarousel" unique_id=1842936470]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(180, 88)
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
+custom_minimum_size = Vector2(156, 188)
+layout_mode = 0
+offset_left = 32.0
+offset_top = 14.0
+offset_right = 188.0
+offset_bottom = 202.0
 theme_override_fonts/font = ExtResource("4_font")
-theme_override_font_sizes/font_size = 15
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBox_card")
+theme_override_styles/pressed = SubResource("StyleBox_card_pressed")
+theme_override_styles/hover = SubResource("StyleBox_card_hover")
+theme_override_styles/focus = SubResource("StyleBox_card_hover")
 text = "선택 2"
 autowrap_mode = 2
 
-[node name="ChoiceButton3" type="Button" parent="MarginContainer/PanelContainer/VBoxContainer/ChoiceRow" unique_id=779700868]
+[node name="ChoiceButton3" type="Button" parent="MarginContainer/PanelContainer/VBoxContainer/ChoiceCarousel" unique_id=779700868]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(180, 88)
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
+custom_minimum_size = Vector2(156, 188)
+layout_mode = 0
+offset_left = 64.0
+offset_top = 14.0
+offset_right = 220.0
+offset_bottom = 202.0
 theme_override_fonts/font = ExtResource("4_font")
-theme_override_font_sizes/font_size = 15
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBox_card")
+theme_override_styles/pressed = SubResource("StyleBox_card_pressed")
+theme_override_styles/hover = SubResource("StyleBox_card_hover")
+theme_override_styles/focus = SubResource("StyleBox_card_hover")
 text = "선택 3"
 autowrap_mode = 2
 
-[node name="RerollRow" type="HBoxContainer" parent="MarginContainer/PanelContainer/VBoxContainer"]
+[node name="RerollRow" type="HBoxContainer" parent="MarginContainer/PanelContainer/VBoxContainer" unique_id=519011975]
 layout_mode = 2
-alignment = 1
 theme_override_constants/separation = 8
+alignment = 1
 
-[node name="RerollLabel" type="Label" parent="MarginContainer/PanelContainer/VBoxContainer/RerollRow"]
+[node name="RerollButton" type="Button" parent="MarginContainer/PanelContainer/VBoxContainer/RerollRow" unique_id=1296453980]
 unique_name_in_owner = true
-layout_mode = 2
-text = "[R] 리롤 · 남은 횟수 2"
-label_settings = ExtResource("3_label_settings")
-horizontal_alignment = 1
-
-[node name="RerollButton" type="Button" parent="MarginContainer/PanelContainer/VBoxContainer/RerollRow"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(100, 28)
+custom_minimum_size = Vector2(126, 28)
 layout_mode = 2
 theme_override_fonts/font = ExtResource("4_font")
 theme_override_font_sizes/font_size = 13
-text = "리롤 (2)"
+text = "[R] 리롤 (2)"
 
-[node name="ShipSeparator" type="HSeparator" parent="MarginContainer/PanelContainer/VBoxContainer"]
-unique_name_in_owner = true
-layout_mode = 2
-
-[node name="SlotActionLabel" type="Button" parent="MarginContainer/PanelContainer/VBoxContainer"]
+[node name="SlotActionLabel" type="Button" parent="MarginContainer/PanelContainer/VBoxContainer" unique_id=547211833]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 28)
 layout_mode = 2
 theme_override_fonts/font = ExtResource("4_font")
 theme_override_font_sizes/font_size = 13
 text = "범용 슬롯 0/5 · [+1]"
-
-[node name="OfferShipPanel" parent="MarginContainer/PanelContainer/VBoxContainer" instance=ExtResource("6_ship_panel")]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 112)
-layout_mode = 2
-
-[node name="OfferWeaponPreview" parent="MarginContainer/PanelContainer/VBoxContainer" instance=ExtResource("7_weapon_preview")]
-unique_name_in_owner = true
-visible = false
-custom_minimum_size = Vector2(0, 126)
-layout_mode = 2

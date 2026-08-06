@@ -31,6 +31,16 @@ var _focused_weapon_id: StringName = &""
 var _focused_trait_id: StringName = &""
 var _selected_hex: HexModuleFrame
 var _hover_trait_id: StringName = &""
+var _preview_augment: PlayerAugment
+var _preview_bay_index := -1
+var _preview_module_hex: HexModuleFrame
+var _preview_module_trait_id: StringName = &""
+var _preview_alpha := 0.35
+var _preview_tween: Tween
+var _preview_session_active := false
+var _preview_restore_bay_index := -1
+var _preview_restore_weapon_id: StringName = &""
+var _preview_restore_trait_id: StringName = &""
 
 
 func _ready() -> void:
@@ -126,6 +136,85 @@ func refresh() -> void:
 	_refresh_detail(loadout)
 
 
+func show_augment_preview(augment: PlayerAugment) -> void:
+	var loadout := _get_loadout()
+	if loadout == null or augment == null or not PlayerAugmentKind.is_weapon_offer(augment.augment_type):
+		clear_augment_preview()
+		return
+	var preview_bay_index := -1
+	match augment.augment_type:
+		PlayerAugmentKind.Kind.WEAPON_ACQUIRE:
+			preview_bay_index = loadout.get_first_empty_bay()
+			# Full bays go straight to replacement selection after confirm; no speculative blink.
+			if preview_bay_index < 0:
+				clear_augment_preview()
+				return
+		PlayerAugmentKind.Kind.WEAPON_TRAIT:
+			preview_bay_index = loadout.find_equipped_slot(augment.get_weapon_id())
+			if preview_bay_index < 0:
+				clear_augment_preview()
+				return
+		_:
+			clear_augment_preview()
+			return
+	if _preview_augment == augment and _preview_bay_index == preview_bay_index:
+		return
+	if not _preview_session_active:
+		_preview_session_active = true
+		_preview_restore_bay_index = _focused_bay_index
+		_preview_restore_weapon_id = _focused_weapon_id
+		_preview_restore_trait_id = _focused_trait_id
+	_stop_preview_tween()
+	_preview_augment = augment
+	_preview_bay_index = preview_bay_index
+	_preview_alpha = 0.35
+	if augment.augment_type == PlayerAugmentKind.Kind.WEAPON_TRAIT:
+		_focused_bay_index = preview_bay_index
+		_focused_weapon_id = augment.get_weapon_id()
+		_focused_trait_id = augment.trait_id
+	refresh()
+	_start_preview_tween()
+
+
+func clear_augment_preview() -> void:
+	if not _preview_session_active and _preview_augment == null:
+		return
+	_stop_preview_tween()
+	_preview_augment = null
+	_preview_bay_index = -1
+	_preview_alpha = 0.35
+	if _preview_session_active:
+		_focused_bay_index = _preview_restore_bay_index
+		_focused_weapon_id = _preview_restore_weapon_id
+		_focused_trait_id = _preview_restore_trait_id
+	_preview_session_active = false
+	_preview_restore_bay_index = -1
+	_preview_restore_weapon_id = &""
+	_preview_restore_trait_id = &""
+	if is_node_ready():
+		refresh()
+
+
+func is_augment_preview_active() -> bool:
+	return _preview_augment != null and _preview_bay_index >= 0
+
+
+func get_preview_bay_index() -> int:
+	return _preview_bay_index
+
+
+func get_preview_alpha() -> float:
+	return _preview_alpha
+
+
+func has_module_augment_preview() -> bool:
+	return is_instance_valid(_preview_module_hex) and _preview_module_trait_id != &""
+
+
+func get_preview_module_trait_id() -> StringName:
+	return _preview_module_trait_id
+
+
 func _rebuild_bays(loadout: PlayerWeaponLoadout) -> void:
 	_clear_runtime_children(bay_row)
 	_bay_clusters.clear()
@@ -168,7 +257,27 @@ func _bind_cluster(
 	index: int,
 	focused: bool,
 ) -> void:
+	cluster.modulate = Color.WHITE
 	var bay := loadout.get_bay(index)
+	var preview_here := index == _preview_bay_index and _preview_augment != null
+	if (
+		preview_here
+		and _preview_augment.augment_type == PlayerAugmentKind.Kind.WEAPON_ACQUIRE
+		and (bay == null or bay.is_empty())
+	):
+		cluster.bind_weapon(
+			_preview_augment.get_weapon_id(),
+			_preview_augment.get_offer_icon(),
+			{},
+			{},
+			{},
+			false,
+			true,
+			false,
+		)
+		cluster.set_focused(true)
+		cluster.modulate = Color(1.0, 1.0, 1.0, _preview_alpha)
+		return
 	if bay == null or bay.is_empty():
 		cluster.bind_weapon(&"", null, {}, {}, {}, false, false, false)
 		cluster.set_focused(false)
@@ -183,7 +292,9 @@ func _bind_cluster(
 		true,
 		false,
 	)
-	cluster.set_focused(focused)
+	cluster.set_focused(focused or preview_here)
+	if preview_here:
+		cluster.modulate = Color(1.0, 1.0, 1.0, _preview_alpha)
 
 
 func _focus_bay(bay_index: int, weapon_id: StringName, trait_id: StringName) -> void:
@@ -301,21 +412,55 @@ func _set_description(text: String) -> void:
 
 
 func _rebuild_module_cards(loadout: PlayerWeaponLoadout) -> void:
+	_preview_module_hex = null
+	_preview_module_trait_id = &""
 	_clear_runtime_children(modules_grid)
 	var traits := loadout.get_weapon_traits(_focused_weapon_id)
+	var preview_trait_id: StringName = &""
+	var preview_rank_increase := 0
+	var preview_icon: Texture2D
+	if (
+		_preview_augment != null
+		and _preview_augment.augment_type == PlayerAugmentKind.Kind.WEAPON_TRAIT
+		and _preview_augment.get_weapon_id() == _focused_weapon_id
+	):
+		preview_trait_id = _preview_augment.trait_id
+		if preview_trait_id == &"" and _preview_augment.trait_definition != null:
+			preview_trait_id = _preview_augment.trait_definition.trait_id
+		preview_rank_increase = _preview_augment.trait_rank_increase
+		preview_icon = _preview_augment.get_offer_icon()
 	var ids: Array[StringName] = []
 	for key in traits.keys():
 		if int(traits[key]) > 0:
 			ids.append(key as StringName)
 	ids.sort_custom(func(a: StringName, b: StringName) -> bool: return String(a) < String(b))
 	for trait_id in ids:
-		modules_grid.add_child(_make_module_hex(
+		var is_preview := trait_id == preview_trait_id
+		var rank := int(traits[trait_id]) + (preview_rank_increase if is_preview else 0)
+		var hex := _make_module_hex(
 			loadout.get_trait_display_name(trait_id),
-			int(traits[trait_id]),
-			loadout.get_trait_icon(trait_id),
+			rank,
+			preview_icon if is_preview and preview_icon != null else loadout.get_trait_icon(trait_id),
 			trait_id,
 			false,
-		))
+			is_preview,
+		)
+		modules_grid.add_child(hex)
+		if is_preview:
+			_preview_module_hex = hex
+			_preview_module_trait_id = trait_id
+	if preview_trait_id != &"" and _preview_module_hex == null:
+		var preview_hex := _make_module_hex(
+			loadout.get_trait_display_name(preview_trait_id),
+			maxi(1, preview_rank_increase),
+			preview_icon,
+			preview_trait_id,
+			false,
+			true,
+		)
+		modules_grid.add_child(preview_hex)
+		_preview_module_hex = preview_hex
+		_preview_module_trait_id = preview_trait_id
 	_add_empty_module_placeholders()
 
 
@@ -330,7 +475,8 @@ func _make_module_hex(
 	icon: Texture2D,
 	trait_id: StringName,
 	empty: bool,
-) -> Control:
+	preview: bool = false,
+) -> HexModuleFrame:
 	assert(module_hex_template != null, "WeaponLoadoutHud requires %ModuleHexTemplate placeholder.")
 	var hex := module_hex_template.duplicate() as HexModuleFrame
 	hex.visible = true
@@ -349,6 +495,16 @@ func _make_module_hex(
 
 	hex.set_module_text("", "")
 	hex.set_module_icon(icon)
+	if preview:
+		hex.interactive = false
+		hex.border_width = 1.5
+		hex.border_color = Color(0.65, 0.98, 1.0, 1.0)
+		hex.fill_color = Color(0.08, 0.3, 0.42, 0.95)
+		hex.modulate = Color(1.0, 1.0, 1.0, _preview_alpha)
+		if _rank > 0:
+			hex.set_module_text("", _rank_roman(_rank))
+		hex.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		return hex
 	hex.border_color = Color(0.5, 0.92, 1.0, 0.95)
 	hex.fill_color = Color(0.06, 0.18, 0.3, 0.95)
 	if _rank > 0:
@@ -375,6 +531,33 @@ func _make_module_hex(
 
 func _rank_roman(rank: int) -> String:
 	return ROMAN[clampi(rank, 0, ROMAN.size() - 1)]
+
+
+func _start_preview_tween() -> void:
+	_preview_tween = create_tween().set_loops().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	_preview_tween.tween_method(_set_preview_alpha, 0.35, 1.0, 0.45)
+	_preview_tween.tween_method(_set_preview_alpha, 1.0, 0.35, 0.45)
+
+
+func _stop_preview_tween() -> void:
+	if _preview_tween != null:
+		_preview_tween.kill()
+		_preview_tween = null
+	for cluster in _bay_clusters:
+		if is_instance_valid(cluster):
+			cluster.modulate = Color.WHITE
+	if is_instance_valid(_preview_module_hex):
+		_preview_module_hex.modulate = Color.WHITE
+
+
+func _set_preview_alpha(alpha: float) -> void:
+	_preview_alpha = alpha
+	if _preview_bay_index >= 0 and _preview_bay_index < _bay_clusters.size():
+		var cluster := _bay_clusters[_preview_bay_index]
+		if is_instance_valid(cluster):
+			cluster.modulate = Color(1.0, 1.0, 1.0, alpha)
+	if is_instance_valid(_preview_module_hex):
+		_preview_module_hex.modulate = Color(1.0, 1.0, 1.0, alpha)
 
 
 func _clear_runtime_children(container: Node) -> void:

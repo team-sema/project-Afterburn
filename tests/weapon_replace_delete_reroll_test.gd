@@ -60,6 +60,39 @@ func _run() -> void:
 
 	_expect(offer.max_reroll_count == 2, "default max reroll is 2")
 	_expect(offer.remaining_reroll_count == 2, "run starts with full rerolls")
+	var available: Array[PlayerAugment] = []
+	for augment in offer.player_augment_pool:
+		if offer._is_player_augment_available(augment, loadout):
+			available.append(augment)
+	_expect(available.size() >= 4, "reroll test has a replacement outside the visible three")
+	if available.size() >= 4:
+		var initial_choices: Array[PlayerAugment] = [available[0], available[1], available[2]]
+		offer._current_player_choices = initial_choices.duplicate()
+		offer.is_offer_active = true
+		offer.active_offer_type = AugmentOfferController.OfferType.PLAYER
+		offer._awaiting_final_choice = true
+		offer.selection_ui._set_choices(initial_choices)
+		offer.selection_ui._focused_choice_index = 1
+		var left_id := initial_choices[0].augment_id
+		var focused_id := initial_choices[1].augment_id
+		var right_id := initial_choices[2].augment_id
+		offer._on_reroll_requested(1)
+		_expect(
+			offer._current_player_choices[0].augment_id == left_id
+			and offer._current_player_choices[2].augment_id == right_id,
+			"focused reroll preserves both sibling cards",
+		)
+		_expect(
+			offer._current_player_choices[1].augment_id != focused_id,
+			"focused reroll replaces only the selected card",
+		)
+		_expect(offer.remaining_reroll_count == 1, "focused reroll consumes one run charge")
+		_expect(
+			offer.selection_ui.get_focused_choice_index() == 1,
+			"focused reroll preserves carousel focus",
+		)
+		offer.is_offer_active = false
+		offer._awaiting_final_choice = false
 
 	world.queue_free()
 	await process_frame

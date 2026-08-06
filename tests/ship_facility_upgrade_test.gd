@@ -4,6 +4,7 @@ const FACILITY_IDS: Array[StringName] = [
 	&"weapon_room", &"hangar", &"engine", &"hull", &"radar", &"shield",
 ]
 const SHIP_PANEL_PATH := "Layout/RightPanel/Margin/VBox/ShipPanel"
+const WEAPON_HUD_PATH := "Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud"
 const GAMEPLAY_PATH := "Layout/Playfield/ViewportContainer/PlayfieldViewport/Gameplay"
 
 var failures: PackedStringArray = []
@@ -17,9 +18,11 @@ func _run() -> void:
 	var world := (load("res://world.tscn") as PackedScene).instantiate() as Control
 	root.add_child(world)
 	var gameplay: Node = world.get_node(GAMEPLAY_PATH)
+	var playfield := world.get_node("Layout/Playfield") as Control
 	var ship := gameplay.get_node("Ship") as Node2D
 	var registry := gameplay.get_node("PlayerAugmentRegistry") as PlayerAugmentRegistry
 	var panel := world.get_node(SHIP_PANEL_PATH) as ShipPanel
+	var weapon_hud := world.get_node(WEAPON_HUD_PATH) as WeaponLoadoutHud
 	var offer := gameplay.get_node("AugmentOfferController") as AugmentOfferController
 	var selection_ui := offer.selection_ui
 	var swap_ui := offer.module_swap_ui
@@ -33,12 +36,12 @@ func _run() -> void:
 
 	_check_initial_slots(registry, panel)
 	_check_pool_targets(offer, registry)
-	await _check_offer_layout(selection_ui, loadout)
+	await _check_offer_layout(selection_ui, loadout, panel, weapon_hud, playfield)
 	_check_engine_modules(registry, move_component, panel)
 	_check_facility_effect_modules(registry, loadout, facility_applier, stats, shield)
 	_check_replacement(registry, loadout)
 	_check_swap_overlay(swap_ui, registry)
-	_check_capacity_limits(registry, swap_ui)
+	_check_capacity_limits(registry, swap_ui, panel)
 	_check_right_panel_fits(world)
 
 	world.queue_free()
@@ -210,24 +213,49 @@ func _check_replacement(registry: PlayerAugmentRegistry, loadout: PlayerWeaponLo
 func _check_offer_layout(
 	selection_ui: AugmentSelectionOverlay,
 	loadout: PlayerWeaponLoadout,
+	status_ship_panel: ShipPanel,
+	weapon_hud: WeaponLoadoutHud,
+	playfield: Control,
 ) -> void:
 	selection_ui.configure_weapon_loadout(loadout)
-	var button_1 := selection_ui.get_node("MarginContainer/PanelContainer/VBoxContainer/ChoiceRow/ChoiceButton1")
-	var button_3 := selection_ui.get_node("MarginContainer/PanelContainer/VBoxContainer/ChoiceRow/ChoiceButton3")
-	var ship_panel := selection_ui.get_node(
-		"MarginContainer/PanelContainer/VBoxContainer/OfferShipPanel"
-	) as ShipPanel
-	var weapon_preview := selection_ui.get_node(
-		"MarginContainer/PanelContainer/VBoxContainer/OfferWeaponPreview"
-	) as AugmentWeaponPreview
+	var button_1 := selection_ui.get_node(
+		"MarginContainer/PanelContainer/VBoxContainer/ChoiceCarousel/ChoiceButton1"
+	) as Button
+	var button_2 := selection_ui.get_node(
+		"MarginContainer/PanelContainer/VBoxContainer/ChoiceCarousel/ChoiceButton2"
+	) as Button
+	var button_3 := selection_ui.get_node(
+		"MarginContainer/PanelContainer/VBoxContainer/ChoiceCarousel/ChoiceButton3"
+	) as Button
 	var expand_button := selection_ui.get_node(
 		"MarginContainer/PanelContainer/VBoxContainer/SlotActionLabel"
 	) as Button
-	_expect(button_1.get_parent() == button_3.get_parent(), "three augment choices share one horizontal row")
-	_expect(ship_panel is ShipPanel, "player offer embeds the ship part UI below choices")
+	var reroll_button := selection_ui.get_node("%RerollButton") as Button
+	_expect(button_1.get_parent() == button_3.get_parent(), "three choices share the carousel host")
 	_expect(
-		weapon_preview is AugmentWeaponPreview,
-		"player offer embeds a weapon loadout preview below choices",
+		button_1.get_parent().name == "ChoiceCarousel",
+		"augment choices use the cylinder carousel instead of a flat HBox row",
+	)
+	_expect(
+		selection_ui.get_node_or_null("%OfferShipPanel") == null
+		and selection_ui.get_node_or_null("%OfferWeaponPreview") == null,
+		"offer no longer duplicates STATUS ship and weapon panels",
+	)
+	_expect(not selection_ui.prompt_label.visible, "choice view omits the redundant instruction copy")
+	_expect(button_1.size.y > button_1.size.x, "augment cards use a taller portrait proportion")
+	var offer_rect := selection_ui.choice_container.get_global_rect()
+	var playfield_rect := playfield.get_global_rect()
+	_expect(
+		offer_rect.position.x >= playfield_rect.position.x - 0.5
+		and offer_rect.position.x + offer_rect.size.x
+		<= playfield_rect.position.x + playfield_rect.size.x + 0.5,
+		"the whole augment window stays inside the central playfield",
+	)
+	selection_ui.set_reroll_state(2, true)
+	_expect(
+		reroll_button.text == "[R] 리롤 (2)"
+		and selection_ui.get_node_or_null("%RerollLabel") == null,
+		"reroll uses one compact button without a duplicate count label",
 	)
 	var fire_rate := load(
 		"res://resources/player_augments/facilities/facility_weapon_room_fire_rate.tres"
@@ -235,7 +263,11 @@ func _check_offer_layout(
 	var move_speed := load(
 		"res://resources/player_augments/facilities/facility_engine.tres"
 	) as PlayerAugment
-	selection_ui._set_choices([fire_rate, move_speed])
+	var acquire_laser := load(
+		"res://resources/player_augments/weapon/acquire_main_laser.tres"
+	) as PlayerAugment
+	selection_ui._set_choices([fire_rate, move_speed, acquire_laser])
+	selection_ui._focused_choice_index = 0
 	selection_ui._showing_ship_modules = true
 	selection_ui._set_ship_section_visible(true)
 	selection_ui._set_choice_buttons_visible(true)
@@ -244,19 +276,41 @@ func _check_offer_layout(
 	selection_ui.breakpoint_intro.visible = false
 	selection_ui._set_input_enabled(true)
 	selection_ui._highlight_choice(1)
+	await create_timer(selection_ui.carousel_transition_duration + 0.05, true).timeout
 	_expect(
-		ship_panel.get_selected_facility_id() == &"engine",
-		"focusing an augment keeps its primary tag highlight",
+		status_ship_panel.get_selected_facility_id() == &"engine",
+		"facility focus highlights the existing right STATUS ship panel",
 	)
-	_expect(ship_panel.get_node_or_null("Engine") == null, "offer preview has no legacy facility tiles")
-	var down_path: NodePath = button_1.focus_neighbor_bottom
-	_expect(not down_path.is_empty(), "augment card has a keyboard path to universal expansion")
 	_expect(
-		button_1.get_node(down_path) == expand_button,
-		"down from an augment card enters the universal expansion action",
+		status_ship_panel.slot_rack.has_module_preview()
+		and status_ship_panel.slot_rack.get_module_preview_index() == 0,
+		"facility focus previews its icon in the first empty STATUS slot",
+	)
+	var engine_definition := selection_ui._player_registry.get_facility_definition(&"engine")
+	_expect(
+		status_ship_panel.slot_rack.get_slot_icon(0) == engine_definition.icon,
+		"facility preview uses the matching facility icon",
+	)
+	var initial_module_alpha: float = status_ship_panel.slot_rack.get_preview_alpha()
+	paused = true
+	await create_timer(0.5, true).timeout
+	paused = false
+	_expect(
+		not is_equal_approx(status_ship_panel.slot_rack.get_preview_alpha(), initial_module_alpha),
+		"facility icon preview keeps blinking while gameplay is paused",
+	)
+	_expect(selection_ui.get_focused_choice_index() == 1, "carousel tracks the focused card")
+	_expect(button_2.z_index > button_1.z_index, "focused carousel card renders in front")
+	_expect(button_2.modulate.a > button_1.modulate.a, "side cards are more transparent than focus")
+	_expect(button_2.scale.x > button_1.scale.x, "side cards are smaller than focus")
+	var down_path: NodePath = button_1.focus_neighbor_bottom
+	_expect(not down_path.is_empty(), "augment card has a keyboard path to reroll")
+	_expect(
+		button_1.get_node(down_path) == reroll_button,
+		"down from an augment card enters the reroll button",
 	)
 	button_1.grab_focus()
-	await process_frame
+	await create_timer(selection_ui.carousel_transition_duration + 0.05, true).timeout
 	var viewport_height := selection_ui.get_viewport().get_visible_rect().size.y
 	_expect(
 		selection_ui.choice_container.global_position.y >= -0.5,
@@ -268,89 +322,168 @@ func _check_offer_layout(
 		"player offer panel stays inside the bottom of the viewport",
 	)
 	paused = true
-	await _press_action(&"ui_down")
-	_expect(root.gui_get_focus_owner() == expand_button, "ui_down moves focus to universal expansion")
-	_expect(ship_panel.slot_rack.has_expansion_preview(), "expansion focus reveals the next hex slot")
-	_expect(ship_panel.slot_rack.get_visible_slot_count() == 6, "preview adds exactly one hex slot")
-	var first_row_hex := ship_panel.slot_rack.get_slot_polygon(0)
-	var second_row_hex := ship_panel.slot_rack.get_slot_polygon(5)
+	await _press_action(&"ui_right")
+	_expect(root.gui_get_focus_owner() == button_2, "ui_right rotates focus to the next card")
+	_expect(selection_ui.get_focused_choice_index() == 1, "right rotation updates carousel focus")
+	var first_rotation := selection_ui._carousel_tween
+	await _press_action(&"ui_right")
 	_expect(
-		first_row_hex[3].is_equal_approx(second_row_hex[1])
+		selection_ui._carousel_tween == first_rotation
+		and selection_ui.get_focused_choice_index() == 1,
+		"rapid repeat is ignored while the carousel is on cooldown",
+	)
+	await create_timer(selection_ui.carousel_min_rotation_interval + 0.05, true).timeout
+	_expect(
+		root.gui_get_focus_owner() == button_2
+		and selection_ui.get_focused_choice_index() == 1,
+		"ignored rapid press does not rotate after release or cooldown",
+	)
+	await _press_action(&"ui_right")
+	_expect(
+		root.gui_get_focus_owner() == button_3
+		and selection_ui.get_focused_choice_index() == 2,
+		"a fresh press after the interval rotates once",
+	)
+	await create_timer(selection_ui.carousel_min_rotation_interval + 0.05, true).timeout
+	await _press_action(&"ui_left")
+	await create_timer(selection_ui.carousel_min_rotation_interval + 0.05, true).timeout
+	await _press_action(&"ui_left")
+	await create_timer(selection_ui.carousel_min_rotation_interval + 0.05, true).timeout
+	_expect(root.gui_get_focus_owner() == button_1, "left rotation returns to the first card")
+	_expect(
+		button_1.focus_neighbor_left == button_1.get_path_to(button_1)
+		and button_1.focus_neighbor_right == button_1.get_path_to(button_1),
+		"carousel cards do not auto-navigate left/right via focus neighbors",
+	)
+	await _press_action(&"ui_down")
+	_expect(root.gui_get_focus_owner() == reroll_button, "ui_down moves focus from card to reroll")
+	await _press_action(&"ui_down")
+	_expect(root.gui_get_focus_owner() == expand_button, "second ui_down enters universal expansion")
+	_expect(status_ship_panel.slot_rack.has_expansion_preview(), "right STATUS reveals the next hex slot")
+	_expect(
+		not status_ship_panel.slot_rack.has_module_preview(),
+		"slot expansion focus replaces the facility-module preview",
+	)
+	_expect(status_ship_panel.slot_rack.get_visible_slot_count() == 6, "preview adds exactly one hex slot")
+	var first_row_hex := status_ship_panel.slot_rack.get_slot_polygon(0)
+	var second_row_hex := status_ship_panel.slot_rack.get_slot_polygon(5)
+	_expect(
+		first_row_hex.size() >= 5
+		and second_row_hex.size() >= 2
+		and first_row_hex[3].is_equal_approx(second_row_hex[1])
 		and first_row_hex[4].is_equal_approx(second_row_hex[0]),
 		"honeycomb rows share flat edges without gaps",
 	)
-	var initial_preview_alpha := ship_panel.slot_rack.get_preview_alpha()
+	var initial_preview_alpha := status_ship_panel.slot_rack.get_preview_alpha()
 	await create_timer(0.5, true).timeout
 	_expect(
-		not is_equal_approx(ship_panel.slot_rack.get_preview_alpha(), initial_preview_alpha),
+		not is_equal_approx(status_ship_panel.slot_rack.get_preview_alpha(), initial_preview_alpha),
 		"next hex keeps blinking while gameplay is paused",
 	)
 	await _press_action(&"ui_up")
+	_expect(root.gui_get_focus_owner() == reroll_button, "ui_up returns from expansion to reroll")
+	_expect(not status_ship_panel.slot_rack.has_expansion_preview(), "leaving expansion hides the preview hex")
+	_expect(status_ship_panel.slot_rack.has_module_preview(), "leaving expansion restores card preview")
+	await _press_action(&"ui_up")
 	paused = false
-	_expect(root.gui_get_focus_owner() == button_1, "ui_up moves focus back to the card row")
-	_expect(not ship_panel.slot_rack.has_expansion_preview(), "leaving expansion hides the preview hex")
+	_expect(root.gui_get_focus_owner() == button_1, "second ui_up returns to the focused card")
 	_expect(
 		selection_ui.slot_action_label.text.contains("범용 슬롯"),
 		"facility preview identifies the shared slot pool",
 	)
-	ship_panel.set_highlighted_facility(&"engine")
-	var selected_facility_before_weapon := ship_panel.get_selected_facility_id()
-	var acquire_laser := load(
-		"res://resources/player_augments/weapon/acquire_main_laser.tres"
-	) as PlayerAugment
-	selection_ui._set_choices([acquire_laser, move_speed])
+	selection_ui._set_choices([acquire_laser, move_speed, fire_rate])
+	selection_ui._focused_choice_index = 0
 	selection_ui._set_choice_buttons_visible(true)
 	selection_ui._highlight_choice(0)
-	_expect(weapon_preview.visible, "weapon acquisition focus shows the weapon loadout preview")
-	_expect(not ship_panel.visible, "weapon acquisition focus hides the unrelated ship facility panel")
-	_expect(expand_button.disabled, "weapon acquisition disables universal facility-slot expansion")
+	_expect(not expand_button.disabled, "weapon acquisition keeps universal facility-slot expansion")
 	_expect(
-		ship_panel.get_selected_facility_id() == selected_facility_before_weapon,
-		"weapon acquisition does not move the ship facility highlight",
+		selection_ui.slot_action_label.text.contains("범용 슬롯"),
+		"weapon focus keeps the slot expansion label instead of a weapon banner",
 	)
 	_expect(
-		weapon_preview.context_label.text == "신규 병기 획득",
-		"weapon acquisition preview identifies the operation",
-	)
-	var has_new_slot_preview := false
-	for header in weapon_preview.slot_headers:
-		if header.text == "신규 배치":
-			has_new_slot_preview = true
-			break
-	_expect(
-		has_new_slot_preview,
-		"weapon acquisition previews the first empty loadout slot (headers: %s, empty: %d)"
-		% [
-			weapon_preview.slot_headers.map(func(header: Label) -> String: return header.text),
-			loadout.get_first_empty_bay(),
-		],
+		button_1.get_node(button_1.focus_neighbor_bottom) == reroll_button,
+		"weapon cards still navigate down to the reroll button",
 	)
 	_expect(
-		button_1.focus_neighbor_bottom.is_empty(),
-		"weapon cards do not navigate down into hidden ship facilities",
+		reroll_button.get_node(reroll_button.focus_neighbor_bottom) == expand_button,
+		"weapon cards still navigate from reroll to universal expansion",
 	)
+	_expect(
+		status_ship_panel.get_selected_facility_id() == &"",
+		"weapon acquisition clears unrelated facility highlight",
+	)
+	_expect(
+		weapon_hud.is_augment_preview_active(),
+		"weapon acquisition uses the existing right STATUS weapon HUD",
+	)
+	_expect(
+		weapon_hud.get_preview_bay_index() == loadout.get_first_empty_bay(),
+		"new weapon blinks in the first empty STATUS bay",
+	)
+	var initial_weapon_alpha: float = weapon_hud.get_preview_alpha()
+	paused = true
+	await create_timer(0.5, true).timeout
+	paused = false
+	_expect(
+		not is_equal_approx(weapon_hud.get_preview_alpha(), initial_weapon_alpha),
+		"new weapon preview keeps blinking while gameplay is paused",
+	)
+
+	var laser := load("res://resources/weapons/definitions/main_laser.tres") as WeaponDefinition
+	var cannon := load("res://resources/weapons/definitions/aux_test_cannon.tres") as WeaponDefinition
+	var acquire_shotgun := load(
+		"res://resources/player_augments/weapon/acquire_main_shotgun.tres"
+	) as PlayerAugment
+	_expect(loadout.offer_equip_weapon(laser), "test fills second bay")
+	_expect(loadout.offer_equip_weapon(cannon), "test fills third bay")
+	selection_ui._set_choices([acquire_shotgun, move_speed, fire_rate])
+	selection_ui._focused_choice_index = 0
+	selection_ui._set_choice_buttons_visible(true)
+	selection_ui._highlight_choice(0)
+	_expect(not weapon_hud.is_augment_preview_active(), "full bays skip speculative weapon blink")
+	loadout.unequip_weapon(&"main_laser")
+	loadout.clear_weapon_progress(&"main_laser")
+	loadout.unequip_weapon(&"aux_test_cannon")
+	loadout.clear_weapon_progress(&"aux_test_cannon")
+
 	var trait_blaster := load(
 		"res://resources/player_augments/weapon/trait_blaster_rapid_loader.tres"
 	) as PlayerAugment
-	selection_ui._set_choices([trait_blaster, move_speed])
+	selection_ui._set_choices([trait_blaster, move_speed, fire_rate])
+	selection_ui._focused_choice_index = 0
 	selection_ui._set_choice_buttons_visible(true)
 	selection_ui._highlight_choice(0)
 	_expect(
-		weapon_preview.context_label.text == "병기 모듈 강화",
-		"weapon module focus shows the target weapon and incoming module level",
+		weapon_hud.is_augment_preview_active() and weapon_hud.get_preview_bay_index() == 0,
+		"weapon trait focus highlights its target STATUS bay",
 	)
 	_expect(
-		weapon_preview.trait_label.text.contains("추가:"),
-		"weapon trait preview distinguishes the incoming trait from installed traits",
+		weapon_hud.has_module_augment_preview()
+		and weapon_hud.get_preview_module_trait_id() == &"blaster_rapid_loader",
+		"weapon trait previews its next module level in the STATUS module grid",
+	)
+	var initial_trait_alpha: float = weapon_hud.get_preview_alpha()
+	paused = true
+	await create_timer(0.5, true).timeout
+	paused = false
+	_expect(
+		not is_equal_approx(weapon_hud.get_preview_alpha(), initial_trait_alpha),
+		"weapon module preview keeps blinking while gameplay is paused",
 	)
 	selection_ui._highlight_choice(1)
-	_expect(ship_panel.visible, "facility focus restores the ship facility panel")
-	_expect(not weapon_preview.visible, "facility focus hides the weapon loadout preview")
+	_expect(not weapon_hud.is_augment_preview_active(), "facility focus clears weapon preview")
+	_expect(not weapon_hud.has_module_augment_preview(), "facility focus clears weapon module preview")
 	_expect(
-		ship_panel.get_selected_facility_id() == &"engine",
-		"facility focus still highlights its own ship facility",
+		status_ship_panel.get_selected_facility_id() == &"engine",
+		"facility focus restores its own STATUS highlight",
+	)
+	selection_ui._on_choice_pressed(2)
+	_expect(
+		selection_ui.get_focused_choice_index() == 2,
+		"clicking a side card rotates it into focus before selection",
 	)
 	selection_ui._set_input_enabled(false)
+	selection_ui._clear_status_preview()
 	selection_ui.visible = false
 	var enemy_choices: Array[EnemyAugment] = [
 		load("res://resources/enemy_augments/enemy_health_boost_1_2.tres") as EnemyAugment,
@@ -360,16 +493,19 @@ func _check_offer_layout(
 	selection_ui._set_choices(enemy_choices)
 	selection_ui._showing_ship_modules = false
 	selection_ui._set_ship_section_visible(false)
+	selection_ui.set_reroll_state(-1, false)
 	selection_ui._set_choice_buttons_visible(true)
 	selection_ui._set_input_enabled(true)
+	selection_ui._highlight_choice(0)
 	_expect(
 		button_1.focus_neighbor_bottom.is_empty(),
-		"enemy offer keeps keyboard navigation within its card row",
+		"enemy offer keeps keyboard navigation within its carousel",
 	)
 	_expect(
-		not button_1.focus_neighbor_right.is_empty(),
-		"enemy offer cards remain keyboard navigable",
+		button_1.focus_neighbor_right == button_1.get_path_to(button_1),
+		"enemy carousel still owns left/right instead of cycling focus neighbors",
 	)
+	_expect(not weapon_hud.is_augment_preview_active(), "enemy offer leaves player STATUS preview clear")
 	selection_ui._set_input_enabled(false)
 
 
@@ -406,6 +542,7 @@ func _check_swap_overlay(
 func _check_capacity_limits(
 	registry: PlayerAugmentRegistry,
 	swap_ui: AugmentModuleSwapOverlay,
+	panel: ShipPanel,
 ) -> void:
 	registry.clear_augments()
 	for expected_capacity in range(
@@ -423,6 +560,8 @@ func _check_capacity_limits(
 	) as PlayerAugment
 	for index in PlayerAugmentRegistry.MAX_SLOT_CAPACITY:
 		_expect(registry.install_augment(engine) == index, "universal slot %d accepts a module" % (index + 1))
+	panel.set_augment_preview(engine)
+	_expect(not panel.slot_rack.has_module_preview(), "full module pool skips incoming icon blink")
 	swap_ui.open(registry, engine)
 	_expect(
 		swap_ui.get_node_or_null("MarginContainer/VBoxContainer/SlotScroll/SlotList/SlotButton15") != null,

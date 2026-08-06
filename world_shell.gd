@@ -2,6 +2,10 @@ extends Control
 
 @onready var gameplay: Node = $Layout/Playfield/ViewportContainer/PlayfieldViewport/Gameplay
 @onready var pause_overlay: ColorRect = %PauseOverlay
+@onready var status_ship_panel: ShipPanel = $Layout/RightPanel/Margin/VBox/ShipPanel
+@onready var weapon_loadout_hud: WeaponLoadoutHud = (
+	$Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud
+)
 
 var _is_manual_pause := false
 
@@ -19,6 +23,9 @@ func _ready() -> void:
 		overlays.append(overlay)
 	for overlay in overlays:
 		overlay.reparent(self)
+	var augment_selection := get_node("AugmentSelectionOverlay") as AugmentSelectionOverlay
+	assert(augment_selection != null, "World shell requires the augment selection overlay.")
+	augment_selection.configure_status_preview(status_ship_panel, weapon_loadout_hud)
 
 
 func _unhandled_input(event: InputEvent) -> void:
