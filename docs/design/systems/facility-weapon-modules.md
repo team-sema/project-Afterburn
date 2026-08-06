@@ -52,7 +52,7 @@
 | 무기 | trait | 요지 |
 |------|-------|------|
 | Blaster | rapid / sync / accel_ap / ricochet | 연사·동시발사·관통·도탄 |
-| Laser | wide / heat / refract / pulse | 폭·열스택·굴절·펄스 |
+| Laser | wide / heat / refract / pulse | 폭·열스택·굴절·펄스(오프 시 빔 페이드아웃) |
 | Shotgun | expanded / choke / cut / burst | 펠릿·집탄·근거리·버스트 |
 | Aux cannon | heavy / auto / he / hv_ap | 피해·연사·AOE·관통 + 궤도 포드 사격 |
 | Plasma | expand / cluster / field / gravity | 반경·클러스터·잔류장·흡인 |
@@ -71,5 +71,6 @@
 
 | 날짜 | 변경 |
 |------|------|
+| 2026-08-06 | `laser_pulse` OFF 전환 시 빔 알파 페이드아웃 |
 | 2026-08-06 | 무기 trait 28종 전투 구현 섹션 추가 |
 | 2026-08-06 | 초안 · 12모듈 FacilityModuleEffect 설계 |
