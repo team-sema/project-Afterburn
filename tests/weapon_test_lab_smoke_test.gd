@@ -40,7 +40,7 @@ func _run() -> void:
 	_expect(enemy_buttons.get_child_count() == 5, "all five enemy spawn controls are present")
 	_expect(weapon_buttons.get_child_count() == 7, "all seven weapon controls are present")
 	_expect(trait_buttons.get_child_count() == 4, "default blaster exposes its four traits")
-	_expect(lab.get_player_augment_count() == 12, "all 12 facility augments are discovered")
+	_expect(lab.get_player_augment_count() == 13, "all 13 facility augments are discovered")
 	_expect(
 		lab.get_enemy_augment_count() == 7,
 		"all seven enemy augments include the gameplay-unregistered resource",
@@ -62,7 +62,7 @@ func _run() -> void:
 	_expect(player_level_events[0] == 1, "C simulates one player level-up event")
 	_expect(lab.is_augment_picker_open(), "C opens the player augment picker")
 	var player_augment_buttons := lab.find_children("Player_*", "Button", true, false)
-	_expect(player_augment_buttons.size() == 12, "player picker renders one row per facility augment")
+	_expect(player_augment_buttons.size() == 13, "player picker renders one row per facility augment")
 	for node in player_augment_buttons:
 		var augment_button := node as Button
 		_expect(
@@ -137,8 +137,18 @@ func _run() -> void:
 	)
 	ricochet_button.pressed.emit()
 	_expect(
+		int(loadout.get_weapon_traits(&"main_blaster").get(&"blaster_ricochet", 0)) == 2,
+		"active module control advances to Lv.II",
+	)
+	ricochet_button.pressed.emit()
+	_expect(
+		int(loadout.get_weapon_traits(&"main_blaster").get(&"blaster_ricochet", 0)) == 3,
+		"active module control advances to Lv.III",
+	)
+	ricochet_button.pressed.emit()
+	_expect(
 		loadout.get_weapon_traits(&"main_blaster").is_empty(),
-		"active trait control disables the trait again",
+		"maxed module control cycles back to disabled",
 	)
 	ricochet_button.pressed.emit()
 	(trait_buttons.get_node("Trait_blaster_accel_ap") as Button).pressed.emit()

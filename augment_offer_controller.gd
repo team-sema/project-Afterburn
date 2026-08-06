@@ -156,21 +156,18 @@ func _is_player_augment_available(augment: PlayerAugment, loadout: PlayerWeaponL
 			if loadout == null or augment.weapon_definition == null:
 				return false
 			var weapon_id := augment.get_weapon_id()
-			# Already equipped → use WEAPON_LEVEL cards instead.
+			# Already equipped weapons grow through their modules.
 			return not loadout.is_weapon_equipped(weapon_id)
-		PlayerAugmentKind.Kind.WEAPON_LEVEL:
-			if loadout == null:
-				return false
-			var weapon_id := augment.get_weapon_id()
-			if weapon_id == &"" or not loadout.is_weapon_equipped(weapon_id):
-				return false
-			return loadout.can_upgrade_weapon(weapon_id)
 		PlayerAugmentKind.Kind.WEAPON_TRAIT:
 			if loadout == null or augment.trait_id == &"":
 				return false
-			if augment.target_weapon_id != &"":
-				return loadout.is_weapon_equipped(augment.target_weapon_id)
-			return not loadout.get_equipped_weapon_ids().is_empty()
+			var target_weapon_id := augment.target_weapon_id
+			if target_weapon_id == &"":
+				var equipped := loadout.get_equipped_weapon_ids()
+				if equipped.is_empty():
+					return false
+				target_weapon_id = equipped[0]
+			return loadout.can_upgrade_weapon_trait(target_weapon_id, augment.trait_id)
 		PlayerAugmentKind.Kind.STAT_MULTIPLIER, PlayerAugmentKind.Kind.FACILITY_EFFECT:
 			return augment.facility_id != &"" and player_registry.has_facility(augment.facility_id)
 		_:
@@ -198,8 +195,6 @@ func _resolve_player_augment(player_augment: PlayerAugment) -> bool:
 	match player_augment.augment_type:
 		PlayerAugmentKind.Kind.WEAPON_ACQUIRE:
 			return await _resolve_weapon_acquire(player_augment, loadout)
-		PlayerAugmentKind.Kind.WEAPON_LEVEL:
-			return _resolve_weapon_level(player_augment, loadout)
 		PlayerAugmentKind.Kind.WEAPON_TRAIT:
 			return _resolve_weapon_trait(player_augment, loadout)
 		PlayerAugmentKind.Kind.STAT_MULTIPLIER, PlayerAugmentKind.Kind.FACILITY_EFFECT:
@@ -212,8 +207,7 @@ func _resolve_weapon_acquire(player_augment: PlayerAugment, loadout: PlayerWeapo
 	if loadout == null or player_augment.weapon_definition == null:
 		return false
 	var definition := player_augment.weapon_definition
-	var starting_level := player_augment.starting_weapon_level
-	if loadout.offer_equip_weapon(definition, starting_level):
+	if loadout.offer_equip_weapon(definition):
 		selection_ui.restore_for_result()
 		return true
 	if weapon_slot_ui == null:
@@ -223,23 +217,13 @@ func _resolve_weapon_acquire(player_augment: PlayerAugment, loadout: PlayerWeapo
 	weapon_slot_ui.open_for_replace(
 		loadout,
 		"무기 교체",
-		"교체할 병기 모듈을 선택하세요.\n교체하면 해당 레벨과 특성이 모두 사라집니다.",
+		"교체할 병기 모듈을 선택하세요.\n교체하면 장착된 모듈 레벨이 모두 사라집니다.",
 		definition,
 	)
 	var slot_index: int = await weapon_slot_ui.selection_finished
 	if slot_index < 0:
 		return false
-	if not loadout.request_replace_equipped(slot_index, definition, starting_level):
-		return false
-	selection_ui.restore_for_result()
-	return true
-
-
-func _resolve_weapon_level(player_augment: PlayerAugment, loadout: PlayerWeaponLoadout) -> bool:
-	if loadout == null:
-		return false
-	var weapon_id := player_augment.get_weapon_id()
-	if not loadout.upgrade_weapon_level(weapon_id):
+	if not loadout.request_replace_equipped(slot_index, definition):
 		return false
 	selection_ui.restore_for_result()
 	return true

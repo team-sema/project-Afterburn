@@ -17,3 +17,10 @@ params = {
 "lifetime_mult": 0.85,
 "spread_mult": 1.5
 }
+rank_overrides = Array[Dictionary]([{
+"close_damage_mult": 2.1,
+"close_range_px": 90,
+}, {
+"close_damage_mult": 2.4,
+"close_range_px": 100,
+}])

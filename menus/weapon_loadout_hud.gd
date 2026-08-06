@@ -170,13 +170,12 @@ func _bind_cluster(
 ) -> void:
 	var bay := loadout.get_bay(index)
 	if bay == null or bay.is_empty():
-		cluster.bind_weapon(&"", null, 1, {}, {}, {}, false, false, false)
+		cluster.bind_weapon(&"", null, {}, {}, {}, false, false, false)
 		cluster.set_focused(false)
 		return
 	cluster.bind_weapon(
 		bay.equipped_weapon_id,
 		loadout.get_weapon_icon(bay.equipped_weapon_id),
-		loadout.get_weapon_level(bay.equipped_weapon_id),
 		{},
 		{},
 		{},
@@ -245,10 +244,7 @@ func _refresh_detail(loadout: PlayerWeaponLoadout) -> void:
 	if selected_icon != null:
 		selected_icon.visible = false
 	if selected_name != null:
-		selected_name.text = "%s Lv.%d" % [
-			loadout.get_weapon_display_name(_focused_weapon_id),
-			loadout.get_weapon_level(_focused_weapon_id),
-		]
+		selected_name.text = loadout.get_weapon_display_name(_focused_weapon_id)
 	_rebuild_module_cards(loadout)
 	if _hover_trait_id != &"":
 		_show_trait_description(loadout, _hover_trait_id)
@@ -273,12 +269,11 @@ func _show_empty_detail() -> void:
 
 func _show_weapon_description(loadout: PlayerWeaponLoadout) -> void:
 	var name := loadout.get_weapon_display_name(_focused_weapon_id)
-	var level := loadout.get_weapon_level(_focused_weapon_id)
 	var body := loadout.get_weapon_description(_focused_weapon_id)
 	if body == "":
-		_set_description("%s Lv.%d" % [name, level])
+		_set_description(name)
 	else:
-		_set_description("%s Lv.%d\n%s" % [name, level, body])
+		_set_description("%s\n%s" % [name, body])
 
 
 func _show_trait_description(loadout: PlayerWeaponLoadout, trait_id: StringName) -> void:

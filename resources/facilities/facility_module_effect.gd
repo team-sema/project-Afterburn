@@ -18,6 +18,8 @@ enum Kind {
 	XP_GAIN_MULT,
 	MAX_SHIELD_ADD,
 	SHIELD_CHARGE_SPEED_MULT,
+	## Appended to preserve serialized values of existing kinds.
+	WEAPON_FIRE_RATE_MULT,
 }
 
 @export var kind: Kind = Kind.WEAPON_DAMAGE_MULT
@@ -37,6 +39,7 @@ static func is_multiplier_kind(effect_kind: Kind) -> bool:
 		Kind.PICKUP_RANGE_MULT,
 		Kind.XP_GAIN_MULT,
 		Kind.SHIELD_CHARGE_SPEED_MULT,
+		Kind.WEAPON_FIRE_RATE_MULT,
 	]
 
 

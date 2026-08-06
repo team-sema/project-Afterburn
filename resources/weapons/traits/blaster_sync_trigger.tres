@@ -16,3 +16,10 @@ params = {
 "damage_mult": 0.85,
 "fire_interval_mult": 1.15,
 }
+rank_overrides = Array[Dictionary]([{
+"damage_mult": 0.92,
+"fire_interval_mult": 1.08,
+}, {
+"damage_mult": 1.0,
+"fire_interval_mult": 1.0,
+}])

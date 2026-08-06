@@ -162,18 +162,28 @@ func _check_replacement(registry: PlayerAugmentRegistry, loadout: PlayerWeaponLo
 	var engine := load(
 		"res://resources/player_augments/facilities/facility_engine.tres"
 	) as PlayerAugment
-	# weapon_room already has one facility_weapon_room from _check_facility_effect_modules
-	var weapon_room := load(
-		"res://resources/player_augments/facilities/facility_weapon_room.tres"
+	# weapon_room already has one damage module from _check_facility_effect_modules
+	var fire_rate := load(
+		"res://resources/player_augments/facilities/facility_weapon_room_fire_rate.tres"
 	) as PlayerAugment
 	_expect(
-		registry.install_augment(weapon_room) == -1,
+		registry.install_augment(fire_rate) == -1,
 		"full weapon room requires an explicit replacement index",
 	)
-	_expect(registry.install_augment(weapon_room, &"", 0) == 0, "replacement installs incoming module")
+	_expect(registry.install_augment(fire_rate, &"", 0) == 0, "replacement installs fire-rate module")
 	_expect(
-		is_equal_approx(loadout.get_facility_damage_multiplier(), 1.15),
-		"replacing with the same weapon-room facility module keeps its damage curve",
+		is_equal_approx(loadout.get_facility_damage_multiplier(), 1.0),
+		"replacing damage module removes its common damage bonus",
+	)
+	_expect(
+		is_equal_approx(loadout.get_facility_fire_rate_multiplier(), 1.15),
+		"weapon-room fire-rate module applies to equipped weapons",
+	)
+	var equipped_weapon := loadout.get_bay(0).equipped_weapon_instance as WeaponSystem
+	_expect(
+		equipped_weapon != null
+		and is_equal_approx(equipped_weapon.get_effective_fire_rate_multiplier(), 1.15),
+		"equipped weapon receives the facility fire-rate multiplier",
 	)
 	_expect(registry.get_installed_count(&"weapon_room") == 1, "weapon room still has one module after replace")
 	_expect(engine != null, "engine facility module resource loads")
@@ -199,7 +209,7 @@ func _check_offer_layout(
 		"player offer embeds a weapon loadout preview below choices",
 	)
 	var fire_rate := load(
-		"res://resources/player_augments/facilities/facility_weapon_room.tres"
+		"res://resources/player_augments/facilities/facility_weapon_room_fire_rate.tres"
 	) as PlayerAugment
 	var move_speed := load(
 		"res://resources/player_augments/facilities/facility_engine.tres"
@@ -297,16 +307,6 @@ func _check_offer_layout(
 		button_1.focus_neighbor_bottom.is_empty(),
 		"weapon cards do not navigate down into hidden ship facilities",
 	)
-	var level_blaster := load(
-		"res://resources/player_augments/weapon/level_main_blaster.tres"
-	) as PlayerAugment
-	selection_ui._set_choices([level_blaster, move_speed])
-	selection_ui._set_choice_buttons_visible(true)
-	selection_ui._highlight_choice(0)
-	_expect(
-		weapon_preview.context_label.text == "병기 코어 강화",
-		"weapon level focus shows the target weapon level preview",
-	)
 	var trait_blaster := load(
 		"res://resources/player_augments/weapon/trait_blaster_rapid_loader.tres"
 	) as PlayerAugment
@@ -314,8 +314,8 @@ func _check_offer_layout(
 	selection_ui._set_choice_buttons_visible(true)
 	selection_ui._highlight_choice(0)
 	_expect(
-		weapon_preview.context_label.text == "병기 증강 장착",
-		"weapon trait focus shows the target weapon and incoming trait",
+		weapon_preview.context_label.text == "병기 모듈 강화",
+		"weapon module focus shows the target weapon and incoming module level",
 	)
 	_expect(
 		weapon_preview.trait_label.text.contains("추가:"),
@@ -391,7 +391,7 @@ func _check_swap_overlay(
 	swap_ui.open(registry, &"weapon_room", incoming)
 	var first_button := swap_ui.get_node("MarginContainer/VBoxContainer/SlotButton1") as Button
 	_expect(swap_ui.visible, "full facility opens the module replacement window")
-	_expect(first_button.text.contains("집속 조준기"), "replacement window identifies installed module")
+	_expect(first_button.text.contains("사격 통제 장치"), "replacement window identifies installed module")
 	swap_ui.close()
 
 

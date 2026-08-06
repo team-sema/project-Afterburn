@@ -66,6 +66,11 @@ func refresh() -> void:
 		weapon_loadout.set_facility_damage_multiplier(
 			facility_registry.get_module_effect_product(FacilityModuleEffect.Kind.WEAPON_DAMAGE_MULT)
 		)
+		weapon_loadout.set_facility_fire_rate_multiplier(
+			facility_registry.get_module_effect_product(
+				FacilityModuleEffect.Kind.WEAPON_FIRE_RATE_MULT
+			)
+		)
 		weapon_loadout.set_boss_damage_multiplier(
 			facility_registry.get_module_effect_product(FacilityModuleEffect.Kind.BOSS_DAMAGE_MULT)
 		)

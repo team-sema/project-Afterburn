@@ -52,8 +52,8 @@ Menu (ui_accept)
 2. XP가 요구량을 채워도 **자동으로 열리지 않음**. `open_augment_offer`(**C**)로 PLAYER 오퍼 요청 · 오퍼 UI가 이미 열려 있으면 XP 미소모
 3. 플레이 시간 60초마다 ENEMY 오퍼를 큐에 추가 (도달 순으로 처리)
 4. `AugmentOfferController.request_offer(type)` → `offer_started(type)` → pause. 강화 분기점 인트로는 PLAYER 청색 / ENEMY 적색 테마로 구분
-5. PLAYER 오퍼는 상단 3지선다와 하단 적용 대상 UI를 함께 표시. `FACILITY_EFFECT`는 함선 부위와 대상 하이라이트, 무기 Kind는 병기 배치·레벨·증강 미리보기를 표시
-6. 시설 카드 → 빈 슬롯 설치(가득 차면 교체 모달). 무기 Kind(획득·레벨·특성) → 로드아웃에 직접 적용(만석 획득은 베이 교체 UI). 함선 부위 선택 → 슬롯 용량 +1(최대 3)
+5. PLAYER 오퍼는 상단 3지선다와 하단 적용 대상 UI를 함께 표시. `FACILITY_EFFECT`는 함선 부위와 대상 하이라이트, 무기 Kind는 병기 배치·모듈 레벨 미리보기를 표시
+6. 시설 카드 → 빈 슬롯 설치(가득 차면 교체 모달). 무기 Kind(획득·모듈 강화) → 로드아웃에 직접 적용(만석 획득은 베이 교체 UI). 함선 부위 선택 → 슬롯 용량 +1(최대 3)
 7. ENEMY 오퍼는 기존 3지선다 선택 → registry 반영
 8. **PLAYER 오퍼 종료 직후** 함선 주변 `enemy_projectiles` 제거 + `augment_resume_burst` VFX (`player_resume_clear_radius` 기본 36)
 9. unpause → `offer_completed(type)`

@@ -8,7 +8,7 @@
 
 1. 필드 무기 드롭은 비활성. XP `drop_chance`는 데이터 유지.
 2. 통합 베이·동시 작동·탄약 없음 유지. `max_equipped_weapon_count` 설정값.
-3. 교체·언장착으로 빠진 무기의 level/traits/`_progress` 항목을 삭제한다. 재획득은 Lv.1부터.
+3. 교체·언장착으로 빠진 무기의 모듈 레벨(`trait_ranks`)과 `_progress` 항목을 삭제한다. 재획득은 모듈 없음부터.
 4. `AugmentOfferController.max_reroll_count`(임시 기본 2). 선택 전 R 리롤. 직전 세트와 완전 동일하면 1회 재추첨.
 5. STATUS는 최신 함선·무기 UI를 유지한다.
 

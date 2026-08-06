@@ -19,10 +19,32 @@ func _run() -> void:
 	for _index in 4:
 		await process_frame
 
-	_expect(loadout.get_weapon_level(&"main_blaster") == 1, "default weapon starts at Lv.1")
 	_expect(loadout.is_weapon_equipped(&"main_blaster"), "blaster starts equipped")
-	_expect(loadout.upgrade_weapon_level(&"main_blaster"), "level up works")
-	_expect(loadout.get_weapon_level(&"main_blaster") == 2, "blaster reaches Lv.2")
+	_expect(not loadout.has_method("get_weapon_level"), "weapon core level API is removed")
+	_expect(
+		loadout.add_or_upgrade_weapon_trait(&"main_blaster", &"blaster_rapid_loader", 1) == 1,
+		"module starts at Lv.I",
+	)
+	_expect(
+		loadout.add_or_upgrade_weapon_trait(&"main_blaster", &"blaster_rapid_loader", 1) == 2,
+		"module reaches Lv.II",
+	)
+	_expect(
+		loadout.add_or_upgrade_weapon_trait(&"main_blaster", &"blaster_rapid_loader", 1) == 3,
+		"module reaches Lv.III",
+	)
+	_expect(
+		not loadout.can_upgrade_weapon_trait(&"main_blaster", &"blaster_rapid_loader"),
+		"maxed module cannot upgrade",
+	)
+	var blaster := loadout.get_bay(0).equipped_weapon_instance as WeaponSystem
+	_expect(
+		is_equal_approx(
+			float(blaster.get_trait_param(&"blaster_rapid_loader", &"fire_interval_mult", 1.0)),
+			0.52
+		),
+		"module Lv.III resolves its explicit combat params",
+	)
 
 	var laser := load("res://resources/weapons/definitions/main_laser.tres") as WeaponDefinition
 	_expect(loadout.offer_equip_weapon(laser), "laser equips into an empty bay")
@@ -42,18 +64,11 @@ func _run() -> void:
 	_expect(
 		loadout.request_replace_equipped(
 			laser_slot,
-			load("res://resources/weapons/definitions/main_shotgun.tres") as WeaponDefinition,
-			1,
+			load("res://resources/weapons/definitions/main_shotgun.tres") as WeaponDefinition
 		),
 		"replace works",
 	)
 	_expect(not loadout.has_weapon_progress(&"main_laser"), "replaced weapon progress deleted")
-
-	loadout.add_or_upgrade_weapon_trait(&"main_blaster", &"pierce_stub", 1)
-	_expect(
-		int(loadout.get_weapon_traits(&"main_blaster").get(&"pierce_stub", 0)) == 1,
-		"trait ranks are stored on weapon_id",
-	)
 
 	weapon_hud.call("refresh")
 	await process_frame
@@ -64,11 +79,11 @@ func _run() -> void:
 	world.queue_free()
 	await process_frame
 	if failures.is_empty():
-		print("weapon level unification test: PASS")
+		print("weapon module level test: PASS")
 		quit()
 		return
 	for failure in failures:
-		push_error("weapon level unification test: %s" % failure)
+		push_error("weapon module level test: %s" % failure)
 	quit(1)
 
 

@@ -11,4 +11,3 @@ description = "레이저 병기 모듈을 획득합니다."
 augment_type = 1
 offer_weight = 1.0
 weapon_definition = ExtResource("2_weapon")
-starting_weapon_level = 1

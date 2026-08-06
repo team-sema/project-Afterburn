@@ -11,14 +11,16 @@ func _initialize() -> void:
 
 func _run() -> void:
 	var acquire_plasma := load("res://resources/player_augments/weapon/acquire_plasma_bomb.tres")
-	var level_plasma := load("res://resources/player_augments/weapon/level_plasma_bomb.tres")
+	var plasma_expand := load("res://resources/weapons/traits/plasma_expand.tres") as WeaponTraitDefinition
 	var plasma_bomb := load("res://resources/weapons/definitions/plasma_bomb.tres")
 	var drop_table := load("res://resources/weapons/default_weapon_drop_table.tres")
 	_expect(is_equal_approx(acquire_plasma.offer_weight, 1.0), "plasma acquire keeps default offer weight")
-	_expect(acquire_plasma.starting_weapon_level == 1, "plasma acquire keeps starting level 1")
 	_expect(acquire_plasma.weapon_definition == plasma_bomb, "plasma acquire keeps its weapon link")
-	_expect(is_equal_approx(level_plasma.offer_weight, 1.0), "plasma level keeps default offer weight")
-	_expect(level_plasma.weapon_definition == plasma_bomb, "plasma level keeps its weapon link")
+	_expect(plasma_expand.max_rank == 3, "plasma module supports three levels")
+	_expect(
+		is_equal_approx(float(plasma_expand.get_param_for_rank(3, &"radius_mult")), 2.2),
+		"plasma module keeps its Lv.III override",
+	)
 	_expect(drop_table.weapons.has(plasma_bomb), "default drop table keeps plasma bomb")
 
 	var world := WORLD_SCENE.instantiate() as Control
@@ -35,7 +37,7 @@ func _run() -> void:
 	world.queue_free()
 	await process_frame
 	acquire_plasma = null
-	level_plasma = null
+	plasma_expand = null
 	plasma_bomb = null
 	drop_table = null
 

@@ -1,6 +1,8 @@
 class_name PlayerAugment
 extends Resource
 
+const ROMAN := ["", "I", "II", "III", "IV", "V"]
+
 @export var augment_id: StringName
 @export var display_name: String
 @export_multiline var description: String
@@ -15,15 +17,13 @@ extends Resource
 ## Relative pick weight inside the offer pool (data-tunable; not a fixed design %).
 @export_range(0.0, 100.0, 0.01) var offer_weight := 1.0
 
-## WEAPON_ACQUIRE / WEAPON_LEVEL / WEAPON_TRAIT
+## WEAPON_ACQUIRE / WEAPON_TRAIT
 @export var weapon_definition: WeaponDefinition
-## WEAPON_ACQUIRE: starting level when the weapon is first obtained.
-@export_range(1, 3, 1) var starting_weapon_level := 1
 ## WEAPON_TRAIT (and optional ACQUIRE filter): which weapon this belongs to.
 @export var target_weapon_id: StringName
-## WEAPON_TRAIT: trait module id stored on weapon progress.
+## WEAPON_TRAIT: module id stored on weapon progress.
 @export var trait_id: StringName
-@export_range(1, 5, 1) var trait_rank_increase := 1
+@export_range(1, 3, 1) var trait_rank_increase := 1
 @export var trait_definition: WeaponTraitDefinition
 
 
@@ -39,28 +39,30 @@ func get_offer_title(loadout: PlayerWeaponLoadout = null) -> String:
 	match augment_type:
 		PlayerAugmentKind.Kind.WEAPON_ACQUIRE:
 			return "신규 병기 모듈\n%s" % _weapon_display_name()
-		PlayerAugmentKind.Kind.WEAPON_LEVEL:
-			var weapon_name := _weapon_display_name()
-			if loadout != null and loadout.has_weapon_progress(get_weapon_id()):
-				var level := loadout.get_weapon_level(get_weapon_id())
-				return "%s 코어 강화\nLv.%d → Lv.%d" % [weapon_name, level, mini(level + 1, 3)]
-			return "%s 코어 강화" % weapon_name
 		PlayerAugmentKind.Kind.WEAPON_TRAIT:
+			var trait_name := display_name
 			if trait_definition != null and trait_definition.display_name != "":
-				return trait_definition.display_name
-			return display_name
+				trait_name = trait_definition.display_name
+			var next_rank := trait_rank_increase
+			if loadout != null:
+				var current_rank := int(
+					loadout.get_weapon_traits(get_weapon_id()).get(trait_id, 0)
+				)
+				next_rank = mini(
+					current_rank + trait_rank_increase,
+					loadout.get_trait_max_rank(trait_id),
+				)
+			return "%s\n모듈 Lv.%s" % [trait_name, ROMAN[clampi(next_rank, 1, ROMAN.size() - 1)]]
 		_:
 			return display_name
 
 
-func get_offer_description(loadout: PlayerWeaponLoadout = null) -> String:
+func get_offer_description(_loadout: PlayerWeaponLoadout = null) -> String:
 	match augment_type:
 		PlayerAugmentKind.Kind.WEAPON_ACQUIRE:
 			if weapon_definition != null and weapon_definition.description != "":
 				return weapon_definition.description
 			return description
-		PlayerAugmentKind.Kind.WEAPON_LEVEL:
-			return "기본 성능이 증가합니다."
 		PlayerAugmentKind.Kind.WEAPON_TRAIT:
 			if trait_definition != null and trait_definition.description != "":
 				return trait_definition.description

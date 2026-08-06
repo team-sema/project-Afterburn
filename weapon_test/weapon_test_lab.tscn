@@ -358,18 +358,11 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 24)
 layout_mode = 2
 disabled = true
-text = "선택 무기 특성 초기화"
+text = "선택 무기 모듈 초기화"
 
 [node name="ActionRow" type="HBoxContainer" parent="Layout/RightPanel/Margin/VBox"]
 layout_mode = 2
 theme_override_constants/separation = 4
-
-[node name="LevelButton" type="Button" parent="Layout/RightPanel/Margin/VBox/ActionRow"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 24)
-layout_mode = 2
-size_flags_horizontal = 3
-text = "레벨 +"
 
 [node name="UnequipButton" type="Button" parent="Layout/RightPanel/Margin/VBox/ActionRow"]
 unique_name_in_owner = true

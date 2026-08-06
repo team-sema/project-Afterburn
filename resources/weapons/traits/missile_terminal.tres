@@ -16,3 +16,12 @@ params = {
 "max_bonus": 1,
 "full_bonus_flight_time": 2.5,
 }
+rank_overrides = Array[Dictionary]([{
+"min_bonus": 0.3,
+"max_bonus": 1.25,
+"full_bonus_flight_time": 2.25,
+}, {
+"min_bonus": 0.4,
+"max_bonus": 1.5,
+"full_bonus_flight_time": 2.0,
+}])

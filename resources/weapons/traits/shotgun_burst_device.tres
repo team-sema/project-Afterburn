@@ -16,3 +16,11 @@ params = {
 "delay": 0.12,
 "extra_damage_mult": 0.9,
 }
+rank_overrides = Array[Dictionary]([{
+"delay": 0.08,
+"extra_damage_mult": 1.0,
+}, {
+"every_nth": 2,
+"delay": 0.06,
+"extra_damage_mult": 1.0,
+}])

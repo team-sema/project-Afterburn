@@ -16,3 +16,12 @@ params = {
 "speed_mult": 1.2,
 "spread_mult": 0.5
 }
+rank_overrides = Array[Dictionary]([{
+"lifetime_mult": 1.6,
+"speed_mult": 1.3,
+"spread_mult": 0.4,
+}, {
+"lifetime_mult": 1.8,
+"speed_mult": 1.4,
+"spread_mult": 0.3,
+}])

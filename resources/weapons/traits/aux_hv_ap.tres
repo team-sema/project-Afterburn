@@ -17,3 +17,14 @@ params = {
 "pierce_bonus": 3,
 "pierce_falloff": 0.9,
 }
+rank_overrides = Array[Dictionary]([{
+"damage_mult": 1.2,
+"speed_mult": 1.8,
+"pierce_bonus": 4,
+"pierce_falloff": 0.93,
+}, {
+"damage_mult": 1.3,
+"speed_mult": 2.0,
+"pierce_bonus": 5,
+"pierce_falloff": 0.96,
+}])

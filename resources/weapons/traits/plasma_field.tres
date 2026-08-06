@@ -16,3 +16,10 @@ params = {
 "field_duration": 3,
 "field_max_bonus_mult": 1,
 }
+rank_overrides = Array[Dictionary]([{
+"field_duration": 4,
+"field_max_bonus_mult": 1.25,
+}, {
+"field_duration": 5,
+"field_max_bonus_mult": 1.5,
+}])

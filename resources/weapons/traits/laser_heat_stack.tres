@@ -16,3 +16,10 @@ params = {
 "stack_bonus": 0.15,
 "max_bonus": 0.9,
 }
+rank_overrides = Array[Dictionary]([{
+"stack_bonus": 0.2,
+"max_bonus": 1.2,
+}, {
+"stack_bonus": 0.25,
+"max_bonus": 1.5,
+}])
