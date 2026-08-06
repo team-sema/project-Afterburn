@@ -40,6 +40,14 @@
   ],
   "cards": [
     {
+      "id": "laser-refraction-vfx",
+      "title": "레이저 굴절빔 VFX",
+      "description": "굴절 피해 경로를 코어·글로우 네온 보조 빔과 짧은 페이드로 표시한다.",
+      "column": "review",
+      "file": "cards/laser-refraction-vfx.md",
+      "tags": ["무기", "레이저", "VFX"]
+    },
+    {
       "id": "support-cannon-drones",
       "title": "보조 캐넌 옵션 드론 개편",
       "description": "유도 캐넌을 플레이어 좌우에서 전방 사격하는 옵션 드론 무기로 개편하고 모듈로 기체 수를 확장한다.",
