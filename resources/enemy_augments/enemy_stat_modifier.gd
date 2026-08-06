@@ -5,6 +5,7 @@ enum Stat {
 	HEALTH,
 	MOVE_SPEED,
 	ACTION_RATE,
+	ARMING_RATE,
 }
 
 @export var stat: Stat = Stat.HEALTH

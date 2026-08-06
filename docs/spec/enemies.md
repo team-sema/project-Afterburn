@@ -53,8 +53,11 @@
 `BombProximityFuseComponent`:
 
 - 느린 하강 `(0, 16)`, HP 140
-- 플레이어가 `trigger_radius`(72) 안이면 정지 → **2초간 빨간 점멸 3회** → 자폭
-- 폭발 VFX scale **1.5×**, 피해 반경 `base_explosion_radius(40) * 1.5`, `blast_damage` **1** (플레이어 피격은 이벤트당 항상 1)
+- 플레이어가 `trigger_radius`(60) 안이면 정지 → **2초간 빨간 점멸 3회** → 자폭
+- 신관 무장과 적색 점멸이 시작되면 반투명 범위 프리뷰 표시
+- 폭발 판정·VFX 최대 링·범위 프리뷰 반경은 모두 `base_explosion_radius(40) * 1.5 = 60px`
+- `blast_damage` **1** (플레이어 피격은 이벤트당 항상 1)
+- `고속 기폭 장치` 적 증강 활성 시 무장 시간 `2.0초 / 1.5 ≈ 1.33초`
 - 투사체 없음
 
 ## Drone 대각 편대

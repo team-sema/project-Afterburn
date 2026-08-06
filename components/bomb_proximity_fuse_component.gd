@@ -10,6 +10,7 @@ extends Node
 @export var stats_component: StatsComponent
 @export var visual_anchor: Node2D
 @export var destroy_effect_spawner: SpawnerComponent
+@export var blast_preview: BombBlastPreview
 
 @export_range(8.0, 200.0, 1.0) var trigger_radius := 72.0
 @export_range(0.5, 5.0, 0.05) var arm_duration := 2.0
@@ -31,6 +32,9 @@ func _ready() -> void:
 	assert(actor != null, "BombProximityFuseComponent requires actor.")
 	assert(move_component != null, "BombProximityFuseComponent requires MoveComponent.")
 	assert(stats_component != null, "BombProximityFuseComponent requires StatsComponent.")
+	assert(blast_preview != null, "BombProximityFuseComponent requires BombBlastPreview.")
+	blast_preview.set_preview_radius(get_blast_radius())
+	blast_preview.visible = false
 	_cache_flash_targets()
 
 
@@ -46,9 +50,18 @@ func _process(_delta: float) -> void:
 
 func _start_arming() -> void:
 	_armed = true
+	blast_preview.visible = true
 	if move_component != null:
 		move_component.velocity = Vector2.ZERO
 	_arm_and_detonate()
+
+
+func apply_arming_rate_multiplier(multiplier: float) -> void:
+	arm_duration /= maxf(0.01, multiplier)
+
+
+func get_blast_radius() -> float:
+	return base_explosion_radius * blast_size_multiplier
 
 
 func _arm_and_detonate() -> void:
@@ -74,6 +87,7 @@ func _detonate() -> void:
 		return
 	_detonating = true
 	_set_flash(false)
+	blast_preview.visible = false
 
 	# Avoid default DestroyedComponent VFX; we spawn a larger blast ourselves.
 	var destroyed := actor.get_node_or_null("DestroyedComponent") as DestroyedComponent
@@ -93,13 +107,16 @@ func _spawn_blast_vfx() -> void:
 	var effect := destroy_effect_spawner.spawn(actor.global_position)
 	if effect == null:
 		return
-	effect.scale = Vector2.ONE * blast_size_multiplier
+	if effect.has_method("set_effect_radius"):
+		effect.call("set_effect_radius", get_blast_radius())
+	else:
+		effect.scale = Vector2.ONE * blast_size_multiplier
 	if effect.has_method("set_effect_color"):
 		effect.call("set_effect_color", blast_effect_color)
 
 
 func _deal_blast_damage() -> void:
-	var radius := base_explosion_radius * blast_size_multiplier
+	var radius := get_blast_radius()
 	var world := actor.get_world_2d()
 	if world == null:
 		return

@@ -6,6 +6,7 @@ signal facility_expansion_selected(facility_id: StringName)
 signal reroll_requested
 
 const CHOICE_ICON_MAX_WIDTH := 28
+const ENEMY_CHOICE_ICON_MAX_WIDTH := 48
 const FACILITY_GRID := [
 	[&"weapon_room", &"hangar"],
 	[&"engine", &"hull"],
@@ -220,6 +221,7 @@ func _set_choices(choices: Array) -> void:
 			continue
 		var augment := current_choices[index] as Resource
 		var player_augment := augment as PlayerAugment
+		var icon_max_width := CHOICE_ICON_MAX_WIDTH
 		if player_augment != null:
 			button.text = "%s\n%s" % [
 				player_augment.get_offer_title(_weapon_loadout),
@@ -229,7 +231,8 @@ func _set_choices(choices: Array) -> void:
 		else:
 			button.text = "%s\n%s" % [augment.get("display_name"), augment.get("description")]
 			button.icon = augment.get("icon") as Texture2D
-		button.add_theme_constant_override("icon_max_width", CHOICE_ICON_MAX_WIDTH)
+			icon_max_width = ENEMY_CHOICE_ICON_MAX_WIDTH
+		button.add_theme_constant_override("icon_max_width", icon_max_width)
 		button.visible = true
 
 

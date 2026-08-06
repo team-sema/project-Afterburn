@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="EnemyAugment" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://resources/enemy_augments/enemy_augment.gd" id="1_augment"]
+[ext_resource type="Texture2D" path="res://assets/svg/enemy_drone.svg" id="2_icon"]
+
+[resource]
+script = ExtResource("1_augment")
+augment_id = &"enemy_drone_formation_reinforcement"
+display_name = "드론 증원 편대"
+description = "이후 등장하는 드론 편대의 스폰 수가 1기 증가합니다."
+icon = ExtResource("2_icon")
+max_stacks = 1
+target_spawn_id = &"drone_formation"
+additional_spawn_count = 1

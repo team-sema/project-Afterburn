@@ -2,6 +2,7 @@ class_name Enemy
 extends Node2D
 
 var augment_registry: EnemyAugmentRegistry
+var spawn_id: StringName
 
 ## When true, boss-damage facility modules apply extra multiplier via WeaponSystem.resolve_hit_damage.
 @export var is_boss := false:

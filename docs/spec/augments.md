@@ -7,9 +7,9 @@
 | `PlayerAugment` | 공통 필드 + `augment_type`, `offer_weight`, `facility_id`, `facility_module_effect`, 무기 필드(`weapon_definition`, `starting_weapon_level`, `trait_*`) |
 | `FacilityModuleEffect` | `kind` + `primary` / `secondary` / `tertiary` (시설 모듈 효과 페이로드) |
 | `WeaponTraitDefinition` | `trait_id`, `target_weapon_id`, `params` Dictionary (무기별 전투 튜닝) |
-| `EnemyAugment` | `augment_id`, `display_name`, `description`, `stat_modifiers[]`, `behavior_components[]` |
+| `EnemyAugment` | 공통 필드 + `icon`, `max_stacks`, `stat_modifiers[]`, `behavior_components[]`, `target_spawn_id`, `additional_spawn_count` |
 | `PlayerStatModifier.Stat` | `MOVE_SPEED`, `FIRE_RATE`, `WEAPON_DAMAGE` (enum 잔여 · **플레이어 오퍼 풀 미사용**) |
-| `EnemyStatModifier.Stat` | `HEALTH`, `MOVE_SPEED`, `ACTION_RATE` |
+| `EnemyStatModifier.Stat` | `HEALTH`, `MOVE_SPEED`, `ACTION_RATE`, `ARMING_RATE` |
 | `PlayerAugmentKind` | `FACILITY_EFFECT`, `WEAPON_ACQUIRE`, `WEAPON_LEVEL`, `WEAPON_TRAIT` (+ enum에 `STAT_MULTIPLIER` 잔여·풀 미사용) |
 
 ## 현재 풀 (Gameplay 익스포트)
@@ -103,9 +103,13 @@
 | `enemy_health_boost_1_2` | 적 증원 | 이후 스폰 적 HEALTH ×1.2 |
 | `enemy_move_speed_boost_1_2` | 가속 적대 | 이후 스폰 적 MOVE_SPEED ×1.2 |
 | `enemy_fire_volume_boost` | 포화 사격 | ACTION_RATE ×1.25 + 추가 탄 2발 + 최소 스프레드 18° |
-| `enemy_near_death_experience` | 임사 체험 | 치명 피해 시 HP 1 · 1초 무적 임사 상태 후 사망 |
+| `enemy_near_death_experience` | 임사 체험 | 치명 피해 시 HP 1 · 1초 무적 임사 상태 후 사망 · one-time |
+| `enemy_drone_formation_reinforcement` | 드론 증원 편대 | Drone 편대 스폰 +1 · one-time · Drone SVG 프리뷰 |
+| `enemy_bomb_fast_fuse` | 고속 기폭 장치 | Bomb 무장 시간 ÷1.5 · one-time · Bomb SVG 프리뷰 |
 
-`gameplay.tscn`의 적 증강 풀에는 위 **4종만** 등록되어 있다.
+`gameplay.tscn`의 적 증강 풀에는 위 **6종**이 등록되어 있다. `max_stacks`는 `0`이면 무제한, `1`이면 one-time이며 한도에 도달한 증강은 이후 후보에서 제외된다.
+
+`target_spawn_id`는 증강 효과를 특정 `EnemySpawnSet`에 한정한다. `additional_spawn_count`는 스폰 수 보너스를 전달하며 현재 `drone_formation` 패턴이 이를 편대원 수에 반영한다. 대상이 지정된 스탯 modifier도 같은 `spawn_id`의 적에만 적용된다.
 
 ### 풀 미등록 리소스
 
@@ -129,6 +133,7 @@
 - `WEAPON_ACQUIRE` 만석 시 `WeaponSlotSelectionOverlay`로 교체 베이 선택(취소 시 카드 선택으로 복귀). **확정 시 피교체 무기 성장 삭제**
 - `WEAPON_LEVEL` / `WEAPON_TRAIT` → 장착 중 무기만 (`PlayerWeaponLoadout`)
 - PLAYER 리롤 → 후보 전체 재생성 (효과 미적용)
+- ENEMY 선택지: `max_stacks` 한도에 도달한 증강 제외
 
 ### UI
 
@@ -136,6 +141,7 @@
   - `FACILITY_EFFECT` 포커스: 함선 부위 UI와 대상 `facility_id` 하이라이트
   - `WEAPON_ACQUIRE` 포커스: 현재 병기 배치와 신규 배치/교체 안내
   - `WEAPON_LEVEL` / `WEAPON_TRAIT` 포커스: 대상 병기 슬롯·레벨·현재/추가 증강 미리보기
+  - 적 그룹 증강: `EnemyAugment.icon`에 지정된 적 SVG를 카드 아이콘으로 표시
 - `WeaponSlotSelectionOverlay` — 만석 시 무기 베이 교체
 - `AugmentModuleSwapOverlay` — 시설 모듈 교체
 - `ProgressionHud` — XP · `[C]` 힌트

@@ -12,7 +12,8 @@
 | `KamikazeAimChargeComponent` | 하강 → 조준(정지) → 락온 돌진 (MoveComponent velocity) |
 | `CasterHoverComponent` | 상단 hover_y 체공 + 좌우 패트롤 |
 | `RadialBarrageShootComponent` | 원형 다연발 링 탄막 |
-| `BombProximityFuseComponent` | 근접 신관 → 적색 점멸 → 1.5× 자폭(VFX+AOE) |
+| `BombProximityFuseComponent` | 근접 신관 → 적색 점멸 → 자폭. 판정·VFX·반투명 프리뷰가 동일 radius 사용 |
+| `BombBlastPreview` | Bomb 신관 무장 중 자폭 판정 범위를 옅은 원과 외곽선으로 표시 |
 
 | `MoveInputComponent` | `ui_*`/WASD → MoveComponent (`MoveStats.speed`) |
 | `MoveStats` | 이동 속도 Resource |

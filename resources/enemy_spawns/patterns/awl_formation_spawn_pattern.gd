@@ -16,6 +16,7 @@ func spawn(
 	enemy_scene: PackedScene,
 	viewport_rect: Rect2,
 	spawn_enemy: Callable,
+	_additional_count: int = 0,
 ) -> void:
 	var half_span := 0.0
 	var half_depth := 0.0
