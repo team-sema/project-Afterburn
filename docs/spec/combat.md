@@ -38,7 +38,7 @@ Hitbox.area_entered
 
 레이저는 Area 겹침을 쓰지 않고 RayCast + DamageTickTimer로 `hurt`를 직접 보낸다.
 
-`HurtComponent.shield_component`는 플레이어에만 연결돼 있다(적은 null → 기존 동작). **플레이어가 맞는 피해는 항상 1.** 실드는 버퍼 HP라 실드 0일 때만 선체가 깎인다. 기본 피격 무적시간은 없다(충격 분산 골격 모듈만 예외) — 같은 프레임의 다른 히트박스는 별개 이벤트다.
+`HurtComponent.shield_component`는 플레이어에만 연결돼 있다(적은 null → 기존 동작). **플레이어가 맞는 피해는 항상 1.** 실드는 버퍼 HP라 실드 0일 때만 선체가 깎인다. 모든 피격 후 기본 0.6초 무적이며, 충격 분산 골격은 선체 피격 무적시간을 1.0초 늘려 총 1.6초로 만든다.
 
 ## 탄
 

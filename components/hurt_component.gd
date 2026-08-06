@@ -2,11 +2,19 @@
 class_name HurtComponent
 extends Node
 
+signal invincibility_started(duration: float)
+signal invincibility_ended
+
 # Grab the stats so we can alter the health
 @export var stats_component: StatsComponent
 
 # Grab a hurtbox so we know when we have taken a hiet
 @export var hurtbox_component: HurtboxComponent
+
+## Short protection after any hit. Player config sets this; enemies leave it at zero.
+@export_range(0.0, 5.0, 0.05) var base_iframe_duration := 0.0
+@export_range(0.05, 1.0, 0.05) var invincible_alpha := 0.45
+@export var invincibility_visual: CanvasItem
 
 # Optional shield buffer HP in front of hull health.
 @export var shield_component: ShieldComponent
@@ -19,9 +27,20 @@ extends Node
 @export var flash_component: FlashComponent
 
 var _iframe_timer: Timer
+var _base_visual_modulate := Color.WHITE
 
 
 func _ready() -> void:
+	if invincibility_visual == null:
+		var actor := get_parent()
+		if actor != null:
+			invincibility_visual = actor.get_node_or_null("Anchor") as CanvasItem
+			if invincibility_visual == null:
+				invincibility_visual = actor as CanvasItem
+	if invincibility_visual != null:
+		_base_visual_modulate = invincibility_visual.modulate
+	hurtbox_component.invincibility_changed.connect(_on_invincibility_changed)
+	_set_invincibility_visual(hurtbox_component.is_invincible)
 	_iframe_timer = Timer.new()
 	_iframe_timer.one_shot = true
 	add_child(_iframe_timer)
@@ -41,6 +60,7 @@ func _ready() -> void:
 			shield_component.notify_hit()
 			remaining = shield_component.absorb_damage(remaining)
 		if remaining <= 0:
+			_try_apply_iframes(false)
 			return
 		stats_component.health -= remaining
 		_on_hull_damaged()
@@ -50,38 +70,69 @@ func _ready() -> void:
 func _on_hull_damaged() -> void:
 	if combat_buff_controller != null:
 		combat_buff_controller.notify_hull_damage()
-	_try_apply_iframes()
+	_try_apply_iframes(true)
 
 
-func _try_apply_iframes() -> void:
+func _try_apply_iframes(include_facility: bool) -> void:
 	if hurtbox_component == null:
 		return
 	# Do not refresh if already invincible.
 	if hurtbox_component.is_invincible:
 		return
-	var duration := _get_iframe_duration()
+	var duration := _get_iframe_duration(include_facility)
 	if duration <= 0.0:
 		return
+	start_invincibility(duration)
+
+
+func start_invincibility(duration: float) -> void:
+	if hurtbox_component == null or duration <= 0.0:
+		return
+	var was_invincible: bool = hurtbox_component.is_invincible
 	hurtbox_component.is_invincible = true
 	if flash_component != null:
 		flash_component.flash()
 	_iframe_timer.start(duration)
+	if not was_invincible:
+		invincibility_started.emit(duration)
 
 
-func _get_iframe_duration() -> float:
+func end_invincibility() -> void:
+	if hurtbox_component == null:
+		return
+	hurtbox_component.is_invincible = false
+
+
+func _get_iframe_duration(include_facility: bool) -> float:
+	var duration := maxf(0.0, base_iframe_duration)
+	if not include_facility:
+		return duration
 	var registry := facility_registry
 	if registry == null:
 		var ship := get_parent()
 		if ship != null:
 			registry = ship.get("augment_registry") as PlayerAugmentRegistry
 	if registry == null:
-		return 0.0
-	if not registry.has_module_effect_kind(FacilityModuleEffect.Kind.HULL_HIT_IFRAMES):
-		return 0.0
-	var first := registry.get_first_module_effect(FacilityModuleEffect.Kind.HULL_HIT_IFRAMES)
-	return maxf(0.0, first.primary) if first != null else 0.0
+		return duration
+	return duration + registry.get_module_effect_sum(FacilityModuleEffect.Kind.HULL_HIT_IFRAMES)
 
 
 func _on_iframe_timeout() -> void:
-	if hurtbox_component != null:
-		hurtbox_component.is_invincible = false
+	end_invincibility()
+
+
+func _on_invincibility_changed(enabled: bool) -> void:
+	_set_invincibility_visual(enabled)
+	if not enabled:
+		invincibility_ended.emit()
+
+
+func _set_invincibility_visual(enabled: bool) -> void:
+	if invincibility_visual == null:
+		return
+	if enabled:
+		var translucent := _base_visual_modulate
+		translucent.a = _base_visual_modulate.a * invincible_alpha
+		invincibility_visual.modulate = translucent
+	else:
+		invincibility_visual.modulate = _base_visual_modulate

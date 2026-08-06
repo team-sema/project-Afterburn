@@ -414,6 +414,14 @@
       "column": "review",
       "file": "cards/weapon-test-lab-augments.md",
       "tags": ["무기", "증강", "테스트", "스폰"]
+    },
+    {
+      "id": "weapon-trait-enemy-motion-audit",
+      "title": "적 이동 증강 및 전투 UI 개선",
+      "description": "적 외력 이동, 충돌·무적 상태와 병기 증강 선택·STATUS UI를 개선한다.",
+      "column": "review",
+      "file": "cards/weapon-trait-enemy-motion-audit.md",
+      "tags": ["무기", "증강", "적", "UI"]
     }
   ]
 }

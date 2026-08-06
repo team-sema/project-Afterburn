@@ -90,6 +90,40 @@ func _run() -> void:
 
 	var detail_cols := weapon_hud.get_node_or_null("%DetailColumns") as HBoxContainer
 	_expect(detail_cols != null, "selected weapon and modules sit in side-by-side columns")
+	var footer_clip := weapon_hud.get_node_or_null("%WeaponDetailFooterClip") as Control
+	var layout := world.get_node("Layout") as Control
+	var right_panel := world.get_node("Layout/RightPanel") as Control
+	var right_box := world.get_node("Layout/RightPanel/Margin/VBox") as VBoxContainer
+	var right_margin := world.get_node("Layout/RightPanel/Margin") as MarginContainer
+	_expect(footer_clip != null, "weapon description uses a fixed clipping region")
+	var layout_size_before := layout.size
+	var right_minimum_before := right_box.get_combined_minimum_size()
+	weapon_hud._set_description(
+		"긴 설명\n두 번째 줄\n세 번째 줄은 레이아웃을 늘리지 않아야 합니다."
+		+ "\n네 번째 줄\n다섯 번째 줄"
+	)
+	await process_frame
+	await process_frame
+	var margin_height := float(
+		right_margin.get_theme_constant("margin_top")
+		+ right_margin.get_theme_constant("margin_bottom")
+	)
+	_expect(footer.max_lines_visible == 2, "weapon description is limited to two visible lines")
+	_expect(footer.clip_text, "weapon description clips overflow text")
+	_expect(
+		is_equal_approx(footer_clip.size.y, 28.0),
+		"weapon description region keeps its fixed two-line height",
+	)
+	_expect(layout.size == layout_size_before, "long weapon descriptions do not resize the world layout")
+	_expect(
+		right_box.get_combined_minimum_size().y <= right_minimum_before.y + 0.5,
+		"long weapon descriptions do not increase the right rail minimum height",
+	)
+	_expect(
+		right_panel.size.y <= layout.size.y + 0.5
+		and right_box.get_combined_minimum_size().y <= layout.size.y - margin_height + 0.5,
+		"long weapon descriptions stay inside the 640x360 shell",
+	)
 
 	if failures.is_empty():
 		print("weapon status focus detail test: PASS")

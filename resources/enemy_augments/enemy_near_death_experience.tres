@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="EnemyAugment" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://resources/enemy_augments/enemy_augment.gd" id="1_augment"]
+[ext_resource type="PackedScene" path="res://components/augment_behaviors/near_death_experience_component.tscn" id="2_behavior"]
+
+[resource]
+script = ExtResource("1_augment")
+augment_id = &"enemy_near_death_experience"
+display_name = "임사 체험"
+description = "이후 등장하는 적이 치명 피해를 받으면 1초간 임사 상태로 버틴 뒤 사망합니다."
+behavior_components = Array[PackedScene]([ExtResource("2_behavior")])

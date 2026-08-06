@@ -29,7 +29,7 @@
 | facility_engine | engine | MOVE_SPEED_MULT | 1.25 |
 | facility_engine_boost | engine | ENGINE_BOOST | 2.5 / 0.8s / 7s CD |
 | facility_hull | hull | MAX_HULL_ADD | +1 |
-| facility_hull_iframe | hull | HULL_HIT_IFRAMES | 0.6s |
+| facility_hull_iframe | hull | HULL_HIT_IFRAMES | +1.0s |
 | facility_radar | radar | PICKUP_RANGE_MULT | 1.5 |
 | facility_radar_xp | radar | XP_GAIN_MULT | 1.5 |
 | facility_shield | shield | MAX_SHIELD_ADD | +1 |

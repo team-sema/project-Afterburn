@@ -164,6 +164,7 @@ shape = SubResource("CircleShape2D_experience_collector")
 script = ExtResource("13_kbeao")
 stats_component = NodePath("../StatsComponent")
 hurtbox_component = NodePath("../PlayerHitPoint/HurtboxComponent")
+base_iframe_duration = 0.6
 shield_component = NodePath("../ShieldComponent")
 combat_buff_controller = NodePath("../ShipCombatBuffController")
 

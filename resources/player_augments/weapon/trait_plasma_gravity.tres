@@ -8,7 +8,7 @@
 script = ExtResource("1_aug")
 augment_id = &"trait_plasma_gravity"
 display_name = "중력 수축"
-description = "폭발 시 적 흡인, 피해 ×1.35, 반경 ×0.9."
+description = "폭발보다 넓은 범위의 적을 강하게 흡인, 피해 ×1.35, 반경 ×0.9."
 augment_type = 3
 offer_weight = 1.0
 weapon_definition = ExtResource("2_weapon")

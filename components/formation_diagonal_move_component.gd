@@ -51,6 +51,9 @@ func _process(delta: float) -> void:
 	if not _active:
 		return
 	formation_elapsed += delta
+	var modifier := _move_modifier()
+	if modifier != null:
+		modifier.advance(delta)
 	_apply_position()
 
 
@@ -72,7 +75,17 @@ func _apply_position() -> void:
 	var hi := viewport_width - edge_margin - _half_span
 	var center_x := _ping_pong(formation_origin.x, lateral_travel, lo, hi)
 	var center_y := formation_origin.y + forward_travel
-	actor.global_position = Vector2(center_x, center_y) + formation_offset
+	var external_offset := Vector2.ZERO
+	var modifier := _move_modifier()
+	if modifier != null:
+		external_offset = modifier.get_offset()
+	actor.global_position = Vector2(center_x, center_y) + formation_offset + external_offset
+
+
+func _move_modifier() -> MoveModifierComponent:
+	if move_component == null:
+		return null
+	return move_component.get_modifier_component()
 
 
 func _ping_pong(start: float, delta: float, lo: float, hi: float) -> float:

@@ -7,12 +7,13 @@
 script = ExtResource("1_def")
 trait_id = &"plasma_gravity"
 display_name = "중력 수축"
-description = "폭발 시 적 흡인, 피해 ×1.35, 반경 ×0.9."
+description = "폭발보다 넓은 범위의 적을 강하게 흡인, 피해 ×1.35, 반경 ×0.9."
 icon = ExtResource("2_icon")
 target_weapon_id = &"plasma_bomb"
 next_rank_hint = "흡인력 증가"
 params = {
-"pull_strength": 90,
+"pull_strength": 240,
+"pull_radius_mult": 1.6,
 "damage_mult": 1.35,
 "radius_mult": 0.9,
 }

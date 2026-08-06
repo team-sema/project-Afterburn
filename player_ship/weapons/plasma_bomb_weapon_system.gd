@@ -7,7 +7,7 @@ extends WeaponSystem
 @export_range(0.05, 10.0, 0.05) var fuse_time := 1.25
 @export_range(4.0, 120.0, 1.0) var blast_radius := 34.0
 @export_range(0.0, 64.0, 1.0) var damage_radius_margin := 0.0
-@export_range(10.0, 300.0, 1.0) var pull_strength := 90.0
+@export_range(10.0, 400.0, 1.0) var pull_strength := 240.0
 
 @onready var muzzle: Marker2D = $Muzzle
 @onready var spawner_component: SpawnerComponent = $SpawnerComponent
@@ -90,8 +90,12 @@ func _configure_projectile(projectile: Node) -> void:
 			field_duration = float(get_trait_param(&"plasma_field", &"field_duration", 3.0))
 			field_max_bonus = float(get_trait_param(&"plasma_field", &"field_max_bonus_mult", 1.0))
 		var gravity_pull := 0.0
+		var gravity_radius_mult := 1.0
 		if has_trait(&"plasma_gravity"):
 			gravity_pull = float(get_trait_param(&"plasma_gravity", &"pull_strength", pull_strength))
+			gravity_radius_mult = float(
+				get_trait_param(&"plasma_gravity", &"pull_radius_mult", 1.0)
+			)
 		projectile.call(
 			"configure_plasma_traits",
 			self,
@@ -100,4 +104,5 @@ func _configure_projectile(projectile: Node) -> void:
 			field_duration,
 			field_max_bonus,
 			gravity_pull,
+			gravity_radius_mult,
 		)

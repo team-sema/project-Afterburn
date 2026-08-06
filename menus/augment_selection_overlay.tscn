@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://503oqsi4rpuh"]
+[gd_scene load_steps=8 format=3 uid="uid://503oqsi4rpuh"]
 
 [ext_resource type="Script" path="res://menus/augment_selection_overlay.gd" id="1_overlay"]
 [ext_resource type="LabelSettings" path="res://fonts/overlay_title_label_settings.tres" id="2_title_settings"]
@@ -6,6 +6,7 @@
 [ext_resource type="FontFile" uid="uid://dhbb73hkpge3y" path="res://fonts/Mulmaru.ttf" id="4_font"]
 [ext_resource type="PackedScene" uid="uid://c6x6veg03hm8w" path="res://menus/augment_breakpoint_intro.tscn" id="5_breakpoint_intro"]
 [ext_resource type="PackedScene" path="res://menus/ship_panel.tscn" id="6_ship_panel"]
+[ext_resource type="PackedScene" path="res://menus/augment_weapon_preview.tscn" id="7_weapon_preview"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_panel"]
 bg_color = Color(0.025, 0.055, 0.11, 0.97)
@@ -156,3 +157,9 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 126)
 layout_mode = 2
 selection_enabled = true
+
+[node name="OfferWeaponPreview" parent="MarginContainer/PanelContainer/VBoxContainer" instance=ExtResource("7_weapon_preview")]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(0, 126)
+layout_mode = 2

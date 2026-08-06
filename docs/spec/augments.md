@@ -36,7 +36,7 @@
 | `facility_engine` | 추력 편향기 | 엔진 | `MOVE_SPEED_MULT` ×1.25 |
 | `facility_engine_boost` | 비상 부스터 | 엔진 | `ENGINE_BOOST` ×2.5 · 0.8초 · CD 7초 · 입력 `engine_boost`(**Shift**) |
 | `facility_hull` | 반응 장갑 | 선체 | `MAX_HULL_ADD` +1 |
-| `facility_hull_iframe` | 충격 분산 골격 | 선체 | `HULL_HIT_IFRAMES` 0.6초 (선체 피격 시) |
+| `facility_hull_iframe` | 충격 분산 골격 | 선체 | 선체 피격 무적시간 +1.0초 |
 | `facility_radar` | 광역 탐지기 | 레이더 | `PICKUP_RANGE_MULT` ×1.5 |
 | `facility_radar_xp` | 전투 데이터 분석기 | 레이더 | `XP_GAIN_MULT` ×1.5 |
 | `facility_shield` | 실드 축전기 | 실드 | `MAX_SHIELD_ADD` +1 |
@@ -84,7 +84,7 @@
 | 플라즈마 | `plasma_expand` | 팽창형 — 반경 ×1.6 · 피해 ×1.1 |
 | | `plasma_cluster` | 집속 폭발 — 피해 ×0.9 + 방사형 소형 3발(각 40%) |
 | | `plasma_field` | 잔류 플라즈마장 — 피해 ×0.95 + 반투명 3초 지대 |
-| | `plasma_gravity` | 중력 기폭 — 흡인 · 피해 ×1.35 · 반경 ×0.9 |
+| | `plasma_gravity` | 중력 기폭 — 넓은 범위 강한 흡인 · 피해 ×1.35 · 반경 ×0.9 |
 | 유도탄 | `missile_multi_rack` | 다중 발사대 — +1발 · 피해 ×0.9 |
 | | `missile_high_mobility` | 고기동 — 탄속 ×2 · 발사 간격 ×0.7 (**선회 변경 없음**) |
 | | `missile_proximity` | 근접 신관 — 직격 ×0.95 + AOE 80% |
@@ -103,8 +103,9 @@
 | `enemy_health_boost_1_2` | 적 증원 | 이후 스폰 적 HEALTH ×1.2 |
 | `enemy_move_speed_boost_1_2` | 가속 적대 | 이후 스폰 적 MOVE_SPEED ×1.2 |
 | `enemy_fire_volume_boost` | 포화 사격 | ACTION_RATE ×1.25 + 추가 탄 2발 + 최소 스프레드 18° |
+| `enemy_near_death_experience` | 임사 체험 | 치명 피해 시 HP 1 · 1초 무적 임사 상태 후 사망 |
 
-`gameplay.tscn`의 적 증강 풀에는 위 **3종만** 등록되어 있다.
+`gameplay.tscn`의 적 증강 풀에는 위 **4종만** 등록되어 있다.
 
 ### 풀 미등록 리소스
 
@@ -131,7 +132,10 @@
 
 ### UI
 
-- `AugmentSelectionOverlay` — 상단 카드 3개 + 하단 함선 부위 UI
+- `AugmentSelectionOverlay` — 상단 카드 3개 + 선택 Kind에 따라 전환되는 하단 적용 대상 UI
+  - `FACILITY_EFFECT` 포커스: 함선 부위 UI와 대상 `facility_id` 하이라이트
+  - `WEAPON_ACQUIRE` 포커스: 현재 병기 배치와 신규 배치/교체 안내
+  - `WEAPON_LEVEL` / `WEAPON_TRAIT` 포커스: 대상 병기 슬롯·레벨·현재/추가 증강 미리보기
 - `WeaponSlotSelectionOverlay` — 만석 시 무기 베이 교체
 - `AugmentModuleSwapOverlay` — 시설 모듈 교체
 - `ProgressionHud` — XP · `[C]` 힌트

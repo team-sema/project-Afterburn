@@ -28,11 +28,10 @@ func _process(_delta: float) -> void:
 		return
 	match _phase:
 		Phase.ENTER:
-			if actor.global_position.y >= hover_y:
-				actor.global_position.y = hover_y
+			if actor.global_position.y - _external_offset().y >= hover_y:
+				actor.global_position.y = hover_y + _external_offset().y
 				_begin_patrol()
 		Phase.PATROL:
-			actor.global_position.y = hover_y
 			_bounce_horizontal()
 
 
@@ -44,9 +43,16 @@ func _begin_patrol() -> void:
 
 func _bounce_horizontal() -> void:
 	var width := actor.get_viewport_rect().size.x
-	if actor.global_position.x < edge_margin:
-		actor.global_position.x = edge_margin
+	var offset_x := _external_offset().x
+	var base_x := actor.global_position.x - offset_x
+	if base_x < edge_margin:
+		actor.global_position.x = edge_margin + offset_x
 		move_component.velocity.x = absf(patrol_speed)
-	elif actor.global_position.x > width - edge_margin:
-		actor.global_position.x = width - edge_margin
+	elif base_x > width - edge_margin:
+		actor.global_position.x = width - edge_margin + offset_x
 		move_component.velocity.x = -absf(patrol_speed)
+
+
+func _external_offset() -> Vector2:
+	var modifier := move_component.get_modifier_component()
+	return modifier.get_offset() if modifier != null else Vector2.ZERO

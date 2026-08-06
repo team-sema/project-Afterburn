@@ -229,10 +229,9 @@ func _apply_repulse(target: Node, hurtbox: HurtboxComponent, base_raw: int) -> v
 		if away.length_squared() < 0.0001:
 			away = Vector2.UP
 		away = away.normalized()
-		enemy.global_position += away * strength * 0.04
-		var move := enemy.get_node_or_null("MoveComponent") as MoveComponent
-		if move != null:
-			move.velocity += away * strength
+		var modifier := enemy.get_node_or_null("MoveModifierComponent") as MoveModifierComponent
+		if modifier != null:
+			modifier.apply_impulse(away * strength)
 	var shock := maxi(1, roundi(float(base_raw) * shock_mult))
 	var shock_hitbox := HitboxComponent.new()
 	shock_hitbox.damage = resolve_hit_damage(shock, hurtbox)

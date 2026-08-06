@@ -13,7 +13,7 @@ enum Kind {
 	MOVE_SPEED_MULT,
 	ENGINE_BOOST, ## primary=speed mult, secondary=duration, tertiary=cooldown
 	MAX_HULL_ADD,
-	HULL_HIT_IFRAMES, ## primary=duration seconds
+	HULL_HIT_IFRAMES, ## primary=bonus duration seconds
 	PICKUP_RANGE_MULT,
 	XP_GAIN_MULT,
 	MAX_SHIELD_ADD,

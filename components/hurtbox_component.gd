@@ -2,11 +2,15 @@
 class_name HurtboxComponent
 extends Area2D
 
+signal invincibility_changed(enabled: bool)
+
 # Create the is_invincible boolean
 var is_invincible = false :
 	# Here we create an inline setter so we can disable and enable collision shapes on
 	# the hurtbox when is_invincible is changed.
 	set(value):
+		if is_invincible == value:
+			return
 		is_invincible = value
 		# Disable any collisions shapes on this hurtbox when it is invincible
 		# And reenable them when it isn't invincible
@@ -15,6 +19,7 @@ var is_invincible = false :
 			# Use call deferred to make sure this doesn't happen in the middle of the
 			# physics process
 			child.set_deferred("disabled", is_invincible)
+		invincibility_changed.emit(is_invincible)
 
 # Create a signal for when this hurtbox is hit by a hitbox
 signal hurt(hitbox)

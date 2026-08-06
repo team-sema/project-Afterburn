@@ -67,7 +67,8 @@ func _ready() -> void:
 		trait_detail.custom_minimum_size = Vector2.ZERO
 	if detail_footer != null:
 		detail_footer.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		detail_footer.max_lines_visible = 4
+		detail_footer.clip_text = true
+		detail_footer.max_lines_visible = 2
 		detail_footer.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	_prepare_templates()
 	_ensure_selected_hex()
