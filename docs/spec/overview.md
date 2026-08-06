@@ -34,19 +34,28 @@
 ## 폴더 맵
 
 ```text
-project.godot / world.*
+project.godot
+world.tscn / world.gd / world_shell.gd      플레이 셸 · 일시정지
+gameplay.tscn                               런 조립 (함선 · 생성기 · 레지스트리 · 오퍼 풀)
+augment_*_controller.gd / *_augment_registry.gd / enemy_generator.gd
 menus/          메뉴 · 게임오버 · 오그먼트 UI · STATUS
-player_ship/    함선 · 히트포인트 · 통합 무기 로드아웃
+player_ship/    함선 · 히트포인트 · 통합 무기 로드아웃 (weapons/)
 enemies/        적 타입 · 슈팅 적
 projectiles/    플레이어/적 탄
-components/     재사용 커스텀 노드
+pickups/        XP 오브 · 무기 픽업
+components/     재사용 커스텀 노드 (augment_behaviors/)
 resources/      GameStats · 오그먼트 · 무기 · 시설 Resource
 effects/        배경 · 폭발 · 머티리얼 · 셰이더
+weapon_test/    무기 테스트장
+tests/          headless 스모크 테스트
 assets/         PNG(레거시) + svg/(네온)
 fonts/ sounds/
-.agents/        비주얼 가이드
+.agents/        비주얼 가이드 · 스킬
+tools/          run-godot.cmd · feature 스크립트
 docs/           스펙 · 칸반 · 설계 (본 문서)
 ```
+
+루트에 `gameplay.tscn`·오퍼/진행 컨트롤러·레지스트리가 함께 있다. 하위 폴더로 옮기는 정리는 백로그 (`docs/spec/gaps.md`).
 
 ## 스펙 페이지 트래킹
 
@@ -60,7 +69,7 @@ Pages 스펙 브라우저(`docs/spec/index.html` · `spec.js`의 `CATEGORIES`)�
 | 컴포넌트 | `components.md` | 재사용 커스텀 노드 · 시설 버프/부스터 |
 | 플레이어 | `player.md` | 함선 · 무기 7종·기본 수치 · **시설 12모듈** · 실드 버퍼/재생 · HUD |
 | 적 | `enemies.md` | 타입 · 생성기 · Threat · `is_boss` |
-| 오그먼트 | `augments.md` | **플레이어 54·적 3 풀** · 시설 12 · trait 28 · Kind · 리롤 |
+| 오그먼트 | `augments.md` | **플레이어 54·적 6 풀** · 시설 12 · trait 28 · Kind · 리롤 |
 | 전투 | `combat.md` | 레이어 · 탄 · 플레이어 피격=1 · 실드 버퍼 |
 | 이펙트 | `effects.md` | 네온 · 배경 · 폭발 |
 | 갭 | `gaps.md` | 미연결 · 백로그 후보 |

@@ -3,10 +3,13 @@
 `/feature`마다 `docs/design/systems/<slug>.md`를 만들고 여기에 한 줄 추가한다.  
 **현재 코드 동작의 정본은 `docs/spec/`** 이다. 여기 문서는 feature 설계·이력이다.
 
+아래 **상태 열의 정본은 [`docs/board/cards.json`](../../board/cards.json)** 이며 이 표는 사본이다. 카드 열을 옮기면 여기도 같이 고친다.
+
 | slug | 제목 | 상태 |
 |------|------|------|
+| [docs-consistency-audit](docs-consistency-audit.md) | 문서 정합성 감사 (규칙·스펙·보드 모순) | review |
 | [facility-weapon-modules](facility-weapon-modules.md) | 시설 모듈 FacilityModuleEffect · 12종 | review |
-| [status-ui-templates](status-ui-templates.md) | STATUS HUD UI 템플릿 플레이스홀더 | doing |
+| [status-ui-templates](status-ui-templates.md) | STATUS HUD UI 템플릿 플레이스홀더 | review |
 | [shield-base-one](shield-base-one.md) | 시작 실드 1 | review |
 | [shield-regen](shield-regen.md) | 실드 재생 · 충전 UI | review |
 | [orbital-barrier-one-hit](orbital-barrier-one-hit.md) | 궤도 방벽 적당 1회 피해 | review |

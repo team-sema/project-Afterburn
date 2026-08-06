@@ -18,22 +18,33 @@ alwaysApply: false
 
 ## Headless 테스트
 
-- Godot headless 실행은 기본 로그 위치 `user://logs` 때문에 샌드박스에서 크래시할 수 있다. 항상 프로젝트 내부 로그 파일을 지정한다.
-- 권장: `Godot_v4.7-stable_*_console.exe --headless --path . --log-file .godot/agent-headless.log --quit-after 1`
-- `--log-file` 없이 먼저 실행하지 않는다.
+- Godot headless 실행은 기본 로그 위치 `user://logs` 때문에 샌드박스에서 크래시할 수 있다.
+- **항상 `tools/run-godot.cmd` 를 쓴다.** 실행 파일을 직접 호출하지 않는다. 래퍼가 `--path`와 `.godot/codex-logs/` 로그 파일을 자동으로 붙인다.
+
+```powershell
+.\tools\run-godot.cmd --headless --script res://tests/<name>.gd
+.\tools\run-godot.cmd --headless --editor --quit
+```
+
+- 실행 파일 경로는 래퍼 기본값 또는 환경 변수 `GODOT_EDITOR_PATH`로 정한다.
+- 판정은 종료 코드 + 명시적 PASS 출력으로 한다. 무관한 에디터·캐시 경고는 실패와 분리해 보고한다.
+- 상세: [`AGENTS.md`](../../AGENTS.md)
 
 ## 폴더 (저장소 루트 = Godot 루트)
 
 `project.godot`가 리포 루트에 있다.
 
 ```
-res://components/          재사용 커스텀 노드
-res://player_ship/         함선·무기
+res://components/          재사용 커스텀 노드 (augment_behaviors/ 포함)
+res://player_ship/         함선·무기 (weapons/)
 res://enemies/             적
 res://projectiles/         탄
-res://menus/               메뉴·오그먼트 UI
-res://resources/           GameStats·오그먼트 Resource
+res://pickups/             XP 오브·무기 픽업
+res://menus/               메뉴·오그먼트 UI·STATUS HUD
+res://resources/           GameStats·오그먼트·무기·시설 Resource
 res://effects/             배경·폭발·머티리얼
+res://weapon_test/         무기 테스트장
+res://tests/               headless 스모크 테스트
 res://assets/  fonts/  sounds/
 ```
 
