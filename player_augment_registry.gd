@@ -2,22 +2,19 @@ class_name PlayerAugmentRegistry
 extends Node
 
 signal augments_changed
-signal facility_slots_changed(facility_id: StringName)
+signal module_slots_changed
 
-const DEFAULT_SLOT_CAPACITY := 1
-const MAX_SLOT_CAPACITY := 3
+const DEFAULT_SLOT_CAPACITY := 5
+const MAX_SLOT_CAPACITY := 15
 
 @export var facilities: Array[ShipFacilityDefinition] = []
 
 
-var _slot_capacities: Dictionary = {}
-var _module_slots: Dictionary = {}
+var _module_slots: Array = []
 
 
 func _ready() -> void:
-	for definition in get_facility_definitions():
-		_slot_capacities[definition.id] = DEFAULT_SLOT_CAPACITY
-		_module_slots[definition.id] = [null]
+	_reset_module_slots()
 
 
 func get_facility_definitions() -> Array[ShipFacilityDefinition]:
@@ -40,44 +37,52 @@ func get_facility_definition(facility_id: StringName) -> ShipFacilityDefinition:
 
 
 func has_facility(facility_id: StringName) -> bool:
-	return _module_slots.has(facility_id)
+	return get_facility_definition(facility_id) != null
 
 
-func get_slot_capacity(facility_id: StringName) -> int:
-	return int(_slot_capacities.get(facility_id, 0))
+func get_slot_capacity() -> int:
+	return _module_slots.size()
 
 
-func can_expand_slots(facility_id: StringName) -> bool:
-	return has_facility(facility_id) and get_slot_capacity(facility_id) < MAX_SLOT_CAPACITY
+func can_expand_slots() -> bool:
+	return get_slot_capacity() < MAX_SLOT_CAPACITY
 
 
-func expand_slots(facility_id: StringName) -> bool:
-	if not can_expand_slots(facility_id):
+func expand_slots() -> bool:
+	if not can_expand_slots():
 		return false
-	_slot_capacities[facility_id] = get_slot_capacity(facility_id) + 1
-	var slots := _module_slots[facility_id] as Array
-	slots.append(null)
-	facility_slots_changed.emit(facility_id)
+	_module_slots.append(null)
+	module_slots_changed.emit()
 	augments_changed.emit()
 	return true
 
 
-func get_facility_slots(facility_id: StringName) -> Array:
-	if not has_facility(facility_id):
-		return []
-	return (_module_slots[facility_id] as Array).duplicate()
+func get_module_slots() -> Array:
+	return _module_slots.duplicate()
 
 
-func get_installed_count(facility_id: StringName) -> int:
+func get_installed_count() -> int:
 	var count := 0
-	for module in get_facility_slots(facility_id):
+	for module in _module_slots:
 		if module != null:
 			count += 1
 	return count
 
 
-func has_empty_slot(facility_id: StringName) -> bool:
-	return get_installed_count(facility_id) < get_slot_capacity(facility_id)
+func get_modules_with_tag(tag: StringName) -> Array[PlayerAugmentModuleState]:
+	var modules: Array[PlayerAugmentModuleState] = []
+	for module in get_installed_modules():
+		if module.augment.has_module_tag(tag):
+			modules.append(module)
+	return modules
+
+
+func get_installed_count_by_tag(tag: StringName) -> int:
+	return get_modules_with_tag(tag).size()
+
+
+func has_empty_slot() -> bool:
+	return get_installed_count() < get_slot_capacity()
 
 
 func install_augment(
@@ -86,27 +91,29 @@ func install_augment(
 	replace_index: int = -1,
 ) -> int:
 	assert(augment != null, "Cannot install a null PlayerAugment.")
-	if not has_facility(augment.facility_id):
-		push_error("Unknown augment facility '%s'." % augment.facility_id)
+	if augment.augment_type != PlayerAugmentKind.Kind.FACILITY_EFFECT:
+		push_error("Only FACILITY_EFFECT augments can use universal module slots.")
 		return -1
-	var slots := _module_slots[augment.facility_id] as Array
-	var slot_index := slots.find(null)
+	var primary_tag := augment.get_primary_module_tag()
+	if primary_tag == &"" or not has_facility(primary_tag):
+		push_error("Unknown augment module tag '%s'." % primary_tag)
+		return -1
+	var slot_index := _module_slots.find(null)
 	if slot_index < 0:
-		if replace_index < 0 or replace_index >= slots.size():
+		if replace_index < 0 or replace_index >= _module_slots.size():
 			return -1
 		slot_index = replace_index
-	slots[slot_index] = PlayerAugmentModuleState.new(augment, target_weapon_id)
-	facility_slots_changed.emit(augment.facility_id)
+	_module_slots[slot_index] = PlayerAugmentModuleState.new(augment, target_weapon_id)
+	module_slots_changed.emit()
 	augments_changed.emit()
 	return slot_index
 
 
 func get_installed_modules() -> Array[PlayerAugmentModuleState]:
 	var modules: Array[PlayerAugmentModuleState] = []
-	for definition in get_facility_definitions():
-		for module in get_facility_slots(definition.id):
-			if module != null:
-				modules.append(module as PlayerAugmentModuleState)
+	for module in _module_slots:
+		if module != null:
+			modules.append(module as PlayerAugmentModuleState)
 	return modules
 
 
@@ -128,10 +135,8 @@ func get_stack_count(augment_id: StringName) -> int:
 
 
 func clear_augments() -> void:
-	for definition in get_facility_definitions():
-		_slot_capacities[definition.id] = DEFAULT_SLOT_CAPACITY
-		_module_slots[definition.id] = [null]
-		facility_slots_changed.emit(definition.id)
+	_reset_module_slots()
+	module_slots_changed.emit()
 	augments_changed.emit()
 
 
@@ -188,19 +193,19 @@ func get_effect_total(effect: ShipFacilityDefinition.Effect) -> float:
 	for definition in get_facility_definitions():
 		if definition.effect != effect:
 			continue
-		var module_count := 0
-		for module in get_facility_slots(definition.id):
-			if module == null:
-				continue
-			var state := module as PlayerAugmentModuleState
-			if state.augment.augment_type == PlayerAugmentKind.Kind.FACILITY_EFFECT:
-				module_count += 1
+		var module_count := get_installed_count_by_tag(definition.id)
 		var value := definition.get_value_for_module_count(module_count)
 		if ShipFacilityDefinition.is_multiplier_effect(effect):
 			total *= value
 		else:
 			total += value
 	return total
+
+
+func _reset_module_slots() -> void:
+	_module_slots.clear()
+	_module_slots.resize(DEFAULT_SLOT_CAPACITY)
+	_module_slots.fill(null)
 
 
 func _effect_to_module_kind(effect: ShipFacilityDefinition.Effect) -> int:

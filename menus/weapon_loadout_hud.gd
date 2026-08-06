@@ -11,12 +11,12 @@ const ROMAN := ["", "I", "II", "III", "IV", "V"]
 
 @onready var bay_title: Label = %BayTitle
 @onready var bay_subtitle: Label = get_node_or_null("%BaySubtitle") as Label
-@onready var bay_row: HBoxContainer = %BayRow
+@onready var bay_row: HexHoneycombContainer = %BayRow
 @onready var selected_title: Label = %SelectedWeaponTitle
 @onready var selected_icon: TextureRect = %SelectedWeaponIcon
 @onready var selected_name: Label = %SelectedWeaponName
 @onready var modules_title: Label = %EquippedModulesTitle
-@onready var modules_grid: GridContainer = %ModulesGrid
+@onready var modules_grid: HexHoneycombContainer = %ModulesGrid
 @onready var detail_rule: ColorRect = get_node_or_null("%DetailRule") as ColorRect
 @onready var detail_footer: Label = %WeaponDetailFooter
 @onready var trait_detail: Label = %TraitDetail
@@ -45,20 +45,20 @@ func _ready() -> void:
 	if bay_subtitle != null:
 		bay_subtitle.visible = false
 	if bay_row != null:
-		bay_row.alignment = BoxContainer.ALIGNMENT_CENTER
 		bay_row.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		bay_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		bay_row.hex_side = _weapon_hex_side()
 	var detail_columns := get_node_or_null("%DetailColumns") as Control
 	if detail_columns != null:
 		detail_columns.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	var bay_spacer := get_node_or_null("%BayDetailSpacer") as Control
 	if bay_spacer != null:
-		bay_spacer.custom_minimum_size = Vector2(0, 8)
+		bay_spacer.custom_minimum_size = Vector2.ZERO
 		bay_spacer.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 		bay_spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	if modules_grid != null:
-		modules_grid.columns = 4
 		modules_grid.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		modules_grid.hex_side = _module_hex_side()
 	if detail_rule != null:
 		detail_rule.visible = true
 		detail_rule.custom_minimum_size = Vector2(0, 1)
@@ -88,13 +88,13 @@ func _prepare_templates() -> void:
 func _weapon_hex_side() -> float:
 	if bay_slot_template != null and bay_slot_template.custom_minimum_size.x > 0.0:
 		return bay_slot_template.custom_minimum_size.x
-	return 42.0
+	return 48.0
 
 
 func _module_hex_side() -> float:
 	if module_hex_template != null and module_hex_template.custom_minimum_size.x > 0.0:
 		return module_hex_template.custom_minimum_size.x
-	return 22.0
+	return 28.0
 
 
 func _ensure_selected_hex() -> void:
@@ -268,12 +268,12 @@ func _show_empty_detail() -> void:
 
 
 func _show_weapon_description(loadout: PlayerWeaponLoadout) -> void:
-	var name := loadout.get_weapon_display_name(_focused_weapon_id)
+	var weapon_name := loadout.get_weapon_display_name(_focused_weapon_id)
 	var body := loadout.get_weapon_description(_focused_weapon_id)
 	if body == "":
-		_set_description(name)
+		_set_description(weapon_name)
 	else:
-		_set_description("%s\n%s" % [name, body])
+		_set_description("%s\n%s" % [weapon_name, body])
 
 
 func _show_trait_description(loadout: PlayerWeaponLoadout, trait_id: StringName) -> void:

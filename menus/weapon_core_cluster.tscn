@@ -6,7 +6,7 @@
 
 [node name="WeaponCoreCluster" type="Control"]
 clip_contents = false
-custom_minimum_size = Vector2(42, 42)
+custom_minimum_size = Vector2(48, 48)
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
@@ -14,12 +14,10 @@ script = ExtResource("1_script")
 
 [node name="Core" parent="." instance=ExtResource("2_hex")]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(38, 38)
+custom_minimum_size = Vector2(48, 48)
 layout_mode = 0
-offset_left = 2.0
-offset_top = 2.0
-offset_right = 40.0
-offset_bottom = 40.0
+offset_right = 48.0
+offset_bottom = 48.0
 
 [node name="Templates" type="Control" parent="."]
 layout_mode = 0

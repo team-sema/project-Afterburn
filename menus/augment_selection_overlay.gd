@@ -2,16 +2,11 @@ class_name AugmentSelectionOverlay
 extends CanvasLayer
 
 signal choice_selected(choice: Resource)
-signal facility_expansion_selected(facility_id: StringName)
+signal universal_slot_expansion_selected
 signal reroll_requested
 
 const CHOICE_ICON_MAX_WIDTH := 28
 const ENEMY_CHOICE_ICON_MAX_WIDTH := 48
-const FACILITY_GRID := [
-	[&"weapon_room", &"hangar"],
-	[&"engine", &"hull"],
-	[&"radar", &"shield"],
-]
 
 @export var player_accent_color: Color
 @export var enemy_accent_color: Color
@@ -29,7 +24,7 @@ const FACILITY_GRID := [
 @onready var title_label: Label = %TitleLabel
 @onready var prompt_label: Label = %PromptLabel
 @onready var ship_separator: HSeparator = %ShipSeparator
-@onready var slot_action_label: Label = %SlotActionLabel
+@onready var slot_action_label: Button = %SlotActionLabel
 @onready var offer_ship_panel: ShipPanel = %OfferShipPanel
 @onready var offer_weapon_preview: AugmentWeaponPreview = %OfferWeaponPreview
 @onready var choice_buttons: Array[Button] = [
@@ -45,6 +40,7 @@ var is_accepting_input := false
 var _showing_ship_modules := false
 var _previewing_weapon := false
 var _weapon_loadout: PlayerWeaponLoadout
+var _player_registry: PlayerAugmentRegistry
 var _reroll_enabled := false
 
 
@@ -53,13 +49,18 @@ func _ready() -> void:
 		choice_buttons[index].pressed.connect(_on_choice_pressed.bind(index))
 		choice_buttons[index].focus_entered.connect(_highlight_choice.bind(index))
 		choice_buttons[index].mouse_entered.connect(_highlight_choice.bind(index))
-	offer_ship_panel.facility_selected.connect(_on_facility_selected)
+	slot_action_label.pressed.connect(_on_expand_slot_pressed)
+	slot_action_label.focus_entered.connect(_refresh_expansion_preview)
+	slot_action_label.focus_exited.connect(_queue_expansion_preview_refresh)
+	slot_action_label.mouse_entered.connect(_refresh_expansion_preview)
+	slot_action_label.mouse_exited.connect(_queue_expansion_preview_refresh)
 	if reroll_button != null:
 		reroll_button.pressed.connect(_on_reroll_pressed)
 	visible = false
 
 
 func configure_player_registry(registry: PlayerAugmentRegistry) -> void:
+	_player_registry = registry
 	offer_ship_panel.set_registry(registry)
 
 
@@ -237,6 +238,8 @@ func _set_choices(choices: Array) -> void:
 
 
 func _set_ship_section_visible(section_visible: bool) -> void:
+	if not section_visible:
+		offer_ship_panel.set_expansion_preview(false)
 	ship_separator.visible = section_visible
 	slot_action_label.visible = section_visible
 	offer_ship_panel.visible = section_visible
@@ -256,15 +259,27 @@ func _highlight_choice(index: int) -> void:
 	slot_action_label.visible = true
 	offer_ship_panel.visible = not is_weapon_offer
 	offer_weapon_preview.visible = is_weapon_offer
-	offer_ship_panel.set_selection_input_enabled(is_accepting_input and not is_weapon_offer)
 	if is_weapon_offer:
+		offer_ship_panel.set_expansion_preview(false)
 		slot_action_label.text = "병기 배치 · 적용 대상 미리보기"
+		slot_action_label.disabled = true
 		offer_weapon_preview.set_loadout(_weapon_loadout)
 		offer_weapon_preview.show_augment(augment)
 	else:
-		slot_action_label.text = "시설을 선택하면 빈 슬롯 +1 · 최대 3"
-		offer_ship_panel.set_expansion_preview_facility(&"")
-		offer_ship_panel.set_highlighted_facility(augment.facility_id)
+		var installed := _player_registry.get_installed_count() if _player_registry != null else 0
+		var capacity := _player_registry.get_slot_capacity() if _player_registry != null else 0
+		slot_action_label.text = "범용 슬롯 %d/%d · [+1] · 최대 %d" % [
+			installed,
+			capacity,
+			PlayerAugmentRegistry.MAX_SLOT_CAPACITY,
+		]
+		slot_action_label.disabled = (
+			not is_accepting_input
+			or _player_registry == null
+			or not _player_registry.can_expand_slots()
+		)
+		offer_ship_panel.set_highlighted_facility(augment.get_primary_module_tag())
+		_refresh_expansion_preview()
 	if is_accepting_input:
 		_configure_focus_navigation()
 
@@ -278,11 +293,12 @@ func _on_choice_pressed(index: int) -> void:
 	choice_selected.emit(current_choices[index] as Resource)
 
 
-func _on_facility_selected(facility_id: StringName) -> void:
+func _on_expand_slot_pressed() -> void:
 	if not is_accepting_input or not _showing_ship_modules:
 		return
+	offer_ship_panel.set_expansion_preview(false)
 	_set_input_enabled(false)
-	facility_expansion_selected.emit(facility_id)
+	universal_slot_expansion_selected.emit()
 
 
 func _set_choice_buttons_visible(buttons_visible: bool) -> void:
@@ -294,13 +310,34 @@ func _set_input_enabled(enabled: bool) -> void:
 	is_accepting_input = enabled
 	for button in choice_buttons:
 		button.disabled = not enabled
-	offer_ship_panel.set_selection_input_enabled(
-		enabled and _showing_ship_modules and not _previewing_weapon
+	slot_action_label.disabled = (
+		not enabled
+		or not _showing_ship_modules
+		or _previewing_weapon
+		or _player_registry == null
+		or not _player_registry.can_expand_slots()
 	)
+	_refresh_expansion_preview()
 	if reroll_button != null:
 		reroll_button.disabled = not enabled or not _reroll_enabled
 	if enabled:
 		_configure_focus_navigation()
+
+
+func _refresh_expansion_preview() -> void:
+	var pointer_inside := (
+		slot_action_label.visible
+		and slot_action_label.get_global_rect().has_point(slot_action_label.get_viewport().get_mouse_position())
+	)
+	offer_ship_panel.set_expansion_preview(
+		not slot_action_label.disabled
+		and not _previewing_weapon
+		and (slot_action_label.has_focus() or pointer_inside)
+	)
+
+
+func _queue_expansion_preview_refresh() -> void:
+	call_deferred("_refresh_expansion_preview")
 
 
 func _configure_focus_navigation() -> void:
@@ -308,18 +345,13 @@ func _configure_focus_navigation() -> void:
 	for button in choice_buttons:
 		if button.visible and not button.disabled:
 			visible_buttons.append(button)
-	var modules: Array[ShipFacilityModule] = []
-	if offer_ship_panel.visible:
-		modules = offer_ship_panel.get_selectable_modules()
-	var module_by_id: Dictionary = {}
-	for module in modules:
-		module_by_id[module.facility_id] = module
 
 	var all_controls: Array[Control] = []
 	for button in visible_buttons:
 		all_controls.append(button)
-	for module in modules:
-		all_controls.append(module)
+	var can_focus_expansion := slot_action_label.visible and not slot_action_label.disabled
+	if can_focus_expansion:
+		all_controls.append(slot_action_label)
 	for control in all_controls:
 		_clear_focus_neighbors(control)
 
@@ -331,62 +363,16 @@ func _configure_focus_navigation() -> void:
 			"focus_neighbor_right",
 			visible_buttons[mini(visible_buttons.size() - 1, index + 1)],
 		)
-		if _showing_ship_modules:
-			var augment := current_choices[index] as PlayerAugment
-			if augment != null and not PlayerAugmentKind.is_weapon_offer(augment.augment_type):
-				var target := module_by_id.get(augment.facility_id) as ShipFacilityModule
-				if target == null:
-					var fallback_column: int = 0 if index * 2 < visible_buttons.size() else 1
-					target = _first_module_in_column(module_by_id, fallback_column)
-				_set_focus_neighbor(button, "focus_neighbor_bottom", target)
-
-	for row in FACILITY_GRID.size():
-		for column in FACILITY_GRID[row].size():
-			var module := module_by_id.get(FACILITY_GRID[row][column]) as ShipFacilityModule
-			if module == null:
-				continue
-			var horizontal_column: int = 1 - column
-			var horizontal := module_by_id.get(FACILITY_GRID[row][horizontal_column]) as ShipFacilityModule
-			_set_focus_neighbor(
-				module,
-				"focus_neighbor_left" if column == 1 else "focus_neighbor_right",
-				horizontal,
-			)
-			var above: Control = _next_module_in_column(module_by_id, column, row, -1)
-			if above == null and not visible_buttons.is_empty():
-				above = visible_buttons[0 if column == 0 else visible_buttons.size() - 1]
-			_set_focus_neighbor(module, "focus_neighbor_top", above)
-			var below := _next_module_in_column(module_by_id, column, row, 1)
-			_set_focus_neighbor(module, "focus_neighbor_bottom", below if below != null else module)
+		if can_focus_expansion:
+			_set_focus_neighbor(button, "focus_neighbor_bottom", slot_action_label)
+	if can_focus_expansion and not visible_buttons.is_empty():
+		_set_focus_neighbor(slot_action_label, "focus_neighbor_top", visible_buttons[0])
 
 	for index in all_controls.size():
 		var previous := all_controls[(index - 1 + all_controls.size()) % all_controls.size()]
 		var next := all_controls[(index + 1) % all_controls.size()]
 		_set_focus_neighbor(all_controls[index], "focus_previous", previous)
 		_set_focus_neighbor(all_controls[index], "focus_next", next)
-
-
-func _first_module_in_column(module_by_id: Dictionary, column: int) -> ShipFacilityModule:
-	for row in FACILITY_GRID.size():
-		var module := module_by_id.get(FACILITY_GRID[row][column]) as ShipFacilityModule
-		if module != null:
-			return module
-	return null
-
-
-func _next_module_in_column(
-	module_by_id: Dictionary,
-	column: int,
-	start_row: int,
-	direction: int,
-) -> ShipFacilityModule:
-	var row := start_row + direction
-	while row >= 0 and row < FACILITY_GRID.size():
-		var module := module_by_id.get(FACILITY_GRID[row][column]) as ShipFacilityModule
-		if module != null:
-			return module
-		row += direction
-	return null
 
 
 func _clear_focus_neighbors(control: Control) -> void:

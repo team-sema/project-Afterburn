@@ -10,8 +10,10 @@ const ROMAN := ["", "I", "II", "III", "IV", "V"]
 @export var icon: Texture2D
 @export var stat_modifiers: Array[PlayerStatModifier] = []
 @export var behavior_components: Array[PackedScene] = []
-## Ship facility slot target. Unused for pure weapon offers (ACQUIRE/LEVEL/TRAIT).
+## Compatibility primary tag. Facility effects no longer own per-facility slots.
 @export var facility_id: StringName
+## Classification tags used for identity, icons and future synergies.
+@export var module_tags: Array[StringName] = []
 ## Per-module facility effect. Preferred over ShipFacilityDefinition curves when set.
 @export var facility_module_effect: FacilityModuleEffect
 ## Relative pick weight inside the offer pool (data-tunable; not a fixed design %).
@@ -33,6 +35,22 @@ func get_weapon_id() -> StringName:
 	if weapon_definition != null:
 		return weapon_definition.id
 	return &""
+
+
+func get_module_tags() -> Array[StringName]:
+	var tags := module_tags.duplicate()
+	if facility_id != &"" and not tags.has(facility_id):
+		tags.push_front(facility_id)
+	return tags
+
+
+func has_module_tag(tag: StringName) -> bool:
+	return tag != &"" and get_module_tags().has(tag)
+
+
+func get_primary_module_tag() -> StringName:
+	var tags := get_module_tags()
+	return tags[0] if not tags.is_empty() else &""
 
 
 func get_offer_title(loadout: PlayerWeaponLoadout = null) -> String:

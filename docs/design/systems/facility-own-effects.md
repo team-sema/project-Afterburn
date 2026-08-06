@@ -7,7 +7,7 @@
 ## 규칙
 
 1. 플레이어 오퍼 풀에서 `STAT_MULTIPLIER` 3종을 삭제한다.
-2. 부위 슬롯 설치 Kind는 `FACILITY_EFFECT`만.
+2. 범용 시설 슬롯 설치 Kind는 `FACILITY_EFFECT`만.
 3. 엔진 이속·무기실 피해 등은 `ShipFacilityDefinition.module_count_values`만 사용한다.
 4. `docs/spec/augments.md` · `player.md` 풀·규칙을 코드와 동기화한다.
 
@@ -15,7 +15,7 @@
 
 - [x] Gameplay 풀에 스탯 모듈 없음 (22종)
 - [x] 스펙·시스템 문서 시설 전담으로 갱신
-- [x] 시설 슬롯 스모크가 시설 모듈만 사용
+- [x] 범용 시설 슬롯 스모크가 시설 모듈만 사용
 
 ## 변경 이력
 

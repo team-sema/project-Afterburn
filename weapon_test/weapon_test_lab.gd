@@ -349,13 +349,13 @@ func _on_enemy_augment_selected(augment: EnemyAugment) -> void:
 
 func _apply_player_augment(augment: PlayerAugment) -> bool:
 	match augment.augment_type:
-		PlayerAugmentKind.Kind.STAT_MULTIPLIER, PlayerAugmentKind.Kind.FACILITY_EFFECT:
-			if not player_registry.has_facility(augment.facility_id):
+		PlayerAugmentKind.Kind.FACILITY_EFFECT:
+			if not player_registry.has_facility(augment.get_primary_module_tag()):
 				return false
 			var replace_index := -1
-			if not player_registry.has_empty_slot(augment.facility_id):
-				if player_registry.can_expand_slots(augment.facility_id):
-					player_registry.expand_slots(augment.facility_id)
+			if not player_registry.has_empty_slot():
+				if player_registry.can_expand_slots():
+					player_registry.expand_slots()
 				else:
 					replace_index = 0
 			return player_registry.install_augment(augment, &"", replace_index) >= 0

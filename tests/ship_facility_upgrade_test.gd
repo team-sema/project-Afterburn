@@ -34,11 +34,11 @@ func _run() -> void:
 	_check_initial_slots(registry, panel)
 	_check_pool_targets(offer, registry)
 	await _check_offer_layout(selection_ui, loadout)
-	await _check_module_keyboard_activation()
 	_check_engine_modules(registry, move_component, panel)
 	_check_facility_effect_modules(registry, loadout, facility_applier, stats, shield)
 	_check_replacement(registry, loadout)
 	_check_swap_overlay(swap_ui, registry)
+	_check_capacity_limits(registry, swap_ui)
 	_check_right_panel_fits(world)
 
 	world.queue_free()
@@ -55,22 +55,35 @@ func _run() -> void:
 func _check_initial_slots(registry: PlayerAugmentRegistry, panel: ShipPanel) -> void:
 	for facility_id in FACILITY_IDS:
 		_expect(registry.has_facility(facility_id), "registry knows facility '%s'" % facility_id)
-		_expect(registry.get_slot_capacity(facility_id) == 1, "%s starts with one slot" % facility_id)
-		_expect(registry.get_installed_count(facility_id) == 0, "%s starts empty" % facility_id)
-	var weapon_room := panel.get_node("WeaponRoom") as ShipFacilityModule
-	_expect(not weapon_room.has_node("LevelLabel"), "ship panel does not show a numeric slot counter")
-	_expect(weapon_room.get_visual_slot_count() == 1, "ship panel draws the default empty slot")
-	_expect(weapon_room.get_slot_rect(0).size == Vector2(18, 18), "ship panel slot is large enough for an icon")
+	_expect(registry.get_slot_capacity() == 5, "universal pool starts with five slots")
+	_expect(registry.get_installed_count() == 0, "universal pool starts empty")
+	_expect(panel.get_node_or_null("WeaponRoom") == null, "legacy facility tiles are removed")
+	_expect(panel.get_node_or_null("ShipDiagram") == null, "legacy ship diagram is removed")
+	_expect(panel.slot_rack.get_visible_slot_count() == 5, "honeycomb draws all five starting slots")
+	_expect(panel.slot_rack.get_slot_icon(0) == null, "universal rack shows an empty starting slot")
+	var slot_size := panel.slot_rack.get_slot_rect(0).size
+	_expect(
+		is_equal_approx(slot_size.x, 28.0) and is_equal_approx(slot_size.y, 28.0 * 0.866025),
+		"flat-top hex slots use the enlarged module scale",
+	)
+	_expect(panel.get_detail_text().contains("범용 슬롯 0/5"), "ship panel shows universal slot usage")
+	var slot_zero := panel.slot_rack.get_slot_polygon(0)
+	var slot_one := panel.slot_rack.get_slot_polygon(1)
+	_expect(
+		slot_zero[2].is_equal_approx(slot_one[0])
+		and slot_zero[3].is_equal_approx(slot_one[5]),
+		"adjacent hex slots share an edge without a gap",
+	)
 
 
 func _check_pool_targets(offer: AugmentOfferController, registry: PlayerAugmentRegistry) -> void:
 	for augment in offer.player_augment_pool:
 		if PlayerAugmentKind.is_weapon_offer(augment.augment_type):
 			continue
-		_expect(augment.facility_id != &"", "%s declares a target facility" % augment.augment_id)
+		_expect(not augment.module_tags.is_empty(), "%s declares an explicit module tag" % augment.augment_id)
 		_expect(
-			registry.has_facility(augment.facility_id),
-			"%s targets a registered facility" % augment.augment_id,
+			registry.has_facility(augment.get_primary_module_tag()),
+			"%s uses a registered primary tag" % augment.augment_id,
 		)
 
 
@@ -83,31 +96,35 @@ func _check_engine_modules(
 	var engine_module := load(
 		"res://resources/player_augments/facilities/facility_engine.tres"
 	) as PlayerAugment
-	_expect(registry.install_augment(engine_module) == 0, "first engine module fills the default slot")
+	_expect(engine_module.has_module_tag(&"engine"), "engine category is preserved as a module tag")
+	_expect(registry.install_augment(engine_module) == 0, "first engine module fills universal slot zero")
 	_expect(
 		is_equal_approx(move_component.velocity_multiplier, base_speed * 1.25),
 		"engine facility module applies its movement multiplier",
 	)
-	_expect(registry.install_augment(engine_module) == -1, "full facility rejects install without replacement")
-	_expect(registry.expand_slots(&"engine"), "engine expands to two slots")
-	_expect(registry.install_augment(engine_module) == 1, "expanded empty slot accepts a second module")
-	var engine_chip := panel.get_facility_module(&"engine")
+	_expect(registry.install_augment(engine_module) == 1, "same-tag module uses another universal slot")
+	var engine_definition := registry.get_facility_definition(&"engine")
 	_expect(
-		engine_chip.get_slot_icon(1) == engine_module.icon,
-		"installed augment icon is exposed by its visual slot",
+		panel.slot_rack.get_slot_icon(1) == engine_definition.icon,
+		"installed slot temporarily uses its primary tag icon",
 	)
+	panel.slot_rack.slot_hovered.emit(1)
+	_expect(
+		panel.get_detail_text().contains("엔진") and panel.get_detail_text().contains(engine_module.display_name),
+		"installed hex hover shows its tag and actual module name",
+	)
+	panel.slot_rack.slot_hover_exited.emit()
 	_expect(
 		is_equal_approx(move_component.velocity_multiplier, base_speed * 1.25 * 1.25),
 		"two engine modules multiply move-speed module effects (×1.25²)",
 	)
-	_expect(registry.install_augment(engine_module, &"", 0) == 0, "occupied slot can be replaced")
-	_expect(registry.get_stack_count(engine_module.augment_id) == 2, "replacement keeps two engine modules")
 	_expect(
 		is_equal_approx(move_component.velocity_multiplier, base_speed * 1.25 * 1.25),
-		"replacing with the same facility module keeps the product stack",
+		"same-tag modules keep the product stack",
 	)
-	_expect(registry.expand_slots(&"engine"), "engine expands to the maximum three slots")
-	_expect(not registry.expand_slots(&"engine"), "facility cannot expand beyond three slots")
+	_expect(registry.get_installed_count_by_tag(&"engine") == 2, "tag query finds both engine modules")
+	registry.clear_augments()
+	_expect(registry.get_slot_capacity() == 5, "clear resets the universal capacity")
 
 
 func _check_facility_effect_modules(
@@ -140,6 +157,7 @@ func _check_facility_effect_modules(
 	registry.install_augment(hull)
 	registry.install_augment(radar)
 	registry.install_augment(shield_module)
+	_expect(not registry.has_empty_slot(), "five mixed tags fill the shared starting pool")
 	_expect(
 		is_equal_approx(loadout.get_facility_damage_multiplier(), 1.15),
 		"weapon-room module applies equipped weapon damage",
@@ -185,7 +203,7 @@ func _check_replacement(registry: PlayerAugmentRegistry, loadout: PlayerWeaponLo
 		and is_equal_approx(equipped_weapon.get_effective_fire_rate_multiplier(), 1.15),
 		"equipped weapon receives the facility fire-rate multiplier",
 	)
-	_expect(registry.get_installed_count(&"weapon_room") == 1, "weapon room still has one module after replace")
+	_expect(registry.get_installed_count_by_tag(&"weapon_room") == 1, "weapon-room tag still has one module after replace")
 	_expect(engine != null, "engine facility module resource loads")
 
 
@@ -202,6 +220,9 @@ func _check_offer_layout(
 	var weapon_preview := selection_ui.get_node(
 		"MarginContainer/PanelContainer/VBoxContainer/OfferWeaponPreview"
 	) as AugmentWeaponPreview
+	var expand_button := selection_ui.get_node(
+		"MarginContainer/PanelContainer/VBoxContainer/SlotActionLabel"
+	) as Button
 	_expect(button_1.get_parent() == button_3.get_parent(), "three augment choices share one horizontal row")
 	_expect(ship_panel is ShipPanel, "player offer embeds the ship part UI below choices")
 	_expect(
@@ -225,19 +246,14 @@ func _check_offer_layout(
 	selection_ui._highlight_choice(1)
 	_expect(
 		ship_panel.get_selected_facility_id() == &"engine",
-		"focusing an augment highlights its target ship facility",
+		"focusing an augment keeps its primary tag highlight",
 	)
-	var weapon_room := ship_panel.get_facility_module(&"weapon_room")
-	for facility_id in FACILITY_IDS:
-		_expect(
-			ship_panel.get_facility_module(facility_id).focus_mode == Control.FOCUS_ALL,
-			"%s expansion option accepts keyboard focus" % facility_id,
-		)
+	_expect(ship_panel.get_node_or_null("Engine") == null, "offer preview has no legacy facility tiles")
 	var down_path: NodePath = button_1.focus_neighbor_bottom
-	_expect(not down_path.is_empty(), "augment card has an explicit keyboard path to ship slots")
+	_expect(not down_path.is_empty(), "augment card has a keyboard path to universal expansion")
 	_expect(
-		button_1.get_node(down_path) == weapon_room,
-		"down from an augment card enters its target ship part",
+		button_1.get_node(down_path) == expand_button,
+		"down from an augment card enters the universal expansion action",
 	)
 	button_1.grab_focus()
 	await process_frame
@@ -253,24 +269,29 @@ func _check_offer_layout(
 	)
 	paused = true
 	await _press_action(&"ui_down")
-	_expect(root.gui_get_focus_owner() == weapon_room, "ui_down moves focus from card to ship part")
+	_expect(root.gui_get_focus_owner() == expand_button, "ui_down moves focus to universal expansion")
+	_expect(ship_panel.slot_rack.has_expansion_preview(), "expansion focus reveals the next hex slot")
+	_expect(ship_panel.slot_rack.get_visible_slot_count() == 6, "preview adds exactly one hex slot")
+	var first_row_hex := ship_panel.slot_rack.get_slot_polygon(0)
+	var second_row_hex := ship_panel.slot_rack.get_slot_polygon(5)
+	_expect(
+		first_row_hex[3].is_equal_approx(second_row_hex[1])
+		and first_row_hex[4].is_equal_approx(second_row_hex[0]),
+		"honeycomb rows share flat edges without gaps",
+	)
+	var initial_preview_alpha := ship_panel.slot_rack.get_preview_alpha()
+	await create_timer(0.5, true).timeout
+	_expect(
+		not is_equal_approx(ship_panel.slot_rack.get_preview_alpha(), initial_preview_alpha),
+		"next hex keeps blinking while gameplay is paused",
+	)
 	await _press_action(&"ui_up")
 	paused = false
-	_expect(root.gui_get_focus_owner() == button_1, "ui_up moves focus from ship part to card row")
-	ship_panel._on_facility_focused(&"weapon_room")
-	_expect(weapon_room.has_expansion_preview(), "focused ship part flashes its next slot")
-	_expect(weapon_room.get_visual_slot_count() == 2, "expansion preview draws one upcoming slot")
-	var initial_preview_alpha := weapon_room.get_preview_alpha()
-	paused = true
-	await create_timer(0.5, true).timeout
-	paused = false
+	_expect(root.gui_get_focus_owner() == button_1, "ui_up moves focus back to the card row")
+	_expect(not ship_panel.slot_rack.has_expansion_preview(), "leaving expansion hides the preview hex")
 	_expect(
-		not is_equal_approx(weapon_room.get_preview_alpha(), initial_preview_alpha),
-		"expansion preview keeps blinking while the offer pauses gameplay",
-	)
-	_expect(
-		not weapon_room.focus_neighbor_top.is_empty(),
-		"top ship slot row has an explicit keyboard path back to augment cards",
+		selection_ui.slot_action_label.text.contains("범용 슬롯"),
+		"facility preview identifies the shared slot pool",
 	)
 	ship_panel.set_highlighted_facility(&"engine")
 	var selected_facility_before_weapon := ship_panel.get_selected_facility_id()
@@ -282,6 +303,7 @@ func _check_offer_layout(
 	selection_ui._highlight_choice(0)
 	_expect(weapon_preview.visible, "weapon acquisition focus shows the weapon loadout preview")
 	_expect(not ship_panel.visible, "weapon acquisition focus hides the unrelated ship facility panel")
+	_expect(expand_button.disabled, "weapon acquisition disables universal facility-slot expansion")
 	_expect(
 		ship_panel.get_selected_facility_id() == selected_facility_before_weapon,
 		"weapon acquisition does not move the ship facility highlight",
@@ -351,23 +373,6 @@ func _check_offer_layout(
 	selection_ui._set_input_enabled(false)
 
 
-func _check_module_keyboard_activation() -> void:
-	var module := (load("res://menus/ship_facility_module.tscn") as PackedScene).instantiate() as ShipFacilityModule
-	root.add_child(module)
-	await process_frame
-	module.facility_id = &"engine"
-	module.set_selection_enabled(true)
-	var activated := [false]
-	module.facility_clicked.connect(func(_facility_id: StringName) -> void: activated[0] = true)
-	var accept := InputEventAction.new()
-	accept.action = &"ui_accept"
-	accept.pressed = true
-	module._gui_input(accept)
-	_expect(activated[0], "focused ship part can be selected with the keyboard accept action")
-	module.queue_free()
-	await process_frame
-
-
 func _press_action(action: StringName) -> void:
 	var pressed_event := InputEventAction.new()
 	pressed_event.action = action
@@ -388,10 +393,41 @@ func _check_swap_overlay(
 	var incoming := load(
 		"res://resources/player_augments/facilities/facility_weapon_room.tres"
 	) as PlayerAugment
-	swap_ui.open(registry, &"weapon_room", incoming)
-	var first_button := swap_ui.get_node("MarginContainer/VBoxContainer/SlotButton1") as Button
-	_expect(swap_ui.visible, "full facility opens the module replacement window")
+	swap_ui.open(registry, incoming)
+	var first_button := swap_ui.get_node(
+		"MarginContainer/VBoxContainer/SlotScroll/SlotList/SlotButton1"
+	) as Button
+	_expect(swap_ui.visible, "full universal pool opens the module replacement window")
 	_expect(first_button.text.contains("사격 통제 장치"), "replacement window identifies installed module")
+	_expect(first_button.text.contains("무기실"), "replacement row preserves the module tag name")
+	swap_ui.close()
+
+
+func _check_capacity_limits(
+	registry: PlayerAugmentRegistry,
+	swap_ui: AugmentModuleSwapOverlay,
+) -> void:
+	registry.clear_augments()
+	for expected_capacity in range(
+		PlayerAugmentRegistry.DEFAULT_SLOT_CAPACITY + 1,
+		PlayerAugmentRegistry.MAX_SLOT_CAPACITY + 1
+	):
+		_expect(registry.expand_slots(), "universal pool expands to %d" % expected_capacity)
+		_expect(
+			registry.get_slot_capacity() == expected_capacity,
+			"universal capacity reaches %d" % expected_capacity,
+		)
+	_expect(not registry.expand_slots(), "universal pool cannot exceed fifteen slots")
+	var engine := load(
+		"res://resources/player_augments/facilities/facility_engine.tres"
+	) as PlayerAugment
+	for index in PlayerAugmentRegistry.MAX_SLOT_CAPACITY:
+		_expect(registry.install_augment(engine) == index, "universal slot %d accepts a module" % (index + 1))
+	swap_ui.open(registry, engine)
+	_expect(
+		swap_ui.get_node_or_null("MarginContainer/VBoxContainer/SlotScroll/SlotList/SlotButton15") != null,
+		"replacement scroll builds all fifteen universal slot rows",
+	)
 	swap_ui.close()
 
 

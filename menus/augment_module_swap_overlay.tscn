@@ -49,29 +49,25 @@ label_settings = ExtResource("2_label")
 horizontal_alignment = 1
 autowrap_mode = 2
 
-[node name="SlotButton1" type="Button" parent="MarginContainer/VBoxContainer"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 58)
+[node name="SlotScroll" type="ScrollContainer" parent="MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 220)
 layout_mode = 2
-theme_override_fonts/font = ExtResource("3_font")
-theme_override_font_sizes/font_size = 15
-text = "슬롯 1"
+horizontal_scroll_mode = 0
 
-[node name="SlotButton2" type="Button" parent="MarginContainer/VBoxContainer"]
+[node name="SlotList" type="VBoxContainer" parent="MarginContainer/VBoxContainer/SlotScroll"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 58)
 layout_mode = 2
-theme_override_fonts/font = ExtResource("3_font")
-theme_override_font_sizes/font_size = 15
-text = "슬롯 2"
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
 
-[node name="SlotButton3" type="Button" parent="MarginContainer/VBoxContainer"]
+[node name="SlotButtonTemplate" type="Button" parent="MarginContainer/VBoxContainer/SlotScroll/SlotList"]
 unique_name_in_owner = true
+visible = false
 custom_minimum_size = Vector2(0, 58)
 layout_mode = 2
 theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 15
-text = "슬롯 3"
+text = "슬롯"
 
 [node name="CancelButton" type="Button" parent="MarginContainer/VBoxContainer"]
 unique_name_in_owner = true

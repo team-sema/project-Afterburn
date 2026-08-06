@@ -39,7 +39,7 @@ func _run() -> void:
 
 	weapon_hud.call("refresh")
 	await process_frame
-	var bay_row: HBoxContainer = weapon_hud.get_node("%BayRow") as HBoxContainer
+	var bay_row: HexHoneycombContainer = weapon_hud.get_node("%BayRow") as HexHoneycombContainer
 	_expect(bay_row.get_child_count() >= 1, "bay row has focus cluster")
 	var first_cluster := bay_row.get_child(0) as WeaponCoreCluster
 	_expect(first_cluster != null, "bay row hosts focused weapon core")

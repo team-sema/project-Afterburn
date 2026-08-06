@@ -12,4 +12,5 @@ description = "장착 중 최대 실드가 1 증가합니다."
 augment_type = 6
 icon = ExtResource("2_icon")
 facility_id = &"shield"
+module_tags = Array[StringName]([&"shield"])
 facility_module_effect = ExtResource("3_effect")

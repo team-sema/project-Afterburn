@@ -30,9 +30,12 @@ func _run() -> void:
 	var playfield_viewport := world.get_node("Layout/Playfield/ViewportContainer/PlayfieldViewport") as SubViewport
 	var playfield_value := world.get_node("Layout/LeftPanel/Margin/VBox/PlayfieldValue") as Label
 	var ship_panel := world.get_node("Layout/RightPanel/Margin/VBox/ShipPanel") as Control
-	_expect(playfield_viewport.size == Vector2i(240, 360), "playfield viewport is 240x360")
+	_expect(
+		playfield_viewport.size == Vector2i(240, 360),
+		"playfield viewport is 240x360 (got %s)" % playfield_viewport.size,
+	)
 	_expect(playfield_value.text == "240 × 360", "HUD matches the playfield viewport size")
-	_expect(ship_panel.custom_minimum_size.y == 126.0, "world ShipPanel inherits its minimum height")
+	_expect(ship_panel.custom_minimum_size.y == 105.0, "world ShipPanel inherits compact honeycomb height")
 	_expect(ship_panel.clip_contents, "world ShipPanel inherits clipping")
 	world.queue_free()
 	await process_frame

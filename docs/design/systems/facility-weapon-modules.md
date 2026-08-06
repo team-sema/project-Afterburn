@@ -1,10 +1,10 @@
 # 시설 모듈 효과 (FacilityModuleEffect)
 
-시설 슬롯에 장착하는 모듈마다 `FacilityModuleEffect`를 두고, Kind별로 공통 스탯을 적용한다. 무기 고유 trait 전투도 본 feature에서 구현한다.
+범용 시설 슬롯에 장착하는 모듈마다 `FacilityModuleEffect`를 두고, Kind별로 공통 스탯을 적용한다. 기존 시설 구분은 module tag로 유지한다. 무기 고유 trait 전투도 본 feature에서 구현한다.
 
 ## 목표
 
-- 13종 시설 모듈이 풀에 등장하고 부위 슬롯에 장착된다.
+- 13종 시설 모듈이 풀에 등장하고 범용 슬롯에 장착된다.
 - 동일 Kind 배율은 primary 곱, 가산은 합.
 - 과충전(주기)·비상 출력(선체 피격)·엔진 부스터·실드 충전 속도·XP 배율 등 timed/특수 효과 동작.
 - `facility_id = hangar` 유지, 표시명만 동력로.

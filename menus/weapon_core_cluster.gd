@@ -8,8 +8,8 @@ signal core_selected(weapon_id: StringName, is_record: bool)
 signal core_hovered(weapon_id: StringName, is_record: bool)
 signal trait_selected(weapon_id: StringName, trait_id: StringName, is_record: bool)
 
-var slot_size := Vector2(42, 42)
-var core_size := Vector2(38, 38)
+var slot_size := Vector2(48, 48)
+var core_size := Vector2(48, 48)
 var trait_size := Vector2(14, 14)
 var orbit_radius := 24.0
 var show_outer_frame := false
@@ -58,15 +58,15 @@ func apply_slot_size(side: float, p_show_outer_frame: bool = false) -> void:
 	slot_size = Vector2(side, side)
 	if show_outer_frame:
 		core_size = Vector2(side * 0.48, side * 0.48)
-		trait_size = Vector2(maxi(12.0, side * 0.22), maxi(12.0, side * 0.22))
+		trait_size = Vector2(maxf(12.0, side * 0.22), maxf(12.0, side * 0.22))
 		orbit_radius = side * 0.36
 	else:
-		core_size = Vector2(side * 0.9, side * 0.9)
+		core_size = Vector2(side, side)
 		if _trait_hex_template != null and _trait_hex_template.custom_minimum_size.x > 0.0:
 			var template_side := _trait_hex_template.custom_minimum_size.x
 			trait_size = Vector2(template_side, template_side)
 		else:
-			trait_size = Vector2(maxi(8.0, side * 0.28), maxi(8.0, side * 0.28))
+			trait_size = Vector2(maxf(8.0, side * 0.28), maxf(8.0, side * 0.28))
 		orbit_radius = side * 0.2
 	custom_minimum_size = slot_size
 	size = slot_size
