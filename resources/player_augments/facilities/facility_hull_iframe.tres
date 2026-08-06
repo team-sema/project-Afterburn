@@ -1,8 +1,9 @@
-[gd_resource type="Resource" script_class="PlayerAugment" load_steps=4 format=3]
+[gd_resource type="Resource" script_class="PlayerAugment" format=3 uid="uid://mwqjqxc4qi2o"]
 
-[ext_resource type="Script" path="res://resources/player_augments/player_augment.gd" id="1_aug"]
+[ext_resource type="Script" uid="uid://bj3m8sydgty8w" path="res://resources/player_augments/player_augment.gd" id="1_aug"]
 [ext_resource type="Texture2D" uid="uid://yhmbs87uwrk5" path="res://assets/svg/facilities/facility_hull.svg" id="2_icon"]
 [ext_resource type="Resource" path="res://resources/facilities/effects/hull_hit_iframes_add_1_0.tres" id="3_effect"]
+[ext_resource type="Script" uid="uid://22vlji4nekje" path="res://resources/player_augments/player_stat_modifier.gd" id="4_kyoj4"]
 
 [resource]
 script = ExtResource("1_aug")

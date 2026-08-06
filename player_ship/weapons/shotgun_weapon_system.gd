@@ -6,7 +6,7 @@ extends WeaponSystem
 @export_range(1, 32, 1) var pellet_count := 5
 @export_range(5.0, 90.0, 1.0) var spread_degrees := 36.0
 @export_range(1.0, 600.0, 1.0) var pellet_speed := 220.0
-@export_range(40.0, 600.0, 1.0) var base_pellet_range := 280.0
+@export_range(0.05, 10.0, 0.01) var base_pellet_lifetime := 1.27
 @export_range(20.0, 200.0, 1.0) var close_range_px := 80.0
 
 @onready var muzzle: Marker2D = $Muzzle
@@ -107,10 +107,10 @@ func _configure_projectile(projectile: Node, direction: Vector2) -> void:
 
 	var speed := pellet_speed
 	speed *= float(get_trait_param(&"shotgun_choke", &"speed_mult", 1.0))
-	var range_mult := 1.0
-	range_mult *= float(get_trait_param(&"shotgun_choke", &"range_mult", 1.0))
-	range_mult *= float(get_trait_param(&"shotgun_cut_barrel", &"range_mult", 1.0))
-	var max_range := base_pellet_range * range_mult
+	var lifetime_mult := 1.0
+	lifetime_mult *= float(get_trait_param(&"shotgun_choke", &"lifetime_mult", 1.0))
+	lifetime_mult *= float(get_trait_param(&"shotgun_cut_barrel", &"lifetime_mult", 1.0))
+	var max_lifetime := base_pellet_lifetime * lifetime_mult
 	move.velocity = direction * speed
 	projectile.rotation = direction.angle() + PI * 0.5
 
@@ -129,7 +129,7 @@ func _configure_projectile(projectile: Node, direction: Vector2) -> void:
 			self,
 			base,
 			origin,
-			max_range,
+			max_lifetime,
 			close_mult,
 			close_px,
 		)

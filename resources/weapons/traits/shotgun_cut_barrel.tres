@@ -1,6 +1,6 @@
-[gd_resource type="Resource" script_class="WeaponTraitDefinition" load_steps=3 format=3]
+[gd_resource type="Resource" script_class="WeaponTraitDefinition" format=3 uid="uid://c6tlt05u1hsrb"]
 
-[ext_resource type="Script" path="res://resources/weapons/weapon_trait_definition.gd" id="1_def"]
+[ext_resource type="Script" uid="uid://dggpfusbxuib7" path="res://resources/weapons/weapon_trait_definition.gd" id="1_def"]
 [ext_resource type="Texture2D" uid="uid://bhsri7kh1kskh" path="res://assets/svg/weapons/weapon_main_shotgun.svg" id="2_icon"]
 
 [resource]
@@ -12,8 +12,8 @@ icon = ExtResource("2_icon")
 target_weapon_id = &"main_shotgun"
 next_rank_hint = "근거리 피해 증가"
 params = {
-"spread_mult": 1.5,
 "close_damage_mult": 1.8,
-"range_mult": 0.85,
 "close_range_px": 80,
+"lifetime_mult": 0.85,
+"spread_mult": 1.5
 }
