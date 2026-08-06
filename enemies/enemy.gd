@@ -20,7 +20,6 @@ var augment_registry: EnemyAugmentRegistry
 @onready var flash_component: FlashComponent = $FlashComponent
 @onready var shake_component: ShakeComponent = $ShakeComponent
 @onready var hurtbox_component: HurtboxComponent = $HurtboxComponent
-@onready var hitbox_component: HitboxComponent = $HitboxComponent
 @onready var hurt_component: HurtComponent = $HurtComponent
 @onready var score_component: ScoreComponent = $ScoreComponent
 @onready var hit_sound_player: VariablePitchAudioStreamPlayer = $HitSoundPlayer
@@ -40,4 +39,3 @@ func _ready() -> void:
 		hit_sound_player.play_with_variance()
 	)
 	stats_component.no_health.connect(queue_free)
-	hitbox_component.hit_hurtbox.connect(queue_free.unbind(1))

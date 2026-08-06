@@ -69,6 +69,9 @@ func _process(delta: float) -> void:
 		return
 
 	formation_elapsed += delta
+	var modifier := move_component.get_modifier_component()
+	if modifier != null:
+		modifier.advance(delta)
 	var speed_scale := 1.0
 	if move_component != null:
 		speed_scale = move_component.velocity_multiplier
@@ -91,7 +94,11 @@ func _apply_formation_position() -> void:
 		speed_scale = move_component.velocity_multiplier
 	var descend_elapsed := minf(formation_elapsed, descend_duration)
 	var center := formation_origin + Vector2(0.0, descend_speed * speed_scale * descend_elapsed)
-	actor.global_position = center + formation_offset
+	var external_offset := Vector2.ZERO
+	var modifier := move_component.get_modifier_component()
+	if modifier != null:
+		external_offset = modifier.get_offset()
+	actor.global_position = center + formation_offset + external_offset
 
 
 func _begin_independent_charge(speed_scale: float) -> void:

@@ -33,7 +33,7 @@ func _run() -> void:
 
 	_check_initial_slots(registry, panel)
 	_check_pool_targets(offer, registry)
-	await _check_offer_layout(selection_ui)
+	await _check_offer_layout(selection_ui, loadout)
 	await _check_module_keyboard_activation()
 	_check_engine_modules(registry, move_component, panel)
 	_check_facility_effect_modules(registry, loadout, facility_applier, stats, shield)
@@ -179,14 +179,25 @@ func _check_replacement(registry: PlayerAugmentRegistry, loadout: PlayerWeaponLo
 	_expect(engine != null, "engine facility module resource loads")
 
 
-func _check_offer_layout(selection_ui: AugmentSelectionOverlay) -> void:
+func _check_offer_layout(
+	selection_ui: AugmentSelectionOverlay,
+	loadout: PlayerWeaponLoadout,
+) -> void:
+	selection_ui.configure_weapon_loadout(loadout)
 	var button_1 := selection_ui.get_node("MarginContainer/PanelContainer/VBoxContainer/ChoiceRow/ChoiceButton1")
 	var button_3 := selection_ui.get_node("MarginContainer/PanelContainer/VBoxContainer/ChoiceRow/ChoiceButton3")
 	var ship_panel := selection_ui.get_node(
 		"MarginContainer/PanelContainer/VBoxContainer/OfferShipPanel"
 	) as ShipPanel
+	var weapon_preview := selection_ui.get_node(
+		"MarginContainer/PanelContainer/VBoxContainer/OfferWeaponPreview"
+	) as AugmentWeaponPreview
 	_expect(button_1.get_parent() == button_3.get_parent(), "three augment choices share one horizontal row")
 	_expect(ship_panel is ShipPanel, "player offer embeds the ship part UI below choices")
+	_expect(
+		weapon_preview is AugmentWeaponPreview,
+		"player offer embeds a weapon loadout preview below choices",
+	)
 	var fire_rate := load(
 		"res://resources/player_augments/facilities/facility_weapon_room.tres"
 	) as PlayerAugment
@@ -250,6 +261,72 @@ func _check_offer_layout(selection_ui: AugmentSelectionOverlay) -> void:
 	_expect(
 		not weapon_room.focus_neighbor_top.is_empty(),
 		"top ship slot row has an explicit keyboard path back to augment cards",
+	)
+	ship_panel.set_highlighted_facility(&"engine")
+	var selected_facility_before_weapon := ship_panel.get_selected_facility_id()
+	var acquire_laser := load(
+		"res://resources/player_augments/weapon/acquire_main_laser.tres"
+	) as PlayerAugment
+	selection_ui._set_choices([acquire_laser, move_speed])
+	selection_ui._set_choice_buttons_visible(true)
+	selection_ui._highlight_choice(0)
+	_expect(weapon_preview.visible, "weapon acquisition focus shows the weapon loadout preview")
+	_expect(not ship_panel.visible, "weapon acquisition focus hides the unrelated ship facility panel")
+	_expect(
+		ship_panel.get_selected_facility_id() == selected_facility_before_weapon,
+		"weapon acquisition does not move the ship facility highlight",
+	)
+	_expect(
+		weapon_preview.context_label.text == "신규 병기 획득",
+		"weapon acquisition preview identifies the operation",
+	)
+	var has_new_slot_preview := false
+	for header in weapon_preview.slot_headers:
+		if header.text == "신규 배치":
+			has_new_slot_preview = true
+			break
+	_expect(
+		has_new_slot_preview,
+		"weapon acquisition previews the first empty loadout slot (headers: %s, empty: %d)"
+		% [
+			weapon_preview.slot_headers.map(func(header: Label) -> String: return header.text),
+			loadout.get_first_empty_bay(),
+		],
+	)
+	_expect(
+		button_1.focus_neighbor_bottom.is_empty(),
+		"weapon cards do not navigate down into hidden ship facilities",
+	)
+	var level_blaster := load(
+		"res://resources/player_augments/weapon/level_main_blaster.tres"
+	) as PlayerAugment
+	selection_ui._set_choices([level_blaster, move_speed])
+	selection_ui._set_choice_buttons_visible(true)
+	selection_ui._highlight_choice(0)
+	_expect(
+		weapon_preview.context_label.text == "병기 코어 강화",
+		"weapon level focus shows the target weapon level preview",
+	)
+	var trait_blaster := load(
+		"res://resources/player_augments/weapon/trait_blaster_rapid_loader.tres"
+	) as PlayerAugment
+	selection_ui._set_choices([trait_blaster, move_speed])
+	selection_ui._set_choice_buttons_visible(true)
+	selection_ui._highlight_choice(0)
+	_expect(
+		weapon_preview.context_label.text == "병기 증강 장착",
+		"weapon trait focus shows the target weapon and incoming trait",
+	)
+	_expect(
+		weapon_preview.trait_label.text.contains("추가:"),
+		"weapon trait preview distinguishes the incoming trait from installed traits",
+	)
+	selection_ui._highlight_choice(1)
+	_expect(ship_panel.visible, "facility focus restores the ship facility panel")
+	_expect(not weapon_preview.visible, "facility focus hides the weapon loadout preview")
+	_expect(
+		ship_panel.get_selected_facility_id() == &"engine",
+		"facility focus still highlights its own ship facility",
 	)
 	selection_ui._set_input_enabled(false)
 	selection_ui.visible = false

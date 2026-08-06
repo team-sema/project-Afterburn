@@ -30,6 +30,7 @@ const FACILITY_GRID := [
 @onready var ship_separator: HSeparator = %ShipSeparator
 @onready var slot_action_label: Label = %SlotActionLabel
 @onready var offer_ship_panel: ShipPanel = %OfferShipPanel
+@onready var offer_weapon_preview: AugmentWeaponPreview = %OfferWeaponPreview
 @onready var choice_buttons: Array[Button] = [
 	%ChoiceButton1,
 	%ChoiceButton2,
@@ -41,6 +42,7 @@ const FACILITY_GRID := [
 var current_choices: Array = []
 var is_accepting_input := false
 var _showing_ship_modules := false
+var _previewing_weapon := false
 var _weapon_loadout: PlayerWeaponLoadout
 var _reroll_enabled := false
 
@@ -62,6 +64,8 @@ func configure_player_registry(registry: PlayerAugmentRegistry) -> void:
 
 func configure_weapon_loadout(loadout: PlayerWeaponLoadout) -> void:
 	_weapon_loadout = loadout
+	if is_node_ready():
+		offer_weapon_preview.set_loadout(loadout)
 
 
 func open_choices(
@@ -233,15 +237,33 @@ func _set_ship_section_visible(section_visible: bool) -> void:
 	ship_separator.visible = section_visible
 	slot_action_label.visible = section_visible
 	offer_ship_panel.visible = section_visible
+	offer_weapon_preview.visible = false
+	_previewing_weapon = false
 
 
 func _highlight_choice(index: int) -> void:
 	if not _showing_ship_modules or index < 0 or index >= current_choices.size():
 		return
 	var augment := current_choices[index] as PlayerAugment
-	if augment != null:
+	if augment == null:
+		return
+	var is_weapon_offer := PlayerAugmentKind.is_weapon_offer(augment.augment_type)
+	_previewing_weapon = is_weapon_offer
+	ship_separator.visible = true
+	slot_action_label.visible = true
+	offer_ship_panel.visible = not is_weapon_offer
+	offer_weapon_preview.visible = is_weapon_offer
+	offer_ship_panel.set_selection_input_enabled(is_accepting_input and not is_weapon_offer)
+	if is_weapon_offer:
+		slot_action_label.text = "병기 배치 · 적용 대상 미리보기"
+		offer_weapon_preview.set_loadout(_weapon_loadout)
+		offer_weapon_preview.show_augment(augment)
+	else:
+		slot_action_label.text = "시설을 선택하면 빈 슬롯 +1 · 최대 3"
 		offer_ship_panel.set_expansion_preview_facility(&"")
 		offer_ship_panel.set_highlighted_facility(augment.facility_id)
+	if is_accepting_input:
+		_configure_focus_navigation()
 
 
 func _on_choice_pressed(index: int) -> void:
@@ -269,7 +291,9 @@ func _set_input_enabled(enabled: bool) -> void:
 	is_accepting_input = enabled
 	for button in choice_buttons:
 		button.disabled = not enabled
-	offer_ship_panel.set_selection_input_enabled(enabled and _showing_ship_modules)
+	offer_ship_panel.set_selection_input_enabled(
+		enabled and _showing_ship_modules and not _previewing_weapon
+	)
 	if reroll_button != null:
 		reroll_button.disabled = not enabled or not _reroll_enabled
 	if enabled:
@@ -281,7 +305,9 @@ func _configure_focus_navigation() -> void:
 	for button in choice_buttons:
 		if button.visible and not button.disabled:
 			visible_buttons.append(button)
-	var modules := offer_ship_panel.get_selectable_modules()
+	var modules: Array[ShipFacilityModule] = []
+	if offer_ship_panel.visible:
+		modules = offer_ship_panel.get_selectable_modules()
 	var module_by_id: Dictionary = {}
 	for module in modules:
 		module_by_id[module.facility_id] = module
@@ -304,11 +330,12 @@ func _configure_focus_navigation() -> void:
 		)
 		if _showing_ship_modules:
 			var augment := current_choices[index] as PlayerAugment
-			var target := module_by_id.get(augment.facility_id) as ShipFacilityModule
-			if target == null:
-				var fallback_column: int = 0 if index * 2 < visible_buttons.size() else 1
-				target = _first_module_in_column(module_by_id, fallback_column)
-			_set_focus_neighbor(button, "focus_neighbor_bottom", target)
+			if augment != null and not PlayerAugmentKind.is_weapon_offer(augment.augment_type):
+				var target := module_by_id.get(augment.facility_id) as ShipFacilityModule
+				if target == null:
+					var fallback_column: int = 0 if index * 2 < visible_buttons.size() else 1
+					target = _first_module_in_column(module_by_id, fallback_column)
+				_set_focus_neighbor(button, "focus_neighbor_bottom", target)
 
 	for row in FACILITY_GRID.size():
 		for column in FACILITY_GRID[row].size():

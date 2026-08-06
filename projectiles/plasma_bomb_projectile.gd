@@ -28,6 +28,7 @@ var _cluster_damage_mult := 0.4
 var _field_duration := 0.0
 var _field_max_bonus_mult := 1.0
 var _pull_strength := 0.0
+var _pull_radius_multiplier := 1.0
 var _is_cluster_child := false
 
 
@@ -52,6 +53,7 @@ func configure_plasma_traits(
 	field_duration: float,
 	field_max_bonus_mult: float,
 	pull_strength: float,
+	pull_radius_multiplier: float = 1.0,
 ) -> void:
 	if weapon != null and is_instance_valid(weapon):
 		configure_damage_snapshot(
@@ -63,6 +65,7 @@ func configure_plasma_traits(
 	_field_duration = maxf(0.0, field_duration)
 	_field_max_bonus_mult = maxf(0.0, field_max_bonus_mult)
 	_pull_strength = maxf(0.0, pull_strength)
+	_pull_radius_multiplier = maxf(1.0, pull_radius_multiplier)
 
 
 func configure_damage_snapshot(damage_multiplier: float, boss_damage_multiplier: float) -> void:
@@ -164,7 +167,7 @@ func _resolve_hit_damage(damage: int, hurtbox: HurtboxComponent = null) -> int:
 
 
 func _apply_gravity_pull() -> void:
-	var radius := get_damage_radius()
+	var radius := get_damage_radius() * _pull_radius_multiplier
 	for node in get_tree().get_nodes_in_group("enemies"):
 		var enemy := node as Node2D
 		if enemy == null or not is_instance_valid(enemy):
@@ -173,11 +176,11 @@ func _apply_gravity_pull() -> void:
 		var dist := offset.length()
 		if dist > radius or dist < 0.01:
 			continue
-		var strength := _pull_strength * (1.0 - dist / radius)
-		enemy.global_position += offset.normalized() * strength * 0.05
-		var move := enemy.get_node_or_null("MoveComponent") as MoveComponent
-		if move != null:
-			move.velocity += offset.normalized() * strength
+		var falloff := sqrt(1.0 - dist / radius)
+		var strength := _pull_strength * falloff
+		var modifier := enemy.get_node_or_null("MoveModifierComponent") as MoveModifierComponent
+		if modifier != null:
+			modifier.apply_impulse(offset.normalized() * strength)
 
 
 func _spawn_clusters() -> void:

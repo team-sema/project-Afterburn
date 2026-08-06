@@ -28,7 +28,8 @@ func _process(_delta: float) -> void:
 	if not is_instance_valid(actor):
 		return
 	var stop_y := actor.get_viewport_rect().size.y * stop_viewport_y_ratio
-	if actor.global_position.y >= stop_y:
+	var base_y := actor.global_position.y - _external_offset().y
+	if base_y >= stop_y:
 		_begin_patrol()
 
 
@@ -42,3 +43,8 @@ func _begin_patrol() -> void:
 	_phase = Phase.PATROL
 	var lateral: float = [-patrol_speed, patrol_speed].pick_random()
 	move_component.velocity = Vector2(lateral, 0.0)
+
+
+func _external_offset() -> Vector2:
+	var modifier := move_component.get_modifier_component()
+	return modifier.get_offset() if modifier != null else Vector2.ZERO

@@ -31,6 +31,7 @@
 [ext_resource type="Script" uid="uid://d0hsrh4ssnxvm" path="res://components/experience_drop_component.gd" id="28_experience_drop"]
 [ext_resource type="PackedScene" path="res://pickups/experience_orb.tscn" id="29_experience_orb"]
 [ext_resource type="PackedScene" path="res://components/enemy_shoot_component.tscn" id="30_shoot"]
+[ext_resource type="Script" path="res://components/move_modifier_component.gd" id="31_move_modifier"]
 
 [node name="Enemy" type="Node2D" unique_id=1578043332]
 script = ExtResource("1_3t1x0")
@@ -151,3 +152,6 @@ stats_component = NodePath("../StatsComponent")
 actor = NodePath("..")
 orb_scene = ExtResource("29_experience_orb")
 drop_chance = 0.62
+
+[node name="MoveModifierComponent" type="Node" parent="."]
+script = ExtResource("31_move_modifier")

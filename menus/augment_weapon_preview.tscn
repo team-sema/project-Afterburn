@@ -1,0 +1,290 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://menus/augment_weapon_preview.gd" id="1_script"]
+[ext_resource type="FontFile" uid="uid://dhbb73hkpge3y" path="res://fonts/Mulmaru.ttf" id="2_font"]
+
+[sub_resource type="StyleBoxFlat" id="Style_slot"]
+bg_color = Color(0.02, 0.075, 0.13, 0.92)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.22, 0.48, 0.66, 0.65)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[sub_resource type="StyleBoxFlat" id="Style_focused"]
+bg_color = Color(0.035, 0.18, 0.29, 0.98)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.35, 0.96, 1, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[sub_resource type="StyleBoxFlat" id="Style_detail"]
+bg_color = Color(0.015, 0.055, 0.105, 0.88)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.15, 0.55, 0.75, 0.55)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[node name="AugmentWeaponPreview" type="Control"]
+clip_contents = true
+custom_minimum_size = Vector2(0, 126)
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("1_script")
+
+[node name="Layout" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 6
+
+[node name="Slots" type="HBoxContainer" parent="Layout"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 1.25
+theme_override_constants/separation = 5
+
+[node name="SlotPanel1" type="PanelContainer" parent="Layout/Slots"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(92, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/focused_panel = SubResource("Style_focused")
+theme_override_styles/panel = SubResource("Style_slot")
+
+[node name="Margin" type="MarginContainer" parent="Layout/Slots/SlotPanel1"]
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 3
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 3
+
+[node name="VBox" type="VBoxContainer" parent="Layout/Slots/SlotPanel1/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 1
+alignment = 1
+
+[node name="SlotHeader1" type="Label" parent="Layout/Slots/SlotPanel1/Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.5, 0.8, 0.95, 0.9)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 8
+text = "병기 1"
+horizontal_alignment = 1
+
+[node name="SlotIcon1" type="TextureRect" parent="Layout/Slots/SlotPanel1/Margin/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(34, 34)
+layout_mode = 2
+size_flags_horizontal = 4
+expand_mode = 1
+stretch_mode = 5
+
+[node name="SlotName1" type="Label" parent="Layout/Slots/SlotPanel1/Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 10
+text = "빈 슬롯"
+horizontal_alignment = 1
+text_overrun_behavior = 3
+
+[node name="SlotMeta1" type="Label" parent="Layout/Slots/SlotPanel1/Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.58, 0.78, 0.9, 0.85)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 8
+text = "배치 가능"
+horizontal_alignment = 1
+
+[node name="SlotPanel2" type="PanelContainer" parent="Layout/Slots"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(92, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/focused_panel = SubResource("Style_focused")
+theme_override_styles/panel = SubResource("Style_slot")
+
+[node name="Margin" type="MarginContainer" parent="Layout/Slots/SlotPanel2"]
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 3
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 3
+
+[node name="VBox" type="VBoxContainer" parent="Layout/Slots/SlotPanel2/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 1
+alignment = 1
+
+[node name="SlotHeader2" type="Label" parent="Layout/Slots/SlotPanel2/Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.5, 0.8, 0.95, 0.9)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 8
+text = "병기 2"
+horizontal_alignment = 1
+
+[node name="SlotIcon2" type="TextureRect" parent="Layout/Slots/SlotPanel2/Margin/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(34, 34)
+layout_mode = 2
+size_flags_horizontal = 4
+expand_mode = 1
+stretch_mode = 5
+
+[node name="SlotName2" type="Label" parent="Layout/Slots/SlotPanel2/Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 10
+text = "빈 슬롯"
+horizontal_alignment = 1
+text_overrun_behavior = 3
+
+[node name="SlotMeta2" type="Label" parent="Layout/Slots/SlotPanel2/Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.58, 0.78, 0.9, 0.85)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 8
+text = "배치 가능"
+horizontal_alignment = 1
+
+[node name="SlotPanel3" type="PanelContainer" parent="Layout/Slots"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(92, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/focused_panel = SubResource("Style_focused")
+theme_override_styles/panel = SubResource("Style_slot")
+
+[node name="Margin" type="MarginContainer" parent="Layout/Slots/SlotPanel3"]
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 3
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 3
+
+[node name="VBox" type="VBoxContainer" parent="Layout/Slots/SlotPanel3/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 1
+alignment = 1
+
+[node name="SlotHeader3" type="Label" parent="Layout/Slots/SlotPanel3/Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.5, 0.8, 0.95, 0.9)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 8
+text = "병기 3"
+horizontal_alignment = 1
+
+[node name="SlotIcon3" type="TextureRect" parent="Layout/Slots/SlotPanel3/Margin/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(34, 34)
+layout_mode = 2
+size_flags_horizontal = 4
+expand_mode = 1
+stretch_mode = 5
+
+[node name="SlotName3" type="Label" parent="Layout/Slots/SlotPanel3/Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 10
+text = "빈 슬롯"
+horizontal_alignment = 1
+text_overrun_behavior = 3
+
+[node name="SlotMeta3" type="Label" parent="Layout/Slots/SlotPanel3/Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.58, 0.78, 0.9, 0.85)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 8
+text = "배치 가능"
+horizontal_alignment = 1
+
+[node name="DetailPanel" type="PanelContainer" parent="Layout"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("Style_detail")
+
+[node name="Margin" type="MarginContainer" parent="Layout/DetailPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 7
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 7
+
+[node name="HBox" type="HBoxContainer" parent="Layout/DetailPanel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 7
+alignment = 1
+
+[node name="CandidateIcon" type="TextureRect" parent="Layout/DetailPanel/Margin/HBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(42, 42)
+layout_mode = 2
+size_flags_vertical = 4
+expand_mode = 1
+stretch_mode = 5
+
+[node name="VBox" type="VBoxContainer" parent="Layout/DetailPanel/Margin/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 3
+alignment = 1
+
+[node name="ContextLabel" type="Label" parent="Layout/DetailPanel/Margin/HBox/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.42, 0.9, 1, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 10
+text = "병기 적용 미리보기"
+
+[node name="ChangeLabel" type="Label" parent="Layout/DetailPanel/Margin/HBox/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 13
+text = "병기 증강 카드를 선택하세요."
+autowrap_mode = 2
+
+[node name="TraitLabel" type="Label" parent="Layout/DetailPanel/Margin/HBox/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(0.66, 0.84, 0.92, 0.92)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 9
+autowrap_mode = 2
+max_lines_visible = 3
+text_overrun_behavior = 3

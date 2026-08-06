@@ -34,7 +34,7 @@ Move / MoveInput / PositionClamp / WeaponMount(Blaster·Laser·Shotgun 등) / Pl
 - 빈 베이면 신규 자동 장착. 만석이면 증강 화면에서 교체 → **피교체 무기 성장(레벨·특성) 완전 삭제**
 - 같은 무기를 다시 얻으면 기본 레벨·특성 없음으로 시작 (교체로 뺀 성장은 보존하지 않음)
 - 무기실: 집속 조준기(공통 피해) · 대형 표적 해석기(보스 피해). 동력로(`hangar`): 과충전·비상 출력
-- HUD: `WeaponLoadoutHud` — 동일 크기 장착 베이 헥스 가로 행. 템플릿(`%BaySlotTemplate` · `%ModuleHexTemplate` · `%SelectedWeaponHex`) 복제. 호버/클릭 포커스 → 하단 `선택된 무기` | `장착된 모듈` + 설명(전투 수치는 인게임 비표시)
+- HUD: `WeaponLoadoutHud` — 동일 크기 장착 베이 헥스 가로 행. 템플릿(`%BaySlotTemplate` · `%ModuleHexTemplate` · `%SelectedWeaponHex`) 복제. 호버/클릭 포커스 → 하단 `선택된 무기` | `장착된 모듈` + 설명(전투 수치는 인게임 비표시). 설명은 고정 2줄·말줄임이며 우측 레일의 최소 크기를 늘리지 않는다
 - 증강 리롤: `AugmentOfferController.max_reroll_count`(임시 기본 2) · 런당 `remaining_reroll_count`
 
 ## 현재 무기 목록 (`gameplay.tscn` 획득 풀)
@@ -112,8 +112,9 @@ Move / MoveInput / PositionClamp / WeaponMount(Blaster·Laser·Shotgun 등) / Pl
 
 ## 플레이어 증강 오퍼
 
-- 화면 상단에 증강 3개, 구분선 아래에 함선 부위 UI를 표시한다
+- 화면 상단에 증강 3개, 구분선 아래에 현재 카드 Kind의 적용 대상 UI를 표시한다
 - `STAT_MULTIPLIER`는 플레이어 오퍼 풀에 없다. `FACILITY_EFFECT` 카드 포커스·호버만 대상 `facility_id` 부위를 하이라이트한다. 무기 Kind 카드는 시설 하이라이트를 강제하지 않는다
+- 무기 Kind 카드 포커스 시 함선 부위 UI 대신 현재 병기 배치를 표시한다. 신규 획득은 빈 슬롯/교체 안내, 레벨·특성은 대상 병기와 적용 전후 정보를 강조한다
 - 카드 대신 확장 가능한 함선 부위를 선택하면 해당 부위의 빈 슬롯을 1개 늘리고 오퍼를 종료한다
 - 확장 부위에 키보드 포커스 또는 마우스 호버가 들어오면 추가될 다음 슬롯이 점멸한다
 - 카드 3개와 확장 가능한 부위 6개는 방향키·Tab으로 이동하고 `ui_accept`로 선택할 수 있다
@@ -126,6 +127,6 @@ Move / MoveInput / PositionClamp / WeaponMount(Blaster·Laser·Shotgun 등) / Pl
 - **플레이어 피격 피해는 이벤트당 항상 1.** `HurtComponent`가 `player` 그룹이면 hitbox.damage와 무관하게 1로 적용한다. (폭탄 자폭 등 소스 수치도 1로 맞춤)
 - **실드 버퍼**: `HurtComponent`가 피격마다 `notify_hit()` 후 `absorb_damage()`를 부른다. 실드가 있는 만큼만 흡수하고 초과분은 선체 HP에서 차감한다. 피해가 항상 1이므로 실드 1이면 그 한 방은 실드만 깎인다.
 - **실드 재생**: 현재 < 최대면 충전 게이지 진행(`regen_charge_duration` 기본 30초 · 급속 재충전기로 속도 ×2). 완료 시 +1. 피격 시 게이지 리셋 후 즉시 재개. 최대면 게이지 0·숨김
-- **충격 분산 골격** 장착 시 선체 피격 후 0.6초 무적(추가 피격으로 타이머 연장 안 함). 기본 무적시간은 없음
+- 모든 피격 후 기본 0.6초 무적 및 기체 반투명 표시(추가 피격으로 타이머 연장 안 함). **충격 분산 골격** 장착 시 선체 피격 무적시간 +1.0초(총 1.6초)
 - 한 프레임에 여러 히트박스가 겹치면 각각 별개 이벤트(각 1 피해)
 - HUD: 좌측 `ShipStatusHud` — `HULL` · `SHIELD` · 실드 바 아래 `ShieldChargeBar`(미만일 때만). 함선 파괴 시 `—`

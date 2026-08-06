@@ -15,7 +15,7 @@
 ## Enemy 베이스 동작
 
 - `no_health` → 점수 + XP + `queue_free`
-- Hurt VFX/SFX · 카미카제 Hitbox free
+- Hurt VFX/SFX · 플레이어 접촉 시 피해만 주고 적은 유지
 - **이동:** `Node2D` + `MoveComponent.translate` (CharacterBody/`move_and_slide` 없음). 기본 진행 **+Y**.
 
 ## EnemyGenerator

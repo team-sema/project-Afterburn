@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://components/augment_behaviors/near_death_experience_component.gd" id="1_script"]
+
+[node name="NearDeathExperienceComponent" type="Node"]
+script = ExtResource("1_script")
+near_death_duration = 1.0

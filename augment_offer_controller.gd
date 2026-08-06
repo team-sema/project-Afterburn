@@ -72,8 +72,8 @@ func _start_offer() -> void:
 		selection_ui.configure_weapon_loadout(_get_loadout())
 		_current_player_choices = _pick_player_choices()
 		choices = _current_player_choices
-		title = "함선 모듈"
-		prompt = "무기·특성·시설 모듈을 선택하거나 함선 부위의 슬롯을 확장하세요"
+		title = "강화 선택"
+		prompt = "병기·증강·시설 모듈을 선택하거나 함선 부위의 슬롯을 확장하세요"
 		accent_color = selection_ui.player_accent_color
 		show_ship_modules = true
 		_awaiting_final_choice = true
