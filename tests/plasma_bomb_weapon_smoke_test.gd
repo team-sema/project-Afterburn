@@ -69,6 +69,77 @@ func _run() -> void:
 			"visual explosion radius remains the configured blast radius",
 		)
 
+	var detached_weapon := WEAPON_DEFINITION.weapon_scene.instantiate() as PlasmaBombWeaponSystem
+	detached_weapon.set_global_damage_multiplier(1.5)
+	detached_weapon.set_boss_damage_multiplier(1.25)
+	var cluster_source := PROJECTILE_SCENE.instantiate() as PlasmaBombProjectile
+	cluster_source.configure_bomb(38.0, 1.0, 34.0, 0.0, 24)
+	cluster_source.configure_plasma_traits(detached_weapon, 3, 0.4, 3.0, 1.0, 0.0)
+	detached_weapon.free()
+	world.add_child(cluster_source)
+	cluster_source.detonate_now()
+	await process_frame
+	var cluster_children: Array[PlasmaBombProjectile] = []
+	for child in world.get_children():
+		if child is PlasmaBombProjectile:
+			cluster_children.append(child as PlasmaBombProjectile)
+	_expect(cluster_children.size() == 3, "cluster trait creates three child bombs")
+	var direction_sum := Vector2.ZERO
+	for child in cluster_children:
+		_expect(is_equal_approx(child.fuse_time, 0.35), "cluster child stores its short fuse")
+		_expect(
+			is_equal_approx((child.get_node("FuseTimer") as Timer).wait_time, 0.35),
+			"cluster child configures its timer before entering the tree",
+		)
+		_expect(
+			is_equal_approx(child.flight_direction.length(), 1.0),
+			"cluster child receives a normalized flight direction",
+		)
+		direction_sum += child.flight_direction
+		var position_before_move := child.global_position
+		child.call("_process", 0.1)
+		var movement := child.global_position - position_before_move
+		_expect(
+			movement.normalized().dot(child.flight_direction) > 0.999,
+			"cluster child moves along its radial direction",
+		)
+		_expect(
+			int(child.call("_resolve_hit_damage", 10)) == 15,
+			"cluster child keeps the launch-time damage multiplier after weapon removal",
+		)
+	_expect(direction_sum.length() < 0.001, "cluster child directions are evenly distributed radially")
+	for child in cluster_children:
+		child.queue_free()
+	await process_frame
+
+	var residual_field: PlasmaResidualField = null
+	for child in world.get_children():
+		if child is PlasmaResidualField:
+			residual_field = child as PlasmaResidualField
+			break
+	_expect(residual_field != null, "residual field trait creates a field")
+	if residual_field != null:
+		_expect(
+			is_equal_approx(residual_field.damage_multiplier, 1.5),
+			"residual field keeps the launch-time damage multiplier after weapon removal",
+		)
+		_expect(
+			is_equal_approx(residual_field.boss_damage_multiplier, 1.25),
+			"residual field keeps the launch-time boss multiplier after weapon removal",
+		)
+		var field_fill := residual_field.get_node("Visual/FieldFill") as Polygon2D
+		_expect(field_fill != null, "residual field creates a visible translucent fill")
+		if field_fill != null:
+			_expect(
+				field_fill.color.a > 0.0 and field_fill.color.a < 1.0,
+				"residual field fill is translucent",
+			)
+			_expect(
+				is_equal_approx(field_fill.polygon[0].length(), residual_field.radius),
+				"residual field visual matches its damage radius",
+			)
+		_expect(residual_field.has_node("Visual/OuterRing"), "residual field has a visible boundary ring")
+
 	var configured_projectile := PROJECTILE_SCENE.instantiate() as PlasmaBombProjectile
 	weapon_system.set_global_damage_multiplier(1.5)
 	weapon_system.call("_configure_projectile", configured_projectile)

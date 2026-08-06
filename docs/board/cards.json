@@ -406,6 +406,14 @@
       "column": "done",
       "file": "cards/nova-drift-visuals.md",
       "tags": ["비주얼", "완료"]
+    },
+    {
+      "id": "weapon-test-lab-augments",
+      "title": "무기 테스트장 증강·지속 스폰",
+      "description": "선택 무기의 특성을 직접 적용하고 적 유형별 반복 스폰을 제어하는 테스트 도구.",
+      "column": "review",
+      "file": "cards/weapon-test-lab-augments.md",
+      "tags": ["무기", "증강", "테스트", "스폰"]
     }
   ]
 }

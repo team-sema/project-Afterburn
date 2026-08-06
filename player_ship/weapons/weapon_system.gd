@@ -212,6 +212,10 @@ func get_effective_damage_multiplier() -> float:
 	)
 
 
+func get_boss_damage_multiplier() -> float:
+	return _boss_damage_multiplier
+
+
 func resolve_hit_damage(base_damage: int, hurtbox: HurtboxComponent = null) -> int:
 	var mult := get_effective_damage_multiplier()
 	if hurtbox != null and not is_equal_approx(_boss_damage_multiplier, 1.0):

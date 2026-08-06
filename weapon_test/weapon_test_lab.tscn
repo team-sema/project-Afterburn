@@ -91,28 +91,29 @@ theme_override_styles/panel = SubResource("StyleBox_left_panel")
 
 [node name="Margin" type="MarginContainer" parent="Layout/LeftPanel"]
 layout_mode = 2
-theme_override_constants/margin_left = 14
-theme_override_constants/margin_top = 12
-theme_override_constants/margin_right = 14
-theme_override_constants/margin_bottom = 12
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 6
 
 [node name="VBox" type="VBoxContainer" parent="Layout/LeftPanel/Margin"]
 layout_mode = 2
-theme_override_constants/separation = 6
+theme_override_constants/separation = 3
 
 [node name="Eyebrow" type="Label" parent="Layout/LeftPanel/Margin/VBox"]
 layout_mode = 2
-text = "TARGET CONTROL"
+text = "TARGET CONTROL  ·  적 스폰"
 label_settings = ExtResource("6_default_label")
 theme_override_colors/font_color = Color(1, 0.35, 0.58, 1)
 
 [node name="Title" type="Label" parent="Layout/LeftPanel/Margin/VBox"]
+visible = false
 layout_mode = 2
 text = "적 스폰"
 label_settings = ExtResource("7_title_label")
 
 [node name="Rule" type="ColorRect" parent="Layout/LeftPanel/Margin/VBox"]
-custom_minimum_size = Vector2(0, 2)
+custom_minimum_size = Vector2(0, 1)
 layout_mode = 2
 color = Color(1, 0.18, 0.45, 0.85)
 
@@ -127,7 +128,7 @@ label_settings = ExtResource("6_default_label")
 
 [node name="SpawnCount" type="SpinBox" parent="Layout/LeftPanel/Margin/VBox/SpawnCountRow"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(64, 0)
+custom_minimum_size = Vector2(58, 24)
 layout_mode = 2
 min_value = 1.0
 max_value = 10.0
@@ -135,12 +136,48 @@ value = 1.0
 allow_greater = false
 allow_lesser = false
 
-[node name="EnemyButtons" type="VBoxContainer" parent="Layout/LeftPanel/Margin/VBox"]
+[node name="EnemyScroll" type="ScrollContainer" parent="Layout/LeftPanel/Margin/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="EnemyButtons" type="VBoxContainer" parent="Layout/LeftPanel/Margin/VBox/EnemyScroll"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_constants/separation = 4
+size_flags_horizontal = 3
+theme_override_constants/separation = 2
+
+[node name="ContinuousIntervalRow" type="HBoxContainer" parent="Layout/LeftPanel/Margin/VBox"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Layout/LeftPanel/Margin/VBox/ContinuousIntervalRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "반복 간격"
+label_settings = ExtResource("6_default_label")
+
+[node name="ContinuousSpawnInterval" type="SpinBox" parent="Layout/LeftPanel/Margin/VBox/ContinuousIntervalRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(68, 24)
+layout_mode = 2
+min_value = 0.5
+max_value = 30.0
+step = 0.5
+value = 2.0
+suffix = " 초"
+allow_greater = false
+allow_lesser = false
+
+[node name="ContinuousSpawnButton" type="Button" parent="Layout/LeftPanel/Margin/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+disabled = true
+toggle_mode = true
+text = "지속 스폰 시작"
 
 [node name="Spacer" type="Control" parent="Layout/LeftPanel/Margin/VBox"]
+visible = false
 layout_mode = 2
 size_flags_vertical = 3
 
@@ -153,7 +190,7 @@ theme_override_colors/font_color = Color(1, 0.55, 0.7, 1)
 
 [node name="ClearTargetsButton" type="Button" parent="Layout/LeftPanel/Margin/VBox"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 28)
+custom_minimum_size = Vector2(0, 24)
 layout_mode = 2
 text = "표적 / 적 탄환 정리"
 
@@ -237,28 +274,29 @@ theme_override_styles/panel = SubResource("StyleBox_right_panel")
 
 [node name="Margin" type="MarginContainer" parent="Layout/RightPanel"]
 layout_mode = 2
-theme_override_constants/margin_left = 12
-theme_override_constants/margin_top = 10
-theme_override_constants/margin_right = 12
-theme_override_constants/margin_bottom = 10
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 6
 
 [node name="VBox" type="VBoxContainer" parent="Layout/RightPanel/Margin"]
 layout_mode = 2
-theme_override_constants/separation = 5
+theme_override_constants/separation = 3
 
 [node name="Eyebrow" type="Label" parent="Layout/RightPanel/Margin/VBox"]
 layout_mode = 2
-text = "LOADOUT CONTROL"
+text = "LOADOUT  ·  장비 / 증강"
 label_settings = ExtResource("6_default_label")
 theme_override_colors/font_color = Color(0.35, 0.82, 1, 1)
 
 [node name="Title" type="Label" parent="Layout/RightPanel/Margin/VBox"]
+visible = false
 layout_mode = 2
 text = "장비 선택"
 label_settings = ExtResource("7_title_label")
 
 [node name="Rule" type="ColorRect" parent="Layout/RightPanel/Margin/VBox"]
-custom_minimum_size = Vector2(0, 2)
+custom_minimum_size = Vector2(0, 1)
 layout_mode = 2
 color = Color(0.1, 0.65, 0.95, 0.85)
 
@@ -285,30 +323,72 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 3
 
+[node name="TraitRule" type="ColorRect" parent="Layout/RightPanel/Margin/VBox"]
+custom_minimum_size = Vector2(0, 1)
+layout_mode = 2
+color = Color(0.48, 0.22, 0.7, 0.8)
+
+[node name="TraitEyebrow" type="Label" parent="Layout/RightPanel/Margin/VBox"]
+layout_mode = 2
+text = "WEAPON AUGMENTS"
+label_settings = ExtResource("6_default_label")
+theme_override_colors/font_color = Color(0.72, 0.5, 1, 1)
+
+[node name="TraitWeaponLabel" type="Label" parent="Layout/RightPanel/Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "무기를 장착하면 특성이 표시됩니다."
+label_settings = ExtResource("6_default_label")
+theme_override_colors/font_color = Color(0.82, 0.7, 1, 1)
+autowrap_mode = 3
+
+[node name="TraitScroll" type="ScrollContainer" parent="Layout/RightPanel/Margin/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="TraitButtons" type="VBoxContainer" parent="Layout/RightPanel/Margin/VBox/TraitScroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 3
+
+[node name="ClearTraitsButton" type="Button" parent="Layout/RightPanel/Margin/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+disabled = true
+text = "선택 무기 특성 초기화"
+
 [node name="ActionRow" type="HBoxContainer" parent="Layout/RightPanel/Margin/VBox"]
 layout_mode = 2
 theme_override_constants/separation = 4
 
 [node name="LevelButton" type="Button" parent="Layout/RightPanel/Margin/VBox/ActionRow"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 28)
+custom_minimum_size = Vector2(0, 24)
 layout_mode = 2
 size_flags_horizontal = 3
 text = "레벨 +"
 
 [node name="UnequipButton" type="Button" parent="Layout/RightPanel/Margin/VBox/ActionRow"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 28)
+custom_minimum_size = Vector2(0, 24)
 layout_mode = 2
 size_flags_horizontal = 3
 text = "슬롯 비우기"
 
 [node name="Hint" type="Label" parent="Layout/RightPanel/Margin/VBox"]
+visible = false
 layout_mode = 2
 text = "슬롯 선택 → 무기 선택\nWASD / 방향키로 기체 이동"
 label_settings = ExtResource("6_default_label")
 theme_override_colors/font_color = Color(0.45, 0.7, 0.85, 0.8)
 autowrap_mode = 3
+
+[node name="ContinuousSpawnTimer" type="Timer" parent="."]
+unique_name_in_owner = true
+wait_time = 2.0
 
 [node name="CornerFrame" type="Control" parent="Layout/RightPanel"]
 layout_mode = 2

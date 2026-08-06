@@ -45,7 +45,7 @@ Move / MoveInput / PositionClamp / WeaponMount(Blaster·Laser·Shotgun 등) / Pl
 | `main_laser` | 레이저 | 연속 빔형 |
 | `main_shotgun` | 샷건 | 부채꼴 다중 펠릿 근거리 화력 |
 | `aux_test_cannon` | 보조 캐넌 | **공전 포드**에서 최근접 적 방향으로 발사 (`orbit_radius`/`orbit_speed` 데이터) |
-| `plasma_bomb` | 플라즈마 폭탄 | 지연 폭발·범위 피해 |
+| `plasma_bomb` | 플라즈마 폭탄 | 지연 폭발·범위 피해 · 방사형 클러스터 자탄 · 잔류장 |
 | `aux_homing_missile` | 유도탄 | 가까운 적을 추적 |
 | `aux_orbital_barrier` | 궤도 방벽 | 주변을 돌며 탄막 소멸 + 적 접촉 피해(**적당 1회**, 일부 trait는 재타격 쿨). 기본 길이 `segment_arc_length≈11.33`(구 34의 1/3). HP 없음 |
 

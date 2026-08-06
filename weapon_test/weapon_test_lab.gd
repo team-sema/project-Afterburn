@@ -18,9 +18,15 @@ const ENEMY_LABELS := {
 @onready var enemy_buttons: VBoxContainer = %EnemyButtons
 @onready var weapon_buttons: VBoxContainer = %WeaponButtons
 @onready var spawn_count: SpinBox = %SpawnCount
+@onready var continuous_spawn_interval: SpinBox = %ContinuousSpawnInterval
+@onready var continuous_spawn_button: Button = %ContinuousSpawnButton
+@onready var continuous_spawn_timer: Timer = %ContinuousSpawnTimer
 @onready var target_count_label: Label = %TargetCount
 @onready var slot_buttons: HBoxContainer = %SlotButtons
 @onready var selected_slot_label: Label = %SelectedSlotLabel
+@onready var trait_weapon_label: Label = %TraitWeaponLabel
+@onready var trait_buttons: VBoxContainer = %TraitButtons
+@onready var clear_traits_button: Button = %ClearTraitsButton
 @onready var level_button: Button = %LevelButton
 @onready var unequip_button: Button = %UnequipButton
 
@@ -28,6 +34,11 @@ var _loadout: PlayerWeaponLoadout
 var _selected_slot := 0
 var _slot_button_list: Array[Button] = []
 var _weapon_button_by_id: Dictionary = {}
+var _trait_definitions: Array[WeaponTraitDefinition] = []
+var _trait_button_by_id: Dictionary = {}
+var _displayed_trait_weapon_id: StringName = &""
+var _continuous_spawn_sets: Dictionary = {}
+var _continuous_spawn_enabled := false
 
 
 func _ready() -> void:
@@ -35,10 +46,15 @@ func _ready() -> void:
 	_loadout = ship.get_weapon_loadout() as PlayerWeaponLoadout
 	assert(_loadout != null, "Weapon test lab requires the ship weapon loadout.")
 	_make_ship_invincible()
+	_load_trait_definitions()
 	_build_enemy_buttons()
 	_build_slot_buttons()
 	_build_weapon_buttons()
 	%ClearTargetsButton.pressed.connect(_clear_targets)
+	continuous_spawn_button.toggled.connect(_set_continuous_spawn)
+	continuous_spawn_interval.value_changed.connect(_on_continuous_spawn_interval_changed)
+	continuous_spawn_timer.timeout.connect(_spawn_continuous_batches)
+	clear_traits_button.pressed.connect(_clear_selected_weapon_traits)
 	level_button.pressed.connect(_level_up_selected_weapon)
 	unequip_button.pressed.connect(_unequip_selected_slot)
 	_loadout.loadout_changed.connect(_refresh_loadout_ui)
@@ -50,20 +66,45 @@ func _build_enemy_buttons() -> void:
 	for spawn_set in enemy_spawn_sets:
 		if spawn_set == null:
 			continue
+		var row := HBoxContainer.new()
+		row.name = "Enemy_%s" % String(spawn_set.spawn_id)
+		row.add_theme_constant_override("separation", 4)
 		var button := Button.new()
 		button.name = "Spawn_%s" % String(spawn_set.spawn_id)
 		button.text = ENEMY_LABELS.get(spawn_set.spawn_id, String(spawn_set.spawn_id))
 		button.tooltip_text = "선택한 수만큼 이 스폰 패턴을 실행합니다."
 		_style_button(button, Color(1.0, 0.22, 0.48, 1.0))
 		button.pressed.connect(func() -> void: _spawn_batches(spawn_set))
-		enemy_buttons.add_child(button)
+		row.add_child(button)
+		var repeat_toggle := CheckButton.new()
+		repeat_toggle.name = "Repeat_%s" % String(spawn_set.spawn_id)
+		repeat_toggle.custom_minimum_size = Vector2(54, 24)
+		repeat_toggle.text = "반복"
+		repeat_toggle.tooltip_text = "지속 스폰 모드에 이 적을 포함합니다."
+		repeat_toggle.toggled.connect(
+			func(enabled: bool) -> void: _set_spawn_set_repeating(spawn_set, enabled)
+		)
+		row.add_child(repeat_toggle)
+		enemy_buttons.add_child(row)
+
+
+func _load_trait_definitions() -> void:
+	var directory := "res://resources/weapons/traits"
+	var files := DirAccess.get_files_at(directory)
+	files.sort()
+	for file_name in files:
+		if not file_name.ends_with(".tres"):
+			continue
+		var definition := load("%s/%s" % [directory, file_name]) as WeaponTraitDefinition
+		if definition != null:
+			_trait_definitions.append(definition)
 
 
 func _build_slot_buttons() -> void:
 	for slot_index in _loadout.get_max_equipped_weapon_count():
 		var button := Button.new()
 		button.name = "Slot%d" % (slot_index + 1)
-		button.custom_minimum_size = Vector2(0, 28)
+		button.custom_minimum_size = Vector2(0, 24)
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		button.toggle_mode = true
 		button.pressed.connect(func() -> void: _select_slot(slot_index))
@@ -89,7 +130,7 @@ func _build_weapon_buttons() -> void:
 
 
 func _style_button(button: Button, accent: Color) -> void:
-	button.custom_minimum_size = Vector2(0, 28)
+	button.custom_minimum_size = Vector2(0, 24)
 	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	button.add_theme_color_override("font_color", Color(0.82, 0.93, 1.0))
 	button.add_theme_color_override("font_hover_color", Color.WHITE)
@@ -116,6 +157,41 @@ func _spawn_batches(spawn_set: EnemySpawnSet) -> void:
 	for batch_index in batch_count:
 		spawn_set.spawn(gameplay.get_viewport_rect(), Callable(self, "_spawn_enemy"))
 	_refresh_target_count()
+
+
+func _set_spawn_set_repeating(spawn_set: EnemySpawnSet, enabled: bool) -> void:
+	if enabled:
+		_continuous_spawn_sets[spawn_set.spawn_id] = spawn_set
+	else:
+		_continuous_spawn_sets.erase(spawn_set.spawn_id)
+	continuous_spawn_button.disabled = _continuous_spawn_sets.is_empty()
+	if _continuous_spawn_sets.is_empty() and _continuous_spawn_enabled:
+		continuous_spawn_button.button_pressed = false
+		_set_continuous_spawn(false)
+
+
+func _set_continuous_spawn(enabled: bool) -> void:
+	if enabled and _continuous_spawn_sets.is_empty():
+		continuous_spawn_button.button_pressed = false
+		return
+	_continuous_spawn_enabled = enabled
+	continuous_spawn_button.text = "지속 스폰 중지" if enabled else "지속 스폰 시작"
+	if enabled:
+		continuous_spawn_timer.start(continuous_spawn_interval.value)
+	else:
+		continuous_spawn_timer.stop()
+
+
+func _on_continuous_spawn_interval_changed(interval: float) -> void:
+	if _continuous_spawn_enabled:
+		continuous_spawn_timer.start(interval)
+
+
+func _spawn_continuous_batches() -> void:
+	if not _continuous_spawn_enabled:
+		return
+	for spawn_set in _continuous_spawn_sets.values():
+		_spawn_batches(spawn_set as EnemySpawnSet)
 
 
 func _spawn_enemy(
@@ -179,6 +255,32 @@ func _unequip_selected_slot() -> void:
 	_loadout.unequip_weapon_at(_selected_slot)
 
 
+func _toggle_selected_weapon_trait(definition: WeaponTraitDefinition) -> void:
+	var bay := _loadout.get_bay(_selected_slot)
+	if bay == null or bay.is_empty() or definition.target_weapon_id != bay.equipped_weapon_id:
+		return
+	var current_rank := int(
+		_loadout.get_weapon_traits(bay.equipped_weapon_id).get(definition.trait_id, 0)
+	)
+	var rank_change := -current_rank if current_rank > 0 else 1
+	_loadout.add_or_upgrade_weapon_trait(
+		bay.equipped_weapon_id,
+		definition.trait_id,
+		rank_change,
+	)
+
+
+func _clear_selected_weapon_traits() -> void:
+	var bay := _loadout.get_bay(_selected_slot)
+	if bay == null or bay.is_empty():
+		return
+	var active_traits := _loadout.get_weapon_traits(bay.equipped_weapon_id)
+	for trait_id in active_traits:
+		var rank := int(active_traits[trait_id])
+		if rank > 0:
+			_loadout.add_or_upgrade_weapon_trait(bay.equipped_weapon_id, trait_id, -rank)
+
+
 func _refresh_loadout_ui() -> void:
 	for index in _slot_button_list.size():
 		var button := _slot_button_list[index]
@@ -217,6 +319,52 @@ func _refresh_loadout_ui() -> void:
 			_loadout.get_weapon_display_name(weapon_id) if equipped else _definition_name(weapon_id),
 			"  [장착]" if equipped else "",
 		]
+	_refresh_trait_ui(selected_weapon_id)
+
+
+func _refresh_trait_ui(weapon_id: StringName) -> void:
+	if weapon_id != _displayed_trait_weapon_id:
+		_rebuild_trait_buttons(weapon_id)
+	var active_traits := _loadout.get_weapon_traits(weapon_id)
+	var has_active_trait := false
+	for trait_id in _trait_button_by_id:
+		var button := _trait_button_by_id[trait_id] as Button
+		var definition := button.get_meta("definition") as WeaponTraitDefinition
+		var active := int(active_traits.get(trait_id, 0)) > 0
+		has_active_trait = has_active_trait or active
+		button.button_pressed = active
+		button.text = "%s  %s" % ["[ON]" if active else "[  ]", definition.display_name]
+		_style_button(
+			button,
+			Color(0.35, 1.0, 0.55, 1.0) if active else Color(0.72, 0.35, 1.0, 1.0),
+		)
+	clear_traits_button.disabled = weapon_id == &"" or not has_active_trait
+
+
+func _rebuild_trait_buttons(weapon_id: StringName) -> void:
+	_displayed_trait_weapon_id = weapon_id
+	_trait_button_by_id.clear()
+	for child in trait_buttons.get_children():
+		trait_buttons.remove_child(child)
+		child.queue_free()
+	if weapon_id == &"":
+		trait_weapon_label.text = "무기를 장착하면 특성이 표시됩니다."
+		return
+	trait_weapon_label.text = "%s 전용 특성" % _loadout.get_weapon_display_name(weapon_id)
+	for definition in _trait_definitions:
+		if definition.target_weapon_id != weapon_id:
+			continue
+		var button := Button.new()
+		button.name = "Trait_%s" % String(definition.trait_id)
+		button.toggle_mode = true
+		button.icon = definition.icon
+		button.expand_icon = true
+		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		button.tooltip_text = definition.description
+		button.set_meta("definition", definition)
+		button.pressed.connect(func() -> void: _toggle_selected_weapon_trait(definition))
+		trait_buttons.add_child(button)
+		_trait_button_by_id[definition.trait_id] = button
 
 
 func _definition_name(weapon_id: StringName) -> String:
