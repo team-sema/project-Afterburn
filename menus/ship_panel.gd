@@ -59,6 +59,11 @@ func set_expansion_preview(enabled: bool) -> void:
 		slot_rack.set_expansion_preview(enabled)
 
 
+func set_augment_preview(augment: PlayerAugment) -> void:
+	if slot_rack != null:
+		slot_rack.set_module_preview(augment)
+
+
 func get_detail_text() -> String:
 	return detail_label.text if detail_label != null else ""
 

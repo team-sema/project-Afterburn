@@ -21,7 +21,7 @@
 - 카드 표시는 `get_offer_title` / `get_offer_description`으로 신규 무기·모듈 강화를 구분
 - 가중치: `offer_weight`(기본 1.0)
 - 무기 전용 Kind는 **함선 시설 슬롯을 소모하지 않음**
-- **리롤:** `max_reroll_count`(임시 기본 2), 런 `remaining_reroll_count`. 선택 전만. [R]/버튼
+- **리롤:** `max_reroll_count`(임시 기본 2), 런 `remaining_reroll_count`. 선택 전만. [R]/버튼으로 **현재 포커스 카드 한 장만** 교체
 
 #### 시설 효과 모듈 13종
 
@@ -133,15 +133,17 @@ primary tag `hangar`는 UI 표시명 **동력로**. tag 키와 기존 아이콘�
 - PLAYER 선택지: 풀 필터 + `offer_weight` 비가중 추출
 - `WEAPON_ACQUIRE` 만석 시 `WeaponSlotSelectionOverlay`로 교체 베이 선택(취소 시 카드 선택으로 복귀). **확정 시 피교체 무기 성장 삭제**
 - `WEAPON_TRAIT` → 장착 중 무기만, Lv.III이면 후보 제외 (`PlayerWeaponLoadout`)
-- PLAYER 리롤 → 후보 전체 재생성 (효과 미적용)
+- PLAYER 리롤 → 현재 포커스 후보 한 장만 재생성하고 다른 두 후보·포커스 유지 (효과 미적용)
 - ENEMY 선택지: `max_stacks` 한도에 도달한 증강 제외
 
 ### UI
 
-- `AugmentSelectionOverlay` — 상단 카드 3개 + 선택 Kind에 따라 전환되는 하단 적용 대상 UI
-  - `FACILITY_EFFECT` 포커스: 함선 tag UI와 primary tag 하이라이트
-  - `WEAPON_ACQUIRE` 포커스: 현재 병기 배치와 신규 배치/교체 안내
-  - `WEAPON_TRAIT` 포커스: 대상 병기 슬롯·현재/다음 모듈 레벨 미리보기
+- `AugmentSelectionOverlay` — 외곽 전체를 좌우 STATUS 사이 중앙 플레이필드 안에 넣은 3장 세로형 카드 캐러셀. 포커스 1장은 전면, 좌우 2장은 축소·반투명 후면으로 표시하며 좌우 입력으로 순환. 좌우 키는 캐러셀이 단독 처리하고, 길게 누르면 키가 눌린 동안에만 최소 0.45초 간격으로 회전하며 키를 뗀 뒤에는 추가 회전하지 않음. 선택 중 별도 조작 설명은 표시하지 않음
+  - `FACILITY_EFFECT` 포커스: 우측 STATUS 함선 슬롯의 primary tag 하이라이트 + 첫 빈 범용 슬롯에 후보 시설 아이콘 점멸. 만석이면 점멸 생략
+  - `WEAPON_ACQUIRE` 포커스: 빈 베이가 있으면 우측 STATUS 첫 빈 베이에 신규 무기 아이콘 점멸. 만석이면 점멸 생략 후 선택 확정 시 교체 UI. 하단 `범용 슬롯 +1`은 유지
+  - `WEAPON_TRAIT` 포커스: 우측 STATUS 대상 무기 베이 강조 + 장착 모듈 영역의 기존/첫 빈 칸에 다음 레벨 아이콘 점멸. 하단 `범용 슬롯 +1`은 유지
+  - `범용 슬롯 +1`: 플레이어 오퍼에서 카드 Kind와 무관하게 항상 표시(`스킵 후 범용 슬롯 확장 n → n+1`). 포커스 시 우측 STATUS의 다음 범용 슬롯 점멸. 최대 용량이면 `스킵 (범용 슬롯 MAX 도달)`로 비활성 표시하며 선택·포커스 이동에서 건너뜀
+  - `[R] 리롤 (n)` 단일 버튼: 현재 포커스 카드만 교체. 위·아래 입력으로 카드와 범용 슬롯 확장 사이에서 포커스 가능
   - 적 그룹 증강: `EnemyAugment.icon`에 지정된 적 SVG를 카드 아이콘으로 표시
 - `WeaponSlotSelectionOverlay` — 만석 시 무기 베이 교체
 - `AugmentModuleSwapOverlay` — 최대 15개 범용 슬롯의 시설 모듈 교체

@@ -23,6 +23,8 @@ var _registry: PlayerAugmentRegistry
 var _slots: Array = []
 var _highlighted_tag: StringName = &""
 var _expansion_preview := false
+var _module_preview: PlayerAugment
+var _module_preview_index := -1
 var _preview_alpha := 0.35
 var _preview_tween: Tween
 var _hovered_slot := -1
@@ -44,6 +46,8 @@ func set_slots(slots: Array) -> void:
 	_slots = slots.duplicate()
 	if _slots.size() >= PlayerAugmentRegistry.MAX_SLOT_CAPACITY:
 		set_expansion_preview(false)
+	if _module_preview != null:
+		set_module_preview(_module_preview)
 	_refresh_tooltip()
 	queue_redraw()
 
@@ -58,15 +62,42 @@ func set_expansion_preview(enabled: bool) -> void:
 	if _expansion_preview == enabled:
 		return
 	_expansion_preview = enabled
+	_refresh_preview_tween()
+	queue_redraw()
+
+
+func set_module_preview(augment: PlayerAugment) -> void:
+	var preview_index := -1
+	if augment != null:
+		for index in _slots.size():
+			if _slots[index] == null:
+				preview_index = index
+				break
+	if _module_preview == augment and _module_preview_index == preview_index:
+		return
+	_module_preview = augment if preview_index >= 0 else null
+	_module_preview_index = preview_index
+	_refresh_preview_tween()
+	queue_redraw()
+
+
+func has_module_preview() -> bool:
+	return _module_preview != null and _module_preview_index >= 0
+
+
+func get_module_preview_index() -> int:
+	return _module_preview_index
+
+
+func _refresh_preview_tween() -> void:
 	if _preview_tween != null:
 		_preview_tween.kill()
 		_preview_tween = null
 	_preview_alpha = 0.35
-	if enabled:
+	if _expansion_preview or has_module_preview():
 		_preview_tween = create_tween().set_loops().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
 		_preview_tween.tween_method(_set_preview_alpha, 0.35, 1.0, 0.45)
 		_preview_tween.tween_method(_set_preview_alpha, 1.0, 0.35, 0.45)
-	queue_redraw()
 
 
 func has_expansion_preview() -> bool:
@@ -84,6 +115,14 @@ func get_visible_slot_count() -> int:
 func get_slot_icon(index: int) -> Texture2D:
 	if index < 0 or index >= _slots.size():
 		return null
+	if index == _module_preview_index and _module_preview != null:
+		if _registry != null:
+			var preview_definition := _registry.get_facility_definition(
+				_module_preview.get_primary_module_tag()
+			)
+			if preview_definition != null and preview_definition.icon != null:
+				return preview_definition.icon
+		return _module_preview.icon
 	var state := _slots[index] as PlayerAugmentModuleState
 	if state == null:
 		return null
@@ -127,13 +166,14 @@ func get_slot_polygon(index: int) -> PackedVector2Array:
 
 func _draw() -> void:
 	for index in get_visible_slot_count():
-		var is_preview := index >= _slots.size()
+		var is_expansion_preview := index >= _slots.size()
+		var is_module_preview := index == _module_preview_index and _module_preview != null
 		var state: PlayerAugmentModuleState = null
-		if not is_preview:
+		if not is_expansion_preview:
 			state = _slots[index] as PlayerAugmentModuleState
 		var fill_color := FILL_EMPTY
 		var border_color := BORDER_EMPTY
-		if is_preview:
+		if is_expansion_preview or is_module_preview:
 			fill_color = Color(PREVIEW_COLOR, _preview_alpha * 0.24)
 			border_color = Color(PREVIEW_COLOR, _preview_alpha)
 		elif state != null:
@@ -149,13 +189,19 @@ func _draw() -> void:
 		outline.append(polygon[0])
 		draw_polyline(outline, border_color, 1.25, true)
 		var center := get_slot_rect(index).get_center()
-		if is_preview:
+		if is_expansion_preview:
 			draw_line(center + Vector2(-3.0, 0.0), center + Vector2(3.0, 0.0), border_color, 1.25)
 			draw_line(center + Vector2(0.0, -3.0), center + Vector2(0.0, 3.0), border_color, 1.25)
 			continue
 		var icon := get_slot_icon(index)
 		if icon != null:
-			draw_texture_rect(icon, Rect2(center - Vector2(6.0, 6.0), Vector2(12.0, 12.0)), false, ICON_COLOR)
+			var icon_color := Color(ICON_COLOR, _preview_alpha) if is_module_preview else ICON_COLOR
+			draw_texture_rect(
+				icon,
+				Rect2(center - Vector2(6.0, 6.0), Vector2(12.0, 12.0)),
+				false,
+				icon_color,
+			)
 
 
 func _gui_input(event: InputEvent) -> void:
