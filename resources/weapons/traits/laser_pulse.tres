@@ -18,3 +18,10 @@ params = {
 "fade_out_duration": 0.12,
 "fade_in_duration": 0.05,
 }
+rank_overrides = Array[Dictionary]([{
+"on_duration": 0.8,
+"active_damage_mult": 2.25,
+}, {
+"on_duration": 0.9,
+"active_damage_mult": 2.5,
+}])

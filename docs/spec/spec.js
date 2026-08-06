@@ -20,7 +20,7 @@ const CATEGORIES = [
   {
     id: "player",
     title: "플레이어",
-    desc: "함선 · 무기 7 · 시설 12 · 실드 버퍼/재생",
+    desc: "함선 · 무기 7 · 시설 13 · 실드 버퍼/재생",
     file: "player.md",
   },
   {
@@ -32,7 +32,7 @@ const CATEGORIES = [
   {
     id: "augments",
     title: "오그먼트",
-    desc: "풀 54 · 시설 12 · trait 28 · 오퍼",
+    desc: "풀 48 · 시설 13 · 무기 모듈 28 · 오퍼",
     file: "augments.md",
   },
   {

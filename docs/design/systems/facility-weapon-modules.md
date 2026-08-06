@@ -4,7 +4,7 @@
 
 ## 목표
 
-- 12종 시설 모듈이 풀에 등장하고 부위 슬롯에 장착된다.
+- 13종 시설 모듈이 풀에 등장하고 부위 슬롯에 장착된다.
 - 동일 Kind 배율은 primary 곱, 가산은 합.
 - 과충전(주기)·비상 출력(선체 피격)·엔진 부스터·실드 충전 속도·XP 배율 등 timed/특수 효과 동작.
 - `facility_id = hangar` 유지, 표시명만 동력로.
@@ -24,6 +24,7 @@
 |----|------|------|------|
 | facility_weapon_room | weapon_room | WEAPON_DAMAGE_MULT | 1.15 |
 | facility_weapon_room_boss | weapon_room | BOSS_DAMAGE_MULT | 1.3 |
+| facility_weapon_room_fire_rate | weapon_room | WEAPON_FIRE_RATE_MULT | 1.15 |
 | facility_hangar | hangar | PERIODIC_DAMAGE_BUFF | 1.4 / 5s / 20s |
 | facility_reactor_emergency | hangar | HULL_HIT_DAMAGE_BUFF | 1.3 / 5s / 15s CD |
 | facility_engine | engine | MOVE_SPEED_MULT | 1.25 |
@@ -45,8 +46,8 @@
 
 ## 무기 Trait 전투
 
-- `WeaponTraitDefinition.params` + `WeaponSystem.has_trait` / `get_trait_param`
-- rank≥1이면 활성(중복 랭크는 효과 동일 취급)
+- `WeaponTraitDefinition.params`(Lv.I) + `rank_overrides`(Lv.II·III) + `WeaponSystem.get_trait_param`
+- 동일 카드 반복 선택으로 Lv.I~III 성장, 최대 레벨이면 오퍼 후보에서 제외
 - 무기 스크립트별 구현 (통일 인터페이스 없음)
 
 | 무기 | trait | 요지 |
@@ -73,4 +74,5 @@
 |------|------|
 | 2026-08-06 | `laser_pulse` OFF 전환 시 빔 알파 페이드아웃 |
 | 2026-08-06 | 무기 trait 28종 전투 구현 섹션 추가 |
+| 2026-08-06 | 무기 모듈 Lv.I~III 및 무기실 공통 공속 모듈 추가 |
 | 2026-08-06 | 초안 · 12모듈 FacilityModuleEffect 설계 |

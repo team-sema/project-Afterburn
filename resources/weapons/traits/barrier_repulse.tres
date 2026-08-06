@@ -16,3 +16,10 @@ params = {
 "shock_damage_mult": 0.4,
 "rehit_cooldown_mult": 0.85,
 }
+rank_overrides = Array[Dictionary]([{
+"knockback_strength": 200,
+"shock_damage_mult": 0.55,
+}, {
+"knockback_strength": 260,
+"shock_damage_mult": 0.7,
+}])

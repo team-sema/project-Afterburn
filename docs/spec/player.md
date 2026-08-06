@@ -27,13 +27,13 @@ Move / MoveInput / PositionClamp / WeaponMount(Blaster·Laser·Shotgun 등) / Pl
 # 무기 (통합 장착 베이)
 
 - `PlayerWeaponLoadout`: `max_equipped_weapon_count`(기본 3)개의 장착 베이. 주/보조·메인/예비 구분 없음
-- 시작: 블래스터가 베이 0 (무기 Lv.1)
+- 시작: 블래스터가 베이 0에 모듈 없이 장착
 - 장착된 무기는 각자 쿨다운으로 **동시에** 작동. 탄약·소진 삭제 없음
-- 성장은 `weapon_id`별 중앙 상태(`WeaponProgressState`: level, trait_ranks). **장착 중인 무기만** 보유
-- **무기 획득·레벨·특성**은 레벨업 **증강 선택**으로만 처리 (필드 무기 드롭 없음)
-- 빈 베이면 신규 자동 장착. 만석이면 증강 화면에서 교체 → **피교체 무기 성장(레벨·특성) 완전 삭제**
-- 같은 무기를 다시 얻으면 기본 레벨·특성 없음으로 시작 (교체로 뺀 성장은 보존하지 않음)
-- 무기실: 집속 조준기(공통 피해) · 대형 표적 해석기(보스 피해). 동력로(`hangar`): 과충전·비상 출력
+- 성장은 `weapon_id`별 중앙 상태(`WeaponProgressState`: `trait_ranks`). **장착 중인 무기의 모듈 레벨만** 보유
+- **무기 획득·모듈 강화**는 레벨업 **증강 선택**으로만 처리 (필드 무기 드롭 없음)
+- 빈 베이면 신규 자동 장착. 만석이면 증강 화면에서 교체 → **피교체 무기 모듈 레벨 완전 삭제**
+- 같은 무기를 다시 얻으면 모듈 없음으로 시작 (교체로 뺀 모듈은 보존하지 않음)
+- 무기실: 집속 조준기(공통 피해) · 사격 통제 장치(공통 공속) · 대형 표적 해석기(보스 피해)
 - HUD: `WeaponLoadoutHud` — 동일 크기 장착 베이 헥스 가로 행. 템플릿(`%BaySlotTemplate` · `%ModuleHexTemplate` · `%SelectedWeaponHex`) 복제. 호버/클릭 포커스 → 하단 `선택된 무기` | `장착된 모듈` + 설명(전투 수치는 인게임 비표시). 설명은 고정 2줄·말줄임이며 우측 레일의 최소 크기를 늘리지 않는다
 - 증강 리롤: `AugmentOfferController.max_reroll_count`(임시 기본 2) · 런당 `remaining_reroll_count`
 
@@ -41,7 +41,7 @@ Move / MoveInput / PositionClamp / WeaponMount(Blaster·Laser·Shotgun 등) / Pl
 
 | id | 표시명 | 현재 역할 |
 |----|--------|-----------|
-| `main_blaster` | 블래스터 | 좌우 교대 발사형. 시작 시 베이 0에 Lv.1 장착 |
+| `main_blaster` | 블래스터 | 좌우 교대 발사형. 시작 시 베이 0에 장착 |
 | `main_laser` | 레이저 | 연속 빔형 |
 | `main_shotgun` | 샷건 | 부채꼴 다중 펠릿 근거리 화력 |
 | `aux_test_cannon` | 보조 캐넌 | 좌우 목표점을 지연 추종하는 **옵션 드론 2기**가 전방 동시 발사. 플레이어 중심에서 멀수록 소폭 가속, 편대 증설 프레임으로 4기 |
@@ -49,9 +49,9 @@ Move / MoveInput / PositionClamp / WeaponMount(Blaster·Laser·Shotgun 등) / Pl
 | `aux_homing_missile` | 유도탄 | 가까운 적을 추적 |
 | `aux_orbital_barrier` | 궤도 방벽 | 주변을 돌며 탄막 소멸 + 적 접촉 피해(**적당 1회**, 일부 trait는 재타격 쿨). 기본 길이 `segment_arc_length≈11.33`(구 34의 1/3). HP 없음 |
 
-### 기본 전투 수치 (WeaponSystem 씬 · Lv.1 · 배율 1.0)
+### 기본 전투 수치 (WeaponSystem 씬 · 모듈/시설 배율 1.0)
 
-정본은 각 `player_ship/weapons/*_weapon_system.tscn` 익스포트. 레벨·시설 배율이 곱해지면 실효값은 달라진다. **인게임 STATUS에는 표시하지 않는다.**
+정본은 각 `player_ship/weapons/*_weapon_system.tscn` 익스포트. 무기 모듈·시설 배율이 적용되면 실효값은 달라진다. **인게임 STATUS에는 표시하지 않는다.**
 
 | 무기 | 핵심 수치 |
 |------|-----------|
@@ -63,7 +63,7 @@ Move / MoveInput / PositionClamp / WeaponMount(Blaster·Laser·Shotgun 등) / Pl
 | 유도탄 | 피해 14 · 간격 1.1초 · 탄속 150 · 선회 5.5 · 재탐색 0.15초 |
 | 궤도 방벽 | 접촉피해 6(**같은 적에게 1회만**, trait에 따라 재타격 쿨) · 반경 22 · 회전 2.8 · **길이 ≈11.33** |
 
-- 위 7종 모두 `WEAPON_ACQUIRE` / `WEAPON_LEVEL` 카드가 Gameplay 플레이어 증강 풀에 등록되어 있다
+- 위 7종 모두 `WEAPON_ACQUIRE` 카드와 전용 `WEAPON_TRAIT` 모듈 4종이 Gameplay 플레이어 증강 풀에 등록되어 있다
 - 무기 정의 파일이 존재하더라도 `gameplay.tscn`의 획득 풀에 없으면 현재 플레이 가능한 무기 목록에 포함하지 않는다
 
 ### 조작 요약 (전투 중)
@@ -81,20 +81,20 @@ Move / MoveInput / PositionClamp / WeaponMount(Blaster·Laser·Shotgun 등) / Pl
 `PlayerAugmentRegistry.augments_changed` / `refresh()` 시 재계산한다.
 
 - 이동속도 = 씬 기본 × **엔진 시설 효과** (`ShipFacilityApplier` → `facility_move_speed_multiplier`)
-- `FIRE_RATE` / `WEAPON_DAMAGE` 전역 배율은 시설·무기 레벨 경로로만 갱신 (별도 스탯 모듈 오퍼 없음)
-- `WEAPON_TRAIT` → 설치 시 `PlayerWeaponLoadout.add_or_upgrade_weapon_trait`; 각 `WeaponSystem`이 `has_trait`/`get_trait_param`으로 전투 효과 적용
-- 무기 레벨·특성은 증강 선택으로만 성장 (필드 픽업 없음)
+- 범용 공격 속도·피해는 무기실 `WEAPON_FIRE_RATE_MULT` / `WEAPON_DAMAGE_MULT` 시설 모듈로 갱신
+- `WEAPON_TRAIT` → `PlayerWeaponLoadout.add_or_upgrade_weapon_trait`; 각 `WeaponSystem`이 현재 Lv.I~III의 `get_trait_param`을 적용
+- 무기 자체 레벨은 없고, 무기 모듈만 증강 선택으로 성장 (필드 픽업 없음)
 
 > `PlayerAugment.behavior_components`는 **적용하지 않음** (적 쪽만 동작).
 
 ## 함선 부위와 모듈 슬롯 (`PlayerAugmentRegistry` / `ShipFacilityApplier`)
 
 **부위 슬롯에 들어가는 플레이어 모듈은 `FACILITY_EFFECT`만이다.** 효과는 카드의 `FacilityModuleEffect`로 정의되며, 동일 Kind는 배율 곱·가산 합으로 중첩한다.
-무기 획득·레벨·특성 증강은 시설 슬롯을 소모하지 않는다. 모듈 목록·수치는 [`augments.md`](augments.md) 「시설 효과 모듈 12종」이 정본.
+무기 획득·전용 모듈 증강은 시설 슬롯을 소모하지 않는다. 모듈 목록·수치는 [`augments.md`](augments.md) 「시설 효과 모듈 13종」이 정본.
 
 | id | 이름(표시) | 담당 모듈 예 |
 |----|------------|--------------|
-| `weapon_room` | 무기실 | 집속 조준기 · 대형 표적 해석기 |
+| `weapon_room` | 무기실 | 집속 조준기 · 사격 통제 장치 · 대형 표적 해석기 |
 | `hangar` | **동력로** | 과충전 반응로 · 비상 출력 장치 |
 | `engine` | 엔진 | 추력 편향기 · 비상 부스터(Shift) |
 | `hull` | 선체 | 반응 장갑 · 충격 분산 골격 |
@@ -114,7 +114,7 @@ Move / MoveInput / PositionClamp / WeaponMount(Blaster·Laser·Shotgun 등) / Pl
 
 - 화면 상단에 증강 3개, 구분선 아래에 현재 카드 Kind의 적용 대상 UI를 표시한다
 - `STAT_MULTIPLIER`는 플레이어 오퍼 풀에 없다. `FACILITY_EFFECT` 카드 포커스·호버만 대상 `facility_id` 부위를 하이라이트한다. 무기 Kind 카드는 시설 하이라이트를 강제하지 않는다
-- 무기 Kind 카드 포커스 시 함선 부위 UI 대신 현재 병기 배치를 표시한다. 신규 획득은 빈 슬롯/교체 안내, 레벨·특성은 대상 병기와 적용 전후 정보를 강조한다
+- 무기 Kind 카드 포커스 시 함선 부위 UI 대신 현재 병기 배치를 표시한다. 신규 획득은 빈 슬롯/교체 안내, 모듈은 대상 병기와 현재→다음 레벨을 강조한다
 - 카드 대신 확장 가능한 함선 부위를 선택하면 해당 부위의 빈 슬롯을 1개 늘리고 오퍼를 종료한다
 - 확장 부위에 키보드 포커스 또는 마우스 호버가 들어오면 추가될 다음 슬롯이 점멸한다
 - 카드 3개와 확장 가능한 부위 6개는 방향키·Tab으로 이동하고 `ui_accept`로 선택할 수 있다

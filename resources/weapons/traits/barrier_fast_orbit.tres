@@ -16,3 +16,10 @@ params = {
 "rehit_cooldown_mult": 0.7,
 "damage_mult": 0.95,
 }
+rank_overrides = Array[Dictionary]([{
+"orbit_speed_mult": 1.8,
+"rehit_cooldown_mult": 0.55,
+}, {
+"orbit_speed_mult": 2.1,
+"rehit_cooldown_mult": 0.4,
+}])

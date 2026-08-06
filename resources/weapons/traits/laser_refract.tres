@@ -14,3 +14,8 @@ next_rank_hint = "굴절 피해 증가"
 params = {
 "fork_damage_mult": 0.55,
 }
+rank_overrides = Array[Dictionary]([{
+"fork_damage_mult": 0.7,
+}, {
+"fork_damage_mult": 0.85,
+}])

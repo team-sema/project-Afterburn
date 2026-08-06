@@ -15,3 +15,10 @@ params = {
 "count_bonus": 1,
 "damage_mult": 0.9,
 }
+rank_overrides = Array[Dictionary]([{
+"count_bonus": 2,
+"damage_mult": 0.8,
+}, {
+"count_bonus": 3,
+"damage_mult": 0.7,
+}])

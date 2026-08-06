@@ -87,7 +87,6 @@ func set_focused(focused: bool) -> void:
 func bind_weapon(
 	p_weapon_id: StringName,
 	icon: Texture2D,
-	level: int,
 	trait_ranks: Dictionary,
 	trait_labels: Dictionary,
 	trait_icons: Dictionary,
@@ -118,7 +117,7 @@ func bind_weapon(
 		queue_redraw()
 		return
 
-	_core.set_module_text("", "Lv.%d" % level)
+	_core.set_module_text("", "")
 	_core.set_module_icon(icon)
 	_core.dimmed = (p_is_record or not active) and not is_focused
 	_style_core()

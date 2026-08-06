@@ -42,7 +42,6 @@ enum AugmentTestMode {
 @onready var trait_weapon_label: Label = %TraitWeaponLabel
 @onready var trait_buttons: VBoxContainer = %TraitButtons
 @onready var clear_traits_button: Button = %ClearTraitsButton
-@onready var level_button: Button = %LevelButton
 @onready var unequip_button: Button = %UnequipButton
 
 var _loadout: PlayerWeaponLoadout
@@ -82,7 +81,6 @@ func _ready() -> void:
 	continuous_spawn_interval.value_changed.connect(_on_continuous_spawn_interval_changed)
 	continuous_spawn_timer.timeout.connect(_spawn_continuous_batches)
 	clear_traits_button.pressed.connect(_clear_selected_weapon_traits)
-	level_button.pressed.connect(_level_up_selected_weapon)
 	unequip_button.pressed.connect(_unequip_selected_slot)
 	_loadout.loadout_changed.connect(_refresh_loadout_ui)
 	_refresh_loadout_ui()
@@ -566,13 +564,6 @@ func _equip_selected_slot(definition: WeaponDefinition) -> void:
 		_loadout.request_replace_equipped(_selected_slot, definition)
 
 
-func _level_up_selected_weapon() -> void:
-	var bay := _loadout.get_bay(_selected_slot)
-	if bay == null or bay.is_empty():
-		return
-	_loadout.upgrade_weapon_level(bay.equipped_weapon_id)
-
-
 func _unequip_selected_slot() -> void:
 	_loadout.unequip_weapon_at(_selected_slot)
 
@@ -584,7 +575,9 @@ func _toggle_selected_weapon_trait(definition: WeaponTraitDefinition) -> void:
 	var current_rank := int(
 		_loadout.get_weapon_traits(bay.equipped_weapon_id).get(definition.trait_id, 0)
 	)
-	var rank_change := -current_rank if current_rank > 0 else 1
+	var rank_change := 1
+	if current_rank >= definition.max_rank:
+		rank_change = -current_rank
 	_loadout.add_or_upgrade_weapon_trait(
 		bay.equipped_weapon_id,
 		definition.trait_id,
@@ -622,16 +615,13 @@ func _refresh_loadout_ui() -> void:
 	var selected_weapon_id: StringName = &""
 	if selected_bay == null or selected_bay.is_empty():
 		selected_slot_label.text = "선택 슬롯 %d · 비어 있음" % (_selected_slot + 1)
-		level_button.disabled = true
 		unequip_button.disabled = true
 	else:
 		selected_weapon_id = selected_bay.equipped_weapon_id
-		selected_slot_label.text = "선택 슬롯 %d · %s Lv.%d" % [
+		selected_slot_label.text = "선택 슬롯 %d · %s" % [
 			_selected_slot + 1,
 			selected_bay.equipped_weapon_display_name,
-			_loadout.get_weapon_level(selected_weapon_id),
 		]
-		level_button.disabled = not _loadout.can_upgrade_weapon(selected_weapon_id)
 		unequip_button.disabled = false
 
 	for weapon_id in _weapon_button_by_id:
@@ -652,10 +642,11 @@ func _refresh_trait_ui(weapon_id: StringName) -> void:
 	for trait_id in _trait_button_by_id:
 		var button := _trait_button_by_id[trait_id] as Button
 		var definition := button.get_meta("definition") as WeaponTraitDefinition
-		var active := int(active_traits.get(trait_id, 0)) > 0
+		var rank := int(active_traits.get(trait_id, 0))
+		var active := rank > 0
 		has_active_trait = has_active_trait or active
 		button.button_pressed = active
-		button.text = "%s  %s" % ["[ON]" if active else "[  ]", definition.display_name]
+		button.text = "%s  %s" % ["[Lv.%d]" % rank if active else "[  ]", definition.display_name]
 		_style_button(
 			button,
 			Color(0.35, 1.0, 0.55, 1.0) if active else Color(0.72, 0.35, 1.0, 1.0),
@@ -670,9 +661,9 @@ func _rebuild_trait_buttons(weapon_id: StringName) -> void:
 		trait_buttons.remove_child(child)
 		child.queue_free()
 	if weapon_id == &"":
-		trait_weapon_label.text = "무기를 장착하면 특성이 표시됩니다."
+		trait_weapon_label.text = "무기를 장착하면 모듈이 표시됩니다."
 		return
-	trait_weapon_label.text = "%s 전용 특성" % _loadout.get_weapon_display_name(weapon_id)
+	trait_weapon_label.text = "%s 전용 모듈 · 클릭 시 Lv.I→III→해제" % _loadout.get_weapon_display_name(weapon_id)
 	for definition in _trait_definitions:
 		if definition.target_weapon_id != weapon_id:
 			continue

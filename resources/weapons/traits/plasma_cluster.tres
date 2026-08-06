@@ -16,3 +16,10 @@ params = {
 "cluster_count": 3,
 "cluster_damage_mult": 0.4,
 }
+rank_overrides = Array[Dictionary]([{
+"cluster_count": 4,
+"cluster_damage_mult": 0.45,
+}, {
+"cluster_count": 5,
+"cluster_damage_mult": 0.5,
+}])

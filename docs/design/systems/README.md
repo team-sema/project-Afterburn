@@ -7,8 +7,9 @@
 
 | slug | 제목 | 상태 |
 |------|------|------|
+| [weapon-module-levels](weapon-module-levels.md) | 무기 자체 레벨 제거 · 전용 모듈 Lv.I~III · 무기실 공통 화력 | review |
 | [docs-consistency-audit](docs-consistency-audit.md) | 문서 정합성 감사 (규칙·스펙·보드 모순) | review |
-| [facility-weapon-modules](facility-weapon-modules.md) | 시설 모듈 FacilityModuleEffect · 12종 | review |
+| [facility-weapon-modules](facility-weapon-modules.md) | 시설 모듈 FacilityModuleEffect · 13종 | review |
 | [status-ui-templates](status-ui-templates.md) | STATUS HUD UI 템플릿 플레이스홀더 | review |
 | [shield-base-one](shield-base-one.md) | 시작 실드 1 | review |
 | [shield-regen](shield-regen.md) | 실드 재생 · 충전 UI | review |

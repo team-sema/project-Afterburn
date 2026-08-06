@@ -1,11 +1,10 @@
 class_name WeaponProgressState
 extends RefCounted
 
-## Per-weapon_id growth for the current run. Slots and UI do not own this.
+## Per-weapon_id module growth for the current run. Slots and UI do not own this.
 
 var weapon_id: StringName = &""
-var level: int = 1
-## trait_id -> rank
+## trait_id -> module level
 var trait_ranks: Dictionary = {}
 var definition: WeaponDefinition = null
 

@@ -51,7 +51,7 @@ func _open(loadout: PlayerWeaponLoadout, title: String, prompt: String, allow_ca
 	prompt_label.text = (
 		prompt
 		if prompt != ""
-		else "%s(으)로 교체할 병기를 선택하세요.\n교체하면 해당 레벨과 특성이 모두 사라집니다." % incoming_name
+		else "%s(으)로 교체할 병기를 선택하세요.\n교체하면 장착된 모듈 레벨이 모두 사라집니다." % incoming_name
 	)
 	visible = true
 	_accepting = true
@@ -68,18 +68,16 @@ func _open(loadout: PlayerWeaponLoadout, title: String, prompt: String, allow_ca
 		var weapon_name := bay.equipped_weapon_display_name
 		if weapon_name.is_empty():
 			weapon_name = String(weapon_id)
-		var level := loadout.get_weapon_level(weapon_id)
 		var traits := loadout.get_weapon_traits(weapon_id)
-		var trait_text := "특성 없음"
+		var trait_text := "모듈 없음"
 		if not traits.is_empty():
 			var parts: PackedStringArray = []
 			for trait_id in traits.keys():
 				parts.append("%s %d" % [String(trait_id), int(traits[trait_id])])
 			parts.sort()
 			trait_text = " / ".join(parts)
-		button.text = "베이 %d · Lv.%d\n%s\n%s\n(교체 시 성장 삭제)" % [
+		button.text = "베이 %d\n%s\n%s\n(교체 시 모듈 삭제)" % [
 			index + 1,
-			level,
 			weapon_name,
 			trait_text,
 		]

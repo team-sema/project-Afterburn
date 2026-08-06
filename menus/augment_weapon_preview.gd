@@ -69,8 +69,6 @@ func refresh() -> void:
 	match _augment.augment_type:
 		PlayerAugmentKind.Kind.WEAPON_ACQUIRE:
 			_preview_acquire()
-		PlayerAugmentKind.Kind.WEAPON_LEVEL:
-			_preview_level()
 		PlayerAugmentKind.Kind.WEAPON_TRAIT:
 			_preview_trait()
 
@@ -91,19 +89,15 @@ func _render_current_loadout() -> void:
 		slot_icons[index].visible = slot_icons[index].texture != null
 		slot_names[index].text = bay.equipped_weapon_display_name
 		var trait_count := _count_active_traits(_loadout.get_weapon_traits(weapon_id))
-		slot_meta[index].text = "Lv.%d · 증강 %d" % [
-			_loadout.get_weapon_level(weapon_id),
-			trait_count,
-		]
+		slot_meta[index].text = "장착 모듈 %d" % trait_count
 
 
 func _preview_acquire() -> void:
 	var definition := _augment.weapon_definition
 	var weapon_name := _weapon_name(_augment.get_weapon_id(), definition)
-	var starting_level := _augment.starting_weapon_level
 	context_label.text = "신규 병기 획득"
-	change_label.text = "%s · Lv.%d" % [weapon_name, starting_level]
-	trait_label.text = "새 병기가 병기 배치에 추가됩니다."
+	change_label.text = weapon_name
+	trait_label.text = "모듈이 없는 새 병기가 병기 배치에 추가됩니다."
 	candidate_icon.texture = definition.icon if definition != null else _augment.get_offer_icon()
 	candidate_icon.visible = candidate_icon.texture != null
 	if _loadout == null:
@@ -114,25 +108,10 @@ func _preview_acquire() -> void:
 		slot_icons[empty_index].texture = candidate_icon.texture
 		slot_icons[empty_index].visible = candidate_icon.visible
 		slot_names[empty_index].text = weapon_name
-		slot_meta[empty_index].text = "Lv.%d · 획득 예정" % starting_level
+		slot_meta[empty_index].text = "모듈 없음 · 획득 예정"
 		_set_slot_focused(empty_index, true)
 		return
 	trait_label.text = "병기 배치가 가득 찼습니다. 선택 후 교체할 병기를 지정합니다."
-
-
-func _preview_level() -> void:
-	var weapon_id := _resolve_target_weapon_id()
-	var current_level := _loadout.get_weapon_level(weapon_id) if _loadout != null else 1
-	context_label.text = "병기 코어 강화"
-	change_label.text = "%s · Lv.%d → Lv.%d" % [
-		_weapon_name(weapon_id, _augment.weapon_definition),
-		current_level,
-		mini(current_level + 1, PlayerWeaponLoadout.MAX_WEAPON_LEVEL),
-	]
-	trait_label.text = _current_trait_summary(weapon_id)
-	candidate_icon.texture = _weapon_icon(weapon_id)
-	candidate_icon.visible = candidate_icon.texture != null
-	_focus_weapon(weapon_id)
 
 
 func _preview_trait() -> void:
@@ -143,10 +122,11 @@ func _preview_trait() -> void:
 	if _loadout != null:
 		current_rank = int(_loadout.get_weapon_traits(weapon_id).get(trait_id, 0))
 	var next_rank := current_rank + _augment.trait_rank_increase
-	context_label.text = "병기 증강 장착"
-	change_label.text = "%s · %s" % [
+	context_label.text = "병기 모듈 강화"
+	change_label.text = "%s · %s %s" % [
 		_weapon_name(weapon_id, _augment.weapon_definition),
 		trait_name,
+		_rank_roman(next_rank),
 	]
 	var rank_change := "신규 → %s" % _rank_roman(next_rank)
 	if current_rank > 0:

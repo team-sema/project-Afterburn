@@ -6,10 +6,9 @@ signal fired
 signal depleted
 
 var _global_fire_rate_multiplier := 1.0
-var _local_fire_rate_multiplier := 1.0
+var _facility_fire_rate_multiplier := 1.0
 var _global_damage_multiplier := 1.0
-var _local_damage_multiplier := 1.0
-## Ship facility (weapon room) channel, kept apart from weapon levels.
+## Ship facility (weapon room) channels.
 var _facility_damage_multiplier := 1.0
 ## Temporary overcharge / emergency facility buffs.
 var _temp_damage_multiplier := 1.0
@@ -81,17 +80,13 @@ func has_trait(trait_id: StringName) -> bool:
 
 
 func get_trait_param(trait_id: StringName, key: StringName, default_value: Variant = null) -> Variant:
-	if not has_trait(trait_id):
+	var rank := get_trait_rank(trait_id)
+	if rank <= 0:
 		return default_value
 	var definition := _load_trait_definition(trait_id)
 	if definition == null:
 		return default_value
-	if definition.params.has(key):
-		return definition.params[key]
-	var string_key := String(key)
-	if definition.params.has(string_key):
-		return definition.params[string_key]
-	return default_value
+	return definition.get_param_for_rank(rank, key, default_value)
 
 
 func _load_trait_definition(trait_id: StringName) -> WeaponTraitDefinition:
@@ -145,27 +140,21 @@ func set_global_fire_rate_multiplier(multiplier: float) -> void:
 	_apply_stat_multipliers()
 
 
-func set_local_fire_rate_multiplier(multiplier: float) -> void:
-	assert(multiplier > 0.0, "Local fire rate multiplier must be greater than zero.")
-	_local_fire_rate_multiplier = multiplier
-	_apply_stat_multipliers()
-
-
 func set_global_damage_multiplier(multiplier: float) -> void:
 	assert(multiplier > 0.0, "Global damage multiplier must be greater than zero.")
 	_global_damage_multiplier = multiplier
 	_apply_stat_multipliers()
 
 
-func set_local_damage_multiplier(multiplier: float) -> void:
-	assert(multiplier > 0.0, "Local damage multiplier must be greater than zero.")
-	_local_damage_multiplier = multiplier
-	_apply_stat_multipliers()
-
-
 func set_facility_damage_multiplier(multiplier: float) -> void:
 	assert(multiplier > 0.0, "Facility damage multiplier must be greater than zero.")
 	_facility_damage_multiplier = multiplier
+	_apply_stat_multipliers()
+
+
+func set_facility_fire_rate_multiplier(multiplier: float) -> void:
+	assert(multiplier > 0.0, "Facility fire rate multiplier must be greater than zero.")
+	_facility_fire_rate_multiplier = multiplier
 	_apply_stat_multipliers()
 
 
@@ -200,13 +189,12 @@ func _on_consumable_capacity_bonus_changed(_delta: int) -> void:
 
 
 func get_effective_fire_rate_multiplier() -> float:
-	return _global_fire_rate_multiplier * _local_fire_rate_multiplier
+	return _global_fire_rate_multiplier * _facility_fire_rate_multiplier
 
 
 func get_effective_damage_multiplier() -> float:
 	return (
 		_global_damage_multiplier
-		* _local_damage_multiplier
 		* _facility_damage_multiplier
 		* _temp_damage_multiplier
 	)

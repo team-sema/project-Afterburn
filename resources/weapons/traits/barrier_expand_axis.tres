@@ -16,3 +16,10 @@ params = {
 "size_mult": 1.35,
 "orbit_speed_mult": 0.9,
 }
+rank_overrides = Array[Dictionary]([{
+"radius_mult": 1.7,
+"size_mult": 1.55,
+}, {
+"radius_mult": 1.95,
+"size_mult": 1.75,
+}])

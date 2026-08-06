@@ -16,3 +16,10 @@ params = {
 "aoe_damage_mult": 0.8,
 "aoe_radius": 28,
 }
+rank_overrides = Array[Dictionary]([{
+"aoe_damage_mult": 0.9,
+"aoe_radius": 36,
+}, {
+"aoe_damage_mult": 1.0,
+"aoe_radius": 44,
+}])

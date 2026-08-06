@@ -11,4 +11,3 @@ description = "좌우 옵션 드론 2기로 구성된 보조 캐넌을 획득합
 augment_type = 1
 offer_weight = 1.0
 weapon_definition = ExtResource("2_weapon")
-starting_weapon_level = 1

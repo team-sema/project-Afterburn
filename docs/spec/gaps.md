@@ -12,23 +12,22 @@
 6. **오그먼트 풀 가중치** — `gameplay.tscn` 하드코드 + `offer_weight`. 범주 % 밸런스 미정
 7. **부위·모듈 밸런스 수치** — `FacilityModuleEffect` primary 등은 플레이스홀더 성격. 기본 선체 1
 8. **보스 콘텐츠** — `Enemy.is_boss` / `bosses` 그룹·보스 피해 배율만 있음. 보스 스폰·패턴 없음
-9. **WEAPON_TRAIT 랭크 스케일** — rank≥1 온/오프. 랭크별 수치 증가는 없음
-10. **우측 패널 세로 여유** — 항목 추가 전 동적 fit 검사를 먼저 확인
+9. **우측 패널 세로 여유** — 항목 추가 전 동적 fit 검사를 먼저 확인
 
 ## 구조 이슈
 
-11. Enemy `no_health` → `queue_free`와 `DestroyedComponent` **이중 free/이펙트**
-12. 카미카제 Hitbox free가 점수/폭발 순서를 건너뛸 수 있음
-13. 파일명 typo: `timed_state_componoent.gd`
-14. `OnetimeAnimatedEffect` vs `neon_explosion` 이원화
-15. `ResourceStash` Autoload는 **게임 코드에서 참조 0** — GameStats는 씬 `@export`로 주입된다. 사용하거나 제거할지 미결
-16. highscore만 런 간 유지, 오그먼트 레지스트리는 비영속
-17. **`gameplay.tscn`에 `ext_resource` 82개** — 증강·시설·무기 풀이 씬에 인라인. 카드 추가마다 씬 편집 필요 + `.tscn` 충돌 유발 (`augment-pool-data-driven`)
-18. **그룹 기반 런타임 조회** — `get_first_node_in_group`이 11개 파일에서 `gameplay_world`·`augment_progression`·`player`·`weapon_acquisition`을 찾는다. 등록 누락이 조용한 실패가 되고 테스트마다 수동 `add_to_group` 필요
-19. **무기 trait `.tres` 이원화** — `resources/weapons/traits/`(무기 코드가 문자열 경로로 로드)와 `resources/player_augments/weapon/trait_*.tres`(오퍼 풀)에 같은 특성이 중복
-20. **루트에 게임 코드 13개** — `gameplay.tscn`·오퍼/진행 컨트롤러·레지스트리·`enemy_generator.gd`(짝 씬은 `enemies/`)
-21. **테스트 공용 베이스 없음** — 33개 테스트가 `_expect` 헬퍼와 긴 씬 경로(`Layout/Playfield/...`)를 각자 하드코딩. `AGENTS.md` 예시의 `tests/example_test.gd`는 실재하지 않음
-22. **`3d/physics_engine="Jolt Physics"`** — 2D 전용 프로젝트에 남은 사문 설정
+10. Enemy `no_health` → `queue_free`와 `DestroyedComponent` **이중 free/이펙트**
+11. 카미카제 Hitbox free가 점수/폭발 순서를 건너뛸 수 있음
+12. 파일명 typo: `timed_state_componoent.gd`
+13. `OnetimeAnimatedEffect` vs `neon_explosion` 이원화
+14. `ResourceStash` Autoload는 **게임 코드에서 참조 0** — GameStats는 씬 `@export`로 주입된다. 사용하거나 제거할지 미결
+15. highscore만 런 간 유지, 오그먼트 레지스트리는 비영속
+16. **`gameplay.tscn`에 `ext_resource` 다수** — 증강·시설·무기 풀이 씬에 인라인. 카드 추가마다 씬 편집 필요 + `.tscn` 충돌 유발 (`augment-pool-data-driven`)
+17. **그룹 기반 런타임 조회** — `get_first_node_in_group`이 11개 파일에서 `gameplay_world`·`augment_progression`·`player`·`weapon_acquisition`을 찾는다. 등록 누락이 조용한 실패가 되고 테스트마다 수동 `add_to_group` 필요
+18. **무기 trait `.tres` 이원화** — `resources/weapons/traits/`(무기 코드가 문자열 경로로 로드)와 `resources/player_augments/weapon/trait_*.tres`(오퍼 풀)에 같은 특성이 중복
+19. **루트에 게임 코드 13개** — `gameplay.tscn`·오퍼/진행 컨트롤러·레지스트리·`enemy_generator.gd`(짝 씬은 `enemies/`)
+20. **테스트 공용 베이스 없음** — 33개 테스트가 `_expect` 헬퍼와 긴 씬 경로(`Layout/Playfield/...`)를 각자 하드코딩. `AGENTS.md` 예시의 `tests/example_test.gd`는 실재하지 않음
+21. **`3d/physics_engine="Jolt Physics"`** — 2D 전용 프로젝트에 남은 사문 설정
 
 ## 콘텐츠 확장 아이디어
 

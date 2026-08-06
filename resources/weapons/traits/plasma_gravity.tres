@@ -17,3 +17,12 @@ params = {
 "pull_strength": 240,
 "radius_mult": 0.9
 }
+rank_overrides = Array[Dictionary]([{
+"damage_mult": 1.5,
+"pull_radius_mult": 1.8,
+"pull_strength": 300,
+}, {
+"damage_mult": 1.65,
+"pull_radius_mult": 2.0,
+"pull_strength": 360,
+}])

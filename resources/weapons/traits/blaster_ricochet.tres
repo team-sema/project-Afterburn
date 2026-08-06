@@ -16,3 +16,10 @@ params = {
 "bounce1_damage_mult": 0.7,
 "bounce2_damage_mult": 0.4,
 }
+rank_overrides = Array[Dictionary]([{
+"bounce1_damage_mult": 0.8,
+"bounce2_damage_mult": 0.55,
+}, {
+"bounce1_damage_mult": 0.9,
+"bounce2_damage_mult": 0.7,
+}])
