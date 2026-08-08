@@ -7,12 +7,13 @@ const BOMB_FAST_FUSE := preload("res://resources/enemy_augments/enemy_bomb_fast_
 
 ## difficulty + min_threat for live MainEncounterPool entries.
 const EXPECTED_ROSTER := {
-	&"drone_formation": {"difficulty": 5.0, "min_threat": 1},
+	&"drone_formation": {"difficulty": 11.0, "min_threat": 1},
+	&"drone_zigzag_mirrored": {"difficulty": 6.0, "min_threat": 1},
 	&"striker_drone_diamond_5": {"difficulty": 7.0, "min_threat": 1},
-	&"bomb_single": {"difficulty": 6.0, "min_threat": 1},
 	&"awl_formation": {"difficulty": 12.0, "min_threat": 1},
 	&"striker_drone_diamond_13": {"difficulty": 15.0, "min_threat": 2},
 	&"tanker_guard_sniper": {"difficulty": 10.0, "min_threat": 2},
+	&"tanker_bomb_vertical": {"difficulty": 9.0, "min_threat": 2},
 	&"interceptor_pair": {"difficulty": 12.0, "min_threat": 2},
 	&"caster_single": {"difficulty": 7.0, "min_threat": 3},
 	&"x9_drone_down": {"difficulty": 9.0, "min_threat": 3},
@@ -47,6 +48,7 @@ func _run() -> void:
 	_test_generator_and_pool_shape()
 	_test_threat_rosters_and_weights()
 	_test_deterministic_weighted_selection()
+	_test_recent_exclusion_variety()
 	await _test_single_encounters()
 	_test_formation_encounters()
 	await _test_spawn_scoped_augments()
@@ -70,7 +72,7 @@ func _test_generator_and_pool_shape() -> void:
 	_expect(progression.get_threat_level() == 1, "run starts at Threat 1")
 	_expect(generator.current_threat_level == 1, "generator reads the initial Threat level")
 	_expect(pool != null and pool.validate(), "EnemyGenerator references one valid MainEncounterPool")
-	_expect(pool.entries.size() == 12, "MainEncounterPool contains all twelve live encounters")
+	_expect(pool.entries.size() == 13, "MainEncounterPool contains all thirteen live encounters")
 	_expect(not _has_property(generator, &"spawn_sets"), "EnemyGenerator no longer exposes spawn_sets")
 	_expect(
 		not _has_property(generator.enemy_spawner, &"enemy_scene"),
@@ -89,24 +91,30 @@ func _test_generator_and_pool_shape() -> void:
 func _expected_weight(difficulty: float, min_threat: int, threat_level: int) -> float:
 	if threat_level < min_threat:
 		return 0.0
-	return EncounterPoolEntry.WEIGHT_SCALE / difficulty
+	return EncounterPoolEntry.WEIGHT_SCALE / sqrt(difficulty)
 
 
 func _test_threat_rosters_and_weights() -> void:
 	_expect_ids(
 		pool.get_eligible_entries(1),
-		[&"drone_formation", &"striker_drone_diamond_5", &"bomb_single", &"awl_formation"],
+		[
+			&"drone_formation",
+			&"drone_zigzag_mirrored",
+			&"striker_drone_diamond_5",
+			&"awl_formation",
+		],
 		"Threat 1",
 	)
 	_expect_ids(
 		pool.get_eligible_entries(2),
 		[
 			&"drone_formation",
+			&"drone_zigzag_mirrored",
 			&"striker_drone_diamond_5",
-			&"bomb_single",
 			&"awl_formation",
 			&"striker_drone_diamond_13",
 			&"tanker_guard_sniper",
+			&"tanker_bomb_vertical",
 			&"interceptor_pair",
 		],
 		"Threat 2",
@@ -115,11 +123,12 @@ func _test_threat_rosters_and_weights() -> void:
 		pool.get_eligible_entries(3),
 		[
 			&"drone_formation",
+			&"drone_zigzag_mirrored",
 			&"striker_drone_diamond_5",
-			&"bomb_single",
 			&"awl_formation",
 			&"striker_drone_diamond_13",
 			&"tanker_guard_sniper",
+			&"tanker_bomb_vertical",
 			&"interceptor_pair",
 			&"caster_single",
 			&"x9_drone_down",
@@ -197,12 +206,36 @@ func _test_deterministic_weighted_selection() -> void:
 		)
 
 
-func _test_single_encounters() -> void:
-	await _test_single_encounter(
-		&"bomb_single",
-		"res://enemies/bomb_enemy.tscn",
-		"res://resources/enemy_movement/sequences/bomb_straight_down.tres",
+func _test_recent_exclusion_variety() -> void:
+	_expect(generator.recent_exclusion_count == 2, "EnemyGenerator skips the last two encounters")
+	var first := pool.choose(1, null, [])
+	_expect(first != null, "Threat 1 choose without exclusions returns a preset")
+	if first == null:
+		return
+	var second := pool.choose(1, null, [first.encounter_id])
+	_expect(second != null, "Threat 1 choose with one exclusion still returns a preset")
+	_expect(
+		second == null or second.encounter_id != first.encounter_id,
+		"Threat 1 exclusion avoids the previous encounter id",
 	)
+	if second == null:
+		return
+	var third := pool.choose(1, null, [first.encounter_id, second.encounter_id])
+	_expect(third != null, "Threat 1 choose with two exclusions still has a candidate")
+	if third != null:
+		_expect(
+			third.encounter_id != first.encounter_id and third.encounter_id != second.encounter_id,
+			"Threat 1 two-exclusion pick is neither of the recent ids",
+		)
+	# Exhausting exclusions falls back instead of failing.
+	var all_ids: Array[StringName] = []
+	for entry in pool.get_eligible_entries(1):
+		all_ids.append(entry.preset.encounter_id)
+	var fallback := pool.choose(1, null, all_ids)
+	_expect(fallback != null, "excluding the whole Threat 1 roster falls back to any eligible")
+
+
+func _test_single_encounters() -> void:
 	await _test_single_encounter(
 		&"caster_single",
 		"res://enemies/shooting_enemy.tscn",
@@ -263,6 +296,7 @@ func _test_single_encounter(
 func _test_formation_encounters() -> void:
 	var expected_counts := {
 		&"drone_formation": 5,
+		&"drone_zigzag_mirrored": 5,
 		&"striker_drone_diamond_5": 5,
 		&"striker_drone_diamond_13": 13,
 		&"awl_formation": 3,
@@ -270,6 +304,7 @@ func _test_formation_encounters() -> void:
 		&"x9_caster_drone_orbit": 9,
 		&"v7_drone_down": 7,
 		&"tanker_guard_sniper": 2,
+		&"tanker_bomb_vertical": 2,
 		&"interceptor_pair": 2,
 		&"interceptor_trio": 3,
 	}
@@ -366,6 +401,32 @@ func _test_formation_encounters() -> void:
 		)
 		diamond13.queue_free()
 
+	var tanker_bomb := generator._spawn(_find_preset(&"tanker_bomb_vertical")) as FormationController
+	_expect(tanker_bomb != null, "tanker_bomb_vertical spawns")
+	if tanker_bomb != null:
+		var tb_by_slot: Dictionary = {}
+		for member in tanker_bomb.get_members():
+			var slot := member.get_formation_slot()
+			if slot != null:
+				tb_by_slot[slot.slot_index] = member
+		_expect(
+			tb_by_slot.has(3) and tb_by_slot[3] is TankerEnemy,
+			"tanker_bomb_vertical front slot is Tanker",
+		)
+		_expect(
+			tb_by_slot.has(2)
+			and (tb_by_slot[2] as Enemy).scene_file_path == "res://enemies/bomb_enemy.tscn",
+			"tanker_bomb_vertical center slot is Bomb",
+		)
+		var tb_preset := _find_preset(&"tanker_bomb_vertical")
+		_expect(
+			tb_preset.formation_movement_sequence.resource_path.ends_with(
+				"tanker_bomb_approach.tres"
+			),
+			"tanker_bomb_vertical slowly homes toward the player",
+		)
+		tanker_bomb.queue_free()
+
 
 func _test_spawn_scoped_augments() -> void:
 	augment_registry.add_augment(DRONE_REINFORCEMENT)
@@ -374,26 +435,30 @@ func _test_spawn_scoped_augments() -> void:
 	drone_controller.queue_free()
 
 	augment_registry.add_augment(BOMB_FAST_FUSE)
-	var bomb_controller := generator._spawn(_find_preset(&"bomb_single")) as FormationController
-	var bomb := bomb_controller.get_members()[0] as Enemy
+	var bomb_controller := generator._spawn(_find_preset(&"tanker_bomb_vertical")) as FormationController
+	var bomb: Enemy = null
+	for member in bomb_controller.get_members():
+		if member.scene_file_path == "res://enemies/bomb_enemy.tscn":
+			bomb = member
+			break
 	await process_frame
-	_expect(is_instance_valid(bomb), "Bomb single Encounter survives release")
+	_expect(is_instance_valid(bomb), "tanker_bomb_vertical Encounter includes a Bomb")
 	if is_instance_valid(bomb):
-		_expect(bomb.spawn_id == &"bomb_single", "Bomb receives its EncounterPreset id")
+		_expect(bomb.spawn_id == &"tanker_bomb_vertical", "Bomb receives its EncounterPreset id")
 		var bomb_fuse := bomb.get_node("BombProximityFuseComponent")
 		var actual_arm_duration := float(bomb_fuse.get("arm_duration"))
 		_expect(
 			is_equal_approx(actual_arm_duration, 2.0 / 1.5),
-			"Bomb fast fuse remains scoped to bomb_single",
+			"Bomb fast fuse applies to formation Bombs without spawn-id gate",
 		)
-		bomb.queue_free()
+		bomb_controller.queue_free()
 	await process_frame
 
 
 func _test_threat_progression() -> void:
-	progression._process(60.0)
+	progression._process(30.0)
 	_expect(generator.current_threat_level == 2, "generator follows Threat 2")
-	progression._process(60.0)
+	progression._process(30.0)
 	_expect(generator.current_threat_level == 3, "generator follows Threat 3")
 
 
@@ -413,8 +478,11 @@ func _test_invalid_weight_safety() -> void:
 	locked_entry.min_threat = 3
 	_expect(is_equal_approx(locked_entry.get_weight(1), 0.0), "below min_threat weight is zero")
 	_expect(
-		is_equal_approx(locked_entry.get_weight(3), EncounterPoolEntry.WEIGHT_SCALE / preset.difficulty),
-		"at min_threat weight is inverse difficulty",
+		is_equal_approx(
+			locked_entry.get_weight(3),
+			EncounterPoolEntry.WEIGHT_SCALE / sqrt(preset.difficulty),
+		),
+		"at min_threat weight is SCALE/sqrt(difficulty)",
 	)
 
 	var zero_pool := EncounterPool.new()

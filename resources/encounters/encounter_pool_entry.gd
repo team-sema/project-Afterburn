@@ -1,11 +1,12 @@
 class_name EncounterPoolEntry
 extends Resource
 
-## Scales inverse-difficulty into selection weights (weight = SCALE / difficulty).
+## Scales inverse-difficulty into selection weights.
+## Uses sqrt so easier packs stay a bit more common without drowning the roster.
 const WEIGHT_SCALE := 60.0
 
 @export var preset: EncounterPreset
-## Encounter is ineligible below this Threat. At/above it, weight is SCALE/difficulty.
+## Encounter is ineligible below this Threat. At/above it, weight is SCALE/sqrt(difficulty).
 @export_range(1, 100, 1) var min_threat := 1
 
 
@@ -15,7 +16,7 @@ func get_weight(threat_level: int) -> float:
 	if maxi(1, threat_level) < min_threat:
 		return 0.0
 	var difficulty := maxf(preset.difficulty, 0.01)
-	return WEIGHT_SCALE / difficulty
+	return WEIGHT_SCALE / sqrt(difficulty)
 
 
 func get_max_defined_threat() -> int:

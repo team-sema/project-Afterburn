@@ -522,6 +522,7 @@ func _request_empty_cleanup() -> void:
 	if not _bindings.is_empty() or _pending_member_spawns > 0:
 		return
 	_cleanup_requested = true
-	center_movement_controller.stop()
+	if is_inside_tree() and center_movement_controller != null:
+		center_movement_controller.stop()
 	formation_empty.emit()
 	queue_free()

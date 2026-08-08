@@ -65,8 +65,8 @@ func _run() -> void:
 	_expect(DRONE_REINFORCEMENT.icon != null, "drone reinforcement references an SVG icon")
 	_expect(BOMB_FAST_FUSE.max_stacks == 1, "bomb fast fuse is configured as one-time")
 	_expect(
-		BOMB_FAST_FUSE.target_spawn_id == &"bomb_single",
-		"fast fuse targets only the Bomb single Encounter",
+		BOMB_FAST_FUSE.target_spawn_id == &"",
+		"fast fuse is not gated to a retired bomb_single encounter id",
 	)
 	_expect(BOMB_FAST_FUSE.icon != null, "bomb fast fuse references the Bomb SVG icon")
 	_expect(
@@ -85,7 +85,7 @@ func _run() -> void:
 		load("res://enemies/bomb_enemy.tscn") as PackedScene
 	).instantiate() as Enemy
 	action_only_bomb.augment_registry = action_only_registry
-	action_only_bomb.spawn_id = &"bomb_single"
+	action_only_bomb.spawn_id = &"tanker_bomb_vertical"
 	root.add_child(action_only_bomb)
 	await process_frame
 	var action_only_fuse := action_only_bomb.get_node("BombProximityFuseComponent")

@@ -17,4 +17,4 @@ description = "이후 등장하는 폭탄 적의 무장 시간이 약 33% 감소
 icon = ExtResource("2_icon")
 max_stacks = 1
 stat_modifiers = Array[ExtResource("3_modifier")]([SubResource("Resource_arming_rate")])
-target_spawn_id = &"bomb_single"
+target_spawn_id = &""

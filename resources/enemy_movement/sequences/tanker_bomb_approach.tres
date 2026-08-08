@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="MovementSequence" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://resources/enemy_movement/movement_sequence.gd" id="1_sequence"]
+[ext_resource type="Script" path="res://resources/enemy_movement/movement_step.gd" id="2_step"]
+[ext_resource type="Script" path="res://resources/enemy_movement/steps/homing_movement_step.gd" id="3_homing"]
+
+[sub_resource type="Resource" id="Homing_slow_player"]
+script = ExtResource("3_homing")
+speed = 22.0
+duration = 0.0
+stop_distance = 0.0
+target_context_key = &"player_position"
+
+[resource]
+script = ExtResource("1_sequence")
+steps = Array[ExtResource("2_step")]([SubResource("Homing_slow_player")])

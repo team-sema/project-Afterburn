@@ -536,6 +536,14 @@
       "tags": ["적", "비주얼", "피드백"]
     },
     {
+      "id": "bomb-formation-escorts",
+      "title": "Bomb 편대 호위",
+      "description": "단독 Bomb 제거. tanker_bomb_vertical만 · 호밍 접근 · 폭발 범위 적 처치.",
+      "column": "review",
+      "file": "cards/bomb-formation-escorts.md",
+      "tags": ["적", "스폰", "편대"]
+    },
+    {
       "id": "drone-midmap-scatter",
       "title": "드론 중반 2.5배속 산개",
       "description": "X9/V3/V5/V7/V9/X5 드론이 맵 절반에서 외향 2.5배속 산개.",

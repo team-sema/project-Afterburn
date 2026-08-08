@@ -120,7 +120,11 @@ func stop() -> void:
 		and sequence != null
 	):
 		var step := sequence.steps[_current_step_index]
-		step.stop(_build_context(), _current_step_state)
+		# Teardown (formation empty cleanup) can stop us after leaving the tree.
+		if _can_build_live_context():
+			step.stop(_build_context(), _current_step_state)
+		else:
+			step.stop({}, _current_step_state)
 	_running = false
 	_finished = false
 	_current_step_active = false
@@ -236,6 +240,20 @@ func _start_if_requested(generation: int) -> void:
 
 func _build_context() -> Dictionary:
 	var result := _context.duplicate(false)
+	if not _can_build_live_context():
+		result["actor"] = actor
+		result["global_position"] = Vector2.ZERO
+		result["base_position"] = Vector2.ZERO
+		result["modifier_offset"] = Vector2.ZERO
+		result["viewport_rect"] = Rect2()
+		result["visible_rect"] = Rect2()
+		result["movement_area"] = Rect2()
+		result["combat_area"] = Rect2()
+		result["despawn_area"] = Rect2()
+		result["speed_multiplier"] = (
+			move_component.velocity_multiplier if move_component != null else 1.0
+		)
+		return result
 	var modifier_offset := move_component.get_modifier_offset()
 	result["actor"] = actor
 	result["global_position"] = actor.global_position
@@ -252,3 +270,14 @@ func _build_context() -> Dictionary:
 	if player != null and is_instance_valid(player):
 		result["player_position"] = player.global_position
 	return result
+
+
+func _can_build_live_context() -> bool:
+	return (
+		actor != null
+		and is_instance_valid(actor)
+		and actor.is_inside_tree()
+		and move_component != null
+		and is_instance_valid(move_component)
+		and movement_space_config != null
+	)

@@ -125,6 +125,7 @@ func _finish() -> void:
 	_active = false
 	set_physics_process(false)
 	if _hitbox != null:
-		_hitbox.monitoring = false
+		# Hitbox area_entered is still locked when this runs from hit_hurtbox.
+		_hitbox.set_deferred("monitoring", false)
 	finished.emit()
 	queue_free()

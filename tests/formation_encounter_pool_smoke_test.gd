@@ -276,7 +276,7 @@ func _test_v3_and_x5_midmap_scatter_presets() -> void:
 func _test_weighted_main_pool_and_flat_spawn() -> void:
 	var pool := load(POOL_PATH) as EncounterPool
 	_expect(pool != null and pool.validate(), "MainEncounterPool validates")
-	_expect(pool.entries.size() == 12, "MainEncounterPool exposes the complete live roster")
+	_expect(pool.entries.size() == 13, "MainEncounterPool exposes the complete live roster")
 	var random_number_generator := RandomNumberGenerator.new()
 	random_number_generator.seed = 20260807
 	var counts: Dictionary = {}

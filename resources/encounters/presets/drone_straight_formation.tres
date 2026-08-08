@@ -39,7 +39,7 @@ slot_index = 5
 [resource]
 script = ExtResource("1_preset")
 encounter_id = &"drone_formation"
-difficulty = 5.0
+difficulty = 11.0
 formation_layout_scene = ExtResource("3_layout")
 formation_movement_sequence = ExtResource("4_movement")
 members = Array[ExtResource("2_member")]([SubResource("Member_slot_0"), SubResource("Member_slot_1"), SubResource("Member_slot_2"), SubResource("Member_slot_3"), SubResource("Member_slot_4")])

@@ -106,7 +106,7 @@ primary tag `hangar`는 UI 표시명 **동력로**. tag 키와 기존 아이콘�
 | `enemy_fire_volume_boost` | 포화 사격 | ACTION_RATE ×1.25 + 추가 탄 2발 + 최소 스프레드 18° |
 | `enemy_near_death_experience` | 임사 체험 | 치명 피해 시 HP 1 · 1초 무적 임사 상태 후 사망 · one-time |
 | `enemy_drone_formation_reinforcement` | 드론 증원 편대 | Drone 편대 스폰 +1 · one-time · Drone SVG 프리뷰 |
-| `enemy_bomb_fast_fuse` | 고속 기폭 장치 | Bomb 무장 시간 ÷1.5 · one-time · Bomb SVG 프리뷰 |
+| `enemy_bomb_fast_fuse` | 고속 기폭 장치 | Bomb 무장 시간 ÷1.5 · one-time · 모든 Bomb Encounter · Bomb SVG 프리뷰 |
 
 `gameplay.tscn`의 적 증강 풀에는 위 **6종**이 등록되어 있다. `max_stacks`는 `0`이면 무제한, `1`이면 one-time이며 한도에 도달한 증강은 이후 후보에서 제외된다.
 
@@ -126,7 +126,7 @@ primary tag `hangar`는 UI 표시명 **동력로**. tag 키와 기존 아이콘�
 - 입력 `open_augment_offer`(**C**): XP ≥ 요구량일 때만 PLAYER 오퍼 오픈 · 성공 시 XP 차감·레벨+1
 - XP 획득량에 레이더 `XP_GAIN_MULT` 배율 적용 (`experience_gain_multiplier`)
 - 첫 요구 경험치 `5`, 레벨마다 요구량 `+3`
-- 적: 플레이 시간 `60초`마다 ENEMY 오퍼를 큐에 추가
+- 적: 플레이 시간 `30초`마다 ENEMY 오퍼를 큐에 추가 (Threat도 동일 간격으로 상승)
 
 ### AugmentOfferController
 
@@ -156,7 +156,7 @@ primary tag `hangar`는 UI 표시명 **동력로**. tag 키와 기존 아이콘�
 - `V` 목록은 실제 런의 3장 무작위 오퍼 대신 적 증강 리소스 전체를 스크롤 목록으로 연다.
 - 목록 행은 아이콘 원본 크기에 영향받지 않는 고정 높이 텍스트 카드로 표시한다.
 - PLAYER 시설 13종과 ENEMY 7종(게임플레이 풀 미등록 `enemy_counter_shot_on_hit` 포함)을 직접 선택해 랩의 레지스트리에 적용한다.
-- 범용 슬롯 확장·교체는 테스트 편의를 위해 랩이 자동 처리한다. Gameplay의 XP/60초 트리거와 후보 필터는 바꾸지 않는다.
+- 범용 슬롯 확장·교체는 테스트 편의를 위해 랩이 자동 처리한다. Gameplay의 XP/30초 트리거와 후보 필터는 바꾸지 않는다.
 
 ## 필드 드롭
 

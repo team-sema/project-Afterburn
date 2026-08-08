@@ -64,11 +64,28 @@ func _run() -> void:
 	if enemy.global_position != armed_position:
 		failures.append("armed bomb should remain stopped after deferred auto-start")
 
+	var nearby := load("res://enemies/normal_enemy.tscn").instantiate() as Enemy
+	nearby.set("augment_registry", EnemyAugmentRegistry.new())
+	world.add_child(nearby)
+	nearby.global_position = enemy.global_position + Vector2(20, 0)
+	var nearby_stats := nearby.stats_component
+	var far := load("res://enemies/normal_enemy.tscn").instantiate() as Enemy
+	far.set("augment_registry", EnemyAugmentRegistry.new())
+	world.add_child(far)
+	far.global_position = enemy.global_position + Vector2(blast_radius + 40.0, 0.0)
+	var far_stats := far.stats_component
+	var far_health_before := far_stats.health
+	await process_frame
+
 	# Skip waits: call detonate path after forcing armed state
 	fuse.call("_detonate")
 	await process_frame
 	if is_instance_valid(enemy) and stats.health > 0:
 		failures.append("detonate should zero health")
+	if is_instance_valid(nearby) and nearby_stats.health > 0:
+		failures.append("detonate should destroy enemies inside blast radius")
+	if not is_instance_valid(far) or far_stats.health != far_health_before:
+		failures.append("detonate should leave enemies outside blast radius untouched")
 
 	world.queue_free()
 	await process_frame
