@@ -16,6 +16,8 @@ enum FormationBreakCondition {
 }
 
 @export var encounter_id: StringName
+## Relative encounter hardness. Spawn weight uses 1/difficulty among eligible Threats.
+@export_range(0.1, 100.0, 0.1) var difficulty := 1.0
 @export var formation_layout_scene: PackedScene
 @export var formation_movement_sequence: MovementSequence
 @export var formation_behavior: FormationBehavior = MaintainFormationBehavior.new()
@@ -39,6 +41,8 @@ func get_validation_errors() -> PackedStringArray:
 	var errors := PackedStringArray()
 	if encounter_id.is_empty():
 		errors.append("EncounterPreset requires a non-empty encounter_id.")
+	if difficulty <= 0.0:
+		errors.append("EncounterPreset difficulty must be greater than 0.")
 	if formation_layout_scene == null:
 		errors.append("EncounterPreset requires a FormationLayout scene.")
 	if formation_movement_sequence == null:

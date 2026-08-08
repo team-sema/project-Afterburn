@@ -6,7 +6,6 @@ const PRESET_PATHS := [
 	"res://resources/encounters/presets/awl_charge_formation.tres",
 	"res://resources/encounters/presets/drone_entry_scatter.tres",
 	"res://resources/encounters/presets/drone_zigzag_mirrored.tres",
-	"res://resources/encounters/presets/mixed_partial_diamond.tres",
 	"res://resources/encounters/presets/x9_drone_down.tres",
 	"res://resources/encounters/presets/x9_caster_drone_orbit.tres",
 	"res://resources/encounters/presets/v7_drone_down.tres",

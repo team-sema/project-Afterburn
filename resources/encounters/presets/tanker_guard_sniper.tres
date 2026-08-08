@@ -20,6 +20,7 @@ slot_index = 2
 [resource]
 script = ExtResource("1_preset")
 encounter_id = &"tanker_guard_sniper"
+difficulty = 10.0
 formation_layout_scene = ExtResource("3_layout")
 formation_movement_sequence = ExtResource("4_movement")
 members = Array[ExtResource("2_member")]([SubResource("Member_tanker"), SubResource("Member_sniper")])

@@ -6,8 +6,8 @@
 |--------|-------------|-----|-----|------|------|
 | Green / Drone | 1 | `normal_enemy.tscn` | 20 | 5 | 편대 대각 하강 · Striker 호위 편대에도 등장 |
 | Yellow / Striker | 1 | `moving_enemy.tscn` | 50 | 10 | 마름모 편대 최후방 · 맵 1/3 하강 후 좌우 패트롤 |
-| Awl / Kamikaze | 2 | `kamikaze_enemy.tscn` | 70 | 15 | 3마리 V로 하강·조준 → 차지 시 V에서 각자 독립 돌진 · 투사체 없음 |
-| Bomb | 2 | `bomb_enemy.tscn` | 140 | 20 | 느린 하강 · 고체력 · 근접 시 2초 3회 적색 점멸 후 1.5× 자폭 · `enemy_bomb.svg` |
+| Awl / Kamikaze | 1 | `kamikaze_enemy.tscn` | 70 | 15 | 3마리 V로 하강·조준 → 차지 시 V에서 각자 독립 돌진 · 투사체 없음 |
+| Bomb | 1 | `bomb_enemy.tscn` | 140 | 20 | 느린 하강 · 고체력 · 근접 시 2초 3회 적색 점멸 후 1.5× 자폭 · `enemy_bomb.svg` |
 | Interceptor | 2 | `interceptor_enemy.tscn` | 40 | 5 | 2~3기 편대 · 좌↔우 대각 진입 · 0.9초 경고 · 연발 조준 탄 · `enemy_interceptor.svg` |
 | Pink / Caster | 3 | `shooting_enemy.tscn` | 110 | 25 | 상단 체공 · 원형 다연발 탄막(5링×20) · `enemy_caster.svg` |
 | Sniper | 3 | `sniper_enemy.tscn` | 95 | 25 | 상단 고정 · 4초 Cone 조준 · 0.5초 레이저 · 2.5초 쿨다운 반복 · `enemy_sniper.svg` |
@@ -24,6 +24,7 @@
 
 - 생성기는 4초 + 0~0.5초 지터의 타이머와 현재 Threat만 관리하고, `main_encounter_pool.tres`에 선택을 요청한다.
 - `MainEncounterPool`이 현재 Threat에서 weight가 0보다 큰 `EncounterPreset` 전체를 대상으로 weighted random을 정확히 한 번 수행한다.
+- 각 EncounterPreset은 `difficulty`(난이도 점수)를 가진다. 풀 Entry의 `min_threat` 이상이면 `weight = 60 / difficulty`로 뽑히고, 미만이면 0이다(어려울수록 희귀).
 - `EncounterPreset`은 FormationLayout Scene, 편대·개별 MovementSequence, 멤버와 슬롯, 등장·해제 조건을 조합하며 `EnemySpawner`가 실제 적을 생성한다.
 - Striker/Bomb/Caster/Sniper 중 Bomb·Caster·Sniper는 `SingleFormation`의 Slot0을 사용하는 1슬롯 Encounter이며, 생성 직후 편대를 해제해 기존 개별 MovementSequence를 그대로 실행한다.
 - **Green:** Drone 편대 — `HorizontalFormation`의 명시적 슬롯 5개에 동시 스폰
@@ -41,25 +42,25 @@
 
 - 이후 난이도는 적 오그먼트 `ACTION_RATE`가 `fire_interval`·`burst_interval`을 나눠 올리고, 상위 Threat 적이 합류하며 오른다. 탄속에는 배율이 없다
 
-### MainEncounterPool 초기 weight
+### MainEncounterPool difficulty · min_threat
 
-| Encounter | Threat 1 | Threat 2 | Threat 3+ |
+| Encounter | difficulty | min_threat | weight (`60/diff`) |
 |---|---:|---:|---:|
-| `drone_formation` | 6 | 6 | 6 |
-| `striker_drone_diamond` | 6 | 6 | 6 |
-| `awl_formation` | 0 | 6 | 6 |
-| `bomb_single` | 0 | 6 | 6 |
-| `caster_single` | 0 | 0 | 4 |
-| `tanker_guard_sniper` | 0 | 1 | 4 |
-| `x9_drone_down` | 0 | 0 | 3 |
-| `x9_caster_drone_orbit` | 0 | 0 | 1 |
-| `v7_drone_down` | 0 | 0 | 2 |
-| `interceptor_pair` | 0 | 2 | 2 |
-| `interceptor_trio` | 0 | 0 | 1 |
+| `drone_formation` | 5 | 1 | 12 |
+| `striker_drone_diamond` | 6 | 1 | 10 |
+| `bomb_single` | 6 | 1 | 10 |
+| `awl_formation` | 12 | 1 | 5 |
+| `tanker_guard_sniper` | 10 | 2 | 6 |
+| `interceptor_pair` | 12 | 2 | 5 |
+| `caster_single` | 7 | 3 | ≈8.57 |
+| `v7_drone_down` | 7 | 3 | ≈8.57 |
+| `x9_drone_down` | 9 | 3 | ≈6.67 |
+| `x9_caster_drone_orbit` | 15 | 3 | 4 |
+| `interceptor_trio` | 18 | 3 | ≈3.33 |
 
-테스트·웨폰 랩용 추가 드론 하강 프리셋(풀 weight 없음): `v3_drone_down`, `v5_drone_down`, `v9_drone_down`, `inverted_v3_drone_down`, `inverted_v5_drone_down`, `inverted_v7_drone_down`, `x5_drone_down`, `drone_triangle_formation`.
+Threat 1 후보 합 weight 37(drone/diamond/bomb/awl), Threat 2는 48, Threat 3은 ≈79.1이다. Bomb·Awl은 Threat 1부터 열려 초반 로스터가 4종이 된다.
 
-Threat 3 기존 합 38에 Interceptor pair/trio `2/1`을 더해 총 weight는 41이다. Pair는 Threat 2부터, Trio는 Threat 3부터 등장한다.
+테스트·웨폰 랩용 추가 드론 하강 프리셋(풀 미등록): `v3_drone_down`, `v5_drone_down`, `v9_drone_down`, `inverted_v3_drone_down`, `inverted_v5_drone_down`, `inverted_v7_drone_down`, `x5_drone_down`, `drone_triangle_formation`.
 
 ## Interceptor 고속 공격 패스
 

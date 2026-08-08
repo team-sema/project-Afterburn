@@ -46,6 +46,7 @@ slot_index = 6
 [resource]
 script = ExtResource("1_preset")
 encounter_id = &"v7_drone_down"
+difficulty = 7.0
 formation_layout_scene = ExtResource("3_layout")
 formation_movement_sequence = ExtResource("4_movement")
 formation_behavior = ExtResource("5_behavior")
