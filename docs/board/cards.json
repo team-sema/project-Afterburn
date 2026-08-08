@@ -528,6 +528,14 @@
       "tags": ["적", "전투", "비주얼"]
     },
     {
+      "id": "tanker-hit-feedback",
+      "title": "Tanker 피격 피드백 강화",
+      "description": "실드 전체 플래시+약한 스케일, 사격 제거, 본체 피드백 완화.",
+      "column": "review",
+      "file": "cards/tanker-hit-feedback.md",
+      "tags": ["적", "비주얼", "피드백"]
+    },
+    {
       "id": "drone-midmap-scatter",
       "title": "드론 중반 2.5배속 산개",
       "description": "X9/V3/V5/V7/V9/X5 드론이 맵 절반에서 외향 2.5배속 산개.",

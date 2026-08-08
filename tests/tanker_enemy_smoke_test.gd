@@ -53,6 +53,28 @@ func _test_independent_health_and_cleanup() -> void:
 	tanker.shield_hurtbox.hurt.emit(hit)
 	_expect(tanker.get_shield_health() == shield_start - 7, "shield hit reduces only Shield HP")
 	_expect(tanker.get_body_health() == body_start, "shield hit leaves Body HP unchanged")
+	_expect(
+		tanker.shield_scale != null and tanker.shield_flash != null,
+		"shield exposes scale and flash hit-feedback components",
+	)
+	_expect(
+		tanker.shield_flash.flash_root == tanker.shield_visual,
+		"shield flash covers the full multi-layer visual root",
+	)
+	var flashed := false
+	for child in tanker.shield_visual.get_children():
+		if child is CanvasItem and (child as CanvasItem).material != null:
+			flashed = true
+			break
+	_expect(flashed, "shield hit applies the white flash material to shield layers")
+	_expect(
+		is_equal_approx(tanker.shield_scale.scale_amount.x, 1.08),
+		"shield scale punch stays subtle",
+	)
+	_expect(
+		tanker.get_node_or_null("EnemyShootComponent") == null,
+		"Tanker has no EnemyShootComponent and does not fire",
+	)
 
 	tanker.hurtbox_component.hurt.emit(hit)
 	_expect(tanker.get_body_health() == body_start - 7, "body hit reduces only Body HP")

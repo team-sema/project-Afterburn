@@ -47,7 +47,7 @@
 |--------|------|
 | `ScaleComponent` | 펀치 스케일 트윈 |
 | `ShakeComponent` | 위치 셰이크 |
-| `FlashComponent` | 화이트 플래시 머티리얼 |
+| `FlashComponent` | 화이트 플래시 머티리얼 · 선택적 `flash_root`로 다중 CanvasItem 동시 플래시 |
 | `EntryWarningComponent` | 화면 밖 고속 진입 전 VisibleRect 가장자리 경고. Interceptor는 좌/우 등장 위치에서 스폰 쪽(왼↔오)을 가리킴 |
 | `SpawnerComponent` | PackedScene 인스턴스 |
 | `EnemySpawner` | 선택된 `EncounterPreset`만 실제 생성하고 의존성·Encounter ID를 트리 진입 전에 주입. 단일 적도 동일한 `FormationController` 생명주기를 사용 |
