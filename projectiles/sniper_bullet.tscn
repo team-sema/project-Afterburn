@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://projectiles/sniper_bullet.gd" id="1_script"]
+
+[node name="SniperBullet" type="Node2D" groups=["enemy_projectiles"]]
+script = ExtResource("1_script")
+speed = 900.0
+bullet_width = 3.0
+max_range = 480.0
+damage = 1

@@ -31,9 +31,9 @@ func _run() -> void:
 	# Fast cycle for headless verification (after deferred ACTION_RATE apply).
 	await process_frame
 	await process_frame
-	attack.set_combat_timings(0.35, 0.12, 0.2)
-	attack.telegraph_start_angle = 40.0
-	attack.telegraph_end_angle = 2.0
+	attack.set_combat_timings(0.35, 0.12, 0.2, 0.08)
+	attack.telegraph_start_angle = 12.0
+	attack.telegraph_end_angle = 0.05
 
 	var movement := enemy.get_node_or_null("MovementController") as MovementController
 	for _i in 300:
@@ -55,7 +55,9 @@ func _run() -> void:
 		attack.get_combat_state() == SniperAttackComponent.CombatState.AIMING,
 		"sniper enters AIMING after positioning",
 	)
-	_expect(failures, attack.is_telegraph_visible(), "AIMING shows telegraph cone")
+	_expect(failures, attack.is_telegraph_visible(), "AIMING shows dual-line telegraph")
+	var initial_telegraph_angle := attack.aim_cone.half_angle_degrees
+	var initial_telegraph_alpha := attack.aim_cone.get_line_alpha()
 	var hold_pos := enemy.global_position
 
 	# Track player during AIMING.
@@ -70,29 +72,76 @@ func _run() -> void:
 		aim_left.x < -0.05 and aim_right.x > 0.05,
 		"AIMING continuously tracks player X",
 	)
+	_expect(
+		failures,
+		attack.aim_cone.half_angle_degrees < initial_telegraph_angle,
+		"telegraph guide lines close together during AIMING",
+	)
+	_expect(
+		failures,
+		attack.aim_cone.get_line_alpha() > initial_telegraph_alpha,
+		"telegraph guide lines darken as focus closes",
+	)
 
-	# Complete first shot cycle and capture laser direction.
-	var first_laser_dir := Vector2.ZERO
-	var saw_first_laser := false
+	# Fully focused lines linger briefly before the shot.
+	for _i in 30:
+		await process_frame
+		if is_equal_approx(
+			attack.aim_cone.half_angle_degrees,
+			attack.telegraph_end_angle,
+		):
+			break
+	_expect(
+		failures,
+		attack.get_combat_state() == SniperAttackComponent.CombatState.AIMING,
+		"sniper holds full focus before firing",
+	)
+	_expect(failures, attack.get_shots_fired() == 0, "full focus does not fire immediately")
+
+	# Complete first shot cycle and capture bullet direction.
+	var first_bullet_dir := Vector2.ZERO
+	var saw_first_bullet := false
+	var visual_anchor := enemy.get_node("Anchor") as Node2D
+	var anchor_rest_position := visual_anchor.position
 	for _i in 120:
 		await process_frame
-		if attack.has_active_laser() and not saw_first_laser:
-			saw_first_laser = true
-			first_laser_dir = attack.get_aim_direction()
-			var laser := _find_laser()
-			if laser != null:
+		if attack.has_active_bullet() and not saw_first_bullet:
+			saw_first_bullet = true
+			first_bullet_dir = attack.get_aim_direction()
+			var bullet := _find_bullet()
+			if bullet != null:
+				await process_frame
+				var recoil_offset := visual_anchor.position - anchor_rest_position
+				var local_shot_direction := first_bullet_dir.rotated(-enemy.global_rotation)
+				_expect(
+					failures,
+					recoil_offset.dot(local_shot_direction) < -0.5,
+					"sniper visual kicks backward on fire",
+				)
+				var bullet_start := bullet.global_position
 				player.global_position = Vector2(20.0, 20.0)
 				await create_timer(0.05).timeout
 				_expect(
 					failures,
-					is_equal_approx(laser.rotation, first_laser_dir.angle() - PI * 0.5),
-					"fired laser stays fixed while player moves",
+					is_equal_approx(bullet.rotation, first_bullet_dir.angle() - PI * 0.5),
+					"fired bullet stays on the telegraphed path while player moves",
+				)
+				_expect(
+					failures,
+					bullet.global_position.distance_to(bullet_start) > 20.0,
+					"sniper bullet travels at high speed",
+				)
+				await create_timer(0.2).timeout
+				_expect(
+					failures,
+					visual_anchor.position.distance_to(anchor_rest_position) < 0.1,
+					"sniper visual returns after recoil",
 				)
 		if attack.get_shots_fired() >= 1 and (
 			attack.get_combat_state() == SniperAttackComponent.CombatState.COOLDOWN
 		):
 			break
-	_expect(failures, attack.get_shots_fired() >= 1, "first laser fires")
+	_expect(failures, attack.get_shots_fired() >= 1, "first bullet fires")
 	_expect(
 		failures,
 		not attack.is_telegraph_visible()
@@ -105,7 +154,6 @@ func _run() -> void:
 		await process_frame
 		if attack.get_combat_state() == SniperAttackComponent.CombatState.COOLDOWN:
 			_expect(failures, not attack.is_telegraph_visible(), "cooldown has no telegraph")
-			_expect(failures, not attack.has_active_laser(), "cooldown has no active laser")
 			break
 
 	_expect(
@@ -114,16 +162,13 @@ func _run() -> void:
 		"sniper does not reposition between shots",
 	)
 
-	# Run until at least 3 shots without overlap / stuck state.
+	# Run until at least 3 shots without overlapping rounds or a stuck state.
 	for _i in 400:
 		await process_frame
 		if attack.get_shots_fired() >= 3:
 			break
-		if (
-			attack.has_active_laser()
-			and attack.get_combat_state() == SniperAttackComponent.CombatState.AIMING
-		):
-			failures.append("new AIMING started while previous laser still active")
+		if _count_bullets() > 1:
+			failures.append("sniper spawned overlapping bullets")
 			break
 
 	_expect(failures, attack.get_shots_fired() >= 3, "sniper fires at least 3 times")
@@ -146,15 +191,26 @@ func _run() -> void:
 	await _finish(failures, enemy, player)
 
 
-func _find_laser() -> SniperLaserBeam:
+func _find_bullet() -> SniperBullet:
 	for node in root.get_children():
-		if node is SniperLaserBeam:
-			return node as SniperLaserBeam
+		if node is SniperBullet:
+			return node as SniperBullet
 	for node in root.get_children():
 		for child in node.get_children():
-			if child is SniperLaserBeam:
-				return child as SniperLaserBeam
+			if child is SniperBullet:
+				return child as SniperBullet
 	return null
+
+
+func _count_bullets() -> int:
+	var count := 0
+	for node in root.get_children():
+		if node is SniperBullet:
+			count += 1
+		for child in node.get_children():
+			if child is SniperBullet:
+				count += 1
+	return count
 
 
 func _expect(failures: PackedStringArray, condition: bool, message: String) -> void:

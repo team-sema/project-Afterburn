@@ -1,17 +1,22 @@
 [gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://components/sniper_attack_component.gd" id="1_script"]
-[ext_resource type="PackedScene" path="res://projectiles/sniper_laser_beam.tscn" id="2_laser"]
+[ext_resource type="PackedScene" path="res://projectiles/sniper_bullet.tscn" id="2_bullet"]
 
 [node name="SniperAttackComponent" type="Node" node_paths=PackedStringArray("aim_cone")]
 script = ExtResource("1_script")
 aim_cone = NodePath("../SniperAimCone")
-laser_scene = ExtResource("2_laser")
+projectile_scene = ExtResource("2_bullet")
 aim_duration = 4.0
-laser_duration = 0.5
+focus_hold_duration = 0.18
+shot_recovery_duration = 0.1
 cooldown_duration = 2.5
-telegraph_start_angle = 42.0
-telegraph_end_angle = 1.2
-laser_width = 4.0
-laser_range = 480.0
-laser_damage = 1
+telegraph_start_angle = 14.0
+telegraph_end_angle = 0.05
+projectile_speed = 900.0
+projectile_width = 3.0
+projectile_range = 480.0
+projectile_damage = 1
+recoil_distance = 5.0
+recoil_kick_duration = 0.05
+recoil_return_duration = 0.18

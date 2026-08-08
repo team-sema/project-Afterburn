@@ -77,8 +77,8 @@
 | `TargetingComponent` | `"player"` 그룹 타깃 |
 | `EnemyShootComponent` | 적 기본 조준 사격 · `fire_interval` + **`burst_count`/`burst_interval`** 연발 · 선택적 actor-forward 발사와 VisibleRect 진입 기반 제한 사격 창 · 기본 탄 `base_enemy_projectile` |
 | `RadialBarrageShootComponent` | Caster 원형 다연발 탄막 |
-| `SniperAttackComponent` | 스나이퍼 조준 Cone · 월드 고정 레이저 · 쿨다운 반복 |
-| `SniperAimCone` | 스나이퍼 조준 텔레그래프 `_draw` |
+| `SniperAttackComponent` | 스나이퍼 이중선 조준·완전 조준 유지 · 고속탄 발사·반동 · 쿨다운 반복 |
+| `SniperAimCone` | 스나이퍼 조준 이중선 텔레그래프 `_draw` |
 | `HoldPositionMovementStep` | 위치 고정(무한) MovementStep |
 | `EnemyFireVolumeBoostComponent` | 위기: 탄수·스프레드 증가 (`augment_behaviors/`) |
 | `CounterShotComponent` | 피격/사망 반격 탄 *(풀에서 제외, 레거시)* |

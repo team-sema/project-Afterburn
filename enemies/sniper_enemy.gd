@@ -1,7 +1,7 @@
 class_name SniperEnemy
 extends Enemy
 
-## Sniper: enters a distant band, holds position, and repeatedly aims/fires a laser.
+## Sniper: enters a distant band, holds position, and repeatedly aims/fires a fast round.
 
 
 func _enter_tree() -> void:

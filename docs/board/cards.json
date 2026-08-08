@@ -522,7 +522,7 @@
     {
       "id": "sniper-enemy",
       "title": "스나이퍼 저격 적기",
-      "description": "원거리 포지션 유지 후 조준 Cone·레이저·쿨다운을 반복하는 Threat 3 적.",
+      "description": "옅은 이중 조준선이 플레이어에게 수렴한 뒤 고속 탄환을 발사하고 반동하는 원거리 적.",
       "column": "review",
       "file": "cards/sniper-enemy.md",
       "tags": ["적", "전투", "비주얼"]
