@@ -2,7 +2,7 @@ class_name SniperAttackComponent
 extends Node
 
 ## Sniper combat loop after positioning: AIMING → FIRING → COOLDOWN (repeat).
-## Telegraph is a scene child (BombBlastPreview pattern). Laser spawns into
+## Telegraph is a scene child (BombBlastPreview pattern). The bullet spawns into
 ## gameplay_world like EnemyShootComponent projectiles.
 
 enum CombatState {
@@ -14,37 +14,50 @@ enum CombatState {
 
 @export var aim_cone: SniperAimCone
 @export_range(0.5, 20.0, 0.05) var aim_duration := 4.0
-@export_range(0.05, 5.0, 0.05) var laser_duration := 0.5
+@export_range(0.0, 1.0, 0.01) var focus_hold_duration := 0.18
+@export_range(0.05, 5.0, 0.05) var shot_recovery_duration := 0.1
 @export_range(0.1, 20.0, 0.05) var cooldown_duration := 2.5
-@export_range(1.0, 90.0, 0.5) var telegraph_start_angle := 42.0
-@export_range(0.1, 30.0, 0.1) var telegraph_end_angle := 1.2
-@export_range(1.0, 24.0, 0.5) var laser_width := 4.0
-@export_range(64.0, 800.0, 1.0) var laser_range := 480.0
-@export_range(1, 20, 1) var laser_damage := 1
-@export var laser_scene: PackedScene
+@export_range(1.0, 45.0, 0.5) var telegraph_start_angle := 14.0
+@export_range(0.0, 15.0, 0.05) var telegraph_end_angle := 0.05
+@export_range(100.0, 2000.0, 10.0) var projectile_speed := 900.0
+@export_range(1.0, 12.0, 0.5) var projectile_width := 3.0
+@export_range(64.0, 800.0, 1.0) var projectile_range := 480.0
+@export_range(1, 20, 1) var projectile_damage := 1
+@export var projectile_scene: PackedScene
+@export_range(0.0, 16.0, 0.5) var recoil_distance := 5.0
+@export_range(0.01, 0.2, 0.01) var recoil_kick_duration := 0.05
+@export_range(0.05, 0.5, 0.01) var recoil_return_duration := 0.18
 
 var enemy: Enemy
 var _state := CombatState.POSITIONING
 var _state_elapsed := 0.0
 var _aim_direction := Vector2.DOWN
 var _base_aim_duration := 4.0
+var _base_focus_hold_duration := 0.18
 var _base_cooldown_duration := 2.5
-var _active_laser: SniperLaserBeam
+var _active_bullet: SniperBullet
 var _shots_fired := 0
 var _hold_position := Vector2.ZERO
 var _hold_locked := false
+var _visual_anchor: Node2D
+var _visual_anchor_rest_position := Vector2.ZERO
+var _recoil_tween: Tween
 
 
 func _ready() -> void:
 	enemy = get_parent() as Enemy
 	assert(enemy != null, "SniperAttackComponent must be attached to an Enemy.")
 	_base_aim_duration = aim_duration
+	_base_focus_hold_duration = focus_hold_duration
 	_base_cooldown_duration = cooldown_duration
 	if aim_cone == null:
 		aim_cone = enemy.get_node_or_null("SniperAimCone") as SniperAimCone
 	assert(aim_cone != null, "SniperAttackComponent requires a SniperAimCone sibling.")
+	_visual_anchor = enemy.get_node_or_null("Anchor") as Node2D
+	if _visual_anchor != null:
+		_visual_anchor_rest_position = _visual_anchor.position
 	aim_cone.hide_telegraph()
-	aim_cone.set_cone_length(laser_range)
+	aim_cone.set_cone_length(projectile_range)
 	_face_visual_direction(Vector2.DOWN)
 
 	var movement := enemy.get_node_or_null("MovementController") as MovementController
@@ -57,14 +70,23 @@ func _ready() -> void:
 func apply_action_rate_multiplier(multiplier: float) -> void:
 	var rate := maxf(0.01, multiplier)
 	aim_duration = _base_aim_duration / rate
+	focus_hold_duration = _base_focus_hold_duration / rate
 	cooldown_duration = _base_cooldown_duration / rate
 
 
-func set_combat_timings(aim: float, laser: float, cooldown: float) -> void:
+func set_combat_timings(
+	aim: float,
+	shot_recovery: float,
+	cooldown: float,
+	focus_hold: float = -1.0,
+) -> void:
 	_base_aim_duration = maxf(0.05, aim)
 	_base_cooldown_duration = maxf(0.05, cooldown)
+	if focus_hold >= 0.0:
+		_base_focus_hold_duration = focus_hold
 	aim_duration = _base_aim_duration
-	laser_duration = maxf(0.05, laser)
+	focus_hold_duration = _base_focus_hold_duration
+	shot_recovery_duration = maxf(0.05, shot_recovery)
 	cooldown_duration = _base_cooldown_duration
 
 
@@ -84,8 +106,8 @@ func is_telegraph_visible() -> bool:
 	return aim_cone != null and aim_cone.visible
 
 
-func has_active_laser() -> bool:
-	return is_instance_valid(_active_laser)
+func has_active_bullet() -> bool:
+	return is_instance_valid(_active_bullet)
 
 
 func _process(delta: float) -> void:
@@ -103,7 +125,7 @@ func _process(delta: float) -> void:
 			_update_aiming(delta)
 		CombatState.FIRING:
 			_state_elapsed += delta
-			if _state_elapsed >= laser_duration:
+			if _state_elapsed >= shot_recovery_duration:
 				_enter_cooldown()
 		CombatState.COOLDOWN:
 			_state_elapsed += delta
@@ -144,17 +166,15 @@ func _begin_hold_and_aim() -> void:
 
 
 func _enter_aiming() -> void:
-	if has_active_laser():
-		_active_laser.queue_free()
-		_active_laser = null
 	_state = CombatState.AIMING
 	_state_elapsed = 0.0
 	_refresh_aim_direction()
 	_face_visual_direction(_aim_direction)
 	_apply_cone_transform()
 	if aim_cone != null:
-		aim_cone.set_cone_length(laser_range)
+		aim_cone.set_cone_length(projectile_range)
 		aim_cone.set_half_angle_degrees(telegraph_start_angle)
+		aim_cone.set_focus_progress(0.0)
 		aim_cone.show_telegraph()
 
 
@@ -162,23 +182,27 @@ func _update_aiming(delta: float) -> void:
 	_state_elapsed += delta
 	_refresh_aim_direction()
 	var progress := clampf(_state_elapsed / maxf(0.05, aim_duration), 0.0, 1.0)
-	var half_angle := lerpf(telegraph_start_angle, telegraph_end_angle, progress)
+	# Cubic ease-out: a sharp initial lock-on that settles flat at full focus.
+	var focus_progress := 1.0 - pow(1.0 - progress, 3.0)
+	var half_angle := lerpf(telegraph_start_angle, telegraph_end_angle, focus_progress)
 	_apply_cone_transform()
 	if aim_cone != null:
 		aim_cone.set_half_angle_degrees(half_angle)
-	if _state_elapsed >= aim_duration:
+		aim_cone.set_focus_progress(focus_progress)
+	if _state_elapsed >= aim_duration + focus_hold_duration:
 		_enter_firing()
 
 
 func _enter_firing() -> void:
-	# Final AIMING-frame direction keeps telegraph and laser aligned.
+	# Final AIMING-frame direction keeps the telegraph and bullet aligned.
 	_refresh_aim_direction()
 	_apply_cone_transform()
 	if aim_cone != null:
 		aim_cone.hide_telegraph()
 	_state = CombatState.FIRING
 	_state_elapsed = 0.0
-	_spawn_laser(_aim_direction)
+	_spawn_bullet(_aim_direction)
+	_play_recoil(_aim_direction)
 	_shots_fired += 1
 
 
@@ -205,9 +229,31 @@ func _face_visual_direction(direction: Vector2) -> void:
 	## Same pattern as Awl: rotate Anchor art toward aim, leave root unrotated.
 	if enemy == null or direction.is_zero_approx():
 		return
-	var visual_anchor := enemy.get_node_or_null("Anchor") as Node2D
-	if visual_anchor != null:
-		visual_anchor.global_rotation = direction.angle() - PI * 0.5
+	if _visual_anchor != null:
+		_visual_anchor.global_rotation = direction.angle() - PI * 0.5
+
+
+func _play_recoil(direction: Vector2) -> void:
+	if _visual_anchor == null or direction.is_zero_approx() or recoil_distance <= 0.0:
+		return
+	if _recoil_tween != null and _recoil_tween.is_valid():
+		_recoil_tween.kill()
+	_visual_anchor.position = _visual_anchor_rest_position
+	var local_direction := direction.rotated(-enemy.global_rotation).normalized()
+	var recoil_position := _visual_anchor_rest_position - local_direction * recoil_distance
+	_recoil_tween = create_tween()
+	_recoil_tween.tween_property(
+		_visual_anchor,
+		"position",
+		recoil_position,
+		recoil_kick_duration,
+	).set_trans(Tween.TRANS_EXPO).set_ease(Tween.EASE_OUT)
+	_recoil_tween.tween_property(
+		_visual_anchor,
+		"position",
+		_visual_anchor_rest_position,
+		recoil_return_duration,
+	).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 
 
 func _apply_cone_transform() -> void:
@@ -218,8 +264,8 @@ func _apply_cone_transform() -> void:
 	aim_cone.rotation = _aim_direction.angle() - PI * 0.5
 
 
-func _spawn_laser(direction: Vector2) -> void:
-	if has_active_laser():
+func _spawn_bullet(direction: Vector2) -> void:
+	if has_active_bullet():
 		return
 	# Same parenting path as EnemyShootComponent projectiles.
 	var projectile_parent := get_tree().get_first_node_in_group("gameplay_world")
@@ -227,31 +273,31 @@ func _spawn_laser(direction: Vector2) -> void:
 		projectile_parent = get_tree().current_scene
 	if projectile_parent == null:
 		return
-	var laser: SniperLaserBeam
-	if laser_scene != null:
-		laser = laser_scene.instantiate() as SniperLaserBeam
+	var bullet: SniperBullet
+	if projectile_scene != null:
+		bullet = projectile_scene.instantiate() as SniperBullet
 	else:
-		laser = SniperLaserBeam.new()
-	if laser == null:
+		bullet = SniperBullet.new()
+	if bullet == null:
 		return
-	laser.global_position = enemy.global_position
-	_active_laser = laser
-	laser.finished.connect(_on_laser_finished, CONNECT_ONE_SHOT)
+	bullet.global_position = enemy.global_position
+	_active_bullet = bullet
+	bullet.finished.connect(_on_bullet_finished, CONNECT_ONE_SHOT)
 	# Mirror EnemyShootComponent: defer enter-tree, then apply launch-equivalent setup.
-	projectile_parent.add_child.call_deferred(laser)
-	laser.call_deferred(
+	projectile_parent.add_child.call_deferred(bullet)
+	bullet.call_deferred(
 		"configure",
 		enemy.global_position,
 		direction,
-		laser_duration,
-		laser_width,
-		laser_range,
-		laser_damage,
+		projectile_speed,
+		projectile_width,
+		projectile_range,
+		projectile_damage,
 	)
 
 
-func _on_laser_finished() -> void:
-	_active_laser = null
+func _on_bullet_finished() -> void:
+	_active_bullet = null
 
 
 func _get_player() -> Node2D:
@@ -268,8 +314,9 @@ func _get_player() -> Node2D:
 
 
 func _exit_tree() -> void:
-	if is_instance_valid(_active_laser):
-		_active_laser.queue_free()
-		_active_laser = null
+	if _recoil_tween != null and _recoil_tween.is_valid():
+		_recoil_tween.kill()
+	if _visual_anchor != null and is_instance_valid(_visual_anchor):
+		_visual_anchor.position = _visual_anchor_rest_position
 	if aim_cone != null and is_instance_valid(aim_cone):
 		aim_cone.hide_telegraph()

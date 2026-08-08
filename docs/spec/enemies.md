@@ -10,7 +10,7 @@
 | Bomb | 1 | `bomb_enemy.tscn` | 140 | 20 | 느린 하강 · 고체력 · 근접 시 2초 3회 적색 점멸 후 1.5× 자폭 · `enemy_bomb.svg` |
 | Interceptor | 2 | `interceptor_enemy.tscn` | 40 | 5 | 2~3기 편대 · 좌↔우 대각 진입 · 0.9초 경고 · 연발 조준 탄 · `enemy_interceptor.svg` |
 | Pink / Caster | 3 | `shooting_enemy.tscn` | 110 | 25 | 상단 체공 · 원형 다연발 탄막(5링×20) · `enemy_caster.svg` |
-| Sniper | 3 | `sniper_enemy.tscn` | 95 | 25 | 상단 고정 · 4초 Cone 조준 · 0.5초 레이저 · 2.5초 쿨다운 반복 · `enemy_sniper.svg` |
+| Sniper | 3 | `sniper_enemy.tscn` | 95 | 25 | 상단 고정 · 4초 이중선 조준+0.18초 집중 · 900px/s 고속탄 · 2.5초 쿨다운 반복 · `enemy_sniper.svg` |
 
 베이스 `enemies/enemy.tscn`: 네온 레이어, 전투/VFX, `TargetingComponent`, `EnemyShootComponent`, `EnemyModifierFactory`, XP 드롭.
 
@@ -85,7 +85,8 @@ Threat 1 후보 합 weight ≈35.57(drone/diamond_5/bomb/awl), Threat 2는 ≈50
 ## Sniper 원거리 저격
 
 - `sniper_entry_hold.tres`: `MoveToPositionStep`(y=48) → `HoldPositionMovementStep`으로 포지션 고정
-- `SniperAttackComponent`: AIMING(4.0s, 플레이어 지속 추적 + Cone 축소) → FIRING(0.5s 월드 고정 레이저) → COOLDOWN(2.5s) 반복
+- `SniperAttackComponent`: AIMING(4.0s, 플레이어 지속 추적 + 옅은 적색 이중선 cubic ease-out 수렴 → 0.18s 완전 조준 유지) → FIRING(900px/s 고속탄 + 5px 비주얼 반동) → COOLDOWN(2.5s) 반복
+- 조준선은 반각 14°에서 0.05°로 모이며 알파 0.01에서 0.36으로 진해진다. 발사 순간 선은 사라지고 탄환은 마지막 조준 경로를 추적 없이 이동한다
 - 재발사 시 재포지셔닝 없음. `EnemyShootComponent`는 `_enter_tree`에서 제거
 - Encounter: `tanker_guard_sniper` — 전방 Tanker(`bottom_inner`) + 후방 Sniper(`center`). `tanker_guard_entry_hold`로 y=48 상단 체공 후 정지. 편대 유지 중 조준·사격
 
