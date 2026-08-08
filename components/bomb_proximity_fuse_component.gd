@@ -3,6 +3,10 @@ extends Node
 
 ## Slow bomb: when the player enters range, flash red 3× over ~2s, then detonate.
 ## Blast VFX/damage radius = base_explosion_radius * blast_size_multiplier (default 1.5).
+## Player takes blast_damage; other enemies whose hurtbox overlaps the blast are destroyed.
+
+const PLAYER_HURTBOX_MASK := 1 << 0
+const ENEMY_HURTBOX_MASK := 1 << 1
 
 @export var actor: Node2D
 @export var move_component: MoveComponent
@@ -51,12 +55,23 @@ func _process(_delta: float) -> void:
 func _start_arming() -> void:
 	_armed = true
 	blast_preview.visible = true
+	_freeze_for_arming()
+	_arm_and_detonate()
+
+
+func _freeze_for_arming() -> void:
+	var enemy := actor as Enemy
+	if enemy != null and enemy.is_formation_member():
+		# Stop the wing so the bomb is not dragged while flashing, then detach.
+		var controller := enemy.get_formation_controller() as FormationController
+		if controller != null and controller.center_movement_controller != null:
+			controller.center_movement_controller.stop()
+		enemy.detach_from_formation()
 	var movement_controller := actor.get_node_or_null("MovementController") as MovementController
 	if movement_controller != null:
 		movement_controller.stop()
 	elif move_component != null:
 		move_component.stop_motion()
-	_arm_and_detonate()
 
 
 func apply_arming_rate_multiplier(multiplier: float) -> void:
@@ -128,13 +143,12 @@ func _deal_blast_damage() -> void:
 	var params := PhysicsShapeQueryParameters2D.new()
 	params.shape = circle
 	params.transform = Transform2D(0.0, actor.global_position)
-	params.collision_mask = 1 # player_hurtbox
 	params.collide_with_areas = true
 	params.collide_with_bodies = false
 
+	params.collision_mask = PLAYER_HURTBOX_MASK
 	var hitbox := HitboxComponent.new()
 	hitbox.damage = blast_damage
-
 	for result in world.direct_space_state.intersect_shape(params, 32):
 		var collider: Variant = result.get("collider")
 		if collider is HurtboxComponent:
@@ -143,6 +157,34 @@ func _deal_blast_damage() -> void:
 				continue
 			hurtbox.hurt.emit(hitbox)
 	hitbox.free()
+
+	params.collision_mask = ENEMY_HURTBOX_MASK
+	var destroyed_enemies: Dictionary = {}
+	for result in world.direct_space_state.intersect_shape(params, 64):
+		var collider: Variant = result.get("collider")
+		if not collider is HurtboxComponent:
+			continue
+		var enemy := _find_enemy_owner(collider as HurtboxComponent)
+		if enemy == null or enemy == actor or not is_instance_valid(enemy):
+			continue
+		var enemy_id := enemy.get_instance_id()
+		if destroyed_enemies.has(enemy_id):
+			continue
+		destroyed_enemies[enemy_id] = true
+		var enemy_stats := enemy.stats_component
+		if enemy_stats == null:
+			enemy_stats = enemy.get_node_or_null("StatsComponent") as StatsComponent
+		if enemy_stats != null:
+			enemy_stats.health = 0
+
+
+func _find_enemy_owner(hurtbox: HurtboxComponent) -> Enemy:
+	var node: Node = hurtbox
+	while node != null:
+		if node is Enemy:
+			return node as Enemy
+		node = node.get_parent()
+	return null
 
 
 func _get_player() -> Node2D:

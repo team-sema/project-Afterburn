@@ -19,7 +19,7 @@ Godot 종스크롤 슈팅 + **XP·시간 기반** 오그먼트 프로토타입 (
 ## 핵심 설계 (구현 시 참고)
 
 - 재미 축: 탄막 회피·사격, 오그먼트 선택(플레이어 강화 vs 적 강화).
-- 오그먼트 트리거: 플레이어는 **XP 충족 후 `C` 수동 오픈**, 적은 **약 60초 주기**. 점수(`GameStats`)는 표시·기록용이며 오퍼 트리거가 아니다. 상세: `docs/spec/augments.md`.
+- 오그먼트 트리거: 플레이어는 **XP 충족 후 `C` 수동 오픈**, 적은 **약 30초 주기**. 점수(`GameStats`)는 표시·기록용이며 오퍼 트리거가 아니다. 상세: `docs/spec/augments.md`.
 - 엔티티는 **컴포넌트(커스텀 노드)** 조합 (`components/`).
 - 비주얼 방향: Nova Drift풍 네온 — `.agents/godot_nova_drift_visual_guide.md`, `docs/spec/effects.md`.
 

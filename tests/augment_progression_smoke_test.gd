@@ -75,8 +75,8 @@ func _run() -> void:
 		"level-up requests a player offer",
 	)
 
-	progression._process(60.0)
-	_expect(progression.enemy_augment_tier == 1, "60 seconds reaches enemy augment tier 1")
+	progression._process(30.0)
+	_expect(progression.enemy_augment_tier == 1, "30 seconds reaches enemy augment tier 1")
 	_expect(progression.pending_offers.size() == 1, "enemy offer waits behind an active player offer")
 	if not progression.pending_offers.is_empty():
 		_expect(

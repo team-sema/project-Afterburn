@@ -1,12 +1,13 @@
-[gd_resource type="Resource" script_class="EncounterPool" load_steps=17 format=3]
+[gd_resource type="Resource" script_class="EncounterPool" load_steps=18 format=3]
 
 [ext_resource type="Script" path="res://resources/encounters/encounter_pool.gd" id="1_pool"]
 [ext_resource type="Script" path="res://resources/encounters/encounter_pool_entry.gd" id="2_entry"]
 [ext_resource type="Resource" path="res://resources/encounters/presets/drone_straight_formation.tres" id="4_drone"]
+[ext_resource type="Resource" path="res://resources/encounters/presets/drone_zigzag_mirrored.tres" id="4_zigzag"]
 [ext_resource type="Resource" path="res://resources/encounters/presets/striker_drone_diamond_5.tres" id="5_striker5"]
 [ext_resource type="Resource" path="res://resources/encounters/presets/striker_drone_diamond_13.tres" id="5_striker13"]
 [ext_resource type="Resource" path="res://resources/encounters/presets/awl_charge_formation.tres" id="6_awl"]
-[ext_resource type="Resource" path="res://resources/encounters/presets/bomb_single.tres" id="7_bomb"]
+[ext_resource type="Resource" path="res://resources/encounters/presets/tanker_bomb_vertical.tres" id="7_tanker_v"]
 [ext_resource type="Resource" path="res://resources/encounters/presets/caster_single.tres" id="8_caster"]
 [ext_resource type="Resource" path="res://resources/encounters/presets/x9_drone_down.tres" id="9_x9_drone"]
 [ext_resource type="Resource" path="res://resources/encounters/presets/x9_caster_drone_orbit.tres" id="10_x9_orbit"]
@@ -20,14 +21,14 @@ script = ExtResource("2_entry")
 preset = ExtResource("4_drone")
 min_threat = 1
 
+[sub_resource type="Resource" id="Entry_zigzag"]
+script = ExtResource("2_entry")
+preset = ExtResource("4_zigzag")
+min_threat = 1
+
 [sub_resource type="Resource" id="Entry_striker5"]
 script = ExtResource("2_entry")
 preset = ExtResource("5_striker5")
-min_threat = 1
-
-[sub_resource type="Resource" id="Entry_bomb"]
-script = ExtResource("2_entry")
-preset = ExtResource("7_bomb")
 min_threat = 1
 
 [sub_resource type="Resource" id="Entry_awl"]
@@ -43,6 +44,11 @@ min_threat = 2
 [sub_resource type="Resource" id="Entry_tanker"]
 script = ExtResource("2_entry")
 preset = ExtResource("13_tanker")
+min_threat = 2
+
+[sub_resource type="Resource" id="Entry_tanker_bomb_v"]
+script = ExtResource("2_entry")
+preset = ExtResource("7_tanker_v")
 min_threat = 2
 
 [sub_resource type="Resource" id="Entry_interceptor_pair"]
@@ -77,4 +83,4 @@ min_threat = 3
 
 [resource]
 script = ExtResource("1_pool")
-entries = Array[ExtResource("2_entry")]([SubResource("Entry_drone"), SubResource("Entry_striker5"), SubResource("Entry_bomb"), SubResource("Entry_awl"), SubResource("Entry_striker13"), SubResource("Entry_tanker"), SubResource("Entry_interceptor_pair"), SubResource("Entry_caster"), SubResource("Entry_x9_drone"), SubResource("Entry_x9_orbit"), SubResource("Entry_v7"), SubResource("Entry_interceptor_trio")])
+entries = Array[ExtResource("2_entry")]([SubResource("Entry_drone"), SubResource("Entry_zigzag"), SubResource("Entry_striker5"), SubResource("Entry_awl"), SubResource("Entry_striker13"), SubResource("Entry_tanker"), SubResource("Entry_tanker_bomb_v"), SubResource("Entry_interceptor_pair"), SubResource("Entry_caster"), SubResource("Entry_x9_drone"), SubResource("Entry_x9_orbit"), SubResource("Entry_v7"), SubResource("Entry_interceptor_trio")])

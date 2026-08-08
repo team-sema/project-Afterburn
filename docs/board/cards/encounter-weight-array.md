@@ -2,7 +2,7 @@
 
 ## 목표
 
-Encounter에 `difficulty`를 두고, 풀에서는 `min_threat` + `weight = 60 / difficulty`로 등장 비율을 잡는다.
+Encounter에 `difficulty`를 두고, 풀에서는 `min_threat` + `weight = 60 / sqrt(difficulty)`로 등장 비율을 잡는다. 생성기는 직전 2 Encounter를 제외해 반복을 줄인다.
 
 ## AC 요약
 

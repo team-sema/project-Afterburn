@@ -126,6 +126,10 @@ func get_formation_slot() -> FormationSlot:
 	return _formation_slot
 
 
+func get_formation_controller() -> Node:
+	return _formation_controller
+
+
 ## Enemy-owned behaviors use this generic request when their independent state
 ## should take over. FormationController decides only whether this member is
 ## still bound; it does not inspect the enemy type or behavior.

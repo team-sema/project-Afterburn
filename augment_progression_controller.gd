@@ -10,7 +10,7 @@ signal threat_level_changed(current_level: int)
 @export var offer_controller: AugmentOfferController
 @export_range(1, 100000, 1) var base_experience_required := 5
 @export_range(0, 100000, 1) var experience_requirement_growth := 3
-@export_range(1.0, 3600.0, 1.0) var enemy_augment_interval := 60.0
+@export_range(1.0, 3600.0, 1.0) var enemy_augment_interval := 30.0
 
 var level := 1
 var current_experience := 0

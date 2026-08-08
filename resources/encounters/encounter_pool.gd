@@ -7,10 +7,26 @@ extends Resource
 func choose(
 	threat_level: int,
 	random_number_generator: RandomNumberGenerator = null,
+	exclude_encounter_ids: Array[StringName] = [],
+) -> EncounterPreset:
+	var selected := _choose_weighted(threat_level, random_number_generator, exclude_encounter_ids)
+	# If exclusions emptied the pool (tiny Threat 1 roster), ignore them.
+	if selected == null and not exclude_encounter_ids.is_empty():
+		return _choose_weighted(threat_level, random_number_generator, [])
+	return selected
+
+
+func _choose_weighted(
+	threat_level: int,
+	random_number_generator: RandomNumberGenerator,
+	exclude_encounter_ids: Array[StringName],
 ) -> EncounterPreset:
 	if entries.is_empty():
 		push_warning("EncounterPool selection skipped because the pool is empty.")
 		return null
+	var exclude := {}
+	for encounter_id in exclude_encounter_ids:
+		exclude[encounter_id] = true
 	var total_weight := 0.0
 	for index in entries.size():
 		var entry := entries[index]
@@ -19,6 +35,8 @@ func choose(
 				"EncounterPool selection skipped because entry %d has no preset." % index
 			)
 			return null
+		if exclude.has(entry.preset.encounter_id):
+			continue
 		var weight := entry.get_weight(threat_level)
 		if weight < 0.0:
 			push_warning(
@@ -28,10 +46,11 @@ func choose(
 			return null
 		total_weight += weight
 	if total_weight <= 0.0:
-		push_warning(
-			"EncounterPool has no encounter with positive weight at Threat %d."
-			% threat_level
-		)
+		if exclude.is_empty():
+			push_warning(
+				"EncounterPool has no encounter with positive weight at Threat %d."
+				% threat_level
+			)
 		return null
 	var random_value := (
 		random_number_generator.randf()
@@ -40,6 +59,10 @@ func choose(
 	)
 	var roll := random_value * total_weight
 	for entry in entries:
+		if entry == null or entry.preset == null:
+			continue
+		if exclude.has(entry.preset.encounter_id):
+			continue
 		var weight := entry.get_weight(threat_level)
 		if weight <= 0.0:
 			continue
@@ -47,8 +70,13 @@ func choose(
 		if roll <= 0.0:
 			return entry.preset
 	for index in range(entries.size() - 1, -1, -1):
-		if entries[index].get_weight(threat_level) > 0.0:
-			return entries[index].preset
+		var entry := entries[index]
+		if entry == null or entry.preset == null:
+			continue
+		if exclude.has(entry.preset.encounter_id):
+			continue
+		if entry.get_weight(threat_level) > 0.0:
+			return entry.preset
 	return null
 
 

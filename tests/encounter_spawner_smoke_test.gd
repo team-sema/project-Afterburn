@@ -10,7 +10,7 @@ const PRESET_PATHS := [
 	"res://resources/encounters/presets/x9_caster_drone_orbit.tres",
 	"res://resources/encounters/presets/v7_drone_down.tres",
 	"res://resources/encounters/presets/striker_single.tres",
-	"res://resources/encounters/presets/bomb_single.tres",
+	"res://resources/encounters/presets/tanker_bomb_vertical.tres",
 	"res://resources/encounters/presets/caster_single.tres",
 	"res://resources/encounters/presets/tanker_guard_sniper.tres",
 	"res://resources/encounters/presets/interceptor_pair.tres",

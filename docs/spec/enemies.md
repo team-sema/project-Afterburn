@@ -22,17 +22,18 @@
 
 ## EnemyGenerator
 
-- 생성기는 4초 + 0~0.5초 지터의 타이머와 현재 Threat만 관리하고, `main_encounter_pool.tres`에 선택을 요청한다.
+- 생성기는 4초 + 0~0.5초 지터의 타이머와 현재 Threat만 관리하고, `main_encounter_pool.tres`에 선택을 요청한다. 직전 **2개** Encounter id는 후보에서 빼서(대안이 있을 때) 반복을 줄인다.
 - `MainEncounterPool`이 현재 Threat에서 weight가 0보다 큰 `EncounterPreset` 전체를 대상으로 weighted random을 정확히 한 번 수행한다.
-- 각 EncounterPreset은 `difficulty`(난이도 점수)를 가진다. 풀 Entry의 `min_threat` 이상이면 `weight = 60 / difficulty`로 뽑히고, 미만이면 0이다(어려울수록 희귀).
+- 각 EncounterPreset은 `difficulty`(난이도 점수)를 가진다. 풀 Entry의 `min_threat` 이상이면 `weight = 60 / sqrt(difficulty)`로 뽑히고, 미만이면 0이다(어려울수록 희귀하되 비율은 완만).
 - `EncounterPreset`은 FormationLayout Scene, 편대·개별 MovementSequence, 멤버와 슬롯, 등장·해제 조건을 조합하며 `EnemySpawner`가 실제 적을 생성한다.
-- Striker/Bomb/Caster/Sniper 중 Bomb·Caster·Sniper는 `SingleFormation`의 Slot0을 사용하는 1슬롯 Encounter이며, 생성 직후 편대를 해제해 기존 개별 MovementSequence를 그대로 실행한다.
-- **Green:** Drone 편대 — `HorizontalFormation`의 명시적 슬롯 5개에 동시 스폰
+- Striker/Caster/Sniper 중 Caster·Sniper는 `SingleFormation` 1슬롯 후 즉시 해제해 개별 MovementSequence를 탄다. **Bomb 단독 Encounter는 없다.**
+- **Green:** Drone 편대 — `HorizontalFormation`의 명시적 슬롯 5개에 동시 스폰 · `drone_zigzag_mirrored`(V5 + zigzag·mirrored)도 Threat 1
 - **Yellow 호위 (5기):** `striker_drone_diamond_5` — `DiamondFormation5` 최후방(Slot0) Striker + Slot1–4 Drone 4기(하단 팁 포함). 슬롯 간격 ±32x / ±28y
 - **Yellow 호위 (13기):** `striker_drone_diamond_13` — `DiamondFormation13`(1-3-5-3-1) 꼭짓점 Striker + Drone 12기. Threat 2+. 슬롯 step 20
+- **Bomb 호위:** `tanker_bomb_vertical`(Threat 2+)
 - **Awl:** 3마리 V 편대
 - **Interceptor:** `interceptor_pair`(Threat 2+) / `interceptor_trio`(Threat 3+)만 사용하며 단독 Encounter는 없음
-- Pink / Bomb / Caster: `caster_single` / `bomb_single`. Sniper는 `tanker_guard_sniper` 후방 슬롯으로만 등장
+- Pink / Caster: `caster_single`. Sniper는 `tanker_guard_sniper` 후방 슬롯으로만 등장
 - 베이스·Drone·Striker는 `EnemyShootComponent`로 조준 사격
 - **초반(Threat 1) 사격 압력** — 투사체를 쏘는 Threat 1 적은 아래 값을 쓴다. Kamikaze·Bomb은 투사체가 없고, Caster는 Threat 3이라 초반 압력에 포함되지 않는다
 
@@ -45,22 +46,23 @@
 
 ### MainEncounterPool difficulty · min_threat
 
-| Encounter | difficulty | min_threat | weight (`60/diff`) |
+| Encounter | difficulty | min_threat | weight (`60/√diff`) |
 |---|---:|---:|---:|
-| `drone_formation` | 5 | 1 | 12 |
-| `striker_drone_diamond_5` | 7 | 1 | ≈8.57 |
-| `bomb_single` | 6 | 1 | 10 |
-| `awl_formation` | 12 | 1 | 5 |
-| `striker_drone_diamond_13` | 15 | 2 | 4 |
-| `tanker_guard_sniper` | 10 | 2 | 6 |
-| `interceptor_pair` | 12 | 2 | 5 |
-| `caster_single` | 7 | 3 | ≈8.57 |
-| `v7_drone_down` | 7 | 3 | ≈8.57 |
-| `x9_drone_down` | 9 | 3 | ≈6.67 |
-| `x9_caster_drone_orbit` | 15 | 3 | 4 |
-| `interceptor_trio` | 18 | 3 | ≈3.33 |
+| `drone_formation` | 11 | 1 | ≈18.11 |
+| `drone_zigzag_mirrored` | 6 | 1 | ≈24.49 |
+| `striker_drone_diamond_5` | 7 | 1 | ≈22.68 |
+| `awl_formation` | 12 | 1 | ≈17.32 |
+| `striker_drone_diamond_13` | 15 | 2 | ≈15.49 |
+| `tanker_guard_sniper` | 10 | 2 | ≈18.97 |
+| `tanker_bomb_vertical` | 9 | 2 | 20 |
+| `interceptor_pair` | 12 | 2 | ≈17.32 |
+| `caster_single` | 7 | 3 | ≈22.68 |
+| `v7_drone_down` | 7 | 3 | ≈22.68 |
+| `x9_drone_down` | 9 | 3 | 20 |
+| `x9_caster_drone_orbit` | 15 | 3 | ≈15.49 |
+| `interceptor_trio` | 18 | 3 | ≈14.14 |
 
-Threat 1 후보 합 weight ≈35.57(drone/diamond_5/bomb/awl), Threat 2는 ≈50.57, Threat 3은 ≈81.7이다. Bomb·Awl은 Threat 1부터 열려 초반 로스터가 4종이 된다.
+Threat 1 후보 합 weight ≈82.6(zigzag/diamond_5가 상위, `drone_formation`·awl는 하위), Threat 2는 ≈154.4, Threat 3은 ≈249.4이다. 초반 로스터는 4종이다.
 
 테스트·웨폰 랩용 추가 드론 하강 프리셋(풀 미등록): `v3_drone_down`, `v5_drone_down`, `v9_drone_down`, `inverted_v3_drone_down`, `inverted_v5_drone_down`, `inverted_v7_drone_down`, `x5_drone_down`, `drone_triangle_formation`.
 
@@ -99,15 +101,22 @@ Threat 1 후보 합 weight ≈35.57(drone/diamond_5/bomb/awl), Threat 2는 ≈50
 
 ## Bomb 근접 자폭
 
-`BombProximityFuseComponent`:
+`BombProximityFuseComponent` (HP 140):
 
-- `bomb_straight_down.tres`의 `LinearMovementStep`으로 느린 하강 `(0, 16)`, HP 140
 - 플레이어가 `trigger_radius`(60) 안이면 정지 → **2초간 빨간 점멸 3회** → 자폭
+- 편대 소속이면 기폭 시작 시 편대 중심 이동을 멈추고 Bomb를 detach한 뒤 무장
 - 신관 무장과 적색 점멸이 시작되면 반투명 범위 프리뷰 표시
 - 폭발 판정·VFX 최대 링·범위 프리뷰 반경은 모두 `base_explosion_radius(40) * 1.5 = 60px`
 - `blast_damage` **1** (플레이어 피격은 이벤트당 항상 1)
-- `고속 기폭 장치` 적 증강 활성 시 무장 시간 `2.0초 / 1.5 ≈ 1.33초`
-- 투사체 없음
+- 폭발 반경 안의 **다른 적**은 hurtbox 겹침 시 즉시 처치(실드·HP 무시, 본인 제외). 점수·XP는 일반 `no_health` 경로
+- `고속 기폭 장치` 적 증강 활성 시 무장 시간 `2.0초 / 1.5 ≈ 1.33초` (`target_spawn_id` 없음 → 모든 Bomb)
+- 투사체 없음 · **단독 `bomb_single` · `bomb_drone_diamond` · `tanker_bomb_horizontal` Encounter는 제거**
+
+### Bomb Encounter
+
+| Encounter | 레이아웃 | 배치 | 이동 | min_threat |
+|---|---|---|---|---:|
+| `tanker_bomb_vertical` | `VerticalFormation` | Tanker `bottom_inner` + Bomb `center` | `tanker_bomb_approach`(플레이어 호밍 22px/s) · 유지 | 2 |
 
 ## Drone 대각 편대
 
