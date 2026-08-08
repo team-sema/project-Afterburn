@@ -1,17 +1,20 @@
-[gd_resource type="Resource" script_class="EncounterPreset" load_steps=13 format=3]
+[gd_resource type="Resource" script_class="EncounterPreset" load_steps=16 format=3]
 
 [ext_resource type="Script" path="res://resources/encounters/encounter_preset.gd" id="1_preset"]
 [ext_resource type="Script" path="res://resources/encounters/encounter_member.gd" id="2_member"]
 [ext_resource type="PackedScene" path="res://formations/layouts/diamond_formation.tscn" id="3_layout"]
-[ext_resource type="Resource" path="res://resources/enemy_movement/sequences/formation_entry_third_patrol.tres" id="4_movement"]
+[ext_resource type="Resource" path="res://resources/enemy_movement/sequences/formation_entry_third.tres" id="4_movement"]
 [ext_resource type="Resource" path="res://resources/formation_behaviors/maintain.tres" id="5_behavior"]
 [ext_resource type="PackedScene" path="res://enemies/normal_enemy.tscn" id="6_drone"]
 [ext_resource type="PackedScene" path="res://enemies/moving_enemy.tscn" id="7_striker"]
+[ext_resource type="Resource" path="res://resources/enemy_movement/sequences/individual_scatter_2_5.tres" id="8_scatter"]
+[ext_resource type="Resource" path="res://resources/enemy_movement/sequences/individual_striker_charge_2_5.tres" id="9_charge"]
 
 [sub_resource type="Resource" id="Member_striker_rear"]
 script = ExtResource("2_member")
 enemy_scene = ExtResource("7_striker")
 slot_index = 0
+individual_movement_override = ExtResource("9_charge")
 
 [sub_resource type="Resource" id="Member_drone_left"]
 script = ExtResource("2_member")
@@ -28,14 +31,21 @@ script = ExtResource("2_member")
 enemy_scene = ExtResource("6_drone")
 slot_index = 3
 
+[sub_resource type="Resource" id="Member_drone_tip"]
+script = ExtResource("2_member")
+enemy_scene = ExtResource("6_drone")
+slot_index = 4
+
 [resource]
 script = ExtResource("1_preset")
-encounter_id = &"striker_drone_diamond"
-difficulty = 6.0
+encounter_id = &"striker_drone_diamond_5"
+difficulty = 7.0
 formation_layout_scene = ExtResource("3_layout")
 formation_movement_sequence = ExtResource("4_movement")
 formation_behavior = ExtResource("5_behavior")
-members = Array[ExtResource("2_member")]([SubResource("Member_striker_rear"), SubResource("Member_drone_left"), SubResource("Member_drone_center"), SubResource("Member_drone_right")])
+members = Array[ExtResource("2_member")]([SubResource("Member_striker_rear"), SubResource("Member_drone_left"), SubResource("Member_drone_center"), SubResource("Member_drone_right"), SubResource("Member_drone_tip")])
 spawn_anchor = 0
 spawn_offset = Vector2(0, -16)
 spawn_edge_margin = 8.0
+formation_break_condition = 1
+individual_movement_sequence = ExtResource("8_scatter")

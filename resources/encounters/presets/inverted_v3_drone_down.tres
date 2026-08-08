@@ -1,11 +1,12 @@
-[gd_resource type="Resource" script_class="EncounterPreset" load_steps=10 format=3]
+[gd_resource type="Resource" script_class="EncounterPreset" load_steps=11 format=3]
 
 [ext_resource type="Script" path="res://resources/encounters/encounter_preset.gd" id="1_preset"]
 [ext_resource type="Script" path="res://resources/encounters/encounter_member.gd" id="2_member"]
 [ext_resource type="PackedScene" path="res://formations/layouts/inverted_v3_formation.tscn" id="3_layout"]
-[ext_resource type="Resource" path="res://resources/enemy_movement/sequences/straight_down.tres" id="4_movement"]
+[ext_resource type="Resource" path="res://resources/enemy_movement/sequences/drone_midmap_entry.tres" id="4_movement"]
 [ext_resource type="Resource" path="res://resources/formation_behaviors/maintain.tres" id="5_behavior"]
 [ext_resource type="PackedScene" path="res://enemies/normal_enemy.tscn" id="6_drone"]
+[ext_resource type="Resource" path="res://resources/enemy_movement/sequences/individual_scatter_double.tres" id="7_scatter"]
 
 [sub_resource type="Resource" id="Member0"]
 script = ExtResource("2_member")
@@ -29,3 +30,5 @@ members = Array[ExtResource("2_member")]([SubResource("Member0"), SubResource("M
 spawn_anchor = 0
 spawn_offset = Vector2(0, -16)
 spawn_edge_margin = 8.0
+formation_break_condition = 1
+individual_movement_sequence = ExtResource("7_scatter")

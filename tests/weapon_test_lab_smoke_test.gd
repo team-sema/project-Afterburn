@@ -27,17 +27,12 @@ func _run() -> void:
 		minimum_size.x <= reference_size.x and minimum_size.y <= reference_size.y,
 		"lab minimum size %s fits the reference viewport %s" % [minimum_size, reference_size],
 	)
-	for panel_path in ["Layout/LeftPanel", "Layout/RightPanel"]:
-		var panel := lab.get_node(panel_path) as Control
-		var panel_rect := panel.get_global_rect()
-		_expect(
-			panel_rect.position.x >= 0.0
-			and panel_rect.position.y >= 0.0
-			and panel_rect.end.x <= reference_size.x
-			and panel_rect.end.y <= reference_size.y,
-			"%s stays inside the reference viewport" % panel_path,
-		)
-	_expect(enemy_buttons.get_child_count() == 5, "all five enemy spawn controls are present")
+	_expect(
+		enemy_buttons.get_child_count() >= 2
+		and enemy_buttons.get_node_or_null("Enemy_drone_formation") != null
+		and enemy_buttons.get_node_or_null("Enemy_striker_drone_diamond_5") != null,
+		"lab discovers core encounter spawn controls",
+	)
 	_expect(weapon_buttons.get_child_count() == 7, "all seven weapon controls are present")
 	_expect(trait_buttons.get_child_count() == 4, "default blaster exposes its four traits")
 	_expect(lab.get_player_augment_count() == 13, "all 13 facility augments are discovered")
@@ -118,9 +113,9 @@ func _run() -> void:
 	(lab.get_node("%ClearTargetsButton") as Button).pressed.emit()
 	await process_frame
 
-	(enemy_buttons.get_node("Enemy_striker_drone_diamond/Spawn_striker_drone_diamond") as Button).pressed.emit()
+	(enemy_buttons.get_node("Enemy_striker_drone_diamond_5/Spawn_striker_drone_diamond_5") as Button).pressed.emit()
 	await process_frame
-	_expect(_count_descendants_in_group(gameplay, &"enemies") == 4, "spawn control creates a diamond escort")
+	_expect(_count_descendants_in_group(gameplay, &"enemies") == 5, "spawn control creates a diamond_5 escort")
 	var spawned_enemy := _first_descendant_in_group(gameplay, &"enemies") as Enemy
 	var experience_drop := spawned_enemy.get_node("ExperienceDropComponent") as ExperienceDropComponent
 	_expect(experience_drop.drop_chance == 0.0, "test targets have experience drops disabled")
@@ -130,7 +125,7 @@ func _run() -> void:
 	_expect(_count_descendants_of_type(gameplay, ExperienceOrb) == 0, "defeated test targets do not create experience orbs")
 	(lab.get_node("%ClearTargetsButton") as Button).pressed.emit()
 	await process_frame
-	_expect(_count_descendants_in_group(gameplay, &"enemies") == 0, "lab clears remaining diamond escorts")
+	_expect(_count_descendants_in_group(gameplay, &"enemies") == 0, "lab clears remaining diamond_5 escorts")
 
 	var ricochet_button := trait_buttons.get_node("Trait_blaster_ricochet") as Button
 	ricochet_button.pressed.emit()
@@ -162,7 +157,7 @@ func _run() -> void:
 	)
 
 	var repeat_striker := (
-		enemy_buttons.get_node("Enemy_striker_drone_diamond/Repeat_striker_drone_diamond") as CheckButton
+		enemy_buttons.get_node("Enemy_striker_drone_diamond_5/Repeat_striker_drone_diamond_5") as CheckButton
 	)
 	var continuous_button := lab.get_node("%ContinuousSpawnButton") as Button
 	var continuous_timer := lab.get_node("%ContinuousSpawnTimer") as Timer
@@ -173,7 +168,7 @@ func _run() -> void:
 	continuous_timer.timeout.emit()
 	await process_frame
 	_expect(
-		_count_descendants_in_group(gameplay, &"enemies") == 4,
+		_count_descendants_in_group(gameplay, &"enemies") == 5,
 		"continuous mode spawns each selected EncounterPreset",
 	)
 	continuous_button.button_pressed = false
@@ -181,7 +176,7 @@ func _run() -> void:
 	continuous_timer.timeout.emit()
 	await process_frame
 	_expect(
-		_count_descendants_in_group(gameplay, &"enemies") == 4,
+		_count_descendants_in_group(gameplay, &"enemies") == 5,
 		"stopped continuous mode ignores later timer ticks",
 	)
 

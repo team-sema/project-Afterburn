@@ -28,7 +28,8 @@
 - `EncounterPreset`은 FormationLayout Scene, 편대·개별 MovementSequence, 멤버와 슬롯, 등장·해제 조건을 조합하며 `EnemySpawner`가 실제 적을 생성한다.
 - Striker/Bomb/Caster/Sniper 중 Bomb·Caster·Sniper는 `SingleFormation`의 Slot0을 사용하는 1슬롯 Encounter이며, 생성 직후 편대를 해제해 기존 개별 MovementSequence를 그대로 실행한다.
 - **Green:** Drone 편대 — `HorizontalFormation`의 명시적 슬롯 5개에 동시 스폰
-- **Yellow 호위:** `striker_drone_diamond` — `DiamondFormation` 최후방(Slot0) Striker + 전방 3슬롯(Slot1–3) Drone. 하단 팁(Slot4)은 비움
+- **Yellow 호위 (5기):** `striker_drone_diamond_5` — `DiamondFormation5` 최후방(Slot0) Striker + Slot1–4 Drone 4기(하단 팁 포함). 슬롯 간격 ±32x / ±28y
+- **Yellow 호위 (13기):** `striker_drone_diamond_13` — `DiamondFormation13`(1-3-5-3-1) 꼭짓점 Striker + Drone 12기. Threat 2+. 슬롯 step 20
 - **Awl:** 3마리 V 편대
 - **Interceptor:** `interceptor_pair`(Threat 2+) / `interceptor_trio`(Threat 3+)만 사용하며 단독 Encounter는 없음
 - Pink / Bomb / Caster: `caster_single` / `bomb_single`. Sniper는 `tanker_guard_sniper` 후방 슬롯으로만 등장
@@ -37,7 +38,7 @@
 
 | 적 | `fire_interval` | 볼리 | 발수 | 탄속 | `initial_delay` |
 |---|---|---|---|---|---|
-| Drone (5기 편대 / 호위 3기) | 4.5 | 1 | 1 | 105 | 1.5 |
+| Drone (5기 편대 / 호위 4기) | 4.5 | 1 | 1 | 105 | 1.5 |
 | Striker (호위 편대) | 4.5 | 2 (`burst_interval` 0.15) | 5 (`spread` 15°) | 80 | 1.5 |
 
 - 이후 난이도는 적 오그먼트 `ACTION_RATE`가 `fire_interval`·`burst_interval`을 나눠 올리고, 상위 Threat 적이 합류하며 오른다. 탄속에는 배율이 없다
@@ -47,9 +48,10 @@
 | Encounter | difficulty | min_threat | weight (`60/diff`) |
 |---|---:|---:|---:|
 | `drone_formation` | 5 | 1 | 12 |
-| `striker_drone_diamond` | 6 | 1 | 10 |
+| `striker_drone_diamond_5` | 7 | 1 | ≈8.57 |
 | `bomb_single` | 6 | 1 | 10 |
 | `awl_formation` | 12 | 1 | 5 |
+| `striker_drone_diamond_13` | 15 | 2 | 4 |
 | `tanker_guard_sniper` | 10 | 2 | 6 |
 | `interceptor_pair` | 12 | 2 | 5 |
 | `caster_single` | 7 | 3 | ≈8.57 |
@@ -58,7 +60,7 @@
 | `x9_caster_drone_orbit` | 15 | 3 | 4 |
 | `interceptor_trio` | 18 | 3 | ≈3.33 |
 
-Threat 1 후보 합 weight 37(drone/diamond/bomb/awl), Threat 2는 48, Threat 3은 ≈79.1이다. Bomb·Awl은 Threat 1부터 열려 초반 로스터가 4종이 된다.
+Threat 1 후보 합 weight ≈35.57(drone/diamond_5/bomb/awl), Threat 2는 ≈50.57, Threat 3은 ≈81.7이다. Bomb·Awl은 Threat 1부터 열려 초반 로스터가 4종이 된다.
 
 테스트·웨폰 랩용 추가 드론 하강 프리셋(풀 미등록): `v3_drone_down`, `v5_drone_down`, `v9_drone_down`, `inverted_v3_drone_down`, `inverted_v5_drone_down`, `inverted_v7_drone_down`, `x5_drone_down`, `drone_triangle_formation`.
 
@@ -111,7 +113,7 @@ Threat 1 후보 합 weight 37(drone/diamond/bomb/awl), Threat 2는 48, Threat 3�
 
 `drone_entry_scatter.tres`는 세로 줄로 모인 뒤 `drone_entry_gather`(뷰포트 y≈0.2)에서 즉시 해제하고, 각 개체가 하위 180° 중 랜덤 직선으로 산개한다.
 
-`x9_drone_down` / `v3_drone_down` / `v5_drone_down` / `v7_drone_down` / `v9_drone_down` / `x5_drone_down`은 `TOP_RANDOM` 스폰 후 `drone_midmap_entry`(뷰포트 y≈0.5, 가로 유지, 60px/s)로 하강한 뒤 `SEQUENCE_FINISHED`로 편대를 해제하고, `individual_scatter_double`(120px/s = 진입 속도 2배)로 산개한다. 산개 방향은 슬롯 오프셋 기준 외향이다(좌익→좌하, 우익→우하, 중앙·선두→하방) 해서 좌우가 교차하지 않는다.
+`x9_drone_down` / `v3_drone_down` / `v5_drone_down` / `v7_drone_down` / `v9_drone_down` / `x5_drone_down` / `inverted_v3_drone_down` / `inverted_v5_drone_down` / `inverted_v7_drone_down`은 `TOP_RANDOM` 스폰 후 `drone_midmap_entry`(뷰포트 y≈0.5, 가로 유지, 60px/s)로 하강한 뒤 `SEQUENCE_FINISHED`로 편대를 해제하고, `individual_scatter_double`(150px/s = 진입 속도 2.5배)로 산개한다. 산개 방향은 슬롯 오프셋 기준 외향이다(좌익→좌하, 우익→우하, 중앙·선두→하방) 해서 좌우가 교차하지 않는다.
 
 `drone_zigzag_formation.tres` / `drone_zigzag_mirrored.tres`는 `zigzag.tres`의 `BoundedDiagonalMovementStep`을 쓴다. 속도와 각도가 일정한 대각선으로 비행하며, VisibleRect가 아닌 더 넓은 MovementArea에서만 방향을 반사하므로 일부 offscreen 이동과 재진입이 가능하다.
 
@@ -119,14 +121,22 @@ Threat 1 후보 합 weight 37(drone/diamond/bomb/awl), Threat 2는 48, Threat 3�
 
 ## Striker 드론 호위 (마름모)
 
-`striker_drone_diamond.tres`가 `DiamondFormation`을 쓴다.
+`striker_drone_diamond_5.tres`가 `DiamondFormation5`(5슬롯)을 쓴다.
 
 - Slot0(`top`, 화면 상단·최후방): Striker
-- Slot1–3(`left`/`center`/`right`): Drone 3기 — Striker 전방 방패
-- Slot4(`bottom`)는 비움
-- 이동: `formation_entry_third_patrol.tres` — 뷰포트 높이 약 1/3까지 직하강한 뒤 `HorizontalPatrolMovementStep`으로 좌우 왕복. 편대는 해제하지 않는다
+- Slot1–4(`left`/`center`/`right`/`bottom`): Drone 4기 — 전방·측면·하단 팁까지 채움
+- 슬롯 간격: 좌우 ±32, 상하 ±28 (기존 ±48/±40보다 조밀)
+- 이동: `formation_entry_third.tres` — 뷰포트 높이 약 1/3까지 직하강(40px/s) 후 `SEQUENCE_FINISHED`로 편대 해제
+- 산개: Drone은 `individual_scatter_2_5`(100px/s = 진입 ×2.5, 슬롯 외향). Striker는 `individual_striker_charge_2_5`(동일 속도, 해제 시점 플레이어 방향 돌진)
 
-레거시 `striker_single.tres`는 단일 해제 경로용으로 남기되 `MainEncounterPool`에는 넣지 않는다.
+`striker_drone_diamond_13.tres`가 `DiamondFormation13`(13슬롯, 1-3-5-3-1)을 쓴다.
+
+- Slot0(`row0_center`): Striker
+- Slot1–12: Drone 12기
+- 슬롯 step 20 (중형 다이아몬드보다 조밀한 격자)
+- 진입·산개 규칙은 5기 버전과 동일. `MainEncounterPool` min_threat **2**
+
+레거시 `striker_single.tres`는 단일 해제 경로용으로 남기되 `MainEncounterPool`에는 넣지 않는다. 구 id `striker_drone_diamond`는 `_5` / `_13`으로 교체됐다.
 
 ## X9 Caster 궤도
 
