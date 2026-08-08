@@ -15,6 +15,7 @@ slot_index = 0
 [resource]
 script = ExtResource("1_preset")
 encounter_id = &"caster_single"
+difficulty = 7.0
 formation_layout_scene = ExtResource("3_layout")
 formation_movement_sequence = ExtResource("4_release")
 members = Array[ExtResource("2_member")]([SubResource("Member_caster")])

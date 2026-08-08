@@ -5,18 +5,19 @@ const DRONE_REINFORCEMENT := preload(
 )
 const BOMB_FAST_FUSE := preload("res://resources/enemy_augments/enemy_bomb_fast_fuse.tres")
 
-const EXPECTED_WEIGHTS := {
-	&"drone_formation": [6.0, 6.0, 6.0],
-	&"striker_drone_diamond": [6.0, 6.0, 6.0],
-	&"awl_formation": [0.0, 6.0, 6.0],
-	&"bomb_single": [0.0, 6.0, 6.0],
-	&"caster_single": [0.0, 0.0, 4.0],
-	&"tanker_guard_sniper": [0.0, 1.0, 4.0],
-	&"x9_drone_down": [0.0, 0.0, 3.0],
-	&"x9_caster_drone_orbit": [0.0, 0.0, 1.0],
-	&"v7_drone_down": [0.0, 0.0, 2.0],
-	&"interceptor_pair": [0.0, 2.0, 2.0],
-	&"interceptor_trio": [0.0, 0.0, 1.0],
+## difficulty + min_threat for live MainEncounterPool entries.
+const EXPECTED_ROSTER := {
+	&"drone_formation": {"difficulty": 5.0, "min_threat": 1},
+	&"striker_drone_diamond": {"difficulty": 6.0, "min_threat": 1},
+	&"bomb_single": {"difficulty": 6.0, "min_threat": 1},
+	&"awl_formation": {"difficulty": 12.0, "min_threat": 1},
+	&"tanker_guard_sniper": {"difficulty": 10.0, "min_threat": 2},
+	&"interceptor_pair": {"difficulty": 12.0, "min_threat": 2},
+	&"caster_single": {"difficulty": 7.0, "min_threat": 3},
+	&"x9_drone_down": {"difficulty": 9.0, "min_threat": 3},
+	&"x9_caster_drone_orbit": {"difficulty": 15.0, "min_threat": 3},
+	&"v7_drone_down": {"difficulty": 7.0, "min_threat": 3},
+	&"interceptor_trio": {"difficulty": 18.0, "min_threat": 3},
 }
 
 var failures := PackedStringArray()
@@ -81,13 +82,19 @@ func _test_generator_and_pool_shape() -> void:
 			continue
 		_expect(not ids.has(entry.preset.encounter_id), "live encounter ids are unique")
 		ids[entry.preset.encounter_id] = true
-	_expect(ids.size() == EXPECTED_WEIGHTS.size(), "MainEncounterPool roster matches migration plan")
+	_expect(ids.size() == EXPECTED_ROSTER.size(), "MainEncounterPool roster matches difficulty plan")
+
+
+func _expected_weight(difficulty: float, min_threat: int, threat_level: int) -> float:
+	if threat_level < min_threat:
+		return 0.0
+	return EncounterPoolEntry.WEIGHT_SCALE / difficulty
 
 
 func _test_threat_rosters_and_weights() -> void:
 	_expect_ids(
 		pool.get_eligible_entries(1),
-		[&"drone_formation", &"striker_drone_diamond"],
+		[&"drone_formation", &"striker_drone_diamond", &"bomb_single", &"awl_formation"],
 		"Threat 1",
 	)
 	_expect_ids(
@@ -95,8 +102,8 @@ func _test_threat_rosters_and_weights() -> void:
 		[
 			&"drone_formation",
 			&"striker_drone_diamond",
-			&"awl_formation",
 			&"bomb_single",
+			&"awl_formation",
 			&"tanker_guard_sniper",
 			&"interceptor_pair",
 		],
@@ -107,14 +114,14 @@ func _test_threat_rosters_and_weights() -> void:
 		[
 			&"drone_formation",
 			&"striker_drone_diamond",
-			&"awl_formation",
 			&"bomb_single",
-			&"caster_single",
+			&"awl_formation",
 			&"tanker_guard_sniper",
+			&"interceptor_pair",
+			&"caster_single",
 			&"x9_drone_down",
 			&"x9_caster_drone_orbit",
 			&"v7_drone_down",
-			&"interceptor_pair",
 			&"interceptor_trio",
 		],
 		"Threat 3",
@@ -127,34 +134,57 @@ func _test_threat_rosters_and_weights() -> void:
 		threat_three_ids,
 		"Threat above authored maximum",
 	)
+	var total_by_threat := {1: 0.0, 2: 0.0, 3: 0.0}
 	for entry in pool.entries:
-		var expected := EXPECTED_WEIGHTS.get(entry.preset.encounter_id, []) as Array
-		for threat_level in range(1, 4):
-			_expect(
-				is_equal_approx(entry.get_weight(threat_level), float(expected[threat_level - 1])),
-				"%s Threat %d weight is %.1f"
-				% [entry.preset.encounter_id, threat_level, float(expected[threat_level - 1])],
-			)
+		var expected := EXPECTED_ROSTER.get(entry.preset.encounter_id, {}) as Dictionary
+		_expect(not expected.is_empty(), "%s is in the difficulty roster" % entry.preset.encounter_id)
+		if expected.is_empty():
+			continue
 		_expect(
-			is_equal_approx(entry.get_weight(99), float(expected[2])),
-			"%s reuses its final weight above Threat 3" % entry.preset.encounter_id,
+			is_equal_approx(entry.preset.difficulty, float(expected["difficulty"])),
+			"%s difficulty is authored" % entry.preset.encounter_id,
 		)
-	_expect(is_equal_approx(pool.get_total_weight(1), 12.0), "Threat 1 total weight is 12")
-	_expect(is_equal_approx(pool.get_total_weight(2), 27.0), "Threat 2 total weight is 27")
-	_expect(is_equal_approx(pool.get_total_weight(3), 41.0), "Threat 3 total weight is 41")
+		_expect(
+			entry.min_threat == int(expected["min_threat"]),
+			"%s min_threat is authored" % entry.preset.encounter_id,
+		)
+		for threat_level in range(1, 4):
+			var want := _expected_weight(
+				float(expected["difficulty"]),
+				int(expected["min_threat"]),
+				threat_level,
+			)
+			_expect(
+				is_equal_approx(entry.get_weight(threat_level), want),
+				"%s Threat %d weight is %.3f"
+				% [entry.preset.encounter_id, threat_level, want],
+			)
+			total_by_threat[threat_level] = float(total_by_threat[threat_level]) + want
+		_expect(
+			is_equal_approx(
+				entry.get_weight(99),
+				_expected_weight(float(expected["difficulty"]), int(expected["min_threat"]), 99),
+			),
+			"%s keeps inverse-difficulty weight above Threat 3" % entry.preset.encounter_id,
+		)
+	_expect(is_equal_approx(pool.get_total_weight(1), float(total_by_threat[1])), "Threat 1 total matches roster")
+	_expect(is_equal_approx(pool.get_total_weight(2), float(total_by_threat[2])), "Threat 2 total matches roster")
+	_expect(is_equal_approx(pool.get_total_weight(3), float(total_by_threat[3])), "Threat 3 total matches roster")
 
 
 func _test_deterministic_weighted_selection() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 20260808
 	var counts: Dictionary = {}
+	var total_weight := pool.get_total_weight(3)
 	for _index in 36000:
 		var preset := pool.choose(3, rng)
 		_expect(preset != null, "Threat 3 weighted selection always returns a preset")
 		if preset != null:
 			counts[preset.encounter_id] = int(counts.get(preset.encounter_id, 0)) + 1
-	for encounter_id in EXPECTED_WEIGHTS:
-		var expected_count := 36000.0 * float(EXPECTED_WEIGHTS[encounter_id][2]) / 41.0
+	for entry in pool.entries:
+		var encounter_id := entry.preset.encounter_id
+		var expected_count := 36000.0 * entry.get_weight(3) / total_weight
 		var actual_count := float(counts.get(encounter_id, 0))
 		var tolerance := maxf(80.0, expected_count * 0.08)
 		_expect(
@@ -314,28 +344,25 @@ func _test_invalid_weight_safety() -> void:
 	var null_entry := EncounterPoolEntry.new()
 	_expect(not null_entry.get_validation_errors().is_empty(), "null EncounterPreset is rejected")
 
-	var no_data_entry := EncounterPoolEntry.new()
-	no_data_entry.preset = preset
-	_expect(not no_data_entry.get_validation_errors().is_empty(), "missing ThreatWeight data is rejected")
+	var bad_difficulty := preset.duplicate() as EncounterPreset
+	bad_difficulty.difficulty = 0.0
+	var bad_entry := EncounterPoolEntry.new()
+	bad_entry.preset = bad_difficulty
+	_expect(not bad_entry.get_validation_errors().is_empty(), "non-positive difficulty is rejected")
 
-	var negative := ThreatWeight.new()
-	negative.threat_level = 1
-	negative.weight = -1.0
-	var negative_entry := EncounterPoolEntry.new()
-	negative_entry.preset = preset
-	negative_entry.threat_weights = [negative]
-	_expect(not negative_entry.get_validation_errors().is_empty(), "negative weight is rejected")
+	var locked_entry := EncounterPoolEntry.new()
+	locked_entry.preset = preset
+	locked_entry.min_threat = 3
+	_expect(is_equal_approx(locked_entry.get_weight(1), 0.0), "below min_threat weight is zero")
+	_expect(
+		is_equal_approx(locked_entry.get_weight(3), EncounterPoolEntry.WEIGHT_SCALE / preset.difficulty),
+		"at min_threat weight is inverse difficulty",
+	)
 
-	var zero := ThreatWeight.new()
-	zero.threat_level = 1
-	zero.weight = 0.0
-	var zero_entry := EncounterPoolEntry.new()
-	zero_entry.preset = preset
-	zero_entry.threat_weights = [zero]
 	var zero_pool := EncounterPool.new()
-	zero_pool.entries = [zero_entry]
-	_expect(not zero_pool.validate(), "all-zero candidate pool is invalid")
-	_expect(zero_pool.choose(1) == null, "all-zero candidate pool returns null safely")
+	zero_pool.entries = [locked_entry]
+	_expect(not zero_pool.validate(), "pool with no Threat 1 candidates is invalid")
+	_expect(zero_pool.choose(1) == null, "empty Threat 1 candidate pool returns null safely")
 
 	var duplicate_pool := EncounterPool.new()
 	duplicate_pool.entries = [pool.entries[0], pool.entries[0]]

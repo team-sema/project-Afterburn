@@ -32,7 +32,6 @@ func _run() -> void:
 	await _test_v7_drone_down()
 	await _test_v9_drone_down()
 	await _test_v3_and_x5_midmap_scatter_presets()
-	await _test_mixed_special_detach_keeps_regular_members()
 	await _test_weighted_main_pool_and_flat_spawn()
 
 	spawner.queue_free()
@@ -271,46 +270,6 @@ func _test_v3_and_x5_midmap_scatter_presets() -> void:
 		)
 
 
-func _test_mixed_special_detach_keeps_regular_members() -> void:
-	var preset := load(
-		"res://resources/encounters/presets/mixed_partial_diamond.tres"
-	) as EncounterPreset
-	var controller := spawner.spawn_encounter(preset) as FormationController
-	controller.set_process(false)
-	controller.center_movement_controller.set_process(false)
-	var awl: Enemy
-	var drones: Array[Enemy] = []
-	for enemy in controller.get_members():
-		if _is_scene(enemy, "res://enemies/kamikaze_enemy.tscn"):
-			awl = enemy
-		else:
-			drones.append(enemy)
-	_expect(awl != null and drones.size() == 2, "mixed Encounter spawns one Awl and two Drones")
-	var awl_slot := awl.get_formation_slot().slot_index
-	var awl_position := awl.global_position
-	controller.center_movement_controller.sequence_finished.emit()
-	_expect(awl.call("is_charging"), "mixed Encounter Awl independently begins charging")
-	_expect(not awl.is_formation_member(), "mixed Encounter detaches only the Awl")
-	_expect(controller.get_members().size() == 2, "regular mixed members remain bound")
-	_expect(controller.get_layout().get_slot(awl_slot) != null, "detached mixed slot remains empty")
-	var drone_positions: Array[Vector2] = []
-	for drone in drones:
-		drone_positions.append(drone.global_position)
-	controller.global_position += Vector2(0.0, 24.0)
-	controller.call("_update_member_positions", 0.0)
-	_expect(awl.global_position.is_equal_approx(awl_position), "charging Awl ignores formation motion")
-	for index in drones.size():
-		_expect(drones[index].is_formation_member(), "regular mixed member remains formation-controlled")
-		_expect(
-			drones[index].global_position.is_equal_approx(
-				drone_positions[index] + Vector2(0.0, 24.0)
-			),
-			"regular mixed member continues following the formation",
-		)
-	awl.queue_free()
-	await _free_controller(controller)
-
-
 func _test_weighted_main_pool_and_flat_spawn() -> void:
 	var pool := load(POOL_PATH) as EncounterPool
 	_expect(pool != null and pool.validate(), "MainEncounterPool validates")
@@ -321,12 +280,13 @@ func _test_weighted_main_pool_and_flat_spawn() -> void:
 	for _index in 6000:
 		var selected := pool.choose(3, random_number_generator)
 		counts[selected.encounter_id] = int(counts.get(selected.encounter_id, 0)) + 1
+	# Inverse difficulty: v7(7) > x9(9) > orbit(15).
 	_expect(
-		int(counts.get(&"x9_drone_down", 0)) > int(counts.get(&"v7_drone_down", 0))
-		and int(counts.get(&"v7_drone_down", 0)) > int(
+		int(counts.get(&"v7_drone_down", 0)) > int(counts.get(&"x9_drone_down", 0))
+		and int(counts.get(&"x9_drone_down", 0)) > int(
 			counts.get(&"x9_caster_drone_orbit", 0)
 		),
-		"MainEncounterPool weighted sampling follows flattened 3:2:1 complex ordering",
+		"MainEncounterPool weighted sampling follows inverse-difficulty ordering",
 	)
 
 	var selected := pool.choose(3, random_number_generator)

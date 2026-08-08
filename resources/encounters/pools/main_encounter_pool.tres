@@ -1,8 +1,7 @@
-[gd_resource type="Resource" script_class="EncounterPool" load_steps=59 format=3]
+[gd_resource type="Resource" script_class="EncounterPool" load_steps=15 format=3]
 
 [ext_resource type="Script" path="res://resources/encounters/encounter_pool.gd" id="1_pool"]
 [ext_resource type="Script" path="res://resources/encounters/encounter_pool_entry.gd" id="2_entry"]
-[ext_resource type="Script" path="res://resources/encounters/threat_weight.gd" id="3_weight"]
 [ext_resource type="Resource" path="res://resources/encounters/presets/drone_straight_formation.tres" id="4_drone"]
 [ext_resource type="Resource" path="res://resources/encounters/presets/striker_drone_diamond.tres" id="5_striker"]
 [ext_resource type="Resource" path="res://resources/encounters/presets/awl_charge_formation.tres" id="6_awl"]
@@ -15,226 +14,61 @@
 [ext_resource type="Resource" path="res://resources/encounters/presets/interceptor_pair.tres" id="14_interceptor_pair"]
 [ext_resource type="Resource" path="res://resources/encounters/presets/interceptor_trio.tres" id="15_interceptor_trio"]
 
-[sub_resource type="Resource" id="Weight_drone_t1"]
-script = ExtResource("3_weight")
-threat_level = 1
-weight = 6.0
-
-[sub_resource type="Resource" id="Weight_drone_t2"]
-script = ExtResource("3_weight")
-threat_level = 2
-weight = 6.0
-
-[sub_resource type="Resource" id="Weight_drone_t3"]
-script = ExtResource("3_weight")
-threat_level = 3
-weight = 6.0
-
 [sub_resource type="Resource" id="Entry_drone"]
 script = ExtResource("2_entry")
 preset = ExtResource("4_drone")
-threat_weights = Array[ExtResource("3_weight")]([SubResource("Weight_drone_t1"), SubResource("Weight_drone_t2"), SubResource("Weight_drone_t3")])
-
-[sub_resource type="Resource" id="Weight_striker_t1"]
-script = ExtResource("3_weight")
-threat_level = 1
-weight = 6.0
-
-[sub_resource type="Resource" id="Weight_striker_t2"]
-script = ExtResource("3_weight")
-threat_level = 2
-weight = 6.0
-
-[sub_resource type="Resource" id="Weight_striker_t3"]
-script = ExtResource("3_weight")
-threat_level = 3
-weight = 6.0
+min_threat = 1
 
 [sub_resource type="Resource" id="Entry_striker"]
 script = ExtResource("2_entry")
 preset = ExtResource("5_striker")
-threat_weights = Array[ExtResource("3_weight")]([SubResource("Weight_striker_t1"), SubResource("Weight_striker_t2"), SubResource("Weight_striker_t3")])
-
-[sub_resource type="Resource" id="Weight_awl_t1"]
-script = ExtResource("3_weight")
-threat_level = 1
-weight = 0.0
-
-[sub_resource type="Resource" id="Weight_awl_t2"]
-script = ExtResource("3_weight")
-threat_level = 2
-weight = 6.0
-
-[sub_resource type="Resource" id="Weight_awl_t3"]
-script = ExtResource("3_weight")
-threat_level = 3
-weight = 6.0
-
-[sub_resource type="Resource" id="Entry_awl"]
-script = ExtResource("2_entry")
-preset = ExtResource("6_awl")
-threat_weights = Array[ExtResource("3_weight")]([SubResource("Weight_awl_t1"), SubResource("Weight_awl_t2"), SubResource("Weight_awl_t3")])
-
-[sub_resource type="Resource" id="Weight_bomb_t1"]
-script = ExtResource("3_weight")
-threat_level = 1
-weight = 0.0
-
-[sub_resource type="Resource" id="Weight_bomb_t2"]
-script = ExtResource("3_weight")
-threat_level = 2
-weight = 6.0
-
-[sub_resource type="Resource" id="Weight_bomb_t3"]
-script = ExtResource("3_weight")
-threat_level = 3
-weight = 6.0
+min_threat = 1
 
 [sub_resource type="Resource" id="Entry_bomb"]
 script = ExtResource("2_entry")
 preset = ExtResource("7_bomb")
-threat_weights = Array[ExtResource("3_weight")]([SubResource("Weight_bomb_t1"), SubResource("Weight_bomb_t2"), SubResource("Weight_bomb_t3")])
+min_threat = 1
 
-[sub_resource type="Resource" id="Weight_caster_t1"]
-script = ExtResource("3_weight")
-threat_level = 1
-weight = 0.0
-
-[sub_resource type="Resource" id="Weight_caster_t2"]
-script = ExtResource("3_weight")
-threat_level = 2
-weight = 0.0
-
-[sub_resource type="Resource" id="Weight_caster_t3"]
-script = ExtResource("3_weight")
-threat_level = 3
-weight = 4.0
-
-[sub_resource type="Resource" id="Entry_caster"]
+[sub_resource type="Resource" id="Entry_awl"]
 script = ExtResource("2_entry")
-preset = ExtResource("8_caster")
-threat_weights = Array[ExtResource("3_weight")]([SubResource("Weight_caster_t1"), SubResource("Weight_caster_t2"), SubResource("Weight_caster_t3")])
-
-[sub_resource type="Resource" id="Weight_tanker_t1"]
-script = ExtResource("3_weight")
-threat_level = 1
-weight = 0.0
-
-[sub_resource type="Resource" id="Weight_tanker_t2"]
-script = ExtResource("3_weight")
-threat_level = 2
-weight = 1.0
-
-[sub_resource type="Resource" id="Weight_tanker_t3"]
-script = ExtResource("3_weight")
-threat_level = 3
-weight = 4.0
+preset = ExtResource("6_awl")
+min_threat = 1
 
 [sub_resource type="Resource" id="Entry_tanker"]
 script = ExtResource("2_entry")
 preset = ExtResource("13_tanker")
-threat_weights = Array[ExtResource("3_weight")]([SubResource("Weight_tanker_t1"), SubResource("Weight_tanker_t2"), SubResource("Weight_tanker_t3")])
-
-[sub_resource type="Resource" id="Weight_x9_drone_t1"]
-script = ExtResource("3_weight")
-threat_level = 1
-weight = 0.0
-
-[sub_resource type="Resource" id="Weight_x9_drone_t2"]
-script = ExtResource("3_weight")
-threat_level = 2
-weight = 0.0
-
-[sub_resource type="Resource" id="Weight_x9_drone_t3"]
-script = ExtResource("3_weight")
-threat_level = 3
-weight = 3.0
-
-[sub_resource type="Resource" id="Entry_x9_drone"]
-script = ExtResource("2_entry")
-preset = ExtResource("9_x9_drone")
-threat_weights = Array[ExtResource("3_weight")]([SubResource("Weight_x9_drone_t1"), SubResource("Weight_x9_drone_t2"), SubResource("Weight_x9_drone_t3")])
-
-[sub_resource type="Resource" id="Weight_x9_orbit_t1"]
-script = ExtResource("3_weight")
-threat_level = 1
-weight = 0.0
-
-[sub_resource type="Resource" id="Weight_x9_orbit_t2"]
-script = ExtResource("3_weight")
-threat_level = 2
-weight = 0.0
-
-[sub_resource type="Resource" id="Weight_x9_orbit_t3"]
-script = ExtResource("3_weight")
-threat_level = 3
-weight = 1.0
-
-[sub_resource type="Resource" id="Entry_x9_orbit"]
-script = ExtResource("2_entry")
-preset = ExtResource("10_x9_orbit")
-threat_weights = Array[ExtResource("3_weight")]([SubResource("Weight_x9_orbit_t1"), SubResource("Weight_x9_orbit_t2"), SubResource("Weight_x9_orbit_t3")])
-
-[sub_resource type="Resource" id="Weight_v7_t1"]
-script = ExtResource("3_weight")
-threat_level = 1
-weight = 0.0
-
-[sub_resource type="Resource" id="Weight_v7_t2"]
-script = ExtResource("3_weight")
-threat_level = 2
-weight = 0.0
-
-[sub_resource type="Resource" id="Weight_v7_t3"]
-script = ExtResource("3_weight")
-threat_level = 3
-weight = 2.0
-
-[sub_resource type="Resource" id="Entry_v7"]
-script = ExtResource("2_entry")
-preset = ExtResource("11_v7")
-threat_weights = Array[ExtResource("3_weight")]([SubResource("Weight_v7_t1"), SubResource("Weight_v7_t2"), SubResource("Weight_v7_t3")])
-
-[sub_resource type="Resource" id="Weight_interceptor_pair_t1"]
-script = ExtResource("3_weight")
-threat_level = 1
-weight = 0.0
-
-[sub_resource type="Resource" id="Weight_interceptor_pair_t2"]
-script = ExtResource("3_weight")
-threat_level = 2
-weight = 2.0
-
-[sub_resource type="Resource" id="Weight_interceptor_pair_t3"]
-script = ExtResource("3_weight")
-threat_level = 3
-weight = 2.0
+min_threat = 2
 
 [sub_resource type="Resource" id="Entry_interceptor_pair"]
 script = ExtResource("2_entry")
 preset = ExtResource("14_interceptor_pair")
-threat_weights = Array[ExtResource("3_weight")]([SubResource("Weight_interceptor_pair_t1"), SubResource("Weight_interceptor_pair_t2"), SubResource("Weight_interceptor_pair_t3")])
+min_threat = 2
 
-[sub_resource type="Resource" id="Weight_interceptor_trio_t1"]
-script = ExtResource("3_weight")
-threat_level = 1
-weight = 0.0
+[sub_resource type="Resource" id="Entry_caster"]
+script = ExtResource("2_entry")
+preset = ExtResource("8_caster")
+min_threat = 3
 
-[sub_resource type="Resource" id="Weight_interceptor_trio_t2"]
-script = ExtResource("3_weight")
-threat_level = 2
-weight = 0.0
+[sub_resource type="Resource" id="Entry_x9_drone"]
+script = ExtResource("2_entry")
+preset = ExtResource("9_x9_drone")
+min_threat = 3
 
-[sub_resource type="Resource" id="Weight_interceptor_trio_t3"]
-script = ExtResource("3_weight")
-threat_level = 3
-weight = 1.0
+[sub_resource type="Resource" id="Entry_x9_orbit"]
+script = ExtResource("2_entry")
+preset = ExtResource("10_x9_orbit")
+min_threat = 3
+
+[sub_resource type="Resource" id="Entry_v7"]
+script = ExtResource("2_entry")
+preset = ExtResource("11_v7")
+min_threat = 3
 
 [sub_resource type="Resource" id="Entry_interceptor_trio"]
 script = ExtResource("2_entry")
 preset = ExtResource("15_interceptor_trio")
-threat_weights = Array[ExtResource("3_weight")]([SubResource("Weight_interceptor_trio_t1"), SubResource("Weight_interceptor_trio_t2"), SubResource("Weight_interceptor_trio_t3")])
+min_threat = 3
 
 [resource]
 script = ExtResource("1_pool")
-entries = Array[ExtResource("2_entry")]([SubResource("Entry_drone"), SubResource("Entry_striker"), SubResource("Entry_awl"), SubResource("Entry_bomb"), SubResource("Entry_caster"), SubResource("Entry_tanker"), SubResource("Entry_x9_drone"), SubResource("Entry_x9_orbit"), SubResource("Entry_v7"), SubResource("Entry_interceptor_pair"), SubResource("Entry_interceptor_trio")])
+entries = Array[ExtResource("2_entry")]([SubResource("Entry_drone"), SubResource("Entry_striker"), SubResource("Entry_bomb"), SubResource("Entry_awl"), SubResource("Entry_tanker"), SubResource("Entry_interceptor_pair"), SubResource("Entry_caster"), SubResource("Entry_x9_drone"), SubResource("Entry_x9_orbit"), SubResource("Entry_v7"), SubResource("Entry_interceptor_trio")])

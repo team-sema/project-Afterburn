@@ -24,6 +24,7 @@ slot_index = 2
 [resource]
 script = ExtResource("1_preset")
 encounter_id = &"interceptor_trio"
+difficulty = 18.0
 formation_layout_scene = ExtResource("3_layout")
 formation_movement_sequence = ExtResource("4_movement")
 members = Array[ExtResource("2_member")]([SubResource("Member_point"), SubResource("Member_left"), SubResource("Member_right")])

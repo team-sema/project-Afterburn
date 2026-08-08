@@ -534,6 +534,14 @@
       "column": "review",
       "file": "cards/interceptor-angled-aim.md",
       "tags": ["적", "전투"]
+    },
+    {
+      "id": "encounter-weight-array",
+      "title": "Encounter Threat weight 배열 작성",
+      "description": "difficulty 점수 + min_threat로 등장 비율(60/diff).",
+      "column": "review",
+      "file": "cards/encounter-weight-array.md",
+      "tags": ["적", "데이터"]
     }
   ]
 }

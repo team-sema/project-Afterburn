@@ -1,30 +1,25 @@
 class_name EncounterPoolEntry
 extends Resource
 
+## Scales inverse-difficulty into selection weights (weight = SCALE / difficulty).
+const WEIGHT_SCALE := 60.0
+
 @export var preset: EncounterPreset
-@export var threat_weights: Array[ThreatWeight] = []
+## Encounter is ineligible below this Threat. At/above it, weight is SCALE/difficulty.
+@export_range(1, 100, 1) var min_threat := 1
 
 
 func get_weight(threat_level: int) -> float:
-	if threat_weights.is_empty():
+	if preset == null:
 		return 0.0
-	var effective_threat := maxi(1, threat_level)
-	var selected_weight := 0.0
-	for threat_weight in threat_weights:
-		if threat_weight == null:
-			continue
-		if threat_weight.threat_level > effective_threat:
-			break
-		selected_weight = threat_weight.weight
-	return selected_weight
+	if maxi(1, threat_level) < min_threat:
+		return 0.0
+	var difficulty := maxf(preset.difficulty, 0.01)
+	return WEIGHT_SCALE / difficulty
 
 
 func get_max_defined_threat() -> int:
-	var maximum := 0
-	for threat_weight in threat_weights:
-		if threat_weight != null:
-			maximum = maxi(maximum, threat_weight.threat_level)
-	return maximum
+	return maxi(1, min_threat)
 
 
 func get_validation_errors() -> PackedStringArray:
@@ -33,19 +28,6 @@ func get_validation_errors() -> PackedStringArray:
 		errors.append("EncounterPoolEntry requires an EncounterPreset.")
 	elif not preset.validate():
 		errors.append("EncounterPoolEntry preset '%s' is invalid." % preset.encounter_id)
-	if threat_weights.is_empty():
-		errors.append("EncounterPoolEntry requires ThreatWeight data.")
-	for index in threat_weights.size():
-		var threat_weight := threat_weights[index]
-		if threat_weight == null:
-			errors.append("ThreatWeight %d is null." % index)
-			continue
-		for threat_error in threat_weight.get_validation_errors():
-			errors.append("ThreatWeight %d: %s" % [index, threat_error])
-		var expected_level := index + 1
-		if threat_weight.threat_level != expected_level:
-			errors.append(
-				"ThreatWeight %d must define Threat %d, got Threat %d."
-				% [index, expected_level, threat_weight.threat_level]
-			)
+	if min_threat < 1:
+		errors.append("EncounterPoolEntry min_threat must be 1 or greater.")
 	return errors
