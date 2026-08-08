@@ -35,6 +35,8 @@ Nova Drift 풍: **밝은 기하 코어 + 다중 글로우 레이어 + 어두운 
 
 Flash / Scale / Shake — 피격·발사 시 펀치감
 
+- `FlashComponent`: 단일 `sprite` 또는 `flash_root`의 CanvasItem 자식들을 한꺼번에 화이트 플래시 (Tanker 실드 다중 레이어)
+
 ## 픽업
 
 - `pickups/experience_orb.tscn` — 사각 **보급 상자** 실루엣 + 황금 글로우(Wide/Tight/Core). 회전하지 않음.

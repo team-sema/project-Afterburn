@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3]
+[gd_scene load_steps=12 format=3]
 
 [ext_resource type="PackedScene" path="res://enemies/enemy.tscn" id="1_enemy"]
 [ext_resource type="Script" path="res://enemies/tanker_enemy.gd" id="2_script"]
@@ -10,6 +10,7 @@
 [ext_resource type="PackedScene" path="res://effects/explosion_effect.tscn" id="8_explosion"]
 [ext_resource type="Script" path="res://components/flash_component.gd" id="9_flash"]
 [ext_resource type="Script" path="res://components/spawner_component.gd" id="10_spawner"]
+[ext_resource type="Script" path="res://components/scale_component.gd" id="11_scale"]
 
 [sub_resource type="CircleShape2D" id="BodyShape"]
 radius = 6.0
@@ -53,10 +54,13 @@ shape = SubResource("BodyShape")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="HitboxComponent" index="0"]
 shape = SubResource("BodyContactShape")
 
-[node name="EnemyShootComponent" parent="." index="15"]
-fire_interval = 5.5
-projectile_speed = 90.0
-initial_delay = 2.0
+[node name="ScaleComponent" parent="." index="5"]
+scale_amount = Vector2(1.1, 1.1)
+scale_duration = 0.22
+
+[node name="ShakeComponent" parent="." index="7"]
+shake_amount = 0.5
+shake_duration = 0.18
 
 [node name="Shield" type="Node2D" parent="." index="20"]
 position = Vector2(0, 16)
@@ -98,10 +102,16 @@ stats_component = NodePath("../StatsComponent")
 hurtbox_component = NodePath("../HurtboxComponent")
 invincibility_visual = NodePath("../Visual")
 
-[node name="FlashComponent" type="Node" parent="Shield" node_paths=PackedStringArray("sprite")]
+[node name="FlashComponent" type="Node" parent="Shield" node_paths=PackedStringArray("flash_root")]
 script = ExtResource("9_flash")
-sprite = NodePath("../Visual/Core")
-flash_duration = 0.12
+flash_root = NodePath("../Visual")
+flash_duration = 0.2
+
+[node name="ScaleComponent" type="Node" parent="Shield" node_paths=PackedStringArray("sprite")]
+script = ExtResource("11_scale")
+sprite = NodePath("../Visual")
+scale_amount = Vector2(1.08, 1.08)
+scale_duration = 0.2
 
 [node name="BreakEffectSpawner" type="Node2D" parent="Shield"]
 script = ExtResource("10_spawner")

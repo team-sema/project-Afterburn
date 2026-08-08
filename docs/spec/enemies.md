@@ -88,7 +88,8 @@ Threat 1 후보 합 weight ≈35.57(drone/diamond_5/bomb/awl), Threat 2는 ≈50
 - `SniperAttackComponent`: AIMING(4.0s, 플레이어 지속 추적 + 옅은 적색 이중선 cubic ease-out 수렴 → 0.18s 완전 조준 유지) → FIRING(900px/s 고속탄 + 5px 비주얼 반동) → COOLDOWN(2.5s) 반복
 - 조준선은 반각 14°에서 0.05°로 모이며 알파 0.01에서 0.36으로 진해진다. 발사 순간 선은 사라지고 탄환은 마지막 조준 경로를 추적 없이 이동한다
 - 재발사 시 재포지셔닝 없음. `EnemyShootComponent`는 `_enter_tree`에서 제거
-- Encounter: `tanker_guard_sniper` — 전방 Tanker(`bottom_inner`) + 후방 Sniper(`center`). `tanker_guard_entry_hold`로 y=48 상단 체공 후 정지. 편대 유지 중 조준·사격
+- Encounter: `tanker_guard_sniper` — 전방 Tanker(`bottom_inner`) + 후방 Sniper(`center`). `tanker_guard_entry_hold`로 y=48 상단 체공 후 정지. 편대 유지 중 **Sniper만** 조준·사격하며 Tanker는 사격하지 않는다
+- Tanker 전방 실드 피격 피드백: 실드 레이어 전체 `FlashComponent` + 약한 `ScaleComponent`(×1.08). 실드 Shake는 쓰지 않는다. 본체는 Scale ×1.1 · Shake 0.5로 일반 적보다 약하게
 
 ## Awl 자폭 (Kamikaze)
 

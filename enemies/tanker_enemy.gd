@@ -12,6 +12,7 @@ signal shield_destroyed
 @onready var shield_stats: StatsComponent = $Shield/StatsComponent
 @onready var shield_hurtbox: HurtboxComponent = $Shield/HurtboxComponent
 @onready var shield_flash: FlashComponent = $Shield/FlashComponent
+@onready var shield_scale: ScaleComponent = $Shield/ScaleComponent
 @onready var shield_break_spawner: SpawnerComponent = $Shield/BreakEffectSpawner
 
 var _shield_destroyed := false
@@ -23,6 +24,10 @@ func _enter_tree() -> void:
 	# results afterward.
 	(get_node("StatsComponent") as StatsComponent).health = body_max_hp
 	(get_node("Shield/StatsComponent") as StatsComponent).health = shield_max_hp
+	# Tanker is a mobile shield wall only — no projectiles.
+	var shoot := get_node_or_null("EnemyShootComponent")
+	if shoot != null:
+		shoot.free()
 
 
 func _ready() -> void:
@@ -49,6 +54,9 @@ func get_shield_health() -> int:
 func _on_shield_hurt(_hitbox: HitboxComponent) -> void:
 	if _shield_destroyed:
 		return
+	# Soft read: flash + tiny scale. No shake — large shield Visual made even small
+	# ShakeComponent offsets read as heavy thrash, and scale was the real punch.
+	shield_scale.tween_scale()
 	shield_flash.flash()
 	hit_sound_player.play_with_variance()
 
