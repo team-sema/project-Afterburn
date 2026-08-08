@@ -1,0 +1,33 @@
+[gd_resource type="Resource" script_class="EncounterPreset" load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://resources/encounters/encounter_preset.gd" id="1_preset"]
+[ext_resource type="Script" path="res://resources/encounters/encounter_member.gd" id="2_member"]
+[ext_resource type="PackedScene" path="res://formations/layouts/v3_formation.tscn" id="3_layout"]
+[ext_resource type="Resource" path="res://resources/enemy_movement/sequences/formation_awl_entry.tres" id="4_formation_movement"]
+[ext_resource type="PackedScene" path="res://enemies/kamikaze_enemy.tscn" id="6_awl"]
+
+[sub_resource type="Resource" id="Member_left"]
+script = ExtResource("2_member")
+enemy_scene = ExtResource("6_awl")
+slot_index = 1
+
+[sub_resource type="Resource" id="Member_point"]
+script = ExtResource("2_member")
+enemy_scene = ExtResource("6_awl")
+slot_index = 0
+
+[sub_resource type="Resource" id="Member_right"]
+script = ExtResource("2_member")
+enemy_scene = ExtResource("6_awl")
+slot_index = 2
+
+[resource]
+script = ExtResource("1_preset")
+encounter_id = &"awl_formation"
+formation_layout_scene = ExtResource("3_layout")
+formation_movement_sequence = ExtResource("4_formation_movement")
+members = Array[ExtResource("2_member")]([SubResource("Member_left"), SubResource("Member_point"), SubResource("Member_right")])
+spawn_anchor = 0
+spawn_offset = Vector2(0, -16)
+spawn_edge_margin = 8.0
+formation_break_condition = 0

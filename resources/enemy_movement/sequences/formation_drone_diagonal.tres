@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="MovementSequence" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://resources/enemy_movement/movement_sequence.gd" id="1_sequence"]
+[ext_resource type="Script" path="res://resources/enemy_movement/movement_step.gd" id="2_step"]
+[ext_resource type="Script" path="res://resources/enemy_movement/steps/bounded_diagonal_movement_step.gd" id="3_diagonal"]
+
+[sub_resource type="Resource" id="BoundedDiagonal_drone"]
+script = ExtResource("3_diagonal")
+forward_speed = 72.0
+angle_degrees = 50.0
+edge_margin = 8.0
+
+[resource]
+script = ExtResource("1_sequence")
+steps = Array[ExtResource("2_step")]([SubResource("BoundedDiagonal_drone")])

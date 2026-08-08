@@ -8,6 +8,7 @@
 
 ## 구현
 
-- `FormationDiagonalMoveComponent`, `StrikerDivePatrolComponent`, `KamikazeAimChargeComponent`
+- Drone/Awl은 `EncounterPreset` + `FormationLayout` + 단일 `FormationController`; Striker는 `striker_entry_patrol.tres` + 개별 `MovementController`
+- 편대 해제 시 각 Enemy가 멤버별 context를 받아 개별 MovementSequence로 전환
 - `enemy_awl.svg`, `kamikaze_enemy.tscn`
 - 2026-07-31 `feature/striker-zigzag-formation` → main (검증 대기)

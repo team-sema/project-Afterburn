@@ -118,9 +118,9 @@ func _run() -> void:
 	(lab.get_node("%ClearTargetsButton") as Button).pressed.emit()
 	await process_frame
 
-	(enemy_buttons.get_node("Enemy_striker/Spawn_striker") as Button).pressed.emit()
+	(enemy_buttons.get_node("Enemy_striker_drone_diamond/Spawn_striker_drone_diamond") as Button).pressed.emit()
 	await process_frame
-	_expect(_count_descendants_in_group(gameplay, &"enemies") == 1, "spawn control creates a target")
+	_expect(_count_descendants_in_group(gameplay, &"enemies") == 4, "spawn control creates a diamond escort")
 	var spawned_enemy := _first_descendant_in_group(gameplay, &"enemies") as Enemy
 	var experience_drop := spawned_enemy.get_node("ExperienceDropComponent") as ExperienceDropComponent
 	_expect(experience_drop.drop_chance == 0.0, "test targets have experience drops disabled")
@@ -128,6 +128,9 @@ func _run() -> void:
 	await process_frame
 	await process_frame
 	_expect(_count_descendants_of_type(gameplay, ExperienceOrb) == 0, "defeated test targets do not create experience orbs")
+	(lab.get_node("%ClearTargetsButton") as Button).pressed.emit()
+	await process_frame
+	_expect(_count_descendants_in_group(gameplay, &"enemies") == 0, "lab clears remaining diamond escorts")
 
 	var ricochet_button := trait_buttons.get_node("Trait_blaster_ricochet") as Button
 	ricochet_button.pressed.emit()
@@ -158,7 +161,9 @@ func _run() -> void:
 		"clear trait control removes every trait from the selected weapon",
 	)
 
-	var repeat_striker := enemy_buttons.get_node("Enemy_striker/Repeat_striker") as CheckButton
+	var repeat_striker := (
+		enemy_buttons.get_node("Enemy_striker_drone_diamond/Repeat_striker_drone_diamond") as CheckButton
+	)
 	var continuous_button := lab.get_node("%ContinuousSpawnButton") as Button
 	var continuous_timer := lab.get_node("%ContinuousSpawnTimer") as Timer
 	repeat_striker.button_pressed = true
@@ -168,15 +173,15 @@ func _run() -> void:
 	continuous_timer.timeout.emit()
 	await process_frame
 	_expect(
-		_count_descendants_in_group(gameplay, &"enemies") == 1,
-		"continuous mode spawns each selected enemy pattern",
+		_count_descendants_in_group(gameplay, &"enemies") == 4,
+		"continuous mode spawns each selected EncounterPreset",
 	)
 	continuous_button.button_pressed = false
 	continuous_button.toggled.emit(false)
 	continuous_timer.timeout.emit()
 	await process_frame
 	_expect(
-		_count_descendants_in_group(gameplay, &"enemies") == 1,
+		_count_descendants_in_group(gameplay, &"enemies") == 4,
 		"stopped continuous mode ignores later timer ticks",
 	)
 

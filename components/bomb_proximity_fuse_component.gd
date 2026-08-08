@@ -51,8 +51,11 @@ func _process(_delta: float) -> void:
 func _start_arming() -> void:
 	_armed = true
 	blast_preview.visible = true
-	if move_component != null:
-		move_component.velocity = Vector2.ZERO
+	var movement_controller := actor.get_node_or_null("MovementController") as MovementController
+	if movement_controller != null:
+		movement_controller.stop()
+	elif move_component != null:
+		move_component.stop_motion()
 	_arm_and_detonate()
 
 

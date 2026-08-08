@@ -1,10 +1,8 @@
 [gd_scene format=3 uid="uid://dxo5ywpsobagu"]
 
 [ext_resource type="PackedScene" uid="uid://psmpwiapllcb" path="res://enemies/enemy.tscn" id="1_i7e5m"]
-[ext_resource type="Script" uid="uid://chfx4jufyxtju" path="res://enemies/moving_enemy.gd" id="2_pj1js"]
 [ext_resource type="Texture2D" uid="uid://cqo8ule6bvype" path="res://assets/svg/enemy_striker.svg" id="3_2nfdr"]
-[ext_resource type="Script" uid="uid://dq8pwqawl2q7u" path="res://components/border_bounce_component.gd" id="4_5442w"]
-[ext_resource type="PackedScene" path="res://components/striker_dive_patrol_component.tscn" id="5_patrol"]
+[ext_resource type="Resource" path="res://resources/enemy_movement/sequences/striker_entry_patrol.tres" id="4_movement"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_7jo6o"]
 size = Vector2(16, 8)
@@ -13,7 +11,6 @@ size = Vector2(16, 8)
 size = Vector2(12, 8)
 
 [node name="MovingEnemy" unique_id=1867910848 instance=ExtResource("1_i7e5m")]
-script = ExtResource("2_pj1js")
 
 [node name="WideGlow" parent="Anchor" parent_id_path=PackedInt32Array(93118890) index="1" unique_id=1704439409]
 texture = ExtResource("3_2nfdr")
@@ -27,8 +24,8 @@ texture = ExtResource("3_2nfdr")
 [node name="StatsComponent" parent="." index="1" unique_id=1304120856]
 health = 50
 
-[node name="MoveComponent" parent="." index="2" unique_id=695129192]
-velocity = Vector2(0, 40)
+[node name="MovementController" parent="."]
+sequence = ExtResource("4_movement")
 
 [node name="VisibleOnScreenNotifier2D" parent="." index="3" unique_id=1344806211]
 rect = Rect2(-10, -7, 20, 14)
@@ -42,12 +39,6 @@ shape = SubResource("RectangleShape2D_shxo4")
 [node name="ScoreComponent" parent="." index="12" unique_id=1849553207]
 adjust_amount = 10
 
-[node name="BorderBounceComponent" type="Node" parent="." index="13" unique_id=305435562 node_paths=PackedStringArray("actor", "move_component")]
-script = ExtResource("4_5442w")
-actor = NodePath("..")
-move_component = NodePath("../MoveComponent")
-metadata/_custom_type_script = "uid://dq8pwqawl2q7u"
-
 [node name="EnemyShootComponent" parent="." index="16" unique_id=1768565056]
 fire_interval = 4.5
 burst_count = 2
@@ -58,7 +49,3 @@ initial_delay = 1.5
 
 [node name="WeaponDropComponent" parent="." index="18" unique_id=776926243]
 enabled = false
-
-[node name="StrikerDivePatrolComponent" parent="." index="20" unique_id=665905732 node_paths=PackedStringArray("actor", "move_component") instance=ExtResource("5_patrol")]
-actor = NodePath("..")
-move_component = NodePath("../MoveComponent")

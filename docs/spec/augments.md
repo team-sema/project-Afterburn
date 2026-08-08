@@ -110,7 +110,7 @@ primary tag `hangar`는 UI 표시명 **동력로**. tag 키와 기존 아이콘�
 
 `gameplay.tscn`의 적 증강 풀에는 위 **6종**이 등록되어 있다. `max_stacks`는 `0`이면 무제한, `1`이면 one-time이며 한도에 도달한 증강은 이후 후보에서 제외된다.
 
-`target_spawn_id`는 증강 효과를 특정 `EnemySpawnSet`에 한정한다. `additional_spawn_count`는 스폰 수 보너스를 전달하며 현재 `drone_formation` 패턴이 이를 편대원 수에 반영한다. 대상이 지정된 스탯 modifier도 같은 `spawn_id`의 적에만 적용된다.
+`target_spawn_id`는 증강 효과를 특정 `EncounterPreset.encounter_id`에 한정한다. `additional_spawn_count`는 스폰 수 보너스를 전달하며 현재 `drone_formation` Encounter가 이를 편대원 수에 반영한다. 대상이 지정된 스탯 modifier도 같은 Encounter ID를 `spawn_id`로 받은 적에만 적용된다.
 
 ### 풀 미등록 리소스
 

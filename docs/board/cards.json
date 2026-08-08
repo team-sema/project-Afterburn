@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-07",
+  "updated": "2026-08-08",
   "source": "docs/board/cards/*.md",
   "columns": [
     {
@@ -208,6 +208,14 @@
       "tags": ["적", "스폰", "Threat"]
     },
     {
+      "id": "striker-drone-diamond",
+      "title": "Striker 드론 호위 마름모",
+      "description": "Striker 단독 제거. 후방 Striker+전방 Drone3, 1/3 하강 후 패트롤.",
+      "column": "review",
+      "file": "cards/striker-drone-diamond.md",
+      "tags": ["적", "스폰", "편대"]
+    },
+    {
       "id": "unified-weapon-system",
       "title": "통합 무기 시스템 · STATUS 무기 UI",
       "description": "통합 장착 베이·동시 사격·weapon_id 성장. 교체 시 성장 삭제.",
@@ -273,8 +281,8 @@
     },
     {
       "id": "fix-formation-viewport-before-tree",
-      "title": "Drone 편대 viewport 트리 가드",
-      "description": "setup_formation이 add_child 전에 viewport를 읽어내던 에러 수정.",
+      "title": "편대 스폰 viewport 초기화 순서",
+      "description": "EnemySpawner 의존성 주입과 FormationController의 viewport 기반 배치 순서를 분리해 트리 진입 전 접근 오류를 제거.",
       "column": "review",
       "file": "cards/fix-formation-viewport-before-tree.md",
       "tags": ["적", "버그"]

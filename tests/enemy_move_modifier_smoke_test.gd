@@ -11,6 +11,7 @@ func _run() -> void:
 	_test_all_enemy_scenes_have_modifier()
 	_test_modifier_decay()
 	await _test_standard_enemy_motion()
+	await _test_sequence_enemy_motion()
 	await _test_drone_formation_motion()
 	await _test_weapon_impulses()
 	await _test_striker_gravity_convergence()
@@ -56,7 +57,7 @@ func _test_modifier_decay() -> void:
 
 
 func _test_standard_enemy_motion() -> void:
-	var enemy := _make_enemy("res://enemies/bomb_enemy.tscn")
+	var enemy := _make_enemy("res://enemies/enemy.tscn")
 	var move := enemy.get_node("MoveComponent") as MoveComponent
 	var modifier := enemy.get_node("MoveModifierComponent") as MoveModifierComponent
 	move.velocity = Vector2(10.0, 0.0)
@@ -70,36 +71,59 @@ func _test_standard_enemy_motion() -> void:
 	await process_frame
 
 
+func _test_sequence_enemy_motion() -> void:
+	var enemy := _make_enemy("res://enemies/bomb_enemy.tscn")
+	var move := enemy.get_node("MoveComponent") as MoveComponent
+	var modifier := enemy.get_node("MoveModifierComponent") as MoveModifierComponent
+	var start := enemy.global_position
+	modifier.apply_impulse(Vector2(100.0, 0.0))
+	await create_timer(0.15).timeout
+	_expect(move.velocity == Vector2(0.0, 16.0), "modifier does not overwrite sequence velocity")
+	_expect(enemy.global_position.y > start.y + 1.0, "sequence movement continues during impulse")
+	_expect(enemy.global_position.x > start.x + 3.0, "sequence enemy receives additive impulse")
+	enemy.queue_free()
+	await process_frame
+
+
 func _test_drone_formation_motion() -> void:
-	var scene := load("res://enemies/normal_enemy.tscn") as PackedScene
-	var origin := Vector2(160.0, 20.0)
-	var settings := {
-		"forward_speed": 30.0,
-		"dive_angle_degrees": 0.0,
-		"half_span": 8.0,
-		"edge_margin": 8.0,
-	}
-	var reference := scene.instantiate() as Enemy
-	var pushed := scene.instantiate() as Enemy
-	reference.augment_registry = EnemyAugmentRegistry.new()
-	pushed.augment_registry = EnemyAugmentRegistry.new()
-	reference.call("setup_formation", origin, Vector2.ZERO, settings)
-	pushed.call("setup_formation", origin, Vector2.ZERO, settings)
-	root.add_child(reference)
-	root.add_child(pushed)
+	var step := LinearMovementStep.new()
+	step.speed = 0.0
+	var sequence := MovementSequence.new()
+	sequence.steps.append(step)
+	var controller := (
+		load("res://formations/formation_controller.tscn") as PackedScene
+	).instantiate() as FormationController
+	controller.formation_layout_scene = load(
+		"res://formations/layouts/horizontal_formation.tscn"
+	) as PackedScene
+	controller.formation_movement_sequence = sequence
+	controller.set_pending_member_count(1)
+	root.add_child(controller)
+	controller.global_position = Vector2(160.0, 20.0)
+	var pushed := (
+		load("res://enemies/normal_enemy.tscn") as PackedScene
+	).instantiate() as Enemy
+	var registry := EnemyAugmentRegistry.new()
+	root.add_child(registry)
+	pushed.augment_registry = registry
+	controller.add_member(pushed, 2)
+	controller.start_formation()
 	await process_frame
 	var modifier := pushed.get_node("MoveModifierComponent") as MoveModifierComponent
 	modifier.apply_impulse(Vector2(140.0, 0.0))
 	await create_timer(0.15).timeout
-	var displaced_x := pushed.global_position.x - reference.global_position.x
+	var slot := controller.get_layout().get_slot(2)
+	var target: Vector2 = controller.global_transform * slot.position
+	var displaced_x := pushed.global_position.x - target.x
 	_expect(displaced_x > 5.0, "formation enemy applies external offset after position rewrite")
 	await create_timer(2.0).timeout
+	target = controller.global_transform * slot.position
 	_expect(
-		absf(pushed.global_position.x - reference.global_position.x) < 1.0,
+		pushed.global_position.distance_to(target) < 1.0,
 		"formation enemy returns to its formation slot",
 	)
-	reference.queue_free()
-	pushed.queue_free()
+	controller.queue_free()
+	registry.queue_free()
 	await process_frame
 
 

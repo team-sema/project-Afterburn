@@ -1,4 +1,4 @@
-[gd_scene load_steps=29 format=3]
+[gd_scene load_steps=30 format=3]
 
 [ext_resource type="Script" path="res://weapon_test/weapon_test_lab.gd" id="1_script"]
 [ext_resource type="PackedScene" path="res://player_ship/ship.tscn" id="2_ship"]
@@ -15,11 +15,11 @@
 [ext_resource type="Resource" path="res://resources/facilities/definitions/hull.tres" id="13_hull"]
 [ext_resource type="Resource" path="res://resources/facilities/definitions/radar.tres" id="14_radar"]
 [ext_resource type="Resource" path="res://resources/facilities/definitions/shield.tres" id="15_shield"]
-[ext_resource type="Resource" path="res://resources/enemy_spawns/drone_formation.tres" id="16_drone"]
-[ext_resource type="Resource" path="res://resources/enemy_spawns/striker.tres" id="17_striker"]
-[ext_resource type="Resource" path="res://resources/enemy_spawns/awl_formation.tres" id="18_awl"]
-[ext_resource type="Resource" path="res://resources/enemy_spawns/bomb.tres" id="19_bomb"]
-[ext_resource type="Resource" path="res://resources/enemy_spawns/caster.tres" id="20_caster"]
+[ext_resource type="Resource" path="res://resources/encounters/presets/drone_straight_formation.tres" id="16_drone"]
+[ext_resource type="Resource" path="res://resources/encounters/presets/striker_drone_diamond.tres" id="17_striker"]
+[ext_resource type="Resource" path="res://resources/encounters/presets/awl_charge_formation.tres" id="18_awl"]
+[ext_resource type="Resource" path="res://resources/encounters/presets/bomb_single.tres" id="19_bomb"]
+[ext_resource type="Resource" path="res://resources/encounters/presets/caster_single.tres" id="20_caster"]
 [ext_resource type="Resource" path="res://resources/weapons/definitions/main_blaster.tres" id="21_blaster"]
 [ext_resource type="Resource" path="res://resources/weapons/definitions/main_laser.tres" id="22_laser"]
 [ext_resource type="Resource" path="res://resources/weapons/definitions/main_shotgun.tres" id="23_shotgun"]
@@ -27,6 +27,7 @@
 [ext_resource type="Resource" path="res://resources/weapons/definitions/plasma_bomb.tres" id="25_plasma"]
 [ext_resource type="Resource" path="res://resources/weapons/definitions/aux_homing_missile.tres" id="26_missile"]
 [ext_resource type="Resource" path="res://resources/weapons/definitions/aux_orbital_barrier.tres" id="27_barrier"]
+[ext_resource type="Script" path="res://enemies/enemy_spawner.gd" id="28_enemy_spawner"]
 
 [sub_resource type="Environment" id="Environment_neon"]
 background_mode = 3
@@ -72,7 +73,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_script")
-enemy_spawn_sets = Array[EnemySpawnSet]([ExtResource("16_drone"), ExtResource("17_striker"), ExtResource("18_awl"), ExtResource("19_bomb"), ExtResource("20_caster")])
+enemy_encounters = Array[EncounterPreset]([ExtResource("16_drone"), ExtResource("17_striker"), ExtResource("18_awl"), ExtResource("19_bomb"), ExtResource("20_caster")])
 weapon_definitions = Array[WeaponDefinition]([ExtResource("21_blaster"), ExtResource("22_laser"), ExtResource("23_shotgun"), ExtResource("24_cannon"), ExtResource("25_plasma"), ExtResource("26_missile"), ExtResource("27_barrier")])
 
 [node name="Layout" type="HBoxContainer" parent="."]
@@ -225,6 +226,9 @@ environment = SubResource("Environment_neon")
 
 [node name="EnemyAugmentRegistry" type="Node" parent="Layout/Playfield/ViewportContainer/PlayfieldViewport/WeaponTestGameplay"]
 script = ExtResource("4_enemy_registry")
+
+[node name="EnemySpawner" type="Node" parent="Layout/Playfield/ViewportContainer/PlayfieldViewport/WeaponTestGameplay"]
+script = ExtResource("28_enemy_spawner")
 
 [node name="PlayerAugmentRegistry" type="Node" parent="Layout/Playfield/ViewportContainer/PlayfieldViewport/WeaponTestGameplay"]
 script = ExtResource("5_player_registry")

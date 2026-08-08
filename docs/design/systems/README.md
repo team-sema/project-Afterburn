@@ -24,6 +24,7 @@
 | [augment-module-slots](augment-module-slots.md) | 증강 모듈 슬롯 (시설·스탯) | review |
 | [bomb-proximity-fuse](bomb-proximity-fuse.md) | 폭탄 근접 자폭 | review |
 | [early-enemy-fire-tuning](early-enemy-fire-tuning.md) | 초반 적 사격 완화 | review |
+| [striker-drone-diamond](striker-drone-diamond.md) | Striker 드론 호위 마름모 | review |
 | [fix-formation-viewport-before-tree](fix-formation-viewport-before-tree.md) | Drone 편대 viewport 트리 가드 | review |
 | [readme-docs-links](readme-docs-links.md) | README 스펙·칸반 링크 | review |
 | [docs-site-kanban](docs-site-kanban.md) | docs 사이트 · 칸반 · 워크플로 | review |

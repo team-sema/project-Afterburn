@@ -6,11 +6,14 @@
 
 | 클래스 | 역할 |
 |--------|------|
-| `MoveComponent` | `velocity * velocity_multiplier`를 actor에 `translate` |
-| `FormationDiagonalMoveComponent` | 공유 시각 기준 직선 대각 편대 이동 (MoveComponent process off). `setup_formation`은 트리 진입 후(또는 deferred)에 viewport를 읽음 |
-| `StrikerDivePatrolComponent` | 직하강 → 화면 중앙 비율에서 정지 → 좌우 velocity 패트롤 |
-| `KamikazeAimChargeComponent` | 하강 → 조준(정지) → 락온 돌진 (MoveComponent velocity) |
-| `CasterHoverComponent` | 상단 hover_y 체공 + 좌우 패트롤 |
+| `MoveComponent` | 레거시 `velocity` 또는 `MovementIntent`를 받아 actor에 실제 이동 적용 |
+| `MovementController` | `MovementSequence`의 현재 Step과 런타임 상태를 소유하고 Intent를 `MoveComponent`에 전달 |
+| `MovementSequence` | 설정 전용 `MovementStep` 배열 Resource. 여러 적이 같은 Resource를 안전하게 공유 |
+| `Linear/Sine/MoveToPosition/Wait/HomingMovementStep` | 조합 가능한 범용 이동 단계 |
+| `HorizontalPatrolMovementStep` | 뷰포트 좌우 경계에서 반사하는 범용 순찰 단계 |
+| `BoundedDiagonalMovementStep` | 편대 반경을 고려해 뷰포트 좌우에서 반사하는 범용 대각 이동 단계 |
+| `FormationSlot` / `FormationLayout` | 에디터에서 배치하는 명시적 슬롯과 검증·미리보기 전용 편대 모양 Scene |
+| `FormationController` | Scene 기반 슬롯 매핑, 단일 편대 중앙 이동, 멤버 위치·이탈·해제 후 개별 Sequence 전환 |
 | `RadialBarrageShootComponent` | 원형 다연발 링 탄막 |
 | `BombProximityFuseComponent` | 근접 신관 → 적색 점멸 → 자폭. 판정·VFX·반투명 프리뷰가 동일 radius 사용 |
 | `BombBlastPreview` | Bomb 신관 무장 중 자폭 판정 범위를 옅은 원과 외곽선으로 표시 |
@@ -44,6 +47,9 @@
 | `ShakeComponent` | 위치 셰이크 |
 | `FlashComponent` | 화이트 플래시 머티리얼 |
 | `SpawnerComponent` | PackedScene 인스턴스 |
+| `EnemySpawner` | 선택된 `EncounterPreset`만 실제 생성하고 의존성·Encounter ID를 트리 진입 전에 주입. 단일 적도 동일한 `FormationController` 생명주기를 사용 |
+| `EncounterPreset` / `EncounterMember` | Layout, 편대·개별 Sequence, 슬롯별 적, 등장 지연, 반전, 편대 해제 조건을 조합하는 설정 Resource |
+| `EncounterPool` / `EncounterPoolEntry` / `ThreatWeight` | 전체 라이브 Encounter 로스터와 Threat별 선택 weight를 한 리소스에서 관리. 마지막 정의 Threat 이후에는 마지막 weight 유지 |
 | `OnetimeAnimatedEffect` | 애니 종료 시 free |
 | `VariablePitchAudioStreamPlayer` | 피치 랜덤 SFX |
 

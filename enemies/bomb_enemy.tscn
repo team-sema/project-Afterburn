@@ -1,10 +1,11 @@
-[gd_scene format=3 uid="uid://dyoidordek441"]
+[gd_scene load_steps=7 format=3 uid="uid://dyoidordek441"]
 
 [ext_resource type="PackedScene" uid="uid://psmpwiapllcb" path="res://enemies/enemy.tscn" id="1_enemy"]
 [ext_resource type="Script" uid="uid://c0gisxxbw04rk" path="res://enemies/bomb_enemy.gd" id="2_script"]
 [ext_resource type="Texture2D" uid="uid://c8cmh0u40cjec" path="res://assets/svg/enemy_bomb.svg" id="3_bomb"]
 [ext_resource type="PackedScene" path="res://components/bomb_proximity_fuse_component.tscn" id="4_fuse"]
 [ext_resource type="Script" path="res://components/bomb_blast_preview.gd" id="5_preview"]
+[ext_resource type="Resource" path="res://resources/enemy_movement/sequences/bomb_straight_down.tres" id="6_movement"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_hurt"]
 
@@ -26,8 +27,8 @@ texture = ExtResource("3_bomb")
 [node name="StatsComponent" parent="." index="1" unique_id=1304120856]
 health = 140
 
-[node name="MoveComponent" parent="." index="2" unique_id=695129192]
-velocity = Vector2(0, 16)
+[node name="MovementController" parent="."]
+sequence = ExtResource("6_movement")
 
 [node name="VisibleOnScreenNotifier2D" parent="." index="3" unique_id=1344806211]
 rect = Rect2(-12, -12, 24, 24)

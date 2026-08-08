@@ -6,10 +6,10 @@ signal enemy_augment_event_simulated(tier: int)
 
 const ENEMY_LABELS := {
 	&"drone_formation": "드론 편대",
-	&"striker": "스트라이커",
+	&"striker_drone_diamond": "스트라이커 호위",
 	&"awl_formation": "송곳 편대",
-	&"bomb": "폭탄",
-	&"caster": "캐스터",
+	&"bomb_single": "폭탄",
+	&"caster_single": "캐스터",
 }
 const PLAYER_AUGMENT_DIRECTORY := "res://resources/player_augments"
 const ENEMY_AUGMENT_DIRECTORY := "res://resources/enemy_augments"
@@ -23,13 +23,14 @@ enum AugmentTestMode {
 	ENEMY,
 }
 
-@export var enemy_spawn_sets: Array[EnemySpawnSet] = []
+@export var enemy_encounters: Array[EncounterPreset] = []
 @export var weapon_definitions: Array[WeaponDefinition] = []
 
 @onready var gameplay: Node2D = $Layout/Playfield/ViewportContainer/PlayfieldViewport/WeaponTestGameplay
 @onready var ship: Node2D = gameplay.get_node("Ship") as Node2D
 @onready var enemy_registry: EnemyAugmentRegistry = gameplay.get_node("EnemyAugmentRegistry") as EnemyAugmentRegistry
 @onready var player_registry: PlayerAugmentRegistry = gameplay.get_node("PlayerAugmentRegistry") as PlayerAugmentRegistry
+@onready var enemy_spawner: EnemySpawner = gameplay.get_node("EnemySpawner") as EnemySpawner
 @onready var enemy_buttons: VBoxContainer = %EnemyButtons
 @onready var weapon_buttons: VBoxContainer = %WeaponButtons
 @onready var spawn_count: SpinBox = %SpawnCount
@@ -51,7 +52,7 @@ var _weapon_button_by_id: Dictionary = {}
 var _trait_definitions: Array[WeaponTraitDefinition] = []
 var _trait_button_by_id: Dictionary = {}
 var _displayed_trait_weapon_id: StringName = &""
-var _continuous_spawn_sets: Dictionary = {}
+var _continuous_encounters: Dictionary = {}
 var _continuous_spawn_enabled := false
 var _player_augment_pool: Array[PlayerAugment] = []
 var _enemy_augment_pool: Array[EnemyAugment] = []
@@ -67,6 +68,8 @@ var _simulated_enemy_tier := 0
 
 func _ready() -> void:
 	randomize()
+	enemy_spawner.augment_registry = enemy_registry
+	enemy_spawner.spawn_parent = gameplay
 	_loadout = ship.get_weapon_loadout() as PlayerWeaponLoadout
 	assert(_loadout != null, "Weapon test lab requires the ship weapon loadout.")
 	_make_ship_invincible()
@@ -379,26 +382,26 @@ func _update_mode_badge(status: String) -> void:
 
 
 func _build_enemy_buttons() -> void:
-	for spawn_set in enemy_spawn_sets:
-		if spawn_set == null:
+	for preset in enemy_encounters:
+		if preset == null:
 			continue
 		var row := HBoxContainer.new()
-		row.name = "Enemy_%s" % String(spawn_set.spawn_id)
+		row.name = "Enemy_%s" % String(preset.encounter_id)
 		row.add_theme_constant_override("separation", 4)
 		var button := Button.new()
-		button.name = "Spawn_%s" % String(spawn_set.spawn_id)
-		button.text = ENEMY_LABELS.get(spawn_set.spawn_id, String(spawn_set.spawn_id))
+		button.name = "Spawn_%s" % String(preset.encounter_id)
+		button.text = ENEMY_LABELS.get(preset.encounter_id, String(preset.encounter_id))
 		button.tooltip_text = "선택한 수만큼 이 스폰 패턴을 실행합니다."
 		_style_button(button, Color(1.0, 0.22, 0.48, 1.0))
-		button.pressed.connect(func() -> void: _spawn_batches(spawn_set))
+		button.pressed.connect(func() -> void: _spawn_batches(preset))
 		row.add_child(button)
 		var repeat_toggle := CheckButton.new()
-		repeat_toggle.name = "Repeat_%s" % String(spawn_set.spawn_id)
+		repeat_toggle.name = "Repeat_%s" % String(preset.encounter_id)
 		repeat_toggle.custom_minimum_size = Vector2(54, 24)
 		repeat_toggle.text = "반복"
 		repeat_toggle.tooltip_text = "지속 스폰 모드에 이 적을 포함합니다."
 		repeat_toggle.toggled.connect(
-			func(enabled: bool) -> void: _set_spawn_set_repeating(spawn_set, enabled)
+			func(enabled: bool) -> void: _set_encounter_repeating(preset, enabled)
 		)
 		row.add_child(repeat_toggle)
 		enemy_buttons.add_child(row)
@@ -468,30 +471,30 @@ func _button_style(accent: Color, background_alpha: float, border_alpha: float) 
 	return style
 
 
-func _spawn_batches(spawn_set: EnemySpawnSet) -> void:
+func _spawn_batches(preset: EncounterPreset) -> void:
 	var batch_count := maxi(1, roundi(spawn_count.value))
 	for batch_index in batch_count:
-		spawn_set.spawn(
-			gameplay.get_viewport_rect(),
-			Callable(self, "_spawn_enemy"),
-			enemy_registry.get_additional_spawn_count(spawn_set.spawn_id),
+		enemy_spawner.spawn_encounter(
+			preset,
+			enemy_registry.get_additional_spawn_count(preset.encounter_id),
+			Callable(self, "_configure_enemy_before_add"),
 		)
 	_refresh_target_count()
 
 
-func _set_spawn_set_repeating(spawn_set: EnemySpawnSet, enabled: bool) -> void:
+func _set_encounter_repeating(preset: EncounterPreset, enabled: bool) -> void:
 	if enabled:
-		_continuous_spawn_sets[spawn_set.spawn_id] = spawn_set
+		_continuous_encounters[preset.encounter_id] = preset
 	else:
-		_continuous_spawn_sets.erase(spawn_set.spawn_id)
-	continuous_spawn_button.disabled = _continuous_spawn_sets.is_empty()
-	if _continuous_spawn_sets.is_empty() and _continuous_spawn_enabled:
+		_continuous_encounters.erase(preset.encounter_id)
+	continuous_spawn_button.disabled = _continuous_encounters.is_empty()
+	if _continuous_encounters.is_empty() and _continuous_spawn_enabled:
 		continuous_spawn_button.button_pressed = false
 		_set_continuous_spawn(false)
 
 
 func _set_continuous_spawn(enabled: bool) -> void:
-	if enabled and _continuous_spawn_sets.is_empty():
+	if enabled and _continuous_encounters.is_empty():
 		continuous_spawn_button.button_pressed = false
 		return
 	_continuous_spawn_enabled = enabled
@@ -510,27 +513,15 @@ func _on_continuous_spawn_interval_changed(interval: float) -> void:
 func _spawn_continuous_batches() -> void:
 	if not _continuous_spawn_enabled:
 		return
-	for spawn_set in _continuous_spawn_sets.values():
-		_spawn_batches(spawn_set as EnemySpawnSet)
+	for preset in _continuous_encounters.values():
+		_spawn_batches(preset as EncounterPreset)
 
 
-func _spawn_enemy(
-	enemy_scene: PackedScene,
-	spawn_position: Vector2,
-	configure: Callable,
-) -> Node:
-	var enemy := enemy_scene.instantiate() as Enemy
-	assert(enemy != null, "Weapon test lab can only spawn Enemy scenes.")
-	enemy.augment_registry = enemy_registry
+func _configure_enemy_before_add(enemy: Enemy) -> void:
 	var experience_drop := enemy.get_node_or_null("ExperienceDropComponent") as ExperienceDropComponent
 	if experience_drop != null:
 		experience_drop.drop_chance = 0.0
-	if configure.is_valid():
-		configure.call(enemy)
-	gameplay.add_child(enemy)
-	enemy.global_position = spawn_position
 	enemy.tree_exited.connect(func() -> void: call_deferred("_refresh_target_count"))
-	return enemy
 
 
 func _clear_targets() -> void:

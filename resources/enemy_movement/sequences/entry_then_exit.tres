@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="MovementSequence" load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://resources/enemy_movement/movement_sequence.gd" id="1_sequence"]
+[ext_resource type="Script" path="res://resources/enemy_movement/movement_step.gd" id="2_step"]
+[ext_resource type="Script" path="res://resources/enemy_movement/steps/move_to_position_step.gd" id="3_move_to"]
+[ext_resource type="Script" path="res://resources/enemy_movement/steps/wait_movement_step.gd" id="4_wait"]
+[ext_resource type="Script" path="res://resources/enemy_movement/steps/linear_movement_step.gd" id="5_linear"]
+
+[sub_resource type="Resource" id="MoveTo_entry"]
+script = ExtResource("3_move_to")
+target_position = Vector2(0, 80)
+speed = 60.0
+affect_x = false
+
+[sub_resource type="Resource" id="Wait_entry"]
+script = ExtResource("4_wait")
+duration = 0.5
+
+[sub_resource type="Resource" id="Linear_exit"]
+script = ExtResource("5_linear")
+direction = Vector2(0, 1)
+speed = 100.0
+
+[resource]
+script = ExtResource("1_sequence")
+steps = Array[ExtResource("2_step")]([SubResource("MoveTo_entry"), SubResource("Wait_entry"), SubResource("Linear_exit")])

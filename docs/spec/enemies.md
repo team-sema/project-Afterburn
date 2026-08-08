@@ -1,14 +1,14 @@
 # 적
 
-## 타입 (생성기 기준)
+## 타입 (MainEncounterPool 기준)
 
 | 코드명 | 최소 Threat | 씬 | HP | 점수 | 특징 |
 |--------|-------------|-----|-----|------|------|
-| Green / Drone | 1 | `normal_enemy.tscn` | 20 | 5 | 편대 대각 하강 |
-| Yellow / Striker | 1 | `moving_enemy.tscn` | 50 | 10 | 직하강 → 중앙 정지 → 좌우 패트롤 |
+| Green / Drone | 1 | `normal_enemy.tscn` | 20 | 5 | 편대 대각 하강 · Striker 호위 편대에도 등장 |
+| Yellow / Striker | 1 | `moving_enemy.tscn` | 50 | 10 | 마름모 편대 최후방 · 맵 1/3 하강 후 좌우 패트롤 |
 | Awl / Kamikaze | 2 | `kamikaze_enemy.tscn` | 70 | 15 | 3마리 V로 하강·조준 → 차지 시 V에서 각자 독립 돌진 · 투사체 없음 |
 | Bomb | 2 | `bomb_enemy.tscn` | 140 | 20 | 느린 하강 · 고체력 · 근접 시 2초 3회 적색 점멸 후 1.5× 자폭 · `enemy_bomb.svg` |
-| Pink / Caster | 3 | `shooting_enemy.tscn` | 110 | 25 | 상단 체공 · 원형 다연발 탄막(5링×20) · `enemy_caster.svg` |
+| Pink / Caster | 3 | `shooting_enemy/shooting_enemy.tscn` | 110 | 25 | 상단 체공 · 원형 다연발 탄막(5링×20) · `enemy_caster.svg` |
 
 베이스 `enemies/enemy.tscn`: 네온 레이어, 전투/VFX, `TargetingComponent`, `EnemyShootComponent`, `EnemyModifierFactory`, XP 드롭.
 
@@ -16,35 +16,52 @@
 
 - `no_health` → 점수 + XP + `queue_free`
 - Hurt VFX/SFX · 플레이어 접촉 시 피해만 주고 적은 유지
-- **이동:** `Node2D` + `MoveComponent.translate` (CharacterBody/`move_and_slide` 없음). 기본 진행 **+Y**.
+- **이동:** `Node2D` + `MovementSequence` → `MovementController` → `MoveComponent.translate` (CharacterBody/`move_and_slide` 없음). Sequence가 없는 기존 객체는 `MoveComponent.velocity` 경로를 유지한다.
 
 ## EnemyGenerator
 
-- `EnemySpawnSet` 리소스가 적 씬, 최소 Threat, `EnemySpawnPattern` 리소스를 정의한다.
-- 패턴 리소스가 편대 오프셋과 이동 파라미터 및 생성 동작을 소유한다. 새 Formation은 Generator 분기 없이 새 패턴 Resource로 추가한다.
-- 생성기는 현재 Threat 이하의 스폰 세트만 후보로 선별하고 그중 하나를 균등하게 선택한다.
-- **Green:** Drone 편대 — 오프셋 배열 길이만큼 동시 스폰(기본 5)
+- 생성기는 4초 + 0~0.5초 지터의 타이머와 현재 Threat만 관리하고, `main_encounter_pool.tres`에 선택을 요청한다.
+- `MainEncounterPool`이 현재 Threat에서 weight가 0보다 큰 `EncounterPreset` 전체를 대상으로 weighted random을 정확히 한 번 수행한다.
+- `EncounterPreset`은 FormationLayout Scene, 편대·개별 MovementSequence, 멤버와 슬롯, 등장·해제 조건을 조합하며 `EnemySpawner`가 실제 적을 생성한다.
+- Striker/Bomb/Caster 중 Bomb·Caster는 `SingleFormation`의 Slot0을 사용하는 1슬롯 Encounter이며, 생성 직후 편대를 해제해 기존 개별 MovementSequence를 그대로 실행한다.
+- **Green:** Drone 편대 — `HorizontalFormation`의 명시적 슬롯 5개에 동시 스폰
+- **Yellow 호위:** `striker_drone_diamond` — `DiamondFormation` 최후방(Slot0) Striker + 전방 3슬롯(Slot1–3) Drone. 하단 팁(Slot4)은 비움
 - **Awl:** 3마리 V 편대
-- Yellow / Pink / Bomb: 단발 스폰
+- Pink / Bomb: `caster_single` / `bomb_single`
 - 베이스·Drone·Striker는 `EnemyShootComponent`로 조준 사격
 - **초반(Threat 1) 사격 압력** — 투사체를 쏘는 Threat 1 적은 아래 값을 쓴다. Kamikaze·Bomb은 투사체가 없고, Caster는 Threat 3이라 초반 압력에 포함되지 않는다
 
 | 적 | `fire_interval` | 볼리 | 발수 | 탄속 | `initial_delay` |
 |---|---|---|---|---|---|
-| Drone (5기 편대) | 4.5 | 1 | 1 | 105 | 1.5 |
-| Striker | 4.5 | 2 (`burst_interval` 0.15) | 5 (`spread` 15°) | 80 | 1.5 |
+| Drone (5기 편대 / 호위 3기) | 4.5 | 1 | 1 | 105 | 1.5 |
+| Striker (호위 편대) | 4.5 | 2 (`burst_interval` 0.15) | 5 (`spread` 15°) | 80 | 1.5 |
 
 - 이후 난이도는 적 오그먼트 `ACTION_RATE`가 `fire_interval`·`burst_interval`을 나눠 올리고, 상위 Threat 적이 합류하며 오른다. 탄속에는 배율이 없다
 
+### MainEncounterPool 초기 weight
+
+| Encounter | Threat 1 | Threat 2 | Threat 3+ |
+|---|---:|---:|---:|
+| `drone_formation` | 6 | 6 | 6 |
+| `striker_drone_diamond` | 6 | 6 | 6 |
+| `awl_formation` | 0 | 6 | 6 |
+| `bomb_single` | 0 | 6 | 6 |
+| `caster_single` | 0 | 0 | 6 |
+| `x9_drone_down` | 0 | 0 | 3 |
+| `x9_caster_drone_orbit` | 0 | 0 | 1 |
+| `v7_striker_drone` | 0 | 0 | 2 |
+
+Threat 3의 `6/6/6/6/6/3/1/2`는 기존 5개 직접 항목의 각 1/6 확률과 중첩 formation pool의 `3:1:2`를 공통분모 36으로 평탄화한 값이다.
+
 ## Caster 상단 체공 · 원형 탄막
 
-- `CasterHoverComponent`: 진입 후 `hover_y`(기본 56)에 고정, 좌우 패트롤만
+- `caster_entry_patrol.tres`: `MoveToPositionStep`으로 y=56에 진입한 뒤 `HorizontalPatrolMovementStep` 실행
 - `RadialBarrageShootComponent`: 주기마다 링 5회 × 20발 (링마다 소각 회전), `base_enemy_projectile`
 - 레거시 상태머신 / `EnemyShootComponent`는 `_enter_tree`에서 제거
 
 ## Awl 자폭 (Kamikaze)
 
-- 스폰: `AwlFormationSpawnPattern`이 3마리 V를 구성하며 하강·조준 구간만 편대를 유지
+- 스폰: `awl_charge_formation.tres`가 `V3Formation` 슬롯 3개를 사용하며 하강·조준 구간만 편대를 유지
 - **차지 시작 순간** V 슬롯에 스냅한 뒤, 각자 기존처럼 자기 위치→플레이어 락온 방향으로 독립 돌진
 - 투사체 없음
 
@@ -52,7 +69,7 @@
 
 `BombProximityFuseComponent`:
 
-- 느린 하강 `(0, 16)`, HP 140
+- `bomb_straight_down.tres`의 `LinearMovementStep`으로 느린 하강 `(0, 16)`, HP 140
 - 플레이어가 `trigger_radius`(60) 안이면 정지 → **2초간 빨간 점멸 3회** → 자폭
 - 신관 무장과 적색 점멸이 시작되면 반투명 범위 프리뷰 표시
 - 폭발 판정·VFX 최대 링·범위 프리뷰 반경은 모두 `base_explosion_radius(40) * 1.5 = 60px`
@@ -62,7 +79,18 @@
 
 ## Drone 대각 편대
 
-`FormationDiagonalMoveComponent`: 공유 클록 대각 + X ping-pong. `DroneFormationSpawnPattern`이 편대 구성과 이동 설정을 주입한다.
+`drone_straight_formation.tres`가 `HorizontalFormation`과 `formation_drone_diagonal.tres`를 조합한다. 편대 중앙의 단일 `MovementController`가 대각 하강과 X ping-pong을 계산하고, `FormationController`가 각 Drone을 슬롯에 유지한다.
+
+## Striker 드론 호위 (마름모)
+
+`striker_drone_diamond.tres`가 `DiamondFormation`을 쓴다.
+
+- Slot0(`top`, 화면 상단·최후방): Striker
+- Slot1–3(`left`/`center`/`right`): Drone 3기 — Striker 전방 방패
+- Slot4(`bottom`)는 비움
+- 이동: `formation_entry_third_patrol.tres` — 뷰포트 높이 약 1/3까지 직하강한 뒤 `HorizontalPatrolMovementStep`으로 좌우 왕복. 편대는 해제하지 않는다
+
+레거시 `striker_single.tres`는 단일 해제 경로용으로 남기되 `MainEncounterPool`에는 넣지 않는다.
 
 ## EnemyModifierFactory
 
