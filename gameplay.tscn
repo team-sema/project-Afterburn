@@ -106,7 +106,9 @@ script = ExtResource("7_player_registry")
 facilities = Array[ExtResource("25_facility_definition")]([ExtResource("26_weapon_room"), ExtResource("27_hangar"), ExtResource("28_engine"), ExtResource("29_hull"), ExtResource("30_radar"), ExtResource("31_shield")])
 
 [node name="AugmentSelectionOverlay" parent="." unique_id=657828853 instance=ExtResource("10_selection")]
-close_duration = 1.0
+phase_transition_duration = 0.3
+result_hold_duration = 1.0
+close_duration = 0.25
 
 [node name="WeaponSlotSelectionOverlay" parent="." unique_id=422025904 instance=ExtResource("11_slot")]
 

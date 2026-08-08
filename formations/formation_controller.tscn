@@ -1,0 +1,22 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://formations/formation_controller.gd" id="1_controller"]
+[ext_resource type="Script" path="res://components/move_component.gd" id="2_move"]
+[ext_resource type="Script" path="res://components/movement_controller.gd" id="3_movement"]
+
+[node name="FormationController" type="Node2D" node_paths=PackedStringArray()]
+script = ExtResource("1_controller")
+
+[node name="MoveComponent" type="Node" parent="." node_paths=PackedStringArray("actor")]
+script = ExtResource("2_move")
+actor = NodePath("..")
+
+[node name="MovementController" type="Node" parent="." node_paths=PackedStringArray("actor", "move_component")]
+script = ExtResource("3_movement")
+actor = NodePath("..")
+move_component = NodePath("../MoveComponent")
+auto_start = false
+
+[node name="LayoutContainer" type="Node2D" parent="."]
+
+[node name="EnemyContainer" type="Node2D" parent="."]

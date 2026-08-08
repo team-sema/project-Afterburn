@@ -1,19 +1,14 @@
-[gd_scene load_steps=9 format=3 uid="uid://e4v02s4qv8gl"]
+[gd_scene load_steps=4 format=3 uid="uid://e4v02s4qv8gl"]
 
 [ext_resource type="Script" uid="uid://b81hx75o63oad" path="res://enemy_generator.gd" id="1_generator"]
-[ext_resource type="Script" uid="uid://fwissbryiv1s" path="res://components/spawner_component.gd" id="2_spawner"]
-[ext_resource type="Script" path="res://resources/enemy_spawns/enemy_spawn_set.gd" id="3_spawn_set"]
-[ext_resource type="Resource" path="res://resources/enemy_spawns/drone_formation.tres" id="4_drone"]
-[ext_resource type="Resource" path="res://resources/enemy_spawns/striker.tres" id="5_striker"]
-[ext_resource type="Resource" path="res://resources/enemy_spawns/awl_formation.tres" id="6_awl"]
-[ext_resource type="Resource" path="res://resources/enemy_spawns/bomb.tres" id="7_bomb"]
-[ext_resource type="Resource" path="res://resources/enemy_spawns/caster.tres" id="8_caster"]
+[ext_resource type="Script" path="res://enemies/enemy_spawner.gd" id="2_spawner"]
+[ext_resource type="Resource" path="res://resources/encounters/pools/main_encounter_pool.tres" id="3_main_pool"]
 
 [node name="EnemyGenerator" type="Node2D" unique_id=755348219]
 script = ExtResource("1_generator")
-spawn_sets = Array[ExtResource("3_spawn_set")]([ExtResource("4_drone"), ExtResource("5_striker"), ExtResource("6_awl"), ExtResource("7_bomb"), ExtResource("8_caster")])
+encounter_pool = ExtResource("3_main_pool")
 
-[node name="SpawnerComponent" type="Node2D" parent="." unique_id=1844585373]
+[node name="EnemySpawner" type="Node" parent="." unique_id=1844585373]
 script = ExtResource("2_spawner")
 
 [node name="SpawnTimer" type="Timer" parent="." unique_id=1919793622]

@@ -9,6 +9,6 @@ extends Resource
 @export_range(0, 100, 1) var max_stacks := 0
 @export var stat_modifiers: Array[EnemyStatModifier] = []
 @export var behavior_components: Array[PackedScene] = []
-## Optional EnemySpawnSet.spawn_id affected by this augment.
+## Optional EncounterPreset.encounter_id affected by this augment.
 @export var target_spawn_id: StringName
 @export_range(0, 100, 1) var additional_spawn_count := 0

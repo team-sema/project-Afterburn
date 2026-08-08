@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="MovementSequence" load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://resources/enemy_movement/movement_sequence.gd" id="1_sequence"]
+[ext_resource type="Script" path="res://resources/enemy_movement/movement_step.gd" id="2_step"]
+[ext_resource type="Script" path="res://resources/enemy_movement/steps/linear_movement_step.gd" id="3_linear"]
+[ext_resource type="Script" path="res://resources/enemy_movement/steps/wait_movement_step.gd" id="4_wait"]
+
+[sub_resource type="Resource" id="Linear_awl_descend"]
+script = ExtResource("3_linear")
+direction = Vector2(0, 1)
+speed = 42.0
+duration = 1.4
+
+[sub_resource type="Resource" id="Wait_awl_aim"]
+script = ExtResource("4_wait")
+duration = 1.4
+
+[resource]
+script = ExtResource("1_sequence")
+steps = Array[ExtResource("2_step")]([SubResource("Linear_awl_descend"), SubResource("Wait_awl_aim")])

@@ -23,6 +23,7 @@ func _run() -> void:
 
 	var stats: StatsComponent = enemy.get_node("StatsComponent") as StatsComponent
 	var move: MoveComponent = enemy.get_node("MoveComponent") as MoveComponent
+	var movement := enemy.get_node("MovementController") as MovementController
 	var fuse := enemy.get_node("BombProximityFuseComponent") as BombProximityFuseComponent
 	var preview := enemy.get_node("BlastRadiusPreview") as BombBlastPreview
 	if stats.health < 100:
@@ -51,11 +52,17 @@ func _run() -> void:
 
 	# Trigger arming
 	fuse.set("_armed", false)
+	var armed_position := enemy.global_position
 	fuse.call("_start_arming")
 	if move.velocity != Vector2.ZERO:
 		failures.append("armed bomb should stop moving")
 	if not preview.visible:
 		failures.append("blast preview should appear when the fuse starts flashing")
+	await process_frame
+	if movement.is_running():
+		failures.append("armed bomb should stop its MovementSequence")
+	if enemy.global_position != armed_position:
+		failures.append("armed bomb should remain stopped after deferred auto-start")
 
 	# Skip waits: call detonate path after forcing armed state
 	fuse.call("_detonate")

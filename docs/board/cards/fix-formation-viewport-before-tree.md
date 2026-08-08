@@ -1,11 +1,11 @@
-# Drone 편대 viewport 트리 가드
+# 편대 스폰 viewport 초기화 순서
 
 ## 목표
 
-- `configure_before_add` / 트리 밖에서 `get_viewport_rect()` 에러 제거
-- Drone `setup_formation`은 스폰이 트리에 붙은 뒤에 실행
+- `EnemySpawner`가 의존성·spawn ID만 트리 진입 전에 주입
+- `FormationController`가 트리에 들어가 Layout을 준비한 뒤 viewport 기준 spawn anchor와 슬롯 위치를 적용
 
 ## AC
 
-- Drone 편대 스폰 시 `!is_inside_tree()` / `get_viewport_rect` 에러 없음
-- 대각·ping-pong 이동은 기존과 동일
+- Drone/Awl Encounter 스폰 시 `!is_inside_tree()` / viewport 접근 에러 없음
+- 편대 중앙의 대각·ping-pong 이동과 슬롯 간격은 기존과 동일

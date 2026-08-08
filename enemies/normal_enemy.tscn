@@ -1,8 +1,6 @@
 [gd_scene format=3 uid="uid://bhw7lkvyjx43v"]
 
 [ext_resource type="PackedScene" uid="uid://psmpwiapllcb" path="res://enemies/enemy.tscn" id="1_pg5ck"]
-[ext_resource type="Script" path="res://enemies/normal_enemy.gd" id="2_normal"]
-[ext_resource type="PackedScene" path="res://components/formation_diagonal_move_component.tscn" id="3_diagonal"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_b0nf3"]
 radius = 8.0
@@ -11,7 +9,6 @@ radius = 8.0
 radius = 6.0
 
 [node name="NormalEnemy" unique_id=1613877094 instance=ExtResource("1_pg5ck")]
-script = ExtResource("2_normal")
 
 [node name="StatsComponent" parent="." index="1" unique_id=1304120856]
 health = 20
@@ -32,9 +29,3 @@ shape = SubResource("CircleShape2D_7jo6o")
 fire_interval = 4.5
 projectile_speed = 105.0
 initial_delay = 1.5
-
-[node name="FormationDiagonalMoveComponent" parent="." index="20" node_paths=PackedStringArray("actor", "move_component") instance=ExtResource("3_diagonal")]
-actor = NodePath("..")
-move_component = NodePath("../MoveComponent")
-forward_speed = 72.0
-dive_angle_degrees = 50.0

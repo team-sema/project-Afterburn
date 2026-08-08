@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="EncounterPreset" load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://resources/encounters/encounter_preset.gd" id="1_preset"]
+[ext_resource type="Script" path="res://resources/encounters/encounter_member.gd" id="2_member"]
+[ext_resource type="PackedScene" path="res://formations/layouts/single_formation.tscn" id="3_layout"]
+[ext_resource type="Resource" path="res://resources/enemy_movement/sequences/single_release.tres" id="4_release"]
+[ext_resource type="Resource" path="res://resources/enemy_movement/sequences/bomb_straight_down.tres" id="5_individual"]
+[ext_resource type="PackedScene" path="res://enemies/bomb_enemy.tscn" id="6_enemy"]
+
+[sub_resource type="Resource" id="Member_bomb"]
+script = ExtResource("2_member")
+enemy_scene = ExtResource("6_enemy")
+slot_index = 0
+
+[resource]
+script = ExtResource("1_preset")
+encounter_id = &"bomb_single"
+formation_layout_scene = ExtResource("3_layout")
+formation_movement_sequence = ExtResource("4_release")
+members = Array[ExtResource("2_member")]([SubResource("Member_bomb")])
+spawn_anchor = 0
+spawn_offset = Vector2(0, -16)
+spawn_edge_margin = 8.0
+formation_break_condition = 1
+individual_movement_sequence = ExtResource("5_individual")

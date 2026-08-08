@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="OrbitFormationBehavior" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/formation_behaviors/orbit_formation_behavior.gd" id="1_behavior"]
+
+[resource]
+script = ExtResource("1_behavior")
+angular_speed = 35.0
+clockwise = true
+excluded_slot_indices = Array[int]([0])

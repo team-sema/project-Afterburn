@@ -3,7 +3,7 @@
 [ext_resource type="PackedScene" uid="uid://psmpwiapllcb" path="res://enemies/enemy.tscn" id="1_7jykc"]
 [ext_resource type="Script" uid="uid://duumbl2eoy0ot" path="res://enemies/shooting_enemy/shooting_enemy.gd" id="2_bxlr2"]
 [ext_resource type="Texture2D" uid="uid://cjhfuwqq2ffkl" path="res://assets/svg/enemy_caster.svg" id="3_gb8yh"]
-[ext_resource type="PackedScene" path="res://components/caster_hover_component.tscn" id="4_hover"]
+[ext_resource type="Resource" path="res://resources/enemy_movement/sequences/caster_entry_patrol.tres" id="4_movement"]
 [ext_resource type="PackedScene" path="res://components/radial_barrage_shoot_component.tscn" id="5_barrage"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_7jo6o"]
@@ -27,6 +27,9 @@ texture = ExtResource("3_gb8yh")
 [node name="StatsComponent" parent="." index="1" unique_id=1304120856]
 health = 110
 
+[node name="MovementController" parent="."]
+sequence = ExtResource("4_movement")
+
 [node name="VisibleOnScreenNotifier2D" parent="." index="3" unique_id=1344806211]
 rect = Rect2(-9, -9, 18, 18)
 
@@ -38,10 +41,6 @@ shape = SubResource("RectangleShape2D_psv4m")
 
 [node name="ScoreComponent" parent="." index="12" unique_id=1849553207]
 adjust_amount = 25
-
-[node name="CasterHoverComponent" parent="." index="19" unique_id=378062221 node_paths=PackedStringArray("actor", "move_component") instance=ExtResource("4_hover")]
-actor = NodePath("..")
-move_component = NodePath("../MoveComponent")
 
 [node name="RadialBarrageShootComponent" parent="." index="20" unique_id=1609255132 instance=ExtResource("5_barrage")]
 pellets_per_ring = 16

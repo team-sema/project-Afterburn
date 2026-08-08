@@ -30,6 +30,7 @@ func _run() -> void:
 	)
 	var shooting_enemy_scene := load("res://enemies/shooting_enemy/shooting_enemy.tscn") as PackedScene
 	var shooting_enemy := shooting_enemy_scene.instantiate() as Node2D
+	shooting_enemy.set("augment_registry", EnemyAugmentRegistry.new())
 	var barrage: Node = shooting_enemy.get_node("RadialBarrageShootComponent")
 	_expect(
 		barrage.projectile_scene.resource_path == "res://projectiles/base_enemy_projectile.tscn",

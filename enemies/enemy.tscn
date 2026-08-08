@@ -32,6 +32,7 @@
 [ext_resource type="PackedScene" path="res://pickups/experience_orb.tscn" id="29_experience_orb"]
 [ext_resource type="PackedScene" path="res://components/enemy_shoot_component.tscn" id="30_shoot"]
 [ext_resource type="Script" path="res://components/move_modifier_component.gd" id="31_move_modifier"]
+[ext_resource type="Script" path="res://components/movement_controller.gd" id="32_movement_controller"]
 
 [node name="Enemy" type="Node2D" unique_id=1578043332]
 script = ExtResource("1_3t1x0")
@@ -73,6 +74,11 @@ health = 3
 script = ExtResource("1_fw1ev")
 actor = NodePath("..")
 metadata/_custom_type_script = "uid://dbgfouplndi2j"
+
+[node name="MovementController" type="Node" parent="." node_paths=PackedStringArray("actor", "move_component")]
+script = ExtResource("32_movement_controller")
+actor = NodePath("..")
+move_component = NodePath("../MoveComponent")
 
 [node name="VisibleOnScreenNotifier2D" type="VisibleOnScreenNotifier2D" parent="." unique_id=1344806211 node_paths=PackedStringArray("actor")]
 script = ExtResource("15_free_offscreen")

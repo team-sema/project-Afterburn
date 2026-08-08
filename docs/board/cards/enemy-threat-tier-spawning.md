@@ -17,5 +17,10 @@
 
 - `EnemySpawnSet` 리소스와 Threat 기반 균등 후보 선택을 추가했다.
 - Tier 1: Drone/Striker, Tier 2: Awl/Bomb, Tier 3: Caster로 구성했다.
-- 편대별 생성·튜닝을 `EnemySpawnPattern` Resource로 분리해 Generator의 Formation별 분기를 제거했다.
+- 단일 적은 기존 `EnemySpawnPattern`, Drone/Awl 편대는 `EncounterPreset`으로 구성하고 공용 `EnemySpawner`가 두 경로를 생성한다.
 - 2026-08-01 `feature/enemy-threat-tier-spawning` → main (검증 대기)
+
+## 후속 통합
+
+- 2026-08-08 최소 Threat + 균등 `EnemySpawnSet` 구조를 `MainEncounterPool`의 Threat별 weight로 대체했다.
+- 단일 적을 포함한 모든 라이브 스폰을 `EncounterPreset → EnemySpawner → FormationController` 경로로 통일하고 중첩 pool을 평탄화했다.
