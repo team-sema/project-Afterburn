@@ -38,6 +38,8 @@ func _test_sequence_resources_load() -> void:
 		"res://resources/enemy_movement/sequences/zigzag.tres",
 		"res://resources/enemy_movement/sequences/move_to_center_then_wait.tres",
 		"res://resources/enemy_movement/sequences/drone_entry_gather.tres",
+		"res://resources/enemy_movement/sequences/drone_midmap_entry.tres",
+		"res://resources/enemy_movement/sequences/individual_scatter_double.tres",
 		"res://resources/enemy_movement/sequences/entry_then_exit.tres",
 	]
 	for path in paths:

@@ -351,8 +351,8 @@ func _build_individual_context(
 			scatter_direction.x *= -1.0
 		scatter_direction = scatter_direction.normalized()
 	else:
-		# Lower hemisphere (+Y down): random straight burst, not a pinwheel fan.
-		scatter_direction = Vector2.DOWN.rotated(randf_range(-PI * 0.5, PI * 0.5))
+		# Outward burst from the authored slot so left/right wings do not cross.
+		scatter_direction = _outward_scatter_direction(offset)
 	var player_direction := enemy.global_position.direction_to(locked_player_position)
 	if player_direction.is_zero_approx():
 		player_direction = Vector2.DOWN
@@ -365,6 +365,22 @@ func _build_individual_context(
 		"player_direction": player_direction,
 		"locked_player_position": locked_player_position,
 	}
+
+
+## Left wings fan left-down, right wings fan right-down, center/front stay near down.
+func _outward_scatter_direction(slot_offset: Vector2) -> Vector2:
+	const SIDE_EPSILON := 0.5
+	const MIN_SIDE_ANGLE := PI * 0.18
+	const MAX_SIDE_ANGLE := PI * 0.5
+	const CENTER_SPREAD := PI * 0.12
+	var angle := 0.0
+	if slot_offset.x < -SIDE_EPSILON:
+		angle = randf_range(MIN_SIDE_ANGLE, MAX_SIDE_ANGLE)
+	elif slot_offset.x > SIDE_EPSILON:
+		angle = randf_range(-MAX_SIDE_ANGLE, -MIN_SIDE_ANGLE)
+	else:
+		angle = randf_range(-CENTER_SPREAD, CENTER_SPREAD)
+	return Vector2.DOWN.rotated(angle)
 
 
 func _find_member_slot_index(enemy: Enemy) -> int:

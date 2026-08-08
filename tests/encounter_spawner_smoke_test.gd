@@ -249,12 +249,17 @@ func _test_member_direction_overrides_propagate() -> void:
 	for enemy in members:
 		var context := enemy.movement_controller.get_context()
 		var actual := context.get("initial_direction", Vector2.ZERO) as Vector2
+		var slot_offset := context.get("formation_slot_offset", Vector2.ZERO) as Vector2
 		_expect(actual.y >= -0.001, "scatter direction stays in the lower hemisphere")
 		_expect(
 			absf(actual.angle_to(Vector2.DOWN)) <= PI * 0.5 + 0.001,
 			"scatter direction is within ±90° of down",
 		)
 		_expect(actual.length() > 0.5, "scatter direction is usable")
+		if slot_offset.x < -0.5:
+			_expect(actual.x < -0.01, "left scatter member fans left")
+		elif slot_offset.x > 0.5:
+			_expect(actual.x > 0.01, "right scatter member fans right")
 	await process_frame
 	for enemy in members:
 		if is_instance_valid(enemy):

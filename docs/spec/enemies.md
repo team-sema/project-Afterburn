@@ -57,7 +57,7 @@
 | `interceptor_pair` | 0 | 2 | 2 |
 | `interceptor_trio` | 0 | 0 | 1 |
 
-테스트·웨폰 랩용 추가 드론 하강 프리셋(풀 weight 없음): `v3_drone_down`, `v5_drone_down`, `inverted_v3_drone_down`, `inverted_v5_drone_down`, `inverted_v7_drone_down`, `x5_drone_down`, `drone_triangle_formation`.
+테스트·웨폰 랩용 추가 드론 하강 프리셋(풀 weight 없음): `v3_drone_down`, `v5_drone_down`, `v9_drone_down`, `inverted_v3_drone_down`, `inverted_v5_drone_down`, `inverted_v7_drone_down`, `x5_drone_down`, `drone_triangle_formation`.
 
 Threat 3 기존 합 38에 Interceptor pair/trio `2/1`을 더해 총 weight는 41이다. Pair는 Threat 2부터, Trio는 Threat 3부터 등장한다.
 
@@ -108,6 +108,8 @@ Threat 3 기존 합 38에 Interceptor pair/trio `2/1`을 더해 총 weight는 41
 `drone_straight_formation.tres`가 `HorizontalFormation`과 `formation_drone_diagonal.tres`를 조합한다. 편대 중앙의 단일 `MovementController`가 일정한 대각 이동을 계산하고, `FormationController`가 각 Drone을 슬롯에 유지한다.
 
 `drone_entry_scatter.tres`는 세로 줄로 모인 뒤 `drone_entry_gather`(뷰포트 y≈0.2)에서 즉시 해제하고, 각 개체가 하위 180° 중 랜덤 직선으로 산개한다.
+
+`x9_drone_down` / `v3_drone_down` / `v5_drone_down` / `v7_drone_down` / `v9_drone_down` / `x5_drone_down`은 `TOP_RANDOM` 스폰 후 `drone_midmap_entry`(뷰포트 y≈0.5, 가로 유지, 60px/s)로 하강한 뒤 `SEQUENCE_FINISHED`로 편대를 해제하고, `individual_scatter_double`(120px/s = 진입 속도 2배)로 산개한다. 산개 방향은 슬롯 오프셋 기준 외향이다(좌익→좌하, 우익→우하, 중앙·선두→하방) 해서 좌우가 교차하지 않는다.
 
 `drone_zigzag_formation.tres` / `drone_zigzag_mirrored.tres`는 `zigzag.tres`의 `BoundedDiagonalMovementStep`을 쓴다. 속도와 각도가 일정한 대각선으로 비행하며, VisibleRect가 아닌 더 넓은 MovementArea에서만 방향을 반사하므로 일부 offscreen 이동과 재진입이 가능하다.
 
