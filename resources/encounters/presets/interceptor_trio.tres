@@ -30,4 +30,4 @@ members = Array[ExtResource("2_member")]([SubResource("Member_point"), SubResour
 spawn_anchor = 1
 spawn_offset = Vector2(0, 0)
 spawn_edge_margin = 24.0
-start_delay = 0.55
+start_delay = 0.9

@@ -224,14 +224,19 @@ func _resolve_startup_context(
 	if not _uses_lateral_attack_run(preset):
 		return resolved
 	if not resolved.has("attack_run_direction"):
-		resolved["attack_run_direction"] = (
-			Vector2.RIGHT if randf() < 0.5 else Vector2.LEFT
-		)
+		resolved["attack_run_direction"] = _pick_angled_lateral_attack_direction()
 	var run_direction := resolved["attack_run_direction"] as Vector2
 	if run_direction.is_zero_approx():
-		run_direction = Vector2.RIGHT
+		run_direction = _pick_angled_lateral_attack_direction()
 	resolved["attack_run_direction"] = run_direction.normalized()
 	return resolved
+
+
+func _pick_angled_lateral_attack_direction() -> Vector2:
+	## Side entry with a downward dive so the pass is never pure horizontal.
+	var go_right := randf() < 0.5
+	var dive := randf_range(0.28, 0.55)
+	return Vector2(1.0 if go_right else -1.0, dive).normalized()
 
 
 func _uses_lateral_attack_run(preset: EncounterPreset) -> bool:
@@ -278,7 +283,10 @@ func _apply_entry_warning_direction(enemy: Enemy, startup_context: Dictionary) -
 	var run_direction := startup_context["attack_run_direction"] as Vector2
 	if run_direction.is_zero_approx():
 		return
-	warning.entry_direction = run_direction.normalized()
+	# Edge telegraph marks the side entry lane (spawn Y on L/R), not the dive path.
+	# Placement uses the inward axis; Interceptor arrows face the spawn side (L↔R swap).
+	warning.entry_direction = Vector2.RIGHT if run_direction.x >= 0.0 else Vector2.LEFT
+	warning.face_spawn_side = true
 
 
 func _resolve_spawn_parent() -> Node:
