@@ -8,7 +8,7 @@
 | Yellow / Striker | 1 | `moving_enemy.tscn` | 50 | 10 | 마름모 편대 최후방 · 맵 1/3 하강 후 좌우 패트롤 |
 | Awl / Kamikaze | 2 | `kamikaze_enemy.tscn` | 70 | 15 | 3마리 V로 하강·조준 → 차지 시 V에서 각자 독립 돌진 · 투사체 없음 |
 | Bomb | 2 | `bomb_enemy.tscn` | 140 | 20 | 느린 하강 · 고체력 · 근접 시 2초 3회 적색 점멸 후 1.5× 자폭 · `enemy_bomb.svg` |
-| Interceptor | 2 | `interceptor_enemy.tscn` | 20 | 5 | 2~3기 편대 · 좌↔우 랜덤 횡단 · 0.55초 진입 경고 · 기체보다 빠른 forward 탄 · `enemy_interceptor.svg` |
+| Interceptor | 2 | `interceptor_enemy.tscn` | 40 | 5 | 2~3기 편대 · 좌↔우 대각 진입 · 0.9초 경고 · 연발 조준 탄 · `enemy_interceptor.svg` |
 | Pink / Caster | 3 | `shooting_enemy.tscn` | 110 | 25 | 상단 체공 · 원형 다연발 탄막(5링×20) · `enemy_caster.svg` |
 | Sniper | 3 | `sniper_enemy.tscn` | 95 | 25 | 상단 고정 · 4초 Cone 조준 · 0.5초 레이저 · 2.5초 쿨다운 반복 · `enemy_sniper.svg` |
 
@@ -63,14 +63,15 @@ Threat 3 기존 합 38에 Interceptor pair/trio `2/1`을 더해 총 weight는 41
 
 ## Interceptor 고속 공격 패스
 
-- `interceptor_enemy.tscn`은 `normal_enemy.tscn`을 상속하므로 Drone과 HP(20)·점수·XP 보상값을 공유한다.
+- `interceptor_enemy.tscn`은 `normal_enemy.tscn`을 상속하되 HP는 **40**(Drone 20의 상향). 점수·XP 보상은 Drone과 동일하다.
 - `interceptor_pair`는 전용 36px 가로 2기 슬롯, `interceptor_trio`는 기존 `V3Formation` 슬롯을 사용한다.
-- `EnemySpawner`가 `ForwardAttackRun` Encounter를 좌→우 / 우→좌 중 랜덤 횡단으로 배치한다. 스폰 Y는 VisibleRect 높이의 약 16~38% 상단 밴드에 두어 깊은 후방(화면 밖 상단) 전용 진입을 피한다.
-- `start_delay=0.55` 동안 횡단 진입 레인에 `EntryWarningComponent` 경고를 표시한다.
-- `ForwardAttackRunMovementStep`: 편대 루트를 횡단 방향으로 먼저 회전한 뒤, 설정된 local forward 축으로만 210px/s 이동한다. 화면 clamp·bounce·sine·strafe·재추적은 없다.
+- `EnemySpawner`가 `ForwardAttackRun` Encounter를 좌→우 / 우→좌 중 랜덤으로 배치하되, 순수 수평이 아니라 하방 dive 각도(대략 15~29°)를 섞은 대각 패스로 진입한다. 스폰 Y는 VisibleRect 높이의 약 16~38% 상단 밴드에 둔다.
+- `start_delay=0.9` 동안 `EntryWarningComponent`(0.9초)가 **좌/우 등장 가장자리**(기체 스폰 Y)에 경고를 표시한다. 화살표는 **왼쪽 등장 → 왼쪽**, **오른쪽 등장 → 오른쪽**을 가리킨다(스폰 쪽을 향하는 L/R 스왑).
+- `ForwardAttackRunMovementStep`: 편대 루트를 대각 진행 방향으로 먼저 회전한 뒤, 설정된 local forward 축으로만 210px/s 이동한다. 화면 clamp·bounce·sine·strafe·재추적은 없다.
 - 편대 루트 회전이 슬롯 위치와 각 멤버 회전에 함께 적용되므로 형태를 유지하면서 기수와 실제 이동 방향이 일치한다.
-- `EnemyShootComponent`의 visible-entry fire gate가 기체 중심이 VisibleRect에 들어온 뒤에만 1.35초 사격 창을 연다. 2발 burst, 0.12초 burst 간격, 0.7초 재공격 간격이며 탄환은 플레이어 조준이 아니라 기체 forward로 **300px/s**(기체 210보다 빠름) 발사한다.
-- 생존 기체는 횡단 방향 DespawnArea 밖으로 그대로 이탈한다. 이 경로는 `no_health`를 발생시키지 않으므로 점수·XP·처치 보상이 없고, 실제 파괴 시에만 기존 보상이 발생한다.
+- `EnemyShootComponent`의 visible-entry fire gate가 기체 중심이 VisibleRect에 들어온 뒤에만 **0.7초** 사격 창을 연다. **10발 burst를 1회만** 발사하고(`burst_interval` 0.05초, `fire_interval` 10초로 재공격 차단), 탄환은 `TargetingComponent`로 **플레이어를 조준**해 **300px/s**(기체 210보다 빠름) 발사한다.
+- 비주얼은 삼각 델타 전투기 실루엣(`enemy_interceptor.svg`, 기수 +Y)이다.
+- 생존 기체는 진행 방향 DespawnArea 밖으로 그대로 이탈한다. 이 경로는 `no_health`를 발생시키지 않으므로 점수·XP·처치 보상이 없고, 실제 파괴 시에만 기존 보상이 발생한다.
 
 ## Caster 상단 체공 · 원형 탄막
 

@@ -526,6 +526,14 @@
       "column": "review",
       "file": "cards/drone-midmap-scatter.md",
       "tags": ["적", "편대", "이동"]
+    },
+    {
+      "id": "interceptor-angled-aim",
+      "title": "인터셉터 대각 진입·조준 탄",
+      "description": "대각 진입·경고 L/R 스왑·10발 단발 연발·HP40.",
+      "column": "review",
+      "file": "cards/interceptor-angled-aim.md",
+      "tags": ["적", "전투"]
     }
   ]
 }
