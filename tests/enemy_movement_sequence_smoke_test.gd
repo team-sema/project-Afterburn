@@ -33,8 +33,11 @@ func _test_sequence_resources_load() -> void:
 		"res://resources/enemy_movement/sequences/striker_entry_patrol.tres",
 		"res://resources/enemy_movement/sequences/caster_entry_patrol.tres",
 		"res://resources/enemy_movement/sequences/straight_down.tres",
+		"res://resources/enemy_movement/sequences/x9_caster_entry_patrol.tres",
+		"res://resources/enemy_movement/sequences/x9_drone_down.tres",
 		"res://resources/enemy_movement/sequences/zigzag.tres",
 		"res://resources/enemy_movement/sequences/move_to_center_then_wait.tres",
+		"res://resources/enemy_movement/sequences/drone_entry_gather.tres",
 		"res://resources/enemy_movement/sequences/entry_then_exit.tres",
 	]
 	for path in paths:
@@ -90,7 +93,7 @@ func _test_striker_and_caster_migration() -> void:
 	var caster_sequence := load(
 		"res://resources/enemy_movement/sequences/caster_entry_patrol.tres"
 	) as MovementSequence
-	var caster := _make_enemy("res://enemies/shooting_enemy/shooting_enemy.tscn")
+	var caster := _make_enemy("res://enemies/shooting_enemy.tscn")
 	caster.set_movement_sequence(
 		caster_sequence,
 		{"initial_direction": Vector2.RIGHT},

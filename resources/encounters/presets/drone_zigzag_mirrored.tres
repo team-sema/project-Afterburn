@@ -40,4 +40,5 @@ members = Array[ExtResource("2_member")]([SubResource("Member_slot_0"), SubResou
 spawn_anchor = 0
 spawn_offset = Vector2(0, -16)
 spawn_edge_margin = 8.0
+spawn_in_movement_area = true
 mirrored = true

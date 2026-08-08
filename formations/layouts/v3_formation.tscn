@@ -7,19 +7,19 @@
 script = ExtResource("1_layout")
 
 [node name="Slot0" type="Marker2D" parent="."]
-position = Vector2(0, 14)
+position = Vector2(0, 11)
 script = ExtResource("2_slot")
 slot_index = 0
 slot_id = &"point"
 
 [node name="Slot1" type="Marker2D" parent="."]
-position = Vector2(-32, -14)
+position = Vector2(-16, -11)
 script = ExtResource("2_slot")
 slot_index = 1
 slot_id = &"left"
 
 [node name="Slot2" type="Marker2D" parent="."]
-position = Vector2(32, -14)
+position = Vector2(16, -11)
 script = ExtResource("2_slot")
 slot_index = 2
 slot_id = &"right"

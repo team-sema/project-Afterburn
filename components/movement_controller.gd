@@ -1,6 +1,10 @@
 class_name MovementController
 extends Node
 
+const DEFAULT_MOVEMENT_SPACE: MovementSpaceConfig = preload(
+	"res://resources/enemy_movement/default_movement_space.tres"
+)
+
 signal step_started(step_index: int, step: MovementStep)
 signal step_finished(step_index: int, step: MovementStep)
 signal sequence_finished
@@ -11,6 +15,7 @@ signal sequence_stopped
 @export var sequence: MovementSequence
 @export var auto_start := true
 @export var initial_context: Dictionary = {}
+@export var movement_space_config: MovementSpaceConfig = DEFAULT_MOVEMENT_SPACE
 
 var _context: Dictionary = {}
 var _context_was_configured := false
@@ -29,6 +34,10 @@ var _intent := MovementIntent.new()
 func _ready() -> void:
 	assert(actor != null, "MovementController requires an actor.")
 	assert(move_component != null, "MovementController requires MoveComponent.")
+	assert(
+		movement_space_config != null and movement_space_config.validate(),
+		"MovementController requires a valid MovementSpaceConfig.",
+	)
 	_ready_complete = true
 	set_process(false)
 	if not _context_was_configured:
@@ -232,7 +241,12 @@ func _build_context() -> Dictionary:
 	result["global_position"] = actor.global_position
 	result["base_position"] = actor.global_position - modifier_offset
 	result["modifier_offset"] = modifier_offset
-	result["viewport_rect"] = actor.get_viewport_rect()
+	var visible_rect := actor.get_viewport_rect()
+	result["viewport_rect"] = visible_rect
+	result["visible_rect"] = visible_rect
+	result["movement_area"] = movement_space_config.get_movement_area(visible_rect)
+	result["combat_area"] = movement_space_config.get_combat_area(visible_rect)
+	result["despawn_area"] = movement_space_config.get_despawn_area(visible_rect)
 	result["speed_multiplier"] = move_component.velocity_multiplier
 	var player := actor.get_tree().get_first_node_in_group("player") as Node2D
 	if player != null and is_instance_valid(player):

@@ -20,6 +20,8 @@ func _process(delta: float) -> void:
 func apply_movement_intent(intent: MovementIntent, delta: float) -> void:
 	assert(intent != null and intent.is_valid, "MoveComponent requires a valid MovementIntent.")
 	velocity = intent.velocity
+	if intent.has_global_rotation:
+		actor.global_rotation = intent.global_rotation
 	if intent.has_global_position:
 		if modifier_component != null:
 			modifier_component.advance(delta)

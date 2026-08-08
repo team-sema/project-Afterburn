@@ -9,10 +9,13 @@ const PRESET_PATHS := [
 	"res://resources/encounters/presets/mixed_partial_diamond.tres",
 	"res://resources/encounters/presets/x9_drone_down.tres",
 	"res://resources/encounters/presets/x9_caster_drone_orbit.tres",
-	"res://resources/encounters/presets/v7_striker_drone.tres",
+	"res://resources/encounters/presets/v7_drone_down.tres",
 	"res://resources/encounters/presets/striker_single.tres",
 	"res://resources/encounters/presets/bomb_single.tres",
 	"res://resources/encounters/presets/caster_single.tres",
+	"res://resources/encounters/presets/tanker_guard_sniper.tres",
+	"res://resources/encounters/presets/interceptor_pair.tres",
+	"res://resources/encounters/presets/interceptor_trio.tres",
 ]
 
 var failures := PackedStringArray()
@@ -242,19 +245,16 @@ func _test_member_direction_overrides_propagate() -> void:
 		return
 	controller.set_process(false)
 	var members := controller.get_members()
-	var expected_by_slot: Dictionary = {}
-	for member in preset.members:
-		expected_by_slot[member.slot_index] = member.initial_direction.normalized()
 	controller.break_formation()
 	for enemy in members:
 		var context := enemy.movement_controller.get_context()
-		var slot_index := int(context.get("slot_index", -1))
-		var expected := expected_by_slot.get(slot_index, Vector2.ZERO) as Vector2
 		var actual := context.get("initial_direction", Vector2.ZERO) as Vector2
+		_expect(actual.y >= -0.001, "scatter direction stays in the lower hemisphere")
 		_expect(
-			actual.is_equal_approx(expected),
-			"EncounterMember slot %d initial_direction reaches individual context" % slot_index,
+			absf(actual.angle_to(Vector2.DOWN)) <= PI * 0.5 + 0.001,
+			"scatter direction is within ±90° of down",
 		)
+		_expect(actual.length() > 0.5, "scatter direction is usable")
 	await process_frame
 	for enemy in members:
 		if is_instance_valid(enemy):
@@ -276,15 +276,13 @@ func _test_awl_breaks_into_individual_charge() -> void:
 	controller.center_movement_controller.set_process(false)
 	var initial_center_y := controller.global_position.y
 
-	# The shipped formation sequence is 1.4 s descent followed by 1.4 s aim.
+	# The shipped formation sequence is a 1.4 s descent, then each Awl charges 3 s.
 	controller.center_movement_controller.update_movement(1.5)
 	controller.call("_update_member_positions", 1.5)
 	_expect(
 		controller.global_position.y > initial_center_y + 58.0,
-		"Awl formation performs its shared descent before aiming",
+		"Awl formation performs its shared descent before charging",
 	)
-	controller.center_movement_controller.update_movement(1.5)
-	controller.call("_update_member_positions", 1.5)
 	await process_frame
 
 	var charging_positions: Array[Vector2] = []

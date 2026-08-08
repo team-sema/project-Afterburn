@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://components/sniper_aim_cone.gd" id="1_script"]
+
+[node name="SniperAimCone" type="Node2D"]
+z_index = 10
+script = ExtResource("1_script")
+half_angle_degrees = 42.0
+cone_length = 420.0

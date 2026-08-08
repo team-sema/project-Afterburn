@@ -351,9 +351,18 @@ func _test_break_preserves_position_context_and_cleanup() -> void:
 	_expect(left_context.has("locked_player_position"), "release context snapshots target position")
 	var left_direction := left_context.get("initial_direction", Vector2.ZERO) as Vector2
 	var right_direction := right_context.get("initial_direction", Vector2.ZERO) as Vector2
-	_expect(left_direction.x < 0.0, "left member receives a leftward scatter direction")
-	_expect(right_direction.x > 0.0, "right member receives a rightward scatter direction")
-	_expect(not left_direction.is_equal_approx(right_direction), "members receive distinct directions")
+	_expect(left_direction.y >= -0.001, "left scatter stays in the lower hemisphere")
+	_expect(right_direction.y >= -0.001, "right scatter stays in the lower hemisphere")
+	_expect(
+		absf(left_direction.angle_to(Vector2.DOWN)) <= PI * 0.5 + 0.001,
+		"left scatter is within ±90° of down",
+	)
+	_expect(
+		absf(right_direction.angle_to(Vector2.DOWN)) <= PI * 0.5 + 0.001,
+		"right scatter is within ±90° of down",
+	)
+	_expect(left_direction.length() > 0.5, "left scatter has a usable direction")
+	_expect(right_direction.length() > 0.5, "right scatter has a usable direction")
 
 	await process_frame
 	left.movement_controller.set_process(false)
@@ -362,8 +371,14 @@ func _test_break_preserves_position_context_and_cleanup() -> void:
 	var right_motion_start := right.global_position
 	left.movement_controller.update_movement(0.1)
 	right.movement_controller.update_movement(0.1)
-	_expect(left.global_position.x < left_motion_start.x, "left individual sequence uses release context")
-	_expect(right.global_position.x > right_motion_start.x, "right individual sequence uses release context")
+	_expect(
+		left.global_position.distance_to(left_motion_start) > 1.0,
+		"left individual sequence uses release context",
+	)
+	_expect(
+		right.global_position.distance_to(right_motion_start) > 1.0,
+		"right individual sequence uses release context",
+	)
 	await process_frame
 	_expect(not is_instance_valid(controller), "broken FormationController cleans itself up")
 	left.queue_free()

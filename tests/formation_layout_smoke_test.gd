@@ -5,10 +5,14 @@ const LAYOUT_PATHS := [
 	"res://formations/layouts/vertical_formation.tscn",
 	"res://formations/layouts/v3_formation.tscn",
 	"res://formations/layouts/v5_formation.tscn",
-	"res://formations/layouts/inverted_v5_formation.tscn",
-	"res://formations/layouts/diamond_formation.tscn",
 	"res://formations/layouts/v7_formation.tscn",
+	"res://formations/layouts/inverted_v3_formation.tscn",
+	"res://formations/layouts/inverted_v5_formation.tscn",
+	"res://formations/layouts/inverted_v7_formation.tscn",
+	"res://formations/layouts/diamond_formation.tscn",
+	"res://formations/layouts/x5_formation.tscn",
 	"res://formations/layouts/x9_formation.tscn",
+	"res://formations/layouts/triangle6_formation.tscn",
 ]
 
 const EXPECTED_POSITIONS := {
@@ -19,30 +23,45 @@ const EXPECTED_POSITIONS := {
 		Vector2(0, -64), Vector2(0, -32), Vector2(0, 0), Vector2(0, 32), Vector2(0, 64),
 	],
 	"res://formations/layouts/v3_formation.tscn": [
-		Vector2(0, 14), Vector2(-32, -14), Vector2(32, -14),
+		Vector2(0, 11), Vector2(-16, -11), Vector2(16, -11),
 	],
 	"res://formations/layouts/v5_formation.tscn": [
-		Vector2(0, 14), Vector2(-32, -14), Vector2(32, -14),
-		Vector2(-64, -42), Vector2(64, -42),
+		Vector2(0, 11), Vector2(-16, -11), Vector2(16, -11),
+		Vector2(-32, -33), Vector2(32, -33),
+	],
+	"res://formations/layouts/v7_formation.tscn": [
+		Vector2(0, 11), Vector2(-16, -11), Vector2(16, -11),
+		Vector2(-32, -33), Vector2(32, -33),
+		Vector2(-48, -55), Vector2(48, -55),
+	],
+	"res://formations/layouts/inverted_v3_formation.tscn": [
+		Vector2(-16, 22), Vector2(0, 0), Vector2(16, 22),
 	],
 	"res://formations/layouts/inverted_v5_formation.tscn": [
-		Vector2(-64, 32), Vector2(-32, 16), Vector2(0, 0),
-		Vector2(32, 16), Vector2(64, 32),
+		Vector2(-32, 44), Vector2(-16, 22), Vector2(0, 0),
+		Vector2(16, 22), Vector2(32, 44),
+	],
+	"res://formations/layouts/inverted_v7_formation.tscn": [
+		Vector2(-48, 66), Vector2(-32, 44), Vector2(-16, 22), Vector2(0, 0),
+		Vector2(16, 22), Vector2(32, 44), Vector2(48, 66),
 	],
 	"res://formations/layouts/diamond_formation.tscn": [
 		Vector2(0, -40), Vector2(-48, 0), Vector2(0, 0),
 		Vector2(48, 0), Vector2(0, 40),
 	],
-	"res://formations/layouts/v7_formation.tscn": [
-		Vector2(0, 14), Vector2(-32, -14), Vector2(32, -14),
-		Vector2(-64, -42), Vector2(64, -42),
-		Vector2(-96, -70), Vector2(96, -70),
+	"res://formations/layouts/x5_formation.tscn": [
+		Vector2(0, 0), Vector2(-16, -16), Vector2(16, -16),
+		Vector2(-16, 16), Vector2(16, 16),
 	],
 	"res://formations/layouts/x9_formation.tscn": [
-		Vector2(0, 0), Vector2(-24, -24), Vector2(24, -24),
-		Vector2(-48, -48), Vector2(48, -48),
-		Vector2(-24, 24), Vector2(24, 24),
-		Vector2(-48, 48), Vector2(48, 48),
+		Vector2(0, 0), Vector2(-16, -16), Vector2(16, -16),
+		Vector2(-32, -32), Vector2(32, -32),
+		Vector2(-16, 16), Vector2(16, 16),
+		Vector2(-32, 32), Vector2(32, 32),
+	],
+	"res://formations/layouts/triangle6_formation.tscn": [
+		Vector2(0, 10), Vector2(-12, -11), Vector2(12, -11),
+		Vector2(-24, -32), Vector2(24, -32), Vector2(0, -32),
 	],
 }
 

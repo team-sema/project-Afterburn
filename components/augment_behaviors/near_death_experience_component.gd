@@ -44,6 +44,8 @@ func _disconnect_offscreen_free() -> void:
 	var notifier := enemy.get_node_or_null("VisibleOnScreenNotifier2D") as FreeOffscreenComponent
 	if notifier == null:
 		return
+	if notifier.has_method("suspend_despawn"):
+		notifier.suspend_despawn()
 	var free_actor := Callable(enemy, "queue_free")
 	if notifier.screen_exited.is_connected(free_actor):
 		notifier.screen_exited.disconnect(free_actor)

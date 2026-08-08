@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://0th6okc5yjpd"]
 
 [ext_resource type="PackedScene" uid="uid://psmpwiapllcb" path="res://enemies/enemy.tscn" id="1_7jykc"]
-[ext_resource type="Script" uid="uid://duumbl2eoy0ot" path="res://enemies/shooting_enemy/shooting_enemy.gd" id="2_bxlr2"]
+[ext_resource type="Script" uid="uid://duumbl2eoy0ot" path="res://enemies/shooting_enemy.gd" id="2_bxlr2"]
 [ext_resource type="Texture2D" uid="uid://cjhfuwqq2ffkl" path="res://assets/svg/enemy_caster.svg" id="3_gb8yh"]
 [ext_resource type="Resource" path="res://resources/enemy_movement/sequences/caster_entry_patrol.tres" id="4_movement"]
 [ext_resource type="PackedScene" path="res://components/radial_barrage_shoot_component.tscn" id="5_barrage"]

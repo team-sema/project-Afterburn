@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="MovementSequence" load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://resources/enemy_movement/movement_sequence.gd" id="1_sequence"]
+[ext_resource type="Script" path="res://resources/enemy_movement/movement_step.gd" id="2_step"]
+[ext_resource type="Script" path="res://resources/enemy_movement/steps/move_to_position_step.gd" id="3_move_to"]
+[ext_resource type="Script" path="res://resources/enemy_movement/steps/hold_position_movement_step.gd" id="4_hold"]
+
+[sub_resource type="Resource" id="MoveTo_top_band"]
+script = ExtResource("3_move_to")
+target_position = Vector2(0, 48)
+speed = 40.0
+affect_x = false
+
+[sub_resource type="Resource" id="Hold_top"]
+script = ExtResource("4_hold")
+
+[resource]
+script = ExtResource("1_sequence")
+steps = Array[ExtResource("2_step")]([SubResource("MoveTo_top_band"), SubResource("Hold_top")])

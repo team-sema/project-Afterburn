@@ -6,12 +6,14 @@
 
 | 클래스 | 역할 |
 |--------|------|
-| `MoveComponent` | 레거시 `velocity` 또는 `MovementIntent`를 받아 actor에 실제 이동 적용 |
+| `MoveComponent` | 레거시 `velocity` 또는 `MovementIntent`를 받아 actor에 실제 이동·선택적 global rotation 적용 |
 | `MovementController` | `MovementSequence`의 현재 Step과 런타임 상태를 소유하고 Intent를 `MoveComponent`에 전달 |
+| `MovementSpaceConfig` | 실제 viewport에서 Visible/Movement/Combat/Despawn 영역을 비율 기반으로 계산하는 공통 설정 |
 | `MovementSequence` | 설정 전용 `MovementStep` 배열 Resource. 여러 적이 같은 Resource를 안전하게 공유 |
 | `Linear/Sine/MoveToPosition/Wait/HomingMovementStep` | 조합 가능한 범용 이동 단계 |
-| `HorizontalPatrolMovementStep` | 뷰포트 좌우 경계에서 반사하는 범용 순찰 단계 |
-| `BoundedDiagonalMovementStep` | 편대 반경을 고려해 뷰포트 좌우에서 반사하는 범용 대각 이동 단계 |
+| `HorizontalPatrolMovementStep` | Caster/Striker처럼 명시적 전투 위치가 필요한 경우 CombatArea 안에서 왕복하는 단계 |
+| `BoundedDiagonalMovementStep` | 명시적 bounded-arena 패턴 전용. VisibleRect가 아닌 확장 MovementArea에서 반사 |
+| `ForwardAttackRunMovementStep` | 목표 방향으로 회전한 뒤 local forward 축으로만 고속 이동. clamp·bounce·strafe 없음 |
 | `FormationSlot` / `FormationLayout` | 에디터에서 배치하는 명시적 슬롯과 검증·미리보기 전용 편대 모양 Scene |
 | `FormationController` | Scene 기반 슬롯 매핑, 단일 편대 중앙 이동, 멤버 위치·이탈·해제 후 개별 Sequence 전환 |
 | `RadialBarrageShootComponent` | 원형 다연발 링 탄막 |
@@ -21,9 +23,9 @@
 | `MoveInputComponent` | `ui_*`/WASD → MoveComponent (`MoveStats.speed`) |
 | `MoveStats` | 이동 속도 Resource |
 | `MoveLeftOrRightComponent` | 상태 진입 시 ±X 속도 |
-| `PositionClampComponent` | 뷰포트 안 클램프 |
-| `BorderBounceComponent` | 화면 가장 X 속도 반사 |
-| `FreeOffscreenComponent` | 화면 밖이면 `queue_free` |
+| `PositionClampComponent` | 플레이어 등 화면 내부 제약이 명시된 actor용 뷰포트 클램프(Enemy 기본 이동에는 미사용) |
+| `BorderBounceComponent` | 명시적 화면 경계 반사용 레거시 컴포넌트(Enemy 기본 이동에는 미사용) |
+| `FreeOffscreenComponent` | Enemy는 확장 DespawnArea 밖에서 제거, Projectile은 기존 screen-exit 정책 유지 |
 
 ## 전투 · 생존
 
@@ -46,6 +48,7 @@
 | `ScaleComponent` | 펀치 스케일 트윈 |
 | `ShakeComponent` | 위치 셰이크 |
 | `FlashComponent` | 화이트 플래시 머티리얼 |
+| `EntryWarningComponent` | 화면 밖 고속 진입 전 예상 진입 지점의 VisibleRect 가장자리에 짧은 경고 표시 |
 | `SpawnerComponent` | PackedScene 인스턴스 |
 | `EnemySpawner` | 선택된 `EncounterPreset`만 실제 생성하고 의존성·Encounter ID를 트리 진입 전에 주입. 단일 적도 동일한 `FormationController` 생명주기를 사용 |
 | `EncounterPreset` / `EncounterMember` | Layout, 편대·개별 Sequence, 슬롯별 적, 등장 지연, 반전, 편대 해제 조건을 조합하는 설정 Resource |
@@ -72,6 +75,10 @@
 | `EnemyModifierFactory` | 스폰 시 적 스탯·행동 컴포넌트 적용 |
 | `EnemyAugmentGrantComponent` | 수동으로 적 오그먼트 grant *(씬 미연결)* |
 | `TargetingComponent` | `"player"` 그룹 타깃 |
-| `EnemyShootComponent` | 적 기본 조준 사격 · `fire_interval` + **`burst_count`/`burst_interval`** 연발 · 기본 탄 `base_enemy_projectile` |
+| `EnemyShootComponent` | 적 기본 조준 사격 · `fire_interval` + **`burst_count`/`burst_interval`** 연발 · 선택적 actor-forward 발사와 VisibleRect 진입 기반 제한 사격 창 · 기본 탄 `base_enemy_projectile` |
+| `RadialBarrageShootComponent` | Caster 원형 다연발 탄막 |
+| `SniperAttackComponent` | 스나이퍼 조준 Cone · 월드 고정 레이저 · 쿨다운 반복 |
+| `SniperAimCone` | 스나이퍼 조준 텔레그래프 `_draw` |
+| `HoldPositionMovementStep` | 위치 고정(무한) MovementStep |
 | `EnemyFireVolumeBoostComponent` | 위기: 탄수·스프레드 증가 (`augment_behaviors/`) |
 | `CounterShotComponent` | 피격/사망 반격 탄 *(풀에서 제외, 레거시)* |

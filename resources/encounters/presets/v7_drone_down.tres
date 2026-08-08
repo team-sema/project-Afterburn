@@ -1,0 +1,54 @@
+[gd_resource type="Resource" script_class="EncounterPreset" load_steps=14 format=3]
+
+[ext_resource type="Script" path="res://resources/encounters/encounter_preset.gd" id="1_preset"]
+[ext_resource type="Script" path="res://resources/encounters/encounter_member.gd" id="2_member"]
+[ext_resource type="PackedScene" path="res://formations/layouts/v7_formation.tscn" id="3_layout"]
+[ext_resource type="Resource" path="res://resources/enemy_movement/sequences/straight_down.tres" id="4_movement"]
+[ext_resource type="Resource" path="res://resources/formation_behaviors/maintain.tres" id="5_behavior"]
+[ext_resource type="PackedScene" path="res://enemies/normal_enemy.tscn" id="6_drone"]
+
+[sub_resource type="Resource" id="Member0"]
+script = ExtResource("2_member")
+enemy_scene = ExtResource("6_drone")
+slot_index = 0
+
+[sub_resource type="Resource" id="Member1"]
+script = ExtResource("2_member")
+enemy_scene = ExtResource("6_drone")
+slot_index = 1
+
+[sub_resource type="Resource" id="Member2"]
+script = ExtResource("2_member")
+enemy_scene = ExtResource("6_drone")
+slot_index = 2
+
+[sub_resource type="Resource" id="Member3"]
+script = ExtResource("2_member")
+enemy_scene = ExtResource("6_drone")
+slot_index = 3
+
+[sub_resource type="Resource" id="Member4"]
+script = ExtResource("2_member")
+enemy_scene = ExtResource("6_drone")
+slot_index = 4
+
+[sub_resource type="Resource" id="Member5"]
+script = ExtResource("2_member")
+enemy_scene = ExtResource("6_drone")
+slot_index = 5
+
+[sub_resource type="Resource" id="Member6"]
+script = ExtResource("2_member")
+enemy_scene = ExtResource("6_drone")
+slot_index = 6
+
+[resource]
+script = ExtResource("1_preset")
+encounter_id = &"v7_drone_down"
+formation_layout_scene = ExtResource("3_layout")
+formation_movement_sequence = ExtResource("4_movement")
+formation_behavior = ExtResource("5_behavior")
+members = Array[ExtResource("2_member")]([SubResource("Member0"), SubResource("Member1"), SubResource("Member2"), SubResource("Member3"), SubResource("Member4"), SubResource("Member5"), SubResource("Member6")])
+spawn_anchor = 0
+spawn_offset = Vector2(0, -16)
+spawn_edge_margin = 8.0

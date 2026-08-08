@@ -83,18 +83,19 @@ func apply_formation_target(
 	target_global_position: Vector2,
 	delta: float,
 	target_rotation: float = 0.0,
+	target_velocity: Vector2 = Vector2.ZERO,
 ) -> void:
 	if movement_mode != MovementMode.FORMATION_MEMBER:
 		return
 	if _formation_controller == null or not is_instance_valid(_formation_controller):
 		return
 	_formation_intent.reset()
-	_formation_intent.set_global_position(target_global_position)
+	_formation_intent.set_global_position(target_global_position, target_velocity)
 	(get_node("MoveComponent") as MoveComponent).apply_movement_intent(
 		_formation_intent,
 		delta,
 	)
-	rotation = target_rotation
+	global_rotation = target_rotation
 
 
 func exit_formation_mode(

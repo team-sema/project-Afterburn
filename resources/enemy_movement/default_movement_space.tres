@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="MovementSpaceConfig" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/enemy_movement/movement_space_config.gd" id="1_config"]
+
+[resource]
+script = ExtResource("1_config")
+movement_margin_x_ratio = 0.2
+movement_margin_top_ratio = 0.2
+movement_margin_bottom_ratio = 0.25
+despawn_margin_x_ratio = 0.55
+despawn_margin_top_ratio = 0.45
+despawn_margin_bottom_ratio = 0.5
+combat_inset_x_ratio = 0.05
+combat_inset_top_ratio = 0.04
+combat_inset_bottom_ratio = 0.08

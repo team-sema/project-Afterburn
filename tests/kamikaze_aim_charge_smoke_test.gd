@@ -57,20 +57,8 @@ func _run() -> void:
 			"Awl offscreen cleanup remains",
 		)
 
-	# Descend has completed and the shared Wait/aim step is active; V must hold.
+	# Descend completes (~1.4s); each Awl detaches and begins the 3s charge.
 	await create_timer(1.6).timeout
-	for enemy in members:
-		var slot := enemy.get_formation_slot()
-		var expected := controller.global_transform * slot.position
-		_expect(
-			failures,
-			enemy.global_position.distance_to(expected) < 0.75,
-			"Awl holds its V slot during the aim phase",
-		)
-		_expect(failures, not enemy.movement_controller.is_running(), "individual charge stays stopped")
-
-	# The 1.4 second descend + 1.4 second wait lets each Awl request its detach.
-	await create_timer(1.35).timeout
 	await process_frame
 	var charging_positions: Array[Vector2] = []
 	for enemy in members:

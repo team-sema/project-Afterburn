@@ -140,8 +140,6 @@ func start_formation(context: Dictionary = {}) -> void:
 	if not movement_context.has("formation_direction"):
 		var viewport_center_x := get_viewport_rect().get_center().x
 		var inward_sign := 1.0 if global_position.x <= viewport_center_x else -1.0
-		if mirrored:
-			inward_sign *= -1.0
 		movement_context["formation_direction"] = Vector2(inward_sign, 0.0)
 	center_move_component.velocity_multiplier = _formation_speed_multiplier
 	center_movement_controller.set_sequence(
@@ -297,7 +295,12 @@ func _apply_member_position(enemy: Enemy, slot: FormationSlot, delta: float) -> 
 	var target_position := global_transform * local_offset
 	var rotation_sign := -1.0 if mirrored else 1.0
 	var target_rotation := global_rotation + deg_to_rad(slot.rotation_offset * rotation_sign)
-	enemy.apply_formation_target(target_position, delta, target_rotation)
+	enemy.apply_formation_target(
+		target_position,
+		delta,
+		target_rotation,
+		center_move_component.velocity,
+	)
 
 
 func _transform_slot_offset(
@@ -348,9 +351,8 @@ func _build_individual_context(
 			scatter_direction.x *= -1.0
 		scatter_direction = scatter_direction.normalized()
 	else:
-		scatter_direction = Vector2(signf(offset.x), 1.0).normalized()
-		if is_zero_approx(offset.x):
-			scatter_direction = Vector2.DOWN
+		# Lower hemisphere (+Y down): random straight burst, not a pinwheel fan.
+		scatter_direction = Vector2.DOWN.rotated(randf_range(-PI * 0.5, PI * 0.5))
 	var player_direction := enemy.global_position.direction_to(locked_player_position)
 	if player_direction.is_zero_approx():
 		player_direction = Vector2.DOWN

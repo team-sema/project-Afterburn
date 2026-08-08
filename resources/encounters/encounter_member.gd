@@ -6,7 +6,7 @@ extends Resource
 ## Negative uses the FormationSlot's authored spawn_delay.
 @export_range(-1.0, 60.0, 0.05) var spawn_delay_override := -1.0
 @export var individual_movement_override: MovementSequence
-## Optional release direction. Zero derives an outward direction from the slot.
+## Optional release direction. Zero picks a random lower-hemisphere direction.
 @export var initial_direction := Vector2.ZERO
 
 

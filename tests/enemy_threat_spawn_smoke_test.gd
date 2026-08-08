@@ -10,10 +10,13 @@ const EXPECTED_WEIGHTS := {
 	&"striker_drone_diamond": [6.0, 6.0, 6.0],
 	&"awl_formation": [0.0, 6.0, 6.0],
 	&"bomb_single": [0.0, 6.0, 6.0],
-	&"caster_single": [0.0, 0.0, 6.0],
+	&"caster_single": [0.0, 0.0, 4.0],
+	&"tanker_guard_sniper": [0.0, 1.0, 4.0],
 	&"x9_drone_down": [0.0, 0.0, 3.0],
 	&"x9_caster_drone_orbit": [0.0, 0.0, 1.0],
-	&"v7_striker_drone": [0.0, 0.0, 2.0],
+	&"v7_drone_down": [0.0, 0.0, 2.0],
+	&"interceptor_pair": [0.0, 2.0, 2.0],
+	&"interceptor_trio": [0.0, 0.0, 1.0],
 }
 
 var failures := PackedStringArray()
@@ -65,7 +68,7 @@ func _test_generator_and_pool_shape() -> void:
 	_expect(progression.get_threat_level() == 1, "run starts at Threat 1")
 	_expect(generator.current_threat_level == 1, "generator reads the initial Threat level")
 	_expect(pool != null and pool.validate(), "EnemyGenerator references one valid MainEncounterPool")
-	_expect(pool.entries.size() == 8, "MainEncounterPool contains all eight live encounters")
+	_expect(pool.entries.size() == 11, "MainEncounterPool contains all eleven live encounters")
 	_expect(not _has_property(generator, &"spawn_sets"), "EnemyGenerator no longer exposes spawn_sets")
 	_expect(
 		not _has_property(generator.enemy_spawner, &"enemy_scene"),
@@ -89,7 +92,14 @@ func _test_threat_rosters_and_weights() -> void:
 	)
 	_expect_ids(
 		pool.get_eligible_entries(2),
-		[&"drone_formation", &"striker_drone_diamond", &"awl_formation", &"bomb_single"],
+		[
+			&"drone_formation",
+			&"striker_drone_diamond",
+			&"awl_formation",
+			&"bomb_single",
+			&"tanker_guard_sniper",
+			&"interceptor_pair",
+		],
 		"Threat 2",
 	)
 	_expect_ids(
@@ -100,9 +110,12 @@ func _test_threat_rosters_and_weights() -> void:
 			&"awl_formation",
 			&"bomb_single",
 			&"caster_single",
+			&"tanker_guard_sniper",
 			&"x9_drone_down",
 			&"x9_caster_drone_orbit",
-			&"v7_striker_drone",
+			&"v7_drone_down",
+			&"interceptor_pair",
+			&"interceptor_trio",
 		],
 		"Threat 3",
 	)
@@ -127,8 +140,8 @@ func _test_threat_rosters_and_weights() -> void:
 			"%s reuses its final weight above Threat 3" % entry.preset.encounter_id,
 		)
 	_expect(is_equal_approx(pool.get_total_weight(1), 12.0), "Threat 1 total weight is 12")
-	_expect(is_equal_approx(pool.get_total_weight(2), 24.0), "Threat 2 total weight is 24")
-	_expect(is_equal_approx(pool.get_total_weight(3), 36.0), "Threat 3 total weight is 36")
+	_expect(is_equal_approx(pool.get_total_weight(2), 27.0), "Threat 2 total weight is 27")
+	_expect(is_equal_approx(pool.get_total_weight(3), 41.0), "Threat 3 total weight is 41")
 
 
 func _test_deterministic_weighted_selection() -> void:
@@ -141,7 +154,7 @@ func _test_deterministic_weighted_selection() -> void:
 		if preset != null:
 			counts[preset.encounter_id] = int(counts.get(preset.encounter_id, 0)) + 1
 	for encounter_id in EXPECTED_WEIGHTS:
-		var expected_count := 36000.0 * float(EXPECTED_WEIGHTS[encounter_id][2]) / 36.0
+		var expected_count := 36000.0 * float(EXPECTED_WEIGHTS[encounter_id][2]) / 41.0
 		var actual_count := float(counts.get(encounter_id, 0))
 		var tolerance := maxf(80.0, expected_count * 0.08)
 		_expect(
@@ -159,7 +172,7 @@ func _test_single_encounters() -> void:
 	)
 	await _test_single_encounter(
 		&"caster_single",
-		"res://enemies/shooting_enemy/shooting_enemy.tscn",
+		"res://enemies/shooting_enemy.tscn",
 		"res://resources/enemy_movement/sequences/caster_entry_patrol.tres",
 	)
 
@@ -221,7 +234,10 @@ func _test_formation_encounters() -> void:
 		&"awl_formation": 3,
 		&"x9_drone_down": 9,
 		&"x9_caster_drone_orbit": 9,
-		&"v7_striker_drone": 7,
+		&"v7_drone_down": 7,
+		&"tanker_guard_sniper": 2,
+		&"interceptor_pair": 2,
+		&"interceptor_trio": 3,
 	}
 	for encounter_id in expected_counts:
 		var controller := generator._spawn(_find_preset(encounter_id)) as FormationController

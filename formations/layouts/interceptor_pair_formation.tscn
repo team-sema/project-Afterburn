@@ -1,0 +1,19 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://formations/formation_layout.gd" id="1_layout"]
+[ext_resource type="Script" path="res://formations/formation_slot.gd" id="2_slot"]
+
+[node name="InterceptorPairFormation" type="Node2D"]
+script = ExtResource("1_layout")
+
+[node name="Slot0" type="Marker2D" parent="."]
+position = Vector2(-18, 0)
+script = ExtResource("2_slot")
+slot_index = 0
+slot_id = &"left"
+
+[node name="Slot1" type="Marker2D" parent="."]
+position = Vector2(18, 0)
+script = ExtResource("2_slot")
+slot_index = 1
+slot_id = &"right"
