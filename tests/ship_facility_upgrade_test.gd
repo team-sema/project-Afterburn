@@ -243,6 +243,11 @@ func _check_offer_layout(
 	)
 	_expect(not selection_ui.prompt_label.visible, "choice view omits the redundant instruction copy")
 	_expect(button_1.size.y > button_1.size.x, "augment cards use a taller portrait proportion")
+	for button in [button_1, button_2, button_3]:
+		_expect(
+			button.get_theme_stylebox(&"disabled") == button.get_theme_stylebox(&"normal"),
+			"augment card keeps the same content margins when selection disables input",
+		)
 	var offer_rect := selection_ui.choice_container.get_global_rect()
 	var playfield_rect := playfield.get_global_rect()
 	_expect(
