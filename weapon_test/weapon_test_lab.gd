@@ -4,15 +4,9 @@ extends Control
 signal player_level_up_simulated(level: int)
 signal enemy_augment_event_simulated(tier: int)
 
-const ENEMY_LABELS := {
-	&"drone_formation": "드론 편대",
-	&"striker_drone_diamond": "스트라이커 호위",
-	&"awl_formation": "송곳 편대",
-	&"bomb_single": "폭탄",
-	&"caster_single": "캐스터",
-}
 const PLAYER_AUGMENT_DIRECTORY := "res://resources/player_augments"
 const ENEMY_AUGMENT_DIRECTORY := "res://resources/enemy_augments"
+const ENCOUNTER_PRESET_DIRECTORY := "res://resources/encounters/presets"
 const PLAYER_AUGMENT_KINDS: Array[PlayerAugmentKind.Kind] = [
 	PlayerAugmentKind.Kind.FACILITY_EFFECT,
 	PlayerAugmentKind.Kind.STAT_MULTIPLIER,
@@ -23,7 +17,6 @@ enum AugmentTestMode {
 	ENEMY,
 }
 
-@export var enemy_encounters: Array[EncounterPreset] = []
 @export var weapon_definitions: Array[WeaponDefinition] = []
 
 @onready var gameplay: Node2D = $Layout/Playfield/ViewportContainer/PlayfieldViewport/WeaponTestGameplay
@@ -54,6 +47,7 @@ var _trait_button_by_id: Dictionary = {}
 var _displayed_trait_weapon_id: StringName = &""
 var _continuous_encounters: Dictionary = {}
 var _continuous_spawn_enabled := false
+var _enemy_encounters: Array[EncounterPreset] = []
 var _player_augment_pool: Array[PlayerAugment] = []
 var _enemy_augment_pool: Array[EnemyAugment] = []
 var _augment_overlay: ColorRect
@@ -74,6 +68,7 @@ func _ready() -> void:
 	assert(_loadout != null, "Weapon test lab requires the ship weapon loadout.")
 	_make_ship_invincible()
 	_load_trait_definitions()
+	_enemy_encounters = _load_encounter_presets()
 	_build_enemy_buttons()
 	_build_slot_buttons()
 	_build_weapon_buttons()
@@ -381,25 +376,39 @@ func _update_mode_badge(status: String) -> void:
 	badge.text = "AUGMENT TEST LAB  ·  %s" % status
 
 
+func _load_encounter_presets() -> Array[EncounterPreset]:
+	var presets: Array[EncounterPreset] = []
+	var files := DirAccess.get_files_at(ENCOUNTER_PRESET_DIRECTORY)
+	files.sort()
+	for file_name in files:
+		if not file_name.ends_with(".tres"):
+			continue
+		var preset := load("%s/%s" % [ENCOUNTER_PRESET_DIRECTORY, file_name]) as EncounterPreset
+		if preset != null:
+			presets.append(preset)
+	return presets
+
+
 func _build_enemy_buttons() -> void:
-	for preset in enemy_encounters:
+	for preset in _enemy_encounters:
 		if preset == null:
 			continue
 		var row := HBoxContainer.new()
 		row.name = "Enemy_%s" % String(preset.encounter_id)
-		row.add_theme_constant_override("separation", 4)
+		row.add_theme_constant_override("separation", 2)
 		var button := Button.new()
 		button.name = "Spawn_%s" % String(preset.encounter_id)
-		button.text = ENEMY_LABELS.get(preset.encounter_id, String(preset.encounter_id))
+		button.text = String(preset.encounter_id)
 		button.tooltip_text = "선택한 수만큼 이 스폰 패턴을 실행합니다."
-		_style_button(button, Color(1.0, 0.22, 0.48, 1.0))
+		_style_button(button, Color(1.0, 0.22, 0.48, 1.0), true)
 		button.pressed.connect(func() -> void: _spawn_batches(preset))
 		row.add_child(button)
 		var repeat_toggle := CheckButton.new()
 		repeat_toggle.name = "Repeat_%s" % String(preset.encounter_id)
-		repeat_toggle.custom_minimum_size = Vector2(54, 24)
-		repeat_toggle.text = "반복"
-		repeat_toggle.tooltip_text = "지속 스폰 모드에 이 적을 포함합니다."
+		repeat_toggle.custom_minimum_size = Vector2(36, 16)
+		repeat_toggle.add_theme_font_size_override("font_size", 10)
+		repeat_toggle.text = "R"
+		repeat_toggle.tooltip_text = "지속 스폰 모드에 이 프리셋을 포함합니다."
 		repeat_toggle.toggled.connect(
 			func(enabled: bool) -> void: _set_encounter_repeating(preset, enabled)
 		)
@@ -448,26 +457,36 @@ func _build_weapon_buttons() -> void:
 		_weapon_button_by_id[definition.id] = button
 
 
-func _style_button(button: Button, accent: Color) -> void:
-	button.custom_minimum_size = Vector2(0, 24)
+func _style_button(button: Button, accent: Color, compact := false) -> void:
+	button.custom_minimum_size = Vector2(0, 16 if compact else 24)
 	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	if compact:
+		button.add_theme_font_size_override("font_size", 10)
 	button.add_theme_color_override("font_color", Color(0.82, 0.93, 1.0))
 	button.add_theme_color_override("font_hover_color", Color.WHITE)
 	button.add_theme_color_override("font_pressed_color", Color.WHITE)
-	button.add_theme_stylebox_override("normal", _button_style(accent, 0.12, 0.45))
-	button.add_theme_stylebox_override("hover", _button_style(accent, 0.22, 0.85))
-	button.add_theme_stylebox_override("pressed", _button_style(accent, 0.34, 1.0))
-	button.add_theme_stylebox_override("focus", _button_style(accent, 0.2, 0.9))
+	button.add_theme_stylebox_override("normal", _button_style(accent, 0.12, 0.45, compact))
+	button.add_theme_stylebox_override("hover", _button_style(accent, 0.22, 0.85, compact))
+	button.add_theme_stylebox_override("pressed", _button_style(accent, 0.34, 1.0, compact))
+	button.add_theme_stylebox_override("focus", _button_style(accent, 0.2, 0.9, compact))
 
 
-func _button_style(accent: Color, background_alpha: float, border_alpha: float) -> StyleBoxFlat:
+func _button_style(
+	accent: Color,
+	background_alpha: float,
+	border_alpha: float,
+	compact := false,
+) -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()
 	style.bg_color = Color(accent.r * 0.12, accent.g * 0.12, accent.b * 0.12, background_alpha)
 	style.border_color = Color(accent.r, accent.g, accent.b, border_alpha)
 	style.set_border_width_all(1)
-	style.set_corner_radius_all(3)
-	style.content_margin_left = 8
-	style.content_margin_right = 8
+	style.set_corner_radius_all(2 if compact else 3)
+	var margin := 4 if compact else 8
+	style.content_margin_left = margin
+	style.content_margin_right = margin
+	style.content_margin_top = 1 if compact else 0
+	style.content_margin_bottom = 1 if compact else 0
 	return style
 
 

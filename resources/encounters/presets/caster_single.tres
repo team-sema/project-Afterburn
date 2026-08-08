@@ -5,7 +5,7 @@
 [ext_resource type="PackedScene" path="res://formations/layouts/single_formation.tscn" id="3_layout"]
 [ext_resource type="Resource" path="res://resources/enemy_movement/sequences/single_release.tres" id="4_release"]
 [ext_resource type="Resource" path="res://resources/enemy_movement/sequences/caster_entry_patrol.tres" id="5_individual"]
-[ext_resource type="PackedScene" path="res://enemies/shooting_enemy/shooting_enemy.tscn" id="6_enemy"]
+[ext_resource type="PackedScene" path="res://enemies/shooting_enemy.tscn" id="6_enemy"]
 
 [sub_resource type="Resource" id="Member_caster"]
 script = ExtResource("2_member")

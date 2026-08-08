@@ -10,7 +10,7 @@
 | YouTube (30–60초) | TODO |
 | 문서·칸반 Pages | https://team-sema.github.io/project-Afterburn/ |
 | Cursor 모델명 (4번) | TODO |
-| Beam.png 출처 | TODO |
+| Beam 글로우 텍스처 | 팀 제작 `assets/svg/beam_glow.svg` (레거시 Beam.png 교체) |
 
 ## PDF 원본 MD
 

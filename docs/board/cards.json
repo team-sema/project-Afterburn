@@ -510,6 +510,14 @@
       "column": "review",
       "file": "cards/enemy-augment-expansion.md",
       "tags": ["적", "증강", "밸런스"]
+    },
+    {
+      "id": "sniper-enemy",
+      "title": "스나이퍼 저격 적기",
+      "description": "원거리 포지션 유지 후 조준 Cone·레이저·쿨다운을 반복하는 Threat 3 적.",
+      "column": "review",
+      "file": "cards/sniper-enemy.md",
+      "tags": ["적", "전투", "비주얼"]
     }
   ]
 }

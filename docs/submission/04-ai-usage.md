@@ -128,9 +128,8 @@ AI가 생성한 내용은 **저장소 규칙·시스템 스펙**에 맞게 검�
 | BGM `music.ogg` | HeartBeast 리소스 저장소 포함 파일 | 튜토리얼 리소스와 동일 파일 | `sounds/music.ogg` |
 | white flash 셰이더 | HeartBeast 리소스 | MIT 계열 스크립트/리소스 | `effects/white_flash_material.*` |
 | Mulmaru 폰트 | [Mushsooni / Mulmaru](https://github.com/mushsooni/mulmaru) | SIL OFL 1.1 | UI 한글·타이틀 |
-| 네온 SVG·글로우 연출 | 팀 제작 (+ Nova Drift **스타일 참고**, 에셋 복제 아님) | 팀 | `assets/svg/`, `effects/` 확장분 |
+| 네온 SVG·글로우 연출 | 팀 제작 (+ Nova Drift **스타일 참고**, 에셋 복제 아님) | 팀 | `assets/svg/` (레이저 `beam_glow.svg` 포함), `effects/` 확장분 |
 | Godot Engine | godotengine.org | MIT | 엔진 |
-| `assets/Beam.png` | `TODO: 출처 확인` | `TODO` | 사용 시 명시 |
 
 MIT 스크립트 사용 시 저작권·허가 고지 유지 (원 LICENSE: Copyright (c) 2023 Heart Gamedev LLC).
 

@@ -35,6 +35,7 @@ func _process(delta: float) -> void:
 			# Charging owns a fixed world-space point. The formation center and
 			# additive movement modifiers cannot pull this enemy after detach.
 			global_position = _charging_position
+			_update_charge_aim()
 			_charge_elapsed += delta
 			if _charge_elapsed >= charge_duration:
 				_begin_dash()
@@ -89,6 +90,14 @@ func get_captured_target_position() -> Vector2:
 func _update_formation_aim() -> void:
 	if not _aim_during_formation or not is_formation_member():
 		return
+	_face_toward_player()
+
+
+func _update_charge_aim() -> void:
+	_face_toward_player()
+
+
+func _face_toward_player() -> void:
 	var targeting := get_node_or_null("TargetingComponent") as TargetingComponent
 	if targeting == null:
 		return

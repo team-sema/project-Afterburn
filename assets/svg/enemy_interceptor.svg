@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="80" viewBox="0 0 32 40">
+  <!-- Nose faces +Y (down). Flat white silhouette for the shared neon layers. -->
+  <path fill="#fff" fill-rule="evenodd" d="M16 39 12.6 28.2 2 23l1.4-5.2 9.2 2.7L13.8 7 16 1l2.2 6 1.2 13.5 9.2-2.7L30 23l-10.6 5.2ZM16 28.5l1.2-8.8L16 11l-1.2 8.7Z"/>
+  <path fill="#fff" d="m9.4 27.2-4.1 6.4 6.7-3.2ZM22.6 27.2l4.1 6.4-6.7-3.2Z"/>
+</svg>

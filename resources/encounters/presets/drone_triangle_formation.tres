@@ -1,0 +1,47 @@
+[gd_resource type="Resource" script_class="EncounterPreset" load_steps=13 format=3]
+
+[ext_resource type="Script" path="res://resources/encounters/encounter_preset.gd" id="1_preset"]
+[ext_resource type="Script" path="res://resources/encounters/encounter_member.gd" id="2_member"]
+[ext_resource type="PackedScene" path="res://formations/layouts/triangle6_formation.tscn" id="3_layout"]
+[ext_resource type="Resource" path="res://resources/enemy_movement/sequences/formation_drone_diagonal.tres" id="4_movement"]
+[ext_resource type="PackedScene" path="res://enemies/normal_enemy.tscn" id="5_drone"]
+
+[sub_resource type="Resource" id="Member_slot_0"]
+script = ExtResource("2_member")
+enemy_scene = ExtResource("5_drone")
+slot_index = 0
+
+[sub_resource type="Resource" id="Member_slot_1"]
+script = ExtResource("2_member")
+enemy_scene = ExtResource("5_drone")
+slot_index = 1
+
+[sub_resource type="Resource" id="Member_slot_2"]
+script = ExtResource("2_member")
+enemy_scene = ExtResource("5_drone")
+slot_index = 2
+
+[sub_resource type="Resource" id="Member_slot_3"]
+script = ExtResource("2_member")
+enemy_scene = ExtResource("5_drone")
+slot_index = 3
+
+[sub_resource type="Resource" id="Member_slot_4"]
+script = ExtResource("2_member")
+enemy_scene = ExtResource("5_drone")
+slot_index = 4
+
+[sub_resource type="Resource" id="Member_slot_5"]
+script = ExtResource("2_member")
+enemy_scene = ExtResource("5_drone")
+slot_index = 5
+
+[resource]
+script = ExtResource("1_preset")
+encounter_id = &"drone_triangle_formation"
+formation_layout_scene = ExtResource("3_layout")
+formation_movement_sequence = ExtResource("4_movement")
+members = Array[ExtResource("2_member")]([SubResource("Member_slot_0"), SubResource("Member_slot_1"), SubResource("Member_slot_2"), SubResource("Member_slot_3"), SubResource("Member_slot_4"), SubResource("Member_slot_5")])
+spawn_anchor = 0
+spawn_offset = Vector2(0, -16)
+spawn_edge_margin = 8.0

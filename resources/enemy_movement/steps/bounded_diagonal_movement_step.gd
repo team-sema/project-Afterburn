@@ -1,9 +1,8 @@
 class_name BoundedDiagonalMovementStep
 extends MovementStep
 
-## Moves forward on a diagonal while reflecting the actor's base position
-## between viewport bounds. Used by a formation center, so the path is
-## calculated once regardless of member count.
+## Explicit bounded-arena pattern. It reflects against MovementArea, never the
+## visible camera rectangle. Used by ordinary constant-diagonal zigzag movement.
 
 @export_range(0.0, 1000.0, 1.0) var forward_speed := 72.0
 @export_range(0.0, 80.0, 0.5) var angle_degrees := 50.0
@@ -32,10 +31,10 @@ func update_movement(
 	intent: MovementIntent,
 ) -> void:
 	var current := context.get("base_position", Vector2.ZERO) as Vector2
-	var viewport_rect := context.get("viewport_rect", Rect2()) as Rect2
+	var movement_area := context.get("movement_area", Rect2()) as Rect2
 	var half_span := maxf(0.0, float(context.get(half_span_context_key, 0.0)))
-	var left := viewport_rect.position.x + edge_margin + half_span
-	var right := viewport_rect.end.x - edge_margin - half_span
+	var left := movement_area.position.x + edge_margin + half_span
+	var right := movement_area.end.x - edge_margin - half_span
 	var horizontal_sign := float(state["horizontal_sign"])
 	var angle := deg_to_rad(angle_degrees)
 	var base_velocity := Vector2(
@@ -46,7 +45,7 @@ func update_movement(
 	var target := current + base_velocity * speed_multiplier * delta
 
 	if right <= left:
-		target.x = clampf(target.x, left, right)
+		target.x = (left + right) * 0.5
 	else:
 		for _reflection in 4:
 			if target.x < left:

@@ -1,0 +1,108 @@
+[gd_scene load_steps=11 format=3]
+
+[ext_resource type="PackedScene" path="res://enemies/enemy.tscn" id="1_enemy"]
+[ext_resource type="Script" path="res://enemies/tanker_enemy.gd" id="2_script"]
+[ext_resource type="Texture2D" path="res://assets/svg/enemy_tanker_body.svg" id="3_body"]
+[ext_resource type="Texture2D" path="res://assets/svg/enemy_tanker_shield.svg" id="4_shield"]
+[ext_resource type="Script" path="res://components/stats_component.gd" id="5_stats"]
+[ext_resource type="Script" path="res://components/hurtbox_component.gd" id="6_hurtbox"]
+[ext_resource type="Script" path="res://components/hurt_component.gd" id="7_hurt"]
+[ext_resource type="PackedScene" path="res://effects/explosion_effect.tscn" id="8_explosion"]
+[ext_resource type="Script" path="res://components/flash_component.gd" id="9_flash"]
+[ext_resource type="Script" path="res://components/spawner_component.gd" id="10_spawner"]
+
+[sub_resource type="CircleShape2D" id="BodyShape"]
+radius = 6.0
+
+[sub_resource type="CircleShape2D" id="BodyContactShape"]
+radius = 5.0
+
+[sub_resource type="RectangleShape2D" id="ShieldShape"]
+size = Vector2(52, 8)
+
+[node name="TankerEnemy" instance=ExtResource("1_enemy")]
+script = ExtResource("2_script")
+body_max_hp = 35
+shield_max_hp = 1000
+
+[node name="DiffuseGlow" parent="Anchor" index="0"]
+self_modulate = Color(0.55, 0.88, 1, 0.08)
+scale = Vector2(0.12, 0.12)
+
+[node name="WideGlow" parent="Anchor" index="1"]
+self_modulate = Color(0.55, 0.88, 1, 0.12)
+scale = Vector2(0.62, 0.62)
+texture = ExtResource("3_body")
+
+[node name="TightGlow" parent="Anchor" index="2"]
+self_modulate = Color(0.72, 0.94, 1, 0.34)
+scale = Vector2(0.52, 0.52)
+texture = ExtResource("3_body")
+
+[node name="Core" parent="Anchor" index="3"]
+self_modulate = Color(0.94, 0.99, 1, 1)
+scale = Vector2(0.46, 0.46)
+texture = ExtResource("3_body")
+
+[node name="VisibleOnScreenNotifier2D" parent="." index="3"]
+rect = Rect2(-28, -10, 56, 34)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HurtboxComponent" index="0"]
+shape = SubResource("BodyShape")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HitboxComponent" index="0"]
+shape = SubResource("BodyContactShape")
+
+[node name="EnemyShootComponent" parent="." index="15"]
+fire_interval = 5.5
+projectile_speed = 90.0
+initial_delay = 2.0
+
+[node name="Shield" type="Node2D" parent="." index="20"]
+position = Vector2(0, 16)
+
+[node name="Visual" type="Node2D" parent="Shield"]
+
+[node name="WideGlow" type="Sprite2D" parent="Shield/Visual"]
+self_modulate = Color(0.4, 0.82, 1, 0.14)
+show_behind_parent = true
+scale = Vector2(0.62, 0.62)
+texture = ExtResource("4_shield")
+
+[node name="TightGlow" type="Sprite2D" parent="Shield/Visual"]
+self_modulate = Color(0.65, 0.92, 1, 0.38)
+show_behind_parent = true
+scale = Vector2(0.58, 0.58)
+texture = ExtResource("4_shield")
+
+[node name="Core" type="Sprite2D" parent="Shield/Visual"]
+self_modulate = Color(0.96, 1, 1, 1)
+scale = Vector2(0.55, 0.55)
+texture = ExtResource("4_shield")
+
+[node name="StatsComponent" type="Node" parent="Shield"]
+script = ExtResource("5_stats")
+health = 1000
+
+[node name="HurtboxComponent" type="Area2D" parent="Shield"]
+collision_layer = 2
+collision_mask = 0
+script = ExtResource("6_hurtbox")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Shield/HurtboxComponent"]
+shape = SubResource("ShieldShape")
+
+[node name="HurtComponent" type="Node" parent="Shield" node_paths=PackedStringArray("stats_component", "hurtbox_component")]
+script = ExtResource("7_hurt")
+stats_component = NodePath("../StatsComponent")
+hurtbox_component = NodePath("../HurtboxComponent")
+invincibility_visual = NodePath("../Visual")
+
+[node name="FlashComponent" type="Node" parent="Shield" node_paths=PackedStringArray("sprite")]
+script = ExtResource("9_flash")
+sprite = NodePath("../Visual/Core")
+flash_duration = 0.12
+
+[node name="BreakEffectSpawner" type="Node2D" parent="Shield"]
+script = ExtResource("10_spawner")
+scene = ExtResource("8_explosion")

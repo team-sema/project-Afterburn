@@ -14,24 +14,41 @@ extends Node
 @export_range(1, 12, 1) var shot_count := 1
 @export_range(0.0, 90.0, 1.0) var spread_degrees := 0.0
 @export_range(0.0, 5.0, 0.05) var initial_delay := 0.75
+## Starts the fire window only after the actor center enters VisibleRect. Useful
+## for one-pass encounters that must never attack from offscreen.
+@export var activate_on_visible_entry := false
+## Zero keeps firing indefinitely after activation.
+@export_range(0.0, 20.0, 0.05, "suffix:s") var active_duration := 0.0
 
 var enemy: Enemy
 ## When enabled, projectiles receive launch(direction, speed). When disabled,
 ## projectile scenes are spawned without directional configuration.
 @export var inject_target_direction := true
+## Overrides target aiming and launches along this actor-local forward axis.
+@export var use_actor_forward_direction := false
+@export var local_forward_direction := Vector2.DOWN
 @export var targeting_component: TargetingComponent
 var fire_timer: Timer
 var _base_fire_interval := 2.0
 var _base_burst_interval := 0.15
 var _burst_volleys_remaining := 0
+var _visible_pass_started := false
+var _fire_window_active := false
+var _active_elapsed := 0.0
+var _volleys_fired := 0
 
 
 func _ready() -> void:
 	enemy = get_parent() as Enemy
 	assert(enemy != null, "EnemyShootComponent must be attached directly to an Enemy.")
 	assert(projectile_scene != null, "EnemyShootComponent requires projectile_scene.")
-	if inject_target_direction:
+	if inject_target_direction and not use_actor_forward_direction:
 		assert(targeting_component != null, "Targeted EnemyShootComponent requires TargetingComponent.")
+	if use_actor_forward_direction:
+		assert(
+			not local_forward_direction.is_zero_approx(),
+			"Forward EnemyShootComponent requires a non-zero local forward direction.",
+		)
 
 	_base_fire_interval = fire_interval
 	_base_burst_interval = burst_interval
@@ -41,11 +58,32 @@ func _ready() -> void:
 	fire_timer.timeout.connect(_on_fire_timer_timeout)
 	add_child(fire_timer)
 
-	if initial_delay > 0.0:
-		await get_tree().create_timer(initial_delay, false).timeout
-		if not is_instance_valid(self) or not is_instance_valid(enemy):
-			return
-	_start_burst()
+	if activate_on_visible_entry:
+		process_priority = 20
+		set_process(true)
+		return
+	_fire_window_active = true
+	_schedule_initial_burst()
+
+
+func _process(delta: float) -> void:
+	if not activate_on_visible_entry or enemy == null or not is_instance_valid(enemy):
+		return
+	if not _visible_pass_started:
+		if enemy.get_viewport_rect().has_point(enemy.global_position):
+			_visible_pass_started = true
+			_fire_window_active = true
+			_active_elapsed = 0.0
+			_schedule_initial_burst()
+		return
+	if not _fire_window_active:
+		return
+	_active_elapsed += delta
+	if active_duration > 0.0 and _active_elapsed >= active_duration:
+		_fire_window_active = false
+		_burst_volleys_remaining = 0
+		fire_timer.stop()
+		set_process(false)
 
 
 func configure_baseline(interval: float, speed: float = -1.0) -> void:
@@ -66,6 +104,8 @@ func apply_action_rate_multiplier(multiplier: float) -> void:
 
 
 func _on_fire_timer_timeout() -> void:
+	if activate_on_visible_entry and not _fire_window_active:
+		return
 	if _burst_volleys_remaining > 0:
 		_fire_next_burst_volley()
 	else:
@@ -73,11 +113,15 @@ func _on_fire_timer_timeout() -> void:
 
 
 func _start_burst() -> void:
+	if activate_on_visible_entry and not _fire_window_active:
+		return
 	_burst_volleys_remaining = maxi(1, burst_count)
 	_fire_next_burst_volley()
 
 
 func _fire_next_burst_volley() -> void:
+	if activate_on_visible_entry and not _fire_window_active:
+		return
 	fire()
 	_burst_volleys_remaining -= 1
 	fire_timer.start(_get_next_fire_delay())
@@ -92,7 +136,12 @@ func _get_next_fire_delay() -> float:
 func fire() -> void:
 	if enemy == null or not is_instance_valid(enemy):
 		return
-	if inject_target_direction:
+	if activate_on_visible_entry and not _fire_window_active:
+		return
+	if use_actor_forward_direction:
+		var forward := local_forward_direction.normalized().rotated(enemy.global_rotation)
+		_fire_projectiles(forward)
+	elif inject_target_direction:
 		if targeting_component == null:
 			push_error("Targeted EnemyShootComponent requires TargetingComponent.")
 			return
@@ -113,6 +162,7 @@ func _fire_projectiles(target_direction: Variant = null) -> void:
 		projectile_parent = get_tree().current_scene
 	if projectile_parent == null:
 		return
+	_volleys_fired += 1
 
 	var count := maxi(1, shot_count)
 	for index in count:
@@ -136,3 +186,22 @@ func _fire_projectiles(target_direction: Variant = null) -> void:
 				)
 				direction = direction.rotated(deg_to_rad(angle_offset))
 			projectile.call_deferred("launch", direction, projectile_speed)
+
+
+func has_visible_pass_started() -> bool:
+	return _visible_pass_started
+
+
+func is_fire_window_active() -> bool:
+	return _fire_window_active
+
+
+func get_volleys_fired() -> int:
+	return _volleys_fired
+
+
+func _schedule_initial_burst() -> void:
+	if initial_delay > 0.0:
+		fire_timer.start(initial_delay)
+	else:
+		_start_burst()

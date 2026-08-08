@@ -7,7 +7,7 @@ func _initialize() -> void:
 
 func _run() -> void:
 	var failures: PackedStringArray = []
-	var scene: PackedScene = load("res://enemies/shooting_enemy/shooting_enemy.tscn")
+	var scene: PackedScene = load("res://enemies/shooting_enemy.tscn")
 	var enemy: Node2D = scene.instantiate() as Node2D
 	enemy.set("augment_registry", EnemyAugmentRegistry.new())
 	root.add_child(enemy)

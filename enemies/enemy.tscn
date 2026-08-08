@@ -83,6 +83,7 @@ move_component = NodePath("../MoveComponent")
 [node name="VisibleOnScreenNotifier2D" type="VisibleOnScreenNotifier2D" parent="." unique_id=1344806211 node_paths=PackedStringArray("actor")]
 script = ExtResource("15_free_offscreen")
 actor = NodePath("..")
+use_despawn_area = true
 metadata/_custom_type_script = "uid://dx86ewq6s2alh"
 
 [node name="ScaleComponent" type="Node" parent="." unique_id=391399757 node_paths=PackedStringArray("sprite")]

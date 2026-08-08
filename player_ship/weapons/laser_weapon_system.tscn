@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://b2d4gofxh8hmh" path="res://player_ship/weapons/laser_weapon_system.gd" id="1_laser"]
 [ext_resource type="Material" uid="uid://c12oxsfcofdko" path="res://effects/additive_unshaded_material.tres" id="2_additive"]
-[ext_resource type="Texture2D" uid="uid://dibdtiaxbccii" path="res://assets/Beam.png" id="2_beam"]
+[ext_resource type="Texture2D" uid="uid://dkwofbfcu1lo2" path="res://assets/svg/beam_glow.svg" id="2_beam"]
 [ext_resource type="Script" uid="uid://cvmjafhyfx5xo" path="res://components/hitbox_component.gd" id="3_hitbox"]
 [ext_resource type="Script" path="res://player_ship/weapons/laser_refract_vfx.gd" id="4_refract"]
 

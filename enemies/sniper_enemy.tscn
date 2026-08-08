@@ -1,0 +1,49 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" uid="uid://psmpwiapllcb" path="res://enemies/enemy.tscn" id="1_enemy"]
+[ext_resource type="Script" path="res://enemies/sniper_enemy.gd" id="2_script"]
+[ext_resource type="Texture2D" path="res://assets/svg/enemy_sniper.svg" id="3_tex"]
+[ext_resource type="Resource" path="res://resources/enemy_movement/sequences/sniper_entry_hold.tres" id="4_movement"]
+[ext_resource type="PackedScene" path="res://components/sniper_attack_component.tscn" id="5_attack"]
+[ext_resource type="PackedScene" path="res://components/sniper_aim_cone.tscn" id="6_cone"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_hurt"]
+size = Vector2(16, 16)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_hit"]
+size = Vector2(8, 8)
+
+[node name="SniperEnemy" instance=ExtResource("1_enemy")]
+script = ExtResource("2_script")
+
+[node name="WideGlow" parent="Anchor" index="1"]
+texture = ExtResource("3_tex")
+
+[node name="TightGlow" parent="Anchor" index="2"]
+texture = ExtResource("3_tex")
+
+[node name="Core" parent="Anchor" index="3"]
+texture = ExtResource("3_tex")
+
+[node name="StatsComponent" parent="." index="1"]
+health = 95
+
+[node name="MovementController" parent="."]
+sequence = ExtResource("4_movement")
+
+[node name="VisibleOnScreenNotifier2D" parent="." index="3"]
+rect = Rect2(-9, -9, 18, 18)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HurtboxComponent" index="0"]
+shape = SubResource("RectangleShape2D_hurt")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HitboxComponent" index="0"]
+shape = SubResource("RectangleShape2D_hit")
+
+[node name="ScoreComponent" parent="." index="12"]
+adjust_amount = 25
+
+[node name="SniperAimCone" parent="." index="19" instance=ExtResource("6_cone")]
+
+[node name="SniperAttackComponent" parent="." index="20" instance=ExtResource("5_attack")]
+aim_cone = NodePath("../SniperAimCone")

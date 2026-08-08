@@ -32,7 +32,7 @@ func _test_all_enemy_scenes_have_modifier() -> void:
 		"res://enemies/moving_enemy.tscn",
 		"res://enemies/kamikaze_enemy.tscn",
 		"res://enemies/bomb_enemy.tscn",
-		"res://enemies/shooting_enemy/shooting_enemy.tscn",
+		"res://enemies/shooting_enemy.tscn",
 	]
 	for path in paths:
 		var scene := load(path) as PackedScene

@@ -3,10 +3,10 @@
 [ext_resource type="Script" path="res://resources/encounters/encounter_preset.gd" id="1_preset"]
 [ext_resource type="Script" path="res://resources/encounters/encounter_member.gd" id="2_member"]
 [ext_resource type="PackedScene" path="res://formations/layouts/x9_formation.tscn" id="3_layout"]
-[ext_resource type="Resource" path="res://resources/enemy_movement/sequences/straight_down.tres" id="4_movement"]
+[ext_resource type="Resource" path="res://resources/enemy_movement/sequences/x9_caster_entry_patrol.tres" id="4_movement"]
 [ext_resource type="Resource" path="res://resources/formation_behaviors/orbit_center_anchor.tres" id="5_behavior"]
 [ext_resource type="PackedScene" path="res://enemies/normal_enemy.tscn" id="6_drone"]
-[ext_resource type="PackedScene" path="res://enemies/shooting_enemy/shooting_enemy.tscn" id="7_caster"]
+[ext_resource type="PackedScene" path="res://enemies/shooting_enemy.tscn" id="7_caster"]
 
 [sub_resource type="Resource" id="Member0"]
 script = ExtResource("2_member")

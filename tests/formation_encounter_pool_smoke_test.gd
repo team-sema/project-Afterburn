@@ -2,7 +2,7 @@ extends SceneTree
 
 const X9_DRONE := "res://resources/encounters/presets/x9_drone_down.tres"
 const X9_ORBIT := "res://resources/encounters/presets/x9_caster_drone_orbit.tres"
-const V7_STRIKER := "res://resources/encounters/presets/v7_striker_drone.tres"
+const V7_DRONE := "res://resources/encounters/presets/v7_drone_down.tres"
 const POOL_PATH := "res://resources/encounters/pools/main_encounter_pool.tres"
 
 var failures := PackedStringArray()
@@ -28,7 +28,7 @@ func _run() -> void:
 
 	await _test_x9_drone_down()
 	await _test_x9_caster_drone_orbit()
-	await _test_v7_striker_drone()
+	await _test_v7_drone_down()
 	await _test_mixed_special_detach_keeps_regular_members()
 	await _test_weighted_main_pool_and_flat_spawn()
 
@@ -78,6 +78,15 @@ func _test_x9_drone_down() -> void:
 func _test_x9_caster_drone_orbit() -> void:
 	var preset := load(X9_ORBIT) as EncounterPreset
 	_expect(preset != null and preset.validate(), "X9_Caster_Drone_Orbit preset validates")
+	var sequence := preset.formation_movement_sequence
+	_expect(
+		sequence != null and sequence.steps.size() == 2,
+		"X9_Caster_Drone_Orbit enters then patrols at the top",
+	)
+	_expect(
+		sequence.steps[1] is HorizontalPatrolMovementStep,
+		"X9_Caster_Drone_Orbit ends on HorizontalPatrolMovementStep",
+	)
 	var controller := spawner.spawn_encounter(preset) as FormationController
 	controller.set_process(false)
 	controller.center_movement_controller.set_process(false)
@@ -86,7 +95,7 @@ func _test_x9_caster_drone_orbit() -> void:
 	var caster := members.get(0) as Enemy
 	_expect(
 		caster != null
-		and _is_scene(caster, "res://enemies/shooting_enemy/shooting_enemy.tscn"),
+		and _is_scene(caster, "res://enemies/shooting_enemy.tscn"),
 		"center slot contains the Caster",
 	)
 	var behavior := controller.formation_behavior as OrbitFormationBehavior
@@ -114,29 +123,23 @@ func _test_x9_caster_drone_orbit() -> void:
 	await _free_controller(controller)
 
 
-func _test_v7_striker_drone() -> void:
-	var preset := load(V7_STRIKER) as EncounterPreset
-	_expect(preset != null and preset.validate(), "V7_Striker_Drone preset validates")
+func _test_v7_drone_down() -> void:
+	var preset := load(V7_DRONE) as EncounterPreset
+	_expect(preset != null and preset.validate(), "V7_Drone_Down preset validates")
 	var controller := spawner.spawn_encounter(preset) as FormationController
 	controller.set_process(false)
 	controller.center_movement_controller.set_process(false)
 	var members := _members_by_slot(controller)
-	_expect(members.size() == 7, "V7_Striker_Drone spawns seven members")
-	var striker := members.get(0) as Enemy
-	_expect(
-		striker != null and _is_scene(striker, "res://enemies/moving_enemy.tscn"),
-		"V7 center contains the Striker",
-	)
+	_expect(members.size() == 7, "V7_Drone_Down spawns seven members")
 	for slot_index in members:
 		var enemy := members[slot_index] as Enemy
 		_expect(enemy.is_formation_member(), "V7 member is formation-controlled")
 		_expect(not enemy.movement_controller.is_running(), "V7 suppresses per-enemy movement")
 		_expect(enemy.get_node_or_null("HurtboxComponent") != null, "V7 member keeps combat collision")
-		if slot_index != 0:
-			_expect(
-				_is_scene(enemy, "res://enemies/normal_enemy.tscn"),
-				"V7 non-center slot is a Drone",
-			)
+		_expect(
+			_is_scene(enemy, "res://enemies/normal_enemy.tscn"),
+			"V7 slot is a Drone",
+		)
 	await _free_controller(controller)
 
 
@@ -183,7 +186,7 @@ func _test_mixed_special_detach_keeps_regular_members() -> void:
 func _test_weighted_main_pool_and_flat_spawn() -> void:
 	var pool := load(POOL_PATH) as EncounterPool
 	_expect(pool != null and pool.validate(), "MainEncounterPool validates")
-	_expect(pool.entries.size() == 8, "MainEncounterPool exposes the complete live roster")
+	_expect(pool.entries.size() == 11, "MainEncounterPool exposes the complete live roster")
 	var random_number_generator := RandomNumberGenerator.new()
 	random_number_generator.seed = 20260807
 	var counts: Dictionary = {}
@@ -191,8 +194,8 @@ func _test_weighted_main_pool_and_flat_spawn() -> void:
 		var selected := pool.choose(3, random_number_generator)
 		counts[selected.encounter_id] = int(counts.get(selected.encounter_id, 0)) + 1
 	_expect(
-		int(counts.get(&"x9_drone_down", 0)) > int(counts.get(&"v7_striker_drone", 0))
-		and int(counts.get(&"v7_striker_drone", 0)) > int(
+		int(counts.get(&"x9_drone_down", 0)) > int(counts.get(&"v7_drone_down", 0))
+		and int(counts.get(&"v7_drone_down", 0)) > int(
 			counts.get(&"x9_caster_drone_orbit", 0)
 		),
 		"MainEncounterPool weighted sampling follows flattened 3:2:1 complex ordering",

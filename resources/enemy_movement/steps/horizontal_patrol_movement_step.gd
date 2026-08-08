@@ -1,7 +1,8 @@
 class_name HorizontalPatrolMovementStep
 extends MovementStep
 
-## Generic endless horizontal patrol with viewport-edge reflection.
+## Explicit combat patrol. It reflects inside CombatArea rather than treating
+## the visible camera edge as a universal movement wall.
 @export_range(0.0, 1000.0, 1.0) var speed := 50.0
 @export_range(0.0, 256.0, 1.0) var edge_margin := 8.0
 @export var choose_random_initial_direction := true
@@ -30,9 +31,9 @@ func update_movement(
 	intent: MovementIntent,
 ) -> void:
 	var base_position := context.get("base_position", Vector2.ZERO) as Vector2
-	var viewport_rect := context.get("viewport_rect", Rect2()) as Rect2
-	var left := viewport_rect.position.x + edge_margin
-	var right := viewport_rect.end.x - edge_margin
+	var combat_area := context.get("combat_area", Rect2()) as Rect2
+	var left := combat_area.position.x + edge_margin
+	var right := combat_area.end.x - edge_margin
 	var direction_sign := float(state["direction"])
 	if base_position.x < left:
 		direction_sign = 1.0

@@ -1,0 +1,62 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="PackedScene" path="res://enemies/normal_enemy.tscn" id="1_drone"]
+[ext_resource type="Script" path="res://enemies/interceptor_enemy.gd" id="2_script"]
+[ext_resource type="Texture2D" path="res://assets/svg/enemy_interceptor.svg" id="3_visual"]
+[ext_resource type="Script" path="res://components/entry_warning_component.gd" id="4_warning"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_hurt"]
+size = Vector2(16, 22)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_hit"]
+size = Vector2(10, 18)
+
+[node name="InterceptorEnemy" instance=ExtResource("1_drone")]
+script = ExtResource("2_script")
+
+[node name="DiffuseGlow" parent="Anchor" index="0"]
+self_modulate = Color(1, 0.38, 0.12, 0.08)
+scale = Vector2(0.13, 0.13)
+
+[node name="WideGlow" parent="Anchor" index="1"]
+self_modulate = Color(1, 0.3, 0.1, 0.14)
+scale = Vector2(0.36, 0.36)
+texture = ExtResource("3_visual")
+
+[node name="TightGlow" parent="Anchor" index="2"]
+self_modulate = Color(1, 0.48, 0.18, 0.38)
+scale = Vector2(0.31, 0.31)
+texture = ExtResource("3_visual")
+
+[node name="Core" parent="Anchor" index="3"]
+self_modulate = Color(1, 0.96, 0.9, 1)
+scale = Vector2(0.29, 0.29)
+texture = ExtResource("3_visual")
+
+[node name="VisibleOnScreenNotifier2D" parent="." index="3"]
+rect = Rect2(-11, -13, 22, 26)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HurtboxComponent" index="0"]
+shape = SubResource("RectangleShape2D_hurt")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HitboxComponent" index="0"]
+shape = SubResource("RectangleShape2D_hit")
+
+[node name="EnemyShootComponent" parent="." index="15"]
+fire_interval = 0.7
+burst_count = 2
+burst_interval = 0.12
+projectile_speed = 300.0
+shot_count = 1
+spread_degrees = 0.0
+initial_delay = 0.05
+activate_on_visible_entry = true
+active_duration = 1.35
+use_actor_forward_direction = true
+local_forward_direction = Vector2(0, 1)
+
+[node name="EntryWarningComponent" type="Node2D" parent="." node_paths=PackedStringArray("actor")]
+script = ExtResource("4_warning")
+actor = NodePath("..")
+entry_direction = Vector2(0, 1)
+warning_duration = 0.55

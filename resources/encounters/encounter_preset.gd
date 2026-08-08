@@ -25,6 +25,9 @@ enum FormationBreakCondition {
 @export var spawn_anchor := SpawnAnchor.TOP_CENTER
 @export var spawn_offset := Vector2(0.0, -16.0)
 @export_range(0.0, 256.0, 1.0) var spawn_edge_margin := 8.0
+## Allow the authored anchor to use MovementArea horizontally. Vertical TOP
+## anchors are already placed above VisibleRect by the active formation depth.
+@export var spawn_in_movement_area := false
 @export_range(0.0, 60.0, 0.05) var start_delay := 0.0
 @export var mirrored := false
 @export var formation_break_condition := FormationBreakCondition.NEVER

@@ -2,16 +2,14 @@
 
 [ext_resource type="Script" path="res://resources/enemy_movement/movement_sequence.gd" id="1_sequence"]
 [ext_resource type="Script" path="res://resources/enemy_movement/movement_step.gd" id="2_step"]
-[ext_resource type="Script" path="res://resources/enemy_movement/steps/sine_movement_step.gd" id="3_sine"]
+[ext_resource type="Script" path="res://resources/enemy_movement/steps/bounded_diagonal_movement_step.gd" id="3_diagonal"]
 
-[sub_resource type="Resource" id="Sine_zigzag"]
-script = ExtResource("3_sine")
-forward_direction = Vector2(0, 1)
-forward_speed = 60.0
-amplitude = 32.0
-period = 1.5
-lateral_sign_context_key = &"lateral_sign"
+[sub_resource type="Resource" id="BoundedDiagonal_zigzag"]
+script = ExtResource("3_diagonal")
+forward_speed = 72.0
+angle_degrees = 50.0
+edge_margin = 8.0
 
 [resource]
 script = ExtResource("1_sequence")
-steps = Array[ExtResource("2_step")]([SubResource("Sine_zigzag")])
+steps = Array[ExtResource("2_step")]([SubResource("BoundedDiagonal_zigzag")])

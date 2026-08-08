@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="MovementSequence" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://resources/enemy_movement/movement_sequence.gd" id="1_sequence"]
+[ext_resource type="Script" path="res://resources/enemy_movement/movement_step.gd" id="2_step"]
+[ext_resource type="Script" path="res://resources/enemy_movement/steps/forward_attack_run_movement_step.gd" id="3_run"]
+
+[sub_resource type="Resource" id="ForwardAttackRun_interceptor"]
+script = ExtResource("3_run")
+local_forward_direction = Vector2(0, 1)
+target_direction = Vector2(0, 1)
+direction_context_key = &"attack_run_direction"
+speed = 210.0
+turn_speed_degrees = 360.0
+face_direction_on_start = true
+duration = 0.0
+
+[resource]
+script = ExtResource("1_sequence")
+steps = Array[ExtResource("2_step")]([SubResource("ForwardAttackRun_interceptor")])

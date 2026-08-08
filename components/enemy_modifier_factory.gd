@@ -87,6 +87,9 @@ func _apply_shoot_action_rate(enemy: Enemy, multiplier: float) -> void:
 	var radial := enemy.get_node_or_null("RadialBarrageShootComponent")
 	if radial != null and radial.has_method("apply_action_rate_multiplier"):
 		radial.call("apply_action_rate_multiplier", multiplier)
+	var sniper := enemy.get_node_or_null("SniperAttackComponent")
+	if sniper != null and sniper.has_method("apply_action_rate_multiplier"):
+		sniper.call("apply_action_rate_multiplier", multiplier)
 
 
 func _apply_arming_rate_multiplier(enemy: Enemy, multiplier: float) -> void:
