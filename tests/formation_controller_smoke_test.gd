@@ -353,6 +353,8 @@ func _test_break_preserves_position_context_and_cleanup() -> void:
 	var right_direction := right_context.get("initial_direction", Vector2.ZERO) as Vector2
 	_expect(left_direction.y >= -0.001, "left scatter stays in the lower hemisphere")
 	_expect(right_direction.y >= -0.001, "right scatter stays in the lower hemisphere")
+	_expect(left_direction.x < -0.01, "left wing scatters leftward")
+	_expect(right_direction.x > 0.01, "right wing scatters rightward")
 	_expect(
 		absf(left_direction.angle_to(Vector2.DOWN)) <= PI * 0.5 + 0.001,
 		"left scatter is within ±90° of down",

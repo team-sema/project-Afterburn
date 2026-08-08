@@ -518,6 +518,14 @@
       "column": "review",
       "file": "cards/sniper-enemy.md",
       "tags": ["적", "전투", "비주얼"]
+    },
+    {
+      "id": "drone-midmap-scatter",
+      "title": "드론 중반 2배속 산개",
+      "description": "X9/V3/V5/V7/V9/X5 드론이 맵 절반에서 외향 2배속 산개.",
+      "column": "review",
+      "file": "cards/drone-midmap-scatter.md",
+      "tags": ["적", "편대", "이동"]
     }
   ]
 }

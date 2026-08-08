@@ -6,6 +6,7 @@ const LAYOUT_PATHS := [
 	"res://formations/layouts/v3_formation.tscn",
 	"res://formations/layouts/v5_formation.tscn",
 	"res://formations/layouts/v7_formation.tscn",
+	"res://formations/layouts/v9_formation.tscn",
 	"res://formations/layouts/inverted_v3_formation.tscn",
 	"res://formations/layouts/inverted_v5_formation.tscn",
 	"res://formations/layouts/inverted_v7_formation.tscn",
@@ -33,6 +34,12 @@ const EXPECTED_POSITIONS := {
 		Vector2(0, 11), Vector2(-16, -11), Vector2(16, -11),
 		Vector2(-32, -33), Vector2(32, -33),
 		Vector2(-48, -55), Vector2(48, -55),
+	],
+	"res://formations/layouts/v9_formation.tscn": [
+		Vector2(0, 11), Vector2(-16, -11), Vector2(16, -11),
+		Vector2(-32, -33), Vector2(32, -33),
+		Vector2(-48, -55), Vector2(48, -55),
+		Vector2(-64, -77), Vector2(64, -77),
 	],
 	"res://formations/layouts/inverted_v3_formation.tscn": [
 		Vector2(-16, 22), Vector2(0, 0), Vector2(16, 22),

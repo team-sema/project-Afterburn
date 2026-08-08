@@ -27,8 +27,11 @@ func _run() -> void:
 	root.add_child(spawner)
 
 	await _test_x9_drone_down()
+	await _test_x9_drone_midmap_scatter()
 	await _test_x9_caster_drone_orbit()
 	await _test_v7_drone_down()
+	await _test_v9_drone_down()
+	await _test_v3_and_x5_midmap_scatter_presets()
 	await _test_mixed_special_detach_keeps_regular_members()
 	await _test_weighted_main_pool_and_flat_spawn()
 
@@ -73,6 +76,84 @@ func _test_x9_drone_down() -> void:
 			"X9 Drone slot %d keeps its X layout offset" % slot_index,
 		)
 	await _free_controller(controller)
+
+
+func _test_x9_drone_midmap_scatter() -> void:
+	var preset := load(X9_DRONE) as EncounterPreset
+	_expect(
+		preset.formation_break_condition
+		== EncounterPreset.FormationBreakCondition.SEQUENCE_FINISHED,
+		"X9_Drone_Down breaks when midmap entry finishes",
+	)
+	_expect(
+		preset.individual_movement_sequence != null
+		and preset.individual_movement_sequence.resource_path.ends_with(
+			"individual_scatter_double.tres"
+		),
+		"X9_Drone_Down uses double-speed scatter after break",
+	)
+	var midmap := preset.formation_movement_sequence
+	_expect(midmap != null and midmap.steps.size() >= 1, "X9 midmap entry has steps")
+	_expect(midmap.steps[0] is MoveToPositionStep, "X9 midmap entry starts with MoveTo")
+	var move_to := midmap.steps[0] as MoveToPositionStep
+	_expect(move_to.target_position_is_viewport_ratio, "X9 midmap uses viewport ratio")
+	_expect(is_equal_approx(move_to.target_position.y, 0.5), "X9 midmap targets half-map Y")
+	_expect(not move_to.affect_x, "X9 midmap keeps spawn column")
+	_expect(is_equal_approx(move_to.speed, 60.0), "X9 midmap entry speed is 60")
+
+	var scatter := preset.individual_movement_sequence
+	var scatter_step := scatter.steps[0] as LinearMovementStep
+	_expect(is_equal_approx(scatter_step.speed, 120.0), "scatter is 2x midmap entry speed")
+
+	var controller := spawner.spawn_encounter(preset) as FormationController
+	var broken := [false]
+	controller.formation_broken.connect(func(_released: Array[Enemy]) -> void: broken[0] = true)
+	var visible := controller.get_viewport_rect()
+	var target_y := visible.position.y + visible.size.y * 0.5
+	# Drive past midmap arrival instead of waiting real-time.
+	for _index in 80:
+		if broken[0] or not is_instance_valid(controller):
+			break
+		controller.center_movement_controller.update_movement(0.05)
+		controller.call("_update_member_positions", 0.05)
+		await process_frame
+	_expect(broken[0], "X9 formation breaks after reaching midmap")
+	await process_frame
+	await process_frame
+	_expect(not is_instance_valid(controller), "X9 controller frees after scatter release")
+	var released_count := 0
+	for child in world.get_children():
+		if child is Enemy:
+			released_count += 1
+			var enemy := child as Enemy
+			_expect(not enemy.is_formation_member(), "released X9 drone is individual")
+			_expect(enemy.movement_controller.is_running(), "released X9 drone runs scatter")
+			enemy.movement_controller.set_process(false)
+			enemy.movement_controller.update_movement(0.05)
+			var context := enemy.movement_controller.get_context()
+			var direction := context.get("initial_direction", Vector2.ZERO) as Vector2
+			_expect(direction.y >= -0.001, "X9 scatter stays in the lower hemisphere")
+			var slot_offset := context.get("formation_slot_offset", Vector2.ZERO) as Vector2
+			if slot_offset.x < -0.5:
+				_expect(direction.x < -0.01, "left X9 wing scatters leftward")
+			elif slot_offset.x > 0.5:
+				_expect(direction.x > 0.01, "right X9 wing scatters rightward")
+			else:
+				_expect(absf(direction.x) <= 0.35, "center X9 column scatters near down")
+			var move := enemy.get_node("MoveComponent") as MoveComponent
+			_expect(
+				is_equal_approx(move.velocity.length(), 120.0),
+				"X9 scatter uses double speed",
+			)
+			_expect(
+				enemy.global_position.y > target_y - 40.0,
+				"X9 scatter starts near half-map depth",
+			)
+	_expect(released_count == 9, "all nine X9 drones scatter individually")
+	for child in world.get_children():
+		if child is Enemy:
+			child.queue_free()
+	await process_frame
 
 
 func _test_x9_caster_drone_orbit() -> void:
@@ -141,6 +222,53 @@ func _test_v7_drone_down() -> void:
 			"V7 slot is a Drone",
 		)
 	await _free_controller(controller)
+
+
+func _test_v9_drone_down() -> void:
+	var preset := load("res://resources/encounters/presets/v9_drone_down.tres") as EncounterPreset
+	_expect(preset != null and preset.validate(), "V9_Drone_Down preset validates")
+	_expect(
+		preset.formation_break_condition
+		== EncounterPreset.FormationBreakCondition.SEQUENCE_FINISHED,
+		"V9_Drone_Down breaks at midmap",
+	)
+	var controller := spawner.spawn_encounter(preset) as FormationController
+	var members := _members_by_slot(controller)
+	_expect(members.size() == 9, "V9_Drone_Down spawns nine members")
+	_expect(
+		controller.get_layout().get_slot(7) != null and controller.get_layout().get_slot(8) != null,
+		"V9 layout exposes far wing slots",
+	)
+	await _free_controller(controller)
+
+
+func _test_v3_and_x5_midmap_scatter_presets() -> void:
+	for path in [
+		"res://resources/encounters/presets/v3_drone_down.tres",
+		"res://resources/encounters/presets/v5_drone_down.tres",
+		"res://resources/encounters/presets/v7_drone_down.tres",
+		"res://resources/encounters/presets/v9_drone_down.tres",
+		"res://resources/encounters/presets/x5_drone_down.tres",
+		"res://resources/encounters/presets/x9_drone_down.tres",
+	]:
+		var preset := load(path) as EncounterPreset
+		_expect(preset != null and preset.validate(), "%s validates" % path)
+		_expect(
+			preset.spawn_anchor == EncounterPreset.SpawnAnchor.TOP_RANDOM,
+			"%s spawns at a random top X" % path,
+		)
+		_expect(
+			preset.formation_break_condition
+			== EncounterPreset.FormationBreakCondition.SEQUENCE_FINISHED,
+			"%s breaks at midmap" % path,
+		)
+		_expect(
+			preset.individual_movement_sequence != null
+			and preset.individual_movement_sequence.resource_path.ends_with(
+				"individual_scatter_double.tres"
+			),
+			"%s uses double-speed scatter" % path,
+		)
 
 
 func _test_mixed_special_detach_keeps_regular_members() -> void:
