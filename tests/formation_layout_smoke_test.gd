@@ -11,6 +11,7 @@ const LAYOUT_PATHS := [
 	"res://formations/layouts/inverted_v5_formation.tscn",
 	"res://formations/layouts/inverted_v7_formation.tscn",
 	"res://formations/layouts/diamond_formation.tscn",
+	"res://formations/layouts/diamond_formation_13.tscn",
 	"res://formations/layouts/x5_formation.tscn",
 	"res://formations/layouts/x9_formation.tscn",
 	"res://formations/layouts/triangle6_formation.tscn",
@@ -53,8 +54,15 @@ const EXPECTED_POSITIONS := {
 		Vector2(16, 22), Vector2(32, 44), Vector2(48, 66),
 	],
 	"res://formations/layouts/diamond_formation.tscn": [
-		Vector2(0, -40), Vector2(-48, 0), Vector2(0, 0),
-		Vector2(48, 0), Vector2(0, 40),
+		Vector2(0, -28), Vector2(-32, 0), Vector2(0, 0),
+		Vector2(32, 0), Vector2(0, 28),
+	],
+	"res://formations/layouts/diamond_formation_13.tscn": [
+		Vector2(0, -40),
+		Vector2(-20, -20), Vector2(0, -20), Vector2(20, -20),
+		Vector2(-40, 0), Vector2(-20, 0), Vector2(0, 0), Vector2(20, 0), Vector2(40, 0),
+		Vector2(-20, 20), Vector2(0, 20), Vector2(20, 20),
+		Vector2(0, 40),
 	],
 	"res://formations/layouts/x5_formation.tscn": [
 		Vector2(0, 0), Vector2(-16, -16), Vector2(16, -16),

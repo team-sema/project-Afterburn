@@ -8,9 +8,10 @@ const BOMB_FAST_FUSE := preload("res://resources/enemy_augments/enemy_bomb_fast_
 ## difficulty + min_threat for live MainEncounterPool entries.
 const EXPECTED_ROSTER := {
 	&"drone_formation": {"difficulty": 5.0, "min_threat": 1},
-	&"striker_drone_diamond": {"difficulty": 6.0, "min_threat": 1},
+	&"striker_drone_diamond_5": {"difficulty": 7.0, "min_threat": 1},
 	&"bomb_single": {"difficulty": 6.0, "min_threat": 1},
 	&"awl_formation": {"difficulty": 12.0, "min_threat": 1},
+	&"striker_drone_diamond_13": {"difficulty": 15.0, "min_threat": 2},
 	&"tanker_guard_sniper": {"difficulty": 10.0, "min_threat": 2},
 	&"interceptor_pair": {"difficulty": 12.0, "min_threat": 2},
 	&"caster_single": {"difficulty": 7.0, "min_threat": 3},
@@ -69,7 +70,7 @@ func _test_generator_and_pool_shape() -> void:
 	_expect(progression.get_threat_level() == 1, "run starts at Threat 1")
 	_expect(generator.current_threat_level == 1, "generator reads the initial Threat level")
 	_expect(pool != null and pool.validate(), "EnemyGenerator references one valid MainEncounterPool")
-	_expect(pool.entries.size() == 11, "MainEncounterPool contains all eleven live encounters")
+	_expect(pool.entries.size() == 12, "MainEncounterPool contains all twelve live encounters")
 	_expect(not _has_property(generator, &"spawn_sets"), "EnemyGenerator no longer exposes spawn_sets")
 	_expect(
 		not _has_property(generator.enemy_spawner, &"enemy_scene"),
@@ -94,16 +95,17 @@ func _expected_weight(difficulty: float, min_threat: int, threat_level: int) -> 
 func _test_threat_rosters_and_weights() -> void:
 	_expect_ids(
 		pool.get_eligible_entries(1),
-		[&"drone_formation", &"striker_drone_diamond", &"bomb_single", &"awl_formation"],
+		[&"drone_formation", &"striker_drone_diamond_5", &"bomb_single", &"awl_formation"],
 		"Threat 1",
 	)
 	_expect_ids(
 		pool.get_eligible_entries(2),
 		[
 			&"drone_formation",
-			&"striker_drone_diamond",
+			&"striker_drone_diamond_5",
 			&"bomb_single",
 			&"awl_formation",
+			&"striker_drone_diamond_13",
 			&"tanker_guard_sniper",
 			&"interceptor_pair",
 		],
@@ -113,9 +115,10 @@ func _test_threat_rosters_and_weights() -> void:
 		pool.get_eligible_entries(3),
 		[
 			&"drone_formation",
-			&"striker_drone_diamond",
+			&"striker_drone_diamond_5",
 			&"bomb_single",
 			&"awl_formation",
+			&"striker_drone_diamond_13",
 			&"tanker_guard_sniper",
 			&"interceptor_pair",
 			&"caster_single",
@@ -260,7 +263,8 @@ func _test_single_encounter(
 func _test_formation_encounters() -> void:
 	var expected_counts := {
 		&"drone_formation": 5,
-		&"striker_drone_diamond": 4,
+		&"striker_drone_diamond_5": 5,
+		&"striker_drone_diamond_13": 13,
 		&"awl_formation": 3,
 		&"x9_drone_down": 9,
 		&"x9_caster_drone_orbit": 9,
@@ -279,34 +283,88 @@ func _test_formation_encounters() -> void:
 			)
 			controller.queue_free()
 
-	var diamond := generator._spawn(_find_preset(&"striker_drone_diamond")) as FormationController
-	_expect(diamond != null, "striker_drone_diamond spawns for slot composition check")
+	var diamond := generator._spawn(_find_preset(&"striker_drone_diamond_5")) as FormationController
+	_expect(diamond != null, "striker_drone_diamond_5 spawns for slot composition check")
 	if diamond != null:
 		var by_slot: Dictionary = {}
 		for member in diamond.get_members():
 			var slot := member.get_formation_slot()
-			_expect(slot != null, "diamond member has a formation slot")
+			_expect(slot != null, "diamond_5 member has a formation slot")
 			if slot != null:
 				by_slot[slot.slot_index] = member
 		_expect(
 			by_slot.has(0)
 			and (by_slot[0] as Enemy).scene_file_path == "res://enemies/moving_enemy.tscn",
-			"diamond rear slot is a Striker",
+			"diamond_5 rear slot is a Striker",
 		)
-		for slot_index in [1, 2, 3]:
+		for slot_index in [1, 2, 3, 4]:
 			_expect(
 				by_slot.has(slot_index)
 				and (by_slot[slot_index] as Enemy).scene_file_path
 				== "res://enemies/normal_enemy.tscn",
-				"diamond front slot %d is a Drone" % slot_index,
+				"diamond_5 slot %d is a Drone" % slot_index,
 			)
-		_expect(not by_slot.has(4), "diamond tip slot stays empty")
 		_expect(
 			diamond.center_movement_controller.sequence.resource_path
-			== "res://resources/enemy_movement/sequences/formation_entry_third_patrol.tres",
-			"diamond uses one-third entry then patrol",
+			== "res://resources/enemy_movement/sequences/formation_entry_third.tres",
+			"diamond_5 uses one-third entry then scatter release",
+		)
+		var diamond_preset := _find_preset(&"striker_drone_diamond_5")
+		_expect(
+			diamond_preset.formation_break_condition
+			== EncounterPreset.FormationBreakCondition.SEQUENCE_FINISHED,
+			"diamond_5 breaks after entry sequence",
+		)
+		_expect(
+			diamond_preset.individual_movement_sequence.resource_path
+			== "res://resources/enemy_movement/sequences/individual_scatter_2_5.tres",
+			"diamond_5 drones scatter at 2.5x entry speed",
+		)
+		_expect(
+			diamond_preset.members[0].individual_movement_override.resource_path
+			== "res://resources/enemy_movement/sequences/individual_striker_charge_2_5.tres",
+			"diamond_5 Striker charges the player at 2.5x entry speed",
 		)
 		diamond.queue_free()
+
+	var diamond13 := generator._spawn(_find_preset(&"striker_drone_diamond_13")) as FormationController
+	_expect(diamond13 != null, "striker_drone_diamond_13 spawns for slot composition check")
+	if diamond13 != null:
+		var by_slot13: Dictionary = {}
+		for member in diamond13.get_members():
+			var slot := member.get_formation_slot()
+			_expect(slot != null, "diamond_13 member has a formation slot")
+			if slot != null:
+				by_slot13[slot.slot_index] = member
+		_expect(
+			by_slot13.has(0)
+			and (by_slot13[0] as Enemy).scene_file_path == "res://enemies/moving_enemy.tscn",
+			"diamond_13 tip slot is a Striker",
+		)
+		for slot_index in range(1, 13):
+			_expect(
+				by_slot13.has(slot_index)
+				and (by_slot13[slot_index] as Enemy).scene_file_path
+				== "res://enemies/normal_enemy.tscn",
+				"diamond_13 slot %d is a Drone" % slot_index,
+			)
+		var diamond13_preset := _find_preset(&"striker_drone_diamond_13")
+		_expect(
+			diamond13_preset.formation_break_condition
+			== EncounterPreset.FormationBreakCondition.SEQUENCE_FINISHED,
+			"diamond_13 breaks after entry sequence",
+		)
+		_expect(
+			diamond13_preset.individual_movement_sequence.resource_path
+			== "res://resources/enemy_movement/sequences/individual_scatter_2_5.tres",
+			"diamond_13 drones use the same 2.5x scatter",
+		)
+		_expect(
+			diamond13_preset.members[0].individual_movement_override.resource_path
+			== "res://resources/enemy_movement/sequences/individual_striker_charge_2_5.tres",
+			"diamond_13 Striker charges the player on scatter",
+		)
+		diamond13.queue_free()
 
 
 func _test_spawn_scoped_augments() -> void:

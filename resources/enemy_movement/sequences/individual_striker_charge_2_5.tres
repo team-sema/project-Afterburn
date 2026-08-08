@@ -4,11 +4,11 @@
 [ext_resource type="Script" path="res://resources/enemy_movement/movement_step.gd" id="2_step"]
 [ext_resource type="Script" path="res://resources/enemy_movement/steps/linear_movement_step.gd" id="3_linear"]
 
-[sub_resource type="Resource" id="Linear_scatter_double"]
+[sub_resource type="Resource" id="Linear_striker_charge_2_5"]
 script = ExtResource("3_linear")
-speed = 150.0
-direction_context_key = &"initial_direction"
+speed = 100.0
+direction_context_key = &"player_direction"
 
 [resource]
 script = ExtResource("1_sequence")
-steps = Array[ExtResource("2_step")]([SubResource("Linear_scatter_double")])
+steps = Array[ExtResource("2_step")]([SubResource("Linear_striker_charge_2_5")])

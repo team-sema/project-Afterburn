@@ -102,7 +102,7 @@ func _test_x9_drone_midmap_scatter() -> void:
 
 	var scatter := preset.individual_movement_sequence
 	var scatter_step := scatter.steps[0] as LinearMovementStep
-	_expect(is_equal_approx(scatter_step.speed, 120.0), "scatter is 2x midmap entry speed")
+	_expect(is_equal_approx(scatter_step.speed, 150.0), "scatter is 2.5x midmap entry speed")
 
 	var controller := spawner.spawn_encounter(preset) as FormationController
 	var broken := [false]
@@ -141,8 +141,8 @@ func _test_x9_drone_midmap_scatter() -> void:
 				_expect(absf(direction.x) <= 0.35, "center X9 column scatters near down")
 			var move := enemy.get_node("MoveComponent") as MoveComponent
 			_expect(
-				is_equal_approx(move.velocity.length(), 120.0),
-				"X9 scatter uses double speed",
+				is_equal_approx(move.velocity.length(), 150.0),
+				"X9 scatter uses 2.5x speed",
 			)
 			_expect(
 				enemy.global_position.y > target_y - 40.0,
@@ -249,6 +249,9 @@ func _test_v3_and_x5_midmap_scatter_presets() -> void:
 		"res://resources/encounters/presets/v9_drone_down.tres",
 		"res://resources/encounters/presets/x5_drone_down.tres",
 		"res://resources/encounters/presets/x9_drone_down.tres",
+		"res://resources/encounters/presets/inverted_v3_drone_down.tres",
+		"res://resources/encounters/presets/inverted_v5_drone_down.tres",
+		"res://resources/encounters/presets/inverted_v7_drone_down.tres",
 	]:
 		var preset := load(path) as EncounterPreset
 		_expect(preset != null and preset.validate(), "%s validates" % path)
@@ -266,14 +269,14 @@ func _test_v3_and_x5_midmap_scatter_presets() -> void:
 			and preset.individual_movement_sequence.resource_path.ends_with(
 				"individual_scatter_double.tres"
 			),
-			"%s uses double-speed scatter" % path,
+			"%s uses 2.5x-speed scatter" % path,
 		)
 
 
 func _test_weighted_main_pool_and_flat_spawn() -> void:
 	var pool := load(POOL_PATH) as EncounterPool
 	_expect(pool != null and pool.validate(), "MainEncounterPool validates")
-	_expect(pool.entries.size() == 11, "MainEncounterPool exposes the complete live roster")
+	_expect(pool.entries.size() == 12, "MainEncounterPool exposes the complete live roster")
 	var random_number_generator := RandomNumberGenerator.new()
 	random_number_generator.seed = 20260807
 	var counts: Dictionary = {}

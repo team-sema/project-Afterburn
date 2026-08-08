@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://resources/enemy_movement/movement_sequence.gd" id="1_sequence"]
 [ext_resource type="Script" path="res://resources/enemy_movement/movement_step.gd" id="2_step"]
 [ext_resource type="Script" path="res://resources/enemy_movement/steps/move_to_position_step.gd" id="3_move_to"]
-[ext_resource type="Script" path="res://resources/enemy_movement/steps/horizontal_patrol_movement_step.gd" id="4_patrol"]
+[ext_resource type="Script" path="res://resources/enemy_movement/steps/wait_movement_step.gd" id="4_wait"]
 
 [sub_resource type="Resource" id="MoveTo_third"]
 script = ExtResource("3_move_to")
@@ -12,11 +12,10 @@ target_position_is_viewport_ratio = true
 speed = 40.0
 affect_x = false
 
-[sub_resource type="Resource" id="Patrol_formation"]
-script = ExtResource("4_patrol")
-speed = 55.0
-edge_margin = 8.0
+[sub_resource type="Resource" id="Wait_brief"]
+script = ExtResource("4_wait")
+duration = 0.05
 
 [resource]
 script = ExtResource("1_sequence")
-steps = Array[ExtResource("2_step")]([SubResource("MoveTo_third"), SubResource("Patrol_formation")])
+steps = Array[ExtResource("2_step")]([SubResource("MoveTo_third"), SubResource("Wait_brief")])

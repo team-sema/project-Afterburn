@@ -3,17 +3,17 @@
 [ext_resource type="Script" path="res://formations/formation_layout.gd" id="1_layout"]
 [ext_resource type="Script" path="res://formations/formation_slot.gd" id="2_slot"]
 
-[node name="DiamondFormation" type="Node2D"]
+[node name="DiamondFormation5" type="Node2D"]
 script = ExtResource("1_layout")
 
 [node name="Slot0" type="Marker2D" parent="."]
-position = Vector2(0, -40)
+position = Vector2(0, -28)
 script = ExtResource("2_slot")
 slot_index = 0
 slot_id = &"top"
 
 [node name="Slot1" type="Marker2D" parent="."]
-position = Vector2(-48, 0)
+position = Vector2(-32, 0)
 script = ExtResource("2_slot")
 slot_index = 1
 slot_id = &"left"
@@ -24,13 +24,13 @@ slot_index = 2
 slot_id = &"center"
 
 [node name="Slot3" type="Marker2D" parent="."]
-position = Vector2(48, 0)
+position = Vector2(32, 0)
 script = ExtResource("2_slot")
 slot_index = 3
 slot_id = &"right"
 
 [node name="Slot4" type="Marker2D" parent="."]
-position = Vector2(0, 40)
+position = Vector2(0, 28)
 script = ExtResource("2_slot")
 slot_index = 4
 slot_id = &"bottom"
