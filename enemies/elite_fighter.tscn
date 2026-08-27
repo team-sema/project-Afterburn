@@ -1,0 +1,75 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" uid="uid://psmpwiapllcb" path="res://enemies/enemy.tscn" id="1_enemy"]
+[ext_resource type="Texture2D" path="res://assets/svg/enemy_elite_fighter.svg" id="2_visual"]
+[ext_resource type="Resource" path="res://resources/enemy_movement/sequences/elite_entry_patrol.tres" id="3_movement"]
+[ext_resource type="PackedScene" path="res://components/enemy_shoot_component.tscn" id="4_shoot"]
+
+[sub_resource type="RectangleShape2D" id="EliteHurtShape"]
+size = Vector2(24, 18)
+
+[sub_resource type="RectangleShape2D" id="EliteHitShape"]
+size = Vector2(20, 14)
+
+[node name="EliteFighter" instance=ExtResource("1_enemy")]
+is_elite = true
+
+[node name="Anchor" parent="." index="0"]
+scale = Vector2(1.35, 1.35)
+
+[node name="DiffuseGlow" parent="Anchor" index="0"]
+self_modulate = Color(1, 0.15, 0.35, 0.14)
+
+[node name="WideGlow" parent="Anchor" index="1"]
+self_modulate = Color(1, 0.12, 0.32, 0.22)
+texture = ExtResource("2_visual")
+
+[node name="TightGlow" parent="Anchor" index="2"]
+self_modulate = Color(1, 0.25, 0.42, 0.5)
+texture = ExtResource("2_visual")
+
+[node name="Core" parent="Anchor" index="3"]
+self_modulate = Color(1, 0.92, 0.94, 1)
+texture = ExtResource("2_visual")
+
+[node name="StatsComponent" parent="." index="1"]
+health = 180
+
+[node name="MovementController" parent="." index="3"]
+sequence = ExtResource("3_movement")
+
+[node name="VisibleOnScreenNotifier2D" parent="." index="4"]
+rect = Rect2(-18, -14, 36, 28)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HurtboxComponent" index="0"]
+shape = SubResource("EliteHurtShape")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HitboxComponent" index="0"]
+shape = SubResource("EliteHitShape")
+
+[node name="ScoreComponent" parent="." index="12"]
+adjust_amount = 40
+
+[node name="EnemyShootComponent" parent="." index="15"]
+fire_interval = 1.25
+burst_count = 2
+burst_interval = 0.14
+projectile_speed = 165.0
+shot_count = 1
+spread_degrees = 0.0
+initial_delay = 0.8
+use_actor_forward_direction = true
+local_forward_direction = Vector2(0, 1)
+
+[node name="ExperienceDropComponent" parent="." index="18"]
+drop_chance = 1.0
+
+[node name="EliteBarrageShootComponent" parent="." index="19" node_paths=PackedStringArray("targeting_component") instance=ExtResource("4_shoot")]
+fire_interval = 7.5
+burst_count = 12
+burst_interval = 0.09
+projectile_speed = 190.0
+shot_count = 1
+spread_degrees = 0.0
+initial_delay = 4.5
+targeting_component = NodePath("../TargetingComponent")

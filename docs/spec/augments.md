@@ -126,7 +126,8 @@ primary tag `hangar`는 UI 표시명 **동력로**. tag 키와 기존 아이콘�
 - 입력 `open_augment_offer`(**C**): XP ≥ 요구량일 때만 PLAYER 오퍼 오픈 · 성공 시 XP 차감·레벨+1
 - XP 획득량에 레이더 `XP_GAIN_MULT` 배율 적용 (`experience_gain_multiplier`)
 - 첫 요구 경험치 `5`, 레벨마다 요구량 `+3`
-- 적: 플레이 시간 `30초`마다 ENEMY 오퍼를 큐에 추가 (Threat도 동일 간격으로 상승)
+- 적: 플레이 시간 `60초` 경과 → 다음 Threat 엘리트 1기 등장 → 처치 순간 Threat 상승. 처치 뒤에만 ENEMY 오퍼를 열고, 선택 완료 후 다음 60초 진행을 재개
+- 엘리트 전투·ENEMY 오퍼 중에는 Threat 타이머와 일반 Encounter 생성이 정지하며 누적 Threat를 큐에 쌓지 않음
 
 ### AugmentOfferController
 
@@ -157,7 +158,7 @@ primary tag `hangar`는 UI 표시명 **동력로**. tag 키와 기존 아이콘�
 - `V` 목록은 실제 런의 3장 무작위 오퍼 대신 적 증강 리소스 전체를 스크롤 목록으로 연다.
 - 목록 행은 아이콘 원본 크기에 영향받지 않는 고정 높이 텍스트 카드로 표시한다.
 - PLAYER 시설 13종과 ENEMY 7종(게임플레이 풀 미등록 `enemy_counter_shot_on_hit` 포함)을 직접 선택해 랩의 레지스트리에 적용한다.
-- 범용 슬롯 확장·교체는 테스트 편의를 위해 랩이 자동 처리한다. Gameplay의 XP/30초 트리거와 후보 필터는 바꾸지 않는다.
+- 범용 슬롯 확장·교체는 테스트 편의를 위해 랩이 자동 처리한다. Gameplay의 XP/60초 트리거와 후보 필터는 바꾸지 않는다.
 
 ## 필드 드롭
 

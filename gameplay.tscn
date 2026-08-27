@@ -76,6 +76,8 @@
 [ext_resource type="Resource" path="res://resources/player_augments/weapon/trait_barrier_fast_orbit.tres" id="66b_tr_barrier_fast"]
 [ext_resource type="Resource" path="res://resources/player_augments/weapon/trait_barrier_expand_axis.tres" id="66c_tr_barrier_expand"]
 [ext_resource type="Resource" path="res://resources/player_augments/weapon/trait_barrier_repulse.tres" id="66d_tr_barrier_repulse"]
+[ext_resource type="Script" path="res://threat_elite_controller.gd" id="67_elite_controller"]
+[ext_resource type="Resource" path="res://resources/encounters/presets/threat_elite_single.tres" id="68_elite_preset"]
 
 [sub_resource type="Environment" id="Environment_neon"]
 background_mode = 3
@@ -142,3 +144,9 @@ augment_registry = NodePath("../PlayerAugmentRegistry")
 [node name="EnemyGenerator" parent="." unique_id=1625416164 node_paths=PackedStringArray("augment_registry", "progression") instance=ExtResource("5_generator")]
 augment_registry = NodePath("../EnemyAugmentRegistry")
 progression = NodePath("../AugmentProgressionController")
+
+[node name="ThreatEliteController" type="Node" parent="." node_paths=PackedStringArray("progression", "enemy_generator")]
+script = ExtResource("67_elite_controller")
+progression = NodePath("../AugmentProgressionController")
+enemy_generator = NodePath("../EnemyGenerator")
+elite_preset = ExtResource("68_elite_preset")

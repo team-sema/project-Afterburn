@@ -13,6 +13,16 @@ var _formation_controller: Node
 var _formation_slot: FormationSlot
 var _formation_intent := MovementIntent.new()
 
+@export var is_elite := false:
+	set(value):
+		is_elite = value
+		if not is_inside_tree():
+			return
+		if value:
+			add_to_group("elites")
+		elif is_in_group("elites"):
+			remove_from_group("elites")
+
 ## When true, boss-damage facility modules apply extra multiplier via WeaponSystem.resolve_hit_damage.
 @export var is_boss := false:
 	set(value):
@@ -33,15 +43,19 @@ var _formation_intent := MovementIntent.new()
 @onready var hurtbox_component: HurtboxComponent = $HurtboxComponent
 @onready var hurt_component: HurtComponent = $HurtComponent
 @onready var score_component: ScoreComponent = $ScoreComponent
+@onready var destroyed_component: DestroyedComponent = $DestroyedComponent
 @onready var hit_sound_player: VariablePitchAudioStreamPlayer = $HitSoundPlayer
+
+var _is_dying := false
 
 func _ready() -> void:
 	add_to_group("enemies")
+	if is_elite:
+		add_to_group("elites")
 	if is_boss:
 		add_to_group("bosses")
-	stats_component.no_health.connect(func():
-		score_component.adjust_score()
-	)
+	assert(not destroyed_component.auto_destroy_on_no_health)
+	stats_component.no_health.connect(_on_no_health)
 	
 	hurtbox_component.hurt.connect(func(hitbox: HitboxComponent):
 		scale_component.tween_scale()
@@ -49,10 +63,16 @@ func _ready() -> void:
 		shake_component.tween_shake()
 		hit_sound_player.play_with_variance()
 	)
-	stats_component.no_health.connect(func():
-		movement_controller.stop()
-		queue_free()
-	)
+
+
+func _on_no_health() -> void:
+	if _is_dying:
+		return
+	_is_dying = true
+	movement_controller.stop()
+	score_component.adjust_score()
+	destroyed_component.spawn_destroy_effect()
+	queue_free()
 
 
 func set_movement_sequence(

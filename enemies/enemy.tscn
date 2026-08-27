@@ -125,6 +125,7 @@ actor = NodePath("..")
 stats_component = NodePath("../StatsComponent")
 destroy_effect_spawner_component = NodePath("../SpawnerComponent")
 destroy_effect_color = Color(1, 0.48435354, 0.65708166, 1)
+auto_destroy_on_no_health = false
 
 [node name="ScoreComponent" type="Node" parent="." unique_id=1849553207]
 script = ExtResource("13_mgey2")

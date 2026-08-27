@@ -17,6 +17,8 @@ func _run() -> void:
 	var progression_hud: Node = world.get_node("Layout/LeftPanel/Margin/VBox/ProgressionHud")
 	var experience_label: Label = progression_hud.get_node("ExperienceLabel") as Label
 	var experience_bar: ProgressBar = progression_hud.get_node("ExperienceBar") as ProgressBar
+	var threat_label: Label = progression_hud.get_node("ThreatLabel") as Label
+	var threat_bar: ProgressBar = progression_hud.get_node("ThreatBar") as ProgressBar
 	var normal_fill := experience_bar.get_theme_stylebox("fill") as StyleBoxFlat
 	var normal_fill_color := normal_fill.bg_color
 
@@ -75,14 +77,14 @@ func _run() -> void:
 		"level-up requests a player offer",
 	)
 
-	progression._process(30.0)
-	_expect(progression.enemy_augment_tier == 1, "30 seconds reaches enemy augment tier 1")
-	_expect(progression.pending_offers.size() == 1, "enemy offer waits behind an active player offer")
-	if not progression.pending_offers.is_empty():
-		_expect(
-			progression.pending_offers.front() == AugmentOfferController.OfferType.ENEMY,
-			"queued offer is an enemy offer",
-		)
+	progression._process(60.0)
+	_expect(progression.enemy_augment_tier == 0, "60 seconds starts the elite before Threat advances")
+	_expect(progression.elite_gate_active, "timer fill opens the next Threat elite gate")
+	_expect(progression.pending_offers.is_empty(), "enemy offer waits for elite defeat")
+	_expect(gameplay.get_tree().get_nodes_in_group("elites").size() == 1, "Threat spawns one elite")
+	_expect(gameplay.get_node("EnemyGenerator").normal_spawns_paused, "elite gate pauses normal spawns")
+	_expect(threat_label.text.contains("ELITE ENGAGED"), "Threat HUD reports the elite gate")
+	_expect(threat_bar.value == threat_bar.max_value, "Threat bar stays full during the elite gate")
 
 	if failures.is_empty():
 		print("augment progression smoke test: PASS")

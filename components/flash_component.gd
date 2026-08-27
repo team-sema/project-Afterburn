@@ -34,6 +34,7 @@ func _ready() -> void:
 	# Store the original sprite material
 	if sprite != null:
 		original_sprite_material = sprite.material
+	timer.timeout.connect(_restore_materials)
 
 func _collect_targets() -> Array[CanvasItem]:
 	var targets: Array[CanvasItem] = []
@@ -57,20 +58,25 @@ func flash():
 	if targets.is_empty():
 		return
 
-	_original_materials.clear()
-	for target in targets:
-		_original_materials[target] = target.material
-		target.material = FLASH_MATERIAL
+	# A new hit during an active flash only extends the existing flash. Capturing a
+	# target's material again here would capture FLASH_MATERIAL as its "original"
+	# material and permanently leave the target flashed after rapid hits.
+	if _original_materials.is_empty():
+		for target in targets:
+			_original_materials[target] = target.material
+			target.material = FLASH_MATERIAL
 
-	# Start the timer (passing in the flash duration)
+	# Restarting this one timer extends the feedback without spawning overlapping
+	# await continuations that can restore materials out of order.
 	timer.start(flash_duration)
 
-	# Wait until the timer times out
-	await timer.timeout
 
-	for target in targets:
-		if is_instance_valid(target):
-			target.material = _original_materials.get(target, null)
+func _restore_materials() -> void:
+	for target_key in _original_materials:
+		var target := target_key as CanvasItem
+		if target != null and is_instance_valid(target):
+			target.material = _original_materials[target_key]
+	_original_materials.clear()
 	# Keep the legacy single-sprite field in sync for older callers.
 	if sprite != null and is_instance_valid(sprite):
 		original_sprite_material = sprite.material

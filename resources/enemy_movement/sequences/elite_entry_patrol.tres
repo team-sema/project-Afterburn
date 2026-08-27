@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="MovementSequence" format=3]
+
+[ext_resource type="Script" uid="uid://df54gp6payrqu" path="res://resources/enemy_movement/movement_sequence.gd" id="1_sequence"]
+[ext_resource type="Script" uid="uid://biufnl0ep3dyf" path="res://resources/enemy_movement/movement_step.gd" id="2_step"]
+[ext_resource type="Script" uid="uid://mn133gorohrs" path="res://resources/enemy_movement/steps/move_to_position_step.gd" id="3_move_to"]
+[ext_resource type="Script" uid="uid://db62ypxw31474" path="res://resources/enemy_movement/steps/horizontal_patrol_movement_step.gd" id="4_patrol"]
+
+[sub_resource type="Resource" id="MoveTo_elite_band"]
+script = ExtResource("3_move_to")
+target_position = Vector2(0, 72)
+speed = 56.0
+affect_x = false
+
+[sub_resource type="Resource" id="Patrol_elite"]
+script = ExtResource("4_patrol")
+speed = 62.0
+edge_margin = 24.0
+
+[resource]
+script = ExtResource("1_sequence")
+steps = Array[ExtResource("2_step")]([SubResource("MoveTo_elite_band"), SubResource("Patrol_elite")])

@@ -13,7 +13,7 @@ const EXPECTED_ROSTER := {
 	&"awl_formation": {"difficulty": 12.0, "min_threat": 1},
 	&"striker_drone_diamond_13": {"difficulty": 15.0, "min_threat": 2},
 	&"tanker_guard_sniper": {"difficulty": 10.0, "min_threat": 2},
-	&"tanker_bomb_vertical": {"difficulty": 9.0, "min_threat": 2},
+	&"bomb_drone_diamond": {"difficulty": 9.0, "min_threat": 2},
 	&"interceptor_pair": {"difficulty": 12.0, "min_threat": 2},
 	&"caster_single": {"difficulty": 7.0, "min_threat": 3},
 	&"x9_drone_down": {"difficulty": 9.0, "min_threat": 3},
@@ -114,7 +114,7 @@ func _test_threat_rosters_and_weights() -> void:
 			&"awl_formation",
 			&"striker_drone_diamond_13",
 			&"tanker_guard_sniper",
-			&"tanker_bomb_vertical",
+			&"bomb_drone_diamond",
 			&"interceptor_pair",
 		],
 		"Threat 2",
@@ -128,7 +128,7 @@ func _test_threat_rosters_and_weights() -> void:
 			&"awl_formation",
 			&"striker_drone_diamond_13",
 			&"tanker_guard_sniper",
-			&"tanker_bomb_vertical",
+			&"bomb_drone_diamond",
 			&"interceptor_pair",
 			&"caster_single",
 			&"x9_drone_down",
@@ -304,7 +304,7 @@ func _test_formation_encounters() -> void:
 		&"x9_caster_drone_orbit": 9,
 		&"v7_drone_down": 7,
 		&"tanker_guard_sniper": 2,
-		&"tanker_bomb_vertical": 2,
+		&"bomb_drone_diamond": 5,
 		&"interceptor_pair": 2,
 		&"interceptor_trio": 3,
 	}
@@ -401,31 +401,38 @@ func _test_formation_encounters() -> void:
 		)
 		diamond13.queue_free()
 
-	var tanker_bomb := generator._spawn(_find_preset(&"tanker_bomb_vertical")) as FormationController
-	_expect(tanker_bomb != null, "tanker_bomb_vertical spawns")
-	if tanker_bomb != null:
-		var tb_by_slot: Dictionary = {}
-		for member in tanker_bomb.get_members():
+	var bomb_diamond := generator._spawn(_find_preset(&"bomb_drone_diamond")) as FormationController
+	_expect(bomb_diamond != null, "bomb_drone_diamond spawns")
+	if bomb_diamond != null:
+		var bd_by_slot: Dictionary = {}
+		for member in bomb_diamond.get_members():
 			var slot := member.get_formation_slot()
 			if slot != null:
-				tb_by_slot[slot.slot_index] = member
+				bd_by_slot[slot.slot_index] = member
 		_expect(
-			tb_by_slot.has(3) and tb_by_slot[3] is TankerEnemy,
-			"tanker_bomb_vertical front slot is Tanker",
+			bd_by_slot.has(2)
+			and (bd_by_slot[2] as Enemy).scene_file_path == "res://enemies/bomb_enemy.tscn",
+			"bomb_drone_diamond center slot is Bomb",
 		)
+		for slot_index in [0, 1, 3, 4]:
+			_expect(
+				bd_by_slot.has(slot_index)
+				and (bd_by_slot[slot_index] as Enemy).scene_file_path == "res://enemies/normal_enemy.tscn",
+				"bomb_drone_diamond slot %d is a Drone" % slot_index,
+			)
+		var bd_preset := _find_preset(&"bomb_drone_diamond")
 		_expect(
-			tb_by_slot.has(2)
-			and (tb_by_slot[2] as Enemy).scene_file_path == "res://enemies/bomb_enemy.tscn",
-			"tanker_bomb_vertical center slot is Bomb",
-		)
-		var tb_preset := _find_preset(&"tanker_bomb_vertical")
-		_expect(
-			tb_preset.formation_movement_sequence.resource_path.ends_with(
-				"tanker_bomb_approach.tres"
+			bd_preset.formation_movement_sequence.resource_path.ends_with(
+				"bomb_drone_approach.tres"
 			),
-			"tanker_bomb_vertical slowly homes toward the player",
+			"bomb_drone_diamond slowly homes toward the player",
 		)
-		tanker_bomb.queue_free()
+		var bomb_homing := bd_preset.formation_movement_sequence.steps[0] as HomingMovementStep
+		_expect(
+			bomb_homing != null and is_equal_approx(bomb_homing.speed, 40.0),
+			"bomb_drone_diamond homes at 40 px/s",
+		)
+		bomb_diamond.queue_free()
 
 
 func _test_spawn_scoped_augments() -> void:
@@ -435,16 +442,16 @@ func _test_spawn_scoped_augments() -> void:
 	drone_controller.queue_free()
 
 	augment_registry.add_augment(BOMB_FAST_FUSE)
-	var bomb_controller := generator._spawn(_find_preset(&"tanker_bomb_vertical")) as FormationController
+	var bomb_controller := generator._spawn(_find_preset(&"bomb_drone_diamond")) as FormationController
 	var bomb: Enemy = null
 	for member in bomb_controller.get_members():
 		if member.scene_file_path == "res://enemies/bomb_enemy.tscn":
 			bomb = member
 			break
 	await process_frame
-	_expect(is_instance_valid(bomb), "tanker_bomb_vertical Encounter includes a Bomb")
+	_expect(is_instance_valid(bomb), "bomb_drone_diamond Encounter includes a Bomb")
 	if is_instance_valid(bomb):
-		_expect(bomb.spawn_id == &"tanker_bomb_vertical", "Bomb receives its EncounterPreset id")
+		_expect(bomb.spawn_id == &"bomb_drone_diamond", "Bomb receives its EncounterPreset id")
 		var bomb_fuse := bomb.get_node("BombProximityFuseComponent")
 		var actual_arm_duration := float(bomb_fuse.get("arm_duration"))
 		_expect(
@@ -456,10 +463,24 @@ func _test_spawn_scoped_augments() -> void:
 
 
 func _test_threat_progression() -> void:
-	progression._process(30.0)
-	_expect(generator.current_threat_level == 2, "generator follows Threat 2")
-	progression._process(30.0)
-	_expect(generator.current_threat_level == 3, "generator follows Threat 3")
+	progression._process(60.0)
+	_expect(generator.current_threat_level == 1, "generator stays at Threat 1 until elite defeat")
+	progression._process(60.0)
+	_expect(generator.current_threat_level == 1, "Threat timer pauses behind the elite gate")
+	var elites := get_nodes_in_group("elites")
+	_expect(elites.size() == 1, "Threat 2 spawns exactly one elite")
+	if elites.size() == 1:
+		(elites[0] as Enemy).stats_component.health = 0
+	_expect(generator.current_threat_level == 2, "elite defeat advances the generator to Threat 2")
+	var offer_controller := gameplay.get_node("AugmentOfferController") as AugmentOfferController
+	_expect(
+		offer_controller.is_offer_active
+		and offer_controller.active_offer_type == AugmentOfferController.OfferType.ENEMY,
+		"elite defeat unlocks the enemy offer",
+	)
+	offer_controller.call("_complete_offer", AugmentOfferController.OfferType.ENEMY)
+	progression._process(60.0)
+	_expect(generator.current_threat_level == 2, "next elite starts before the following Threat advances")
 
 
 func _test_invalid_weight_safety() -> void:
