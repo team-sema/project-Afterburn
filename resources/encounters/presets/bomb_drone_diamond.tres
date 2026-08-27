@@ -1,0 +1,45 @@
+[gd_resource type="Resource" script_class="EncounterPreset" format=3]
+
+[ext_resource type="Script" uid="uid://c6t14vfypdxop" path="res://resources/encounters/encounter_preset.gd" id="1_preset"]
+[ext_resource type="Script" uid="uid://cbtt1l1ekmuxi" path="res://resources/encounters/encounter_member.gd" id="2_member"]
+[ext_resource type="PackedScene" path="res://formations/layouts/diamond_formation.tscn" id="3_layout"]
+[ext_resource type="Resource" path="res://resources/enemy_movement/sequences/bomb_drone_approach.tres" id="4_movement"]
+[ext_resource type="Resource" path="res://resources/formation_behaviors/maintain.tres" id="5_behavior"]
+[ext_resource type="PackedScene" uid="uid://bhw7lkvyjx43v" path="res://enemies/normal_enemy.tscn" id="6_drone"]
+[ext_resource type="PackedScene" uid="uid://dyoidordek441" path="res://enemies/bomb_enemy.tscn" id="7_bomb"]
+
+[sub_resource type="Resource" id="Member_drone_top"]
+script = ExtResource("2_member")
+enemy_scene = ExtResource("6_drone")
+
+[sub_resource type="Resource" id="Member_drone_left"]
+script = ExtResource("2_member")
+enemy_scene = ExtResource("6_drone")
+slot_index = 1
+
+[sub_resource type="Resource" id="Member_bomb_center"]
+script = ExtResource("2_member")
+enemy_scene = ExtResource("7_bomb")
+slot_index = 2
+
+[sub_resource type="Resource" id="Member_drone_right"]
+script = ExtResource("2_member")
+enemy_scene = ExtResource("6_drone")
+slot_index = 3
+
+[sub_resource type="Resource" id="Member_drone_bottom"]
+script = ExtResource("2_member")
+enemy_scene = ExtResource("6_drone")
+slot_index = 4
+
+[resource]
+script = ExtResource("1_preset")
+encounter_id = &"bomb_drone_diamond"
+difficulty = 9.0
+formation_layout_scene = ExtResource("3_layout")
+formation_movement_sequence = ExtResource("4_movement")
+formation_behavior = ExtResource("5_behavior")
+members = Array[ExtResource("2_member")]([SubResource("Member_drone_top"), SubResource("Member_drone_left"), SubResource("Member_bomb_center"), SubResource("Member_drone_right"), SubResource("Member_drone_bottom")])
+spawn_anchor = 0
+spawn_offset = Vector2(0, -20)
+spawn_edge_margin = 32.0

@@ -16,13 +16,14 @@
 
 ## Enemy 베이스 동작
 
-- `no_health` → 점수 + XP + `queue_free`
+- 생존→사망 시 `no_health` 1회 → 점수 + XP + 기본 파괴 FX + `Enemy` 최종 `queue_free`
+- 중복 치명 입력은 사망 보상을 반복하지 않는다. 화면 밖 despawn은 `no_health`를 발생시키지 않아 보상이 없다
 - Hurt VFX/SFX · 플레이어 접촉 시 피해만 주고 적은 유지
 - **이동:** `Node2D` + `MovementSequence` → `MovementController` → `MoveComponent.translate` (CharacterBody/`move_and_slide` 없음). Sequence가 없는 기존 객체는 `MoveComponent.velocity` 경로를 유지한다.
 
 ## EnemyGenerator
 
-- 생성기는 4초 + 0~0.5초 지터의 타이머와 현재 Threat만 관리하고, `main_encounter_pool.tres`에 선택을 요청한다. 직전 **2개** Encounter id는 후보에서 빼서(대안이 있을 때) 반복을 줄인다.
+- 생성기는 4초 + 0~0.5초 지터의 타이머와 현재 Threat만 관리하고, `main_encounter_pool.tres`에 선택을 요청한다. 직전 **2개** Encounter id는 후보에서 빼서(대안이 있을 때) 반복을 줄인다. 엘리트 게이트 중에는 타이머를 정지하고 적 증강 오퍼 완료 후 새 간격으로 재개한다.
 - `MainEncounterPool`이 현재 Threat에서 weight가 0보다 큰 `EncounterPreset` 전체를 대상으로 weighted random을 정확히 한 번 수행한다.
 - 각 EncounterPreset은 `difficulty`(난이도 점수)를 가진다. 풀 Entry의 `min_threat` 이상이면 `weight = 60 / sqrt(difficulty)`로 뽑히고, 미만이면 0이다(어려울수록 희귀하되 비율은 완만).
 - `EncounterPreset`은 FormationLayout Scene, 편대·개별 MovementSequence, 멤버와 슬롯, 등장·해제 조건을 조합하며 `EnemySpawner`가 실제 적을 생성한다.
@@ -30,7 +31,7 @@
 - **Green:** Drone 편대 — `HorizontalFormation`의 명시적 슬롯 5개에 동시 스폰 · `drone_zigzag_mirrored`(V5 + zigzag·mirrored)도 Threat 1
 - **Yellow 호위 (5기):** `striker_drone_diamond_5` — `DiamondFormation5` 최후방(Slot0) Striker + Slot1–4 Drone 4기(하단 팁 포함). 슬롯 간격 ±32x / ±28y
 - **Yellow 호위 (13기):** `striker_drone_diamond_13` — `DiamondFormation13`(1-3-5-3-1) 꼭짓점 Striker + Drone 12기. Threat 2+. 슬롯 step 20
-- **Bomb 호위:** `tanker_bomb_vertical`(Threat 2+)
+- **Bomb 호위:** `bomb_drone_diamond` — 드론 4기 다이아몬드 중앙 Bomb(Threat 2+)
 - **Awl:** 3마리 V 편대
 - **Interceptor:** `interceptor_pair`(Threat 2+) / `interceptor_trio`(Threat 3+)만 사용하며 단독 Encounter는 없음
 - Pink / Caster: `caster_single`. Sniper는 `tanker_guard_sniper` 후방 슬롯으로만 등장
@@ -54,7 +55,7 @@
 | `awl_formation` | 12 | 1 | ≈17.32 |
 | `striker_drone_diamond_13` | 15 | 2 | ≈15.49 |
 | `tanker_guard_sniper` | 10 | 2 | ≈18.97 |
-| `tanker_bomb_vertical` | 9 | 2 | 20 |
+| `bomb_drone_diamond` | 9 | 2 | 20 |
 | `interceptor_pair` | 12 | 2 | ≈17.32 |
 | `caster_single` | 7 | 3 | ≈22.68 |
 | `v7_drone_down` | 7 | 3 | ≈22.68 |
@@ -63,6 +64,18 @@
 | `interceptor_trio` | 18 | 3 | ≈14.14 |
 
 Threat 1 후보 합 weight ≈82.6(zigzag/diamond_5가 상위, `drone_formation`·awl는 하위), Threat 2는 ≈154.4, Threat 3은 ≈249.4이다. 초반 로스터는 4종이다.
+
+## Threat 엘리트
+
+- `ThreatEliteController`가 60초 타이머 완료마다 MainEncounterPool과 분리된 다음 Threat의 `threat_elite_single`을 정확히 1기 소환한다.
+- 엘리트 전투가 시작되면 일반 Encounter 생성은 정지한다. 이미 살아 있는 일반 적은 유지한다.
+- 엘리트 처치 전에는 Threat 수치가 오르지 않고 적 증강 오퍼도 열리지 않는다. 처치 순간 Threat를 1 올린 뒤 기존 ENEMY 3지선다를 열고, 선택 완료 뒤 일반 생성과 다음 Threat 타이머를 재개한다.
+- 전투·오퍼 중 Threat 시간은 누적하지 않는다. 따라서 긴 전투 뒤 엘리트가 연속 생성되지 않는다.
+- 첫 엘리트는 Threat 2에서 HP **180**. 이후 Threat마다 기본 HP **+60**이며, 이미 선택된 적 `HEALTH` 증강 배율이 스폰 시 추가 적용된다.
+- 이동: 화면 상단 y=72 진입(56px/s) → 좌우 순찰(62px/s). 화면 밖 자동 despawn은 정지한다.
+- 기본 공격: 1.25초 간격으로 전방 단발 2회를 0.14초 간격으로 발사. 탄속 165, 첫 발사 지연 0.8초.
+- 집중 연사: 약 7.5초마다 플레이어의 현재 위치를 계속 추적하며 0.09초 간격으로 12발을 쏟아낸다. 탄속 190, 첫 연사 지연 4.5초.
+- 비주얼: `enemy_elite_fighter.svg`, 1.35배 실루엣과 강화된 적색 글로우. 점수 40, XP 오브 확정 드롭.
 
 테스트·웨폰 랩용 추가 드론 하강 프리셋(풀 미등록): `v3_drone_down`, `v5_drone_down`, `v9_drone_down`, `inverted_v3_drone_down`, `inverted_v5_drone_down`, `inverted_v7_drone_down`, `x5_drone_down`, `drone_triangle_formation`.
 
@@ -110,13 +123,13 @@ Threat 1 후보 합 weight ≈82.6(zigzag/diamond_5가 상위, `drone_formation`
 - `blast_damage` **1** (플레이어 피격은 이벤트당 항상 1)
 - 폭발 반경 안의 **다른 적**은 hurtbox 겹침 시 즉시 처치(실드·HP 무시, 본인 제외). 점수·XP는 일반 `no_health` 경로
 - `고속 기폭 장치` 적 증강 활성 시 무장 시간 `2.0초 / 1.5 ≈ 1.33초` (`target_spawn_id` 없음 → 모든 Bomb)
-- 투사체 없음 · **단독 `bomb_single` · `bomb_drone_diamond` · `tanker_bomb_horizontal` Encounter는 제거**
+- 투사체 없음 · 단독 `bomb_single`과 Tanker 호위 `tanker_bomb_vertical`/`tanker_bomb_horizontal` Encounter는 없다
 
 ### Bomb Encounter
 
 | Encounter | 레이아웃 | 배치 | 이동 | min_threat |
 |---|---|---|---|---:|
-| `tanker_bomb_vertical` | `VerticalFormation` | Tanker `bottom_inner` + Bomb `center` | `tanker_bomb_approach`(플레이어 호밍 22px/s) · 유지 | 2 |
+| `bomb_drone_diamond` | `DiamondFormation5` | Bomb `center` + Drone `top`/`left`/`right`/`bottom` | `bomb_drone_approach`(플레이어 호밍 40px/s) · 유지 | 2 |
 
 ## Drone 대각 편대
 

@@ -2,15 +2,15 @@
 
 Godot 4.7 종스크롤 슈팅 + XP·시간 기반 오그먼트 프로토타입 (`mayhem_shmup`).
 
-적을 처치해 XP를 모으고 **`C`** 로 플레이어 오그먼트(시설 모듈 · 무기 획득/레벨/특성)를 고른다. 약 30초마다 적 오그먼트도 선택된다.
+적을 처치해 XP를 모으고 **`C`** 로 플레이어 오그먼트(시설 모듈 · 무기 획득/레벨/특성)를 고른다. 60초마다 등장하는 엘리트를 처치하면 Threat가 상승하고 적 오그먼트를 선택한다.
 
 ## 문서
 
 | | URL |
 |--|-----|
-| 문서 홈 | https://team-sema.github.io/project-Afterburn/ |
-| **스펙** (카테고리별) | https://team-sema.github.io/project-Afterburn/spec/ |
-| **칸반 보드** | https://team-sema.github.io/project-Afterburn/board/ |
+| 문서 홈 | https://team-sema.github.io/project-Afterburn-codex/ |
+| **스펙** (카테고리별) | https://team-sema.github.io/project-Afterburn-codex/spec/ |
+| **칸반 보드** | https://team-sema.github.io/project-Afterburn-codex/board/ |
 
 로컬 미리보기:
 

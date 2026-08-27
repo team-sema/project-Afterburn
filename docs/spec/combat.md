@@ -33,7 +33,7 @@ Hitbox.area_entered
       → (player) incoming = 1
       → notify_hit (실드 충전 게이지 리셋)
       → 실드에 먼저 피해 적용, 남은 피해만 stats.health -= remaining
-  → no_health → 파괴/점수
+  → 생존→사망 전환이면 no_health 1회 → 파괴/점수
 ```
 
 레이저는 Area 겹침을 쓰지 않고 RayCast + DamageTickTimer로 `hurt`를 직접 보낸다.
@@ -56,4 +56,4 @@ Hitbox.area_entered
 | Pink 해금 | score > 50 |
 | Green / Yellow / Pink / Awl / Bomb 점수 | 5 / 10 / 25 / 15 / 20 |
 
-> 플레이어 오그먼트는 **점수 임계가 아니라 XP + C 키**. 적 오그먼트는 플레이 시간 30초 간격.
+> 플레이어 오그먼트는 **점수 임계가 아니라 XP + C 키**. 적 오그먼트는 60초마다 등장하는 엘리트를 처치한 뒤 선택.

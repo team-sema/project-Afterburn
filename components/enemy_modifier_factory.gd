@@ -81,9 +81,9 @@ func _apply_action_rate_multiplier(enemy: Enemy, multiplier: float) -> void:
 func _apply_shoot_action_rate(enemy: Enemy, multiplier: float) -> void:
 	if enemy == null or not is_instance_valid(enemy):
 		return
-	var shoot := enemy.get_node_or_null("EnemyShootComponent") as EnemyShootComponent
-	if shoot != null:
-		shoot.apply_action_rate_multiplier(multiplier)
+	for node in enemy.find_children("*", "", true, false):
+		if node is EnemyShootComponent:
+			(node as EnemyShootComponent).apply_action_rate_multiplier(multiplier)
 	var radial := enemy.get_node_or_null("RadialBarrageShootComponent")
 	if radial != null and radial.has_method("apply_action_rate_multiplier"):
 		radial.call("apply_action_rate_multiplier", multiplier)

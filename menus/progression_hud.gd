@@ -13,6 +13,7 @@ var _normal_experience_fill_color := Color.WHITE
 var _normal_experience_label_color := Color.WHITE
 var _is_augment_ready := false
 var _highlight_time := 0.0
+var _elite_gate_active := false
 
 
 func _ready() -> void:
@@ -25,6 +26,7 @@ func _ready() -> void:
 	_normal_experience_label_color = experience_label.get_theme_color("font_color")
 	progression.experience_changed.connect(_on_experience_changed)
 	progression.enemy_augment_progress_changed.connect(_on_enemy_augment_progress_changed)
+	progression.elite_gate_changed.connect(_on_elite_gate_changed)
 	progression.call_deferred("publish_state")
 
 
@@ -69,8 +71,15 @@ func _on_enemy_augment_progress_changed(
 	current_threat_level: int,
 ) -> void:
 	threat_bar.max_value = maxf(1.0, interval)
-	threat_bar.value = elapsed
+	threat_bar.value = interval if _elite_gate_active else elapsed
+	if _elite_gate_active:
+		threat_label.text = "THREAT %02d   ELITE ENGAGED" % current_threat_level
+		return
 	var remaining_seconds := maxi(0, ceili(interval - elapsed))
 	var minutes := remaining_seconds / 60
 	var seconds := remaining_seconds % 60
 	threat_label.text = "THREAT %02d   %02d:%02d" % [current_threat_level, minutes, seconds]
+
+
+func _on_elite_gate_changed(is_active: bool, _threat_level: int) -> void:
+	_elite_gate_active = is_active

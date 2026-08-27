@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-09",
+  "updated": "2026-08-28",
   "source": "docs/board/cards/*.md",
   "columns": [
     {
@@ -39,6 +39,38 @@
     }
   ],
   "cards": [
+    {
+      "id": "backlog-card-cleanup",
+      "title": "불필요한 백로그 카드 정리",
+      "description": "구현 근거가 없거나 현재 구조상 불필요한 해결책 카드를 활성 칸반에서 제거한다.",
+      "column": "review",
+      "file": "cards/backlog-card-cleanup.md",
+      "tags": ["문서", "칸반", "정리"]
+    },
+    {
+      "id": "codex-usage-push",
+      "title": "Push 시 Codex 활용 기록",
+      "description": "기능 완료 시 제출용 Codex 활용 기록을 근거 기반으로 작성하고 같은 커밋에 포함한다.",
+      "column": "review",
+      "file": "cards/codex-usage-push.md",
+      "tags": ["문서", "제출", "AI", "워크플로"]
+    },
+    {
+      "id": "remove-submission-docs",
+      "title": "기존 제출 문서 삭제",
+      "description": "원본 공모 제출 MD를 삭제한다. Codex용 제출 문서는 별도 작성.",
+      "column": "review",
+      "file": "cards/remove-submission-docs.md",
+      "tags": ["문서", "제출"]
+    },
+    {
+      "id": "pages-codex-urls",
+      "title": "Codex Pages URL",
+      "description": "README·칸반 README·문서 홈 링크를 project-Afterburn-codex Pages로 교체.",
+      "column": "review",
+      "file": "cards/pages-codex-urls.md",
+      "tags": ["문서", "Pages"]
+    },
     {
       "id": "submission-ai-usage-copy",
       "title": "제출 AI 활용 문서 퇴고",
@@ -400,14 +432,6 @@
       "tags": ["문서", "칸반", "워크플로"]
     },
     {
-      "id": "player-augment-behaviors",
-      "title": "플레이어 오그먼트 behavior 적용",
-      "description": "PlayerAugment.behavior_components를 Applier가 부착하도록.",
-      "column": "ready",
-      "file": "cards/player-augment-behaviors.md",
-      "tags": ["오그먼트", "플레이어"]
-    },
-    {
       "id": "enemy-baseline-fire",
       "title": "적 기본 사격·포화 위기",
       "description": "기본 조준사격 + 위기를 탄량 증가로 교체, 이동 속도 소폭 상향.",
@@ -424,14 +448,6 @@
       "tags": ["오그먼트", "적"]
     },
     {
-      "id": "wire-enemy-augment-grant",
-      "title": "EnemyAugmentGrantComponent 연결",
-      "description": "완성된 grant API를 씬/드롭에 연결.",
-      "column": "ideas",
-      "file": "cards/wire-enemy-augment-grant.md",
-      "tags": ["오그먼트", "후보"]
-    },
-    {
       "id": "physics-layers-projectiles",
       "title": "탄 물리 레이어 3·4 정리",
       "description": "이름만 있고 탄은 layer 0 + mask 패턴.",
@@ -440,18 +456,10 @@
       "tags": ["전투", "후보"]
     },
     {
-      "id": "clear-augments-on-run",
-      "title": "런 시작 시 clear_augments",
-      "description": "명시적 초기화로 씬 리로드 의존 줄이기.",
-      "column": "ideas",
-      "file": "cards/clear-augments-on-run.md",
-      "tags": ["오그먼트", "후보"]
-    },
-    {
       "id": "enemy-death-path-cleanup",
       "title": "적 사망 경로 정리",
-      "description": "queue_free + DestroyedComponent 이중 처리 정리.",
-      "column": "ideas",
+      "description": "사망 신호를 단발화하고 적의 FX·최종 free 소유권을 Enemy로 통일한다.",
+      "column": "review",
       "file": "cards/enemy-death-path-cleanup.md",
       "tags": ["적", "리팩터"]
     },
@@ -554,7 +562,7 @@
     {
       "id": "bomb-formation-escorts",
       "title": "Bomb 편대 호위",
-      "description": "단독 Bomb 제거. tanker_bomb_vertical만 · 호밍 접근 · 폭발 범위 적 처치.",
+      "description": "초기 Tanker 호위안. 후속 bomb-diamond-escort에서 Drone 다이아몬드 중앙 Bomb으로 교체됨.",
       "column": "done",
       "file": "cards/bomb-formation-escorts.md",
       "tags": ["적", "스폰", "편대"]
@@ -590,6 +598,30 @@
       "column": "review",
       "file": "cards/encounter-weight-array.md",
       "tags": ["적", "데이터"]
+    },
+    {
+      "id": "threat-elite-boss-loop",
+      "title": "Threat 엘리트 · 보스 진행 루프",
+      "description": "Threat 상승 엘리트, 처치 후 적 증강, N번째 Threat 보스의 상태 전이와 미결정 밸런스 항목을 설계한다.",
+      "column": "review",
+      "file": "cards/threat-elite-boss-loop.md",
+      "tags": ["적", "Threat", "엘리트", "보스", "증강"]
+    },
+    {
+      "id": "threat-elite-progression",
+      "title": "Threat 엘리트 처치 게이트",
+      "description": "Threat 상승마다 엘리트를 소환하고 처치 후에만 적 증강 오퍼를 열어 다음 구간을 재개한다.",
+      "column": "review",
+      "file": "cards/threat-elite-progression.md",
+      "tags": ["적", "Threat", "엘리트", "증강"]
+    },
+    {
+      "id": "bomb-diamond-escort",
+      "title": "Bomb 드론 다이아몬드 호위",
+      "description": "Tanker 호위 대신 드론 4기 다이아몬드 중앙에 Bomb를 배치한다.",
+      "column": "review",
+      "file": "cards/bomb-diamond-escort.md",
+      "tags": ["적", "스폰", "편대", "Bomb"]
     },
     {
       "id": "offer-category-mix",

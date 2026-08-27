@@ -11,14 +11,36 @@ extends Node
 # Export and grab access to a spawner component so we can create an effect on death
 @export var destroy_effect_spawner_component: SpawnerComponent
 @export var destroy_effect_color := Color("ff3f8f")
+## Player and standalone users keep the legacy automatic effect + free path.
+## Enemy disables this and owns its ordered score -> effect -> free path.
+@export var auto_destroy_on_no_health := true
+
+var _suppress_next_effect := false
 
 func _ready() -> void:
-	# Connect the the no health signal on our stats to the destroy function
-	stats_component.no_health.connect(destroy)
+	assert(actor != null, "DestroyedComponent requires an actor.")
+	assert(stats_component != null, "DestroyedComponent requires StatsComponent.")
+	assert(
+		destroy_effect_spawner_component != null,
+		"DestroyedComponent requires a destroy effect spawner.",
+	)
+	if auto_destroy_on_no_health and not stats_component.no_health.is_connected(destroy):
+		stats_component.no_health.connect(destroy)
 
 func destroy() -> void:
-	# create an effect (from the spawner component) and free the actor
+	spawn_destroy_effect()
+	actor.queue_free()
+
+
+func spawn_destroy_effect() -> Node:
+	if _suppress_next_effect:
+		_suppress_next_effect = false
+		return null
 	var destroy_effect := destroy_effect_spawner_component.spawn(actor.global_position)
 	if destroy_effect.has_method("set_effect_color"):
 		destroy_effect.call("set_effect_color", destroy_effect_color)
-	actor.queue_free()
+	return destroy_effect
+
+
+func suppress_next_effect() -> void:
+	_suppress_next_effect = true

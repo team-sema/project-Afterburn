@@ -7,7 +7,7 @@
 [ext_resource type="Resource" uid="uid://dyru17mhjp7x4" path="res://resources/encounters/presets/striker_drone_diamond_5.tres" id="5_striker5"]
 [ext_resource type="Resource" uid="uid://c4axu4brwnlic" path="res://resources/encounters/presets/striker_drone_diamond_13.tres" id="5_striker13"]
 [ext_resource type="Resource" uid="uid://cgyspc32titp8" path="res://resources/encounters/presets/awl_charge_formation.tres" id="6_awl"]
-[ext_resource type="Resource" uid="uid://cg15mkar0n4tr" path="res://resources/encounters/presets/tanker_bomb_vertical.tres" id="7_tanker_v"]
+[ext_resource type="Resource" path="res://resources/encounters/presets/bomb_drone_diamond.tres" id="7_bomb_diamond"]
 [ext_resource type="Resource" uid="uid://bm3y3hs8ty058" path="res://resources/encounters/presets/caster_single.tres" id="8_caster"]
 [ext_resource type="Resource" uid="uid://dhfkqigg4j6d0" path="res://resources/encounters/presets/x9_drone_down.tres" id="9_x9_drone"]
 [ext_resource type="Resource" uid="uid://p7t6m8jhj1oh" path="res://resources/encounters/presets/x9_caster_drone_orbit.tres" id="10_x9_orbit"]
@@ -42,9 +42,9 @@ script = ExtResource("2_entry")
 preset = ExtResource("13_tanker")
 min_threat = 2
 
-[sub_resource type="Resource" id="Entry_tanker_bomb_v"]
+[sub_resource type="Resource" id="Entry_bomb_diamond"]
 script = ExtResource("2_entry")
-preset = ExtResource("7_tanker_v")
+preset = ExtResource("7_bomb_diamond")
 min_threat = 2
 
 [sub_resource type="Resource" id="Entry_interceptor_pair"]
@@ -79,4 +79,4 @@ min_threat = 3
 
 [resource]
 script = ExtResource("1_pool")
-entries = Array[ExtResource("2_entry")]([SubResource("Entry_drone"), SubResource("Entry_zigzag"), SubResource("Entry_striker5"), SubResource("Entry_awl"), SubResource("Entry_striker13"), SubResource("Entry_tanker"), SubResource("Entry_tanker_bomb_v"), SubResource("Entry_interceptor_pair"), SubResource("Entry_caster"), SubResource("Entry_x9_drone"), SubResource("Entry_x9_orbit"), SubResource("Entry_v7"), SubResource("Entry_interceptor_trio")])
+entries = Array[ExtResource("2_entry")]([SubResource("Entry_drone"), SubResource("Entry_zigzag"), SubResource("Entry_striker5"), SubResource("Entry_awl"), SubResource("Entry_striker13"), SubResource("Entry_tanker"), SubResource("Entry_bomb_diamond"), SubResource("Entry_interceptor_pair"), SubResource("Entry_caster"), SubResource("Entry_x9_drone"), SubResource("Entry_x9_orbit"), SubResource("Entry_v7"), SubResource("Entry_interceptor_trio")])

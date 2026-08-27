@@ -11,6 +11,7 @@ extends Node2D
 @export_range(0, 8, 1) var recent_exclusion_count := 2
 
 var current_threat_level := 1
+var normal_spawns_paused := false
 var _recent_encounter_ids: Array[StringName] = []
 
 @onready var enemy_spawner: EnemySpawner = $EnemySpawner
@@ -50,6 +51,8 @@ func _on_threat_level_changed(new_threat_level: int) -> void:
 
 
 func _on_spawn_timer_timeout() -> void:
+	if normal_spawns_paused:
+		return
 	var preset := pick_encounter(current_threat_level)
 	if preset == null:
 		push_warning(
@@ -63,12 +66,31 @@ func _on_spawn_timer_timeout() -> void:
 
 
 func _schedule_next_spawn() -> void:
+	if normal_spawns_paused:
+		return
 	spawn_timer.start(spawn_interval + randf_range(0.0, spawn_interval_jitter))
 
 
 func _spawn(preset: EncounterPreset) -> FormationController:
 	_remember_encounter(preset.encounter_id)
 	return enemy_spawner.spawn_encounter(preset)
+
+
+func spawn_special_encounter(
+	preset: EncounterPreset,
+	configure_before_add: Callable = Callable(),
+) -> FormationController:
+	return enemy_spawner.spawn_encounter(preset, 0, configure_before_add)
+
+
+func set_normal_spawns_paused(is_paused: bool) -> void:
+	if normal_spawns_paused == is_paused:
+		return
+	normal_spawns_paused = is_paused
+	if normal_spawns_paused:
+		spawn_timer.stop()
+	else:
+		_schedule_next_spawn()
 
 
 func _remember_encounter(encounter_id: StringName) -> void:
