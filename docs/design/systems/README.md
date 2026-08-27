@@ -3,7 +3,7 @@
 `/feature`마다 `docs/design/systems/<slug>.md`를 만들고 여기에 한 줄 추가한다.  
 **현재 코드 동작의 정본은 `docs/spec/`** 이다. 여기 문서는 feature 설계·이력이다.
 
-아래 **상태 열의 정본은 [`docs/board/cards.json`](../../board/cards.json)** 이며 이 표는 사본이다. 카드 열을 옮기면 여기도 같이 고친다.
+아래 **상태 열은 사본**이다. 열 이동 정본은 [Notion 아이템 칸반](https://app.notion.com/p/102c71bf78394bcaa9ff627548faf7f9?v=3c9b8c11155f8111bfeb000c00cae3b8)이다.
 
 | slug | 제목 | 상태 |
 |------|------|------|
@@ -31,6 +31,7 @@
 | [readme-docs-links](readme-docs-links.md) | README 스펙·칸반 링크 | review |
 | [docs-site-kanban](docs-site-kanban.md) | docs 사이트 · 칸반 · 워크플로 | review |
 | [kanban-agent-prompt-copy](kanban-agent-prompt-copy.md) | 보드→에이전트 프롬프트 복사 | review |
+| [notion-kanban-skills](notion-kanban-skills.md) | `/feature`·`/push` 열 이동 → Notion | review |
 | [kanban-v2](kanban-v2.md) | 백로그 칸반 v2 | 운영 |
 | [sniper-enemy](sniper-enemy.md) | 스나이퍼 저격 · 수렴 이중선 조준 · 고속탄 | review |
 | [offer-category-mix](offer-category-mix.md) | 오퍼 획득/모듈/시설 범주 배율 | review |

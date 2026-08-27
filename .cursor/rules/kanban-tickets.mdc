@@ -1,96 +1,122 @@
 ---
-description: "Manage development as kanban tickets (docs/board); auto-update cards on /feature and /push"
+description: "Manage development as kanban tickets; /feature and /push move columns in Notion"
 alwaysApply: true
 ---
 
 # 칸반 티켓 (카드) 관리
 
-개발 단위는 **티켓(카드)** 이다. `docs/board/` 칸반을 쓴다.
+개발 단위는 **티켓(카드)** 이다. 열 이동은 **Notion 아이템 칸반**에서 한다.
 
-정본: [docs/design/systems/kanban-v2.md](docs/design/systems/kanban-v2.md) · 보드: `docs/board/`
+정본(열 이동): [아이템 칸반](https://app.notion.com/p/102c71bf78394bcaa9ff627548faf7f9?v=3c9b8c11155f8111bfeb000c00cae3b8)  
+규칙 문서: [docs/design/systems/kanban-v2.md](docs/design/systems/kanban-v2.md)  
+Git `docs/board/` 는 Pages 스냅샷·카드 본문 보관용이며, **`/feature`·`/push`가 column을 쓰지 않는다.**
 
-## 데이터
+## Notion DB
 
-| 경로 | 역할 |
+| 항목 | 값 |
 |------|------|
-| `docs/board/cards.json` | 카드 인덱스 (`id`, `title`, `description`, `column`, `file`, `tags`) |
-| `docs/board/cards/<id>.md` | 카드 본문 (1카드 = 1 MD) |
+| DB | [아이템 칸반](https://app.notion.com/p/102c71bf78394bcaa9ff627548faf7f9) |
+| parent | `team-sema` (`3c5b8c11-155f-8078-9a93-cc4db4043a37`) — 주간 회의록과 형제 |
+| data_source | `collection://7020a703-aeb4-4531-a883-fb6b4d2a811c` |
+| 제목 | `이름` |
+| 열 | `상태` (select) |
+| slug | `카드 ID` (git feature slug와 동일) |
 
-**카드 `id` = feature slug** 를 기본으로 한다 (`feature/shop-ui` → `shop-ui`).  
-기존 카드가 다른 id면 `cards.json`에서 slug·제목으로 찾아 매칭하고, 없으면 **새 카드+MD를 만든다**.
+`카드 ID`가 `_column-`로 시작하면 열 고정용 자리 카드다. 티켓으로 쓰지 않는다.
 
 ## 열 (이동 규칙)
 
-| column | 언제 |
-|--------|------|
-| `ideas` | 미확정 후보만 |
-| `speccing` | `/feature`로 스펙·Task **작성 중** |
-| `ready` | 스펙·AC 확정, 코딩 직전 |
-| `doing` | 실제 구현 중 (인당 1~2장 권장) |
-| `review` | **코드가 main에 들어간 직후** (`/push` 기본 도착) |
-| `fix` | 검증에서 문제 → 수정 후 다시 `doing` → `review` |
-| `done` | **사람이 플레이/검증 확인한 뒤만** — 에이전트가 `/push`만으로 `done` 넣지 않음 |
+| git column | Notion `상태` | 언제 |
+|------------|---------------|------|
+| `ideas` | 아이디어 / 백로그 | 미확정 후보만 |
+| `speccing` | 스펙 작성 중 | `/feature`로 스펙·Task **작성 중** |
+| `ready` | 구현 대기 | 스펙·AC 확정, 코딩 직전 |
+| `doing` | 구현 중 | 실제 구현 중 (인당 1~2장 권장) |
+| `review` | 검증 대기 | **코드가 main에 들어간 직후** (`/push` 기본 도착) |
+| `fix` | 수정 필요 | 검증에서 문제 → 수정 후 다시 구현 중 → 검증 대기 |
+| `done` | 완료 | **사람이 플레이/검증 확인한 뒤만** — 에이전트가 `/push`만으로 완료 넣지 않음 |
 
-**시작 열은 `ideas`만이 아니다.** 카드를 만들 때 성숙도에 맞는 열로 **바로 넣는다**:
+**시작 열은 `아이디어 / 백로그`만이 아니다.** 카드를 만들 때 성숙도에 맞는 열로 **바로 넣는다**:
 
-- 미확정 아이디어 → `ideas`
-- **스펙·AC가 이미 확정된** 항목 → `ready` (구현 대기)로 바로
-- 지금 바로 구현에 들어갈 항목 → `doing` (구현 중)으로 바로
+- 미확정 아이디어 → `아이디어 / 백로그`
+- **스펙·AC가 이미 확정된** 항목 → `구현 대기`
+- 지금 바로 구현에 들어갈 항목 → `구현 중`
 
-`ideas`/`speccing`을 반드시 거칠 필요 없다.
+`아이디어`/`스펙 작성 중`을 반드시 거칠 필요 없다.
 
-## 보드 UI → 저장소 반영
+## Agent — Notion 조작 (필수)
 
-Pages 보드에서 드래그한 열은 **브라우저 임시 저장**이다. JSON 다운로드로 커밋하지 않는다.
+Notion MCP (`plugin-notion-workspace-notion`)를 쓴다. 사용자에게 “노션에서 옮겨줘”를 시키지 않는다.
 
-사람이 **에이전트 프롬프트 복사**를 눌러 Cursor에 붙여넣으면, 에이전트는 그 목록대로 `cards.json`(·카드 MD)만 갱신한다.  
-주로 `review` → `done` / `fix` (사람 검증 후).
+**찾기** (`notion-query-data-sources`, SQL):
 
-프롬프트에 `커밋해 주세요`가 있으면 칸반 전용으로 `main` 커밋해도 된다 (아래 예외).
+```sql
+SELECT url, "이름", "상태", "카드 ID"
+FROM "collection://7020a703-aeb4-4531-a883-fb6b4d2a811c"
+WHERE "카드 ID" = ?
+```
+
+slug가 없으면 `"이름"` CONTAINS로 한 번 더 찾고, 그래도 없으면 **새 페이지 생성**.
+
+**열 이동** (`notion-update-page`):
+
+- `command`: `update_properties`
+- `properties`: `{ "상태": "<Notion 상태 이름>" }`
+- `page_id`: 쿼리 `url`의 페이지 ID
+
+**새 카드** (`notion-create-pages`):
+
+- `parent`: `{ "type": "data_source_id", "data_source_id": "7020a703-aeb4-4531-a883-fb6b4d2a811c" }`
+- `이름`, `상태`, `설명`, `카드 ID`(= slug), `태그`(있으면)
+
+MCP 실패·권한 오류면 티켓을 건너뛰지 말고 응답에 **이슈**로 적고, `/push`면 커밋 전에 중단한다.
+
+## 보드 UI → 반영
+
+- **운영 보드:** Notion에서 직접 드래그해도 된다.
+- Pages 보드 드래그는 브라우저 임시 저장이다. JSON 다운로드로 커밋하지 않는다.
+- 사람이 **에이전트 프롬프트 복사**를 붙여넣으면, 목록의 열만 **Notion `상태`로** 반영한다 (`docs/board/cards.json`은 건드리지 않음). 요청된 카드만.
+- 프롬프트에 `커밋해 주세요`가 있어도 칸반 열 이동만이면 **git 커밋하지 않는다** (Notion이 저장소다).
 
 ## 카드 추가 (브랜치 불필요)
 
-**단순 카드 추가·열 변경 같은 칸반 전용 편집은 `feature/*` 브랜치 없이 `main`에서 바로** 해도 된다.
+**단순 카드 추가·열 변경은 `feature/*` 없이 Notion에서** 한다. git 브랜치·`/push` 불필요.
 
-- 대상: `docs/board/cards.json` + `docs/board/cards/<id>.md`. **이 파일들만** 바뀌는 경우.
-- 커밋은 사용자가 요청할 때만 (`git-workflow` 유지). 브랜치·`/push` 스킬은 불필요.
-- 게임 코드·씬·리소스가 **함께** 바뀌면 이 예외 아님 → `feature/*` + `/push`.
+게임 코드·씬·리소스가 **함께** 바뀌면 코드는 `feature/*` + `/push`, 티켓 열은 같은 작업에서 Notion만 갱신.
 
 ## Agent — `/feature`·작업 시작 시
 
-1. slug로 카드 검색 (`id` 일치 우선).
-2. 없으면 `cards/<slug>.md` + `cards.json` 항목 생성 (`column`: 스펙부터면 `speccing`, 스펙 확정돼 있으면 `ready`, 바로 구현이면 `doing`).
-3. 있으면 열을 맞춤: 스펙 작성 → `speccing`, 구현 시작 → `doing`.
-4. MD에 목표·AC 요약을 짧게 갱신 (있으면).
-
-사용자에게 “카드 만들어줘”를 시키지 말고 **에이전트가 직접** 파일을 수정한다.
+1. slug로 Notion `카드 ID` 검색.
+2. 없으면 아이템 칸반에 페이지 생성 (`상태`: 스펙부터면 `스펙 작성 중`, 스펙 확정돼 있으면 `구현 대기`, 바로 구현이면 `구현 중`).
+3. 있으면 열을 맞춤: 스펙 작성 → `스펙 작성 중`, 구현 시작 → `구현 중`.
+4. 설명·목표가 비었으면 `설명`을 짧게 채운다.
 
 ## Agent — `/push` 직전 (커밋 메시지 작성 전, 필수)
 
 정합성 체크(스펙·Task) **통과 후**, 스크립트 실행 **전에**:
 
-1. 현재 `feature/<slug>`의 카드를 찾거나 생성.
-2. `column`을 **`review`** 로 설정 (사용자가 `done`/`fix`을 명시하지 않는 한).
-3. `cards/<id>.md`에 한 줄 이력 추가 예: `## 구현` / `- YYYY-MM-DD feature/<slug> → main (검증 대기)`.
-4. `cards.json`의 `updated` 날짜 갱신.
-5. 위 파일 변경을 **같은 feature 커밋에 포함**.
+1. 현재 `feature/<slug>`의 Notion 카드를 찾거나 생성.
+2. `상태`를 **`검증 대기`** 로 설정 (사용자가 `완료`/`수정 필요`를 명시하지 않는 한).
+3. `설명` 또는 페이지 본문에 한 줄 이력을 남겨도 된다. 예: `YYYY-MM-DD feature/<slug> → main (검증 대기)`.
+4. **`docs/board/cards.json` / 카드 MD는 이 커밋에 넣지 않는다.**
 
-`/push` 응답의 정합성 블록에 티켓 한 줄 추가:
+`/push` 응답의 정합성 블록:
 
 ```markdown
-- 티켓: <id> → review (OK / 생성함 / 이슈)
+- 티켓: <id> → 검증 대기 (OK / 생성함 / 이슈)
 ```
+
+`/merge-feature`만 쓰는 경우에도 카드가 아직 `구현 중`이면 `검증 대기`로 옮긴다.
 
 ## Agent — 검증·수정 피드백 시
 
-- “검증 OK / 완료 처리” → 해당 카드 `done`.
-- “버그·수정 필요” → `fix` (또는 바로 고치면 `doing`).
-- 수정 `/push` 후 → 다시 `review`.
-- 보드 **에이전트 프롬프트 복사** 붙여넣기 → 목록의 `column`만 반영 (요청된 카드만).
+- “검증 OK / 완료 처리” → Notion `완료`.
+- “버그·수정 필요” → `수정 필요` (또는 바로 고치면 `구현 중`).
+- 수정 `/push` 후 → 다시 `검증 대기`.
 
 ## 하지 않음
 
-- `/push`만으로 `done` 자동 처리 금지.
-- 무관한 다른 카드의 `column`을 마음대로 바꾸지 않음 (이번 slug 티켓·프롬프트에 적힌 카드만).
-- Godot 게임 로직과 칸반 파일을 한 커밋에 섞는 것은 **허용** (같은 feature의 티켓 갱신).
+- `/push`만으로 `완료` 자동 처리 금지.
+- 무관한 다른 카드의 `상태`를 마음대로 바꾸지 않음 (이번 slug 티켓·프롬프트에 적힌 카드만).
+- `/feature`·`/push`에서 git `docs/board/` column을 고치지 않음.
 - 보드 JSON 다운로드를 팀 반영 경로로 안내하지 않음.
