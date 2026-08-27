@@ -24,6 +24,10 @@ Deletes the feature branch after merge by default. Pass `--no-delete` to keep it
 
 Do not force push. Merge main into feature, verify, re-run.
 
+## Kanban
+
+If this merge is the first time the slug lands on main, follow `kanban-tickets`: Notion `상태` → `검증 대기` (skip if already there). Do not edit `docs/board/`.
+
 ## Never Do
 
 - `git push --force`, change `git config`, use `develop`, create a PR unless asked.
