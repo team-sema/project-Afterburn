@@ -40,6 +40,7 @@
 | `ScoreComponent` | `GameStats.score`에 가산 |
 | `ExperienceDropComponent` | 적 사망 시 경험치 오브 스폰 |
 | `ExperienceCollectorComponent` | 플레이어 XP 수집 반경 제공 |
+| `ExperienceOrb` | 드롭 후 아래로 이동하며, 기본 낙하 속도는 플레이어 기본 이동 속도의 절반인 70px/s |
 
 ## 연출 · 스폰
 

@@ -32,10 +32,16 @@ func _run() -> void:
 	_expect(has_c_key, "augment offer action is bound to C")
 
 	var ship: Node2D = gameplay.get_node("Ship") as Node2D
+	var ship_move_input := ship.get_node("MoveInputComponent") as MoveInputComponent
+	var ship_move := ship.get_node("MoveComponent") as MoveComponent
 	var collector: Area2D = ship.get_node("ExperienceCollector") as Area2D
 	var orb_scene: PackedScene = load("res://pickups/experience_orb.tscn")
-	var orb: Area2D = orb_scene.instantiate() as Area2D
+	var orb: ExperienceOrb = orb_scene.instantiate() as ExperienceOrb
 	gameplay.add_child(orb)
+	_expect(
+		is_equal_approx(orb.drift_speed, ship_move_input.move_stats.speed * ship_move.velocity_multiplier * 0.5),
+		"experience orb drift is half the ship's default movement speed",
+	)
 	orb.setup(7, collector.global_position + Vector2(60.0, 0.0))
 	for _index in 2:
 		await physics_frame

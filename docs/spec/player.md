@@ -14,7 +14,7 @@ Move / MoveInput / PositionClamp / WeaponMount(Blaster·Laser·Shotgun 등) / Pl
 ## ExperienceCollector
 
 - 기본 수집 반경 **36px** (`collection_radius`) · 레이더 시설 배율이 곱해짐
-- XP 오브가 범위에 들어오면 바깥으로 짧게 튕긴 뒤 플레이어에게 가속
+- XP 오브는 드롭 후 아래로 이동(기본 **70px/s** = 함선 기본 이동 속도의 절반)하다가 수집 범위에 들어오면 바깥으로 짧게 튕긴 뒤 플레이어에게 가속
 - 오브 비주얼: 황금 글로우 사각 보급상자 (`pickups/experience_orb.tscn`, `assets/svg/supply_crate.svg`)
 - Collector 중심 근처에서 XP를 지급하며 PlayerHitPoint와 독립
 
