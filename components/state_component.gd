@@ -6,6 +6,7 @@ extends Node
 signal entering() # Emit when the state is entering (can surely do something before enabling the state)
 signal enabled() # Emit when the state has been enabled
 signal disabled() # Emit when the state has been disabled
+@warning_ignore("unused_signal") # Emitted by specialized state components such as TimedStateComponent.
 signal state_finished() # Emit when the state is finished (not always the same as disabling it)
 
 var is_active: bool = false

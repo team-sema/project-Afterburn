@@ -17,7 +17,7 @@ func update_movement(
 	_delta: float,
 	_context: Dictionary,
 	_state: Dictionary,
-	intent: MovementIntent,
+	_intent: MovementIntent,
 ) -> void:
 	push_error("%s must implement update_movement()." % resource_path)
 

@@ -4,11 +4,11 @@
 
 | 코드명 | 최소 Threat | 씬 | HP | 점수 | 특징 |
 |--------|-------------|-----|-----|------|------|
-| Green / Drone | 1 | `normal_enemy.tscn` | 20 | 5 | 편대 대각 하강 · Striker 호위 편대에도 등장 |
-| Yellow / Striker | 1 | `moving_enemy.tscn` | 50 | 10 | 마름모 편대 최후방 · 맵 1/3 하강 후 좌우 패트롤 |
-| Awl / Kamikaze | 1 | `kamikaze_enemy.tscn` | 70 | 15 | 3마리 V로 하강·조준 → 차지 시 V에서 각자 독립 돌진 · 투사체 없음 |
-| Bomb | 1 | `bomb_enemy.tscn` | 140 | 20 | 느린 하강 · 고체력 · 근접 시 2초 3회 적색 점멸 후 1.5× 자폭 · `enemy_bomb.svg` |
-| Interceptor | 2 | `interceptor_enemy.tscn` | 40 | 5 | 2~3기 편대 · 좌↔우 대각 진입 · 0.9초 경고 · 연발 조준 탄 · `enemy_interceptor.svg` |
+| Green / Drone | 1 | `normal_enemy.tscn` | 28 | 5 | 편대 대각 하강 · Striker 호위 편대에도 등장 |
+| Yellow / Striker | 1 | `moving_enemy.tscn` | 60 | 10 | 마름모 편대 최후방 · 맵 1/3 하강 후 좌우 패트롤 |
+| Awl / Kamikaze | 1 | `kamikaze_enemy.tscn` | 80 | 15 | 3마리 V로 하강·조준 → 차지 시 V에서 각자 독립 돌진 · 투사체 없음 |
+| Bomb | 1 | `bomb_enemy.tscn` | 160 | 20 | 빠른 편대 돌진 · 고체력 · 근접 시 3초 3회 적색 점멸 후 1.5× 자폭 · `enemy_bomb.svg` |
+| Interceptor | 1 | `interceptor_enemy.tscn` | 50 | 5 | 2~3기 편대 · 좌↔우 대각 진입 · 0.9초 경고 · 연발 조준 탄 · `enemy_interceptor.svg` |
 | Pink / Caster | 3 | `shooting_enemy.tscn` | 110 | 25 | 상단 체공 · 원형 다연발 탄막(5링×20) · `enemy_caster.svg` |
 | Sniper | 3 | `sniper_enemy.tscn` | 95 | 25 | 상단 고정 · 4초 이중선 조준+0.18초 집중 · 900px/s 고속탄 · 2.5초 쿨다운 반복 · `enemy_sniper.svg` |
 
@@ -23,18 +23,24 @@
 
 ## EnemyGenerator
 
-- 생성기는 4초 + 0~0.5초 지터의 타이머와 현재 Threat만 관리하고, `main_encounter_pool.tres`에 선택을 요청한다. 직전 **2개** Encounter id는 후보에서 빼서(대안이 있을 때) 반복을 줄인다. 엘리트 게이트 중에는 타이머를 정지하고 적 증강 오퍼 완료 후 새 간격으로 재개한다.
+- **현재 페이싱:** 일반 Encounter는 2.8초 + 0~0.3초 지연으로 생성한다. Threat 1부터 13기 Striker 호위, Bomb 드론 다이아몬드, Interceptor Pair도 후보에 포함한다. Tanker/Sniper 호위는 Threat 2부터 등장하며, 탱커가 살아 있으면 같은 편대 대신 단독 스나이퍼가 등장한다. Threat 3 편대는 이후 Threat에서 추가된다.
+
+- **초반 HP 기준:** Drone 28, Striker 60, Awl 80, Bomb 160, Interceptor 50. 무기 선택 직후 편대 전체가 즉시 처치되는 빈도를 낮춘다.
+
+- **Bomb 편대:** Bomb은 다이아몬드 상단에 배치된다. 편대는 플레이어 기본 이동속도보다 빠른 130px/s로 대시하며, Bomb이 플레이어 60px 범위에 들어오면 퓨즈가 편대를 멈추고 제자리에서 3초간 점멸 차지 후 폭발한다.
+
+- 생성기는 2.8초 + 0~0.3초 지터의 타이머와 현재 Threat만 관리하고, `main_encounter_pool.tres`에 선택을 요청한다. 직전 **2개** Encounter id는 후보에서 빼서(대안이 있을 때) 반복을 줄인다. 엘리트 게이트 중에는 타이머를 정지하고 적 증강 오퍼 완료 후 새 간격으로 재개한다.
 - `MainEncounterPool`이 현재 Threat에서 weight가 0보다 큰 `EncounterPreset` 전체를 대상으로 weighted random을 정확히 한 번 수행한다.
 - 각 EncounterPreset은 `difficulty`(난이도 점수)를 가진다. 풀 Entry의 `min_threat` 이상이면 `weight = 60 / sqrt(difficulty)`로 뽑히고, 미만이면 0이다(어려울수록 희귀하되 비율은 완만).
 - `EncounterPreset`은 FormationLayout Scene, 편대·개별 MovementSequence, 멤버와 슬롯, 등장·해제 조건을 조합하며 `EnemySpawner`가 실제 적을 생성한다.
 - Striker/Caster/Sniper 중 Caster·Sniper는 `SingleFormation` 1슬롯 후 즉시 해제해 개별 MovementSequence를 탄다. **Bomb 단독 Encounter는 없다.**
 - **Green:** Drone 편대 — `HorizontalFormation`의 명시적 슬롯 5개에 동시 스폰 · `drone_zigzag_mirrored`(V5 + zigzag·mirrored)도 Threat 1
 - **Yellow 호위 (5기):** `striker_drone_diamond_5` — `DiamondFormation5` 최후방(Slot0) Striker + Slot1–4 Drone 4기(하단 팁 포함). 슬롯 간격 ±32x / ±28y
-- **Yellow 호위 (13기):** `striker_drone_diamond_13` — `DiamondFormation13`(1-3-5-3-1) 꼭짓점 Striker + Drone 12기. Threat 2+. 슬롯 step 20
-- **Bomb 호위:** `bomb_drone_diamond` — 드론 4기 다이아몬드 중앙 Bomb(Threat 2+)
+- **Yellow 호위 (13기):** `striker_drone_diamond_13` — `DiamondFormation13`(1-3-5-3-1) 꼭짓점 Striker + Drone 12기. Threat 1+. 슬롯 step 20
+- **Bomb 호위:** `bomb_drone_diamond` — 드론 4기 다이아몬드 중앙 Bomb(Threat 1+)
 - **Awl:** 3마리 V 편대
-- **Interceptor:** `interceptor_pair`(Threat 2+) / `interceptor_trio`(Threat 3+)만 사용하며 단독 Encounter는 없음
-- Pink / Caster: `caster_single`. Sniper는 `tanker_guard_sniper` 후방 슬롯으로만 등장
+- **Interceptor:** `interceptor_pair`(Threat 1+) / `interceptor_trio`(Threat 3+)만 사용하며 단독 Encounter는 없음
+- Pink / Caster: `caster_single`. Sniper는 기본적으로 `tanker_guard_sniper` 후방 슬롯으로 등장하며, 탱커가 살아 있는 동안에는 `sniper_reinforcement` 단독 Encounter로 대체된다.
 - 베이스·Drone·Striker는 `EnemyShootComponent`로 조준 사격
 - **초반(Threat 1) 사격 압력** — 투사체를 쏘는 Threat 1 적은 아래 값을 쓴다. Kamikaze·Bomb은 투사체가 없고, Caster는 Threat 3이라 초반 압력에 포함되지 않는다
 
@@ -53,17 +59,17 @@
 | `drone_zigzag_mirrored` | 6 | 1 | ≈24.49 |
 | `striker_drone_diamond_5` | 7 | 1 | ≈22.68 |
 | `awl_formation` | 12 | 1 | ≈17.32 |
-| `striker_drone_diamond_13` | 15 | 2 | ≈15.49 |
+| `striker_drone_diamond_13` | 15 | 1 | ≈15.49 |
 | `tanker_guard_sniper` | 10 | 2 | ≈18.97 |
-| `bomb_drone_diamond` | 9 | 2 | 20 |
-| `interceptor_pair` | 12 | 2 | ≈17.32 |
+| `bomb_drone_diamond` | 9 | 1 | 20 |
+| `interceptor_pair` | 12 | 1 | ≈17.32 |
 | `caster_single` | 7 | 3 | ≈22.68 |
 | `v7_drone_down` | 7 | 3 | ≈22.68 |
 | `x9_drone_down` | 9 | 3 | 20 |
 | `x9_caster_drone_orbit` | 15 | 3 | ≈15.49 |
 | `interceptor_trio` | 18 | 3 | ≈14.14 |
 
-Threat 1 후보 합 weight ≈82.6(zigzag/diamond_5가 상위, `drone_formation`·awl는 하위), Threat 2는 ≈154.4, Threat 3은 ≈249.4이다. 초반 로스터는 4종이다.
+Threat 1 후보 합 weight ≈135.4, Threat 2는 ≈154.4, Threat 3은 ≈249.4이다. Threat 1부터 7종 Encounter가 후보에 포함된다.
 
 ## Threat 엘리트
 
@@ -81,7 +87,7 @@ Threat 1 후보 합 weight ≈82.6(zigzag/diamond_5가 상위, `drone_formation`
 
 ## Interceptor 고속 공격 패스
 
-- `interceptor_enemy.tscn`은 `normal_enemy.tscn`을 상속하되 HP는 **40**(Drone 20의 상향). 점수·XP 보상은 Drone과 동일하다.
+- `interceptor_enemy.tscn`은 `normal_enemy.tscn`을 상속하되 HP는 **50**. 점수·XP 보상은 Drone과 동일하다.
 - `interceptor_pair`는 전용 36px 가로 2기 슬롯, `interceptor_trio`는 기존 `V3Formation` 슬롯을 사용한다.
 - `EnemySpawner`가 `ForwardAttackRun` Encounter를 좌→우 / 우→좌 중 랜덤으로 배치하되, 순수 수평이 아니라 하방 dive 각도(대략 15~29°)를 섞은 대각 패스로 진입한다. 스폰 Y는 VisibleRect 높이의 약 16~38% 상단 밴드에 둔다.
 - `start_delay=0.9` 동안 `EntryWarningComponent`(0.9초)가 **좌/우 등장 가장자리**(기체 스폰 Y)에 경고를 표시한다. 화살표는 **왼쪽 등장 → 왼쪽**, **오른쪽 등장 → 오른쪽**을 가리킨다(스폰 쪽을 향하는 L/R 스왑).
@@ -103,7 +109,7 @@ Threat 1 후보 합 weight ≈82.6(zigzag/diamond_5가 상위, `drone_formation`
 - `SniperAttackComponent`: AIMING(4.0s, 플레이어 지속 추적 + 옅은 적색 이중선 cubic ease-out 수렴 → 0.18s 완전 조준 유지) → FIRING(900px/s 고속탄 + 5px 비주얼 반동) → COOLDOWN(2.5s) 반복
 - 조준선은 반각 14°에서 0.05°로 모이며 알파 0.01에서 0.36으로 진해진다. 발사 순간 선은 사라지고 탄환은 마지막 조준 경로를 추적 없이 이동한다
 - 재발사 시 재포지셔닝 없음. `EnemyShootComponent`는 `_enter_tree`에서 제거
-- Encounter: `tanker_guard_sniper` — 전방 Tanker(`bottom_inner`) + 후방 Sniper(`center`). `tanker_guard_entry_hold`로 y=48 상단 체공 후 정지. 편대 유지 중 **Sniper만** 조준·사격하며 Tanker는 사격하지 않는다
+- Encounter: `tanker_guard_sniper` — 전방 Tanker(`bottom_inner`) + 후방 Sniper(`center`). `tanker_guard_entry_hold`로 y=48 상단 체공 후 정지. 편대 유지 중 **Sniper만** 조준·사격하며 Tanker는 사격하지 않는다. 탱커가 이미 살아 있으면 `sniper_reinforcement` 단독 Encounter로 대체된다
 - Tanker 전방 실드 피격 피드백: 실드 레이어 전체 `FlashComponent` + 약한 `ScaleComponent`(×1.08). 실드 Shake는 쓰지 않는다. 본체는 Scale ×1.1 · Shake 0.5로 일반 적보다 약하게
 
 ## Awl 자폭 (Kamikaze)
@@ -114,9 +120,9 @@ Threat 1 후보 합 weight ≈82.6(zigzag/diamond_5가 상위, `drone_formation`
 
 ## Bomb 근접 자폭
 
-`BombProximityFuseComponent` (HP 140):
+`BombProximityFuseComponent` (HP 160):
 
-- 플레이어가 `trigger_radius`(60) 안이면 정지 → **2초간 빨간 점멸 3회** → 자폭
+- 플레이어가 `trigger_radius`(60) 안이면 정지 → **3초간 빨간 점멸 3회** → 자폭
 - 편대 소속이면 기폭 시작 시 편대 중심 이동을 멈추고 Bomb를 detach한 뒤 무장
 - 신관 무장과 적색 점멸이 시작되면 반투명 범위 프리뷰 표시
 - 폭발 판정·VFX 최대 링·범위 프리뷰 반경은 모두 `base_explosion_radius(40) * 1.5 = 60px`

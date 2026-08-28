@@ -15,7 +15,7 @@
 [ext_resource type="Script" uid="uid://bj3m8sydgty8w" path="res://resources/player_augments/player_augment.gd" id="14_player_augment"]
 [ext_resource type="Script" uid="uid://be4x07sn0gawv" path="res://resources/enemy_augments/enemy_augment.gd" id="15_enemy_augment"]
 [ext_resource type="Resource" uid="uid://dck0gm7gvfvng" path="res://resources/enemy_augments/enemy_health_boost_1_2.tres" id="19_enemy_health"]
-[ext_resource type="Resource" uid="uid://bqh12igupjjb2" path="res://resources/enemy_augments/enemy_fire_volume_boost.tres" id="20_enemy_fire"]
+[ext_resource type="Resource" path="res://resources/enemy_augments/enemy_fire_volume_boost.tres" id="20_enemy_fire"]
 [ext_resource type="Resource" uid="uid://bg0yl0s7f0b4p" path="res://resources/enemy_augments/enemy_move_speed_boost_1_2.tres" id="21_enemy_move"]
 [ext_resource type="Resource" path="res://resources/enemy_augments/enemy_near_death_experience.tres" id="22_enemy_near_death"]
 [ext_resource type="Resource" path="res://resources/enemy_augments/enemy_drone_formation_reinforcement.tres" id="23_enemy_drone_reinforcement"]

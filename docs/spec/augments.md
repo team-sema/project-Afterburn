@@ -163,7 +163,7 @@ primary tag `hangar`는 UI 표시명 **동력로**. tag 키와 기존 아이콘�
 ## 필드 드롭
 
 - 무기 필드 드롭 **비활성** (`WeaponDropComponent.enabled = false`)
-- XP: `ExperienceDropComponent.drop_chance`(기본/enemy 0.62). `experience_amount`는 적별 유지
+- XP: `ExperienceDropComponent.drop_chance`(기본/enemy 0.45). `experience_amount`는 적별 유지
 
 ## 레지스트리
 

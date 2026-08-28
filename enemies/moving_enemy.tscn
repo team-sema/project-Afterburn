@@ -22,7 +22,7 @@ texture = ExtResource("3_2nfdr")
 texture = ExtResource("3_2nfdr")
 
 [node name="StatsComponent" parent="." index="1" unique_id=1304120856]
-health = 50
+health = 60
 
 [node name="MovementController" parent="."]
 sequence = ExtResource("4_movement")

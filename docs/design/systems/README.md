@@ -32,6 +32,7 @@
 | [docs-site-kanban](docs-site-kanban.md) | docs 사이트 · 칸반 · 워크플로 | review |
 | [kanban-agent-prompt-copy](kanban-agent-prompt-copy.md) | 보드→에이전트 프롬프트 복사 | review |
 | [notion-kanban-skills](notion-kanban-skills.md) | `/feature`·`/push` 열 이동 → Notion | review |
+| [early-game-pacing](early-game-pacing.md) | 초반 Encounter·HP·Bomb·XP 페이싱 | review |
 | [kanban-manual-cards](kanban-manual-cards.md) | `/push` 카드 초안 추천 · 수동 관리 | review |
 | [kanban-v2](kanban-v2.md) | 백로그 칸반 v2 | 운영 |
 | [sniper-enemy](sniper-enemy.md) | 스나이퍼 저격 · 수렴 이중선 조준 · 고속탄 | review |

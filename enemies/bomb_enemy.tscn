@@ -25,7 +25,7 @@ texture = ExtResource("3_bomb")
 texture = ExtResource("3_bomb")
 
 [node name="StatsComponent" parent="." index="1" unique_id=1304120856]
-health = 140
+health = 160
 
 [node name="MovementController" parent="."]
 sequence = ExtResource("6_movement")
@@ -58,4 +58,5 @@ visual_anchor = NodePath("../Anchor")
 destroy_effect_spawner = NodePath("../SpawnerComponent")
 blast_preview = NodePath("../BlastRadiusPreview")
 trigger_radius = 60.0
+arm_duration = 3.0
 blast_damage = 1

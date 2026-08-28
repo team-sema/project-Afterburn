@@ -25,7 +25,7 @@ texture = ExtResource("3_awl")
 texture = ExtResource("3_awl")
 
 [node name="StatsComponent" parent="." index="1"]
-health = 70
+health = 80
 
 [node name="VisibleOnScreenNotifier2D" parent="." index="3"]
 rect = Rect2(-8, -12, 16, 24)

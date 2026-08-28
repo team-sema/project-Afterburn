@@ -1,12 +1,15 @@
 extends Node2D
 
+const TANKER_GUARD_SNIPER_ID := &"tanker_guard_sniper"
+const SNIPER_REINFORCEMENT_PRESET := preload("res://resources/encounters/presets/sniper_single.tres")
+
 @export var augment_registry: EnemyAugmentRegistry
 @export var progression: AugmentProgressionController
 @export var encounter_pool: EncounterPool
 
 @export_group("Spawn Timing")
-@export_range(0.2, 30.0, 0.1) var spawn_interval := 4.0
-@export_range(0.0, 5.0, 0.05) var spawn_interval_jitter := 0.5
+@export_range(0.2, 30.0, 0.1) var spawn_interval := 2.8
+@export_range(0.0, 5.0, 0.05) var spawn_interval_jitter := 0.3
 ## Skip the last N encounter ids when alternatives exist (variety without raising difficulty).
 @export_range(0, 8, 1) var recent_exclusion_count := 2
 
@@ -61,7 +64,7 @@ func _on_spawn_timer_timeout() -> void:
 		)
 		_schedule_next_spawn()
 		return
-	_spawn(preset)
+	_spawn(resolve_normal_preset(preset))
 	_schedule_next_spawn()
 
 
@@ -74,6 +77,19 @@ func _schedule_next_spawn() -> void:
 func _spawn(preset: EncounterPreset) -> FormationController:
 	_remember_encounter(preset.encounter_id)
 	return enemy_spawner.spawn_encounter(preset)
+
+
+func resolve_normal_preset(preset: EncounterPreset) -> EncounterPreset:
+	if preset != null and preset.encounter_id == TANKER_GUARD_SNIPER_ID and _has_active_tanker():
+		return SNIPER_REINFORCEMENT_PRESET
+	return preset
+
+
+func _has_active_tanker() -> bool:
+	for enemy in get_tree().get_nodes_in_group("enemies"):
+		if enemy is TankerEnemy and is_instance_valid(enemy) and not enemy.is_queued_for_deletion():
+			return true
+	return false
 
 
 func spawn_special_encounter(

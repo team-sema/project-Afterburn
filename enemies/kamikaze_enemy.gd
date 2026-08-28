@@ -10,7 +10,7 @@ enum BehaviorState {
 	DASHING,
 }
 
-@export_range(0.0, 10.0, 0.05) var charge_duration := 3.0
+@export_range(0.0, 10.0, 0.05) var charge_duration := 2.0
 @export var dash_movement_sequence: MovementSequence
 
 var _behavior_state := BehaviorState.FORMATION

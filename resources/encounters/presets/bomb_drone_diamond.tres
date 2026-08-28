@@ -8,19 +8,20 @@
 [ext_resource type="PackedScene" uid="uid://bhw7lkvyjx43v" path="res://enemies/normal_enemy.tscn" id="6_drone"]
 [ext_resource type="PackedScene" uid="uid://dyoidordek441" path="res://enemies/bomb_enemy.tscn" id="7_bomb"]
 
-[sub_resource type="Resource" id="Member_drone_top"]
+[sub_resource type="Resource" id="Member_drone_center"]
 script = ExtResource("2_member")
 enemy_scene = ExtResource("6_drone")
+slot_index = 2
 
 [sub_resource type="Resource" id="Member_drone_left"]
 script = ExtResource("2_member")
 enemy_scene = ExtResource("6_drone")
 slot_index = 1
 
-[sub_resource type="Resource" id="Member_bomb_center"]
+[sub_resource type="Resource" id="Member_bomb_top"]
 script = ExtResource("2_member")
 enemy_scene = ExtResource("7_bomb")
-slot_index = 2
+slot_index = 0
 
 [sub_resource type="Resource" id="Member_drone_right"]
 script = ExtResource("2_member")
@@ -39,7 +40,7 @@ difficulty = 9.0
 formation_layout_scene = ExtResource("3_layout")
 formation_movement_sequence = ExtResource("4_movement")
 formation_behavior = ExtResource("5_behavior")
-members = Array[ExtResource("2_member")]([SubResource("Member_drone_top"), SubResource("Member_drone_left"), SubResource("Member_bomb_center"), SubResource("Member_drone_right"), SubResource("Member_drone_bottom")])
+members = Array[ExtResource("2_member")]([SubResource("Member_drone_center"), SubResource("Member_drone_left"), SubResource("Member_bomb_top"), SubResource("Member_drone_right"), SubResource("Member_drone_bottom")])
 spawn_anchor = 0
 spawn_offset = Vector2(0, -20)
 spawn_edge_margin = 32.0
