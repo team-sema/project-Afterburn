@@ -174,7 +174,7 @@ Audit 출력 형식:
 | 구현 현황 | `docs/spec/` |
 | 시스템 스펙 | `docs/design/systems/<slug>.md` |
 | Task 문서 | `docs/design/tasks/<slug>-tasks.md` |
-| 칸반 | `docs/board/` |
+| 칸반 (Notion) | [아이템 칸반](https://app.notion.com/p/102c71bf78394bcaa9ff627548faf7f9?v=3c9b8c11155f8111bfeb000c00cae3b8) · `docs/design/systems/kanban-v2.md` |
 | 비주얼 | `.agents/godot_nova_drift_visual_guide.md` |
 
 문서 수정 시 `docs-and-plans` rule: 본문 직접 갱신, 맨 하단 `## 변경 이력` 추가 (최신이 위).
@@ -215,7 +215,7 @@ working tree가 깨끗해야 한다. 브랜치 전환 후 응답 **맨 앞**:
 
 `브랜치: feature/<slug> · 범위: components/... · player_ship/... (2~5개 경로)`
 
-칸반: `kanban-tickets` — Notion에서 slug(`카드 ID`) **조회만**(MCP 있을 때). 없으면 **카드 초안 추천**. 자동 생성·열 이동·`docs/board/cards.json` 수정 금지.
+칸반: `kanban-tickets` — Notion에서 slug(`카드 ID`) **조회만**(MCP 있을 때). 없으면 **제목·본문 초안만 추천**. 자동 생성·열 이동·Notion 쓰기 금지(명시 요청 시만).
 
 ### Step 3. 관련 문서 탐색
 

@@ -1,15 +1,14 @@
 ---
-description: "Manage development as kanban tickets; /push recommends card drafts for manual Notion updates"
+description: "Manage development as kanban tickets; /push recommends card title and body only for manual Notion updates"
 alwaysApply: true
 ---
 
 # 칸반 티켓 (카드) 관리
 
-개발 단위는 **티켓(카드)** 이다. **카드 생성·열 이동은 사람이 Notion에서** 한다.
+개발 단위는 **티켓(카드)** 이다. **카드 생성·열 이동·태그·완료는 사람이 Notion에서** 한다.
 
-정본(열 이동): [아이템 칸반](https://app.notion.com/p/102c71bf78394bcaa9ff627548faf7f9?v=3c9b8c11155f8111bfeb000c00cae3b8)  
-규칙 문서: [docs/design/systems/kanban-v2.md](docs/design/systems/kanban-v2.md)  
-Git `docs/board/` 는 Pages 스냅샷·카드 본문 보관용이며, **`/feature`·`/push`가 column을 쓰지 않는다.**
+정본: [아이템 칸반](https://app.notion.com/p/102c71bf78394bcaa9ff627548faf7f9?v=3c9b8c11155f8111bfeb000c00cae3b8)  
+규칙 문서: [docs/design/systems/kanban-v2.md](docs/design/systems/kanban-v2.md)
 
 ## Notion DB
 
@@ -26,15 +25,15 @@ Git `docs/board/` 는 Pages 스냅샷·카드 본문 보관용이며, **`/featur
 
 ## 열 (이동 규칙)
 
-| git column | Notion `상태` | 언제 |
-|------------|---------------|------|
-| `ideas` | 아이디어 / 백로그 | 미확정 후보만 |
-| `speccing` | 스펙 작성 중 | `/feature`로 스펙·Task **작성 중** |
-| `ready` | 구현 대기 | 스펙·AC 확정, 코딩 직전 |
-| `doing` | 구현 중 | 실제 구현 중 (인당 1~2장 권장) |
-| `review` | 검증 대기 | **코드가 main에 들어간 직후** (`/push` 후 사람이 옮김) |
-| `fix` | 수정 필요 | 검증에서 문제 → 수정 후 다시 구현 중 → 검증 대기 |
-| `done` | 완료 | **사람이 플레이/검증 확인한 뒤만** |
+| Notion `상태` | 언제 |
+|---------------|------|
+| 아이디어 / 백로그 | 미확정 후보만 |
+| 스펙 작성 중 | `/feature`로 스펙·Task **작성 중** |
+| 구현 대기 | 스펙·AC 확정, 코딩 직전 |
+| 구현 중 | 실제 구현 중 (인당 1~2장 권장) |
+| 검증 대기 | **코드가 main에 들어간 직후** (`/push` 후 사람이 옮김) |
+| 수정 필요 | 검증에서 문제 → 수정 후 다시 구현 중 → 검증 대기 |
+| 완료 | **사람이 플레이/검증 확인한 뒤만** |
 
 **시작 열은 `아이디어 / 백로그`만이 아니다.** 카드를 만들 때 성숙도에 맞는 열로 **바로 넣는다**:
 
@@ -44,7 +43,7 @@ Git `docs/board/` 는 Pages 스냅샷·카드 본문 보관용이며, **`/featur
 
 ## Agent — Notion MCP
 
-- **기본:** `/feature`·`/push`·`/merge-feature`에서 Notion 카드를 **자동 생성·열 이동하지 않는다.**
+- **기본:** `/feature`·`/push`·`/merge-feature`에서 Notion 카드를 **자동 생성·열 이동·태그 설정하지 않는다.**
 - **읽기(선택):** MCP가 연결돼 있으면 slug로 **기존 카드 조회**만 한다. 없거나 실패해도 git push는 **중단하지 않는다.**
 - **쓰기:** 사용자가 **「노션에 반영해줘」** 등으로 명시할 때만 `notion-create-pages` / `notion-update-page`를 쓴다.
 
@@ -58,45 +57,34 @@ WHERE "카드 ID" = ?
 
 ## Agent — `/push`·`/merge-feature` (커밋 전)
 
-정합성 체크(스펙·Task) **통과 후**, 스크립트 실행 **전에** 카드 **초안을 추천**한다. Notion에 쓰지 않는다.
+정합성 체크(스펙·Task) **통과 후**, 스크립트 실행 **전에** 카드 **제목·본문 초안만** 추천한다. Notion에 쓰지 않는다.
 
-1. `feature/<slug>`·`git diff`·시스템 스펙에서 **추천 제목·설명·카드 ID·태그·열**을 작성한다.
-2. MCP로 조회 가능하면 **기존 카드 있음/없음**만 덧붙인다.
-3. **`docs/board/cards.json` / 카드 MD는 이 커밋에 넣지 않는다.**
-4. merge 후 사람이 Notion에서 카드를 만들거나 **`검증 대기`** 로 옮긴다.
+1. `feature/<slug>`·`git diff`·시스템 스펙에서 **추천 제목·추천 본문**을 작성한다.
+2. MCP로 조회 가능하면 **기존 카드 있음/없음**만 덧붙인다 (있으면 본문 추천은 생략 가능).
+3. merge 후 사람이 Notion에서 카드를 만들거나 **`검증 대기`** 로 옮긴다.
 
 `/push` 응답 블록:
 
 ```markdown
 ### 칸반 (수동)
-- slug: `<slug>`
+- feature slug: `<slug>` (Notion `카드 ID` 후보)
 - 기존 카드: (있음 · `<이름>` / 없음 · MCP 미연결)
 - 추천 제목: …
-- 추천 설명: …
-- 추천 카드 ID: `<slug>`
-- 추천 태그: …
-- 추천 열: 검증 대기
-- Notion에서 카드 생성·열 이동은 사람이 한다.
+- 추천 본문: …
+- 카드 생성·열·태그는 사람이 Notion에서 한다.
 ```
 
 ## Agent — `/feature`·작업 시작
 
 1. slug로 Notion 카드 **조회만** (MCP 있을 때).
-2. 없으면 **카드 초안 추천** (제목·설명·`카드 ID`·추천 열: `스펙 작성 중` 또는 `구현 중`). **자동 생성하지 않는다.**
-3. 사람이 Notion에서 카드를 만들고 열을 맞춘다.
-
-## 보드 UI → 반영
-
-- **운영 보드:** Notion에서 직접 드래그.
-- Pages 보드 드래그는 브라우저 임시 저장. JSON 다운로드로 커밋하지 않는다.
-- 사람이 **에이전트 프롬프트 복사**를 붙여넣으면, 목록의 열만 **Notion `상태`로** 반영한다 (`docs/board/cards.json`은 건드리지 않음). **명시 요청**일 때만 MCP 쓰기.
-- 프롬프트에 `커밋해 주세요`가 있어도 칸반 열 이동만이면 **git 커밋하지 않는다.**
+2. 없으면 **제목·본문 초안만 추천**. **자동 생성하지 않는다.**
+3. 사람이 Notion에서 카드를 만들고 열·태그를 맞춘다.
 
 ## 카드 추가 (브랜치 불필요)
 
 **단순 카드 추가·열 변경은 `feature/*` 없이 Notion에서** 한다.
 
-게임 코드·씬·리소스가 **함께** 바뀌면 코드는 `feature/*` + `/push`, 티켓은 `/push` 응답의 추천을 보고 사람이 Notion에서 처리.
+게임 코드·씬·리소스가 **함께** 바뀌면 코드는 `feature/*` + `/push`, 티켓은 `/push` 응답의 초안을 보고 사람이 Notion에서 처리.
 
 ## Agent — 검증·수정 피드백 시
 
@@ -105,8 +93,8 @@ WHERE "카드 ID" = ?
 
 ## 하지 않음
 
-- `/push`·`/merge-feature`에서 Notion 카드 **자동 생성·열 이동**.
+- `/push`·`/merge-feature`에서 Notion 카드 **자동 생성·열 이동·태그 설정**.
 - Notion MCP 없음을 이유로 **git push 중단**.
 - `/push`만으로 `완료` 자동 처리.
 - 무관한 다른 카드의 `상태`를 마음대로 바꾸지 않음.
-- `/feature`·`/push`에서 git `docs/board/` column을 고치지 않음.
+- git `docs/board/` (삭제됨) 또는 Pages 칸반 관련 파일 생성·수정.

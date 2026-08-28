@@ -8,10 +8,9 @@ Godot 4.7 종스크롤 슈팅 + XP·시간 기반 오그먼트 프로토타입 (
 
 | | URL |
 |--|-----|
-| 문서 홈 | https://team-sema.github.io/project-Afterburn-codex/ |
-| **스펙** (카테고리별) | https://team-sema.github.io/project-Afterburn-codex/spec/ |
+| 문서 홈 | https://team-sema.github.io/project-Afterburn/ |
+| **스펙** (카테고리별) | https://team-sema.github.io/project-Afterburn/spec/ |
 | **칸반 (Notion)** | https://app.notion.com/p/102c71bf78394bcaa9ff627548faf7f9?v=3c9b8c11155f8111bfeb000c00cae3b8 |
-| 칸반 Pages 스냅샷 | https://team-sema.github.io/project-Afterburn-codex/board/ |
 
 로컬 미리보기:
 
@@ -19,10 +18,9 @@ Godot 4.7 종스크롤 슈팅 + XP·시간 기반 오그먼트 프로토타입 (
 cd docs
 # HTTP 서버로 연 뒤
 # http://localhost:8080/spec/
-# http://localhost:8080/board/
 ```
 
-원본 MD: [`docs/spec/`](docs/spec/) · [`docs/board/`](docs/board/)
+원본 MD: [`docs/spec/`](docs/spec/)
 
 ## 실행
 

@@ -26,7 +26,7 @@ Do not force push. Merge main into feature, verify, re-run.
 
 ## Kanban
 
-Follow `kanban-tickets`: output a **card draft** for manual Notion update (suggested column `검증 대기`). Do **not** auto-create or move cards. Do not edit `docs/board/`.
+Follow `kanban-tickets`: output **title and body draft only** for manual Notion update. Do **not** auto-create or move cards.
 
 ## Never Do
 
