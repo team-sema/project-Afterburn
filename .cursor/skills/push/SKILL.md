@@ -49,7 +49,7 @@ git diff --stat
 | 4 | 코드 변경이 스펙·Task에 **근거** 있음 | 스펙 먼저 갱신 |
 | 5 | **수정 금지** 미변경: 오그먼트 오퍼 임계·물리 레이어·스폰 공식 등 (이 feature 스펙에 명시된 범위 외) | 별도 feature로 분리·되돌림 |
 | 6 | 스펙·Task 변경 시 `## 변경 이력` 한 줄 (`docs-and-plans`) | 이력 추가 |
-| 7 | **칸반 티켓** (`kanban-tickets`): Notion 아이템 칸반 slug 카드 `상태`=`검증 대기`. **`docs/board/`는 이 커밋에 넣지 않음** | Notion 티켓 누락·갱신 실패 시 중단 |
+| 7 | **칸반 티켓** (`kanban-tickets`): Notion 카드 **초안 추천** (제목·설명·`카드 ID`·태그·`검증 대기`). **자동 생성·열 이동 금지**. **`docs/board/`는 이 커밋에 넣지 않음** | 추천 블록 누락 시 중단 |
 | 8 | **현황 스펙 `docs/spec/` 필수** — 동작·수치·타입·입력·스폰·탄·UI가 바뀌면 관련 카테고리 MD가 **이 커밋/diff에 포함**되고 코드와 모순 없음. 연쇄 문서(`combat` 점수표·`gaps`·`overview` 루프 등)도 같이 맞춤. 순수 리네임·버그픽스·테스트만이면 diff에 스펙 없어도 되나 응답에 **「현황 스펙 해당 없음: …」** 명시 | 스펙 갱신 없이 push 금지 |
 
 **출력:**
@@ -63,7 +63,16 @@ git diff --stat
 - AC ↔ 구현: (OK / 이슈 요약)
 - diff 범위: (OK / 이슈)
 - 수정 금지 파일: (미변경 / 이슈)
-- 티켓: <id> → 검증 대기 (OK / 생성함 / 이슈)
+
+### 칸반 (수동)
+- slug: `<slug>`
+- 기존 카드: (있음 · `<이름>` / 없음 · MCP 미연결)
+- 추천 제목: …
+- 추천 설명: …
+- 추천 카드 ID: `<slug>`
+- 추천 태그: …
+- 추천 열: 검증 대기
+- Notion에서 카드 생성·열 이동은 사람이 한다.
 ```
 
 ### 3. 커밋 메시지 작성
@@ -91,6 +100,7 @@ chmod +x tools/push-feature.sh tools/merge-feature.sh 2>/dev/null || true
 - `git push --force`, `git config` 변경
 - STOP 상태에서 main에 feature merge 시도
 - GitHub PR 생성 (필수 아님)
+- Notion 카드 자동 생성·열 이동 (Notion MCP 없음으로 push 중단 금지)
 
 ## 관련
 

@@ -26,7 +26,7 @@ Do not force push. Merge main into feature, verify, re-run.
 
 ## Kanban
 
-If this merge is the first time the slug lands on main, follow `kanban-tickets`: Notion `상태` → `검증 대기` (skip if already there). Do not edit `docs/board/`.
+Follow `kanban-tickets`: output a **card draft** for manual Notion update (suggested column `검증 대기`). Do **not** auto-create or move cards. Do not edit `docs/board/`.
 
 ## Never Do
 
