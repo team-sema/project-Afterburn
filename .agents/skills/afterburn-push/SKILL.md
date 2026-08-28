@@ -22,7 +22,7 @@ git diff --stat
 2. If not on `feature/*`, stop and guide to `tools/start-feature.sh`.
 3. If diff does not match slug/request, warn about scope drift.
 4. **Docs·code gate (required before commit):** system spec + Task vs implementation; **관련 `docs/spec/*.md` must match code** when behavior/numbers/UI change (same commit). Pure rename/bugfix may omit with explicit “현황 스펙 해당 없음” reason. Fail → stop, do not push.
-5. **Kanban ticket (required before commit):** `kanban-tickets` rule — Notion 아이템 칸반 card `상태` → `검증 대기`. Do not commit `docs/board/` for this. Report `티켓: <id> → 검증 대기`.
+5. **Kanban (recommend only, before commit):** Follow `kanban-tickets` — output a **card draft** (title, description, `카드 ID`, tags, suggested `검증 대기`). Do **not** create or move Notion cards. Do not commit `docs/board/`. Notion MCP missing must **not** block push.
 6. Generate commit message (`feat:` / `fix:` / `docs:` / `godot:`).
 7. Run:
 

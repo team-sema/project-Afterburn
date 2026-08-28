@@ -215,7 +215,7 @@ working tree가 깨끗해야 한다. 브랜치 전환 후 응답 **맨 앞**:
 
 `브랜치: feature/<slug> · 범위: components/... · player_ship/... (2~5개 경로)`
 
-칸반: `kanban-tickets` — Notion 아이템 칸반에서 slug(`카드 ID`) 찾거나 만들고 `스펙 작성 중`/`구현 중`으로. `docs/board/cards.json`은 고치지 않는다.
+칸반: `kanban-tickets` — Notion에서 slug(`카드 ID`) **조회만**(MCP 있을 때). 없으면 **카드 초안 추천**. 자동 생성·열 이동·`docs/board/cards.json` 수정 금지.
 
 ### Step 3. 관련 문서 탐색
 

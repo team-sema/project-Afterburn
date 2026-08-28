@@ -36,7 +36,7 @@
 
 열 이동 정본은 [아이템 칸반](https://app.notion.com/p/102c71bf78394bcaa9ff627548faf7f9?v=3c9b8c11155f8111bfeb000c00cae3b8)이다.
 
-`/feature`·`/push`는 Notion `상태`를 옮긴다. 이 Pages 보드의 `cards.json`은 스냅샷이다.
+`/feature`·`/push`는 Notion 카드 **초안을 추천**한다. 카드 생성·열 이동은 사람이 Notion에서 한다. 이 Pages 보드의 `cards.json`은 스냅샷이다.
 
 ## 팀 반영 방법 (Pages 보드 → Notion)
 

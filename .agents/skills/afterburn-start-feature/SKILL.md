@@ -20,7 +20,7 @@ chmod +x tools/start-feature.sh 2>/dev/null || true
 3. If the working tree is not clean, stop and tell the user to commit or stash first.
 4. After the branch is created, report the branch name.
 5. Infer the likely paths (`components/`, `player_ship/`, `enemies/`, `menus/`, `docs/design/...`) this slug should touch. Do not ask the user to write the path list.
-6. **Kanban ticket:** Follow `.cursor/rules/kanban-tickets.mdc`. Find or create the Notion 아이템 칸반 page (`카드 ID` = slug); set `상태` to `스펙 작성 중` or `구현 중`. Do not edit `docs/board/cards.json`.
+6. **Kanban ticket:** Follow `.cursor/rules/kanban-tickets.mdc`. Optionally query Notion for an existing card; if none, **recommend** a card draft (title, description, `카드 ID`, suggested column). Do **not** auto-create or move cards. Do not edit `docs/board/cards.json`.
 7. Keep later edits within the inferred feature scope unless the user expands it.
 
 ## Never Do
