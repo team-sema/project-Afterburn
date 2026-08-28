@@ -15,7 +15,7 @@
 |------|-----|
 | 문서 홈 | https://team-sema.github.io/project-Afterburn/ |
 | 스펙 | https://team-sema.github.io/project-Afterburn/spec/ |
-| 칸반 | https://team-sema.github.io/project-Afterburn/board/ |
+| 칸반 (Notion) | https://app.notion.com/p/102c71bf78394bcaa9ff627548faf7f9?v=3c9b8c11155f8111bfeb000c00cae3b8 |
 
 ## 예외 조건
 
@@ -29,11 +29,7 @@
 
 - [x] 루트 `README.md`가 있다
 - [x] 스펙·칸반 Pages URL이 표 또는 동등한 형태로 있다
-- [x] `docs/spec/`, `docs/board/` 상대 경로 안내가 있다
-
-## 구현 메모
-
-- 실행·`/feature`·`/push` 요약도 짧게 포함
+- [x] `docs/spec/` 상대 경로 안내가 있다
 
 ---
 
@@ -41,4 +37,5 @@
 
 | 날짜 | 변경 |
 |------|------|
+| 2026-08-29 | Pages `/board/` 제거; README·링크는 Notion 칸반 |
 | 2026-07-22 | 초기 스펙 |

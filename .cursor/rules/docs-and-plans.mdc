@@ -16,7 +16,7 @@ alwaysApply: false
 | 기능 시스템 스펙 | `docs/design/systems/<slug>.md` |
 | Task | `docs/design/tasks/<slug>-tasks.md` |
 | 설계 인덱스 | `docs/design/README.md`, `docs/design/systems/README.md` |
-| 칸반 | `docs/board/` |
+| 칸반 (Notion) | [아이템 칸반](https://app.notion.com/p/102c71bf78394bcaa9ff627548faf7f9?v=3c9b8c11155f8111bfeb000c00cae3b8) · `docs/design/systems/kanban-v2.md` |
 | 비주얼 가이드 | `.agents/godot_nova_drift_visual_guide.md` |
 
 ## 기획 vs 설계 vs 현황

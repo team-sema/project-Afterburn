@@ -31,7 +31,7 @@ AI 산출물은 저장소 규칙·시스템 스펙에 부합하는지 검수한 
 
 Godot는 버전 간 API 변경이 잦아 모델이 기억에 의존하면 구버전 문법이 섞입니다. 엔진 관련 사항은 Context7로 공식 문서를 조회한 뒤 작성하도록 규칙에 명시했습니다.
 
-참고: [칸반](https://team-sema.github.io/project-Afterburn/board/) · [스펙](https://team-sema.github.io/project-Afterburn/spec/)
+참고: [칸반 (Notion)](https://app.notion.com/p/102c71bf78394bcaa9ff627548faf7f9?v=3c9b8c11155f8111bfeb000c00cae3b8) · [스펙](https://team-sema.github.io/project-Afterburn/spec/)
 
 ---
 
@@ -79,43 +79,41 @@ AI는 위 판단을 사람이 내린 뒤, 그 사이의 브랜치 생성·문서
 
 
 
-## 4. 칸반 기반 작업 관리 [칸반](https://team-sema.github.io/project-Afterburn/board/)
+## 4. 칸반 기반 작업 관리 [칸반 (Notion)](https://app.notion.com/p/102c71bf78394bcaa9ff627548faf7f9?v=3c9b8c11155f8111bfeb000c00cae3b8)
 
-티켓은 `docs/board/`에 마크다운과 JSON으로 두고, 에이전트가 카드 상태를 직접 읽고 갱신합니다. 저장소 안에 둔 이유는 에이전트가 접근할 수 있어야 하기 때문이며, 그 결과 카드 이동이 커밋 이력에 남아 스펙 diff와 함께 추적됩니다.
+티켓·열·태그는 **Notion 아이템 칸반**에서 사람이 관리한다. 기능 설계·Task는 git `docs/design/`에, 구현 현황은 `docs/spec/`에 둔다.
 
+| 항목 | 역할 |
+|------|------|
+| Notion `이름` | 카드 제목 |
+| Notion `상태` | 열 (아이디어 / 백로그 → … → 완료) |
+| Notion `카드 ID` | feature slug (`player-augment-behaviors` 등) |
+| `docs/design/systems/<slug>.md` | 기능 시스템 스펙 |
+| `docs/design/tasks/<slug>-tasks.md` | Task·AC |
 
-| 파일                         | 역할                               |
-| -------------------------- | -------------------------------- |
-| `docs/board/cards.json`    | 카드 인덱스 (id, title, column, tags) |
-| `docs/board/cards/<id>.md` | 카드 본문 (목표·AC·이력)                 |
-| GitHub Pages `/board/`     | 브라우저에서 열 상태 공유                   |
-
-
-열: `ideas` → `speccing` → `ready` → `doing` → `review` → `fix` → `done`
+열: 아이디어 / 백로그 → 스펙 작성 중 → 구현 대기 → 구현 중 → 검증 대기 → 수정 필요 → 완료
 
 ### AI가 하는 일
 
-- `/feature` 시작 시 slug로 카드를 검색하고, 없으면 생성하여 `speccing`/`doing`으로 이동.
-- 구현 범위·AC를 카드 및 시스템 스펙과 일치시킴.
-- `/push` 직전 열을 `review`로 변경하고 이력 한 줄을 추가해 같은 커밋에 포함.
-- 보드에서 복사한 **에이전트 프롬프트**를 받으면 해당 카드의 열만 반영.
-
-
+- `/feature`·`/push`에서 Notion 카드 **조회만**(MCP 있을 때).
+- 카드가 없으면 **제목·본문 초안만 추천** (자동 생성·열 이동 없음).
+- 구현 범위·AC를 시스템 스펙·Task와 일치시킴.
+- 사용자가 **「노션에 반영해줘」**라고 명시할 때만 MCP로 Notion 수정.
 
 ### 사람이 하는 일
 
-- 백로그 우선순위 및 `ideas`/`ready` 판단.
-- `review` 카드를 플레이로 확인한 뒤 보드에서 `done`/`fix`으로 드래그 → **에이전트 프롬프트 복사** → Cursor에 붙여넣기.
+- Notion에서 카드 **생성·열 이동·완료** (`검증 대기` → `완료`/`수정 필요`).
+- 백로그 우선순위 및 열 판단.
 - 2인 협업 시 같은 날 `main` pull, feature 브랜치는 짧게 유지.
 
-`done` 이동은 사람만 수행합니다. 머지 완료(`review`)와 플레이 검증 완료(`done`)를 단계로 나누어 기록하기 위한 규칙이며, 이에 따라 다수의 카드가 검증 대기 상태인 `review`에 위치합니다.
+`완료` 이동은 사람만 수행합니다. main 머지 후 `검증 대기`에 두고, 플레이 검증 뒤 `완료`로 옮깁니다.
 
 ### 진행 예시
 
-1. 사람이 "통합 무기 STATUS 디테일"의 개선방향을 정리하여 AI agent에게 요청.
-2. 에이전트가 `feature/weapon-status-detail` 생성, 카드를 `doing`으로 이동, 시스템 스펙·Task 작성.
-3. 스펙 범위 내에서 코드 구현, `docs/spec/` 현황 동기화.
-4. `/push` — 정합성 검사 통과 후 카드를 `review`로 이동, main 머지.
-5. 사람이 플레이 확인 후 `done`(또는 `fix`)으로 이동, 프롬프트 복사로 저장소 반영.
+1. 사람이 "통합 무기 STATUS 디테일" 개선 방향을 정리하여 AI agent에게 요청.
+2. 에이전트가 `feature/weapon-status-detail` 생성, **제목·본문 초안 추천**; 사람이 Notion 카드를 `구현 중`으로 생성.
+3. 시스템 스펙·Task 작성, 스펙 범위 내 코드 구현, `docs/spec/` 동기화.
+4. `/push` — 정합성 검사 후 main 머지; 사람이 Notion에서 `검증 대기`로 이동.
+5. 사람이 플레이 확인 후 `완료`(또는 `수정 필요`)로 이동.
 
 ---

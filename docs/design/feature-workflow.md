@@ -5,7 +5,7 @@
 ## `/feature <설명>`
 
 1. slug 추론 → `./tools/start-feature.sh <slug>`
-2. 칸ban 카드 **초안 추천** (사람이 Notion에서 생성·열 이동)
+2. Notion 카드 **제목·본문 초안만 추천** (생성·열 이동은 사람)
 3. `docs/design/systems/<slug>.md` 작성·갱신
 4. `docs/design/tasks/<slug>-tasks.md` Task 분리
 5. 스펙 범위 안만 구현
@@ -14,7 +14,7 @@
 ## `/push`
 
 1. 스펙·Task·diff 정합성
-2. 칸ban 카드 **초안 추천** (`검증 대기`는 사람이 Notion에서 옮김)
+2. Notion 카드 **제목·본문 초안만 추천** (`검증 대기` 등 열은 사람이 Notion에서 옮김)
 3. `./tools/push-feature.sh -m "feat: ..."`
 4. `origin/main` 신규면 **중단**(exit 2) → feature에서 `git merge main` 후 재시도
 
@@ -32,5 +32,6 @@
 
 | 날짜 | 변경 |
 |------|------|
-| 2026-08-28 | `/push` 칸ban 자동 생성·열 이동 → **초안 추천** (사람이 Notion 관리) |
+| 2026-08-29 | Pages `/board/` 제거; 에이전트는 제목·본문만 추천 |
+| 2026-08-28 | `/push` 칸반 자동 생성·열 이동 → **초안 추천** (사람이 Notion 관리) |
 | 2026-07-22 | cat_dice 워크플로를 Afterburn에 이식한 요약 추가 |

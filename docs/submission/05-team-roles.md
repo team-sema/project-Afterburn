@@ -44,6 +44,6 @@ Cursor 룰·스킬과 `/feature`·`/push` 자동화, 스펙·Task·칸반 연동
 
 - Cursor 룰·스킬과 `/feature`·`/push`를 팀 공통 워크플로로 사용
 - 기능별 담당자 1인이 `feature/<slug>` 브랜치 담당
-- `docs/spec/`에 구현 현황, `docs/design/`에 기능 명세, `docs/board/`에 진행 상태 기록
+- `docs/spec/`에 구현 현황, `docs/design/`에 기능 명세, **Notion 칸반**에 진행 상태·티켓
 - 기능 담당자가 구현·완료 조건 확인, 다른 팀원이 실제 플레이로 교차 검증
 - Cursor Agent 초안은 기능 담당자가 검토·반영하며, 세부 활용 방식은 제출물 4에 별도 정리
