@@ -159,7 +159,7 @@ script = ExtResource("28_experience_drop")
 stats_component = NodePath("../StatsComponent")
 actor = NodePath("..")
 orb_scene = ExtResource("29_experience_orb")
-drop_chance = 0.62
+drop_chance = 0.45
 
 [node name="MoveModifierComponent" type="Node" parent="."]
 script = ExtResource("31_move_modifier")

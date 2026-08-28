@@ -24,5 +24,5 @@ func _resize_to_viewport() -> void:
 	for texture_rect in [space, far_stars, close_stars]:
 		texture_rect.position = Vector2.ZERO
 		texture_rect.size = viewport_size
-	for layer in [space_layer, far_stars_layer, close_stars_layer]:
-		layer.motion_mirroring.y = viewport_size.y
+	for parallax_layer in [space_layer, far_stars_layer, close_stars_layer]:
+		parallax_layer.motion_mirroring.y = viewport_size.y

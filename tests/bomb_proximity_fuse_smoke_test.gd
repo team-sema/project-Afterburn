@@ -28,6 +28,8 @@ func _run() -> void:
 	var preview := enemy.get_node("BlastRadiusPreview") as BombBlastPreview
 	if stats.health < 100:
 		failures.append("bomb should have high health")
+	if not is_equal_approx(fuse.arm_duration, 3.0):
+		failures.append("bomb should charge for three seconds before detonating")
 	if move.velocity.y > 25.0:
 		failures.append("bomb should move slowly")
 	if enemy.get_node_or_null("EnemyShootComponent") != null:

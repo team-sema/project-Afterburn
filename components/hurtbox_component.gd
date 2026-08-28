@@ -22,4 +22,5 @@ var is_invincible = false :
 		invincibility_changed.emit(is_invincible)
 
 # Create a signal for when this hurtbox is hit by a hitbox
+@warning_ignore("unused_signal") # Emitted by HitboxComponent and weapon/projectile systems.
 signal hurt(hitbox)

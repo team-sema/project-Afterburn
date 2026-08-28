@@ -76,7 +76,7 @@ func _on_enemy_augment_progress_changed(
 		threat_label.text = "THREAT %02d   ELITE ENGAGED" % current_threat_level
 		return
 	var remaining_seconds := maxi(0, ceili(interval - elapsed))
-	var minutes := remaining_seconds / 60
+	var minutes := floori(float(remaining_seconds) / 60.0)
 	var seconds := remaining_seconds % 60
 	threat_label.text = "THREAT %02d   %02d:%02d" % [current_threat_level, minutes, seconds]
 

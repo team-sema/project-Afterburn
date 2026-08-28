@@ -63,10 +63,10 @@ func _apply_damage_resolver() -> void:
 	if hitbox == null:
 		return
 	hitbox.damage_resolver = func(hurtbox: HurtboxComponent) -> int:
-		var scale := 1.0
+		var damage_scale := 1.0
 		if _pierce_hits > 0:
-			scale *= pow(_pierce_falloff, float(_pierce_hits))
-		var raw := maxi(1, roundi(float(_base_damage) * scale))
+			damage_scale *= pow(_pierce_falloff, float(_pierce_hits))
+		var raw := maxi(1, roundi(float(_base_damage) * damage_scale))
 		if _weapon != null:
 			return _weapon.resolve_hit_damage(raw, hurtbox)
 		return raw

@@ -4,10 +4,10 @@
 [ext_resource type="Script" uid="uid://biufnl0ep3dyf" path="res://resources/enemy_movement/movement_step.gd" id="2_step"]
 [ext_resource type="Script" uid="uid://bvyc313222mjp" path="res://resources/enemy_movement/steps/homing_movement_step.gd" id="3_homing"]
 
-[sub_resource type="Resource" id="Homing_slow_player"]
+[sub_resource type="Resource" id="Homing_bomb_charge_range"]
 script = ExtResource("3_homing")
-speed = 40.0
+speed = 130.0
 
 [resource]
 script = ExtResource("1_sequence")
-steps = Array[ExtResource("2_step")]([SubResource("Homing_slow_player")])
+steps = Array[ExtResource("2_step")]([SubResource("Homing_bomb_charge_range")])

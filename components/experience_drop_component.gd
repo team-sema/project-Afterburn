@@ -8,7 +8,7 @@ extends Node
 @export var orb_scene: PackedScene
 @export_range(1, 1000, 1) var experience_amount := 1
 ## Temporary bump after removing weapon drops (was 0.5). Tunable in the inspector / scene.
-@export_range(0.0, 1.0, 0.01) var drop_chance := 0.62
+@export_range(0.0, 1.0, 0.01) var drop_chance := 0.45
 
 
 func _ready() -> void:

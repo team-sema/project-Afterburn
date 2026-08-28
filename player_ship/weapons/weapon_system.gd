@@ -1,6 +1,7 @@
 class_name WeaponSystem
 extends Node2D
 
+@warning_ignore("unused_signal") # Emitted by concrete weapon systems and consumed by the ship VFX.
 signal fired
 ## Legacy no-op path; ammo depletion no longer unequips weapons.
 signal depleted

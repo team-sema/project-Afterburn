@@ -11,10 +11,10 @@ const EXPECTED_ROSTER := {
 	&"drone_zigzag_mirrored": {"difficulty": 6.0, "min_threat": 1},
 	&"striker_drone_diamond_5": {"difficulty": 7.0, "min_threat": 1},
 	&"awl_formation": {"difficulty": 12.0, "min_threat": 1},
-	&"striker_drone_diamond_13": {"difficulty": 15.0, "min_threat": 2},
+	&"striker_drone_diamond_13": {"difficulty": 15.0, "min_threat": 1},
 	&"tanker_guard_sniper": {"difficulty": 10.0, "min_threat": 2},
-	&"bomb_drone_diamond": {"difficulty": 9.0, "min_threat": 2},
-	&"interceptor_pair": {"difficulty": 12.0, "min_threat": 2},
+	&"bomb_drone_diamond": {"difficulty": 9.0, "min_threat": 1},
+	&"interceptor_pair": {"difficulty": 12.0, "min_threat": 1},
 	&"caster_single": {"difficulty": 7.0, "min_threat": 3},
 	&"x9_drone_down": {"difficulty": 9.0, "min_threat": 3},
 	&"x9_caster_drone_orbit": {"difficulty": 15.0, "min_threat": 3},
@@ -46,11 +46,13 @@ func _run() -> void:
 	generator.spawn_timer.stop()
 
 	_test_generator_and_pool_shape()
+	_test_early_enemy_health_baselines()
 	_test_threat_rosters_and_weights()
 	_test_deterministic_weighted_selection()
 	_test_recent_exclusion_variety()
 	await _test_single_encounters()
 	_test_formation_encounters()
+	await _test_tanker_guard_replacement()
 	await _test_spawn_scoped_augments()
 	_test_threat_progression()
 	_test_invalid_weight_safety()
@@ -71,6 +73,8 @@ func _run() -> void:
 func _test_generator_and_pool_shape() -> void:
 	_expect(progression.get_threat_level() == 1, "run starts at Threat 1")
 	_expect(generator.current_threat_level == 1, "generator reads the initial Threat level")
+	_expect(is_equal_approx(generator.spawn_interval, 2.8), "normal encounters spawn every 2.8 seconds")
+	_expect(is_equal_approx(generator.spawn_interval_jitter, 0.3), "normal spawn jitter is 0.3 seconds")
 	_expect(pool != null and pool.validate(), "EnemyGenerator references one valid MainEncounterPool")
 	_expect(pool.entries.size() == 13, "MainEncounterPool contains all thirteen live encounters")
 	_expect(not _has_property(generator, &"spawn_sets"), "EnemyGenerator no longer exposes spawn_sets")
@@ -88,6 +92,23 @@ func _test_generator_and_pool_shape() -> void:
 	_expect(ids.size() == EXPECTED_ROSTER.size(), "MainEncounterPool roster matches difficulty plan")
 
 
+func _test_early_enemy_health_baselines() -> void:
+	var expected_health := {
+		"res://enemies/normal_enemy.tscn": 28,
+		"res://enemies/moving_enemy.tscn": 60,
+		"res://enemies/kamikaze_enemy.tscn": 80,
+		"res://enemies/bomb_enemy.tscn": 160,
+		"res://enemies/interceptor_enemy.tscn": 50,
+	}
+	for scene_path in expected_health:
+		var enemy := (load(scene_path) as PackedScene).instantiate() as Enemy
+		_expect(
+			(enemy.get_node("StatsComponent") as StatsComponent).health == int(expected_health[scene_path]),
+			"%s starts with %d HP" % [scene_path.get_file(), int(expected_health[scene_path])],
+		)
+		enemy.free()
+
+
 func _expected_weight(difficulty: float, min_threat: int, threat_level: int) -> float:
 	if threat_level < min_threat:
 		return 0.0
@@ -102,6 +123,9 @@ func _test_threat_rosters_and_weights() -> void:
 			&"drone_zigzag_mirrored",
 			&"striker_drone_diamond_5",
 			&"awl_formation",
+			&"striker_drone_diamond_13",
+			&"bomb_drone_diamond",
+			&"interceptor_pair",
 		],
 		"Threat 1",
 	)
@@ -241,6 +265,40 @@ func _test_single_encounters() -> void:
 		"res://enemies/shooting_enemy.tscn",
 		"res://resources/enemy_movement/sequences/caster_entry_patrol.tres",
 	)
+
+
+func _test_tanker_guard_replacement() -> void:
+	var tanker_guard := _find_preset(&"tanker_guard_sniper")
+	var first_controller := generator._spawn(tanker_guard) as FormationController
+	_expect(first_controller != null, "tanker_guard_sniper spawns its initial Tanker")
+	if first_controller == null:
+		return
+	await process_frame
+	var replacement: EncounterPreset = generator.resolve_normal_preset(tanker_guard)
+	_expect(
+		replacement.encounter_id == &"sniper_reinforcement",
+		"an active Tanker replaces tanker_guard_sniper with a single Sniper",
+	)
+	var replacement_controller := generator._spawn(replacement) as FormationController
+	_expect(replacement_controller != null, "single Sniper replacement spawns")
+	if replacement_controller != null:
+		_expect(
+			replacement_controller.get_members().size() == 1,
+			"Tanker replacement encounter contains only one Sniper",
+		)
+		if not replacement_controller.get_members().is_empty():
+			_expect(
+				replacement_controller.get_members()[0].scene_file_path == "res://enemies/sniper_enemy.tscn",
+				"Tanker replacement uses the Sniper scene",
+			)
+			replacement_controller.queue_free()
+	var tanker_count := 0
+	for enemy in get_nodes_in_group("enemies"):
+		if enemy is TankerEnemy:
+			tanker_count += 1
+	_expect(tanker_count == 1, "replacement does not create a second Tanker")
+	first_controller.queue_free()
+	await process_frame
 
 
 func _test_single_encounter(
@@ -410,11 +468,11 @@ func _test_formation_encounters() -> void:
 			if slot != null:
 				bd_by_slot[slot.slot_index] = member
 		_expect(
-			bd_by_slot.has(2)
-			and (bd_by_slot[2] as Enemy).scene_file_path == "res://enemies/bomb_enemy.tscn",
-			"bomb_drone_diamond center slot is Bomb",
+			bd_by_slot.has(0)
+			and (bd_by_slot[0] as Enemy).scene_file_path == "res://enemies/bomb_enemy.tscn",
+			"bomb_drone_diamond top slot is Bomb",
 		)
-		for slot_index in [0, 1, 3, 4]:
+		for slot_index in [1, 2, 3, 4]:
 			_expect(
 				bd_by_slot.has(slot_index)
 				and (bd_by_slot[slot_index] as Enemy).scene_file_path == "res://enemies/normal_enemy.tscn",
@@ -429,8 +487,17 @@ func _test_formation_encounters() -> void:
 		)
 		var bomb_homing := bd_preset.formation_movement_sequence.steps[0] as HomingMovementStep
 		_expect(
-			bomb_homing != null and is_equal_approx(bomb_homing.speed, 40.0),
-			"bomb_drone_diamond homes at 40 px/s",
+			bomb_homing != null
+			and is_equal_approx(bomb_homing.speed, 130.0)
+			and is_zero_approx(bomb_homing.stop_distance),
+			"bomb_drone_diamond dashes faster than the player until the Bomb fuse stops it",
+		)
+		var bomb_fuse := bd_by_slot[0].get_node("BombProximityFuseComponent") as BombProximityFuseComponent
+		_expect(
+			bomb_fuse != null
+			and is_equal_approx(bomb_fuse.trigger_radius, 60.0)
+			and is_equal_approx(bomb_fuse.arm_duration, 3.0),
+			"top-slot Bomb stops the formation at 60 px and charges for three seconds",
 		)
 		bomb_diamond.queue_free()
 
@@ -455,7 +522,7 @@ func _test_spawn_scoped_augments() -> void:
 		var bomb_fuse := bomb.get_node("BombProximityFuseComponent")
 		var actual_arm_duration := float(bomb_fuse.get("arm_duration"))
 		_expect(
-			is_equal_approx(actual_arm_duration, 2.0 / 1.5),
+			is_equal_approx(actual_arm_duration, 3.0 / 1.5),
 			"Bomb fast fuse applies to formation Bombs without spawn-id gate",
 		)
 		bomb_controller.queue_free()

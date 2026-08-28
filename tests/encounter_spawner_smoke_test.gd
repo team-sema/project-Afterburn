@@ -12,6 +12,7 @@ const PRESET_PATHS := [
 	"res://resources/encounters/presets/striker_single.tres",
 	"res://resources/encounters/presets/tanker_bomb_vertical.tres",
 	"res://resources/encounters/presets/caster_single.tres",
+	"res://resources/encounters/presets/sniper_single.tres",
 	"res://resources/encounters/presets/tanker_guard_sniper.tres",
 	"res://resources/encounters/presets/interceptor_pair.tres",
 	"res://resources/encounters/presets/interceptor_trio.tres",
@@ -280,7 +281,7 @@ func _test_awl_breaks_into_individual_charge() -> void:
 	controller.center_movement_controller.set_process(false)
 	var initial_center_y := controller.global_position.y
 
-	# The shipped formation sequence is a 1.4 s descent, then each Awl charges 3 s.
+	# The shipped formation sequence is a 1.4 s descent, then each Awl charges 2 s.
 	controller.center_movement_controller.update_movement(1.5)
 	controller.call("_update_member_positions", 1.5)
 	_expect(
@@ -296,7 +297,7 @@ func _test_awl_breaks_into_individual_charge() -> void:
 			continue
 		_expect(not awl.is_formation_member(), "Awl switches to individual ownership")
 		_expect(awl.get_parent() == world, "detached Awl is reparented to the encounter world")
-		_expect(awl.call("is_charging"), "detached Awl enters its 3 second charge state")
+		_expect(awl.call("is_charging"), "detached Awl enters its 2 second charge state")
 		_expect(not awl.movement_controller.is_running(), "Awl stays stopped while charging")
 		charging_positions.append(awl.global_position)
 
@@ -307,7 +308,7 @@ func _test_awl_breaks_into_individual_charge() -> void:
 		if not is_instance_valid(awl):
 			continue
 		awl.set_process(false)
-		awl.call("_process", 1.5)
+		awl.call("_process", 0.5)
 		_expect(
 			awl.global_position.is_equal_approx(charging_positions[index]),
 			"Awl remains at its detach position during charging",

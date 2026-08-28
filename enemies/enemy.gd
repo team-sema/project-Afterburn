@@ -57,7 +57,7 @@ func _ready() -> void:
 	assert(not destroyed_component.auto_destroy_on_no_health)
 	stats_component.no_health.connect(_on_no_health)
 	
-	hurtbox_component.hurt.connect(func(hitbox: HitboxComponent):
+	hurtbox_component.hurt.connect(func(_hitbox: HitboxComponent):
 		scale_component.tween_scale()
 		flash_component.flash()
 		shake_component.tween_shake()

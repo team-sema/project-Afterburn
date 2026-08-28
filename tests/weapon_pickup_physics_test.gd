@@ -26,7 +26,7 @@ func _run() -> void:
 	var weapon_drop := enemy.get_node("WeaponDropComponent") as WeaponDropComponent
 	_expect(weapon_drop.enabled == false, "weapon drops disabled")
 	var xp := enemy.get_node("ExperienceDropComponent") as ExperienceDropComponent
-	_expect(xp.drop_chance > 0.5, "XP drop frequency slightly raised from legacy 0.5")
+	_expect(is_equal_approx(xp.drop_chance, 0.45), "XP drop frequency is tuned down to 45%")
 	_expect(xp.experience_amount == 1, "per-orb XP value unchanged on base enemy")
 
 	# Killing should not spawn a WeaponPickup.

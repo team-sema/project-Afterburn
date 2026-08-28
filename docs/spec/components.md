@@ -39,6 +39,7 @@
 | `DestroyedComponent` | `no_health` → 이펙트 스폰 + free |
 | `ScoreComponent` | `GameStats.score`에 가산 |
 | `ExperienceDropComponent` | 적 사망 시 경험치 오브 스폰 |
+| XP drop tuning | 일반 적 XP 오브 드롭 확률은 0.45, 엘리트는 1.0 |
 | `ExperienceCollectorComponent` | 플레이어 XP 수집 반경 제공 |
 | `ExperienceOrb` | 드롭 후 아래로 이동하며, 기본 낙하 속도는 플레이어 기본 이동 속도의 절반인 70px/s |
 

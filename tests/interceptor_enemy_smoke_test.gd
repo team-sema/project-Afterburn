@@ -64,12 +64,12 @@ func _test_resources_and_roster() -> void:
 		as InterceptorEnemy
 	)
 	_expect(
-		(interceptor.get_node("StatsComponent") as StatsComponent).health == 40,
-		"Interceptor uses raised health (40)",
+		(interceptor.get_node("StatsComponent") as StatsComponent).health == 50,
+		"Interceptor uses raised health (50)",
 	)
 	_expect(
-		(drone.get_node("StatsComponent") as StatsComponent).health == 20,
-		"Drone baseline health remains 20",
+		(drone.get_node("StatsComponent") as StatsComponent).health == 28,
+		"Drone baseline health is 28",
 	)
 	var shoot := interceptor.get_node("EnemyShootComponent") as EnemyShootComponent
 	_expect(not shoot.use_actor_forward_direction, "Interceptor aims projectiles at the player")

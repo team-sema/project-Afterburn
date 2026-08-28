@@ -57,7 +57,7 @@ func _run() -> void:
 			"Awl offscreen cleanup remains",
 		)
 
-	# Descend completes (~1.4s); each Awl detaches and begins the 3s charge.
+	# Descend completes (~1.4s); each Awl detaches and begins the 2s charge.
 	await create_timer(1.6).timeout
 	await process_frame
 	var charging_positions: Array[Vector2] = []
@@ -81,7 +81,7 @@ func _run() -> void:
 	player.global_position = Vector2(180.0, 300.0)
 	await create_timer(1.7).timeout
 	for enemy in members:
-		_expect(failures, enemy.call("is_dashing"), "Awl enters DASHING after three seconds")
+		_expect(failures, enemy.call("is_dashing"), "Awl enters DASHING after its two second charge")
 		_expect(failures, enemy.movement_controller.is_running(), "Awl individual dash Sequence starts")
 		_expect(
 			failures,
