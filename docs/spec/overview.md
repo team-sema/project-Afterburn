@@ -6,8 +6,7 @@
 
 종스크롤 슈팅에 **XP·시간 기반 오그먼트 선택**을 얹은 프로토타입이다. 엔티티는 HeartBeast Galaxy Defiance 계열의 **컴포넌트(커스텀 노드)** 조합으로 구성한다.
 
-> **이 폴더(`docs/spec/`)는 구현 스펙**이다 — main 코드와 일치하는 동작·수치만.  
-> 의도·역할·방향(기획)은 [`docs/design/`](../design/) · 층 규칙 [`doc-layers.md`](../design/doc-layers.md). Notion에는 기획을 쓰지 않는다.
+의도·역할(기획)은 [Pages `/design/`](../design/). 이 폴더는 **구현 스펙**(main 코드와 일치하는 동작·수치)이다.
 
 ## 핵심 루프
 
@@ -88,4 +87,5 @@ Pages 스펙 브라우저(`docs/spec/index.html` · `spec.js`)가 아래 MD를 �
 
 | 날짜 | 변경 |
 |------|------|
-| 2026-08-30 | 적·진형·Encounter·run-pacing 계층 스펙 추가 · Pages 그룹 네비 |
+| 2026-08-30 | 기획 링크 단순화 · doc-layers 참조 제거 |
+| 2026-08-30 | 적·진형·Encounter·run-pacing 계층 · Pages 그룹 네비 |

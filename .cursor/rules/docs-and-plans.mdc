@@ -1,5 +1,5 @@
 ---
-description: "Editing docs; changelog; 기획 vs 구현 스펙 layers"
+description: "Editing docs; changelog at bottom of design/spec docs"
 globs:
   - "docs/**/*.md"
   - ".cursor/**/*.md"
@@ -8,48 +8,30 @@ alwaysApply: false
 
 # 문서
 
-층 구분 정본: [`docs/design/doc-layers.md`](docs/design/doc-layers.md)
-
 ## 경로
 
 | 용도 | 경로 |
 |------|------|
-| **구현 스펙** (현황) | `docs/spec/` — Pages `docs/spec/index.html` |
-| **기획** (의도·방향) | `docs/design/vision.md`, `docs/design/enemies/` 등 |
-| **기능 설계** (feature) | `docs/design/systems/<slug>.md` |
+| 구현 스펙 | `docs/spec/` — Pages `/spec/` |
+| 기획 (의도·방향) | `docs/design/vision.md`, `enemies/` … — Pages `/design/` |
+| 기능 설계 | `docs/design/systems/<slug>.md` |
 | Task | `docs/design/tasks/<slug>-tasks.md` |
-| 설계 인덱스 | `docs/design/README.md`, `docs/design/systems/README.md` |
-| 칸반 (Notion만) | [아이템 칸반](https://app.notion.com/p/102c71bf78394bcaa9ff627548faf7f9?v=3c9b8c11155f8111bfeb000c00cae3b8) · `docs/design/systems/kanban-v2.md` |
-| 비주얼 가이드 | `.agents/godot_nova_drift_visual_guide.md` |
+| 워크플로 요약 | `docs/design/feature-workflow.md` |
+| 칸반 | Notion · `docs/design/systems/kanban-v2.md` |
+| 비주얼 | `.agents/godot_nova_drift_visual_guide.md` |
 
-## 기획 vs 기능 설계 vs 구현 스펙
+- 확정 수치 정본은 `docs/spec/`.
+- 동작·수치·UI가 바뀌면 **같은 feature 커밋에** 관련 `docs/spec/` 갱신 (`/push` 항목 8).
+- 의도만 바뀌면 기획 MD만.
 
-| 층 | 경로 | 질문 |
-|----|------|------|
-| **기획** | `docs/design/vision.md`, `design/enemies/` … | 왜 / 어떤 역할·재미인가 (TBD 가능) |
-| **기능 설계** | `docs/design/systems/<slug>.md` | 이번 feature AC·TBD |
-| **구현 스펙** | `docs/spec/` | 지금 코드가 하는 일 — **main과 1:1**, TBD 금지 |
+## 수정 시
 
-- Notion에는 기획·스펙 본문을 쓰지 않는다 (티켓·열만).
-- 확정 **수치**의 정본은 항상 `docs/spec/`. design에 숫자를 이중으로 두지 않는다.
-- **필수:** 동작·수치·타입·입력·스폰·탄·UI가 바뀌면 **같은 feature 커밋에** 관련 `docs/spec/`를 갱신한다. `/push` 항목 8.
-- 의도만 바뀌고 코드 불변이면 기획 문서만 고치고, 응답에 「구현 스펙 해당 없음」을 명시.
+- 본문 직접 갱신 · 하단 `## 변경 이력` (최신이 위).
+- `systems/` 신규·갱신 시 `systems/README.md`에 한 줄.
+- `docs/spec/` 카테고리 변경 시 `spec.js` 목록과 맞출 것.
+- 연쇄 문서(점수표·갭·개요 루프 등)를 낡은 채로 두지 말 것.
 
-## 설계·스펙 수정
-
-- 변경 시 해당 문서 **본문을 직접 갱신**하고, 맨 하단 **변경 이력**에 한 줄을 추가한다. (`docs/spec/` 카테고리 MD는 이력이 없어도 본문 동기화가 우선.)
-- 시스템 스펙 신규·갱신 시 `docs/design/systems/README.md` 인덱스에 한 줄 추가한다.
-- `docs/spec/` 카테고리 문서를 고치면 브라우저 목록(`spec.js`)과 맞는지 확인한다.
-- 한 카테고리만 고치고 점수표·갭·개요 루프 등 **연쇄 문서가 낡은 채로 두지 않는다.**
-- 구현 스펙에 식별자 나열만 두지 않는다. **역할·화면·동작**이 먼저, 클래스명은 앵커.
-
-## 변경 이력 (설계·시스템 스펙·Task·기획 문서 공통)
-
-- **위치:** 문서 **맨 하단** 고정 (`---` 구분선 뒤).
-- **제목:** `## 변경 이력` (번호 붙이지 않음).
-- **표:** `날짜 | 변경` 두 열만.
-- **순서:** **최신이 위** (역시간).
-- **내용:** 한 줄 요약. 상세는 git diff.
+## 변경 이력 형식
 
 ```markdown
 ---
@@ -63,5 +45,5 @@ alwaysApply: false
 
 ## 스타일
 
-- 문서: 한국어, 표·목록으로 읽기 쉽게.
-- 코드·식별자 예시: 영문 snake_case / PascalCase.
+- 한국어, 표·목록.
+- 식별자: snake_case / PascalCase.
