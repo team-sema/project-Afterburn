@@ -16,10 +16,25 @@ const NAV = [
       {
         id: "enemies",
         title: "적",
-        desc: "로스터 의도",
+        desc: "로스터 · 의도",
         file: "enemies/index.md",
         children: [
+          { id: "enemies/drone", title: "Drone", file: "enemies/drone.md" },
+          { id: "enemies/striker", title: "Striker", file: "enemies/striker.md" },
+          { id: "enemies/awl", title: "Awl", file: "enemies/awl.md" },
           { id: "enemies/bomb", title: "Bomb", file: "enemies/bomb.md" },
+          {
+            id: "enemies/interceptor",
+            title: "Interceptor",
+            file: "enemies/interceptor.md",
+          },
+          { id: "enemies/caster", title: "Caster", file: "enemies/caster.md" },
+          { id: "enemies/sniper", title: "Sniper", file: "enemies/sniper.md" },
+          {
+            id: "enemies/elite-fighter",
+            title: "Elite",
+            file: "enemies/elite-fighter.md",
+          },
         ],
       },
     ],
