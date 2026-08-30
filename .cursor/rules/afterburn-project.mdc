@@ -9,12 +9,13 @@ Godot 종스크롤 슈팅 + **XP·시간 기반** 오그먼트 프로토타입 (
 
 ## 단일 기준 (Source of Truth)
 
-- **구현 현황 스펙:** `docs/spec/` (카테고리별) — 현재 코드가 하는 일의 정본.
-- **기능 설계:** `docs/design/systems/<slug>.md` — `/feature`로 추가·변경하는 규칙의 동작의 정본.
+- **구현 스펙:** `docs/spec/` — 현재 코드가 하는 일의 정본 (Pages `/spec/`). TBD 금지.
+- **기획:** `docs/design/vision.md`, `docs/design/enemies/` 등 — 의도·역할·방향. Notion 아님.
+- **기능 설계:** `docs/design/systems/<slug>.md` — `/feature` AC·TBD.
 - **Task:** `docs/design/tasks/<slug>-tasks.md`
-- 기획 방향 문서(GDD)가 생기면 그것을 방향 정본으로 두고, 계산·UI 상세는 시스템 스펙이 정본.
+- 층 구분: [`docs/design/doc-layers.md`](docs/design/doc-layers.md)
 
-기획·동작이 바뀌면 **시스템 스펙과 `docs/spec/` 현황 스펙을 먼저**(또는 같은 feature 커밋에) 고친다. `/push`는 현황 스펙 동기화 없이 통과시키지 않는다.
+코드 동작이 바뀌면 **구현 스펙**을 같은 feature 커밋에 맞춘다. `/push`는 구현 스펙 동기화 없이 통과시키지 않는다. 의도만 바뀌면 기획 문서만.
 
 ## 핵심 설계 (구현 시 참고)
 
@@ -25,7 +26,7 @@ Godot 종스크롤 슈팅 + **XP·시간 기반** 오그먼트 프로토타입 (
 
 ## 에이전트 동작
 
-- 작업 전 관련 `docs/spec/`·`docs/design/systems/`를 읽는다.
-- 사용자가 스펙과 다른 구현을 요청하면, 스펙 갱신 여부를 짧게 확인한다.
+- 작업 전 관련 `docs/spec/`·`docs/design/`(기획·systems)를 읽는다.
+- 사용자가 스펙과 다른 구현을 요청하면, 구현 스펙/기획 갱신 여부를 짧게 확인한다.
 - 커밋은 사용자가 요청할 때만 생성한다 (명시 없으면 커밋·푸시 금지).
 - 백로그·칸반 카드는 **사람이 Notion에서** 관리. `/push`는 **제목·본문 초안만** 추천 (`kanban-tickets` rule).

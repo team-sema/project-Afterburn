@@ -6,6 +6,9 @@
 
 종스크롤 슈팅에 **XP·시간 기반 오그먼트 선택**을 얹은 프로토타입이다. 엔티티는 HeartBeast Galaxy Defiance 계열의 **컴포넌트(커스텀 노드)** 조합으로 구성한다.
 
+> **이 폴더(`docs/spec/`)는 구현 스펙**이다 — main 코드와 일치하는 동작·수치만.  
+> 의도·역할·방향(기획)은 [`docs/design/`](../design/) · 층 규칙 [`doc-layers.md`](../design/doc-layers.md). Notion에는 기획을 쓰지 않는다.
+
 ## 핵심 루프
 
 1. 적을 처치해 점수·XP 획득
@@ -52,24 +55,37 @@ assets/         PNG(레거시) + svg/(네온)
 fonts/ sounds/
 .agents/        비주얼 가이드 · 스킬
 tools/          run-godot.cmd · feature 스크립트
-docs/           스펙 · 칸반 · 설계 (본 문서)
+docs/           스펙 · 설계 (본 문서)
 ```
 
 루트에 `gameplay.tscn`·오퍼/진행 컨트롤러·레지스트리가 함께 있다. 하위 폴더로 옮기는 정리는 백로그 (`docs/spec/gaps.md`).
 
 ## 스펙 페이지 트래킹
 
-Pages 스펙 브라우저(`docs/spec/index.html` · `spec.js`의 `CATEGORIES`)가 아래 MD를 전부 로드한다.  
+Pages 스펙 브라우저(`docs/spec/index.html` · `spec.js`)가 아래 MD를 로드한다.  
 **목록·수치·동작의 정본은 이 카테고리 MD**이며, `docs/design/systems/`는 feature 설계·이력이다.
+
+적 관련은 **4층**으로 나눈다: 유닛 → 진형 → Encounter 조합 → 런 페이싱.
 
 | 카테고리 | 파일 | 트래킹 내용 |
 |----------|------|-------------|
 | 개요 | `overview.md` | 루프 · 씬 · Autoload · 폴더 |
+| 런 · 페이싱 | `run-pacing.md` | Threat · 스폰 주기 · 엘리트 게이트 |
 | 씬 플로우 | `scene-flow.md` | 메뉴·World·오퍼·STATUS 패널 |
 | 컴포넌트 | `components.md` | 재사용 커스텀 노드 · 시설 버프/부스터 |
-| 플레이어 | `player.md` | 함선 · 무기 7종·기본 수치 · **시설 13모듈** · 실드 버퍼/재생 · HUD |
-| 적 | `enemies.md` | 타입 · 생성기 · Threat · `is_boss` |
-| 오그먼트 | `augments.md` | **플레이어 48·적 6 풀** · 시설 13 · 무기 모듈 28 · Kind · 리롤 |
-| 전투 | `combat.md` | 레이어 · 탄 · 플레이어 피격=1 · 실드 버퍼 |
+| 플레이어 | `player.md` | 함선 · 무기 · 시설 · 실드 · HUD |
+| 적 | `enemies/` | 유닛 타입별 HP·사격·행동 |
+| 진형 | `formations/` | 슬롯 기하만 |
+| Encounter | `encounters/` | 적+진형+이동 조합 · 풀 카탈로그 |
+| 오그먼트 | `augments.md` | 플레이어·적 풀 · Kind · 리롤 |
+| 전투 | `combat.md` | 레이어 · 탄 · 피격=1 · 실드 버퍼 |
 | 이펙트 | `effects.md` | 네온 · 배경 · 폭발 |
 | 갭 | `gaps.md` | 미연결 · 백로그 후보 |
+
+---
+
+## 변경 이력
+
+| 날짜 | 변경 |
+|------|------|
+| 2026-08-30 | 적·진형·Encounter·run-pacing 계층 스펙 추가 · Pages 그룹 네비 |

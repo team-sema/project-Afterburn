@@ -18,20 +18,29 @@ Menu (ui_accept)
 
 ## World (`world.tscn` / `world.gd`)
 
-### 런타임 트리 (요약)
+한 화면을 **왼쪽 HUD · 중앙 전장 · 오른쪽 STATUS** 세 칸으로 나눈다. 각 칸에 `NeonCornerFrame` 모서리 브래킷(장식)이 있다.
 
-- `WorldEnvironment` — 네온 글로우
-- `EnemyAugmentRegistry` / `PlayerAugmentRegistry`
-- `AugmentSelectionOverlay` / `AugmentModuleSwapOverlay` / `AugmentOfferController` / `AugmentProgressionController`
-- `Ship` / `SpaceBackground` / `EnemyGenerator` / `ScoreLabel`
+### 화면에 보이는 것
 
-우측 패널(`world.tscn`): `STATUS` → `ShipPanel`(5×3 범용 육각 슬롯 벌집 + 슬롯 호버 상세) → `WeaponBox/Margin/WeaponLoadoutHud`
+| 구역 | 내용 |
+|------|------|
+| **왼쪽** | 타이틀 → 점수 → XP·Threat 바 → 선체·실드(미충전 시 실드 게이지) → 그 아래가 전장 뷰포트 안내 |
+| **중앙** | 플레이필드 `240×360` — 함선·적·탄·배경이 여기서 움직임 |
+| **오른쪽 STATUS** | 위: 함선 시설(5×3 범용 육각 슬롯, 호버 시 상세) · 아래: 장착 무기·모듈 벌집(클릭/호버로 포커스, 설명은 말줄임·패널 크기 고정) |
 
-`WeaponLoadoutHud`: 템플릿 복제 48px 무기 베이·28px 장착 모듈 flat-top 헥스를 변이 맞닿는 벌집으로 배치 → 좌우(`선택된 무기` | `장착된 모듈`) → 가로선+고정 2줄 설명. 호버/클릭 포커스. 설명 초과분은 말줄임하며 우측 레일 크기를 변경하지 않는다.
+전장 위에는 평소엔 안 보이지만, 오그먼트 선택 때 **중앙 카드 캐러셀**과(필요 시) **슬롯/베이 교체 모달**이 오버레이로 뜬다. ESC 일시정지 UI도 같은 World 위다.
 
-좌측 패널(`world.tscn`): 타이틀 → `SCORE` → `ProgressionHud`(XP·위협 바) → `ShipStatusHud`(선체·실드 바 · 실드 미만 시 `ShieldChargeBar`) → `PLAYFIELD`(`240 × 360`)
+### 뒤에서 도는 것 (플레이어가 이름 몰라도 됨)
 
-좌·플레이필드·우 세 패널에 `NeonCornerFrame` 모서리 브래킷 (장식 전용).
+| 역할 | 담당 |
+|------|------|
+| 점수·XP·Threat 진행 | 진행 HUD + Threat/엘리트 게이트([런·페이싱](#run-pacing)) |
+| 적 스폰 | Encounter 생성기 — 무엇을 뽑을지는 [카탈로그](#encounters/catalog) |
+| 플레이어/적 오그먼트 보관 | 각각의 레지스트리 (선택 결과를 런 동안 유지) |
+| 오퍼 열고 닫기·일시정지 | 오퍼 컨트롤러가 요청 → 선택 UI → 레지스트리 반영 → 재개 |
+| 네온 글로우 | 월드 환경(블룸) — [이펙트](#effects) |
+
+코드/씬 노드 이름(`Ship`, `EnemyGenerator`, `AugmentOfferController` 등)은 구현·디버그용이다. **스펙을 읽을 때는 위 역할 표를 우선**하고, 상세 동작은 플레이어·오그먼트·페이싱 문서로 간다.
 
 ### 라이프사이클
 
@@ -59,3 +68,11 @@ Menu (ui_accept)
 9. **PLAYER 오퍼 종료 직후** 함선 주변 `enemy_projectiles` 제거 + `augment_resume_burst` VFX (`player_resume_clear_radius` 기본 36)
 10. unpause → `offer_completed(type)`. ENEMY 오퍼였다면 일반 Encounter와 새 60초 타이머 재개
 11. 대기 중인 오퍼가 있으면 deferred로 재요청
+
+---
+
+## 변경 이력
+
+| 날짜 | 변경 |
+|------|------|
+| 2026-08-30 | World「런타임 트리」식별자 나열 → 화면 구역·역할 표로 교체 |

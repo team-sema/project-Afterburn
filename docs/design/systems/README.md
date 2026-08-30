@@ -37,5 +37,6 @@
 | [kanban-v2](kanban-v2.md) | 백로그 칸반 v2 | 운영 |
 | [sniper-enemy](sniper-enemy.md) | 스나이퍼 저격 · 수렴 이중선 조준 · 고속탄 | review |
 | [offer-category-mix](offer-category-mix.md) | 오퍼 획득/모듈/시설 범주 배율 | review |
+| [spec-enemy-hierarchy](spec-enemy-hierarchy.md) | 적·진형·Encounter 스펙 계층 · Pages 네비 · 기획/구현 구분 | 구현 중 |
 
 현황 스펙(카테고리): [`docs/spec/`](../../spec/)

@@ -10,7 +10,7 @@
   <header class="spec-top">
     <div>
       <h1>구현 스펙</h1>
-      <p class="sub">카테고리별 현재 코드 기준 문서 · 클릭해서 열람</p>
+      <p class="sub">현재 코드 기준 · 적→진형→Encounter→페이싱 계층으로 탐색</p>
     </div>
     <div class="spec-actions">
       <a class="btn ghost" href="../">문서 홈</a>
@@ -18,10 +18,13 @@
     </div>
   </header>
 
+  <div class="layer-chips" id="layer-chips" aria-label="적 계층 바로가기"></div>
+
   <div class="spec-layout">
     <nav class="cat-nav" id="cat-nav" aria-label="스펙 카테고리"></nav>
     <article class="spec-panel">
       <header class="spec-panel-head">
+        <p class="crumb" id="panel-crumb" hidden></p>
         <h2 id="panel-title">불러오는 중…</h2>
         <p class="path" id="panel-path"></p>
       </header>
