@@ -3,12 +3,6 @@
  */
 const NAV = [
   {
-    id: "layers",
-    title: "층 규칙",
-    desc: "기획 vs 구현 스펙",
-    file: "doc-layers.md",
-  },
-  {
     id: "vision",
     title: "방향",
     desc: "재미 · 런 목표",
@@ -16,8 +10,8 @@ const NAV = [
   },
   {
     group: true,
-    title: "콘텐츠 기획",
-    hint: "의도 · 역할 (수치 없음)",
+    title: "콘텐츠",
+    hint: "의도 · 역할",
     children: [
       {
         id: "enemies",
@@ -31,16 +25,23 @@ const NAV = [
     ],
   },
   {
-    id: "workflow",
+    group: true,
     title: "워크플로",
-    desc: "/feature · /push",
-    file: "feature-workflow.md",
-  },
-  {
-    id: "systems",
-    title: "기능 설계 목록",
-    desc: "systems/ 인덱스 (feature AC)",
-    file: "systems/README.md",
+    hint: "개발·문서 위치",
+    children: [
+      {
+        id: "workflow",
+        title: "/feature · /push",
+        desc: "문서 위치 포함",
+        file: "feature-workflow.md",
+      },
+      {
+        id: "systems",
+        title: "기능 설계 목록",
+        desc: "systems/ 인덱스",
+        file: "systems/README.md",
+      },
+    ],
   },
 ];
 
@@ -59,13 +60,12 @@ const PAGES = (() => {
 })();
 
 const LAYER_CHIPS = [
-  { id: "layers", label: "층 규칙" },
   { id: "vision", label: "방향" },
-  { id: "enemies", label: "적 기획" },
+  { id: "enemies", label: "적" },
   { id: "workflow", label: "워크플로" },
 ];
 
-const DEFAULT_ID = "layers";
+const DEFAULT_ID = "vision";
 
 const navEl = document.getElementById("cat-nav");
 const titleEl = document.getElementById("panel-title");

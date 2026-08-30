@@ -1,15 +1,8 @@
 # 적
 
-유닛(무엇을 하는가)만 다룬다 — **구현 스펙**.  
-**왜 이 적인가(기획 의도)** → [`docs/design/enemies/`](../../design/enemies/).  
-**슬롯 기하** → [진형](#formations). **조합** → [Encounter](#encounters). **언제** → [런·페이싱](#run-pacing).
-
-층 규칙: [`docs/design/doc-layers.md`](../../design/doc-layers.md)
-
-```text
-Enemy 씬  →  Formation layout  →  EncounterPreset  →  EncounterPool
-(이 문서)     (formations/)         (encounters/)        (run-pacing + catalog)
-```
+유닛(무엇을 하는가) — **구현 스펙**.  
+의도(왜) → [기획 · 적](../design/#enemies).  
+진형 → [formations](#formations) · 조합 → [encounters](#encounters) · 언제 → [run-pacing](#run-pacing).
 
 ## 타입 요약
 
