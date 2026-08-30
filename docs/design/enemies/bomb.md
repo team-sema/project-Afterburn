@@ -11,7 +11,7 @@
 
 ## 구현
 
-수치·퓨즈·Encounter → [`docs/spec/enemies/bomb.md`](../../spec/enemies/bomb.md) · [catalog](../../spec/encounters/catalog.md)
+수치·퓨즈·Encounter → [구현 스펙 · Bomb](../spec/#enemies/bomb) · [카탈로그](../spec/#encounters/catalog)
 
 ---
 
@@ -19,4 +19,5 @@
 
 | 날짜 | 변경 |
 |------|------|
+| 2026-08-30 | Pages 스펙 해시 링크 |
 | 2026-08-30 | 초안 |

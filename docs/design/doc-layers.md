@@ -18,7 +18,7 @@
 | 종류 | 경로 | 내용 |
 |------|------|------|
 | **콘텐츠 기획** | `design/enemies/`, (추후 `weapons/` 등) | 로스터 의도·역할·압박. feature slug와 무관하게 유지 |
-| **방향** | `design/vision.md` | 게임 전체 재미 축·런 목표 (짧게) |
+| **방향** | `design/vision.md` | 게임 전체 재미·런 목표 (짧게) |
 | **기능 설계** | `design/systems/<slug>.md` | *이번 feature* AC·TBD·이력. `/feature` 정본 |
 | **Task** | `design/tasks/<slug>-tasks.md` | 구현 체크리스트 |
 | **운영** | `kanban-v2.md` 등 | 워크플로·칸반 규칙 (기획 콘텐츠 아님) |
@@ -60,4 +60,5 @@
 
 | 날짜 | 변경 |
 |------|------|
+| 2026-08-30 | 「재미 축」표현 제거 · Pages `/design/` 브라우저 |
 | 2026-08-30 | 초안: 기획 vs 구현 스펙 · design 하위 역할 |
