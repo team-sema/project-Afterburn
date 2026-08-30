@@ -1,13 +1,14 @@
 # 설계 (`docs/design/`)
 
-**기획·기능 설계**가 여기 있다. **지금 코드가 하는 일**은 [`docs/spec/`](../spec/) (구현 스펙 · Pages `/spec/`).
+**기획·기능 설계**가 여기 있다. Pages 브라우저: 이 폴더의 [`index.html`](index.html) (`/design/`) — MD를 사이트에서 읽음.  
+**지금 코드가 하는 일**은 [`docs/spec/`](../spec/) · Pages `/spec/`.
 
 층 구분 정본: [`doc-layers.md`](doc-layers.md)
 
 | 경로 | 역할 | 종류 |
 |------|------|------|
 | [`doc-layers.md`](doc-layers.md) | 기획 vs 구현 스펙 규칙 | 운영 |
-| [`vision.md`](vision.md) | 게임 방향·재미 축 | **기획** |
+| [`vision.md`](vision.md) | 게임 방향·플레이 재미 | **기획** |
 | [`enemies/`](enemies/) | 적 의도·역할 | **기획** |
 | [`systems/`](systems/) | feature별 AC·TBD·이력 | 기능 설계 |
 | [`tasks/`](tasks/) | 구현 Task | 기능 설계 |
