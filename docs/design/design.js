@@ -98,11 +98,22 @@ function escapeHtml(text) {
 }
 
 function pageFromHash(raw) {
-  const hash = (raw || "").replace(/^#/, "");
+  let hash = (raw || "").replace(/^#/, "");
+  try {
+    hash = decodeURIComponent(hash);
+  } catch (_) {
+    /* keep raw */
+  }
   if (!hash) return PAGES.get(DEFAULT_ID);
   if (PAGES.has(hash)) return PAGES.get(hash);
   const bare = hash.replace(/\.md$/, "");
   if (PAGES.has(bare)) return PAGES.get(bare);
+  // Unknown deep link — stay on hub that owns the prefix (enemies/foo → enemies)
+  const slash = hash.indexOf("/");
+  if (slash > 0) {
+    const parent = hash.slice(0, slash);
+    if (PAGES.has(parent)) return PAGES.get(parent);
+  }
   return PAGES.get(DEFAULT_ID);
 }
 
