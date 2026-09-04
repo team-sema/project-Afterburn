@@ -16,7 +16,7 @@
 - `ForwardAttackRunMovementStep`: 편대 루트를 진행 방향으로 회전 후 local forward 210px/s. clamp·bounce·재추적 없음
 - 화면 진입 후 **0.7초** 사격 창 · **10발 burst 1회만** (`burst_interval` 0.05, `fire_interval` 10으로 재공격 차단)
 - 탄: 플레이어 조준 · **300px/s**
-- Drone에서 상속한 전역 일반 적 사격 안전선을 사용하며, 플레이필드 높이의 60% 아래에서는 남은 볼리를 발사하지 않음
+- Drone에서 상속한 전역 일반 적 사격 안전선을 사용하며, 플레이필드 높이의 70% 아래에서는 남은 볼리를 발사하지 않음
 - 생존 기체는 DespawnArea 이탈 시 보상 없음 (`no_health` 없음)
 
 ## 조합

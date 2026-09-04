@@ -13,8 +13,8 @@ func _run() -> void:
 	root.add_child(gameplay_world)
 	var augment_registry := EnemyAugmentRegistry.new()
 	_expect(
-		is_equal_approx(augment_registry.shot_threshold_y_ratio, 0.6),
-		"Enemy registry owns the shared threshold at the player starting line",
+		is_equal_approx(augment_registry.shot_threshold_y_ratio, 0.7),
+		"Enemy registry allows fire in the upper 70 percent of the playfield",
 	)
 
 	var projectile_source := Node2D.new()
