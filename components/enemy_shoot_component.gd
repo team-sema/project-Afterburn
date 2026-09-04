@@ -19,6 +19,9 @@ extends Node
 @export var activate_on_visible_entry := false
 ## Zero keeps firing indefinitely after activation.
 @export_range(0.0, 20.0, 0.05, "suffix:s") var active_duration := 0.0
+## Prevents ordinary enemies from firing after descending into the player's
+## starting band. Special attacks leave this disabled.
+@export var apply_shot_threshold := false
 
 var enemy: Enemy
 ## When enabled, projectiles receive launch(direction, speed). When disabled,
@@ -138,6 +141,8 @@ func fire() -> void:
 		return
 	if activate_on_visible_entry and not _fire_window_active:
 		return
+	if _is_below_shot_threshold():
+		return
 	if use_actor_forward_direction:
 		var forward := local_forward_direction.normalized().rotated(enemy.global_rotation)
 		_fire_projectiles(forward)
@@ -198,6 +203,17 @@ func is_fire_window_active() -> bool:
 
 func get_volleys_fired() -> int:
 	return _volleys_fired
+
+
+func _is_below_shot_threshold() -> bool:
+	if not apply_shot_threshold:
+		return false
+	var visible_rect := enemy.get_viewport_rect()
+	var threshold_y := (
+		visible_rect.position.y
+		+ visible_rect.size.y * enemy.augment_registry.shot_threshold_y_ratio
+	)
+	return enemy.global_position.y > threshold_y
 
 
 func _schedule_initial_burst() -> void:

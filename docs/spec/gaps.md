@@ -28,6 +28,7 @@
 19. **루트에 게임 코드 13개** — `gameplay.tscn`·오퍼/진행 컨트롤러·레지스트리·`enemy_generator.gd`(짝 씬은 `enemies/`)
 20. **테스트 공용 베이스 없음** — 33개 테스트가 `_expect` 헬퍼와 긴 씬 경로(`Layout/Playfield/...`)를 각자 하드코딩. `AGENTS.md` 예시의 `tests/example_test.gd`는 실재하지 않음
 21. **`3d/physics_engine="Jolt Physics"`** — 2D 전용 프로젝트에 남은 사문 설정
+22. **일반 적 사격 안전선 소유권** — 현재 공통 0.6 값은 런 공유와 즉시 반영을 위해 `EnemyAugmentRegistry`에 있다. 두 번째 전역 전투 안전 옵션 또는 threshold 증강을 구현할 때 authored 기본값은 `EnemyCombatConfig` Resource로 분리하고, Registry에는 활성 증강에서 계산한 런타임 보정만 둔다. 개별 적의 연사·탄수·탄속·패턴은 각 공격 컴포넌트에 유지하며, 런타임에 `.tres`나 `ProjectSettings` 원본을 직접 변경하지 않는다.
 
 ## 콘텐츠 확장 아이디어
 

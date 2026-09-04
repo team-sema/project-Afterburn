@@ -77,7 +77,7 @@
 | `EnemyModifierFactory` | 스폰 시 적 스탯·행동 컴포넌트 적용 |
 | `EnemyAugmentGrantComponent` | 수동으로 적 오그먼트 grant *(씬 미연결)* |
 | `TargetingComponent` | `"player"` 그룹 타깃 |
-| `EnemyShootComponent` | 적 기본 조준 사격 · `fire_interval` + **`burst_count`/`burst_interval`** 연발 · 선택적 actor-forward 발사와 VisibleRect 진입 기반 제한 사격 창 · 기본 탄 `base_enemy_projectile` |
+| `EnemyShootComponent` | 적 기본 조준 사격 · `fire_interval` + **`burst_count`/`burst_interval`** 연발 · 선택적 actor-forward 발사와 VisibleRect 진입 기반 제한 사격 창 · `apply_shot_threshold` 사용 시 Registry의 공통 Y 안전선 아래 발사 차단 · 기본 탄 `base_enemy_projectile` |
 | `RadialBarrageShootComponent` | Caster 원형 다연발 탄막 |
 | `SniperAttackComponent` | 스나이퍼 이중선 조준·완전 조준 유지 · 고속탄 발사·반동 · 쿨다운 반복 |
 | `SniperAimCone` | 스나이퍼 조준 이중선 텔레그래프 `_draw` |
