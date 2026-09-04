@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="EncounterPreset" format=3]
+[gd_resource type="Resource" script_class="EncounterPreset" format=3 uid="uid://b7ix1lb3jut1k"]
 
 [ext_resource type="Script" uid="uid://c6t14vfypdxop" path="res://resources/encounters/encounter_preset.gd" id="1_preset"]
 [ext_resource type="Script" uid="uid://cbtt1l1ekmuxi" path="res://resources/encounters/encounter_member.gd" id="2_member"]

@@ -1,10 +1,10 @@
-[gd_resource type="Resource" script_class="EncounterPreset" format=3]
+[gd_resource type="Resource" script_class="EncounterPreset" format=3 uid="uid://rgc5xoepjfpd"]
 
 [ext_resource type="Script" uid="uid://c6t14vfypdxop" path="res://resources/encounters/encounter_preset.gd" id="1_preset"]
 [ext_resource type="Script" uid="uid://cbtt1l1ekmuxi" path="res://resources/encounters/encounter_member.gd" id="2_member"]
 [ext_resource type="PackedScene" path="res://formations/layouts/single_formation.tscn" id="3_layout"]
 [ext_resource type="Resource" uid="uid://ciw8jhdxct5qd" path="res://resources/enemy_movement/sequences/single_release.tres" id="4_release"]
-[ext_resource type="Resource" path="res://resources/enemy_movement/sequences/elite_entry_patrol.tres" id="5_individual"]
+[ext_resource type="Resource" uid="uid://dky4sw631n2si" path="res://resources/enemy_movement/sequences/elite_entry_patrol.tres" id="5_individual"]
 [ext_resource type="PackedScene" path="res://enemies/elite_fighter.tscn" id="6_elite"]
 
 [sub_resource type="Resource" id="Member_elite"]
@@ -18,6 +18,5 @@ difficulty = 20.0
 formation_layout_scene = ExtResource("3_layout")
 formation_movement_sequence = ExtResource("4_release")
 members = Array[ExtResource("2_member")]([SubResource("Member_elite")])
-spawn_anchor = 1
 formation_break_condition = 1
 individual_movement_sequence = ExtResource("5_individual")

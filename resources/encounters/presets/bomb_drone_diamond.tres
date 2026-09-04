@@ -1,9 +1,9 @@
-[gd_resource type="Resource" script_class="EncounterPreset" format=3]
+[gd_resource type="Resource" script_class="EncounterPreset" format=3 uid="uid://dharoag8kx085"]
 
 [ext_resource type="Script" uid="uid://c6t14vfypdxop" path="res://resources/encounters/encounter_preset.gd" id="1_preset"]
 [ext_resource type="Script" uid="uid://cbtt1l1ekmuxi" path="res://resources/encounters/encounter_member.gd" id="2_member"]
 [ext_resource type="PackedScene" path="res://formations/layouts/diamond_formation.tscn" id="3_layout"]
-[ext_resource type="Resource" path="res://resources/enemy_movement/sequences/bomb_drone_approach.tres" id="4_movement"]
+[ext_resource type="Resource" uid="uid://dco2jwvop8cs8" path="res://resources/enemy_movement/sequences/bomb_drone_approach.tres" id="4_movement"]
 [ext_resource type="Resource" path="res://resources/formation_behaviors/maintain.tres" id="5_behavior"]
 [ext_resource type="PackedScene" uid="uid://bhw7lkvyjx43v" path="res://enemies/normal_enemy.tscn" id="6_drone"]
 [ext_resource type="PackedScene" uid="uid://dyoidordek441" path="res://enemies/bomb_enemy.tscn" id="7_bomb"]
@@ -21,7 +21,6 @@ slot_index = 1
 [sub_resource type="Resource" id="Member_bomb_top"]
 script = ExtResource("2_member")
 enemy_scene = ExtResource("7_bomb")
-slot_index = 0
 
 [sub_resource type="Resource" id="Member_drone_right"]
 script = ExtResource("2_member")
