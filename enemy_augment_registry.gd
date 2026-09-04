@@ -5,6 +5,8 @@ signal augment_added(augment: EnemyAugment)
 signal augments_cleared
 
 @export var active_augments: Array[EnemyAugment] = []
+## Shared lower-screen safety line for every opted-in EnemyShootComponent.
+@export_range(0.0, 1.0, 0.01) var shot_threshold_y_ratio := 0.6
 
 
 func add_augment(augment: EnemyAugment) -> void:
