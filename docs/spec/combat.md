@@ -51,8 +51,8 @@ Hitbox.area_entered
 
 ### 일반 적 사격 안전선
 
-- `EnemyAugmentRegistry.shot_threshold_y_ratio`의 기본값 **0.6**을 플레이필드 공통 Y 안전선으로 사용한다.
-- `EnemyShootComponent.apply_shot_threshold`가 켜진 적은 중심점 Y가 `VisibleRect` 높이의 60%를 넘으면 발사하지 않는다. 값이 작을수록 더 위에서 사격을 멈춘다.
+- `EnemyAugmentRegistry.shot_threshold_y_ratio`의 기본값 **0.7**을 플레이필드 공통 Y 안전선으로 사용한다.
+- `EnemyShootComponent.apply_shot_threshold`가 켜진 적은 중심점 Y가 `VisibleRect` 높이의 70%를 넘으면 발사하지 않는다. 즉 상단 70%에서는 발사할 수 있고 하단 30%에서는 발사하지 않는다. 값이 작을수록 더 위에서 사격을 멈춘다.
 - Drone · Striker · 이를 상속한 Interceptor가 안전선을 사용한다. Elite 및 Caster/Sniper 전용 공격은 사용하지 않는다.
 - 안전선은 볼리 생성 직전에 매번 공통값을 읽는다. 런타임에 공통값이 바뀌면 이미 활성화된 적용 대상도 다음 발사부터 새 값을 사용한다.
 
