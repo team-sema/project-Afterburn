@@ -8,7 +8,7 @@
 
 - slug = Notion `카드 ID`
 - 없으면 아이템 칸반에 페이지 생성
-- `/push` 기본 도착: `검증 대기`
+- `/push` 기본 도착: `검증`
 - `/push`만으로 `완료` 금지
 
 ## Acceptance Criteria
