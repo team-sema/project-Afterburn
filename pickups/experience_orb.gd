@@ -27,10 +27,12 @@ var _age := 0.0
 var _state := CollectionState.DRIFTING
 var _collector: Area2D
 var _attraction_speed := 0.0
+var _knockback_tween: Tween
 
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_PAUSABLE
+	add_to_group("experience_orbs")
 	collision_layer = 0
 	collision_mask = EXPERIENCE_COLLECTOR_LAYER
 	monitoring = true
@@ -41,6 +43,18 @@ func _ready() -> void:
 func setup(amount: int, spawn_position: Vector2) -> void:
 	experience_amount = amount
 	global_position = spawn_position
+
+
+func start_forced_attraction(collector: Area2D) -> bool:
+	if _state == CollectionState.COLLECTED or not is_instance_valid(collector):
+		return false
+	if _knockback_tween != null and _knockback_tween.is_valid():
+		_knockback_tween.kill()
+	_collector = collector
+	_attraction_speed = maximum_attraction_speed
+	_state = CollectionState.ATTRACTING
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	return true
 
 
 func _process(delta: float) -> void:
@@ -64,6 +78,7 @@ func _process_attraction(delta: float) -> void:
 	if not is_instance_valid(_collector):
 		_collector = null
 		_state = CollectionState.DRIFTING
+		process_mode = Node.PROCESS_MODE_PAUSABLE
 		return
 	_attraction_speed = move_toward(
 		_attraction_speed,
@@ -87,9 +102,12 @@ func _on_area_entered(area: Area2D) -> void:
 	if away_direction.is_zero_approx():
 		away_direction = Vector2.RIGHT.rotated(randf() * TAU)
 	var knockback_target := global_position + away_direction * knockback_distance
-	var tween := create_tween()
-	tween.tween_property(self, "global_position", knockback_target, knockback_duration).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	await tween.finished
+	_knockback_tween = create_tween()
+	_knockback_tween.tween_property(self, "global_position", knockback_target, knockback_duration).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	await _knockback_tween.finished
+	_knockback_tween = null
+	if _state != CollectionState.KNOCKBACK:
+		return
 	if not is_instance_valid(_collector):
 		_collector = null
 		_state = CollectionState.DRIFTING

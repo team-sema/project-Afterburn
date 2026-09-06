@@ -78,6 +78,8 @@
 [ext_resource type="Resource" path="res://resources/player_augments/weapon/trait_barrier_repulse.tres" id="66d_tr_barrier_repulse"]
 [ext_resource type="Script" path="res://threat_elite_controller.gd" id="67_elite_controller"]
 [ext_resource type="Resource" path="res://resources/encounters/presets/threat_elite_single.tres" id="68_elite_preset"]
+[ext_resource type="Script" path="res://components/bullet_cancel_reward_controller.gd" id="69_bullet_cancel_reward"]
+[ext_resource type="PackedScene" path="res://pickups/experience_orb.tscn" id="70_experience_orb"]
 
 [sub_resource type="Environment" id="Environment_neon"]
 background_mode = 3
@@ -145,8 +147,17 @@ augment_registry = NodePath("../PlayerAugmentRegistry")
 augment_registry = NodePath("../EnemyAugmentRegistry")
 progression = NodePath("../AugmentProgressionController")
 
-[node name="ThreatEliteController" type="Node" parent="." node_paths=PackedStringArray("progression", "enemy_generator")]
+[node name="BulletCancelRewardController" type="Node" parent="." node_paths=PackedStringArray("gameplay_world", "experience_collector")]
+process_mode = 3
+script = ExtResource("69_bullet_cancel_reward")
+gameplay_world = NodePath("..")
+experience_collector = NodePath("../Ship/ExperienceCollector")
+experience_orb_scene = ExtResource("70_experience_orb")
+
+[node name="ThreatEliteController" type="Node" parent="." node_paths=PackedStringArray("progression", "enemy_generator", "bullet_cancel_reward")]
+process_mode = 3
 script = ExtResource("67_elite_controller")
 progression = NodePath("../AugmentProgressionController")
 enemy_generator = NodePath("../EnemyGenerator")
+bullet_cancel_reward = NodePath("../BulletCancelRewardController")
 elite_preset = ExtResource("68_elite_preset")

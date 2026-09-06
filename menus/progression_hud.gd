@@ -14,6 +14,10 @@ var _normal_experience_label_color := Color.WHITE
 var _is_augment_ready := false
 var _highlight_time := 0.0
 var _elite_gate_active := false
+var _bullet_cancel_reward_active := false
+var _current_experience := 0
+var _experience_required := 1
+var _level := 1
 
 
 func _ready() -> void:
@@ -27,6 +31,7 @@ func _ready() -> void:
 	progression.experience_changed.connect(_on_experience_changed)
 	progression.enemy_augment_progress_changed.connect(_on_enemy_augment_progress_changed)
 	progression.elite_gate_changed.connect(_on_elite_gate_changed)
+	progression.bullet_cancel_reward_changed.connect(_on_bullet_cancel_reward_changed)
 	progression.call_deferred("publish_state")
 
 
@@ -43,14 +48,28 @@ func _process(delta: float) -> void:
 
 
 func _on_experience_changed(current_experience: int, experience_required: int, level: int) -> void:
-	experience_bar.max_value = max(1, experience_required)
-	experience_bar.value = current_experience
-	var is_ready := current_experience >= experience_required
+	_current_experience = current_experience
+	_experience_required = experience_required
+	_level = level
+	_refresh_experience()
+
+
+func _refresh_experience() -> void:
+	experience_bar.max_value = max(1, _experience_required)
+	experience_bar.value = _current_experience
+	var is_ready := _current_experience >= _experience_required
 	if is_ready:
-		experience_label.text = "LEVEL %02d   AUGMENT READY [C]" % level
+		if _bullet_cancel_reward_active:
+			experience_label.text = "LEVEL %02d   XP RECOVERY" % _level
+		else:
+			experience_label.text = "LEVEL %02d   AUGMENT READY [C]" % _level
 	else:
-		experience_label.text = "LEVEL %02d   %d / %d XP" % [level, current_experience, experience_required]
-	_set_augment_ready(is_ready)
+		experience_label.text = "LEVEL %02d   %d / %d XP" % [
+			_level,
+			_current_experience,
+			_experience_required,
+		]
+	_set_augment_ready(is_ready and not _bullet_cancel_reward_active)
 
 
 func _set_augment_ready(is_ready: bool) -> void:
@@ -83,3 +102,8 @@ func _on_enemy_augment_progress_changed(
 
 func _on_elite_gate_changed(is_active: bool, _threat_level: int) -> void:
 	_elite_gate_active = is_active
+
+
+func _on_bullet_cancel_reward_changed(is_active: bool) -> void:
+	_bullet_cancel_reward_active = is_active
+	_refresh_experience()

@@ -41,7 +41,9 @@
 | `ExperienceDropComponent` | 적 사망 시 경험치 오브 스폰 |
 | XP drop tuning | 일반 적 XP 오브 드롭 확률은 0.45, 엘리트는 1.0 |
 | `ExperienceCollectorComponent` | 플레이어 XP 수집 반경 제공 |
-| `ExperienceOrb` | 드롭 후 아래로 이동하며, 기본 낙하 속도는 플레이어 기본 이동 속도의 절반인 70px/s |
+| `ExperienceOrb` | 드롭 후 아래로 이동하며, 기본 낙하 속도는 플레이어 기본 이동 속도의 절반인 70px/s. 강제 흡수 시 반경·넉백을 건너뛰고 일시정지 중에도 플레이어에게 이동 |
+| `BulletCancelRewardController` | 플레이필드 적탄을 1 XP 오브로 변환하고, 기존 오브와 함께 전부 실제 회수될 때까지 기다리는 엘리트 이상 공용 보상 연출 |
+| `EnemyHealthBarComponent` | 엘리트·보스급 적이 피해를 받으면 기체 위에 남은 HP를 표시하고, 마지막 피격 1.5초 후 페이드아웃 |
 
 ## 연출 · 스폰
 

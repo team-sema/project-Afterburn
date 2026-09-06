@@ -6,7 +6,7 @@ for %%I in ("%~dp0..") do set "PROJECT_ROOT=%%~fI"
 if defined GODOT_EDITOR_PATH (
 	set "GODOT_PATH=%GODOT_EDITOR_PATH%"
 ) else (
-	set "GODOT_PATH=%PROJECT_ROOT%\..\..\Godot_v4.6-stable_mono_win64_console.exe"
+	set "GODOT_PATH=%PROJECT_ROOT%\..\..\..\Godot_v4.7-stable_win64\Godot_v4.7-stable_win64_console.exe"
 )
 
 if not exist "%GODOT_PATH%" (
