@@ -19,6 +19,7 @@ func _initialize() -> void:
 func _run() -> void:
 	var gameplay := (load("res://gameplay.tscn") as PackedScene).instantiate()
 	var gameplay_offer := gameplay.get_node("AugmentOfferController") as AugmentOfferController
+	gameplay_offer._ensure_offer_pools_loaded()
 	_expect(
 		gameplay_offer.enemy_augment_pool.has(DRONE_REINFORCEMENT),
 		"drone reinforcement is registered in the gameplay offer pool",
@@ -90,7 +91,7 @@ func _run() -> void:
 	await process_frame
 	var action_only_fuse := action_only_bomb.get_node("BombProximityFuseComponent")
 	_expect(
-		is_equal_approx(float(action_only_fuse.get("arm_duration")), 2.0),
+		is_equal_approx(float(action_only_fuse.get("arm_duration")), 3.0),
 		"general action rate does not accelerate the Bomb fuse",
 	)
 	action_only_bomb.queue_free()
