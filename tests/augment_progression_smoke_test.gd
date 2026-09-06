@@ -59,6 +59,16 @@ func _run() -> void:
 	progression_hud.call("_process", 0.5)
 	var highlighted_fill := experience_bar.get_theme_stylebox("fill") as StyleBoxFlat
 	_expect(highlighted_fill.bg_color != normal_fill_color, "full experience bar cycles highlight colors")
+	progression.set_bullet_cancel_reward_active(true)
+	_expect(not experience_label.text.contains("[C]"), "reward sequence hides the augment input hint")
+	Input.action_press("open_augment_offer")
+	progression._process(0.0)
+	Input.action_release("open_augment_offer")
+	_expect(progression.level == 1, "reward sequence blocks player level-up input")
+	_expect(progression.current_experience == 7, "blocked reward input does not spend experience")
+	_expect(not offer_controller.is_offer_active, "reward sequence does not open a player offer")
+	progression.set_bullet_cancel_reward_active(false)
+	_expect(experience_label.text.contains("[C]"), "augment input hint returns after the reward sequence")
 
 	Input.action_press("open_augment_offer")
 	progression._process(0.0)

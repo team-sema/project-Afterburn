@@ -6,6 +6,7 @@ signal elite_defeated(threat_level: int)
 
 @export var progression: AugmentProgressionController
 @export var enemy_generator: Node
+@export var bullet_cancel_reward: BulletCancelRewardController
 @export var elite_preset: EncounterPreset
 @export_range(1, 10000, 1) var base_elite_health := 180
 @export_range(0, 10000, 1) var health_per_threat := 60
@@ -17,6 +18,7 @@ var active_threat_level := 0
 func _ready() -> void:
 	assert(progression != null, "ThreatEliteController requires progression.")
 	assert(enemy_generator != null, "ThreatEliteController requires EnemyGenerator.")
+	assert(bullet_cancel_reward != null, "ThreatEliteController requires bullet cancel reward.")
 	assert(elite_preset != null and elite_preset.validate(true), "Elite preset is invalid.")
 	assert(enemy_generator.has_method("spawn_special_encounter"))
 	assert(enemy_generator.has_method("set_normal_spawns_paused"))
@@ -54,10 +56,14 @@ func _on_active_elite_defeated() -> void:
 	var completed_threat := active_threat_level
 	active_elite = null
 	active_threat_level = 0
-	assert(
-		progression.complete_elite_milestone(completed_threat),
-		"Elite defeat must complete the active Threat milestone.",
-	)
+	progression.set_bullet_cancel_reward_active(true)
+	get_tree().paused = true
+	await bullet_cancel_reward.collect_projectiles_and_vacuum()
+	var milestone_completed := progression.complete_elite_milestone(completed_threat)
+	progression.set_bullet_cancel_reward_active(false)
+	if not milestone_completed:
+		get_tree().paused = false
+	assert(milestone_completed, "Elite defeat must complete the active Threat milestone.")
 	elite_defeated.emit(completed_threat)
 
 

@@ -54,7 +54,7 @@ func _run() -> void:
 	_test_formation_encounters()
 	await _test_tanker_guard_replacement()
 	await _test_spawn_scoped_augments()
-	_test_threat_progression()
+	await _test_threat_progression()
 	_test_invalid_weight_safety()
 
 	for enemy in get_nodes_in_group("enemies"):
@@ -538,6 +538,8 @@ func _test_threat_progression() -> void:
 	_expect(elites.size() == 1, "Threat 2 spawns exactly one elite")
 	if elites.size() == 1:
 		(elites[0] as Enemy).stats_component.health = 0
+		var elite_controller := gameplay.get_node("ThreatEliteController") as ThreatEliteController
+		await elite_controller.elite_defeated
 	_expect(generator.current_threat_level == 2, "elite defeat advances the generator to Threat 2")
 	var offer_controller := gameplay.get_node("AugmentOfferController") as AugmentOfferController
 	_expect(

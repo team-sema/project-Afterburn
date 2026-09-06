@@ -11,7 +11,7 @@
 5. **`clear_augments()`** — 미호출 (씬 리로드에 의존)
 6. **오그먼트 풀 가중치** — `gameplay.tscn` 하드코드 + `offer_weight` × 범주 배율(획득↑·모듈↓, 베이 만석 시 둘 다↓·획득>0). 슬롯 강제·고정 %는 없음
 7. **부위·모듈 밸런스 수치** — `FacilityModuleEffect` primary 등은 플레이스홀더 성격. 기본 선체 1
-8. **보스 콘텐츠** — `Enemy.is_boss` / `bosses` 그룹·보스 피해 배율만 있음. 보스 스폰·패턴 없음
+8. **보스 콘텐츠** — `Enemy.is_boss` / `bosses` 그룹·보스 피해 배율과 엘리트 이상 공용 `BulletCancelRewardController`만 있음. 보스 스폰·패턴·처치 호출부는 없음
 9. **우측 패널 세로 여유** — 항목 추가 전 동적 fit 검사를 먼저 확인
 
 ## 구조 이슈

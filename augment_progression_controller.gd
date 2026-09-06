@@ -8,6 +8,7 @@ signal enemy_augment_progress_changed(elapsed: float, interval: float, current_t
 signal threat_level_changed(current_level: int)
 signal elite_milestone_requested(threat_level: int)
 signal elite_gate_changed(is_active: bool, threat_level: int)
+signal bullet_cancel_reward_changed(is_active: bool)
 
 @export var offer_controller: AugmentOfferController
 @export_range(1, 100000, 1) var base_experience_required := 5
@@ -22,6 +23,7 @@ var enemy_augment_tier := 0
 var pending_offers: Array[AugmentOfferController.OfferType] = []
 var elite_gate_active := false
 var active_elite_threat := 0
+var bullet_cancel_reward_active := false
 var _awaiting_elite_enemy_offer := false
 ## Facility XP_GAIN_MULT product. Applied in add_experience.
 var experience_gain_multiplier := 1.0
@@ -39,6 +41,7 @@ func publish_state() -> void:
 	enemy_augment_progress_changed.emit(enemy_augment_elapsed, enemy_augment_interval, get_threat_level())
 	threat_level_changed.emit(get_threat_level())
 	elite_gate_changed.emit(elite_gate_active, active_elite_threat)
+	bullet_cancel_reward_changed.emit(bullet_cancel_reward_active)
 
 
 func get_threat_level() -> int:
@@ -70,6 +73,8 @@ func add_experience(amount: int) -> void:
 
 
 func _try_level_up() -> void:
+	if bullet_cancel_reward_active:
+		return
 	if current_experience < experience_required:
 		return
 	if not offer_controller.request_offer(AugmentOfferController.OfferType.PLAYER):
@@ -79,6 +84,13 @@ func _try_level_up() -> void:
 	level += 1
 	experience_required = base_experience_required + (level - 1) * experience_requirement_growth
 	experience_changed.emit(current_experience, experience_required, level)
+
+
+func set_bullet_cancel_reward_active(is_active: bool) -> void:
+	if bullet_cancel_reward_active == is_active:
+		return
+	bullet_cancel_reward_active = is_active
+	bullet_cancel_reward_changed.emit(bullet_cancel_reward_active)
 
 
 func _try_request_offer() -> void:
