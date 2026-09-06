@@ -4,8 +4,6 @@ extends Control
 signal player_level_up_simulated(level: int)
 signal enemy_augment_event_simulated(tier: int)
 
-const PLAYER_AUGMENT_DIRECTORY := "res://resources/player_augments"
-const ENEMY_AUGMENT_DIRECTORY := "res://resources/enemy_augments"
 const ENCOUNTER_PRESET_DIRECTORY := "res://resources/encounters/presets"
 const PLAYER_AUGMENT_KINDS: Array[PlayerAugmentKind.Kind] = [
 	PlayerAugmentKind.Kind.FACILITY_EFFECT,
@@ -135,42 +133,15 @@ func get_enemy_augment_count() -> int:
 
 
 func _load_augment_resources() -> void:
-	_collect_augment_resources(PLAYER_AUGMENT_DIRECTORY)
-	_collect_augment_resources(ENEMY_AUGMENT_DIRECTORY)
-	_player_augment_pool.sort_custom(
-		func(a: PlayerAugment, b: PlayerAugment) -> bool:
-			if a.augment_type != b.augment_type:
-				return a.augment_type < b.augment_type
-			return String(a.augment_id) < String(b.augment_id)
+	_player_augment_pool = AugmentPoolLoader.load_player_augments(
+		AugmentPoolLoader.DEFAULT_PLAYER_DIR,
+		PLAYER_AUGMENT_KINDS,
+		false,
 	)
-	_enemy_augment_pool.sort_custom(
-		func(a: EnemyAugment, b: EnemyAugment) -> bool:
-			return String(a.augment_id) < String(b.augment_id)
+	_enemy_augment_pool = AugmentPoolLoader.load_enemy_augments(
+		AugmentPoolLoader.DEFAULT_ENEMY_DIR,
+		false,
 	)
-
-
-func _collect_augment_resources(directory_path: String) -> void:
-	var directory := DirAccess.open(directory_path)
-	if directory == null:
-		push_error("WeaponTestLab: cannot open augment directory '%s'." % directory_path)
-		return
-	directory.list_dir_begin()
-	var file_name := directory.get_next()
-	while file_name != "":
-		if not file_name.begins_with("."):
-			var resource_path := directory_path.path_join(file_name)
-			if directory.current_is_dir():
-				_collect_augment_resources(resource_path)
-			elif file_name.ends_with(".tres"):
-				var resource := load(resource_path)
-				if resource is PlayerAugment:
-					var player_augment := resource as PlayerAugment
-					if player_augment.augment_type in PLAYER_AUGMENT_KINDS:
-						_player_augment_pool.append(player_augment)
-				elif resource is EnemyAugment:
-					_enemy_augment_pool.append(resource as EnemyAugment)
-		file_name = directory.get_next()
-	directory.list_dir_end()
 
 
 func _build_augment_overlay() -> void:

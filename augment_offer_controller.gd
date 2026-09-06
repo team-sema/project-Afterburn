@@ -19,8 +19,12 @@ enum OfferType {
 @export var module_swap_ui: AugmentModuleSwapOverlay
 @export var weapon_slot_ui: WeaponSlotSelectionOverlay
 @export var ship: Node2D
+## Empty + auto_load → folder scan. Tests may assign a pool before _ready / without auto_load.
 @export var player_augment_pool: Array[PlayerAugment] = []
 @export var enemy_augment_pool: Array[EnemyAugment] = []
+@export var auto_load_offer_pools := true
+@export_dir var player_augment_directory := AugmentPoolLoader.DEFAULT_PLAYER_DIR
+@export_dir var enemy_augment_directory := AugmentPoolLoader.DEFAULT_ENEMY_DIR
 @export_range(1, 3, 1) var choices_per_offer := 3
 @export_range(8.0, 120.0, 1.0) var player_resume_clear_radius := 36.0
 ## Run-wide reroll budget (temporary balance; tune via export only).
@@ -45,6 +49,7 @@ func _ready() -> void:
 	assert(selection_ui != null, "AugmentOfferController requires an AugmentSelectionOverlay.")
 	assert(module_swap_ui != null, "AugmentOfferController requires an AugmentModuleSwapOverlay.")
 	assert(ship != null, "AugmentOfferController requires a Ship reference.")
+	_ensure_offer_pools_loaded()
 	assert(enemy_augment_pool.size() >= choices_per_offer, "Enemy augment pool is too small for an offer.")
 	remaining_reroll_count = max_reroll_count
 	selection_ui.configure_player_registry(player_registry)
@@ -52,6 +57,15 @@ func _ready() -> void:
 	selection_ui.choice_selected.connect(_on_choice_selected)
 	selection_ui.universal_slot_expansion_selected.connect(_on_universal_slot_expansion_selected)
 	selection_ui.reroll_requested.connect(_on_reroll_requested)
+
+
+func _ensure_offer_pools_loaded() -> void:
+	if not auto_load_offer_pools:
+		return
+	if player_augment_pool.is_empty():
+		player_augment_pool = AugmentPoolLoader.load_player_offer_pool(player_augment_directory)
+	if enemy_augment_pool.is_empty():
+		enemy_augment_pool = AugmentPoolLoader.load_enemy_offer_pool(enemy_augment_directory)
 
 
 func request_offer(offer_type: OfferType) -> bool:
@@ -104,6 +118,7 @@ func _get_loadout() -> PlayerWeaponLoadout:
 
 
 func _pick_player_choices() -> Array[PlayerAugment]:
+	_ensure_offer_pools_loaded()
 	var loadout := _get_loadout()
 	var valid: Array[PlayerAugment] = []
 	for augment in player_augment_pool:
@@ -113,6 +128,7 @@ func _pick_player_choices() -> Array[PlayerAugment]:
 
 
 func _pick_enemy_choices() -> Array[EnemyAugment]:
+	_ensure_offer_pools_loaded()
 	var choices: Array[EnemyAugment] = []
 	for augment in enemy_augment_pool:
 		if _is_enemy_augment_available(augment):
