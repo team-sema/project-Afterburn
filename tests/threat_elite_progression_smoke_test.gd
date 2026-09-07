@@ -28,23 +28,9 @@ func _run() -> void:
 	if is_instance_valid(elite):
 		_expect(elite.is_elite and elite.is_in_group("elites"), "spawned enemy is marked elite")
 		_expect(elite.spawn_id == &"threat_elite", "elite uses the dedicated encounter id")
-		_expect(elite.stats_component.health == 180, "first elite starts with 180 HP")
+		_expect(elite.stats_component.health == 420, "first elite starts with 420 HP")
 		var shoot := elite.get_node("EnemyShootComponent") as EnemyShootComponent
-		var barrage := elite.get_node("EliteBarrageShootComponent") as EnemyShootComponent
-		_expect(
-			is_equal_approx(shoot.fire_interval, 1.25)
-			and shoot.burst_count == 2
-			and shoot.shot_count == 1
-			and shoot.use_actor_forward_direction,
-			"elite periodically fires two forward shots",
-		)
-		_expect(
-			is_equal_approx(barrage.fire_interval, 7.5)
-			and barrage.burst_count == 12
-			and is_equal_approx(barrage.burst_interval, 0.09)
-			and not barrage.use_actor_forward_direction,
-			"elite periodically pours aimed fire toward the player",
-		)
+		_expect(shoot.get_script().resource_path.ends_with("elite_attack_component.gd"), "elite uses coordinated attack phases")
 		_expect(
 			elite.movement_controller.sequence.resource_path.ends_with("elite_entry_patrol.tres"),
 			"elite enters the upper band and patrols",
@@ -73,7 +59,7 @@ func _run() -> void:
 	_expect(offer_controller.selection_ui.visible, "enemy offer UI opens while reward pause stays active")
 	_expect(enemy_registry.get_active_augments().is_empty(), "enemy stays unchanged until a choice is applied")
 
-	var chosen := offer_controller.enemy_augment_pool[0]
+	var chosen := load("res://resources/enemy_augments/enemy_health_boost_1_2.tres") as EnemyAugment
 	enemy_registry.add_augment(chosen)
 	offer_controller.call("_complete_offer", AugmentOfferController.OfferType.ENEMY)
 	_expect(enemy_registry.get_stack_count(chosen.augment_id) == 1, "enemy augment applies after elite defeat")
@@ -86,7 +72,14 @@ func _run() -> void:
 	var next_elite := elite_controller.active_elite
 	_expect(is_instance_valid(next_elite), "Threat 3 spawns a new elite")
 	if is_instance_valid(next_elite):
-		_expect(next_elite.stats_component.health == 288, "Threat 3 elite scales before health augment")
+		_expect(next_elite.stats_component.health == 672, "Threat 3 elite scales before health augment")
+		_expect(next_elite.spawn_id == &"threat_elite_awl", "second gate selects the charge elite")
+		next_elite.stats_component.health = 0
+		await elite_controller.elite_defeated
+		_expect(progression.get_threat_level() == 3, "charge elite defeat also advances Threat")
+		offer_controller.call("_complete_offer", AugmentOfferController.OfferType.ENEMY)
+		progression._process(60.0)
+		_expect(elite_controller.active_elite.spawn_id == &"threat_elite", "third gate returns to fighter")
 
 	gameplay.queue_free()
 	await process_frame

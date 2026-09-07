@@ -8,8 +8,9 @@ signal elite_defeated(threat_level: int)
 @export var enemy_generator: Node
 @export var bullet_cancel_reward: BulletCancelRewardController
 @export var elite_preset: EncounterPreset
-@export_range(1, 10000, 1) var base_elite_health := 180
-@export_range(0, 10000, 1) var health_per_threat := 60
+@export var charge_elite_preset: EncounterPreset = preload("res://resources/encounters/presets/threat_elite_awl.tres")
+@export_range(1, 10000, 1) var base_elite_health := 420
+@export_range(0, 10000, 1) var health_per_threat := 140
 
 var active_elite: Enemy
 var active_threat_level := 0
@@ -20,6 +21,7 @@ func _ready() -> void:
 	assert(enemy_generator != null, "ThreatEliteController requires EnemyGenerator.")
 	assert(bullet_cancel_reward != null, "ThreatEliteController requires bullet cancel reward.")
 	assert(elite_preset != null and elite_preset.validate(true), "Elite preset is invalid.")
+	assert(charge_elite_preset != null and charge_elite_preset.validate(true), "Charge elite preset is invalid.")
 	assert(enemy_generator.has_method("spawn_special_encounter"))
 	assert(enemy_generator.has_method("set_normal_spawns_paused"))
 	progression.elite_milestone_requested.connect(_on_elite_milestone_requested)
@@ -32,7 +34,7 @@ func _on_elite_milestone_requested(threat_level: int) -> void:
 	enemy_generator.call("set_normal_spawns_paused", true)
 	var controller := enemy_generator.call(
 		"spawn_special_encounter",
-		elite_preset,
+		charge_elite_preset if threat_level % 2 == 1 else elite_preset,
 		_configure_elite.bind(threat_level),
 	) as FormationController
 	assert(controller != null, "Elite encounter failed to spawn.")

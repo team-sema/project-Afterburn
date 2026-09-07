@@ -1,21 +1,14 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 64 64">
-  <!-- Nose faces +Y (down), matching the existing enemy sprite convention. -->
-  <g transform="rotate(180 32 32)">
-    <!-- Wing tips sweep toward the rear, so there are no forward-facing wing protrusions. -->
-    <path fill="#fff" d="
-    M32 2
-    C34 8.5 35.6 14.1 37.6 19.1
-    L41.2 27.1 59 35.2 55.2 40.3 38.6 36.3
-    L36.7 51.2 32 61.7 27.3 51.2 25.4 36.3
-    L8.8 40.3 5 35.2 22.8 27.1 26.4 19.1
-    C28.4 14.1 30 8.5 32 2 Z
-    "/>
-    <!-- Dark, inset canopy. -->
-    <path fill="#171b25" d="M32 11.2 28.9 24.2 32 30.2 35.1 24.2Z"/>
-    <!-- Twin machine-gun barrels point forward along the airframe. -->
-    <path fill="#171b25" d="M21.3 36.9 22.5 36.6 23.1 29.1 21.9 29.4Z M41.5 36.6l1.2.3-.6-7.5-1.2-.3Z"/>
-    <!-- Short missiles sit on the outer-wing hardpoints; their pointed ends face forward. -->
-    <path fill="#fff" d="M10.8 39.3 8.4 31.1 9.5 26.7l1.5 4.4 2.1 8.2Z M53.2 39.3l2.1-8.2 1.5-4.4 1.1 4.4-2.4 8.2Z"/>
-    <path fill="#171b25" d="m10 37.9-.8-6.7.4-2 .6 2 .9 6.6Z M54 37.9l.9-6.6.6-2 .4 2-.8 6.7Z"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <!-- Down-facing artillery elite; white mask with transparent seams. -->
+  <g fill="#fff">
+    <path d="M8 26 43 40 48 61 34 71 8 56 3 41Z"/>
+    <path d="m120 26-35 14-5 21 14 10 26-15 5-15Z"/>
+    <path d="M15 59 30 68 30 86 24 102 18 89Z"/>
+    <path d="m113 59-15 9v18l6 16 6-13Z"/>
+    <path d="M42 14 53 21 51 44 44 36 39 21Z"/>
+    <path d="m86 14-11 7 2 23 7-8 5-15Z"/>
+    <path fill-rule="evenodd" d="M64 19 75 33 77 54 88 72 77 85 70 100 64 115 58 100 51 85 40 72 51 54 53 33Z M64 42 58 54 64 73 70 54Z"/>
+    <path d="M35 75 45 81 54 99 42 93Z"/>
+    <path d="m93 75-10 6-9 18 12-6Z"/>
   </g>
 </svg>

@@ -1,0 +1,22 @@
+from PIL import Image, ImageDraw, ImageFont, ImageFilter
+from pathlib import Path
+root = Path('artifacts')
+canvas = Image.new('RGB', (1100, 650), '#080d19')
+draw = ImageDraw.Draw(canvas)
+font = ImageFont.truetype('C:/Windows/Fonts/arial.ttf', 26)
+small = ImageFont.truetype('C:/Windows/Fonts/arial.ttf', 16)
+draw.text((44, 25), 'AFTERBURN / ELITE AIRFRAMES', font=font, fill='#eaf1fc')
+draw.text((44, 64), 'White vector cores / transparent cuts / forward axis: down', font=small, fill='#8492ad')
+for x, name, label, desc, dims in [(280, 'enemy_elite_fighter', '01 / BARRAGE FIGHTER', 'Broad shoulders + twin forward pods', (300,300)), (820,'enemy_elite_awl','02 / ELITE AWL','Piercing keel + lateral emitters',(272,340))]:
+    src = Image.open(root / (name+'_preview.png')).convert('RGBA')
+    src.thumbnail(dims, Image.Resampling.LANCZOS)
+    pos = (x-src.width//2, 105+(350-src.height)//2)
+    canvas.paste(src, pos, src)
+    draw.text((x-200, 462), label, font=font, fill='#eaf1fc')
+    draw.text((x-200, 500), desc, font=small, fill='#8492ad')
+    tiny = Image.open(root/(name+'_preview.png')).convert('RGBA')
+    tiny.thumbnail((43,54), Image.Resampling.LANCZOS)
+    canvas.paste(tiny,(x-80,551),tiny)
+    draw.text((x-13,563), 'small-size check', font=small, fill='#8492ad')
+draw.line((550,110,550,610), fill='#202b40')
+canvas.save(root/'elite_airframes_comparison.png')
