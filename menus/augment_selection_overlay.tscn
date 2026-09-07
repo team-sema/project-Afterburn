@@ -157,6 +157,34 @@ theme_override_styles/focus = SubResource("StyleBox_card_hover")
 text = "선택 1"
 autowrap_mode = 2
 
+[node name="TierLabel" type="Label" parent="MarginContainer/PanelContainer/VBoxContainer/ChoiceCarousel/ChoiceButton1"]
+unique_name_in_owner = false
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 9.0
+offset_top = 5.0
+offset_right = -9.0
+offset_bottom = 17.0
+grow_horizontal = 2
+mouse_filter = 2
+theme_override_fonts/font = ExtResource("4_font")
+theme_override_font_sizes/font_size = 9
+text = "SILVER"
+horizontal_alignment = 1
+
+[node name="TierAccent" type="ColorRect" parent="MarginContainer/PanelContainer/VBoxContainer/ChoiceCarousel/ChoiceButton1"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 12.0
+offset_top = 19.0
+offset_right = -12.0
+offset_bottom = 21.0
+grow_horizontal = 2
+mouse_filter = 2
+color = Color(0.62, 0.84, 0.98, 0.92)
+
 [node name="ChoiceButton2" type="Button" parent="MarginContainer/PanelContainer/VBoxContainer/ChoiceCarousel" unique_id=1842936470]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(156, 188)
@@ -175,6 +203,34 @@ theme_override_styles/focus = SubResource("StyleBox_card_hover")
 text = "선택 2"
 autowrap_mode = 2
 
+[node name="TierLabel" type="Label" parent="MarginContainer/PanelContainer/VBoxContainer/ChoiceCarousel/ChoiceButton2"]
+unique_name_in_owner = false
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 9.0
+offset_top = 5.0
+offset_right = -9.0
+offset_bottom = 17.0
+grow_horizontal = 2
+mouse_filter = 2
+theme_override_fonts/font = ExtResource("4_font")
+theme_override_font_sizes/font_size = 9
+text = "SILVER"
+horizontal_alignment = 1
+
+[node name="TierAccent" type="ColorRect" parent="MarginContainer/PanelContainer/VBoxContainer/ChoiceCarousel/ChoiceButton2"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 12.0
+offset_top = 19.0
+offset_right = -12.0
+offset_bottom = 21.0
+grow_horizontal = 2
+mouse_filter = 2
+color = Color(0.62, 0.84, 0.98, 0.92)
+
 [node name="ChoiceButton3" type="Button" parent="MarginContainer/PanelContainer/VBoxContainer/ChoiceCarousel" unique_id=779700868]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(156, 188)
@@ -192,6 +248,34 @@ theme_override_styles/hover = SubResource("StyleBox_card_hover")
 theme_override_styles/focus = SubResource("StyleBox_card_hover")
 text = "선택 3"
 autowrap_mode = 2
+
+[node name="TierLabel" type="Label" parent="MarginContainer/PanelContainer/VBoxContainer/ChoiceCarousel/ChoiceButton3"]
+unique_name_in_owner = false
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 9.0
+offset_top = 5.0
+offset_right = -9.0
+offset_bottom = 17.0
+grow_horizontal = 2
+mouse_filter = 2
+theme_override_fonts/font = ExtResource("4_font")
+theme_override_font_sizes/font_size = 9
+text = "SILVER"
+horizontal_alignment = 1
+
+[node name="TierAccent" type="ColorRect" parent="MarginContainer/PanelContainer/VBoxContainer/ChoiceCarousel/ChoiceButton3"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 12.0
+offset_top = 19.0
+offset_right = -12.0
+offset_bottom = 21.0
+grow_horizontal = 2
+mouse_filter = 2
+color = Color(0.62, 0.84, 0.98, 0.92)
 
 [node name="RerollRow" type="HBoxContainer" parent="MarginContainer/PanelContainer/VBoxContainer" unique_id=519011975]
 layout_mode = 2

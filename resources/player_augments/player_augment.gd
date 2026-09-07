@@ -3,9 +3,18 @@ extends Resource
 
 const ROMAN := ["", "I", "II", "III", "IV", "V"]
 
+enum Tier {
+	SILVER,
+	GOLD,
+	PRISMATIC,
+}
+
 @export var augment_id: StringName
 @export var display_name: String
 @export_multiline var description: String
+## Presentation and design-power band. Offer timing/odds are intentionally
+## owned by the offer policy rather than this Resource.
+@export var tier: Tier = Tier.SILVER
 @export var augment_type: PlayerAugmentKind.Kind = PlayerAugmentKind.Kind.STAT_MULTIPLIER
 @export var icon: Texture2D
 @export var stat_modifiers: Array[PlayerStatModifier] = []
@@ -27,6 +36,16 @@ const ROMAN := ["", "I", "II", "III", "IV", "V"]
 @export var trait_id: StringName
 @export_range(1, 3, 1) var trait_rank_increase := 1
 @export var trait_definition: WeaponTraitDefinition
+
+
+func get_tier_label() -> String:
+	match tier:
+		Tier.GOLD:
+			return "GOLD"
+		Tier.PRISMATIC:
+			return "PRISMATIC"
+		_:
+			return "SILVER"
 
 
 func get_weapon_id() -> StringName:

@@ -1,0 +1,52 @@
+[gd_scene format=3 uid="uid://dtlt4nifx88yd"]
+
+[ext_resource type="PackedScene" uid="uid://d0t6qpeevle3p" path="res://menus/cards/augment_card_base.tscn" id="1"]
+[ext_resource type="Shader" uid="uid://cf5l5svfu4h12" path="res://menus/augment_card_surface.gdshader" id="2"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_8lub7"]
+resource_local_to_scene = true
+shader = ExtResource("2")
+shader_parameter/metal = Color(0.72, 0.38, 1, 1)
+shader_parameter/spectrum_amount = 1.0
+shader_parameter/ray_strength = 0.22
+shader_parameter/ray_speed = 0.5
+shader_parameter/focus_ring_strength = 0.55
+shader_parameter/base_glow = 0.35
+shader_parameter/base_reflection = 0.5
+shader_parameter/motion = 15.784979555555338
+shader_parameter/emphasis = 1.0
+shader_parameter/activation = 0.0
+shader_parameter/surface_size = Vector2(172, 204)
+shader_parameter/card_size = Vector2(156, 188)
+shader_parameter/surface_offset = Vector2(-8, -8)
+shader_parameter/orb_center = Vector2(78, 51)
+shader_parameter/halo_radius = 28.0
+shader_parameter/corner_cut = 10.0
+shader_parameter/glow_strength = 1.0
+shader_parameter/reflection_strength = 1.0
+shader_parameter/spectrum_speed = 0.055
+shader_parameter/halo_strength = 0.32
+shader_parameter/mist_strength = 1.0
+
+[node name="PrismaticAugmentCard" unique_id=1160935816 instance=ExtResource("1")]
+rotating_orbits_enabled = true
+static_arcs_enabled = false
+side_gems_enabled = true
+decoration_color = Color(0.663, 0.902, 0.965, 1)
+particles_enabled = true
+animate_tier_accent = true
+
+[node name="Surface" parent="." index="0" unique_id=1338219826]
+material = SubResource("ShaderMaterial_8lub7")
+
+[node name="TierLabel" parent="." index="7" unique_id=340659263]
+modulate = Color(1, 0.68, 0.88314074, 1)
+theme_override_colors/font_color = Color(0.94, 0.84, 1, 1)
+text = "PRISMATIC"
+
+[node name="TierAccent" parent="." index="8" unique_id=1760557819]
+modulate = Color(1, 0.68, 0.88314074, 1)
+color = Color(0.3, 1, 0.92, 1)
+
+[node name="Title" parent="." index="9" unique_id=1808948972]
+theme_override_colors/font_color = Color(0.94, 0.84, 1, 1)

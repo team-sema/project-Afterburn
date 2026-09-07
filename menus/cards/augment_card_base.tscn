@@ -1,0 +1,136 @@
+[gd_scene format=3 uid="uid://d0t6qpeevle3p"]
+
+[ext_resource type="Script" uid="uid://dy8pm46rut7f1" path="res://menus/augment_card_art.gd" id="1"]
+[ext_resource type="Shader" uid="uid://cf5l5svfu4h12" path="res://menus/augment_card_surface.gdshader" id="2"]
+[ext_resource type="FontFile" uid="uid://dhbb73hkpge3y" path="res://fonts/Mulmaru.ttf" id="3"]
+[ext_resource type="Texture2D" uid="uid://dil5ki5jurkbf" path="res://assets/svg/weapons/weapon_aux_homing_missile.svg" id="4"]
+
+[sub_resource type="ShaderMaterial" id="Surface"]
+resource_local_to_scene = true
+shader = ExtResource("2")
+shader_parameter/metal = Color(0.408, 0.4488, 0.48, 1)
+shader_parameter/spectrum_amount = 0.0
+shader_parameter/ray_strength = 0.0
+shader_parameter/ray_speed = 0.5
+shader_parameter/focus_ring_strength = 0.0
+shader_parameter/base_glow = 0.18
+shader_parameter/base_reflection = 0.12
+shader_parameter/motion = 128.28578097791458
+shader_parameter/emphasis = 1.0
+shader_parameter/activation = 0.0
+shader_parameter/surface_size = Vector2(172, 204)
+shader_parameter/card_size = Vector2(156, 188)
+shader_parameter/surface_offset = Vector2(-8, -8)
+shader_parameter/orb_center = Vector2(78, 51)
+shader_parameter/halo_radius = 28.0
+shader_parameter/corner_cut = 10.0
+shader_parameter/glow_strength = 1.0
+shader_parameter/reflection_strength = 0.2110000100225
+shader_parameter/spectrum_speed = 0.055
+shader_parameter/halo_strength = 0.09
+shader_parameter/mist_strength = 1.0
+
+[node name="AugmentCard" type="Control" unique_id=831497575]
+texture_filter = 1
+layout_mode = 3
+anchors_preset = 0
+offset_right = 156.0
+offset_bottom = 188.0
+mouse_filter = 2
+script = ExtResource("1")
+rotating_orbits_enabled = null
+static_arcs_enabled = null
+side_gems_enabled = null
+orbit_colors = PackedColorArray(0.5294118, 0.9254902, 1, 1, 0.83137256, 0.63529414, 1, 1, 1, 0.90588236, 0.7411765, 1)
+particles_enabled = null
+
+[node name="Surface" type="ColorRect" parent="." unique_id=1338219826]
+show_behind_parent = true
+material = SubResource("Surface")
+layout_mode = 0
+offset_left = -8.0
+offset_top = -8.0
+offset_right = 164.0
+offset_bottom = 196.0
+mouse_filter = 2
+
+[node name="MedallionAnchor" type="Marker2D" parent="." unique_id=1077449124]
+position = Vector2(78, 51)
+
+[node name="CrestAnchor" type="Marker2D" parent="." unique_id=543422669]
+position = Vector2(78, 6)
+
+[node name="DividerAnchor" type="Marker2D" parent="." unique_id=142848086]
+position = Vector2(78, 115)
+
+[node name="OrnamentAnchor" type="Marker2D" parent="." unique_id=757296517]
+position = Vector2(78, 179)
+
+[node name="ParticlesArea" type="Control" parent="." unique_id=1733101715]
+anchors_preset = 0
+offset_left = 22.0
+offset_top = 27.0
+offset_right = 134.0
+offset_bottom = 76.0
+mouse_filter = 2
+
+[node name="Icon" type="TextureRect" parent="." unique_id=1730946663]
+layout_mode = 0
+offset_left = 62.0
+offset_top = 35.0
+offset_right = 94.0
+offset_bottom = 67.0
+mouse_filter = 2
+texture = ExtResource("4")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="TierLabel" type="Label" parent="." unique_id=340659263]
+layout_mode = 0
+offset_left = 9.0
+offset_top = 9.0
+offset_right = 147.0
+offset_bottom = 21.0
+theme_override_colors/font_color = Color(0.75, 0.9, 1, 1)
+theme_override_fonts/font = ExtResource("3")
+theme_override_font_sizes/font_size = 9
+text = "SILVER"
+horizontal_alignment = 1
+
+[node name="TierAccent" type="ColorRect" parent="." unique_id=1760557819]
+layout_mode = 0
+offset_left = 53.0
+offset_top = 21.0
+offset_right = 103.0
+offset_bottom = 22.0
+mouse_filter = 2
+color = Color(0.62, 0.84, 0.98, 0.92)
+
+[node name="Title" type="Label" parent="." unique_id=1808948972]
+layout_mode = 0
+offset_left = 15.0
+offset_top = 79.0
+offset_right = 141.0
+offset_bottom = 113.0
+theme_override_colors/font_color = Color(0.86, 0.94, 1, 1)
+theme_override_fonts/font = ExtResource("3")
+theme_override_font_sizes/font_size = 14
+text = "다중 런처
+모듈 Lv.1"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="Description" type="Label" parent="." unique_id=1958523776]
+layout_mode = 0
+offset_left = 16.0
+offset_top = 119.0
+offset_right = 140.0
+offset_bottom = 168.0
+theme_override_colors/font_color = Color(0.73, 0.78, 0.81, 1)
+theme_override_fonts/font = ExtResource("3")
+theme_override_font_sizes/font_size = 12
+text = "미사일 +1발, 피해 ×0.9."
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
