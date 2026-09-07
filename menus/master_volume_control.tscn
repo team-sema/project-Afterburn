@@ -36,7 +36,6 @@ mouse_filter = 2
 texture = ExtResource("2_speaker")
 expand_mode = 1
 stretch_mode = 5
-tooltip_text = "마스터 볼륨"
 
 [node name="VolumeSlider" type="HSlider" parent="."]
 unique_name_in_owner = true
@@ -44,7 +43,6 @@ custom_minimum_size = Vector2(78, 14)
 layout_mode = 2
 size_flags_horizontal = 3
 mouse_default_cursor_shape = 2
-tooltip_text = "마스터 볼륨"
 theme_override_icons/grabber = ExtResource("3_grabber")
 theme_override_icons/grabber_highlight = ExtResource("3_grabber")
 theme_override_icons/grabber_disabled = ExtResource("3_grabber")

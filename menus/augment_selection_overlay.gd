@@ -348,7 +348,6 @@ func _apply_player_tier_style(index: int, augment: PlayerAugment) -> void:
 		button.move_child(art, 0)
 	art.visible = true
 	art.configure(augment, _weapon_loadout)
-	button.tooltip_text = button.text
 	button.text = ""
 	button.icon = null
 	for style in [normal_style, hover_style, pressed_style]:
@@ -371,7 +370,6 @@ func _apply_default_card_style(index: int) -> void:
 	var art := button.get_node_or_null("CardArt")
 	if art != null:
 		art.visible = false
-	button.tooltip_text = ""
 	var normal_style := _make_card_style(
 		Color(0.025, 0.075, 0.14, 0.98),
 		Color(0.2, 0.68, 0.9, 0.78),

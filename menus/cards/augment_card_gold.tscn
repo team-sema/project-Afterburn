@@ -6,14 +6,14 @@
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_7l4wa"]
 resource_local_to_scene = true
 shader = ExtResource("2")
-shader_parameter/metal = Color(0.92, 0.62, 0.16, 1)
+shader_parameter/metal = Color(0.89828837, 0.6547487, 0.19260275, 1)
 shader_parameter/spectrum_amount = 0.0
 shader_parameter/ray_strength = 0.0
 shader_parameter/ray_speed = 0.5
 shader_parameter/focus_ring_strength = 0.0
 shader_parameter/base_glow = 0.18
 shader_parameter/base_reflection = 0.0150000007125
-shader_parameter/motion = 200.6129810605847
+shader_parameter/motion = 59.29988272727054
 shader_parameter/emphasis = 1.0
 shader_parameter/activation = 0.0
 shader_parameter/surface_size = Vector2(172, 204)

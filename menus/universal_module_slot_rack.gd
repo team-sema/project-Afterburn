@@ -38,7 +38,6 @@ func _ready() -> void:
 
 func set_registry(registry: PlayerAugmentRegistry) -> void:
 	_registry = registry
-	_refresh_tooltip()
 	queue_redraw()
 
 
@@ -48,7 +47,6 @@ func set_slots(slots: Array) -> void:
 		set_expansion_preview(false)
 	if _module_preview != null:
 		set_module_preview(_module_preview)
-	_refresh_tooltip()
 	queue_redraw()
 
 
@@ -250,4 +248,3 @@ func _refresh_tooltip() -> void:
 			if definition != null:
 				tag_name = definition.display_name
 		lines.append("%d. %s · %s" % [index + 1, tag_name, state.augment.display_name])
-	tooltip_text = "\n".join(lines)
