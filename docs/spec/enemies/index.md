@@ -16,6 +16,7 @@
 | Pink / Caster | 3 | `shooting_enemy.tscn` | 110 | 25 | [caster](#enemies/caster) |
 | Sniper | 3 | `sniper_enemy.tscn` | 95 | 25 | [sniper](#enemies/sniper) |
 | Elite Fighter | (타임 게이트) | `elite_fighter.tscn` | Threat 공식 | 40 | [elite-fighter](#enemies/elite-fighter) |
+| Elite Awl | (교대 타임 게이트) | `elite_awl.tscn` | Threat 공식 | 40 | [elite-awl](#enemies/elite-awl) |
 
 베이스 `enemies/enemy.tscn`: 네온 레이어, 전투/VFX, `TargetingComponent`, `EnemyShootComponent`, `EnemyModifierFactory`, XP 드롭.
 
@@ -45,3 +46,8 @@ HEALTH / MOVE_SPEED / ACTION_RATE (+ `EnemyShootComponent` / `RadialBarrageShoot
 - [Caster](#enemies/caster)
 - [Sniper](#enemies/sniper)
 - [Elite Fighter](#enemies/elite-fighter)
+- [Elite Awl](#enemies/elite-awl)
+
+## 변경 이력
+
+- 2026-09-07: 돌격형 Elite Awl 및 교대 엘리트 로스터 추가.

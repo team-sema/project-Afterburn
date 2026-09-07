@@ -20,14 +20,14 @@
 
 | 단계 | 동작 |
 |------|------|
-| 60초 타이머 완료 | `threat_elite_single` 1기 (`ThreatEliteController`) |
+| 60초 타이머 완료 | 사격형 `threat_elite_single` / 돌격형 `threat_elite_awl` 교대로 1기 (`ThreatEliteController`) |
 | 엘리트 전투 중 | 일반 Encounter 타이머 **정지** · 기존 일반 적 유지 |
 | 엘리트 처치 | 전투 정지 → 적탄을 XP로 변환 → 화면의 모든 XP 강제 회수 |
 | XP 회수 완료 | Threat **+1** → 적 증강 3지선다 |
 | 오퍼 완료 | 일반 스폰·다음 Threat 타이머 재개 |
 | 전투·오퍼 중 | Threat 시간 **누적 안 함** (연속 엘리트 방지) |
 
-첫 엘리트: Threat **2**, HP 공식은 [elite-fighter](#enemies/elite-fighter).
+첫 엘리트: Threat **2** 사격형. Threat **3** 돌격형, 이후 짝수 Threat 사격형·홀수 Threat 돌격형으로 교대한다. 공통 HP 공식은 [elite-fighter](#enemies/elite-fighter), 돌격 규칙은 [elite-awl](#enemies/elite-awl).
 
 탄소거 보상 중에는 전투 전체와 플레이어 오그먼트 `C` 입력을 잠근다. 적탄 1발은 XP 1로 변환되며, 기존 XP와 엘리트 확정 드롭까지 실제로 수집된 뒤에만 적 오그먼트 오퍼가 열린다. 아직 미구현인 보스도 향후 같은 공용 보상 컨트롤러를 호출한다.
 
@@ -41,3 +41,7 @@
 
 - [적](#enemies) · [진형](#formations) · [Encounter](#encounters)
 - 설계 초안(TBD 보스): `docs/design/systems/threat-elite-boss-loop.md`
+
+## 변경 이력
+
+- 2026-09-07: 사격형·돌격형 엘리트 교대 출현 규칙 반영.

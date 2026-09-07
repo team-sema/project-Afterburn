@@ -7,6 +7,7 @@
 
 | slug | 제목 | 상태 |
 |------|------|------|
+| [elite-combat-patterns](elite-combat-patterns.md) | 엘리트 생존력·교대 공격·3방향 연사 | 구현 중 |
 | [player-augment-tiers](player-augment-tiers.md) | 플레이어 증강 실버·골드·프리즘 티어 기반 | 구현 중 |
 | [submission-ai-usage-copy](submission-ai-usage-copy.md) | 제출 AI 활용 문서 퇴고 | review |
 | [submission-copy-ko](submission-copy-ko.md) | 제출 문서 한국어 카피 · features 4.7 | review |

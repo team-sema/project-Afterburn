@@ -3,7 +3,24 @@
 [ext_resource type="PackedScene" uid="uid://psmpwiapllcb" path="res://enemies/enemy.tscn" id="1_enemy"]
 [ext_resource type="Texture2D" uid="uid://h538i0rlgk46" path="res://assets/svg/enemy_elite_fighter.svg" id="2_visual"]
 [ext_resource type="Resource" path="res://resources/enemy_movement/sequences/elite_entry_patrol.tres" id="3_movement"]
-[ext_resource type="PackedScene" path="res://components/enemy_shoot_component.tscn" id="4_shoot"]
+[ext_resource type="Script" path="res://components/elite_attack_component.gd" id="4_attack"]
+[ext_resource type="PackedScene" path="res://components/sniper_aim_cone.tscn" id="5_cone"]
+[ext_resource type="Shader" path="res://effects/elite_glow.gdshader" id="6_glow"]
+[ext_resource type="PackedScene" path="res://effects/elite_explosion_effect.tscn" id="7_explosion"]
+
+[sub_resource type="ShaderMaterial" id="EliteTightGlow"]
+shader = ExtResource("6_glow")
+shader_parameter/radius = 7.0
+shader_parameter/padding = 24.0
+
+[sub_resource type="ShaderMaterial" id="EliteWideGlow"]
+shader = ExtResource("6_glow")
+shader_parameter/radius = 22.0
+shader_parameter/padding = 24.0
+
+[sub_resource type="ShaderMaterial" id="EliteDiffuseGlow"]
+shader = ExtResource("6_glow")
+shader_parameter/radial_halo = true
 
 [sub_resource type="RectangleShape2D" id="EliteHurtShape"]
 size = Vector2(24, 18)
@@ -18,14 +35,20 @@ is_elite = true
 scale = Vector2(1.35, 1.35)
 
 [node name="DiffuseGlow" parent="Anchor" index="0"]
-self_modulate = Color(1, 0.15, 0.35, 0.14)
+self_modulate = Color(1, 0.08, 0.2, 0.16)
+material = SubResource("EliteDiffuseGlow")
+scale = Vector2(0.55, 0.48)
 
 [node name="WideGlow" parent="Anchor" index="1"]
-self_modulate = Color(1, 0.12, 0.32, 0.22)
+self_modulate = Color(1, 0.08, 0.2, 0.28)
+material = SubResource("EliteWideGlow")
+scale = Vector2(0.25, 0.25)
 texture = ExtResource("2_visual")
 
 [node name="TightGlow" parent="Anchor" index="2"]
-self_modulate = Color(1, 0.25, 0.42, 0.5)
+self_modulate = Color(1, 0.22, 0.32, 0.65)
+material = SubResource("EliteTightGlow")
+scale = Vector2(0.25, 0.25)
 texture = ExtResource("2_visual")
 
 [node name="Core" parent="Anchor" index="3"]
@@ -33,13 +56,17 @@ self_modulate = Color(1, 0.92, 0.94, 1)
 texture = ExtResource("2_visual")
 
 [node name="StatsComponent" parent="." index="1"]
-health = 180
+health = 420
 
 [node name="MovementController" parent="." index="3"]
 sequence = ExtResource("3_movement")
 
 [node name="VisibleOnScreenNotifier2D" parent="." index="4"]
 rect = Rect2(-18, -14, 36, 28)
+
+[node name="ScaleComponent" parent="." index="5"]
+scale_amount = Vector2(1.2, 1.2)
+scale_duration = 0.24
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="HurtboxComponent" index="0"]
 shape = SubResource("EliteHurtShape")
@@ -50,26 +77,14 @@ shape = SubResource("EliteHitShape")
 [node name="ScoreComponent" parent="." index="12"]
 adjust_amount = 40
 
+[node name="SpawnerComponent" parent="." index="10"]
+scene = ExtResource("7_explosion")
+
 [node name="EnemyShootComponent" parent="." index="15"]
-fire_interval = 1.25
-burst_count = 2
-burst_interval = 0.14
-projectile_speed = 165.0
-shot_count = 1
-spread_degrees = 0.0
-initial_delay = 0.8
-use_actor_forward_direction = true
-local_forward_direction = Vector2(0, 1)
+script = ExtResource("4_attack")
+apply_shot_threshold = false
 
 [node name="ExperienceDropComponent" parent="." index="18"]
 drop_chance = 1.0
 
-[node name="EliteBarrageShootComponent" parent="." index="19" node_paths=PackedStringArray("targeting_component") instance=ExtResource("4_shoot")]
-fire_interval = 7.5
-burst_count = 12
-burst_interval = 0.09
-projectile_speed = 190.0
-shot_count = 1
-spread_degrees = 0.0
-initial_delay = 4.5
-targeting_component = NodePath("../TargetingComponent")
+[node name="EliteAimCone" parent="." index="19" instance=ExtResource("5_cone")]

@@ -57,9 +57,10 @@ const NAV = [
           { id: "enemies/sniper", title: "Sniper", file: "enemies/sniper.md" },
           {
             id: "enemies/elite-fighter",
-            title: "Elite",
+            title: "Elite Fighter",
             file: "enemies/elite-fighter.md",
           },
+          { id: "enemies/elite-awl", title: "Elite Awl", file: "enemies/elite-awl.md" },
         ],
       },
       {
