@@ -7,12 +7,20 @@
 | `PlayerAugment` | 공통 필드 + `tier`(`SILVER`/`GOLD`/`PRISMATIC`), `augment_type`, `offer_weight`, `module_tags`(`facility_id` fallback), `facility_module_effect`, 무기 필드(`weapon_definition`, `trait_*`) |
 | `FacilityModuleEffect` | `kind` + `primary` / `secondary` / `tertiary` (시설 모듈 효과 페이로드) |
 | `WeaponTraitDefinition` | `trait_id`, `target_weapon_id`, `max_rank`(기본 3), `params`(Lv.I), `rank_overrides`(Lv.II·III) |
-| `EnemyAugment` | 공통 필드 + `icon`, `max_stacks`, `stat_modifiers[]`, `behavior_components[]`, `target_spawn_id`, `additional_spawn_count` |
+| `EnemyAugment` | 공통 필드 + `icon`, `max_stacks`, `stat_modifiers[]`, `behavior_components[]`, `target_spawn_id`, `additional_spawn_count`, `include_in_offer_pool` |
 | `PlayerStatModifier.Stat` | `MOVE_SPEED`, `FIRE_RATE`, `WEAPON_DAMAGE` (enum 잔여 · **플레이어 오퍼 풀 미사용**) |
 | `EnemyStatModifier.Stat` | `HEALTH`, `MOVE_SPEED`, `ACTION_RATE`, `ARMING_RATE` |
 | `PlayerAugmentKind` | `FACILITY_EFFECT`, `WEAPON_ACQUIRE`, `WEAPON_TRAIT` (+ enum에 `STAT_MULTIPLIER` 잔여·풀 미사용) |
 
-## 현재 풀 (Gameplay 익스포트)
+## 현재 풀 (폴더 스캔)
+
+`AugmentOfferController`는 `auto_load_offer_pools`(기본 true)일 때 `AugmentPoolLoader`로 디렉터리를 스캔한다.  
+`gameplay.tscn`에 카드 `ext_resource`/배열을 두지 않는다. 테스트는 풀을 직접 주입하거나 `auto_load`로 스캔 결과를 쓴다.
+
+| 대상 | 경로 | 포함 규칙 |
+|------|------|-----------|
+| 플레이어 오퍼 | `res://resources/player_augments/` | `FACILITY_EFFECT` · `WEAPON_ACQUIRE` · `WEAPON_TRAIT` 이고 `offer_weight > 0` |
+| 적 오퍼 | `res://resources/enemy_augments/` | `include_in_offer_pool == true` |
 
 ### 플레이어
 
@@ -110,7 +118,7 @@ primary tag `hangar`는 UI 표시명 **동력로**. tag 키와 기존 아이콘�
 | `enemy_drone_formation_reinforcement` | 드론 증원 편대 | Drone 편대 스폰 +1 · one-time · Drone SVG 프리뷰 |
 | `enemy_bomb_fast_fuse` | 고속 기폭 장치 | Bomb 무장 시간 ÷1.5 · one-time · 모든 Bomb Encounter · Bomb SVG 프리뷰 |
 
-`gameplay.tscn`의 적 증강 풀에는 위 **6종**이 등록되어 있다. `max_stacks`는 `0`이면 무제한, `1`이면 one-time이며 한도에 도달한 증강은 이후 후보에서 제외된다.
+`include_in_offer_pool == true`인 적 증강 **6종**이 폴더 스캔으로 오퍼에 들어간다. `max_stacks`는 `0`이면 무제한, `1`이면 one-time이며 한도에 도달한 증강은 이후 후보에서 제외된다.
 
 `target_spawn_id`는 증강 효과를 특정 `EncounterPreset.encounter_id`에 한정한다. `additional_spawn_count`는 스폰 수 보너스를 전달하며 현재 `drone_formation` Encounter가 이를 편대원 수에 반영한다. 대상이 지정된 스탯 modifier도 같은 Encounter ID를 `spawn_id`로 받은 적에만 적용된다.
 
@@ -118,7 +126,7 @@ primary tag `hangar`는 UI 표시명 **동력로**. tag 키와 기존 아이콘�
 
 | ID | 표시명 | 상태 |
 |----|--------|------|
-| `enemy_counter_shot_on_hit` | 보복 프로토콜 | 리소스는 존재하지만 Gameplay 적 증강 풀에는 미등록 |
+| `enemy_counter_shot_on_hit` | 보복 프로토콜 | `.tres` 존재 · `include_in_offer_pool = false` (랩에서는 선택 가능) |
 
 ## 트리거 · 컨트롤러
 
@@ -159,7 +167,7 @@ primary tag `hangar`는 UI 표시명 **동력로**. tag 키와 기존 아이콘�
 - `C` 목록은 시설 증강 13종만 표시한다. 무기 획득·모듈은 기존 랩 오른쪽 무기 UI가 담당한다.
 - `V` 목록은 실제 런의 3장 무작위 오퍼 대신 적 증강 리소스 전체를 스크롤 목록으로 연다.
 - 목록 행은 아이콘 원본 크기에 영향받지 않는 고정 높이 텍스트 카드로 표시한다.
-- PLAYER 시설 13종과 ENEMY 7종(게임플레이 풀 미등록 `enemy_counter_shot_on_hit` 포함)을 직접 선택해 랩의 레지스트리에 적용한다.
+- PLAYER 시설 13종과 ENEMY 7종(`include_in_offer_pool = false`인 `enemy_counter_shot_on_hit` 포함)을 직접 선택해 랩의 레지스트리에 적용한다. 스캔은 `AugmentPoolLoader` 공용.
 - 범용 슬롯 확장·교체는 테스트 편의를 위해 랩이 자동 처리한다. Gameplay의 XP/60초 트리거와 후보 필터는 바꾸지 않는다.
 
 ## 필드 드롭
@@ -170,3 +178,12 @@ primary tag `hangar`는 UI 표시명 **동력로**. tag 키와 기존 아이콘�
 ## 레지스트리
 
 `PlayerAugmentRegistry`는 시작 5칸·최대 15칸의 범용 슬롯 배열과 `PlayerAugmentModuleState`를 보유한다. 슬롯에는 `FACILITY_EFFECT`만 설치한다. `get_modules_with_tag`로 분류를 조회하고 `get_module_effect_product` / `get_module_effect_sum`으로 Kind별 합산한다.
+
+---
+
+## 변경 이력
+
+| 날짜 | 변경 |
+|------|------|
+| 2026-09-06 | 오퍼 풀을 `AugmentPoolLoader` 폴더 스캔으로 · `gameplay.tscn` 인라인 목록 제거 |
+

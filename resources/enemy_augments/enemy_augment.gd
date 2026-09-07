@@ -12,3 +12,5 @@ extends Resource
 ## Optional EncounterPreset.encounter_id affected by this augment.
 @export var target_spawn_id: StringName
 @export_range(0, 100, 1) var additional_spawn_count := 0
+## False = lab/debug only; folder scan skips it for runtime enemy offers.
+@export var include_in_offer_pool := true
