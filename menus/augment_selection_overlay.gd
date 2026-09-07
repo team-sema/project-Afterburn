@@ -15,6 +15,13 @@ const CAROUSEL_SIDE_MODULATE := Color(0.5, 0.58, 0.7, 0.5)
 const CAROUSEL_FOCUS_MODULATE := Color.WHITE
 ## Initial hold delay before continuous rotation starts.
 const CAROUSEL_HOLD_DELAY := 0.35
+const PLAYER_CARD_CONTENT_TOP := 24.0
+const DEFAULT_CARD_CONTENT_TOP := 8.0
+const CARD_SCENES := [
+	preload("res://menus/cards/augment_card_silver.tscn"),
+	preload("res://menus/cards/augment_card_gold.tscn"),
+	preload("res://menus/cards/augment_card_prismatic.tscn"),
+]
 
 @export var player_accent_color: Color
 @export var enemy_accent_color: Color
@@ -40,6 +47,16 @@ const CAROUSEL_HOLD_DELAY := 0.35
 	%ChoiceButton1,
 	%ChoiceButton2,
 	%ChoiceButton3,
+]
+@onready var tier_labels: Array[Label] = [
+	%ChoiceButton1.get_node("TierLabel") as Label,
+	%ChoiceButton2.get_node("TierLabel") as Label,
+	%ChoiceButton3.get_node("TierLabel") as Label,
+]
+@onready var tier_accents: Array[ColorRect] = [
+	%ChoiceButton1.get_node("TierAccent") as ColorRect,
+	%ChoiceButton2.get_node("TierAccent") as ColorRect,
+	%ChoiceButton3.get_node("TierAccent") as ColorRect,
 ]
 @onready var reroll_button: Button = get_node_or_null("%RerollButton") as Button
 @onready var reroll_label: Label = get_node_or_null("%RerollLabel") as Label
@@ -281,11 +298,211 @@ func _populate_choice_button(index: int) -> void:
 			player_augment.get_offer_description(_weapon_loadout),
 		]
 		button.icon = player_augment.get_offer_icon()
+		_apply_player_tier_style(index, player_augment)
 	else:
 		button.text = "%s\n\n%s" % [augment.get("display_name"), augment.get("description")]
 		button.icon = augment.get("icon") as Texture2D
 		icon_max_width = ENEMY_CHOICE_ICON_MAX_WIDTH
+		_apply_default_card_style(index)
 	button.add_theme_constant_override("icon_max_width", icon_max_width)
+
+
+func _apply_player_tier_style(index: int, augment: PlayerAugment) -> void:
+	var palette := _get_player_tier_palette(augment.tier)
+	var button := choice_buttons[index]
+	var normal_style := _make_card_style(
+		palette["background"],
+		palette["border"],
+		palette["shadow"],
+		int(palette["border_width"]),
+		int(palette["shadow_size"]),
+		PLAYER_CARD_CONTENT_TOP,
+	)
+	var hover_style := _make_card_style(
+		palette["hover_background"],
+		palette["hover_border"],
+		palette["hover_shadow"],
+		int(palette["border_width"]) + 1,
+		int(palette["shadow_size"]) + 2,
+		PLAYER_CARD_CONTENT_TOP,
+	)
+	var pressed_style := _make_card_style(
+		palette["pressed_background"],
+		palette["hover_border"],
+		palette["hover_shadow"],
+		int(palette["border_width"]) + 1,
+		int(palette["shadow_size"]),
+		PLAYER_CARD_CONTENT_TOP,
+	)
+	_set_card_styles(button, normal_style, hover_style, pressed_style)
+	_set_card_font_colors(button, palette["text"], palette["hover_text"])
+	var art := button.get_node_or_null("CardArt")
+	if art != null and art.scene_file_path != CARD_SCENES[int(augment.tier)].resource_path:
+		button.remove_child(art)
+		art.queue_free()
+		art = null
+	if art == null:
+		art = CARD_SCENES[int(augment.tier)].instantiate()
+		art.name = "CardArt"
+		button.add_child(art)
+		button.move_child(art, 0)
+	art.visible = true
+	art.configure(augment, _weapon_loadout)
+	button.tooltip_text = button.text
+	button.text = ""
+	button.icon = null
+	for style in [normal_style, hover_style, pressed_style]:
+		style.draw_center = false
+		style.border_color.a = 0.0
+		style.shadow_size = 0
+		style.corner_radius_top_left = 0
+		style.corner_radius_top_right = 0
+		style.corner_radius_bottom_left = 0
+		style.corner_radius_bottom_right = 0
+
+	# Tier presentation now belongs to the inherited card scene.
+	tier_labels[index].visible = false
+	tier_accents[index].visible = false
+	button.set_meta("player_augment_tier", augment.tier)
+
+
+func _apply_default_card_style(index: int) -> void:
+	var button := choice_buttons[index]
+	var art := button.get_node_or_null("CardArt")
+	if art != null:
+		art.visible = false
+	button.tooltip_text = ""
+	var normal_style := _make_card_style(
+		Color(0.025, 0.075, 0.14, 0.98),
+		Color(0.2, 0.68, 0.9, 0.78),
+		Color(0.02, 0.55, 0.85, 0.2),
+		1,
+		4,
+		DEFAULT_CARD_CONTENT_TOP,
+	)
+	var hover_style := _make_card_style(
+		Color(0.04, 0.12, 0.21, 0.99),
+		Color(0.32, 0.88, 1.0, 0.95),
+		Color(0.05, 0.65, 0.95, 0.32),
+		2,
+		6,
+		DEFAULT_CARD_CONTENT_TOP,
+	)
+	var pressed_style := _make_card_style(
+		Color(0.07, 0.18, 0.28, 1.0),
+		Color(0.65, 0.98, 1.0, 1.0),
+		Color(0.05, 0.65, 0.95, 0.24),
+		2,
+		4,
+		DEFAULT_CARD_CONTENT_TOP,
+	)
+	_set_card_styles(button, normal_style, hover_style, pressed_style)
+	_set_card_font_colors(button, Color.WHITE, Color(0.92, 1.0, 1.0))
+	tier_labels[index].visible = false
+	tier_accents[index].visible = false
+	button.set_meta("player_augment_tier", -1)
+
+
+func _set_card_styles(
+	button: Button,
+	normal_style: StyleBoxFlat,
+	hover_style: StyleBoxFlat,
+	pressed_style: StyleBoxFlat,
+) -> void:
+	button.add_theme_stylebox_override("normal", normal_style)
+	button.add_theme_stylebox_override("disabled", normal_style)
+	button.add_theme_stylebox_override("hover", hover_style)
+	button.add_theme_stylebox_override("focus", hover_style)
+	button.add_theme_stylebox_override("pressed", pressed_style)
+
+
+func _set_card_font_colors(button: Button, normal: Color, highlighted: Color) -> void:
+	button.add_theme_color_override("font_color", normal)
+	button.add_theme_color_override("font_disabled_color", normal.darkened(0.18))
+	button.add_theme_color_override("font_hover_color", highlighted)
+	button.add_theme_color_override("font_focus_color", highlighted)
+	button.add_theme_color_override("font_pressed_color", highlighted)
+
+
+func _make_card_style(
+	background: Color,
+	border: Color,
+	shadow: Color,
+	border_width: int,
+	shadow_size: int,
+	content_top: float,
+) -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.content_margin_left = 9.0
+	style.content_margin_top = content_top
+	style.content_margin_right = 9.0
+	style.content_margin_bottom = 8.0
+	style.bg_color = background
+	style.border_width_left = border_width
+	style.border_width_top = border_width
+	style.border_width_right = border_width
+	style.border_width_bottom = border_width
+	style.border_color = border
+	var corner_radius := 6 + border_width * 2
+	style.corner_radius_top_left = corner_radius
+	style.corner_radius_top_right = corner_radius
+	style.corner_radius_bottom_right = corner_radius
+	style.corner_radius_bottom_left = corner_radius
+	style.shadow_color = shadow
+	style.shadow_size = shadow_size
+	return style
+
+
+func _get_player_tier_palette(tier: PlayerAugment.Tier) -> Dictionary:
+	match tier:
+		PlayerAugment.Tier.GOLD:
+			return {
+				"background": Color(0.12, 0.075, 0.018, 0.99),
+				"border": Color(0.92, 0.62, 0.16, 0.96),
+				"shadow": Color(1.0, 0.56, 0.08, 0.28),
+				"hover_background": Color(0.19, 0.12, 0.025, 1.0),
+				"hover_border": Color(1.0, 0.88, 0.42, 1.0),
+				"hover_shadow": Color(1.0, 0.68, 0.12, 0.46),
+				"pressed_background": Color(0.24, 0.16, 0.04, 1.0),
+				"text": Color(1.0, 0.91, 0.69, 1.0),
+				"hover_text": Color(1.0, 0.98, 0.86, 1.0),
+				"label": Color(1.0, 0.79, 0.28, 1.0),
+				"accent": Color(1.0, 0.68, 0.14, 0.96),
+				"border_width": 2,
+				"shadow_size": 5,
+			}
+		PlayerAugment.Tier.PRISMATIC:
+			return {
+				"background": Color(0.075, 0.025, 0.13, 0.99),
+				"border": Color(0.72, 0.38, 1.0, 0.98),
+				"shadow": Color(0.25, 0.86, 1.0, 0.34),
+				"hover_background": Color(0.12, 0.045, 0.2, 1.0),
+				"hover_border": Color(0.42, 1.0, 0.94, 1.0),
+				"hover_shadow": Color(0.9, 0.28, 1.0, 0.52),
+				"pressed_background": Color(0.16, 0.065, 0.25, 1.0),
+				"text": Color(0.94, 0.84, 1.0, 1.0),
+				"hover_text": Color(0.86, 1.0, 0.98, 1.0),
+				"label": Color(1.0, 0.58, 0.96, 1.0),
+				"accent": Color(0.3, 1.0, 0.92, 1.0),
+				"border_width": 3,
+				"shadow_size": 7,
+			}
+		_:
+			return {
+				"background": Color(0.045, 0.075, 0.115, 0.99),
+				"border": Color(0.68, 0.82, 0.93, 0.9),
+				"shadow": Color(0.38, 0.72, 0.92, 0.2),
+				"hover_background": Color(0.07, 0.12, 0.17, 1.0),
+				"hover_border": Color(0.88, 0.97, 1.0, 1.0),
+				"hover_shadow": Color(0.52, 0.86, 1.0, 0.34),
+				"pressed_background": Color(0.09, 0.15, 0.21, 1.0),
+				"text": Color(0.86, 0.94, 1.0, 1.0),
+				"hover_text": Color(0.97, 1.0, 1.0, 1.0),
+				"label": Color(0.75, 0.9, 1.0, 1.0),
+				"accent": Color(0.62, 0.84, 0.98, 0.92),
+				"border_width": 1,
+				"shadow_size": 3,
+			}
 
 
 func _set_ship_section_visible(section_visible: bool) -> void:

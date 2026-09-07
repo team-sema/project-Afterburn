@@ -1,0 +1,49 @@
+[gd_scene format=3 uid="uid://c7g0jwo2jbmdx"]
+
+[ext_resource type="PackedScene" uid="uid://d0t6qpeevle3p" path="res://menus/cards/augment_card_base.tscn" id="1"]
+[ext_resource type="Shader" uid="uid://cf5l5svfu4h12" path="res://menus/augment_card_surface.gdshader" id="2"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_7l4wa"]
+resource_local_to_scene = true
+shader = ExtResource("2")
+shader_parameter/metal = Color(0.92, 0.62, 0.16, 1)
+shader_parameter/spectrum_amount = 0.0
+shader_parameter/ray_strength = 0.0
+shader_parameter/ray_speed = 0.5
+shader_parameter/focus_ring_strength = 0.0
+shader_parameter/base_glow = 0.18
+shader_parameter/base_reflection = 0.0150000007125
+shader_parameter/motion = 200.6129810605847
+shader_parameter/emphasis = 1.0
+shader_parameter/activation = 0.0
+shader_parameter/surface_size = Vector2(172, 204)
+shader_parameter/card_size = Vector2(156, 188)
+shader_parameter/surface_offset = Vector2(-8, -8)
+shader_parameter/orb_center = Vector2(78, 51)
+shader_parameter/halo_radius = 28.0
+shader_parameter/corner_cut = 10.0
+shader_parameter/glow_strength = 1.0
+shader_parameter/reflection_strength = 1.0
+shader_parameter/spectrum_speed = 0.055
+shader_parameter/halo_strength = 0.09
+shader_parameter/mist_strength = 0.0
+
+[node name="GoldAugmentCard" unique_id=928661086 instance=ExtResource("1")]
+rotating_orbits_enabled = false
+static_arcs_enabled = true
+side_gems_enabled = true
+decoration_color = Color(0.92, 0.62, 0.16, 1)
+particles_enabled = false
+
+[node name="Surface" parent="." index="0" unique_id=1338219826]
+material = SubResource("ShaderMaterial_7l4wa")
+
+[node name="TierLabel" parent="." index="7" unique_id=340659263]
+theme_override_colors/font_color = Color(1, 0.91, 0.69, 1)
+text = "GOLD"
+
+[node name="TierAccent" parent="." index="8" unique_id=1760557819]
+color = Color(0.92, 0.62, 0.16, 1)
+
+[node name="Title" parent="." index="9" unique_id=1808948972]
+theme_override_colors/font_color = Color(1, 0.91, 0.69, 1)

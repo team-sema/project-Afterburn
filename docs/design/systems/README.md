@@ -7,6 +7,7 @@
 
 | slug | 제목 | 상태 |
 |------|------|------|
+| [player-augment-tiers](player-augment-tiers.md) | 플레이어 증강 실버·골드·프리즘 티어 기반 | 구현 중 |
 | [submission-ai-usage-copy](submission-ai-usage-copy.md) | 제출 AI 활용 문서 퇴고 | review |
 | [submission-copy-ko](submission-copy-ko.md) | 제출 문서 한국어 카피 · features 4.7 | review |
 | [weapon-module-levels](weapon-module-levels.md) | 무기 자체 레벨 제거 · 전용 모듈 Lv.I~III · 무기실 공통 화력 | review |

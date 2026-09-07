@@ -4,7 +4,7 @@
 
 | 타입 | 필드 |
 |------|------|
-| `PlayerAugment` | 공통 필드 + `augment_type`, `offer_weight`, `module_tags`(`facility_id` fallback), `facility_module_effect`, 무기 필드(`weapon_definition`, `trait_*`) |
+| `PlayerAugment` | 공통 필드 + `tier`(`SILVER`/`GOLD`/`PRISMATIC`), `augment_type`, `offer_weight`, `module_tags`(`facility_id` fallback), `facility_module_effect`, 무기 필드(`weapon_definition`, `trait_*`) |
 | `FacilityModuleEffect` | `kind` + `primary` / `secondary` / `tertiary` (시설 모듈 효과 페이로드) |
 | `WeaponTraitDefinition` | `trait_id`, `target_weapon_id`, `max_rank`(기본 3), `params`(Lv.I), `rank_overrides`(Lv.II·III) |
 | `EnemyAugment` | 공통 필드 + `icon`, `max_stacks`, `stat_modifiers[]`, `behavior_components[]`, `target_spawn_id`, `additional_spawn_count`, `include_in_offer_pool` |
@@ -27,6 +27,8 @@
 - 총 **48종**: 시설 효과 **13** + 무기 획득 7 + 무기 모듈 **28**
 - **범용 시설 슬롯 모듈은 `FACILITY_EFFECT`만.** 각 카드의 `facility_module_effect`(`FacilityModuleEffect`)가 효과를 정의한다. 동일 Kind는 primary **곱**(배율) / **합**(가산).
 - 카드 표시는 `get_offer_title` / `get_offer_description`으로 신규 무기·모듈 강화를 구분
+- 티어 기본값은 `SILVER`. 기존 48종은 모두 기본 실버이며 티어별 등장 시점·확률은 아직 적용하지 않는다.
+- 선택 카드는 티어 라벨, 프레임 색·굵기, 상단 액센트로 실버·골드·프리즘을 구분한다. 프리즘 액센트는 스펙트럼 색으로 순환한다.
 - 가중치: `offer_weight`(기본 1.0)
 - 무기 전용 Kind는 **함선 시설 슬롯을 소모하지 않음**
 - **리롤:** `max_reroll_count`(임시 기본 2), 런 `remaining_reroll_count`. 선택 전만. [R]/버튼으로 **현재 포커스 카드 한 장만** 교체
