@@ -14,6 +14,8 @@ func _run() -> void:
 	_expect(default_augment.tier == PlayerAugment.Tier.SILVER, "player augments default to Silver")
 	_expect(default_augment.get_tier_label() == "SILVER", "Silver tier has a stable display label")
 	var gameplay := (load("res://gameplay.tscn") as PackedScene).instantiate()
+	root.add_child(gameplay)
+	await process_frame
 	var offer_controller := gameplay.get_node("AugmentOfferController") as AugmentOfferController
 	_expect(offer_controller.player_augment_pool.size() == 48, "the current player augment pool remains intact")
 	for augment in offer_controller.player_augment_pool:
