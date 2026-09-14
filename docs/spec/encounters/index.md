@@ -9,10 +9,10 @@ enemies/<type>     +  formations/<layout>  +  MovementSequence
           ──── EncounterPreset (이 층) ────
                          |
                          v
-              EncounterPoolEntry (min_threat)
+              EncounterPoolEntry (min_threat)   또는   Step에 직접 지정 / EncounterWave
                          |
                          v
-              EnemyGenerator 타이머 (run-pacing)
+              EncounterSequence 토큰 패턴 → EncounterDirector (run-pacing)
 ```
 
 코드:
@@ -21,7 +21,8 @@ enemies/<type>     +  formations/<layout>  +  MovementSequence
 |--------|------|
 | Preset | `resources/encounters/presets/<id>.tres` |
 | Pool | `resources/encounters/pools/main_encounter_pool.tres` |
-| 스크립트 | `EncounterPreset` · `EncounterMember` · `EncounterPoolEntry` |
+| 시퀀스 | `resources/encounter_sequences/main_encounter_sequence.tres` · `waves/<id>.tres` |
+| 스크립트 | `EncounterPreset` · `EncounterMember` · `EncounterPoolEntry` · `EncounterSequence` · `EncounterSequencePhase` · `EncounterSequenceStep` · `EncounterWave` |
 
 ## Preset이 담는 것
 
@@ -39,7 +40,7 @@ enemies/<type>     +  formations/<layout>  +  MovementSequence
 
 1. [카탈로그](#encounters/catalog) — 풀에 뭐가 있나
 2. 궁금한 Encounter 행의 진형·적 링크
-3. [런·페이싱](#run-pacing) — 얼마나 자주·Threat 게이트
+3. [런·페이싱](#run-pacing) — 어떤 순서·간격으로(시퀀스)·Threat 게이트
 
 ## 작성 규칙
 

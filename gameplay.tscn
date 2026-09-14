@@ -24,6 +24,8 @@
 [ext_resource type="Resource" path="res://resources/encounters/presets/threat_elite_single.tres" id="68_elite_preset"]
 [ext_resource type="Script" path="res://components/bullet_cancel_reward_controller.gd" id="69_bullet_cancel_reward"]
 [ext_resource type="PackedScene" path="res://pickups/experience_orb.tscn" id="70_experience_orb"]
+[ext_resource type="Script" path="res://encounters/encounter_director.gd" id="71_encounter_director"]
+[ext_resource type="Resource" path="res://resources/encounter_sequences/main_encounter_sequence.tres" id="72_main_sequence"]
 
 [sub_resource type="Environment" id="Environment_neon"]
 background_mode = 3
@@ -103,3 +105,10 @@ progression = NodePath("../AugmentProgressionController")
 enemy_generator = NodePath("../EnemyGenerator")
 bullet_cancel_reward = NodePath("../BulletCancelRewardController")
 elite_preset = ExtResource("68_elite_preset")
+
+[node name="EncounterDirector" type="Node" parent="." node_paths=PackedStringArray("enemy_generator", "progression", "threat_elite_controller")]
+script = ExtResource("71_encounter_director")
+enemy_generator = NodePath("../EnemyGenerator")
+progression = NodePath("../AugmentProgressionController")
+threat_elite_controller = NodePath("../ThreatEliteController")
+sequence = ExtResource("72_main_sequence")

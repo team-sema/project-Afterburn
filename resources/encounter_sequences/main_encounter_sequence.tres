@@ -1,0 +1,54 @@
+[gd_resource type="Resource" script_class="EncounterSequence" load_steps=11 format=3]
+
+[ext_resource type="Script" path="res://resources/encounter_sequences/encounter_sequence.gd" id="1_sequence_script"]
+[ext_resource type="Script" path="res://resources/encounter_sequences/encounter_sequence_step.gd" id="2_step_script"]
+[ext_resource type="Script" path="res://resources/encounter_sequences/encounter_sequence_phase.gd" id="3_phase_script"]
+[ext_resource type="Resource" path="res://resources/encounters/pools/main_encounter_pool.tres" id="4_main_pool"]
+[ext_resource type="Resource" path="res://resources/encounter_sequences/waves/drone_swarm_wave.tres" id="5_drone_swarm_wave"]
+
+[sub_resource type="Resource" id="Resource_step_a"]
+script = ExtResource("2_step_script")
+token = &"a"
+kind = 0
+post_delay_min = 2.8
+post_delay_max = 3.1
+encounter_pool = ExtResource("4_main_pool")
+wait_for_clear = true
+
+[sub_resource type="Resource" id="Resource_step_b"]
+script = ExtResource("2_step_script")
+token = &"b"
+kind = 1
+post_delay_min = 2.8
+post_delay_max = 3.1
+wave = ExtResource("5_drone_swarm_wave")
+wait_for_clear = true
+
+[sub_resource type="Resource" id="Resource_step_c"]
+script = ExtResource("2_step_script")
+token = &"c"
+kind = 2
+post_delay_min = 2.8
+post_delay_max = 3.1
+wait_for_clear = true
+
+[sub_resource type="Resource" id="Resource_step_d"]
+script = ExtResource("2_step_script")
+token = &"d"
+kind = 3
+post_delay_min = 2.8
+post_delay_max = 3.1
+wait_for_clear = true
+
+[sub_resource type="Resource" id="Resource_phase_main"]
+script = ExtResource("3_phase_script")
+phase_id = &"main"
+pattern = "a a a a b a a a b a a a c a a a a b a a a a d"
+repeat_count = 1
+
+[resource]
+script = ExtResource("1_sequence_script")
+sequence_id = &"main_encounter_sequence"
+shared_steps = Array[ExtResource("2_step_script")]([SubResource("Resource_step_a"), SubResource("Resource_step_b"), SubResource("Resource_step_c"), SubResource("Resource_step_d")])
+phases = Array[ExtResource("3_phase_script")]([SubResource("Resource_phase_main")])
+on_complete = 0

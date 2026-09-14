@@ -143,11 +143,12 @@ label_settings = ExtResource("4_title_label")
 script = ExtResource("5_score_hud")
 game_stats = ExtResource("2_stats")
 
-[node name="ProgressionHud" type="VBoxContainer" parent="Layout/LeftPanel/Margin/VBox" unique_id=1125713299 node_paths=PackedStringArray("progression")]
+[node name="ProgressionHud" type="VBoxContainer" parent="Layout/LeftPanel/Margin/VBox" unique_id=1125713299 node_paths=PackedStringArray("progression", "encounter_director")]
 layout_mode = 2
 theme_override_constants/separation = 3
 script = ExtResource("8_progression_hud")
 progression = NodePath("../../../../Playfield/ViewportContainer/PlayfieldViewport/Gameplay/AugmentProgressionController")
+encounter_director = NodePath("../../../../Playfield/ViewportContainer/PlayfieldViewport/Gameplay/EncounterDirector")
 
 [node name="ExperienceLabel" type="Label" parent="Layout/LeftPanel/Margin/VBox/ProgressionHud" unique_id=1383963096]
 unique_name_in_owner = true
