@@ -440,3 +440,34 @@ body.spec-page { padding: 20px 20px 48px; }
 
 .spec-body a { color: var(--accent-2); }
 .spec-body .md-error { color: #e08a7a; }
+
+.spec-body .enemy-look {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0.85em 0;
+  padding: 14px 18px;
+  background: #0a1018;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+
+.spec-body .enemy-look img {
+  flex: 0 0 auto;
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  image-rendering: auto;
+}
+
+.spec-body .enemy-look--pink img {
+  filter: drop-shadow(0 0 7px rgba(255, 70, 160, 0.7));
+}
+
+.spec-body .enemy-look--orange img {
+  filter: drop-shadow(0 0 7px rgba(255, 120, 40, 0.75));
+}
+
+.spec-body .enemy-look--crimson img {
+  filter: drop-shadow(0 0 8px rgba(255, 45, 80, 0.8));
+}

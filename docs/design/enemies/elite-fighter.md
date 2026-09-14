@@ -1,5 +1,13 @@
 # Elite Fighter
 
+## 외형
+
+![Elite Fighter](sprites/enemy_elite_fighter.svg)
+
+일반 적보다 훨씬 큰 **다익·포격기**. 중앙 용골에 좌우 날개·측면 포대가 붙은 형태로, Threat 관문임을 실루엣만으로 구분한다. **진한 적색/분홍** 글로우.
+- 스프라이트: `assets/svg/enemy_elite_fighter.svg`
+- 틴트: 크림슨 글로우 · 밝은 코어 (`elite_fighter.tscn`). 피격 시 확대·폭발 스케일이 일반보다 큼.
+
 ## 의도
 
 **Threat 관문**.
@@ -77,6 +85,7 @@ Threat 2·4·6…에서 출현하며, 홀수 Threat 관문에는 [Elite Awl](../
 
 ## 변경 이력
 
+- 2026-09-14: 외형(스프라이트 미리보기) 추가.
 - 2026-09-13: 기획 의도와 구현 규칙을 통합.
 
 

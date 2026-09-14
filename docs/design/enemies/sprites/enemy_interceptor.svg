@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="80" viewBox="0 0 32 40">
+  <!-- Nose +Y (down). Compact arrowhead fighter with swept wings. -->
+  <path fill="#fff" fill-rule="evenodd" d="
+    M16 38.5
+    L13.4 28
+    L4.5 19.5
+    L8.8 15.2
+    L12.8 17.8
+    L13.5 9.2
+    L14.2 4.2
+    L16 1.8
+    L17.8 4.2
+    L18.5 9.2
+    L19.2 17.8
+    L23.2 15.2
+    L27.5 19.5
+    L18.6 28
+    Z
+    M16 27.5
+    L17.8 18.2
+    L16 10.5
+    L14.2 18.2
+    Z
+  "/>
+</svg>

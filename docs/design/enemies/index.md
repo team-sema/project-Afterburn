@@ -5,17 +5,19 @@
 
 ## 타입 요약
 
-| 코드명 | 최소 Threat | 씬 | HP | 점수 | 상세 |
-|--------|-------------|-----|-----|------|------|
-| Green / Drone | 1 | `normal_enemy.tscn` | 28 | 5 | [drone](../enemies/drone.md) |
-| Yellow / Striker | 1 | `moving_enemy.tscn` | 60 | 10 | [striker](../enemies/striker.md) |
-| Awl / Kamikaze | 1 | `kamikaze_enemy.tscn` | 80 | 15 | [awl](../enemies/awl.md) |
-| Bomb | 1 | `bomb_enemy.tscn` | 160 | 20 | [bomb](../enemies/bomb.md) |
-| Interceptor | 1 | `interceptor_enemy.tscn` | 50 | 5 | [interceptor](../enemies/interceptor.md) |
-| Pink / Caster | 3 | `shooting_enemy.tscn` | 110 | 25 | [caster](../enemies/caster.md) |
-| Sniper | 3 | `sniper_enemy.tscn` | 95 | 25 | [sniper](../enemies/sniper.md) |
-| Elite Fighter | (타임 게이트) | `elite_fighter.tscn` | Threat 공식 | 40 | [elite-fighter](../enemies/elite-fighter.md) |
-| Elite Awl | (교대 타임 게이트) | `elite_awl.tscn` | Threat 공식 | 40 | [elite-awl](../enemies/elite-awl.md) |
+| 코드명 | 외형 | 최소 Threat | 씬 | HP | 점수 | 상세 |
+|--------|------|-------------|-----|-----|------|------|
+| Green / Drone | 분홍 네온 다이아몬드 | 1 | `normal_enemy.tscn` | 28 | 5 | [drone](drone.md) |
+| Yellow / Striker | 넓은 날개 다이아몬드 | 1 | `moving_enemy.tscn` | 60 | 10 | [striker](striker.md) |
+| Awl / Kamikaze | 세로로 긴 송곳 | 1 | `kamikaze_enemy.tscn` | 80 | 15 | [awl](awl.md) |
+| Bomb | 원형 본체 + 짧은 신관 | 1 | `bomb_enemy.tscn` | 160 | 20 | [bomb](bomb.md) |
+| Interceptor | 주황 네온 화살촉 | 1 | `interceptor_enemy.tscn` | 50 | 5 | [interceptor](interceptor.md) |
+| Pink / Caster | 육각·크리스탈형 | 3 | `shooting_enemy.tscn` | 110 | 25 | [caster](caster.md) |
+| Sniper | 가느다란 창형 | 3 | `sniper_enemy.tscn` | 95 | 25 | [sniper](sniper.md) |
+| Elite Fighter | 대형 다익 포격기 | (타임 게이트) | `elite_fighter.tscn` | Threat 공식 | 40 | [elite-fighter](elite-fighter.md) |
+| Elite Awl | 대형 관통 용골 | (교대 타임 게이트) | `elite_awl.tscn` | Threat 공식 | 40 | [elite-awl](elite-awl.md) |
+
+스프라이트는 흰 마스크 SVG를 네온 글로우 레이어로 칠해 쓴다. 상세 문서의 **외형** 절에 미리보기와 설명이 있다.
 
 베이스 `enemies/enemy.tscn`: 네온 레이어, 전투/VFX, `TargetingComponent`, `EnemyShootComponent`, `EnemyModifierFactory`, XP 드롭.
 
@@ -37,19 +39,18 @@ HEALTH / MOVE_SPEED / ACTION_RATE (+ `EnemyShootComponent` / `RadialBarrageShoot
 
 ## 하위 문서
 
-- [Drone](../enemies/drone.md)
-- [Striker](../enemies/striker.md)
-- [Awl](../enemies/awl.md)
-- [Bomb](../enemies/bomb.md)
-- [Interceptor](../enemies/interceptor.md)
-- [Caster](../enemies/caster.md)
-- [Sniper](../enemies/sniper.md)
-- [Elite Fighter](../enemies/elite-fighter.md)
-- [Elite Awl](../enemies/elite-awl.md)
+- [Drone](drone.md)
+- [Striker](striker.md)
+- [Awl](awl.md)
+- [Bomb](bomb.md)
+- [Interceptor](interceptor.md)
+- [Caster](caster.md)
+- [Sniper](sniper.md)
+- [Elite Fighter](elite-fighter.md)
+- [Elite Awl](elite-awl.md)
 
 ## 변경 이력
 
+- 2026-09-14: 타입 요약에 외형 한 줄 · 상세 문서 스프라이트 미리보기 추가.
 - 2026-09-13: 주제별 통합 기획서로 이전하고 문서 링크·구현 기준 정리.
-
-
 - 2026-09-07: 돌격형 Elite Awl 및 교대 엘리트 로스터 추가.

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="160" viewBox="0 0 128 160">
+  <!-- Down-facing Awl elite: piercing keel, swept armour, lateral emitters. -->
+  <g fill="#fff">
+    <path d="M45 10 55 20 51 44 40 35Z"/>
+    <path d="m83 10-10 10 4 24 11-9Z"/>
+    <path d="M19 23 47 50 46 72 57 104 38 87 25 61Z"/>
+    <path d="m109 23-28 27 1 22-11 32 19-17 13-26Z"/>
+    <path d="M20 65 35 80 29 88 9 76Z"/>
+    <path d="m108 65-15 15 6 8 20-12Z"/>
+    <path fill-rule="evenodd" d="M64 21 77 49 73 73 79 88 64 151 49 88 55 73 51 49Z M64 39 58 53 64 72 70 53Z"/>
+  </g>
+</svg>

@@ -245,9 +245,24 @@ function renderMarkdown(src, currentId) {
     }
   };
 
+  const imageHtml = (alt, href) => {
+    const base = new URL(PAGES.get(currentId)?.file || "overview.md", location.href);
+    const safeSrc = escapeHtml(new URL(href, base).href);
+    const safeAlt = escapeHtml(alt || "");
+    const tint =
+      /interceptor/i.test(href) || /interceptor/i.test(alt)
+        ? " enemy-look--orange"
+        : /elite/i.test(href) || /elite/i.test(alt)
+          ? " enemy-look--crimson"
+          : " enemy-look--pink";
+    return `<figure class="enemy-look${tint}"><img src="${safeSrc}" alt="${safeAlt}" loading="lazy" /></figure>`;
+  };
+
   const inline = (text) => {
     let t = escapeHtml(text);
     t = t.replace(/`([^`]+)`/g, "<code>$1</code>");
+    // Images before links so ![alt](url) is not treated as a link.
+    t = t.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (_, alt, href) => imageHtml(alt, href));
     t = t.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, label, href) => {
       const route = resolveMdHref(href, currentId);
       if (route) {
@@ -360,6 +375,11 @@ function renderMarkdown(src, currentId) {
     }
 
     closeLists();
+    const onlyImage = line.match(/^!\[([^\]]*)\]\(([^)]+)\)\s*$/);
+    if (onlyImage) {
+      html.push(imageHtml(onlyImage[1], onlyImage[2]));
+      continue;
+    }
     html.push(`<p>${inline(line)}</p>`);
   }
 
