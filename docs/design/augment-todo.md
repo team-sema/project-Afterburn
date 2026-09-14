@@ -1,9 +1,9 @@
 # 증강 TODO (아이디어)
 
-구현 후보·밸런스 메모를 쌓는 **아이디어 보드**다.  
-확정된 동작은 `/feature`로 `docs/design/systems/<slug>.md` + Task를 만들고, 들어간 뒤에는 [`docs/spec/augments.md`](../spec/augments.md)가 정본이다.
+구현 후보·밸런스 메모를 쌓는 **아이디어 보드**다.
+확정할 기능은 `/feature`로 관련 주제 기획서(`augments.md`, `player.md`)를 먼저 갱신하고 Task에서 링크한다. 이 문서는 미결정 아이디어이며 구현 기준이 아니다.
 
-현재 오퍼 풀(플레이어 **54** / 적 **6**)은 [`docs/spec/augments.md`](../spec/augments.md)·`gameplay.tscn`이 정본이다. 여기 항목은 **아직 풀에 없는 후보**를 우선 적는다.
+현재 오퍼 풀의 종류·수량은 [오그먼트 기획서](augments.md)의 폴더 스캔 규칙과 목록을 따른다. 여기에는 아직 풀에 없는 후보를 우선 적는다.
 
 ## 상태
 
@@ -32,7 +32,7 @@
 
 ## 동력로 (반영 완료 · 초안 이력)
 
-**구현됨** — 정본은 [`docs/spec/augments.md`](../spec/augments.md) 「시설 효과 모듈 13종」. 아래는 당시 초안이며 실제 출하 수치와 다르다.
+**구현됨** — 정본은 [`docs/design/augments.md`](augments.md) 「시설 효과 모듈 13종」. 아래는 당시 초안이며 실제 출하 수치와 다르다.
 
 역할 분담: **무기실** = 지속 기본 화력(집속 조준기 상시 배율) · **동력로** = 주기적 과부하(버프 윈도우).
 
@@ -67,7 +67,7 @@
 
 ## 실드 재생 (반영 완료 · 초안 이력)
 
-**구현됨** — 정본은 [`docs/spec/player.md`](../spec/player.md)·[`docs/design/systems/shield-regen.md`](systems/shield-regen.md). 아래는 당시 초안이다.
+**구현됨** — 정본은 [`docs/design/player.md`](player.md)·[`docs/design/history/shield-regen.md`](history/shield-regen.md). 아래는 당시 초안이다.
 
 현재 실드가 최대 미만이면 **한 칸씩** 회복한다. 시설로 최대치만 늘리는 것과 별개. **시작 실드 1** (`shield-base-one`).
 
@@ -101,6 +101,9 @@
 ---
 
 ## 변경 이력
+
+- 2026-09-13: 주제별 통합 기획서로 이전하고 문서 링크·구현 기준 정리.
+
 
 | 날짜 | 변경 |
 |---|---|

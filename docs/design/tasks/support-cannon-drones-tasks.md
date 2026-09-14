@@ -2,8 +2,8 @@
 
 ## 문서
 - [x] 옵션 드론 편대·발사 규칙 확정
-- [x] `docs/spec/player.md` 현황 갱신
-- [x] `docs/spec/augments.md` 특성 갱신
+- [x] `docs/design/player.md` 현황 갱신
+- [x] `docs/design/augments.md` 특성 갱신
 
 ## 구현
 - [x] 공전·최근접 적 조준 제거

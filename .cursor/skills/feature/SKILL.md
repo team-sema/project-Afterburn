@@ -3,274 +3,36 @@ name: feature
 description: >-
   End-to-end feature workflow for Project Afterburn: document first, task breakdown,
   implementation, self-audit, summary. Use for /feature or when the user requests
-  a new game feature. Never implement before spec exists.
+  a new game feature. Read and update the relevant design document before implementation.
 disable-model-invocation: true
 ---
 
-# Feature Skill
+# Feature
 
-## 목적
+## 순서
 
-`/feature`는 사용자가 새 기능 아이디어를 입력했을 때, AI가 즉시 코드부터 수정하지 않고 아래 플로우를 강제로 따른다.
+브랜치 → 주제별 기획서 갱신 → Task → 구현 → 자체 검증 → 결과 요약.
 
-**문서 업데이트 → Task 분리 → 구현 → 자체 Audit → 결과 요약**
+1. 요청에서 짧은 영문 slug와 수정 경로를 정한다. `feature/<slug>`에서만 편집한다. 일반 시작은 `tools/start-feature.sh`를 사용한다. 사용자가 병렬 작업을 위해 별도 worktree를 요청하면 커밋된 기준 브랜치에서 만들고 원본 작업을 보존한다.
+2. `docs/design/README.md`에서 관련 기획서를 찾고 먼저 갱신한다. 의도·동작·수치·예외·화면·완료 조건을 같은 문서에 둔다. 새 독립 주제만 `docs/design/<topic>.md`로 추가하고 README·design.js에 등록한다.
+3. `docs/design/tasks/<slug>-tasks.md`에 기획서 링크·작업 순서·수정 예상/금지 경로·검증 방법을 적는다. 기능 규칙을 Task에 복제하지 않는다.
+4. 확정된 기획만 구현한다. 필요한 판단이 미결정이면 질문 또는 TODO로 남긴다. 관련 없는 게임 규칙·API·리팩터링을 추가하지 않는다.
+5. 구현 후 기획서의 이번 변경을 확정 규칙으로 반영하고 구현 상태·검증 결과를 갱신한다.
+6. 결과에 기획서 경로, 변경 내용, 검증 결과, 미구현·확인 필요 항목을 보고한다. 커밋·push는 사용자 요청 시에만 한다.
 
-이 스킬의 핵심 목적은 AI가 스펙에 없는 기능을 임의로 추가하거나, 기존 규칙을 마음대로 바꾸는 것을 방지하는 것이다.
+## 문서 기준
 
-## 명령어 형식
+- 구현 기준은 주제별 기획서 한 곳이다. 별도 시스템 설계서·구현 스펙은 만들지 않는다.
+- `docs/design/history/`는 과거 기록이며 현재 동작보다 우선하지 않는다. 기능마다 이력 설계서를 새로 만들지 않는다.
+- 같은 대화의 피드백에도 기획서 → Task → 코드 → 검증을 적용한다.
+- 순수 오타·리네이밍처럼 규칙 영향이 없으면 기획 변경을 생략하고 이유를 보고한다.
+- 양식: `docs/design/template.md`; 운영: `docs/design/feature-workflow.md`.
+- 수정한 기획서의 변경 이력을 갱신한다.
 
-```
-/feature <기능 설명>
-```
+## 자체 검증
 
-예:
+기획의 완료 조건과 실제 동작을 비교한다. 요청 밖 변경·수정 금지 경로·관련 문서 모순·테스트 결과를 확인하고 남은 항목을 명시한다. Godot 실행은 `tools/run-godot.cmd`를 사용한다.
 
-```
-/feature 플레이어 오그먼트에 behavior_components가 있으면 Ship에 붙여서 적용한다.
-```
+## 칸반
 
-## 최우선 규칙
-
-사용자의 Feature 요청은 아이디어가 아니라 **구현 스펙의 출발점**이다.
-
-AI는 사용자의 Feature를 임의 해석해 확장하지 않는다.
-
-항상 다음 순서를 지킨다:
-
-**브랜치 생성 → 문서화 → Task 분리 → 구현 → Audit → 결과 요약**
-
-**모든 편집(문서·Task·코드)은 `feature/<slug>` 브랜치에서만** 한다. `main`이나 다른 `feature/*`에서 구현하지 않는다.
-
-코드를 수정하기 전에 반드시 관련 문서를 먼저 찾고 업데이트한다. 문서에 적히지 않은 기능을 코드로 구현하지 않는다.
-
----
-
-## 실행 원칙
-
-### 1. 문서 우선
-
-관련 문서가 없으면 새 문서를 생성한다.
-
-문서에는 최소한 아래 내용을 포함한다:
-
-- 기능 목적
-- 동작 조건
-- 표시 정보
-- 계산 방식 (해당 시)
-- 예외 조건
-- 영향받는 시스템
-- Acceptance Criteria
-
-### 2. 문서 없는 코드 수정 금지
-
-기능 구현 중 문서에 없는 판단이 필요하면 임의로 구현하지 말고 **TODO 또는 질문**으로 남긴다.
-
-### 3. Task 분리
-
-문서 업데이트 후 구현 전에 Task를 분리한다. Task는 **구현 순서** 기준으로 작성한다.
-
-각 Task에는 아래 내용을 포함한다:
-
-- Task 이름
-- 목적
-- 수정 예상 파일
-- 수정 금지 파일
-- 완료 조건
-
-### 4. 구현
-
-Task 목록을 기준으로 기능을 구현한다.
-
-- 스펙에 없는 기능 추가 금지
-- 기존 룰 임의 변경 금지
-- 기존 파일 구조 임의 변경 금지
-- 기존 public API 임의 변경 금지
-- 관련 없는 리팩터링 금지
-- UI/연출 과잉 구현 금지
-
-필요한 경우 새 파일은 생성할 수 있으나, 생성 이유를 결과 요약에 남긴다.
-
-### 5. 자체 Audit
-
-구현 후 반드시 문서와 실제 구현을 비교한다.
-
-확인 항목:
-
-- 문서에 적힌 기능이 구현되었는가?
-- 문서에 없는 기능이 추가되었는가?
-- **관련 `docs/spec/`이 구현과 일치하는가?** (동작 변경이면 diff에 포함)
-- 수정 금지 파일을 건드렸는가?
-- 오그먼트·점수 임계·물리 레이어·스폰 규칙을 스펙 없이 바꿨는가?
-- Acceptance Criteria를 만족하는가?
-- 테스트 또는 수동 검증 방법이 존재하는가?
-- `feature/<slug>` 브랜치에서만 편집했는가?
-
-Audit 출력 형식:
-
-```markdown
-## Audit 결과
-
-### 통과
-- ...
-
-### 확인 필요
-- ...
-
-### 미구현
-- ...
-
-### 스펙 외 변경
-- ...
-```
-
----
-
-## 피드백 라운드 (별도 스킬 입력 불필요)
-
-`/feature`로 시작한 **같은 대화**에서 사용자가 수정·피드백을 주면, `/change`나 다른 스킬을 다시 치지 않아도 **이 섹션을 자동 적용**한다.
-
-### 매 피드백마다 (순서 고정)
-
-1. **시스템 스펙** — `docs/design/systems/<slug>.md` (동작·표시·AC 변경 시).
-2. **현황 스펙** — 관련 `docs/spec/*.md`를 **같은 라운드에서** 코드와 맞게 갱신 (미루지 않음).
-3. **Task/AC** — `docs/design/tasks/<slug>-tasks.md` 완료 조건·수정 파일 갱신.
-4. **코드** — 스펙에 반영된 내용만 구현.
-5. **미니 Audit** — 응답 말미에 3~5줄.
-
-스펙에 없는 변경은 코드로 하지 않는다. 사용자가 “문서 말고 코드만”이라고 해도 **동작·표시·조건**이 바뀌면 시스템·현황 스펙을 먼저 고친다.
-
-### 미니 Audit 형식
-
-```markdown
-### 미니 Audit
-- 시스템 스펙: (변경 요약 또는 “해당 없음”)
-- 현황 스펙 docs/spec: (파일 목록 또는 “해당 없음: 이유”)
-- AC/Task 갱신: (Y/N)
-- 코드만 변경: (Y/N — Y면 스펙 영향 없는 리네이밍·버그만 해당)
-```
-
-### 완료 신호
-
-사용자가 “완료”, “이대로 push”, “OK” 등으로 끝내면 **전체 Audit**(위 §5)을 한 번 더 수행한 뒤 `/push` 안내.
-
----
-
-## 금지 사항
-
-- 문서 수정 없이 코드부터 수정
-- 동작 변경 후 `docs/spec/` 현황 스펙을 미룬 채 `/push`·merge
-- 스펙에 없는 기능 추가
-- 오그먼트 풀·점수 임계·물리 레이어를 스펙 없이 변경
-- 관련 없는 UI 개선·리팩터·파일 구조 대규모 변경
-- 요청하지 않은 애니메이션 추가
-- `main` 또는 다른 `feature/*` 브랜치에서 파일 수정
-
----
-
-## 프로젝트 문서 경로 (Afterburn)
-
-| 용도 | 경로 |
-|------|------|
-| 구현 현황 | `docs/spec/` |
-| 시스템 스펙 | `docs/design/systems/<slug>.md` |
-| Task 문서 | `docs/design/tasks/<slug>-tasks.md` |
-| 칸반 (Notion) | [아이템 칸반](https://app.notion.com/p/102c71bf78394bcaa9ff627548faf7f9?v=3c9b8c11155f8111bfeb000c00cae3b8) · `docs/design/systems/kanban-v2.md` |
-| 비주얼 | `.agents/godot_nova_drift_visual_guide.md` |
-
-문서 수정 시 `docs-and-plans` rule: 본문 직접 갱신, 맨 하단 `## 변경 이력` 추가 (최신이 위).
-
-시스템 스펙 신규·갱신 시 `docs/design/systems/README.md` 인덱스에 한 줄 추가한다.
-
----
-
-## Feature slug
-
-요청에서 **짧은 영문 slug**를 추론한다 (예: `player-augment-behaviors`).
-
-- 소문자·숫자·하이픈만
-- 브랜치명: `feature/<slug>`
-- 스펙·Task·칸반 카드 id에도 동일 slug 사용
-
-## 전체 플로우
-
-### Step 1. 입력 해석
-
-Feature를 **한 문장**으로 요약하고 **feature slug**를 정한다.
-
-### Step 2. Feature 브랜치 생성 (필수 — 모든 편집 전)
-
-```bash
-git branch --show-current
-git status --porcelain
-```
-
-| 현재 상태 | 동작 |
-|-----------|------|
-| 이미 `feature/<slug>` | 그대로 진행 |
-| `feature/<다른-slug>` | 이 feature와 무관하면 중단 |
-| `main` 등, `feature/<slug>` 없음 | `./tools/start-feature.sh <slug>` |
-| `feature/<slug>` 이미 존재 | `git checkout feature/<slug>` |
-
-working tree가 깨끗해야 한다. 브랜치 전환 후 응답 **맨 앞**:
-
-`브랜치: feature/<slug> · 범위: components/... · player_ship/... (2~5개 경로)`
-
-칸반: `kanban-tickets` — Notion에서 slug(`카드 ID`) **조회만**(MCP 있을 때). 없으면 **제목·본문 초안만 추천**. 자동 생성·열 이동·Notion 쓰기 금지(명시 요청 시만).
-
-### Step 3. 관련 문서 탐색
-
-- `docs/spec/` 관련 카테고리
-- `docs/design/systems/`
-- 기존 feature 문서
-
-없으면 `docs/design/systems/<feature-slug>.md` 신규.
-
-### Step 4. 문서 업데이트
-
-```markdown
-# Feature: <기능명>
-
-## 목적
-
-## 동작 조건
-
-## 표시 정보
-
-## 계산 방식
-
-## 예외 조건
-
-## 영향받는 시스템
-
-## Acceptance Criteria
-
-## 구현 메모
-```
-
-### Step 5. Task 생성
-
-`docs/design/tasks/<feature-slug>-tasks.md`
-
-### Step 6. 구현 (반드시 `feature/<slug>`에서)
-
-`feature-scope` rule. Godot 4.7, `context7-godot`로 API 확인.
-
-### Step 7–8. Audit + 결과 요약
-
-커밋·push는 사용자가 요청할 때만 (`/push`).
-
----
-
-## 다른 스킬과의 관계
-
-| 스킬 / 스크립트 | 역할 |
-|-----------------|------|
-| `./tools/start-feature.sh` | `/feature` Step 2 |
-| `/feature` | 브랜치 → 문서 → Task → 구현 → Audit |
-| `/push` | feature 완료 후 main 반영 |
-
----
-
-## 추가 자료
-
-[examples.md](examples.md)
+`.cursor/rules/kanban-tickets.mdc`를 따른다. Notion 카드 제목·본문 초안만 추천하며 사용자 명시 요청 없이 생성·이동하지 않는다.

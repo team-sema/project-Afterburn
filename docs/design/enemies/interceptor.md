@@ -1,8 +1,8 @@
-# Interceptor — 기획
+# Interceptor
 
 ## 의도
 
-**옆·대각에서 짧게 스치는** 교전.  
+**옆·대각에서 짧게 스치는** 교전.
 위에서 천천히 내려오는 편대와 달리, 좌우에서 경고를 준 뒤 빠르게 지나가며 한 번 갈긴다. 세로 스크롤만 보고 있으면 맞는다는 감각을 깨뜨린다.
 
 ## 플레이어가 고민할 점
@@ -21,13 +21,50 @@
 
 2기(pair)·3기(trio). 혼자 배회하는 Encounter는 두지 않는다.
 
-## 구현
 
-→ [구현 스펙 · Interceptor](../spec/#enemies/interceptor) · [Encounter 카탈로그](../spec/#encounters/catalog)
+## 확정 규칙·수치
 
----
+
+| 항목 | 값 |
+|------|-----|
+| 씬 | `enemies/interceptor_enemy.tscn` (`normal_enemy` 상속) |
+| HP | **50** |
+| 점수·XP | Drone과 동일 |
+| 최소 Threat | 1 (pair) / 3 (trio) |
+| 비주얼 | `enemy_interceptor.svg` (기수 +Y) |
+
+## 고속 공격 패스 (유닛·공통)
+
+- `EnemySpawner`가 `ForwardAttackRun`을 좌→우 / 우→좌 랜덤 + dive 각도(약 15~29°)로 배치
+- 스폰 Y: VisibleRect 높이의 약 16~38% 상단 밴드
+- `start_delay=0.9` 동안 `EntryWarningComponent`가 좌/우 등장 가장자리에 경고 (화살표는 스폰 쪽)
+- `ForwardAttackRunMovementStep`: 편대 루트를 진행 방향으로 회전 후 local forward 210px/s. clamp·bounce·재추적 없음
+- 화면 진입 후 **0.7초** 사격 창 · **10발 burst 1회만** (`burst_interval` 0.05, `fire_interval` 10으로 재공격 차단)
+- 탄: 플레이어 조준 · **300px/s**
+- Drone에서 상속한 전역 일반 적 사격 안전선을 사용하며, 플레이필드 높이의 70% 아래에서는 남은 볼리를 발사하지 않음
+- 생존 기체는 DespawnArea 이탈 시 보상 없음 (`no_health` 없음)
+
+## 조합
+
+| Encounter | 진형 |
+|-----------|------|
+| `interceptor_pair` | [interceptor-pair](../formations/interceptor-pair.md) (36px 가로 2슬롯) |
+| `interceptor_trio` | [V3](../formations/v3.md) |
+
+단독 Encounter 없음.
+
+→ [Encounter 카탈로그](../encounters/catalog.md)
+
+
+## 완료 조건·검증
+
+- 기획에 명시된 등장 조건, 공격 예고·실행·종료와 보상 처리를 확인한다.
+- 관련 씬의 수치와 위 규칙을 대조하고, 행동 변경 시 해당 적의 스모크 테스트를 실행한다.
 
 ## 변경 이력
+
+- 2026-09-13: 기획 의도와 구현 규칙을 통합.
+
 
 | 날짜 | 변경 |
 |------|------|

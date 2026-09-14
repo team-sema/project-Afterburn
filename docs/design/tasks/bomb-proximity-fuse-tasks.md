@@ -15,7 +15,7 @@
 ## Task 3 — 생성기·스펙·테스트
 
 - 목적: 스폰 + 문서 + 스모크
-- 수정 예상: `enemy_generator.gd`, `enemies/enemy_generator.tscn`, `docs/spec/*`, `tests/bomb_proximity_fuse_smoke_test.gd`
+- 수정 예상: `enemy_generator.gd`, `enemies/enemy_generator.tscn`, `docs/design/*`, `tests/bomb_proximity_fuse_smoke_test.gd`
 - 완료: 생성·스펙·테스트 준비
 
 ---

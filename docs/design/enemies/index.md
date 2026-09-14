@@ -1,28 +1,55 @@
-# 적 기획
+# 적
 
-각 적이 **왜 있는지**, 플레이어에게 **어떤 판단을 요구하는지**를 적는다.  
-왼쪽 네비로 타입별 문서에 들어가고, 수치·사격·Encounter는 **구현 스펙**으로 이어진다.
+각 적의 의도·역할·확정 규칙은 아래 상세 문서에서 함께 읽는다.
+진형 → [formations](../formations/index.md) · 조합 → [encounters](../encounters/index.md) · 언제 → [run-pacing](../run-pacing.md).
 
-| 적 | 한 줄 요약 | 기획 | 구현 |
-|----|------------|------|------|
-| [Drone](drone.md) | 편대 밀도 · 기본 탄압 | [의도 문서](drone.md) | [spec](../spec/#enemies/drone) |
-| [Striker](striker.md) | 호위 편대의 핵 · 끊으면 판이 바뀜 | [의도 문서](striker.md) | [spec](../spec/#enemies/striker) |
-| [Awl](awl.md) | 예고 후 돌진 · 몸박 | [의도 문서](awl.md) | [spec](../spec/#enemies/awl) |
-| [Bomb](bomb.md) | 접근할수록 위험한 공간 압박 | [의도 문서](bomb.md) | [spec](../spec/#enemies/bomb) |
-| [Interceptor](interceptor.md) | 측면 고속 통과 · 짧은 교전 | [의도 문서](interceptor.md) | [spec](../spec/#enemies/interceptor) |
-| [Caster](caster.md) | 상단 탄막으로 아래 공간을 조임 | [의도 문서](caster.md) | [spec](../spec/#enemies/caster) |
-| [Sniper](sniper.md) | 조준선으로 자리를 버리게 함 | [의도 문서](sniper.md) | [spec](../spec/#enemies/sniper) |
-| [Elite](elite-fighter.md) | Threat 관문 · 처치 후 적 강화 | [의도 문서](elite-fighter.md) | [spec](../spec/#enemies/elite-fighter) |
+## 타입 요약
 
-조합·풀 가중치: [Encounter 카탈로그](../spec/#encounters/catalog) · 언제 뽑히는지: [런·페이싱](../spec/#run-pacing)
+| 코드명 | 최소 Threat | 씬 | HP | 점수 | 상세 |
+|--------|-------------|-----|-----|------|------|
+| Green / Drone | 1 | `normal_enemy.tscn` | 28 | 5 | [drone](../enemies/drone.md) |
+| Yellow / Striker | 1 | `moving_enemy.tscn` | 60 | 10 | [striker](../enemies/striker.md) |
+| Awl / Kamikaze | 1 | `kamikaze_enemy.tscn` | 80 | 15 | [awl](../enemies/awl.md) |
+| Bomb | 1 | `bomb_enemy.tscn` | 160 | 20 | [bomb](../enemies/bomb.md) |
+| Interceptor | 1 | `interceptor_enemy.tscn` | 50 | 5 | [interceptor](../enemies/interceptor.md) |
+| Pink / Caster | 3 | `shooting_enemy.tscn` | 110 | 25 | [caster](../enemies/caster.md) |
+| Sniper | 3 | `sniper_enemy.tscn` | 95 | 25 | [sniper](../enemies/sniper.md) |
+| Elite Fighter | (타임 게이트) | `elite_fighter.tscn` | Threat 공식 | 40 | [elite-fighter](../enemies/elite-fighter.md) |
+| Elite Awl | (교대 타임 게이트) | `elite_awl.tscn` | Threat 공식 | 40 | [elite-awl](../enemies/elite-awl.md) |
 
----
+베이스 `enemies/enemy.tscn`: 네온 레이어, 전투/VFX, `TargetingComponent`, `EnemyShootComponent`, `EnemyModifierFactory`, XP 드롭.
+
+## Enemy 베이스 동작
+
+- 생존→사망 시 `no_health` 1회 → 점수 + XP + 기본 파괴 FX + `Enemy` 최종 `queue_free`
+- 중복 치명 입력은 사망 보상을 반복하지 않는다. 화면 밖 despawn은 `no_health`를 발생시키지 않아 보상이 없다
+- Hurt VFX/SFX · 플레이어 접촉 시 피해만 주고 적은 유지
+- **이동:** `Node2D` + `MovementSequence` → `MovementController` → `MoveComponent.translate` (CharacterBody/`move_and_slide` 없음). Sequence가 없는 기존 객체는 `MoveComponent.velocity` 경로를 유지한다.
+
+## EnemyModifierFactory
+
+HEALTH / MOVE_SPEED / ACTION_RATE (+ `EnemyShootComponent` / `RadialBarrageShootComponent` / `SniperAttackComponent` 주기).
+
+## 보스 플래그 (`is_boss`)
+
+- `Enemy.is_boss == true`이면 `bosses` 그룹에 들어가며, 시설 **대형 표적 해석기**(`BOSS_DAMAGE_MULT`) 피해 배율 대상이 된다
+- 현재 스폰 세트에는 보스 적을 넣는 콘텐츠가 **없음** (플래그·배율만 구현) — [gaps](../gaps.md)
+
+## 하위 문서
+
+- [Drone](../enemies/drone.md)
+- [Striker](../enemies/striker.md)
+- [Awl](../enemies/awl.md)
+- [Bomb](../enemies/bomb.md)
+- [Interceptor](../enemies/interceptor.md)
+- [Caster](../enemies/caster.md)
+- [Sniper](../enemies/sniper.md)
+- [Elite Fighter](../enemies/elite-fighter.md)
+- [Elite Awl](../enemies/elite-awl.md)
 
 ## 변경 이력
 
-| 날짜 | 변경 |
-|------|------|
-| 2026-08-30 | 타입별 본문·인덱스 한국어 정리 |
-| 2026-08-30 | 타입 링크를 상대 MD로 · 구 JS 캐시 시 vision 폴백 완화 |
-| 2026-08-30 | 타입별 기획 MD + 네비 · 로스터에 충분한 설명 링크 |
-| 2026-08-30 | 로스터 표 |
+- 2026-09-13: 주제별 통합 기획서로 이전하고 문서 링크·구현 기준 정리.
+
+
+- 2026-09-07: 돌격형 Elite Awl 및 교대 엘리트 로스터 추가.

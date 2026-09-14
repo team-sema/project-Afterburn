@@ -171,7 +171,7 @@ MIT 스크립트 사용 시 저작권·허가 고지를 유지합니다 (원 LIC
 ## 6. 개발 · 기술 특징
 
 - **컴포넌트 조합 아키텍처** — 적·플레이어·탄을 이동 / 전투 / 연출 / 스폰 커스텀 노드의 조합으로 구성했습니다. 적 8종과 편대 13종이 같은 부품을 다르게 조립한 결과물입니다.
-- **문서·칸반 사이트** — 구현 현황 스펙과 개발 보드를 GitHub Pages로 공개해 두 명이 같은 레퍼런스를 보며 작업했습니다. 상세 워크플로는 제출물 4를 참고해 주세요.
+- **문서·칸반 사이트** — 구현 기획서과 개발 보드를 GitHub Pages로 공개해 두 명이 같은 레퍼런스를 보며 작업했습니다. 상세 워크플로는 제출물 4를 참고해 주세요.
 
 ---
 
@@ -196,7 +196,7 @@ MIT 스크립트 사용 시 저작권·허가 고지를 유지합니다 (원 LIC
 | 소스·저장소                   | [https://github.com/team-sema/project-Afterburn](https://github.com/team-sema/project-Afterburn)            |
 | 플레이 (웹 빌드)               | [https://team-sema.github.io/project-Afterburn/play/](https://team-sema.github.io/project-Afterburn/play/) |
 | 플레이 영상 (YouTube, 30~60초) | [https://youtu.be/pygYKXhX_Y8](https://youtu.be/pygYKXhX_Y8)                                          |
-| 스펙·칸반 문서 (참고)            | [https://team-sema.github.io/project-Afterburn/](https://team-sema.github.io/project-Afterburn/)            |
+| 기획·칸반 문서 (참고)            | [https://team-sema.github.io/project-Afterburn/](https://team-sema.github.io/project-Afterburn/)            |
 
 
 ---

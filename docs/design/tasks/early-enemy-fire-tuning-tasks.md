@@ -4,7 +4,7 @@
 
 - [x] Drone (`normal_enemy.tscn`) 사격 오버라이드 완화 (주기 4.5 · 탄속 105 · 첫 사격 1.5)
 - [x] Striker (`moving_enemy.tscn`) 사격 오버라이드 완화 (주기 4.5 · 볼리 2 · 탄속 80 · 첫 사격 1.5)
-- [x] 현황 스펙 (`docs/spec/enemies.md`)에 초반 사격 압력 표 추가
+- [x] 현황 스펙 (`docs/design/enemies.md`)에 초반 사격 압력 표 추가
 - [x] 헤드리스 프로브로 씬 반영값 확인 후 프로브 삭제
 - [x] 적 관련 smoke 회귀 확인 (편대·연발·자율 사격·Threat 스폰)
 

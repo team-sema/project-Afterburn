@@ -8,42 +8,11 @@ alwaysApply: false
 
 # 문서
 
-## 경로
-
-| 용도 | 경로 |
-|------|------|
-| 구현 스펙 | `docs/spec/` — Pages `/spec/` |
-| 기획 (의도·방향) | `docs/design/vision.md`, `enemies/` … — Pages `/design/` |
-| 기능 설계 | `docs/design/systems/<slug>.md` |
-| Task | `docs/design/tasks/<slug>-tasks.md` |
-| 워크플로 요약 | `docs/design/feature-workflow.md` |
-| 칸반 | Notion · `docs/design/systems/kanban-v2.md` |
-| 비주얼 | `.agents/godot_nova_drift_visual_guide.md` |
-
-- 확정 수치 정본은 `docs/spec/`.
-- 동작·수치·UI가 바뀌면 **같은 feature 커밋에** 관련 `docs/spec/` 갱신 (`/push` 항목 8).
-- 의도만 바뀌면 기획 MD만.
-
-## 수정 시
-
-- 본문 직접 갱신 · 하단 `## 변경 이력` (최신이 위).
-- `systems/` 신규·갱신 시 `systems/README.md`에 한 줄.
-- `docs/spec/` 카테고리 변경 시 `spec.js` 목록과 맞출 것.
-- 연쇄 문서(점수표·갭·개요 루프 등)를 낡은 채로 두지 말 것.
-
-## 변경 이력 형식
-
-```markdown
----
-
-## 변경 이력
-
-| 날짜 | 변경 |
-|------|------|
-| YYYY-MM-DD | 한 줄 요약 |
-```
-
-## 스타일
-
-- 한국어, 표·목록.
-- 식별자: snake_case / PascalCase.
+- 구현 기준은 `docs/design/`의 주제별 기획서다. 입구: `docs/design/README.md`.
+- 의도·규칙·수치·화면·예외·완료 조건을 같은 문서에 기록한다. 양식은 `docs/design/template.md`.
+- 기능 추가 전에 관련 기획서를 갱신하고, 동작 변경 시 같은 커밋에서 구현 상태까지 맞춘다.
+- 과거 `docs/design/history/`는 당시 기록이며 별도 설계 단계가 아니다. 신규 기능 설계서를 이력 폴더에 추가하지 않는다.
+- Task: `docs/design/tasks/<slug>-tasks.md`. 기획서 링크·작업 순서·검증 결과만 기록하고 규칙·수치를 복제하지 않는다.
+- 새 주제는 README와 design.js 탐색 목록에 등록한다.
+- 한국어로 본문을 직접 갱신하고 맨 아래 변경 이력을 최신 순으로 기록한다.
+- 관련 문서의 중복 규칙은 정본 링크로 연결한다. 미결정·변경 예정과 확정 규칙을 구분한다.

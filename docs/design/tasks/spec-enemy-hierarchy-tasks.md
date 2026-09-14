@@ -9,4 +9,4 @@
 
 ## 수정 파일 (요약)
 
-- `docs/spec/**`, `docs/design/**`, `docs/site.css`, cursor rules
+- `docs/design/**`, `docs/design/**`, `docs/site.css`, cursor rules

@@ -21,7 +21,7 @@ git diff --stat
 
 2. If not on `feature/*`, stop and guide to `tools/start-feature.sh`.
 3. If diff does not match slug/request, warn about scope drift.
-4. **Docs·code gate (required before commit):** system spec + Task vs implementation; **관련 `docs/spec/*.md` must match code** when behavior/numbers/UI change (same commit). Pure rename/bugfix may omit with explicit “현황 스펙 해당 없음” reason. Fail → stop, do not push.
+4. **Docs·code gate:** Read the topic design documents linked by the Task and compare their rules and acceptance criteria with the diff. Behavior/numbers/UI changes must update those same `docs/design/` documents in this commit. Historical feature notes are not the implementation authority. For changes with no design impact, state the reason. On inconsistency, stop before push.
 5. **Kanban (recommend only, before commit):** Follow `kanban-tickets` — output **title and body draft only** (optional slug reference). Do **not** create or move Notion cards. Notion MCP missing must **not** block push.
 6. Generate commit message (`feat:` / `fix:` / `docs:` / `godot:`).
 7. Run:
@@ -39,7 +39,7 @@ Do not force push. Tell the user to merge main into the feature branch, resolve/
 
 ## Godot Check
 
-If scenes/resources/gameplay changed, briefly confirm the flow and check for `docs/spec` / system-spec contradictions.
+If scenes/resources/gameplay changed, briefly confirm the flow and check for contradictions with the topic design documents.
 
 ## Success
 

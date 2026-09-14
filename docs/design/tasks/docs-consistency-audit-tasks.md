@@ -1,15 +1,15 @@
 # docs-consistency-audit Task
 
-스펙: [`docs/design/systems/docs-consistency-audit.md`](../systems/docs-consistency-audit.md)
+스펙: [`docs/design/history/docs-consistency-audit.md`](../history/docs-consistency-audit.md)
 
 | # | Task | 파일 | 완료 |
 |---|------|------|------|
 | 1 | 오그먼트 트리거를 XP·시간 기반으로 정정 · 점수는 표시용임을 명시 | `.cursor/rules/afterburn-project.mdc` | ✅ |
 | 2 | 한 줄 소개 정정 + 조작(`C`) 요약 추가 | `README.md` | ✅ |
-| 3 | 스펙 트래킹 표 적 풀 3 → 6 | `docs/spec/overview.md` | ✅ |
-| 4 | 폴더 맵을 실제 디렉터리·루트 조립 파일로 갱신 | `docs/spec/overview.md` | ✅ |
-| 5 | 구조 부채 항목 17~22 추가 · `ResourceStash` 항목 정확화 | `docs/spec/gaps.md` | ✅ |
-| 6 | `status-ui-templates` 상태 doing → review | `docs/design/systems/README.md` | ✅ |
+| 3 | 스펙 트래킹 표 적 풀 3 → 6 | `docs/design/overview.md` | ✅ |
+| 4 | 폴더 맵을 실제 디렉터리·루트 조립 파일로 갱신 | `docs/design/overview.md` | ✅ |
+| 5 | 구조 부채 항목 17~22 추가 · `ResourceStash` 항목 정확화 | `docs/design/gaps.md` | ✅ |
+| 6 | `status-ui-templates` 상태 doing → review | `docs/design/history/README.md` | ✅ |
 | 7 | `fix-formation-viewport-before-tree` 열 doing → review (`bfa5795` main 포함) | `docs/board/cards.json` | ✅ |
 | 8 | 풀 수 54/6 정정 · 동력로·실드 재생 절 `done` 처리 · 초안 대비 실제 차이 표 | `docs/design/augment-todo.md` | ✅ |
 | 9 | headless 실행을 `tools/run-godot.cmd` 단일 경로로 · 폴더 맵 갱신 | `.cursor/rules/godot-development.mdc` | ✅ |

@@ -5,7 +5,7 @@
 - [x] `striker_drone_diamond_5.tres` / `_13.tres` · 구 `striker_drone_diamond.tres` 삭제
 - [x] `main_encounter_pool.tres` 등록 (5→threat1, 13→threat2)
 - [x] `formation_entry_third` + `individual_scatter_2_5` + `individual_striker_charge_2_5` · 패트롤 제거
-- [x] `docs/spec/enemies.md` · 스모크 테스트 동기화
+- [x] `docs/design/enemies.md` · 스모크 테스트 동기화
 
 ## AC 검증
 

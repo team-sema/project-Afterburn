@@ -6,10 +6,10 @@ disable-model-invocation: true
 
 # Push (feature 완료 → main) — **기본 종료 명령**
 
-**언제:** 피쳐 개발이 **끝났을 때** (거의 항상 이것만 사용).  
+**언제:** 피쳐 개발이 **끝났을 때** (거의 항상 이것만 사용).
 **브랜치 시작:** `./tools/start-feature.sh <slug>` (또는 `git checkout -b feature/<slug>`).
 
-`feature/*`에서 **커밋 → origin/main 신규 여부 확인 → 없으면 main merge & push**.  
+`feature/*`에서 **커밋 → origin/main 신규 여부 확인 → 없으면 main merge & push**.
 `origin/main`에 새 커밋이 pull 되면 **머지하지 않고 중단**(exit 2).
 
 ## 명령
@@ -37,28 +37,27 @@ git diff --stat
 
 ### 2. 문서·코드 정합성 (필수 — 스크립트 실행 전)
 
-브랜치명에서 slug 추출: `feature/<slug>` → `docs/design/systems/<slug>.md`, `docs/design/tasks/<slug>-tasks.md`, **관련 `docs/spec/*.md`**를 읽고 `git diff`와 대조한다. **불일치 시 push 중단**.
+브랜치명에서 slug를 추출하고 Task에 연결된 주제별 기획서, `docs/design/tasks/<slug>-tasks.md`, `git diff`를 대조한다. 불일치 시 push를 중단한다.
 
 **체크리스트:**
 
 | # | 확인 | 불일치 시 |
 |---|------|-----------|
-| 1 | 시스템 스펙 존재·이번 feature와 동일 slug | 스펙 없으면 생성 또는 slug 확인 |
+| 1 | Task가 관련 주제별 기획서를 가리키고 변경 범위가 일치 | 기획서 링크·범위 확인 |
 | 2 | Acceptance Criteria ↔ 실제 구현 | 스펙 또는 코드 수정 |
 | 3 | Task 완료 조건·수정 예상 파일 ↔ `git diff --stat` | Task 또는 diff 정리 |
 | 4 | 코드 변경이 스펙·Task에 **근거** 있음 | 스펙 먼저 갱신 |
 | 5 | **수정 금지** 미변경: 오그먼트 오퍼 임계·물리 레이어·스폰 공식 등 (이 feature 스펙에 명시된 범위 외) | 별도 feature로 분리·되돌림 |
 | 6 | 스펙·Task 변경 시 `## 변경 이력` 한 줄 (`docs-and-plans`) | 이력 추가 |
 | 7 | **칸반 티켓** (`kanban-tickets`): Notion 카드 **제목·본문 초안만** 추천. **자동 생성·열 이동·태그 설정 금지** | 추천 블록 누락 시 중단 |
-| 8 | **현황 스펙 `docs/spec/` 필수** — 동작·수치·타입·입력·스폰·탄·UI가 바뀌면 관련 카테고리 MD가 **이 커밋/diff에 포함**되고 코드와 모순 없음. 연쇄 문서(`combat` 점수표·`gaps`·`overview` 루프 등)도 같이 맞춤. 순수 리네임·버그픽스·테스트만이면 diff에 스펙 없어도 되나 응답에 **「현황 스펙 해당 없음: …」** 명시 | 스펙 갱신 없이 push 금지 |
+| 8 | 동작·수치·UI 변경 시 관련 기획서가 같은 diff에 포함되고 구현과 일치. 연쇄 문서도 갱신. 규칙 영향이 없으면 생략 이유 보고 | 기획 갱신 없이 push 금지 |
 
 **출력:**
 
 ```markdown
 ### Push 전 정합성
 - slug: <slug>
-- 스펙: docs/design/systems/<slug>.md — (OK / 이슈)
-- 현황 스펙: docs/spec/<관련>.md — (OK · 파일 목록 / 해당 없음: 이유 / 이슈)
+- 기획서: <관련 주제 경로> — (OK / 해당 없음: 이유 / 이슈)
 - Task: docs/design/tasks/<slug>-tasks.md — (OK / 없음 / 이슈)
 - AC ↔ 구현: (OK / 이슈 요약)
 - diff 범위: (OK / 이슈)

@@ -50,7 +50,7 @@ res://assets/  fonts/  sounds/
 
 `docs/`, `tools/*.sh`, `.cursor/`, `.agents/`는 res 밖. Godot 트리 밖 경로에 `.tscn` 금지.
 
-상세 현황: `docs/spec/overview.md`.
+상세 현황: `docs/design/overview.md`.
 
 ## 씬 vs 스크립트
 
@@ -73,7 +73,7 @@ res://assets/  fonts/  sounds/
 
 ## 스펙 연동
 
-- 오그먼트·점수 임계·물리 레이어·스폰 규칙은 `docs/spec/` 및 해당 `docs/design/systems/<slug>.md`와 일치해야 한다.
+- 오그먼트·점수 임계·물리 레이어·스폰 규칙은 관련 `docs/design/` 주제별 기획서와 일치해야 한다.
 - 수치·규칙 변경 시 스펙 문서도 같이 수정한다.
 
 ## 변경 범위

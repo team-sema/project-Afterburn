@@ -1,0 +1,43 @@
+# 갭 · 확장 포인트
+
+구현은 됐지만 **미연결·미사용·중복**인 지점. Notion [아이템 칸반](https://app.notion.com/p/102c71bf78394bcaa9ff627548faf7f9?v=3c9b8c11155f8111bfeb000c00cae3b8) 백로그 후보와 대응한다.
+
+## 기능 갭
+
+1. **`PlayerAugment.behavior_components`** — 필드만 있고 Applier가 부착하지 않음
+2. **`EnemyAugmentGrantComponent`** — API 완비, 씬 사용 0
+3. **`EnemyStatModifier.ACTION_RATE`** — `enemy_fire_volume_boost`로 풀 연결됨 (사격 주기 + TimedState)
+4. **물리 레이어 3–4** — 이름만, 탄은 layer 0
+5. **`clear_augments()`** — 미호출 (씬 리로드에 의존)
+6. **오그먼트 풀 가중치** — 폴더 스캔 풀 + `offer_weight` × 범주 배율(획득↑·모듈↓, 베이 만석 시 둘 다↓·획득>0). 슬롯 강제·고정 %는 없음
+7. **부위·모듈 밸런스 수치** — `FacilityModuleEffect` primary 등은 플레이스홀더 성격. 기본 선체 1
+8. **보스 콘텐츠** — `Enemy.is_boss` / `bosses` 그룹·보스 피해 배율과 엘리트 이상 공용 `BulletCancelRewardController`만 있음. 보스 스폰·패턴·처치 호출부는 없음
+9. **우측 패널 세로 여유** — 항목 추가 전 동적 fit 검사를 먼저 확인
+
+## 구조 이슈
+
+10. Enemy `no_health` → `queue_free`와 `DestroyedComponent` **이중 free/이펙트**
+11. 카미카제 Hitbox free가 점수/폭발 순서를 건너뛸 수 있음
+12. 파일명 typo: `timed_state_componoent.gd`
+13. `OnetimeAnimatedEffect` vs `neon_explosion` 이원화
+14. `ResourceStash` Autoload는 **게임 코드에서 참조 0** — GameStats는 씬 `@export`로 주입된다. 사용하거나 제거할지 미결
+15. highscore만 런 간 유지, 오그먼트 레지스트리는 비영속
+16. ~~**`gameplay.tscn`에 증강 풀 `ext_resource`**~~ — `AugmentPoolLoader` 폴더 스캔으로 이전 (`augment-pool-data-driven`). 시설 정의 배열 등 다른 인라인 리소스는 남을 수 있음
+17. **그룹 기반 런타임 조회** — `get_first_node_in_group`이 11개 파일에서 `gameplay_world`·`augment_progression`·`player`·`weapon_acquisition`을 찾는다. 등록 누락이 조용한 실패가 되고 테스트마다 수동 `add_to_group` 필요
+18. **무기 trait `.tres` 이원화** — `resources/weapons/traits/`(무기 코드가 문자열 경로로 로드)와 `resources/player_augments/weapon/trait_*.tres`(오퍼 풀)에 같은 특성이 중복
+19. **루트에 게임 코드 13개** — `gameplay.tscn`·오퍼/진행 컨트롤러·레지스트리·`enemy_generator.gd`(짝 씬은 `enemies/`)
+20. **테스트 공용 베이스 없음** — 33개 테스트가 `_expect` 헬퍼와 긴 씬 경로(`Layout/Playfield/...`)를 각자 하드코딩. `AGENTS.md` 예시의 `tests/example_test.gd`는 실재하지 않음
+21. **`3d/physics_engine="Jolt Physics"`** — 2D 전용 프로젝트에 남은 사문 설정
+22. **일반 적 사격 안전선 소유권** — 현재 공통 0.7 값은 런 공유와 즉시 반영을 위해 `EnemyAugmentRegistry`에 있다. 두 번째 전역 전투 안전 옵션 또는 threshold 증강을 구현할 때 authored 기본값은 `EnemyCombatConfig` Resource로 분리하고, Registry에는 활성 증강에서 계산한 런타임 보정만 둔다. 개별 적의 연사·탄수·탄속·패턴은 각 공격 컴포넌트에 유지하며, 런타임에 `.tres`나 `ProjectSettings` 원본을 직접 변경하지 않는다.
+
+## 콘텐츠 확장 아이디어
+
+- Threat Tier별 스폰 세트 및 **보스** 콘텐츠
+- 플레이어 행동 오그먼트 (대시 등)
+- **설정 메뉴** (볼륨 등) — ESC 일시정지는 구현됨, `pause-settings-menu` 카드의 설정 부분은 미완
+- 복잡한 무기 trait(도탄·잔류장 등) 플레이 밸런스 튜닝
+
+
+## 과거 제안 확인
+
+과거 기능 설계의 미구현 제안은 [변경 이력 목록](history/README.md)에 보존한다. 보스 루프 등 TBD는 현재 규칙이 아니며, 재개할 때 해당 주제 기획서에 합의된 범위와 완료 조건을 먼저 반영한다.

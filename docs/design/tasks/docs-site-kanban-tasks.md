@@ -29,7 +29,7 @@
 - `components/`, `player_ship/`, `enemies/` 등 게임플레이 코드
 
 **완료 조건:**
-- [x] `docs/index.html`, `docs/spec/`, `docs/board/`, `docs/design/` 존재
+- [x] `docs/index.html`, `docs/design/`, `docs/board/`, `docs/design/` 존재
 
 ---
 

@@ -1,8 +1,8 @@
-# Sniper — 기획
+# Sniper
 
 ## 의도
 
-**조준선으로 “지금 서 있는 자리”를 버리게** 만든다.  
+**조준선으로 “지금 서 있는 자리”를 버리게** 만든다.
 맞기 전에 그곳이 죽는 자리라는 걸 보여 주고, 움직이거나 끊게 한다. 앞에 Tanker 등이 있으면 “앞을 막은 채로 뒤를 노리는” 읽기가 생긴다.
 
 ## 플레이어가 고민할 점
@@ -21,13 +21,42 @@
 
 가드 + Sniper 편대가 기본. 이미 탱커가 있으면 단독 보강으로 바뀔 수 있다 (구현).
 
-## 구현
 
-→ [구현 스펙 · Sniper](../spec/#enemies/sniper) · [Encounter 카탈로그](../spec/#encounters/catalog)
+## 확정 규칙·수치
 
----
+
+| 항목 | 값 |
+|------|-----|
+| 씬 | `enemies/sniper_enemy.tscn` |
+| HP | 95 |
+| 점수 | 25 |
+| 최소 Threat | 2+ (호위 Encounter) |
+
+## 원거리 저격
+
+- `sniper_entry_hold.tres`: `MoveToPositionStep`(y=48) → `HoldPositionMovementStep`
+- `SniperAttackComponent`: AIMING(4.0s, 플레이어 추적 + 옅은 적색 이중선 cubic ease-out 수렴 → 0.18s 유지) → FIRING(900px/s + 5px 반동) → COOLDOWN(2.5s) 반복
+- 조준선: 반각 14°→0.05°, 알파 0.01→0.36. 발사 순간 선 소실, 탄은 마지막 경로를 추적 없이 이동
+- 재발사 시 재포지셔닝 없음. `EnemyShootComponent`는 `_enter_tree`에서 제거
+
+## 조합
+
+- 기본: `tanker_guard_sniper` — 전방 Tanker + 후방 Sniper. 편대 유지 중 **Sniper만** 사격
+- 탱커가 이미 살아 있으면 `sniper_reinforcement` 단독으로 대체
+- Tanker 실드 피격: Flash + Scale ×1.08 (Shake 없음). 본체 Scale ×1.1 · Shake 0.5
+
+→ [Encounter 카탈로그](../encounters/catalog.md)
+
+
+## 완료 조건·검증
+
+- 기획에 명시된 등장 조건, 공격 예고·실행·종료와 보상 처리를 확인한다.
+- 관련 씬의 수치와 위 규칙을 대조하고, 행동 변경 시 해당 적의 스모크 테스트를 실행한다.
 
 ## 변경 이력
+
+- 2026-09-13: 기획 의도와 구현 규칙을 통합.
+
 
 | 날짜 | 변경 |
 |------|------|

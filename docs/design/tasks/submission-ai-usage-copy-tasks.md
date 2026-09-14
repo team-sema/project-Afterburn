@@ -1,6 +1,6 @@
 # submission-ai-usage-copy Task
 
-스펙: [`docs/design/systems/submission-ai-usage-copy.md`](../systems/submission-ai-usage-copy.md)
+스펙: [`docs/design/history/submission-ai-usage-copy.md`](../history/submission-ai-usage-copy.md)
 
 | # | Task | 파일 | 완료 |
 |---|------|------|------|
