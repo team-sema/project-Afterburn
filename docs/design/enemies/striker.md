@@ -1,8 +1,16 @@
-# Striker — 기획
+# Striker
+
+## 외형
+
+![Striker](sprites/enemy_striker.svg)
+
+Drone보다 **가로로 넓은 다이아몬드**. 양옆으로 펼친 날개감이 있어 편대 핵으로 읽힌다. 같은 분홍 네온 팔레트.
+- 스프라이트: `assets/svg/enemy_striker.svg`
+- 틴트: 분홍 글로우 (베이스 `enemy.tscn` 상속)
 
 ## 의도
 
-호위 편대의 **핵**. Drone 구름 뒤에 있어서, “어디부터 부술지”를 고르게 한다.  
+호위 편대의 **핵**. Drone 구름 뒤에 있어서, “어디부터 부술지”를 고르게 한다.
 핵을 끊으면 편대가 풀리며 산개·돌진으로 판이 바뀐다. 정리한 보상이기도 하고, 곧이어 오는 2차 위협이기도 하다.
 
 ## 플레이어가 고민할 점
@@ -21,13 +29,48 @@
 
 Diamond 호위 편대의 꼭짓점·후방. 예전 단독 프리셋은 풀 밖에 둔다.
 
-## 구현
 
-→ [구현 스펙 · Striker](../spec/#enemies/striker) · [Encounter 카탈로그](../spec/#encounters/catalog)
+## 확정 규칙·수치
 
----
+
+| 항목 | 값 |
+|------|-----|
+| 씬 | `enemies/moving_enemy.tscn` |
+| HP | 60 |
+| 점수 | 10 |
+| 최소 Threat | 1 |
+| 사격 | `EnemyShootComponent` 조준 산탄 |
+
+## Threat 1 사격 (호위 편대)
+
+| `fire_interval` | 볼리 | 발수 | 탄속 | `initial_delay` |
+|---|---|---|---|---|
+| 4.5 | 2 (`burst_interval` 0.15) | 5 (`spread` 15°) | 80 | 1.5 |
+
+전역 일반 적 사격 안전선을 사용하므로 중심점이 플레이필드 높이의 70% 아래로 내려가면 발사하지 않는다.
+
+## 조합에서 쓰이는 곳
+
+| Encounter | 역할 |
+|-----------|------|
+| `striker_drone_diamond_5` | Diamond5 최후방(Slot0) · 해제 후 플레이어 돌진 |
+| `striker_drone_diamond_13` | Diamond13 꼭짓점 · 동일 산개 규칙 |
+
+레거시 `striker_single`은 풀 미등록.
+
+→ [Encounter 카탈로그](../encounters/catalog.md) · [Diamond 5](../formations/diamond-5.md)
+
+
+## 완료 조건·검증
+
+- 기획에 명시된 등장 조건, 공격 예고·실행·종료와 보상 처리를 확인한다.
+- 관련 씬의 수치와 위 규칙을 대조하고, 행동 변경 시 해당 적의 스모크 테스트를 실행한다.
 
 ## 변경 이력
+
+- 2026-09-14: 외형(스프라이트 미리보기) 추가.
+- 2026-09-13: 기획 의도와 구현 규칙을 통합.
+
 
 | 날짜 | 변경 |
 |------|------|

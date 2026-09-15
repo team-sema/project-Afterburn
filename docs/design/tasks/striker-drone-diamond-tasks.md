@@ -4,7 +4,7 @@
 - [x] `striker_drone_diamond.tres` (Diamond · Striker 후방 + Drone 3)
 - [x] `main_encounter_pool`에서 `striker_single` 교체
 - [x] weapon test lab · threat/lab 스모크 갱신
-- [x] `docs/spec/enemies.md` · 시스템 스펙 동기화
+- [x] `docs/design/enemies.md` · 시스템 스펙 동기화
 
 ## AC
 

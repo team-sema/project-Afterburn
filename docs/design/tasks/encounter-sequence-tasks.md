@@ -1,6 +1,6 @@
 # Tasks — encounter-sequence
 
-시스템 스펙: [encounter-sequence.md](../systems/encounter-sequence.md)
+시스템 스펙: [encounter-sequence.md](../history/encounter-sequence.md) · 현황: [run-pacing.md](../run-pacing.md)
 
 ## 1. 시퀀스 Resource
 
@@ -44,7 +44,7 @@
 
 ## 7. 현황 스펙
 
-- 수정 예상: `docs/spec/run-pacing.md` · `docs/spec/overview.md` · `docs/spec/encounters/index.md` · `docs/spec/components.md` · `docs/design/systems/README.md`
+- 수정 예상: `docs/design/run-pacing.md` · `docs/design/overview.md` · `docs/design/encounters/index.md` · `docs/design/components.md`
 - 완료 조건: 일반 스폰·엘리트 트리거 정본이 "시퀀스 데이터"로 갱신되고, 적 계층에 시퀀스 층이 들어간다.
 
 ## 상태

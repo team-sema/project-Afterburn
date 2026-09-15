@@ -1,49 +1,25 @@
-# Feature 워크플로 요약
+# Feature 작업 방식
 
-상세: `.cursor/skills/feature/SKILL.md`, `.cursor/skills/push/SKILL.md`
+## 기획서 하나를 기준으로 작업
 
-## 문서 위치
+`docs/design/`의 주제별 기획서에 의도·동작·수치·완료 조건을 함께 둔다. 별도 시스템 설계서나 구현 스펙을 만들지 않는다. 과거 `history/`는 참고 기록이다.
 
-| 내용 | 경로 |
-|------|------|
-| 의도·역할·방향 (기획) | `docs/design/vision.md`, `docs/design/enemies/` … · Pages `/design/` |
-| 이번 feature AC | `docs/design/systems/<slug>.md` |
-| Task | `docs/design/tasks/<slug>-tasks.md` |
-| 지금 코드 동작·수치 | `docs/spec/` · Pages `/spec/` |
-| 칸반 티켓·열 | Notion만 |
+## /feature
 
-확정 수치는 spec만. 동작이 바뀌면 같은 커밋에 spec을 맞춘다.
+1. 요청 범위와 짧은 slug를 정하고 feature 브랜치를 만든다.
+2. 관련 기획서를 찾아 의도·규칙·예외·수치·완료 조건을 먼저 갱신한다. 독립 주제만 새 기획서를 추가하고 README와 design.js에 등록한다.
+3. `tasks/<slug>-tasks.md`에 기획서 링크, 작업 순서, 수정 경로와 검증 방법을 적는다.
+4. 기획서를 기준으로 구현하고 같은 문서의 구현 상태를 맞춘다.
+5. 기획·코드·검증 결과를 대조한다. 변경 예정과 미결정 내용을 현재 동작으로 표기하지 않는다.
 
-## `/feature <설명>`
+## /push
 
-1. slug → `./tools/start-feature.sh <slug>`
-2. Notion 카드 **제목·본문 초안만** 추천 (생성·열은 사람)
-3. 의도 변경 → 기획 MD · AC → `systems/<slug>.md` · Task
-4. 구현 · **동작 변경 시 `docs/spec/` 같이**
-5. Audit → `/push`
+관련 기획서·Task·diff의 정합성을 확인하고, 사용자 요청 시 기존 push 스크립트로 커밋·merge한다. origin/main 변경 시 기존 중단 규칙을 따른다. 별도 worktree에서 작업 중이면 main을 쓰는 다른 작업을 건드리지 않도록 merge 위치를 확인한다.
 
-## `/push`
+## 칸반
 
-1. systems·Task·spec·diff 정합성
-2. 칸반 제목·본문 초안만
-3. `./tools/push-feature.sh -m "…"`
-4. `origin/main` 신규면 중단 → feature에서 `git merge main` 후 재시도
-
-## 스크립트
-
-| 스크립트 | 역할 |
-|----------|------|
-| `tools/start-feature.sh` | `feature/<slug>` 생성 |
-| `tools/push-feature.sh` | 커밋 + merge |
-| `tools/merge-feature.sh` | 이미 커밋된 feature merge |
-
----
+티켓 생성·열 이동·태그는 사람이 Notion에서 관리한다. AI는 제목·본문 초안만 추천한다. 진행 상태를 기획서 여러 곳에 복제하지 않는다.
 
 ## 변경 이력
 
-| 날짜 | 변경 |
-|------|------|
-| 2026-08-30 | doc-layers 흡수 · 메타 문구 축소 |
-| 2026-08-29 | Pages `/board/` 제거; 제목·본문만 추천 |
-| 2026-08-28 | 칸반 초안 추천 |
-| 2026-07-22 | Afterburn 워크플로 요약 |
+- 2026-09-13: 주제별 기획서 → Task → 구현 → 검증으로 단순화.

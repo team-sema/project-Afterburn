@@ -9,7 +9,7 @@ Godot 4.7 종스크롤 슈팅 + XP·시간 기반 오그먼트 프로토타입 (
 | | URL |
 |--|-----|
 | 문서 홈 | https://team-sema.github.io/project-Afterburn/ |
-| **스펙** (카테고리별) | https://team-sema.github.io/project-Afterburn/spec/ |
+| **기획서** (의도·규칙·수치) | https://team-sema.github.io/project-Afterburn/design/ |
 | **칸반 (Notion)** | https://app.notion.com/p/102c71bf78394bcaa9ff627548faf7f9?v=3c9b8c11155f8111bfeb000c00cae3b8 |
 
 로컬 미리보기:
@@ -17,10 +17,10 @@ Godot 4.7 종스크롤 슈팅 + XP·시간 기반 오그먼트 프로토타입 (
 ```bash
 cd docs
 # HTTP 서버로 연 뒤
-# http://localhost:8080/spec/
+# http://localhost:8080/design/
 ```
 
-원본 MD: [`docs/spec/`](docs/spec/)
+원본 MD: [`docs/design/`](docs/design/README.md)
 
 ## 실행
 
@@ -29,5 +29,5 @@ cd docs
 
 ## 워크플로
 
-- `/feature` → 스펙·Task → 구현 → `/push` (main merge)
+- `/feature` → 기획서·Task → 구현 → `/push` (main merge)
 - 상세: [`docs/design/feature-workflow.md`](docs/design/feature-workflow.md)

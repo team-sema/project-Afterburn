@@ -10,5 +10,5 @@
 ## Tasks
 
 1. [x] `AugmentOfferController` 배율 가중 픽 + 리롤 Kind 우선
-2. [x] `docs/spec/augments.md` 갱신
+2. [x] `docs/design/augments.md` 갱신
 3. [x] headless: 비중·만석 하향·획득 비가중치>0

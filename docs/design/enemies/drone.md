@@ -1,8 +1,16 @@
-# Drone — 기획
+# Drone
+
+## 외형
+
+![Drone](sprites/enemy_drone.svg)
+
+분홍 네온의 빛나는 **작은 다이아몬드** 실루엣. 몸통 안에 마름모 구멍이 있고, 좌우에 짧은 날개 팁이 있다. 화면에서 가장 흔한 “잡몹” 실루엣이다.
+- 스프라이트: `assets/svg/enemy_drone.svg`
+- 틴트: 분홍 글로우 · 거의 흰 코어 (베이스 `enemy.tscn`)
 
 ## 의도
 
-화면을 채우는 **기본 밀도**, 그리고 내버려 두면 계속 맞는 **탄압**.  
+화면을 채우는 **기본 밀도**, 그리고 내버려 두면 계속 맞는 **탄압**.
 잡몹처럼 보이지만, 방치하면 편대가 플레이 공간을 조금씩 잠식한다. 초반부터 나와 **이동과 사격의 기본 리듬**을 잡게 한다.
 
 ## 플레이어가 고민할 점
@@ -19,16 +27,57 @@
 
 ## 편대·Encounter에서의 역할
 
-거의 모든 편대의 **살과 호위**. Striker·Bomb·Caster 궤도 같은 조합의 몸통 역할.  
+거의 모든 편대의 **살과 호위**. Striker·Bomb·Caster 궤도 같은 조합의 몸통 역할.
 배치·이동 수치와 기하 패턴은 구현 스펙과 Encounter 쪽을 본다.
 
-## 구현
 
-→ [구현 스펙 · Drone](../spec/#enemies/drone) · [Encounter 카탈로그](../spec/#encounters/catalog)
+## 확정 규칙·수치
 
----
+
+| 항목 | 값 |
+|------|-----|
+| 씬 | `enemies/normal_enemy.tscn` |
+| HP | 28 |
+| 점수 | 5 |
+| 최소 Threat | 1 |
+| 사격 | `EnemyShootComponent` 조준 단발 |
+
+## Threat 1 사격
+
+| `fire_interval` | 볼리 | 발수 | 탄속 | `initial_delay` |
+|---|---|---|---|---|
+| 4.5 | 1 | 1 | 105 | 1.5 |
+
+이후 난이도는 적 오그먼트 `ACTION_RATE`가 `fire_interval`·`burst_interval`을 나눠 올린다. 탄속에는 배율이 없다.
+
+전역 일반 적 사격 안전선을 사용하므로 중심점이 플레이필드 높이의 70% 아래로 내려가면 발사하지 않는다.
+
+## 조합에서 쓰이는 곳
+
+호위·편대 본체로 가장 많이 쓰인다. 유닛 수치만 여기; 배치·이동은 Encounter.
+
+| Encounter | 역할 |
+|-----------|------|
+| `drone_formation` | 5기 대각 편대 본체 |
+| `drone_zigzag_mirrored` | zigzag 편대 본체 |
+| `striker_drone_diamond_5` / `_13` | 호위 |
+| `bomb_drone_diamond` | 호위 |
+| `v7_drone_down` / `x9_drone_down` | 하강 후 산개 |
+| `x9_caster_drone_orbit` | 궤도 호위 |
+
+→ [Encounter 카탈로그](../encounters/catalog.md) · [진형](../formations/index.md)
+
+
+## 완료 조건·검증
+
+- 기획에 명시된 등장 조건, 공격 예고·실행·종료와 보상 처리를 확인한다.
+- 관련 씬의 수치와 위 규칙을 대조하고, 행동 변경 시 해당 적의 스모크 테스트를 실행한다.
 
 ## 변경 이력
+
+- 2026-09-14: 외형(스프라이트 미리보기) 추가.
+- 2026-09-13: 기획 의도와 구현 규칙을 통합.
+
 
 | 날짜 | 변경 |
 |------|------|

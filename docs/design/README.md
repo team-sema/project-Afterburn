@@ -1,29 +1,33 @@
-# 설계 (`docs/design/`)
+# Project Afterburn 기획서
 
-Pages: [`/design/`](index.html) · 구현 스펙: [`/spec/`](../spec/)
+게임의 의도·규칙·수치·완료 조건을 함께 관리하는 구현 기준 문서입니다. AI는 작업할 주제의 문서를 읽고 먼저 갱신한 뒤 구현합니다.
 
-| 경로 | 내용 |
-|------|------|
-| [`vision.md`](vision.md) | 방향·플레이 재미 |
-| [`enemies/`](enemies/) | 적 의도·역할 |
-| [`systems/`](systems/) | feature AC·이력 |
-| [`tasks/`](tasks/) | Task |
-| [`feature-workflow.md`](feature-workflow.md) | `/feature`·`/push` · 문서 위치 |
-| [`augment-todo.md`](augment-todo.md) | 증강 아이디어 메모 |
+## 문서 찾기
+
+- [게임 방향](vision.md) · [전체 개요](overview.md)
+- [플레이어](player.md) · [함선 모듈](ship-modules/index.md) · [무기 모듈](weapon-modules/index.md) · [오그먼트](augments.md) · [전투](combat.md)
+- [적](enemies/index.md) · [진형](formations/index.md) · [Encounter](encounters/index.md) · [런 페이싱](run-pacing.md)
+- [씬·UI 흐름](scene-flow.md) · [컴포넌트](components.md) · [이펙트](effects.md)
+- [미결정·확장 후보](gaps.md) · [증강 아이디어](augment-todo.md)
+- [작업 방식](feature-workflow.md) · [새 기획서 양식](template.md)
+- [작업 체크리스트](tasks/README.md) · [과거 변경 이력](history/README.md)
+
+## AI가 따르는 기준
+
+1. 주제별 문서의 확정 규칙을 구현 기준으로 사용한다. 신규 기능도 기존 주제 문서를 갱신하며, 독립된 주제일 때만 새 문서를 만든다.
+2. 기획 의도, 동작 조건·예외, 수치·공식, 화면·입력, 관련 코드, 완료 조건을 같은 문서에 기록한다.
+3. 변경 예정은 해당 문서의 ‘이번 변경’에 적고 구현 후 ‘확정 규칙’에 반영한다. 미결정/TBD는 구현 승인으로 해석하지 않는다.
+4. 코드와 문서가 다르면 요청 범위에서 확인하고 수정한다. 이번 요청 밖의 불일치는 확인 필요로 기록하고 임의로 게임 규칙을 바꾸지 않는다.
+5. Task는 수정할 기획서 링크·작업 순서·검증 결과만 기록한다. 수치나 규칙을 복제하지 않는다.
+6. history/는 당시 결정의 참고 자료다. 구현 기준으로 우선하지 않으며 새 기능마다 별도 설계서를 만들지 않는다.
 
 ## UI 입력 원칙
 
-- 실행 가능한 선택지는 방향 입력 + `ui_accept`만으로 도달·결정
-- 화면을 열거나 모달에서 돌아오면 유효 항목에 포커스 복구
-- 비활성 항목은 포커스 경로에서 제외
-- 방향 이동은 화면 배치와 맞는 이웃
-- 마우스 호버와 키보드 포커스는 같은 하이라이트·미리보기
-
----
+- 실행 가능한 선택지는 방향 입력 + `ui_accept`만으로 도달·결정한다.
+- 화면을 열거나 모달에서 돌아오면 유효 항목에 포커스를 복구한다.
+- 비활성 항목은 포커스 경로에서 제외하고, 방향 이동은 화면 배치와 맞춘다.
+- 마우스 호버와 키보드 포커스는 같은 하이라이트·미리보기를 사용한다.
 
 ## 변경 이력
 
-| 날짜 | 변경 |
-|------|------|
-| 2026-08-30 | doc-layers 제거 · 인덱스 단순화 |
-| 2026-08-30 | enemies/ vision 입구 |
+- 2026-09-13: 기획·기능 설계·구현 스펙을 주제별 기획서로 통합.

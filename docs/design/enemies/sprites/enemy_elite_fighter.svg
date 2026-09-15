@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <!-- Down-facing artillery elite; white mask with transparent seams. -->
+  <g fill="#fff">
+    <path d="M8 26 43 40 48 61 34 71 8 56 3 41Z"/>
+    <path d="m120 26-35 14-5 21 14 10 26-15 5-15Z"/>
+    <path d="M15 59 30 68 30 86 24 102 18 89Z"/>
+    <path d="m113 59-15 9v18l6 16 6-13Z"/>
+    <path d="M42 14 53 21 51 44 44 36 39 21Z"/>
+    <path d="m86 14-11 7 2 23 7-8 5-15Z"/>
+    <path fill-rule="evenodd" d="M64 19 75 33 77 54 88 72 77 85 70 100 64 115 58 100 51 85 40 72 51 54 53 33Z M64 42 58 54 64 73 70 54Z"/>
+    <path d="M35 75 45 81 54 99 42 93Z"/>
+    <path d="m93 75-10 6-9 18 12-6Z"/>
+  </g>
+</svg>

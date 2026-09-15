@@ -3,29 +3,15 @@ description: "Project Afterburn identity, spec source of truth, MVP scope"
 alwaysApply: true
 ---
 
-# Project Afterburn — 프로젝트
+# Project Afterburn
 
-Godot 종스크롤 슈팅 + **XP·시간 기반** 오그먼트 프로토타입 (`mayhem_shmup`).
+Godot 종스크롤 슈팅 + XP·시간 기반 오그먼트 프로토타입.
 
-## Source of Truth
+## 구현 기준
 
-- **구현 스펙:** `docs/spec/` (Pages `/spec/`) — 코드와 1:1
-- **기획:** `docs/design/vision.md`, `enemies/` … (Pages `/design/`)
-- **기능 설계 / Task:** `docs/design/systems/`, `tasks/`
-- 워크플로 요약: `docs/design/feature-workflow.md`
-
-동작 변경 → 같은 커밋에 구현 스펙. `/push`는 spec 동기화 없이 통과시키지 않는다.
-
-## 핵심 (구현 참고)
-
-- 재미: 탄막 회피·사격, 오그먼트 선택(플레이어 vs 적 강화)
-- 오그먼트: 플레이어는 XP 후 **`C`**, 적은 ~30초 주기. 점수는 오퍼 트리거 아님 — `docs/spec/augments.md`
-- 컴포넌트 조합 (`components/`)
-- 비주얼: `.agents/godot_nova_drift_visual_guide.md`, `docs/spec/effects.md`
-
-## 에이전트
-
-- 관련 `docs/spec/`·`docs/design/`를 읽고 작업
-- 스펙과 다른 구현 요청 시 문서 갱신 여부 짧게 확인
-- 커밋은 사용자 요청 시에만
-- 칸반: Notion에서 사람이 관리 · `/push`는 제목·본문 초안만 (`kanban-tickets`)
+- `docs/design/README.md`에서 관련 주제 기획서를 찾는다. 기획서에 의도·동작·수치·완료 조건을 함께 관리한다.
+- AI는 기획서를 먼저 갱신하고 구현한다. 요청 밖의 규칙을 임의로 바꾸지 않는다.
+- 과거 기능 설계 이력은 `docs/design/history/`, 작업 체크리스트는 `docs/design/tasks/`다.
+- 게임 루프는 `docs/design/overview.md`, 오퍼는 `augments.md`, 페이싱은 `run-pacing.md`를 따른다.
+- 비주얼은 `.agents/godot_nova_drift_visual_guide.md`와 `docs/design/effects.md`를 참고한다.
+- 커밋은 사용자 요청 시에만 한다. Notion 칸반은 사람이 관리하고 AI는 제목·본문 초안만 추천한다.

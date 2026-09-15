@@ -1,6 +1,6 @@
 # submission-copy-ko Task
 
-스펙: [`docs/design/systems/submission-copy-ko.md`](../systems/submission-copy-ko.md)
+스펙: [`docs/design/history/submission-copy-ko.md`](../history/submission-copy-ko.md)
 
 | # | Task | 파일 | 완료 |
 |---|------|------|------|

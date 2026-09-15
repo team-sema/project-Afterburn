@@ -10,7 +10,7 @@
 - `.cursor/rules/feature-scope.mdc`, `afterburn-project.mdc`
 - `.cursor/skills/feature/SKILL.md`, `.cursor/skills/push/SKILL.md`
 - `.agents/skills/afterburn-start-feature/SKILL.md`, `afterburn-push/SKILL.md`, `afterburn-merge-feature/SKILL.md`
-- `docs/design/systems/kanban-v2.md`, `docs/board/README.md`
+- `docs/design/history/kanban-v2.md`, `docs/board/README.md`
 
 ## AC
 

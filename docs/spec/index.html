@@ -1,38 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Project Afterburn · 스펙</title>
-  <link rel="stylesheet" href="../site.css" />
-</head>
-<body class="spec-page">
-  <header class="spec-top">
-    <div>
-      <h1>구현 스펙</h1>
-      <p class="sub">현재 코드 기준 · 적→진형→Encounter→페이싱 계층으로 탐색</p>
-    </div>
-    <div class="spec-actions">
-      <a class="btn" href="../design/">기획</a>
-      <a class="btn ghost" href="../">문서 홈</a>
-      <a class="btn ghost" href="https://app.notion.com/p/102c71bf78394bcaa9ff627548faf7f9?v=3c9b8c11155f8111bfeb000c00cae3b8">칸반</a>
-    </div>
-  </header>
-
-  <div class="layer-chips" id="layer-chips" aria-label="적 계층 바로가기"></div>
-
-  <div class="spec-layout">
-    <nav class="cat-nav" id="cat-nav" aria-label="스펙 카테고리"></nav>
-    <article class="spec-panel">
-      <header class="spec-panel-head">
-        <p class="crumb" id="panel-crumb" hidden></p>
-        <h2 id="panel-title">불러오는 중…</h2>
-        <p class="path" id="panel-path"></p>
-      </header>
-      <div class="spec-body" id="panel-body"></div>
-    </article>
-  </div>
-
-  <script src="spec.js"></script>
-</body>
-</html>
+<html lang="ko"><head><meta charset="utf-8"><title>기획서로 이동</title></head>
+<body><p>문서가 통합되었습니다. <a id="destination" href="../design/">기획서 열기</a></p>
+<script>const target = "../design/" + location.hash; document.getElementById("destination").href = target; location.replace(target);</script>
+</body></html>
