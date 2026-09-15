@@ -14,6 +14,9 @@ signal bullet_cancel_reward_changed(is_active: bool)
 @export_range(1, 100000, 1) var base_experience_required := 5
 @export_range(0, 100000, 1) var experience_requirement_growth := 3
 @export_range(1.0, 3600.0, 1.0) var enemy_augment_interval := 60.0
+## Timer-driven elite gates. An EncounterDirector turns this off and calls
+## request_elite_milestone() itself.
+@export var automatic_elite_milestones := true
 
 var level := 1
 var current_experience := 0
@@ -49,19 +52,32 @@ func get_threat_level() -> int:
 
 
 func _process(delta: float) -> void:
-	if not elite_gate_active:
+	if automatic_elite_milestones and not elite_gate_active:
 		enemy_augment_elapsed += delta
-	if not elite_gate_active and enemy_augment_elapsed >= enemy_augment_interval:
-		enemy_augment_elapsed = 0.0
-		elite_gate_active = true
-		active_elite_threat = get_threat_level() + 1
-		elite_gate_changed.emit(true, active_elite_threat)
-		elite_milestone_requested.emit(active_elite_threat)
+	if (
+		automatic_elite_milestones
+		and not elite_gate_active
+		and enemy_augment_elapsed >= enemy_augment_interval
+	):
+		request_elite_milestone()
 	var current_threat_level := get_threat_level()
 	enemy_augment_progress_changed.emit(enemy_augment_elapsed, enemy_augment_interval, current_threat_level)
 	if Input.is_action_just_pressed(OPEN_AUGMENT_OFFER_ACTION):
 		_try_level_up()
 	_try_request_offer()
+
+
+## Opens the next Threat gate now. Returns false while a gate or its reward
+## offer is still in progress.
+func request_elite_milestone() -> bool:
+	if elite_gate_active or _awaiting_elite_enemy_offer:
+		return false
+	enemy_augment_elapsed = 0.0
+	elite_gate_active = true
+	active_elite_threat = get_threat_level() + 1
+	elite_gate_changed.emit(true, active_elite_threat)
+	elite_milestone_requested.emit(active_elite_threat)
+	return true
 
 
 func add_experience(amount: int) -> void:

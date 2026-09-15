@@ -6,6 +6,9 @@ const SNIPER_REINFORCEMENT_PRESET := preload("res://resources/encounters/presets
 @export var augment_registry: EnemyAugmentRegistry
 @export var progression: AugmentProgressionController
 @export var encounter_pool: EncounterPool
+## Timer-driven random spawning. An EncounterDirector turns this off when it
+## starts and drives spawns explicitly instead.
+@export var automatic_spawning_enabled := true
 
 @export_group("Spawn Timing")
 @export_range(0.2, 30.0, 0.1) var spawn_interval := 2.8
@@ -35,7 +38,8 @@ func _ready() -> void:
 	)
 	progression.threat_level_changed.connect(_on_threat_level_changed)
 	spawn_timer.timeout.connect(_on_spawn_timer_timeout)
-	_schedule_next_spawn()
+	if automatic_spawning_enabled:
+		_schedule_next_spawn()
 
 
 func pick_encounter(
@@ -54,7 +58,7 @@ func _on_threat_level_changed(new_threat_level: int) -> void:
 
 
 func _on_spawn_timer_timeout() -> void:
-	if normal_spawns_paused:
+	if normal_spawns_paused or not automatic_spawning_enabled:
 		return
 	var preset := pick_encounter(current_threat_level)
 	if preset == null:
@@ -69,7 +73,7 @@ func _on_spawn_timer_timeout() -> void:
 
 
 func _schedule_next_spawn() -> void:
-	if normal_spawns_paused:
+	if normal_spawns_paused or not automatic_spawning_enabled:
 		return
 	spawn_timer.start(spawn_interval + randf_range(0.0, spawn_interval_jitter))
 
@@ -77,6 +81,37 @@ func _schedule_next_spawn() -> void:
 func _spawn(preset: EncounterPreset) -> FormationController:
 	_remember_encounter(preset.encounter_id)
 	return enemy_spawner.spawn_encounter(preset)
+
+
+## Threat-weighted pick from an arbitrary pool, honoring the recent-id exclusion.
+func pick_from_pool(
+	pool: EncounterPool,
+	random_number_generator: RandomNumberGenerator = null,
+) -> EncounterPreset:
+	var selected_pool := pool if pool != null else encounter_pool
+	return selected_pool.choose(
+		current_threat_level,
+		random_number_generator,
+		_recent_encounter_ids,
+	)
+
+
+## Explicit spawn used by EncounterDirector. Applies the same preset substitution
+## as timer spawns and returns a run that completes when every member is gone.
+func spawn_preset_tracked(preset: EncounterPreset) -> EncounterRun:
+	if preset == null:
+		return null
+	return EncounterRun.track(_spawn(resolve_normal_preset(preset)))
+
+
+func set_automatic_spawning_enabled(is_enabled: bool) -> void:
+	if automatic_spawning_enabled == is_enabled:
+		return
+	automatic_spawning_enabled = is_enabled
+	if not automatic_spawning_enabled:
+		spawn_timer.stop()
+	elif not normal_spawns_paused:
+		_schedule_next_spawn()
 
 
 func resolve_normal_preset(preset: EncounterPreset) -> EncounterPreset:
@@ -105,7 +140,7 @@ func set_normal_spawns_paused(is_paused: bool) -> void:
 	normal_spawns_paused = is_paused
 	if normal_spawns_paused:
 		spawn_timer.stop()
-	else:
+	elif automatic_spawning_enabled:
 		_schedule_next_spawn()
 
 

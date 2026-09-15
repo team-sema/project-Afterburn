@@ -2,6 +2,9 @@ class_name ProgressionHud
 extends VBoxContainer
 
 @export var progression: Node
+## Optional. When set and running a sequence, Threat HUD shows phase progress
+## instead of the 60s elite timer countdown.
+@export var encounter_director: Node
 
 @onready var experience_label: Label = %ExperienceLabel
 @onready var experience_bar: ProgressBar = %ExperienceBar
@@ -18,6 +21,13 @@ var _bullet_cancel_reward_active := false
 var _current_experience := 0
 var _experience_required := 1
 var _level := 1
+var _current_threat_level := 1
+var _sequence_mode := false
+var _sequence_stage := 0
+var _sequence_step_index := 0
+var _sequence_step_count := 0
+var _timer_elapsed := 0.0
+var _timer_interval := 60.0
 
 
 func _ready() -> void:
@@ -32,6 +42,10 @@ func _ready() -> void:
 	progression.enemy_augment_progress_changed.connect(_on_enemy_augment_progress_changed)
 	progression.elite_gate_changed.connect(_on_elite_gate_changed)
 	progression.bullet_cancel_reward_changed.connect(_on_bullet_cancel_reward_changed)
+	if encounter_director != null:
+		encounter_director.sequence_started.connect(_on_sequence_started)
+		encounter_director.sequence_progress_changed.connect(_on_sequence_progress_changed)
+		encounter_director.sequence_completed.connect(_on_sequence_completed)
 	progression.call_deferred("publish_state")
 
 
@@ -89,19 +103,65 @@ func _on_enemy_augment_progress_changed(
 	interval: float,
 	current_threat_level: int,
 ) -> void:
-	threat_bar.max_value = maxf(1.0, interval)
-	threat_bar.value = interval if _elite_gate_active else elapsed
-	if _elite_gate_active:
-		threat_label.text = "THREAT %02d   ELITE ENGAGED" % current_threat_level
-		return
-	var remaining_seconds := maxi(0, ceili(interval - elapsed))
-	var minutes := floori(float(remaining_seconds) / 60.0)
-	var seconds := remaining_seconds % 60
-	threat_label.text = "THREAT %02d   %02d:%02d" % [current_threat_level, minutes, seconds]
+	_timer_elapsed = elapsed
+	_timer_interval = interval
+	_current_threat_level = current_threat_level
+	_refresh_threat()
 
 
 func _on_elite_gate_changed(is_active: bool, _threat_level: int) -> void:
 	_elite_gate_active = is_active
+	_refresh_threat()
+
+
+func _on_sequence_started(_sequence_id: StringName) -> void:
+	_sequence_mode = true
+	_refresh_threat()
+
+
+func _on_sequence_progress_changed(
+	stage: int,
+	step_index: int,
+	step_count: int,
+	_token: StringName,
+	_kind: EncounterSequenceStep.Kind,
+) -> void:
+	_sequence_mode = true
+	_sequence_stage = stage
+	_sequence_step_index = step_index
+	_sequence_step_count = step_count
+	_refresh_threat()
+
+
+func _on_sequence_completed(_sequence_id: StringName) -> void:
+	_sequence_mode = false
+	_sequence_stage = 0
+	_sequence_step_index = 0
+	_sequence_step_count = 0
+	_refresh_threat()
+
+
+func _refresh_threat() -> void:
+	if _elite_gate_active:
+		threat_bar.max_value = maxf(1.0, float(maxi(1, _sequence_step_count)))
+		threat_bar.value = threat_bar.max_value
+		if _sequence_mode:
+			threat_label.text = "STAGE %02d   ELITE ENGAGED" % maxi(1, _sequence_stage)
+		else:
+			threat_label.text = "ELITE ENGAGED"
+		return
+	if _sequence_mode:
+		var step_count := maxi(1, _sequence_step_count)
+		threat_bar.max_value = float(step_count)
+		threat_bar.value = float(clampi(_sequence_step_index, 0, step_count))
+		threat_label.text = "STAGE %02d" % maxi(1, _sequence_stage)
+		return
+	threat_bar.max_value = maxf(1.0, _timer_interval)
+	threat_bar.value = _timer_elapsed
+	var remaining_seconds := maxi(0, ceili(_timer_interval - _timer_elapsed))
+	var minutes := floori(float(remaining_seconds) / 60.0)
+	var seconds := remaining_seconds % 60
+	threat_label.text = "%02d:%02d" % [minutes, seconds]
 
 
 func _on_bullet_cancel_reward_changed(is_active: bool) -> void:

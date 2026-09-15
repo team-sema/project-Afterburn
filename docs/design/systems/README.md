@@ -7,6 +7,7 @@
 
 | slug | 제목 | 상태 |
 |------|------|------|
+| [encounter-sequence](encounter-sequence.md) | 적 등장 시퀀스 · 토큰 패턴 Phase · NORMAL/WAVE/ELITE/BOSS | 구현 중 |
 | [elite-combat-patterns](elite-combat-patterns.md) | 엘리트 생존력·교대 공격·3방향 연사 | 구현 중 |
 | [player-augment-tiers](player-augment-tiers.md) | 플레이어 증강 실버·골드·프리즘 티어 기반 | 구현 중 |
 | [submission-ai-usage-copy](submission-ai-usage-copy.md) | 제출 AI 활용 문서 퇴고 | review |

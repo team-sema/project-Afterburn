@@ -3,6 +3,8 @@ extends Node2D
 
 signal member_added(enemy: Enemy, slot_index: int)
 signal member_removed(slot_index: int)
+## Every authored member has either spawned or failed. Emitted once per count set.
+signal member_spawns_finished
 signal formation_broken(released_members: Array[Enemy])
 signal formation_empty
 
@@ -22,6 +24,7 @@ signal formation_empty
 var _layout: FormationLayout
 var _bindings: Dictionary = {}
 var _pending_member_spawns := 0
+var _member_spawns_finished_emitted := false
 var _formation_started := false
 var _formation_elapsed := 0.0
 var _break_requested := false
@@ -71,8 +74,21 @@ func _process(delta: float) -> void:
 
 func set_pending_member_count(count: int) -> void:
 	_pending_member_spawns = maxi(0, count)
+	_member_spawns_finished_emitted = false
+	_emit_member_spawns_finished_if_ready()
 	if _pending_member_spawns == 0 and _break_requested:
 		break_formation.call_deferred()
+
+
+func are_member_spawns_finished() -> bool:
+	return _pending_member_spawns == 0
+
+
+func _emit_member_spawns_finished_if_ready() -> void:
+	if _pending_member_spawns > 0 or _member_spawns_finished_emitted:
+		return
+	_member_spawns_finished_emitted = true
+	member_spawns_finished.emit()
 
 
 func prepare_slots_for_members(members: Array[EncounterMember]) -> void:
@@ -109,6 +125,7 @@ func add_member(
 		"initial_direction": initial_direction,
 	}
 	_pending_member_spawns = maxi(0, _pending_member_spawns - 1)
+	_emit_member_spawns_finished_if_ready()
 	if _bindings.size() == 1:
 		_formation_speed_multiplier = enemy.move_component.velocity_multiplier
 		center_move_component.velocity_multiplier = _formation_speed_multiplier
@@ -124,6 +141,7 @@ func add_member(
 
 func notify_member_spawn_failed() -> void:
 	_pending_member_spawns = maxi(0, _pending_member_spawns - 1)
+	_emit_member_spawns_finished_if_ready()
 	if _pending_member_spawns == 0 and _break_requested:
 		break_formation.call_deferred()
 		return

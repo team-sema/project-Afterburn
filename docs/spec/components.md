@@ -36,7 +36,7 @@
 | `HitboxComponent` | 공격 Area2D · `damage` · `hit_hurtbox` |
 | `HurtComponent` | hurt → 피해 처리 · 공용 무적 타이머와 반투명 표시 · 플레이어 기본 0.6초 무적 |
 | `ShieldComponent` | 버퍼 HP · **시작 최대 1** · 피해는 실드 우선·초과분은 선체 · 미만 시 충전 게이지 → `restore_shield(1)` · `notify_hit` 시 게이지 리셋 |
-| `DestroyedComponent` | `no_health` → 이펙트 스폰 + free |
+| `DestroyedComponent` | `no_health` 시 이펙트+free(기본). Enemy는 `auto_destroy_on_no_health=false`로 점수→이펙트→free를 직접 소유 |
 | `ScoreComponent` | `GameStats.score`에 가산 |
 | `ExperienceDropComponent` | 적 사망 시 경험치 오브 스폰 |
 | XP drop tuning | 일반 적 XP 오브 드롭 확률은 0.45, 엘리트는 1.0 |
@@ -53,10 +53,14 @@
 | `ShakeComponent` | 위치 셰이크 |
 | `FlashComponent` | 화이트 플래시 머티리얼 · 선택적 `flash_root`로 다중 CanvasItem 동시 플래시 |
 | `EntryWarningComponent` | 화면 밖 고속 진입 전 VisibleRect 가장자리 경고. Interceptor는 좌/우 등장 위치에서 스폰 쪽(왼↔오)을 가리킴 |
+| `EncounterStepWarning` | WAVE/ELITE/BOSS 스텝 직전 맵 중앙 빨간 점멸 경고 (종류별 마크) |
 | `SpawnerComponent` | PackedScene 인스턴스 |
 | `EnemySpawner` | 선택된 `EncounterPreset`만 실제 생성하고 의존성·Encounter ID를 트리 진입 전에 주입. 단일 적도 동일한 `FormationController` 생명주기를 사용 |
 | `EncounterPreset` / `EncounterMember` | Layout, 편대·개별 Sequence, 슬롯별 적, 등장 지연, 반전, 편대 해제 조건을 조합하는 설정 Resource |
 | `EncounterPool` / `EncounterPoolEntry` | 라이브 Encounter 로스터. Entry는 `min_threat`만 두고, Preset `difficulty`로 `weight = 60 / sqrt(difficulty)` 산출(어려울수록 희귀·비율 완만). `EnemyGenerator`는 직전 2 id 제외 |
+| `EncounterSequence` / `EncounterSequencePhase` / `EncounterSequenceStep` / `EncounterWave` | 등장 시나리오 데이터. Phase = 토큰 패턴 문자열, Step = NORMAL/WAVE/ELITE/BOSS + `post_delay_min~max`, Wave = 순서 고정 편대 묶음 |
+| `EncounterDirector` | 시퀀스 재생 노드. 시작 시 `EnemyGenerator` 타이머·60초 엘리트 타이머를 끄고 스텝 순서대로 스폰·게이트 요청. `sequence_progress_changed`로 HUD에 Phase 스텝 진행을 알림 |
+| `EncounterRun` | 스폰된 편대 1개의 적을 편대 해제 후까지 추적, 전부 사라지면 `completed` (ELITE `wait_for_clear` 판정) |
 | `OnetimeAnimatedEffect` | 애니 종료 시 free |
 | `VariablePitchAudioStreamPlayer` | 피치 랜덤 SFX |
 
