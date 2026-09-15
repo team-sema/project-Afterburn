@@ -86,10 +86,26 @@ func _run() -> void:
 		float(ProjectSettings.get_setting("display/window/size/viewport_width")),
 		float(ProjectSettings.get_setting("display/window/size/viewport_height")),
 	)
-	var minimum_size: Vector2 = lab.get_combined_minimum_size()
+	var layout := lab.get_node("Layout") as Control
+	var playfield := lab.get_node("Layout/Playfield") as Control
+	var sub_viewport := lab.get_node("Layout/Playfield/ViewportContainer/PlayfieldViewport") as SubViewport
+	var detail_min: Vector2 = lab.get_node("Layout/DetailPanel").get_combined_minimum_size()
+	var summary_min: Vector2 = lab.get_node("Layout/SummaryPanel").get_combined_minimum_size()
 	_expect(
-		minimum_size.x <= viewport_size.x and minimum_size.y <= viewport_size.y,
-		"monitor lab minimum size %s fits viewport %s" % [minimum_size, viewport_size],
+		layout.size.x <= viewport_size.x + 0.5 and layout.size.y <= viewport_size.y + 0.5,
+		"monitor lab layout %s fits viewport %s" % [layout.size, viewport_size],
+	)
+	_expect(
+		detail_min.y <= viewport_size.y and summary_min.y <= viewport_size.y,
+		"side panels min height detail=%s summary=%s fit viewport height %s" % [detail_min.y, summary_min.y, viewport_size.y],
+	)
+	_expect(
+		is_equal_approx(playfield.size.x, 240.0) and is_equal_approx(playfield.size.y, 360.0),
+		"playfield stays 240x360 (got %s)" % playfield.size,
+	)
+	_expect(
+		sub_viewport.size == Vector2i(240, 360),
+		"playfield SubViewport stays 240x360 (got %s)" % sub_viewport.size,
 	)
 
 	lab.queue_free()
