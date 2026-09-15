@@ -36,7 +36,7 @@
 | `HitboxComponent` | 공격 Area2D · `damage` · `hit_hurtbox` |
 | `HurtComponent` | hurt → 피해 처리 · 공용 무적 타이머와 반투명 표시 · 플레이어 기본 0.6초 무적 |
 | `ShieldComponent` | 버퍼 HP · **시작 최대 1** · 피해는 실드 우선·초과분은 선체 · 미만 시 충전 게이지 → `restore_shield(1)` · `notify_hit` 시 게이지 리셋 |
-| `DestroyedComponent` | `no_health` → 이펙트 스폰 + free |
+| `DestroyedComponent` | `no_health` 시 이펙트+free(기본). Enemy는 `auto_destroy_on_no_health=false`로 점수→이펙트→free를 직접 소유 |
 | `ScoreComponent` | `GameStats.score`에 가산 |
 | `ExperienceDropComponent` | 적 사망 시 경험치 오브 스폰 |
 | XP drop tuning | 일반 적 XP 오브 드롭 확률은 0.45, 엘리트는 1.0 |

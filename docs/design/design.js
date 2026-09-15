@@ -38,7 +38,7 @@ const NAV = [
   {
     group: true,
     title: "적 · 진형 · 조합",
-    hint: "유닛 → 슬롯 → Encounter → 풀",
+    hint: "목록을 누르면 하위가 열린다",
     children: [
       {
         id: "enemies",
@@ -116,9 +116,93 @@ const NAV = [
     ],
   },
   {
+    group: true,
+    title: "함선 · 무기 모듈",
+    hint: "목록을 누르면 하위가 열린다",
+    children: [
+      {
+        id: "ship-modules",
+        title: "함선 모듈",
+        desc: "시설 효과 13종",
+        file: "ship-modules/index.md",
+        children: [
+          {
+            id: "ship-modules/weapon-room",
+            title: "무기실",
+            file: "ship-modules/weapon-room.md",
+          },
+          {
+            id: "ship-modules/reactor",
+            title: "동력로",
+            file: "ship-modules/reactor.md",
+          },
+          {
+            id: "ship-modules/engine",
+            title: "엔진",
+            file: "ship-modules/engine.md",
+          },
+          { id: "ship-modules/hull", title: "선체", file: "ship-modules/hull.md" },
+          {
+            id: "ship-modules/radar",
+            title: "레이더",
+            file: "ship-modules/radar.md",
+          },
+          {
+            id: "ship-modules/shield",
+            title: "실드",
+            file: "ship-modules/shield.md",
+          },
+        ],
+      },
+      {
+        id: "weapon-modules",
+        title: "무기 모듈",
+        desc: "획득 · 무기별 강화",
+        file: "weapon-modules/index.md",
+        children: [
+          {
+            id: "weapon-modules/blaster",
+            title: "블래스터",
+            file: "weapon-modules/blaster.md",
+          },
+          {
+            id: "weapon-modules/laser",
+            title: "레이저",
+            file: "weapon-modules/laser.md",
+          },
+          {
+            id: "weapon-modules/shotgun",
+            title: "샷건",
+            file: "weapon-modules/shotgun.md",
+          },
+          {
+            id: "weapon-modules/aux-cannon",
+            title: "보조 캐넌",
+            file: "weapon-modules/aux-cannon.md",
+          },
+          {
+            id: "weapon-modules/plasma-bomb",
+            title: "플라즈마",
+            file: "weapon-modules/plasma-bomb.md",
+          },
+          {
+            id: "weapon-modules/homing-missile",
+            title: "유도탄",
+            file: "weapon-modules/homing-missile.md",
+          },
+          {
+            id: "weapon-modules/orbital-barrier",
+            title: "궤도 방벽",
+            file: "weapon-modules/orbital-barrier.md",
+          },
+        ],
+      },
+    ],
+  },
+  {
     id: "augments",
     title: "오그먼트",
-    desc: "풀 · 시설 · 무기 모듈 · 오퍼",
+    desc: "풀 · 오퍼 · 트리거",
     file: "augments.md",
   },
   {
@@ -175,8 +259,9 @@ const LAYER_CHIPS = [
   { id: "enemies", label: "① 적" },
   { id: "formations", label: "② 진형" },
   { id: "encounters", label: "③ Encounter" },
-  { id: "encounters/catalog", label: "카탈로그" },
-  { id: "run-pacing", label: "④ 페이싱" },
+  { id: "ship-modules", label: "함선 모듈" },
+  { id: "weapon-modules", label: "무기 모듈" },
+  { id: "run-pacing", label: "페이싱" },
 ];
 
 const navEl = document.getElementById("cat-nav");
@@ -185,6 +270,9 @@ const pathEl = document.getElementById("panel-path");
 const bodyEl = document.getElementById("panel-body");
 const crumbEl = document.getElementById("panel-crumb");
 const chipsEl = document.getElementById("layer-chips");
+
+/** Manual expand overrides (id → true). Active-branch pages stay open anyway. */
+const manualExpanded = new Set();
 
 function escapeHtml(text) {
   return String(text)
@@ -250,11 +338,15 @@ function renderMarkdown(src, currentId) {
     const safeSrc = escapeHtml(new URL(href, base).href);
     const safeAlt = escapeHtml(alt || "");
     const tint =
-      /interceptor/i.test(href) || /interceptor/i.test(alt)
-        ? " enemy-look--orange"
-        : /elite/i.test(href) || /elite/i.test(alt)
-          ? " enemy-look--crimson"
-          : " enemy-look--pink";
+      /facility_/i.test(href) || /facility_/i.test(alt)
+        ? " enemy-look--cyan"
+        : /weapon_/i.test(href) || /weapon_/i.test(alt)
+          ? " enemy-look--blue"
+          : /interceptor/i.test(href) || /interceptor/i.test(alt)
+            ? " enemy-look--orange"
+            : /elite/i.test(href) || /elite/i.test(alt)
+              ? " enemy-look--crimson"
+              : " enemy-look--pink";
     return `<figure class="enemy-look${tint}"><img src="${safeSrc}" alt="${safeAlt}" loading="lazy" /></figure>`;
   };
 
@@ -396,24 +488,58 @@ function isActiveBranch(pageId, activeId) {
   return activeId === pageId || activeId.startsWith(pageId + "/");
 }
 
+function isTreeOpen(page, activeId) {
+  if (!page.children?.length) return false;
+  // A child route keeps ancestors open.
+  if (activeId && activeId.startsWith(page.id + "/")) return true;
+  return manualExpanded.has(page.id);
+}
+
 function makeBtn(page, activeId, depth) {
+  const hasKids = Boolean(page.children?.length);
+  const open = isTreeOpen(page, activeId);
   const btn = document.createElement("button");
   btn.type = "button";
   btn.className =
     "cat-btn" +
     (page.id === activeId ? " active" : "") +
     (depth ? ` depth-${depth}` : "") +
-    (isActiveBranch(page.id, activeId) && page.children ? " open" : "");
+    (hasKids ? " has-children" : "") +
+    (open ? " open" : "");
   btn.dataset.id = page.id;
   const desc = page.desc
     ? `<span class="cat-desc">${escapeHtml(page.desc)}</span>`
     : "";
+  const caret = hasKids
+    ? `<span class="nav-caret" aria-hidden="true">${open ? "▾" : "▸"}</span>`
+    : `<span class="nav-caret-spacer" aria-hidden="true"></span>`;
   btn.innerHTML = `
-    <span class="cat-title">${escapeHtml(page.title)}</span>
-    ${desc}
+    ${caret}
+    <span class="cat-copy">
+      <span class="cat-title">${escapeHtml(page.title)}</span>
+      ${desc}
+    </span>
   `;
-  btn.addEventListener("click", () => selectPage(page.id, true));
+  btn.addEventListener("click", () => {
+    if (hasKids) {
+      // Same parent again while already here → collapse. Otherwise expand.
+      if (page.id === activeId && manualExpanded.has(page.id)) {
+        manualExpanded.delete(page.id);
+      } else {
+        manualExpanded.add(page.id);
+      }
+    }
+    selectPage(page.id, true);
+  });
   return btn;
+}
+
+function appendNavTree(parentEl, page, activeId, depth) {
+  parentEl.appendChild(makeBtn(page, activeId, depth));
+  if (!page.children?.length || !isTreeOpen(page, activeId)) return;
+  for (const child of page.children) {
+    appendNavTree(parentEl, child, activeId, depth + 1);
+  }
 }
 
 function renderNav(activeId) {
@@ -435,13 +561,7 @@ function renderNav(activeId) {
       }`;
       wrap.appendChild(label);
       for (const child of entry.children) {
-        wrap.appendChild(makeBtn(child, activeId, 0));
-        // Always expand leaves in this hierarchy group for discoverability.
-        if (child.children) {
-          for (const leaf of child.children) {
-            wrap.appendChild(makeBtn(leaf, activeId, 1));
-          }
-        }
+        appendNavTree(wrap, child, activeId, 0);
       }
       navEl.appendChild(wrap);
       continue;

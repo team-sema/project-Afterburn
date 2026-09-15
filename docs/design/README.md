@@ -5,7 +5,7 @@
 ## 문서 찾기
 
 - [게임 방향](vision.md) · [전체 개요](overview.md)
-- [플레이어·무기·시설](player.md) · [오그먼트](augments.md) · [전투](combat.md)
+- [플레이어](player.md) · [함선 모듈](ship-modules/index.md) · [무기 모듈](weapon-modules/index.md) · [오그먼트](augments.md) · [전투](combat.md)
 - [적](enemies/index.md) · [진형](formations/index.md) · [Encounter](encounters/index.md) · [런 페이싱](run-pacing.md)
 - [씬·UI 흐름](scene-flow.md) · [컴포넌트](components.md) · [이펙트](effects.md)
 - [미결정·확장 후보](gaps.md) · [증강 아이디어](augment-todo.md)
