@@ -1,20 +1,22 @@
 # DiamondFormation5
 
+![Diamond5](sprites/layout_diamond5.svg)
+
 | 항목 | 값 |
 |------|-----|
 | 씬 | `formations/layouts/diamond_formation.tscn` |
 | 슬롯 | 5 |
-| 간격 (Striker 호위 기준) | 좌우 ±32 · 상하 ±28 |
+| 간격 | 좌우 ±32 · 상하 ±28 |
 
 ## 슬롯
 
-| Slot | 이름 | 위치 요지 |
-|------|------|-----------|
-| 0 | `top` | 화면 상단·최후방 |
-| 1 | `left` | 좌 |
-| 2 | `center` | 중앙 |
-| 3 | `right` | 우 |
-| 4 | `bottom` | 하단 팁 |
+| Slot | id | 오프셋 (x, y) |
+|------|-----|---------------|
+| 0 | `top` | (0, -28) |
+| 1 | `left` | (-32, 0) |
+| 2 | `center` | (0, 0) |
+| 3 | `right` | (32, 0) |
+| 4 | `bottom` | (0, 28) |
 
 ## 사용 Encounter
 

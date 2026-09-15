@@ -55,6 +55,7 @@ const NAV = [
             title: "Interceptor",
             file: "enemies/interceptor.md",
           },
+          { id: "enemies/tanker", title: "Tanker", file: "enemies/tanker.md" },
           { id: "enemies/caster", title: "Caster", file: "enemies/caster.md" },
           { id: "enemies/sniper", title: "Sniper", file: "enemies/sniper.md" },
           {
@@ -87,7 +88,31 @@ const NAV = [
             file: "formations/diamond-13.md",
           },
           { id: "formations/v3", title: "V3", file: "formations/v3.md" },
+          { id: "formations/v5", title: "V5", file: "formations/v5.md" },
+          { id: "formations/v7", title: "V7", file: "formations/v7.md" },
+          { id: "formations/v9", title: "V9", file: "formations/v9.md" },
+          {
+            id: "formations/inverted-v3",
+            title: "Inverted V3",
+            file: "formations/inverted-v3.md",
+          },
+          {
+            id: "formations/inverted-v5",
+            title: "Inverted V5",
+            file: "formations/inverted-v5.md",
+          },
+          {
+            id: "formations/inverted-v7",
+            title: "Inverted V7",
+            file: "formations/inverted-v7.md",
+          },
+          { id: "formations/x5", title: "X5", file: "formations/x5.md" },
           { id: "formations/x9", title: "X9", file: "formations/x9.md" },
+          {
+            id: "formations/triangle6",
+            title: "Triangle6",
+            file: "formations/triangle6.md",
+          },
           {
             id: "formations/interceptor-pair",
             title: "Interceptor pair",
@@ -97,6 +122,11 @@ const NAV = [
             id: "formations/single",
             title: "Single",
             file: "formations/single.md",
+          },
+          {
+            id: "formations/vertical",
+            title: "Vertical",
+            file: "formations/vertical.md",
           },
         ],
       },
