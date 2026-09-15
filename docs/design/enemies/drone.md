@@ -28,7 +28,7 @@
 ## 편대·Encounter에서의 역할
 
 거의 모든 편대의 **살과 호위**. Striker·Bomb·Caster 궤도 같은 조합의 몸통 역할.
-배치·이동 수치와 기하 패턴은 구현 스펙과 Encounter 쪽을 본다.
+슬롯 기하·배치 그림은 [진형 카탈로그](../formations/index.md) (드론 Encounter 대응 표 포함). 멤버·이동 수치는 [Encounter 카탈로그](../encounters/catalog.md).
 
 
 ## 확정 규칙·수치
@@ -65,7 +65,7 @@
 | `v7_drone_down` / `x9_drone_down` | 하강 후 산개 |
 | `x9_caster_drone_orbit` | 궤도 호위 |
 
-→ [Encounter 카탈로그](../encounters/catalog.md) · [진형](../formations/index.md)
+→ [Encounter 카탈로그](../encounters/catalog.md) · [진형 배치 목록](../formations/index.md)
 
 
 ## 완료 조건·검증
@@ -75,6 +75,7 @@
 
 ## 변경 이력
 
+- 2026-09-15: 진형 카탈로그(배치 SVG) 링크로 편대 기하 안내를 연결.
 - 2026-09-14: 외형(스프라이트 미리보기) 추가.
 - 2026-09-13: 기획 의도와 구현 규칙을 통합.
 

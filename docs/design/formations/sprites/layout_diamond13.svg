@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 299.2 299.2" role="img" aria-label="layout_diamond13">
+  <rect width="100%" height="100%" fill="#050b14"/>
+  <line x1="149.6" y1="0" x2="149.6" y2="299.2" stroke="#1a3a55" stroke-width="1" stroke-dasharray="3 3"/>
+  <line x1="0" y1="149.6" x2="299.2" y2="149.6" stroke="#1a3a55" stroke-width="1" stroke-dasharray="3 3"/>
+  <circle cx="149.6" cy="61.6" r="7" fill="#ff4d8d" stroke="#ffb3d0" stroke-width="1.5"/>
+  <text x="149.6" y="65.1" text-anchor="middle" font-family="ui-monospace,Consolas,monospace" font-size="9" fill="#1a0510">0</text>
+  <circle cx="105.6" cy="105.6" r="7" fill="#ff4d8d" stroke="#ffb3d0" stroke-width="1.5"/>
+  <text x="105.6" y="109.1" text-anchor="middle" font-family="ui-monospace,Consolas,monospace" font-size="9" fill="#1a0510">1</text>
+  <circle cx="149.6" cy="105.6" r="7" fill="#ff4d8d" stroke="#ffb3d0" stroke-width="1.5"/>
+  <text x="149.6" y="109.1" text-anchor="middle" font-family="ui-monospace,Consolas,monospace" font-size="9" fill="#1a0510">2</text>
+  <circle cx="193.6" cy="105.6" r="7" fill="#ff4d8d" stroke="#ffb3d0" stroke-width="1.5"/>
+  <text x="193.6" y="109.1" text-anchor="middle" font-family="ui-monospace,Consolas,monospace" font-size="9" fill="#1a0510">3</text>
+  <circle cx="61.6" cy="149.6" r="7" fill="#ff4d8d" stroke="#ffb3d0" stroke-width="1.5"/>
+  <text x="61.6" y="153.1" text-anchor="middle" font-family="ui-monospace,Consolas,monospace" font-size="9" fill="#1a0510">4</text>
+  <circle cx="105.6" cy="149.6" r="7" fill="#ff4d8d" stroke="#ffb3d0" stroke-width="1.5"/>
+  <text x="105.6" y="153.1" text-anchor="middle" font-family="ui-monospace,Consolas,monospace" font-size="9" fill="#1a0510">5</text>
+  <circle cx="149.6" cy="149.6" r="7" fill="#ff4d8d" stroke="#ffb3d0" stroke-width="1.5"/>
+  <text x="149.6" y="153.1" text-anchor="middle" font-family="ui-monospace,Consolas,monospace" font-size="9" fill="#1a0510">6</text>
+  <circle cx="193.6" cy="149.6" r="7" fill="#ff4d8d" stroke="#ffb3d0" stroke-width="1.5"/>
+  <text x="193.6" y="153.1" text-anchor="middle" font-family="ui-monospace,Consolas,monospace" font-size="9" fill="#1a0510">7</text>
+  <circle cx="237.6" cy="149.6" r="7" fill="#ff4d8d" stroke="#ffb3d0" stroke-width="1.5"/>
+  <text x="237.6" y="153.1" text-anchor="middle" font-family="ui-monospace,Consolas,monospace" font-size="9" fill="#1a0510">8</text>
+  <circle cx="105.6" cy="193.6" r="7" fill="#ff4d8d" stroke="#ffb3d0" stroke-width="1.5"/>
+  <text x="105.6" y="197.1" text-anchor="middle" font-family="ui-monospace,Consolas,monospace" font-size="9" fill="#1a0510">9</text>
+  <circle cx="149.6" cy="193.6" r="7" fill="#ff4d8d" stroke="#ffb3d0" stroke-width="1.5"/>
+  <text x="149.6" y="197.1" text-anchor="middle" font-family="ui-monospace,Consolas,monospace" font-size="9" fill="#1a0510">10</text>
+  <circle cx="193.6" cy="193.6" r="7" fill="#ff4d8d" stroke="#ffb3d0" stroke-width="1.5"/>
+  <text x="193.6" y="197.1" text-anchor="middle" font-family="ui-monospace,Consolas,monospace" font-size="9" fill="#1a0510">11</text>
+  <circle cx="149.6" cy="237.6" r="7" fill="#ff4d8d" stroke="#ffb3d0" stroke-width="1.5"/>
+  <text x="149.6" y="241.1" text-anchor="middle" font-family="ui-monospace,Consolas,monospace" font-size="9" fill="#1a0510">12</text>
+</svg>

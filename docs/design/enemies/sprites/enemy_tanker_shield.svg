@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="16" viewBox="0 0 96 16">
+  <!-- Thin front plate; tip faces +Y (down). -->
+  <path fill="#fff" d="M6 1h84l5 4-6 9H7L1 5Zm38 3h8l-1 6h-6Z"/>
+</svg>
