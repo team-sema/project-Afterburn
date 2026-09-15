@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <!-- Sealed armoured mine: fourfold symmetry, no external fuse. -->
+  <g fill="#fff">
+    <path fill-rule="evenodd" d="M44 10 84 10 90 23 105 23 105 38 118 44 118 84 105 90 105 105 90 105 84 118 44 118 38 105 23 105 23 90 10 84 10 44 23 38 23 23 38 23Z
+      M43 27 85 27 78 34 50 34Z
+      M101 43 101 85 94 78 94 50Z
+      M85 101 43 101 50 94 78 94Z
+      M27 85 27 43 34 50 34 78Z
+      M64 50 75 64 64 78 53 64Z"/>
+  </g>
+</svg>
