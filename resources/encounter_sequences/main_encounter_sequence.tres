@@ -18,6 +18,9 @@
 ;   NORMAL/WAVE = 스폰(또는 WAVE 마지막 스폰) 직후부터
 ;   ELITE/BOSS  = 관문이 닫힌 뒤부터 (적이 아직 살아 있어도 다음 대기는 이미 셈)
 ;
+; WAVE/ELITE/BOSS wait_for_clear: WARNING·관문 전에 추적 편대가 비울 때까지 대기
+;   clear_timeout > 0이면 클리어 또는 타임아웃 중 먼저 · clear_min_wait는 최소 호흡
+;
 ; 재생 주체: encounters/encounter_director.gd (게임플레이 시작 시 이 리소스를 재생)
 ; =============================================================================
 [gd_resource type="Resource" script_class="EncounterSequence" load_steps=11 format=3]
@@ -41,15 +44,19 @@ post_delay_max = 3.1
 encounter_pool = ExtResource("4_main_pool")
 wait_for_clear = true
 
-; b = 웨이브. wave 리소스에 적힌 편대들을 interval 간격으로 연속 스폰.
+; b = 웨이브. 앞선 편대가 비우거나 clear_timeout이 지나면 WARNING → wave 연속 스폰.
+; clear_min_wait: 빨리 클리어해도 WAVE 전에 최소 호흡.
+; post_delay: WAVE 마지막 스폰 뒤 다음 a까지 여유 (NORMAL보다 김).
 [sub_resource type="Resource" id="Resource_step_b"]
 script = ExtResource("2_step_script")
 token = &"b"
 kind = 1
-post_delay_min = 2.8
-post_delay_max = 3.1
+post_delay_min = 5.0
+post_delay_max = 5.5
 wave = ExtResource("5_drone_swarm_wave")
 wait_for_clear = true
+clear_timeout = 6.0
+clear_min_wait = 2.5
 
 ; c = 엘리트 관문. elite_preset 비우면 ThreatEliteController 교대 규칙 사용.
 ; wait_for_clear=true면 추적 중인 이전 편대가 다 사라진 뒤 관문 오픈.

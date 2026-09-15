@@ -75,6 +75,7 @@ func _initialize() -> void:
 func _run() -> void:
 	await _test_resources()
 	await _test_director_flow()
+	await _test_wave_waits_for_clear()
 	await _test_delay_and_boss_skip()
 	await _test_gameplay_wiring()
 
@@ -111,6 +112,22 @@ func _test_resources() -> void:
 		_expect(
 			step_b != null and step_b.wave != null and step_b.wave.encounter_preset_paths.size() == 3,
 			"token b is a three-formation drone swarm wave",
+		)
+		_expect(
+			step_b != null
+			and step_b.wait_for_clear
+			and is_equal_approx(step_b.clear_timeout, 6.0)
+			and is_equal_approx(step_b.clear_min_wait, 2.5)
+			and is_equal_approx(step_b.post_delay_min, 5.0)
+			and is_equal_approx(step_b.post_delay_max, 5.5),
+			"token b waits for clear with timeout/min breath, then a longer post_delay before the next a",
+		)
+		_expect(
+			step_b != null
+			and step_b.wave != null
+			and is_equal_approx(step_b.wave.interval_min, 0.55)
+			and is_equal_approx(step_b.wave.interval_max, 0.7),
+			"drone swarm formations use the tighter 0.55~0.7s interval",
 		)
 
 	var phase := EncounterSequencePhase.new()
@@ -214,6 +231,7 @@ func _test_director_flow() -> void:
 	step_b.wave = wave
 	step_b.post_delay_min = 0.0
 	step_b.post_delay_max = 0.0
+	step_b.wait_for_clear = false
 	var step_c := EncounterSequenceStep.new()
 	step_c.token = &"c"
 	step_c.kind = EncounterSequenceStep.Kind.ELITE
@@ -275,6 +293,52 @@ func _test_director_flow() -> void:
 	_expect(generator.spawned_ids.size() == 4, "gate close resumes with the final a")
 	_expect(completed[0], "STOP sequence emits sequence_completed")
 	_expect(not director.is_running, "director stops after STOP completion")
+
+	host.queue_free()
+	await process_frame
+
+
+func _test_wave_waits_for_clear() -> void:
+	var drone := load(DRONE_PRESET_PATH) as EncounterPreset
+	var zigzag := load(ZIGZAG_PRESET_PATH) as EncounterPreset
+	var wave := EncounterWave.new()
+	wave.wave_id = &"pair"
+	wave.encounter_preset_paths = PackedStringArray([DRONE_PRESET_PATH, ZIGZAG_PRESET_PATH])
+	wave.interval_min = 0.0
+	wave.interval_max = 0.0
+	var step_b := EncounterSequenceStep.new()
+	step_b.token = &"b"
+	step_b.kind = EncounterSequenceStep.Kind.WAVE
+	step_b.wave = wave
+	step_b.post_delay_min = 0.0
+	step_b.post_delay_max = 0.0
+	step_b.wait_for_clear = true
+	step_b.clear_timeout = 0.4
+	step_b.clear_min_wait = 0.05
+	var sequence := EncounterSequence.new()
+	sequence.sequence_id = &"wave_clear"
+	sequence.on_complete = EncounterSequence.OnComplete.STOP
+	sequence.shared_steps = [_normal_step(&"a", [drone]), step_b]
+	var phase := EncounterSequencePhase.new()
+	phase.phase_id = &"wave_clear"
+	phase.pattern = "a b"
+	sequence.phases = [phase]
+
+	var parts := _make_director(sequence)
+	var host: Node = parts[0]
+	var director: EncounterDirector = parts[1]
+	var generator: FakeGenerator = parts[2]
+	director.start_sequence()
+	await process_frame
+	await process_frame
+	_expect(generator.spawned_ids == [&"drone_formation"], "WAVE holds until the prior NORMAL run clears or times out")
+	generator.complete_all_runs()
+	await create_timer(0.12).timeout
+	_expect(
+		generator.spawned_ids == [&"drone_formation", &"drone_formation", &"drone_zigzag_mirrored"],
+		"WAVE starts after clear and clear_min_wait",
+	)
+	_expect(not director.is_running, "wave-clear sequence finishes after WAVE")
 
 	host.queue_free()
 	await process_frame
@@ -343,6 +407,7 @@ func _test_gameplay_wiring() -> void:
 	step_b.wave = wave
 	step_b.post_delay_min = 0.0
 	step_b.post_delay_max = 0.0
+	step_b.wait_for_clear = false
 	var sequence := EncounterSequence.new()
 	sequence.sequence_id = &"wiring"
 	sequence.on_complete = EncounterSequence.OnComplete.STOP

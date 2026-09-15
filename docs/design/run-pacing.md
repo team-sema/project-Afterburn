@@ -19,7 +19,7 @@
 
 - **Phase**: 공백으로 나눈 토큰 패턴 (`"a a a b a a c"`) + `repeat_count`. 순서대로 실행.
 - **Step(토큰)**: 종류 `NORMAL` / `WAVE` / `ELITE` / `BOSS` + `post_delay_min~max`. 시퀀스 공용(`shared_steps`) 또는 Phase 로컬(`steps`, 같은 토큰이면 우선).
-- **다음 스텝까지 간격**: 매 스텝 `[post_delay_min, post_delay_max]` 균등 랜덤. 기준 시점 — NORMAL: 스폰 순간 · WAVE: 마지막 편대 스폰 순간 · ELITE/BOSS: 게이트가 닫힌 순간. 앞 스텝 적이 살아 있어도 기다리지 않는다.
+- **다음 스텝까지 간격**: 매 스텝 `[post_delay_min, post_delay_max]` 균등 랜덤. 기준 시점 — NORMAL: 스폰 순간 · WAVE: 마지막 편대 스폰 순간 · ELITE/BOSS: 게이트가 닫힌 순간. NORMAL끼리·WAVE 종료 후는 앞 스텝 적이 살아 있어도 기다리지 않는다.
 - 마지막 Phase가 끝나면 `on_complete` — `REPEAT_LAST_PHASE`(기본) 또는 `STOP`.
 
 | 종류 | 무엇을 | 후보 선택 |
@@ -29,17 +29,17 @@
 | `ELITE` | 아래 엘리트 게이트를 연다 | `elite_preset` 지정 시 그 preset, 비우면 교대 규칙 |
 | `BOSS` | 엘리트 게이트와 같은 흐름 + `is_boss` (엘리트 HP 공식 미적용) | `boss_preset` 비어 있으면 경고 후 **건너뜀** |
 
-`ELITE`/`BOSS`는 `wait_for_clear`(기본 true)면 Director가 추적 중인 모든 편대의 적이 사라진 뒤 게이트를 연다.
+`WAVE`/`ELITE`/`BOSS`는 `wait_for_clear`(기본 true)면 WARNING·게이트 전에 Director가 추적 중인 편대가 비울 때까지 기다린다. `clear_timeout` > 0이면 **클리어 또는 타임아웃 중 먼저** 온 쪽으로 진행하고, `clear_min_wait`가 있으면 그 대기 시작부터 최소 그 초만큼은 쉰 뒤 진행한다 (빨리 클리어해도 WAVE 호흡을 남김). `clear_timeout` 0은 클리어만 본다(무한 대기).
 
 WAVE·ELITE·BOSS 스텝은 스폰/게이트 직전에 맵 중앙에 `WARNING` 텍스트가 점멸한다 (NORMAL은 없음).
 
 **현재 기본 시퀀스**
 
-| 토큰 | 종류 | 내용 | post_delay |
+| 토큰 | 종류 | 내용 | post_delay · clear |
 |---|---|---|---|
 | `a` | NORMAL | `MainEncounterPool` 랜덤 | 2.8 ~ 3.1초 |
-| `b` | WAVE | `drone_swarm_wave`: 드론 편대 3연속 (straight → triangle → zigzag), 편대 간격 1.0~1.2초 | 2.8 ~ 3.1초 |
-| `c` | ELITE | 교대 규칙 · wait_for_clear | 2.8 ~ 3.1초 |
+| `b` | WAVE | `drone_swarm_wave`: 드론 편대 3연속 (straight → triangle → zigzag), 편대 간격 0.55~0.7초 | 5.0 ~ 5.5초 · clear_timeout 6.0 · clear_min_wait 2.5 |
+| `c` | ELITE | 교대 규칙 · wait_for_clear (timeout 없음) | 2.8 ~ 3.1초 |
 | `d` | BOSS | 비움 (보스 미구현 → 건너뜀) | — |
 
 - Phase `main`: `a a a a b a a a b a a a c a a a a b a a a a d`
@@ -92,11 +92,14 @@ WAVE·ELITE·BOSS 스텝은 스폰/게이트 직전에 맵 중앙에 `WARNING` �
 - 엘리트 전투 중 일반 Encounter 생성이 멈추고 기존 일반 적은 유지된다.
 - 처치 보상 정산 후 Threat 상승·적 오퍼·다음 구간 순서가 지켜진다.
 - 엘리트·오퍼 중 다음 관문 시간이 누적되지 않는다.
+- WAVE는 WARNING 전에 선행 편대 클리어(또는 `clear_timeout`)와 `clear_min_wait` 호흡을 거친다.
 
 검증 참고: `tests/threat_elite_progression_smoke_test.gd` · `tests/encounter_sequence_smoke_test.gd`. Godot 실행은 `tools/run-godot.cmd`를 사용한다.
 
 ## 변경 이력
 
+- 2026-09-15: WAVE 후 다음 NORMAL까지 `b` post_delay를 5.0~5.5초로 늘림.
+- 2026-09-15: WAVE 전 `wait_for_clear` + `clear_timeout`/`clear_min_wait`로 a→b 호흡을 주고, `drone_swarm_wave` 편대 간격을 0.55~0.7초로 줄임.
 - 2026-09-15: 주제별 통합 기획서와 Encounter 시퀀스 현황을 병합.
 - 2026-09-13: 기본 시퀀스를 요청 예시형 `a/b/c/d` 혼합 패턴 1개 + 반복으로 교체. 임의 opening(`a×20→c`)/loop 분리 폐기.
 - 2026-09-15: `EncounterWave` 편대 목록을 `encounter_preset_paths`로 작성해 프리셋 경로 목록을 데이터에서 관리.

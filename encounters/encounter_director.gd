@@ -155,6 +155,9 @@ func _run_step(step: EncounterSequenceStep) -> void:
 		EncounterSequenceStep.Kind.NORMAL:
 			_spawn_normal(step)
 		EncounterSequenceStep.Kind.WAVE:
+			await _wait_for_clear_gated(step)
+			if not _can_continue():
+				return
 			await _play_step_warning(step.kind)
 			if not _can_continue():
 				return
@@ -238,10 +241,9 @@ func _run_gate(step: EncounterSequenceStep) -> bool:
 	if is_boss and preset == null:
 		push_warning("EncounterDirector: BOSS step '%s' has no boss_preset; skipping." % step.token)
 		return false
-	if step.wait_for_clear:
-		await _wait_for_clear()
-		if not _can_continue():
-			return false
+	await _wait_for_clear_gated(step)
+	if not _can_continue():
+		return false
 	await _play_step_warning(step.kind)
 	if not _can_continue():
 		return false
@@ -257,14 +259,32 @@ func _run_gate(step: EncounterSequenceStep) -> bool:
 	return _can_continue()
 
 
+func _wait_for_clear_gated(step: EncounterSequenceStep) -> void:
+	if not step.wait_for_clear:
+		return
+	var started_msec := Time.get_ticks_msec()
+	await _wait_for_clear_or_timeout(step.clear_timeout)
+	if not _can_continue():
+		return
+	var elapsed := float(Time.get_ticks_msec() - started_msec) / 1000.0
+	var remaining := step.clear_min_wait - elapsed
+	if remaining > 0.0:
+		await _wait_seconds(remaining)
+
+
 func _wait_for_clear() -> void:
+	await _wait_for_clear_or_timeout(0.0)
+
+
+func _wait_for_clear_or_timeout(timeout: float) -> void:
+	if timeout > 0.0:
+		_wait_timer.start(timeout)
 	while _can_continue() and not _active_runs.is_empty():
-		var pending := _active_runs.duplicate()
-		for run in pending:
-			if not run.is_completed():
-				await run.completed
-				break
+		if timeout > 0.0 and _wait_timer.is_stopped():
+			return
 		await get_tree().process_frame
+	if timeout > 0.0 and not _wait_timer.is_stopped():
+		_wait_timer.stop()
 
 
 func _wait_seconds(duration: float) -> void:
