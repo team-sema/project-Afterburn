@@ -11,7 +11,8 @@ Use only for the merge-only workflow when all changes are already committed. For
 
 1. Confirm working tree is clean. If not, use `afterburn-push`.
 2. Use current `feature/*` unless the user named a branch.
-3. Run:
+3. Compare the committed branch diff with `docs/design/tasks/<slug>-tasks.md` and its linked canonical topic documents. Current rules, numbers, completion criteria, and recorded verification must agree with the implementation. Treat `docs/design/history/` as context only. If design-impacting code has no matching topic-document update, stop and use `afterburn-push` after fixing the branch.
+4. Run:
 
 ```bash
 chmod +x tools/merge-feature.sh 2>/dev/null || true

@@ -21,7 +21,13 @@ git diff --stat
 
 2. If not on `feature/*`, stop and guide to `tools/start-feature.sh`.
 3. If diff does not match slug/request, warn about scope drift.
-4. **Docs·code gate:** Read the topic design documents linked by the Task and compare their rules and acceptance criteria with the diff. Behavior/numbers/UI changes must update those same `docs/design/` documents in this commit. Historical feature notes are not the implementation authority. For changes with no design impact, state the reason. On inconsistency, stop before push.
+4. **Docs·code gate:** Read `docs/design/README.md`, the topic design documents linked by the Task, and the Task itself. Compare their rules, numbers, completion criteria, scope, and verification results with the diff. On inconsistency, stop before push.
+   - Behavior, numbers, UI, input, spawning, or content changes update the existing canonical topic documents in the same commit.
+   - Changes belong in the relevant prose/table/criteria, not only in `이번 변경` or the changelog. Fold completed work into the document's current rules and leave only current status or remaining work in `이번 변경`.
+   - Do not require every template heading in an established document. Preserve its useful structure and make the smallest coherent edit.
+   - A cross-topic change updates only what each document owns; keep one canonical source for repeated rules or numbers and link from the others.
+   - `docs/design/history/` and old Tasks are evidence, not implementation authority. Do not create a per-feature design document unless the change establishes a new durable topic.
+   - For changes with no design impact, state the reason instead of making a ceremonial documentation edit.
 5. **Kanban (recommend only, before commit):** Follow `kanban-tickets` — output **title and body draft only** (optional slug reference). Do **not** create or move Notion cards. Notion MCP missing must **not** block push.
 6. Generate commit message (`feat:` / `fix:` / `docs:` / `godot:`).
 7. Run:
