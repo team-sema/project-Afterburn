@@ -1,42 +1,45 @@
 class_name EncounterSequenceStep
 extends Resource
 
-## One token of an EncounterSequencePhase pattern. What to spawn and how long
-## to wait before the next token starts.
+## pattern 안의 토큰 하나(예: "a")의 의미.
+## “무엇을 할지” + “끝난 뒤 다음 토큰까지 얼마나 쉴지”.
 
 enum Kind {
+	## 편대 1개 스폰. presets가 있으면 그중 랜덤, 없으면 pool(Threat 가중).
 	NORMAL,
+	## EncounterWave: 여러 편대를 interval 간격으로 연속 스폰.
 	WAVE,
+	## 엘리트 관문 (처치 → 탄소거 보상 → Threat+1 → 적 오그먼트 오퍼).
 	ELITE,
+	## 보스 관문. boss_preset 없으면 스킵. is_boss 플래그만 부여.
 	BOSS,
 }
 
-## Name used inside EncounterSequencePhase.pattern. No whitespace.
+## pattern에 적는 이름. 공백 불가.
 @export var token: StringName
 @export var kind := Kind.NORMAL
 
 @export_group("Timing")
-## Delay before the next step starts, rolled uniformly in [min, max].
-## NORMAL/WAVE measure from the (last) spawn; ELITE/BOSS from gate close.
+## 다음 스텝까지 대기(초). 매번 [min, max] 균등 랜덤.
+## 기준 시각: NORMAL/WAVE = (마지막) 스폰 직후 · ELITE/BOSS = 관문 종료 후.
 @export_range(0.0, 120.0, 0.05, "suffix:s") var post_delay_min := 2.8
 @export_range(0.0, 120.0, 0.05, "suffix:s") var post_delay_max := 3.1
 
 @export_group("Normal")
-## Explicit candidates. One entry spawns that formation; several pick uniformly.
-## Explicit presets ignore Threat gating on purpose.
+## 고정 후보. 1개면 그것만, 여러 개면 균등 랜덤. Threat min 무시.
 @export var encounter_presets: Array[EncounterPreset] = []
-## Used only when encounter_presets is empty. Threat-weighted like timer spawning.
+## presets가 비었을 때만 사용. 예전 타이머 스폰과 같은 Threat 가중 풀.
 @export var encounter_pool: EncounterPool
 
 @export_group("Wave")
 @export var wave: EncounterWave
 
 @export_group("Gate")
-## ELITE: null falls back to the ThreatEliteController alternation rule.
+## ELITE: 비우면 ThreatEliteController의 사격/돌격 교대 규칙.
 @export var elite_preset: EncounterPreset
-## BOSS: null skips the step with a warning (no boss content yet).
+## BOSS: 비우면 경고 후 이 스텝 스킵 (보스 콘텐츠 미구현).
 @export var boss_preset: EncounterPreset
-## Wait until every tracked encounter is cleared before opening the gate.
+## true면 추적 중인 이전 편대가 다 사라진 뒤에야 관문을 연다.
 @export var wait_for_clear := true
 
 

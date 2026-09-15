@@ -1,12 +1,14 @@
 class_name EncounterWave
 extends Resource
 
-## An ordered burst of formations spawned back to back. Reusable across steps.
+## WAVE 스텝이 참조하는 “연속 편대 묶음”.
+## encounter_presets를 앞에서부터 스폰하고, 편대 사이마다 interval을 쉰다.
+## (스텝의 post_delay와 다름: interval=웨이브 안, post_delay=웨이브 끝난 뒤 다음 토큰)
 
 @export var wave_id: StringName
-## Spawned in array order.
+## 스폰 순서 고정.
 @export var encounter_presets: Array[EncounterPreset] = []
-## Gap between consecutive formations, rolled uniformly in [min, max].
+## 편대와 편대 사이 대기(초), [min, max] 랜덤.
 @export_range(0.0, 30.0, 0.05, "suffix:s") var interval_min := 1.0
 @export_range(0.0, 30.0, 0.05, "suffix:s") var interval_max := 1.0
 

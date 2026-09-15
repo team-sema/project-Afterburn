@@ -31,14 +31,14 @@
 
 `ELITE`/`BOSS`는 `wait_for_clear`(기본 true)면 Director가 추적 중인 모든 편대의 적이 사라진 뒤 게이트를 연다.
 
-WAVE·ELITE·BOSS 스텝은 스폰/게이트 직전에 맵 중앙에 작은 `EncounterStepWarning`이 점멸한다 (NORMAL은 없음).
+WAVE·ELITE·BOSS 스텝은 스폰/게이트 직전에 맵 중앙에 `WARNING` 텍스트가 점멸한다 (NORMAL은 없음).
 
 **현재 기본 시퀀스**
 
 | 토큰 | 종류 | 내용 | post_delay |
 |---|---|---|---|
 | `a` | NORMAL | `MainEncounterPool` 랜덤 | 2.8 ~ 3.1초 |
-| `b` | WAVE | `drone_swarm_wave`: `drone_formation` 1편대 (테스트용 라이트) | 2.8 ~ 3.1초 |
+| `b` | WAVE | `drone_swarm_wave`: 드론 편대 3연속 (straight → triangle → zigzag), 편대 간격 1.0~1.2초 | 2.8 ~ 3.1초 |
 | `c` | ELITE | 교대 규칙 · wait_for_clear | 2.8 ~ 3.1초 |
 | `d` | BOSS | 비움 (보스 미구현 → 건너뜀) | — |
 
@@ -99,6 +99,7 @@ WAVE·ELITE·BOSS 스텝은 스폰/게이트 직전에 맵 중앙에 작은 `Enc
 
 - 2026-09-15: 주제별 통합 기획서와 Encounter 시퀀스 현황을 병합.
 - 2026-09-13: 기본 시퀀스를 요청 예시형 `a/b/c/d` 혼합 패턴 1개 + 반복으로 교체. 임의 opening(`a×20→c`)/loop 분리 폐기.
+- 2026-09-15: `drone_swarm_wave`를 드론 편대 3연속(straight·triangle·zigzag)으로 구성.
 - 2026-09-13: Threat HUD를 시퀀스 진행도로 전환. `drone_swarm_wave`를 드론 1편대로 축소(테스트 난이도).
 - 2026-09-13: 주제별 통합 기획서로 이전하고 문서 링크·구현 기준 정리.
 - 2026-09-10: `EncounterDirector` + 데이터 시퀀스(토큰 패턴 Phase · NORMAL/WAVE/ELITE/BOSS 스텝 · 범위 랜덤 간격)가 타이머 스폰·60초 엘리트 타이머를 대체.

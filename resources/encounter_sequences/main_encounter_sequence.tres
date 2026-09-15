@@ -1,3 +1,25 @@
+; =============================================================================
+; 메인 한 판의 “적 등장 시나리오” 데이터
+; =============================================================================
+; 읽는 법 (큰 → 작음):
+;
+;   EncounterSequence (이 파일 루트 [resource])
+;     ├─ shared_steps : 토큰 사전 (a/b/c/d가 각각 무엇을 의미하는지)
+;     └─ phases[]     : 재생할 Phase 목록 (지금은 main 하나)
+;           └─ pattern : 공백으로 나눈 토큰 나열 = 실제 등장 순서
+;
+; 토큰 의미 (kind):
+;   a = NORMAL(0)  일반 편대 1개 (풀에서 Threat 가중 랜덤)
+;   b = WAVE(1)    미리 정한 편대들을 짧은 간격으로 연속 투입
+;   c = ELITE(2)   엘리트 관문 (처치→탄소거 XP→Threat+1→적 오그먼트)
+;   d = BOSS(3)    보스 관문 (지금은 boss_preset 비어 있어 스킵)
+;
+; post_delay_min~max : 이 토큰이 “끝난 뒤” 다음 토큰까지 대기(초, 범위 랜덤)
+;   NORMAL/WAVE = 스폰(또는 WAVE 마지막 스폰) 직후부터
+;   ELITE/BOSS  = 관문이 닫힌 뒤부터 (적이 아직 살아 있어도 다음 대기는 이미 셈)
+;
+; 재생 주체: encounters/encounter_director.gd (게임플레이 시작 시 이 리소스를 재생)
+; =============================================================================
 [gd_resource type="Resource" script_class="EncounterSequence" load_steps=11 format=3]
 
 [ext_resource type="Script" path="res://resources/encounter_sequences/encounter_sequence.gd" id="1_sequence_script"]
@@ -6,6 +28,10 @@
 [ext_resource type="Resource" path="res://resources/encounters/pools/main_encounter_pool.tres" id="4_main_pool"]
 [ext_resource type="Resource" path="res://resources/encounter_sequences/waves/drone_swarm_wave.tres" id="5_drone_swarm_wave"]
 
+; --- shared_steps: 토큰 사전 -------------------------------------------------
+; pattern에 나오는 글자마다 여기 정의가 있어야 함.
+
+; a = 일반 편대. encounter_pool에서 현재 Threat로 1개 뽑음.
 [sub_resource type="Resource" id="Resource_step_a"]
 script = ExtResource("2_step_script")
 token = &"a"
@@ -15,6 +41,7 @@ post_delay_max = 3.1
 encounter_pool = ExtResource("4_main_pool")
 wait_for_clear = true
 
+; b = 웨이브. wave 리소스에 적힌 편대들을 interval 간격으로 연속 스폰.
 [sub_resource type="Resource" id="Resource_step_b"]
 script = ExtResource("2_step_script")
 token = &"b"
@@ -24,6 +51,8 @@ post_delay_max = 3.1
 wave = ExtResource("5_drone_swarm_wave")
 wait_for_clear = true
 
+; c = 엘리트 관문. elite_preset 비우면 ThreatEliteController 교대 규칙 사용.
+; wait_for_clear=true면 추적 중인 이전 편대가 다 사라진 뒤 관문 오픈.
 [sub_resource type="Resource" id="Resource_step_c"]
 script = ExtResource("2_step_script")
 token = &"c"
@@ -32,6 +61,7 @@ post_delay_min = 2.8
 post_delay_max = 3.1
 wait_for_clear = true
 
+; d = 보스 관문. boss_preset이 비어 있으면 Director가 경고 후 건너뜀.
 [sub_resource type="Resource" id="Resource_step_d"]
 script = ExtResource("2_step_script")
 token = &"d"
@@ -40,12 +70,17 @@ post_delay_min = 2.8
 post_delay_max = 3.1
 wait_for_clear = true
 
+; --- phase: 실제 재생 순서 ---------------------------------------------------
+; pattern만 고치면 등장 순서가 바뀜. repeat_count는 이 Phase를 몇 번 돌지.
 [sub_resource type="Resource" id="Resource_phase_main"]
 script = ExtResource("3_phase_script")
 phase_id = &"main"
 pattern = "a a a a b a a a b a a a c a a a a b a a a a d"
 repeat_count = 1
 
+; --- Sequence 루트 -----------------------------------------------------------
+; on_complete = 0 → REPEAT_LAST_PHASE (끝나면 마지막 Phase를 다시 반복)
+; on_complete = 1 → STOP
 [resource]
 script = ExtResource("1_sequence_script")
 sequence_id = &"main_encounter_sequence"
