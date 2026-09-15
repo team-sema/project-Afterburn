@@ -109,8 +109,8 @@ func _test_resources() -> void:
 		)
 		var step_b := main_sequence.resolve_step(main_phase, &"b")
 		_expect(
-			step_b != null and step_b.wave != null and step_b.wave.encounter_presets.size() == 1,
-			"token b is a light single-formation drone wave",
+			step_b != null and step_b.wave != null and step_b.wave.encounter_presets.size() == 3,
+			"token b is a three-formation drone swarm wave",
 		)
 
 	var phase := EncounterSequencePhase.new()

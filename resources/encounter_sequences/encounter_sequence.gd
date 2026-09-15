@@ -1,16 +1,28 @@
 class_name EncounterSequence
 extends Resource
 
-## Authored spawn scenario: shared token definitions plus ordered phases.
+## 한 판의 적 등장 시나리오(최상위 Resource).
+##
+## 계층:
+##   Sequence
+##     · shared_steps = 토큰 사전 (a→NORMAL, b→WAVE …)
+##     · phases[]     = 재생 구간들 (각 Phase에 pattern 문자열)
+##     · on_complete  = 마지막 Phase가 끝나면 반복할지 / 멈출지
+##
+## 에디터에서 고치는 진입점: `main_encounter_sequence.tres`
+## 런타임 재생: `EncounterDirector`
 
 enum OnComplete {
+	## 마지막 Phase의 pattern을 처음부터 다시 돈다 (한 판이 끝나지 않음).
 	REPEAT_LAST_PHASE,
+	## 시퀀스 종료. Director가 idle.
 	STOP,
 }
 
 @export var sequence_id: StringName
-## Token definitions every phase can use (a / b / c / d ...).
+## 모든 Phase가 공유하는 토큰 정의. pattern의 글자 → Step 매핑.
 @export var shared_steps: Array[EncounterSequenceStep] = []
+## 위에서 아래로 순서 재생. 지금은 보통 Phase 1개.
 @export var phases: Array[EncounterSequencePhase] = []
 @export var on_complete := OnComplete.REPEAT_LAST_PHASE
 

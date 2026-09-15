@@ -1,13 +1,22 @@
 class_name EncounterSequencePhase
 extends Resource
 
-## A whitespace-separated token pattern such as "a a a b a a c". Tokens resolve
-## to this phase's steps first, then to EncounterSequence.shared_steps.
+## Sequence 안의 “한 구간”.
+##
+## pattern 예: `"a a a b a a c"`
+##   → 공백/개행으로 쪼개서 토큰 배열이 되고, Director가 왼쪽부터 하나씩 실행.
+##
+## 토큰 해석 우선순위:
+##   1) 이 Phase의 steps[] (로컬 재정의)
+##   2) Sequence.shared_steps (공통 사전)
+##
+## repeat_count: 이 Phase pattern을 몇 번 연속 재생할지 (Sequence.on_complete와 별개).
 
 @export var phase_id: StringName
+## 등장 순서. 공백만 바꾸면 시나리오가 바뀐다.
 @export_multiline var pattern := ""
 @export_range(1, 99, 1) var repeat_count := 1
-## Phase-local token definitions. Same token here overrides shared_steps.
+## Phase 전용 토큰. 같은 이름이 shared_steps에 있어도 여기가 이긴다.
 @export var steps: Array[EncounterSequenceStep] = []
 
 

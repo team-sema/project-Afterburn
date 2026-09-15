@@ -1,12 +1,16 @@
-[gd_resource type="Resource" script_class="EncounterWave" load_steps=4 format=3]
+; WAVE(b)용 연속 편대 묶음.
+; encounter_presets를 앞에서부터 스폰하고, 사이마다 interval(초)을 쉰다.
+[gd_resource type="Resource" script_class="EncounterWave" load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://resources/encounter_sequences/encounter_wave.gd" id="1_wave_script"]
 [ext_resource type="Script" path="res://resources/encounters/encounter_preset.gd" id="2_preset_script"]
 [ext_resource type="Resource" path="res://resources/encounters/presets/drone_straight_formation.tres" id="3_drone_straight"]
+[ext_resource type="Resource" path="res://resources/encounters/presets/drone_triangle_formation.tres" id="4_drone_triangle"]
+[ext_resource type="Resource" path="res://resources/encounters/presets/drone_zigzag_formation.tres" id="5_drone_zigzag"]
 
 [resource]
 script = ExtResource("1_wave_script")
 wave_id = &"drone_swarm_wave"
-encounter_presets = Array[ExtResource("2_preset_script")]([ExtResource("3_drone_straight")])
+encounter_presets = Array[ExtResource("2_preset_script")]([ExtResource("3_drone_straight"), ExtResource("4_drone_triangle"), ExtResource("5_drone_zigzag")])
 interval_min = 1.0
-interval_max = 1.0
+interval_max = 1.2

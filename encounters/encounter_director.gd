@@ -1,9 +1,16 @@
 class_name EncounterDirector
 extends Node
 
-## Plays an EncounterSequence: walks each phase's token pattern and drives
-## EnemyGenerator / AugmentProgressionController / ThreatEliteController
-## instead of their timers. Timers stay untouched until start_sequence().
+## EncounterSequence 재생기 (게임플레이에 붙는 노드).
+##
+## 흐름:
+##   1) start_sequence() → 타이머 스폰/60초 엘리트를 끔
+##   2) Phase.pattern 토큰을 왼쪽부터 실행 (NORMAL/WAVE 스폰, ELITE/BOSS 관문)
+##   3) 각 토큰 후 Step.post_delay 대기
+##   4) Phase·Sequence 규칙에 따라 반복 또는 종료
+##
+## 데이터: `resources/encounter_sequences/main_encounter_sequence.tres`
+## 실제 스폰/관문은 EnemyGenerator · ThreatEliteController · AugmentProgression에 위임.
 
 signal sequence_started(sequence_id: StringName)
 signal phase_started(phase_id: StringName, repetition: int, repeat_count: int)

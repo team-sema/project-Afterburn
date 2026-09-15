@@ -37,7 +37,7 @@ Flash / Scale / Shake — 피격·발사 시 펀치감
 
 - `FlashComponent`: 단일 `sprite` 또는 `flash_root`의 CanvasItem 자식들을 한꺼번에 화이트 플래시 (Tanker 실드 다중 레이어)
 - `EntryWarningComponent`: 고속 진입 전 VisibleRect 가장자리 화살표 점멸
-- `EncounterStepWarning`: WAVE/ELITE/BOSS 시퀀스 스텝 직전 맵 중앙 작은 다이아몬드 점멸 (빨간색, 종류별 마크)
+- `EncounterStepWarning`: WAVE/ELITE/BOSS 시퀀스 스텝 직전 맵 중앙에 `WARNING` 텍스트 점멸 (빨간색)
 
 ## 픽업
 
