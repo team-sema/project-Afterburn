@@ -37,6 +37,7 @@
 - [Tasks: unified-module-slots](unified-module-slots-tasks.md)
 - [Tasks: unified-weapon-system](unified-weapon-system-tasks.md)
 - [기획 문서 통합 작업](unify-design-docs-tasks.md)
+- [프로젝트 스킬 문서 구조 대응](skill-doc-structure-tasks.md)
 - [Tasks: weapon-augment-acquisition](weapon-augment-acquisition-tasks.md)
 - [Tasks: weapon-module-levels](weapon-module-levels-tasks.md)
 - [Tasks: weapon-replace-delete-reroll](weapon-replace-delete-reroll-tasks.md)

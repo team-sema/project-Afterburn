@@ -1,6 +1,6 @@
 ---
 name: afterburn-start-feature
-description: Use when the user asks /start-feature, start feature, create feature branch, or begin new work in Project Afterburn. Create a feature/* branch from latest main with tools/start-feature.sh and declare the expected path scope before implementation.
+description: Use when the user asks /start-feature, start feature, create feature branch, or begin new work in Project Afterburn. Create a feature/* branch from latest main, identify the canonical topic design documents, and declare the expected path scope before implementation.
 ---
 
 # Start Feature Branch
@@ -19,9 +19,12 @@ chmod +x tools/start-feature.sh 2>/dev/null || true
 
 3. If the working tree is not clean, stop and tell the user to commit or stash first.
 4. After the branch is created, report the branch name.
-5. Infer the likely paths (`components/`, `player_ship/`, `enemies/`, `menus/`, `docs/design/...`) this slug should touch. Do not ask the user to write the path list.
-6. **Kanban ticket:** Follow `.cursor/rules/kanban-tickets.mdc`. Optionally query Notion for an existing card; if none, **recommend title and body only**. Do **not** auto-create or move cards.
-7. Keep later edits within the inferred feature scope unless the user expands it.
+5. Read `docs/design/README.md` and `docs/design/feature-workflow.md`. Identify the smallest existing topic document(s) that own the requested rules; `docs/design/history/` and old Task files are context only.
+6. Infer the likely code paths and canonical design documents this slug should touch. Report both after creating the branch; do not ask the user to produce the path list.
+7. Plan to update existing prose, tables, numbers, and completion criteria in place. Do not create a separate implementation-spec tree, a per-feature system spec, or a history entry. Create a new topic document only for a genuinely independent, durable subject; then register it in `docs/design/README.md` and `docs/design/design.js`.
+8. Create `docs/design/tasks/<slug>-tasks.md` when implementation begins. It links the canonical design documents and records ordered work, scope, and verification without copying gameplay rules or numbers.
+9. **Kanban ticket:** Follow `.cursor/rules/kanban-tickets.mdc`. Optionally query Notion for an existing card; if none, **recommend title and body only**. Do **not** auto-create or move cards.
+10. Keep later edits within the inferred feature scope unless the user expands it.
 
 ## Never Do
 
