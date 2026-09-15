@@ -82,6 +82,16 @@ func get_blast_radius() -> float:
 	return base_explosion_radius * blast_size_multiplier
 
 
+func get_threat_projectile_rate() -> float:
+	return 0.0
+
+
+func get_threat_reaction_time() -> float:
+	if not _armed or _detonating:
+		return -1.0
+	return arm_duration
+
+
 func _arm_and_detonate() -> void:
 	var period := arm_duration / float(maxi(1, flash_count))
 	var on_time := period * 0.55

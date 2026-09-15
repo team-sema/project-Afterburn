@@ -47,6 +47,19 @@ func apply_action_rate_multiplier(multiplier: float) -> void:
 		fire_timer.wait_time = fire_interval
 
 
+func get_threat_projectile_rate() -> float:
+	var cycle_duration := fire_interval + maxf(0.0, float(ring_count - 1) * ring_interval)
+	return float(maxi(1, pellets_per_ring) * maxi(1, ring_count)) / maxf(0.05, cycle_duration)
+
+
+func get_threat_reaction_time() -> float:
+	if enemy == null:
+		return -1.0
+	var playfield_size := enemy.get_viewport_rect().size
+	var response_distance := minf(playfield_size.x, playfield_size.y)
+	return response_distance / maxf(1.0, projectile_speed)
+
+
 func _on_fire_timer_timeout() -> void:
 	if _rings_remaining > 0:
 		_fire_next_ring()
