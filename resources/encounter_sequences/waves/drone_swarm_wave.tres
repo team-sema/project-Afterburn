@@ -9,5 +9,5 @@
 script = ExtResource("1_wave_script")
 wave_id = &"drone_swarm_wave"
 encounter_preset_paths = PackedStringArray("res://resources/encounters/presets/drone_straight_formation.tres", "res://resources/encounters/presets/drone_triangle_formation.tres", "res://resources/encounters/presets/drone_zigzag_formation.tres")
-interval_min = 1.0
-interval_max = 1.2
+interval_min = 0.55
+interval_max = 0.7

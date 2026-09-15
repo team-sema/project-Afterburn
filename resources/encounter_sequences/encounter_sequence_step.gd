@@ -39,8 +39,12 @@ enum Kind {
 @export var elite_preset: EncounterPreset
 ## BOSS: 비우면 경고 후 이 스텝 스킵 (보스 콘텐츠 미구현).
 @export var boss_preset: EncounterPreset
-## true면 추적 중인 이전 편대가 다 사라진 뒤에야 관문을 연다.
+## true면 WAVE WARNING / 관문 전에 추적 중인 이전 편대가 비울 때까지 기다린다.
 @export var wait_for_clear := true
+## >0이면 클리어와 이 초 중 먼저 온 쪽으로 진행. 0이면 클리어만 본다(무한).
+@export_range(0.0, 120.0, 0.05, "suffix:s") var clear_timeout := 0.0
+## wait_for_clear 대기 시작부터 최소 이 초는 쉰 뒤 WARNING/관문으로 간다 (빨리 클리어해도 호흡 유지).
+@export_range(0.0, 120.0, 0.05, "suffix:s") var clear_min_wait := 0.0
 
 
 func roll_post_delay(random_number_generator: RandomNumberGenerator = null) -> float:
@@ -65,6 +69,10 @@ func get_validation_errors() -> PackedStringArray:
 		errors.append("post_delay_min cannot be negative.")
 	if post_delay_max < post_delay_min:
 		errors.append("post_delay_max must be >= post_delay_min.")
+	if clear_timeout < 0.0:
+		errors.append("clear_timeout cannot be negative.")
+	if clear_min_wait < 0.0:
+		errors.append("clear_min_wait cannot be negative.")
 	match kind:
 		Kind.NORMAL:
 			if encounter_presets.is_empty() and encounter_pool == null:
