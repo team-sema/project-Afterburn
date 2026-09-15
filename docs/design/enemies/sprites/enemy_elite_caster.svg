@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="160" viewBox="0 0 128 160">
+  <!-- Suspended crystal with detached angular arcs, open at both poles. -->
+  <g fill="#fff">
+    <path d="M48 30 38 44 26 54 20 73 29 90 46 107 36 106 14 93 5 73 15 50 34 35Z"/>
+    <path d="m80 30 14 5 19 15 10 23-9 20-22 13-10 1 17-17 9-17-6-19-12-10Z"/>
+    <path transform="translate(25.6 23.6) scale(0.6)" fill-rule="evenodd" d="M64 7 82 67 76 98 64 151 52 98 46 67Z M64 32 56 66 64 84 72 66Z M61 94 64 132 67 94 64 100Z"/>
+  </g>
+</svg>
