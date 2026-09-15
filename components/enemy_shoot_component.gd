@@ -205,6 +205,25 @@ func get_volleys_fired() -> int:
 	return _volleys_fired
 
 
+func get_threat_projectile_rate() -> float:
+	if activate_on_visible_entry and not _fire_window_active:
+		return 0.0
+	if enemy != null and _is_below_shot_threshold():
+		return 0.0
+	var cycle_duration := fire_interval + maxf(0.0, float(burst_count - 1) * burst_interval)
+	return float(maxi(1, burst_count) * maxi(1, shot_count)) / maxf(0.05, cycle_duration)
+
+
+func get_threat_reaction_time() -> float:
+	if enemy == null or (activate_on_visible_entry and not _fire_window_active):
+		return -1.0
+	if _is_below_shot_threshold():
+		return -1.0
+	var playfield_size := enemy.get_viewport_rect().size
+	var response_distance := minf(playfield_size.x, playfield_size.y)
+	return response_distance / maxf(1.0, projectile_speed)
+
+
 func _is_below_shot_threshold() -> bool:
 	if not apply_shot_threshold:
 		return false

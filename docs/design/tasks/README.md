@@ -34,6 +34,7 @@
 - [보조 캐넌 옵션 드론 Task](support-cannon-drones-tasks.md)
 - [tanker-hit-feedback tasks](tanker-hit-feedback-tasks.md)
 - [threat-elite-progression tasks](threat-elite-progression-tasks.md)
+- [Threat Monitor Tasks](threat-monitor-tasks.md)
 - [Tasks: unified-module-slots](unified-module-slots-tasks.md)
 - [Tasks: unified-weapon-system](unified-weapon-system-tasks.md)
 - [기획 문서 통합 작업](unify-design-docs-tasks.md)

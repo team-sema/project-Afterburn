@@ -1,0 +1,422 @@
+[gd_scene load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://threat_monitor/threat_monitor_lab.gd" id="1_lab"]
+[ext_resource type="PackedScene" uid="uid://ndsn1d66d5g3" path="res://gameplay.tscn" id="2_gameplay"]
+[ext_resource type="Script" path="res://threat_monitor/threat_monitor.gd" id="3_monitor"]
+[ext_resource type="Script" path="res://threat_monitor/threat_history_graph.gd" id="4_graph"]
+[ext_resource type="LabelSettings" uid="uid://x33lbqidu7sv" path="res://fonts/default_label_settings.tres" id="5_default"]
+[ext_resource type="LabelSettings" uid="uid://c0rnshv8jeh2e" path="res://fonts/title_label_settings.tres" id="6_title"]
+
+[sub_resource type="StyleBoxFlat" id="StylePanelRed"]
+bg_color = Color(0.018, 0.035, 0.075, 1)
+border_width_right = 2
+border_color = Color(1, 0.18, 0.45, 0.85)
+
+[sub_resource type="StyleBoxFlat" id="StylePanelBlue"]
+bg_color = Color(0.018, 0.035, 0.075, 1)
+border_width_left = 2
+border_color = Color(0.1, 0.65, 0.95, 0.85)
+
+[sub_resource type="StyleBoxFlat" id="StyleBarBackground"]
+bg_color = Color(0.02, 0.08, 0.14, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="StyleBarFill"]
+bg_color = Color(1, 0.18, 0.5, 0.92)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[node name="ThreatMonitorLab" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_lab")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.005, 0.012, 0.028, 1)
+
+[node name="Layout" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 0
+
+[node name="SummaryPanel" type="PanelContainer" parent="Layout"]
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StylePanelRed")
+
+[node name="Margin" type="MarginContainer" parent="Layout/SummaryPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="VBox" type="VBoxContainer" parent="Layout/SummaryPanel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Eyebrow" type="Label" parent="Layout/SummaryPanel/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.35, 0.58, 1)
+text = "LIVE ANALYSIS"
+label_settings = ExtResource("5_default")
+
+[node name="Title" type="Label" parent="Layout/SummaryPanel/Margin/VBox"]
+layout_mode = 2
+text = "THREAT MONITOR"
+label_settings = ExtResource("6_title")
+
+[node name="Rule" type="ColorRect" parent="Layout/SummaryPanel/Margin/VBox"]
+custom_minimum_size = Vector2(0, 2)
+layout_mode = 2
+color = Color(1, 0.18, 0.45, 0.85)
+
+[node name="CurrentTitle" type="Label" parent="Layout/SummaryPanel/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.55, 0.7, 1)
+text = "CURRENT"
+label_settings = ExtResource("5_default")
+
+[node name="CurrentValue" type="Label" parent="Layout/SummaryPanel/Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.3, 0.55, 1)
+text = "000.0"
+label_settings = ExtResource("6_title")
+
+[node name="MetricGrid" type="GridContainer" parent="Layout/SummaryPanel/Margin/VBox"]
+layout_mode = 2
+columns = 2
+
+[node name="SmoothTitle" type="Label" parent="Layout/SummaryPanel/Margin/VBox/MetricGrid"]
+layout_mode = 2
+text = "SMOOTH"
+label_settings = ExtResource("5_default")
+
+[node name="SmoothValue" type="Label" parent="Layout/SummaryPanel/Margin/VBox/MetricGrid"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "000.0"
+label_settings = ExtResource("5_default")
+horizontal_alignment = 2
+
+[node name="PeakTitle" type="Label" parent="Layout/SummaryPanel/Margin/VBox/MetricGrid"]
+layout_mode = 2
+text = "PEAK 10S"
+label_settings = ExtResource("5_default")
+
+[node name="PeakValue" type="Label" parent="Layout/SummaryPanel/Margin/VBox/MetricGrid"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "000.0"
+label_settings = ExtResource("5_default")
+horizontal_alignment = 2
+
+[node name="DoseTitle" type="Label" parent="Layout/SummaryPanel/Margin/VBox/MetricGrid"]
+layout_mode = 2
+text = "DOSE"
+label_settings = ExtResource("5_default")
+
+[node name="DoseValue" type="Label" parent="Layout/SummaryPanel/Margin/VBox/MetricGrid"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "00000.0"
+label_settings = ExtResource("5_default")
+horizontal_alignment = 2
+
+[node name="GraphTitle" type="Label" parent="Layout/SummaryPanel/Margin/VBox"]
+layout_mode = 2
+text = "최근 10초  ·  0—100"
+label_settings = ExtResource("5_default")
+
+[node name="ThreatGraph" type="Control" parent="Layout/SummaryPanel/Margin/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 128)
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+script = ExtResource("4_graph")
+
+[node name="RestartButton" type="Button" parent="Layout/SummaryPanel/Margin/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+text = "다시 시작  [R]"
+
+[node name="Playfield" type="Control" parent="Layout"]
+custom_minimum_size = Vector2(240, 360)
+layout_mode = 2
+
+[node name="ViewportContainer" type="SubViewportContainer" parent="Layout/Playfield"]
+texture_filter = 1
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+stretch = true
+
+[node name="PlayfieldViewport" type="SubViewport" parent="Layout/Playfield/ViewportContainer"]
+handle_input_locally = false
+use_hdr_2d = true
+size = Vector2i(240, 360)
+render_target_update_mode = 4
+
+[node name="Gameplay" parent="Layout/Playfield/ViewportContainer/PlayfieldViewport" instance=ExtResource("2_gameplay")]
+
+[node name="ModeBadge" type="Label" parent="Layout/Playfield"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 8.0
+offset_bottom = 26.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(0.65, 0.9, 1, 0.92)
+text = "F6 MONITOR PLAY"
+label_settings = ExtResource("5_default")
+horizontal_alignment = 1
+
+[node name="DetailPanel" type="PanelContainer" parent="Layout"]
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StylePanelBlue")
+
+[node name="Margin" type="MarginContainer" parent="Layout/DetailPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="VBox" type="VBoxContainer" parent="Layout/DetailPanel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="Title" type="Label" parent="Layout/DetailPanel/Margin/VBox"]
+layout_mode = 2
+text = "COMPONENTS"
+label_settings = ExtResource("6_title")
+
+[node name="Rule" type="ColorRect" parent="Layout/DetailPanel/Margin/VBox"]
+custom_minimum_size = Vector2(0, 2)
+layout_mode = 2
+color = Color(0.1, 0.65, 0.95, 0.85)
+
+[node name="AttackRow" type="HBoxContainer" parent="Layout/DetailPanel/Margin/VBox"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Layout/DetailPanel/Margin/VBox/AttackRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "ATTACK"
+label_settings = ExtResource("5_default")
+
+[node name="AttackValue" type="Label" parent="Layout/DetailPanel/Margin/VBox/AttackRow"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "000"
+label_settings = ExtResource("5_default")
+
+[node name="AttackBar" type="ProgressBar" parent="Layout/DetailPanel/Margin/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 8)
+layout_mode = 2
+theme_override_styles/background = SubResource("StyleBarBackground")
+theme_override_styles/fill = SubResource("StyleBarFill")
+show_percentage = false
+
+[node name="SpaceRow" type="HBoxContainer" parent="Layout/DetailPanel/Margin/VBox"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Layout/DetailPanel/Margin/VBox/SpaceRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "SPACE"
+label_settings = ExtResource("5_default")
+
+[node name="SpaceValue" type="Label" parent="Layout/DetailPanel/Margin/VBox/SpaceRow"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "000"
+label_settings = ExtResource("5_default")
+
+[node name="SpaceBar" type="ProgressBar" parent="Layout/DetailPanel/Margin/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 8)
+layout_mode = 2
+theme_override_styles/background = SubResource("StyleBarBackground")
+theme_override_styles/fill = SubResource("StyleBarFill")
+show_percentage = false
+
+[node name="ReactionRow" type="HBoxContainer" parent="Layout/DetailPanel/Margin/VBox"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Layout/DetailPanel/Margin/VBox/ReactionRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "REACTION"
+label_settings = ExtResource("5_default")
+
+[node name="ReactionValue" type="Label" parent="Layout/DetailPanel/Margin/VBox/ReactionRow"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "000"
+label_settings = ExtResource("5_default")
+
+[node name="ReactionBar" type="ProgressBar" parent="Layout/DetailPanel/Margin/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 8)
+layout_mode = 2
+theme_override_styles/background = SubResource("StyleBarBackground")
+theme_override_styles/fill = SubResource("StyleBarFill")
+show_percentage = false
+
+[node name="RemovalRow" type="HBoxContainer" parent="Layout/DetailPanel/Margin/VBox"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Layout/DetailPanel/Margin/VBox/RemovalRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "REMOVAL"
+label_settings = ExtResource("5_default")
+
+[node name="RemovalValue" type="Label" parent="Layout/DetailPanel/Margin/VBox/RemovalRow"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "000"
+label_settings = ExtResource("5_default")
+
+[node name="RemovalBar" type="ProgressBar" parent="Layout/DetailPanel/Margin/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 8)
+layout_mode = 2
+theme_override_styles/background = SubResource("StyleBarBackground")
+theme_override_styles/fill = SubResource("StyleBarFill")
+show_percentage = false
+
+[node name="PatternRow" type="HBoxContainer" parent="Layout/DetailPanel/Margin/VBox"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Layout/DetailPanel/Margin/VBox/PatternRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "PATTERN"
+label_settings = ExtResource("5_default")
+
+[node name="PatternValue" type="Label" parent="Layout/DetailPanel/Margin/VBox/PatternRow"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "000"
+label_settings = ExtResource("5_default")
+
+[node name="PatternBar" type="ProgressBar" parent="Layout/DetailPanel/Margin/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 8)
+layout_mode = 2
+theme_override_styles/background = SubResource("StyleBarBackground")
+theme_override_styles/fill = SubResource("StyleBarFill")
+show_percentage = false
+
+[node name="Spacer" type="Control" parent="Layout/DetailPanel/Margin/VBox"]
+custom_minimum_size = Vector2(0, 4)
+layout_mode = 2
+
+[node name="EnemyCount" type="Label" parent="Layout/DetailPanel/Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "적                 000"
+label_settings = ExtResource("5_default")
+
+[node name="ProjectileCount" type="Label" parent="Layout/DetailPanel/Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "적탄               000"
+label_settings = ExtResource("5_default")
+
+[node name="RelevantProjectileCount" type="Label" parent="Layout/DetailPanel/Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "방어 구역 진입 탄   000"
+label_settings = ExtResource("5_default")
+
+[node name="ConcurrentSources" type="Label" parent="Layout/DetailPanel/Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "동시 공격원         000"
+label_settings = ExtResource("5_default")
+
+[node name="ThreatFamilies" type="Label" parent="Layout/DetailPanel/Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "공격 종류           000"
+label_settings = ExtResource("5_default")
+
+[node name="AttackRate" type="Label" parent="Layout/DetailPanel/Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "예상 적탄/초       000.0"
+label_settings = ExtResource("5_default")
+
+[node name="RemovalTime" type="Label" parent="Layout/DetailPanel/Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "제거 예상          000.0s"
+label_settings = ExtResource("5_default")
+
+[node name="PassiveSafeRatio" type="Label" parent="Layout/DetailPanel/Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "정지 안전 비율     000.0%"
+label_settings = ExtResource("5_default")
+
+[node name="Fragmentation" type="Label" parent="Layout/DetailPanel/Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "안전 공간 분절     000.0%"
+label_settings = ExtResource("5_default")
+
+[node name="ReactionTime" type="Label" parent="Layout/DetailPanel/Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "최소 대응 여유        --"
+label_settings = ExtResource("5_default")
+
+[node name="SampleCount" type="Label" parent="Layout/DetailPanel/Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "표본               00000"
+label_settings = ExtResource("5_default")
+
+[node name="Footer" type="Label" parent="Layout/DetailPanel/Margin/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(0.45, 0.72, 0.88, 0.85)
+text = "개발 계측 전용\n게임 규칙 자동 변경 없음"
+label_settings = ExtResource("5_default")
+vertical_alignment = 2
+
+[node name="ThreatMonitor" type="Node" parent="." node_paths=PackedStringArray("monitored_root", "player")]
+script = ExtResource("3_monitor")
+monitored_root = NodePath("../Layout/Playfield/ViewportContainer/PlayfieldViewport/Gameplay")
+player = NodePath("../Layout/Playfield/ViewportContainer/PlayfieldViewport/Gameplay/Ship")

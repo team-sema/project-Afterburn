@@ -99,7 +99,7 @@ WAVE·ELITE·BOSS 스텝은 스폰/게이트 직전에 맵 중앙에 `WARNING` �
 
 - 2026-09-15: 주제별 통합 기획서와 Encounter 시퀀스 현황을 병합.
 - 2026-09-13: 기본 시퀀스를 요청 예시형 `a/b/c/d` 혼합 패턴 1개 + 반복으로 교체. 임의 opening(`a×20→c`)/loop 분리 폐기.
-- 2026-09-15: `EncounterWave` 편대 목록을 `encounter_preset_paths`(줄 단위 경로)로 작성해 .tres 가독성 확보.
+- 2026-09-15: `EncounterWave` 편대 목록을 `encounter_preset_paths`로 작성해 프리셋 경로 목록을 데이터에서 관리.
 - 2026-09-15: `drone_swarm_wave`를 드론 편대 3연속(straight·triangle·zigzag)으로 구성.
 - 2026-09-13: Threat HUD를 시퀀스 진행도로 전환. `drone_swarm_wave`를 드론 1편대로 축소(테스트 난이도).
 - 2026-09-13: 주제별 통합 기획서로 이전하고 문서 링크·구현 기준 정리.

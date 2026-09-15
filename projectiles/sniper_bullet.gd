@@ -55,6 +55,12 @@ func get_direction() -> Vector2:
 	return _direction
 
 
+func get_threat_velocity() -> Vector2:
+	if not _active:
+		return Vector2.ZERO
+	return _direction * speed
+
+
 func _physics_process(delta: float) -> void:
 	if not _active:
 		return

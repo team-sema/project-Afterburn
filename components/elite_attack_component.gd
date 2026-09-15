@@ -22,6 +22,21 @@ func apply_action_rate_multiplier(multiplier: float) -> void:
 	_action_rate = maxf(0.01, multiplier)
 
 
+func get_threat_projectile_rate() -> float:
+	if phase == Phase.ENTRY:
+		return 0.0
+	var fan_duration := 0.45 + 3.0 * maxf(0.18, 0.34 / _action_rate)
+	var burst_duration := 9.0 * maxf(0.08, 0.13 / _action_rate)
+	var cycle_duration := fan_duration + 1.0 + burst_duration + maxf(1.0, 1.6 / _action_rate)
+	return 50.0 / maxf(0.05, cycle_duration)
+
+
+func get_threat_reaction_time() -> float:
+	if phase == Phase.AIM or phase == Phase.BURST:
+		return 1.0
+	return super.get_threat_reaction_time()
+
+
 func _process(delta: float) -> void:
 	if enemy.is_queued_for_deletion() or enemy.stats_component.health <= 0:
 		return
