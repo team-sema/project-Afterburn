@@ -7,7 +7,7 @@ extends Resource
 enum Kind {
 	## 편대 1개 스폰. presets가 있으면 그중 랜덤, 없으면 pool(Threat 가중).
 	NORMAL,
-	## EncounterWave: 여러 편대를 interval 간격으로 연속 스폰.
+	## EncounterWave: `encounter_preset_paths` 순서대로 interval 간격 연속 스폰.
 	WAVE,
 	## 엘리트 관문 (처치 → 탄소거 보상 → Threat+1 → 적 오그먼트 오퍼).
 	ELITE,

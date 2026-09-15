@@ -25,7 +25,7 @@
 | 종류 | 무엇을 | 후보 선택 |
 |---|---|---|
 | `NORMAL` | 편대 1개 | `encounter_presets` 지정 시 균등 랜덤(직전 id 회피, **Threat 무시**) · 비었으면 `encounter_pool.choose(현재 Threat)` (weight·min_threat·직전 2 id 제외 그대로) |
-| `WAVE` | `EncounterWave` 의 `encounter_presets`를 **순서대로**, 편대 사이 `interval_min~max` 랜덤 | 고정 순서 |
+| `WAVE` | `EncounterWave` 의 `encounter_preset_paths`를 **순서대로**, 편대 사이 `interval_min~max` 랜덤 | 고정 순서 |
 | `ELITE` | 아래 엘리트 게이트를 연다 | `elite_preset` 지정 시 그 preset, 비우면 교대 규칙 |
 | `BOSS` | 엘리트 게이트와 같은 흐름 + `is_boss` (엘리트 HP 공식 미적용) | `boss_preset` 비어 있으면 경고 후 **건너뜀** |
 
@@ -99,6 +99,7 @@ WAVE·ELITE·BOSS 스텝은 스폰/게이트 직전에 맵 중앙에 `WARNING` �
 
 - 2026-09-15: 주제별 통합 기획서와 Encounter 시퀀스 현황을 병합.
 - 2026-09-13: 기본 시퀀스를 요청 예시형 `a/b/c/d` 혼합 패턴 1개 + 반복으로 교체. 임의 opening(`a×20→c`)/loop 분리 폐기.
+- 2026-09-15: `EncounterWave` 편대 목록을 `encounter_preset_paths`(줄 단위 경로)로 작성해 .tres 가독성 확보.
 - 2026-09-15: `drone_swarm_wave`를 드론 편대 3연속(straight·triangle·zigzag)으로 구성.
 - 2026-09-13: Threat HUD를 시퀀스 진행도로 전환. `drone_swarm_wave`를 드론 1편대로 축소(테스트 난이도).
 - 2026-09-13: 주제별 통합 기획서로 이전하고 문서 링크·구현 기준 정리.
