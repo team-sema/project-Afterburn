@@ -14,6 +14,8 @@ signal elite_defeated(threat_level: int)
 
 var active_elite: Enemy
 var active_threat_level := 0
+var _next_gate_preset: EncounterPreset
+var _next_gate_is_boss := false
 
 
 func _ready() -> void:
@@ -28,14 +30,31 @@ func _ready() -> void:
 	progression.elite_gate_changed.connect(_on_elite_gate_changed)
 
 
+## Overrides the alternation rule for the next gate only. A null preset keeps
+## the rule. Boss gates mark the enemy is_boss and keep the scene's HP.
+func set_next_gate(preset: EncounterPreset, is_boss := false) -> void:
+	_next_gate_preset = preset
+	_next_gate_is_boss = is_boss and preset != null
+
+
+func _resolve_gate_preset(threat_level: int) -> EncounterPreset:
+	if _next_gate_preset != null:
+		return _next_gate_preset
+	return charge_elite_preset if threat_level % 2 == 1 else elite_preset
+
+
 func _on_elite_milestone_requested(threat_level: int) -> void:
 	assert(active_elite == null or not is_instance_valid(active_elite), "Only one elite may be active.")
 	active_threat_level = threat_level
+	var preset := _resolve_gate_preset(threat_level)
+	var is_boss := _next_gate_is_boss
+	_next_gate_preset = null
+	_next_gate_is_boss = false
 	enemy_generator.call("set_normal_spawns_paused", true)
 	var controller := enemy_generator.call(
 		"spawn_special_encounter",
-		charge_elite_preset if threat_level % 2 == 1 else elite_preset,
-		_configure_elite.bind(threat_level),
+		preset,
+		_configure_gate_enemy.bind(threat_level, is_boss),
 	) as FormationController
 	assert(controller != null, "Elite encounter failed to spawn.")
 	var members := controller.get_members()
@@ -45,10 +64,13 @@ func _on_elite_milestone_requested(threat_level: int) -> void:
 	elite_spawned.emit(active_elite, threat_level)
 
 
-func _configure_elite(enemy: Enemy, threat_level: int) -> void:
-	enemy.is_elite = true
-	var stats := enemy.get_node("StatsComponent") as StatsComponent
-	stats.health = base_elite_health + maxi(0, threat_level - 2) * health_per_threat
+func _configure_gate_enemy(enemy: Enemy, threat_level: int, is_boss: bool) -> void:
+	if is_boss:
+		enemy.is_boss = true
+	else:
+		enemy.is_elite = true
+		var stats := enemy.get_node("StatsComponent") as StatsComponent
+		stats.health = base_elite_health + maxi(0, threat_level - 2) * health_per_threat
 	var notifier := enemy.get_node_or_null("VisibleOnScreenNotifier2D") as FreeOffscreenComponent
 	if notifier != null:
 		notifier.suspend_despawn()

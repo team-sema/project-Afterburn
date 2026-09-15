@@ -68,7 +68,7 @@ docs/           주제별 기획서 · 변경 이력
 | 카테고리 | 파일 | 트래킹 내용 |
 |----------|------|-------------|
 | 개요 | `overview.md` | 루프 · 씬 · Autoload · 폴더 |
-| 런 · 페이싱 | `run-pacing.md` | Threat · 스폰 주기 · 엘리트 게이트 |
+| 런 · 페이싱 | `run-pacing.md` | Threat · 등장 시퀀스(토큰 패턴) · 엘리트 게이트 |
 | 씬 플로우 | `scene-flow.md` | 메뉴·World·오퍼·STATUS 패널 |
 | 컴포넌트 | `components.md` | 재사용 커스텀 노드 · 시설 버프/부스터 |
 | 플레이어 | `player.md` | 함선 · 무기 · 시설 · 실드 · HUD |

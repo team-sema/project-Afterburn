@@ -14,6 +14,7 @@
 - [Feature: docs 사이트 · 칸반 · 워크플로 이식](docs-site-kanban.md)
 - [초반 적 사격 완화](early-enemy-fire-tuning.md)
 - [Feature: 초반 페이싱 조정](early-game-pacing.md)
+- [Feature: 적 등장 시퀀스](encounter-sequence.md)
 - [엘리트 전투 패턴 개선](elite-combat-patterns.md)
 - [Feature: 시설이 효과 담당 (스탯 모듈 제거)](facility-own-effects.md)
 - [시설 모듈 효과 (FacilityModuleEffect)](facility-weapon-modules.md)

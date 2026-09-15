@@ -11,7 +11,7 @@
 3. **물리 레이어 3–4** — `project.godot`에 `player_projectile` / `enemy_projectile` **이름만**. 탄 Hitbox는 대개 layer 0 + hurtbox mask ([전투](combat.md))
 4. **`clear_augments()`** — 레지스트리 API만 있고 게임오버·재시작 경로에서는 미호출(씬 전환에 의존). 테스트에서만 호출
 5. **부위·모듈 밸런스 수치** — `FacilityModuleEffect` primary 등은 플레이스홀더 성격. 기본 선체 1
-6. **보스 콘텐츠** — `Enemy.is_boss` / `bosses` · 보스 피해 배율 · 엘리트 이상 공용 `BulletCancelRewardController`는 있음. **전용 보스 씬·패턴·밸런스는 없음**. 병렬 Encounter 시퀀스는 BOSS 게이트에 `is_boss`만 넘길 수 있음
+6. **보스 콘텐츠** — `Enemy.is_boss` / `bosses` · 보스 피해 배율 · 엘리트 이상 공용 `BulletCancelRewardController`는 있음. **전용 보스 씬·패턴·밸런스는 없음**. Encounter 시퀀스 BOSS 스텝은 `is_boss` 게이트만 연결 가능
 7. **우측 패널 세로 여유** — 항목 추가 전 동적 fit 검사를 먼저 확인
 
 ## 구조 이슈
