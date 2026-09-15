@@ -200,14 +200,15 @@ func _pick_normal_preset(step: EncounterSequenceStep) -> EncounterPreset:
 
 func _spawn_wave(step: EncounterSequenceStep) -> void:
 	var wave := step.wave
-	for index in wave.encounter_presets.size():
+	var presets := wave.get_encounter_presets()
+	for index in presets.size():
 		if not _can_continue():
 			return
 		if index > 0:
 			await _wait_seconds(wave.roll_interval(_random_number_generator))
 			if not _can_continue():
 				return
-		_spawn_preset(wave.encounter_presets[index], step.token)
+		_spawn_preset(presets[index], step.token)
 
 
 func _spawn_preset(preset: EncounterPreset, token: StringName) -> void:

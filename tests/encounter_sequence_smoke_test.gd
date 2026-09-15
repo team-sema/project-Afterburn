@@ -109,7 +109,7 @@ func _test_resources() -> void:
 		)
 		var step_b := main_sequence.resolve_step(main_phase, &"b")
 		_expect(
-			step_b != null and step_b.wave != null and step_b.wave.encounter_presets.size() == 3,
+			step_b != null and step_b.wave != null and step_b.wave.encounter_preset_paths.size() == 3,
 			"token b is a three-formation drone swarm wave",
 		)
 
@@ -205,7 +205,7 @@ func _test_director_flow() -> void:
 
 	var wave := EncounterWave.new()
 	wave.wave_id = &"pair"
-	wave.encounter_presets = [drone, zigzag]
+	wave.encounter_preset_paths = PackedStringArray([DRONE_PRESET_PATH, ZIGZAG_PRESET_PATH])
 	wave.interval_min = 0.0
 	wave.interval_max = 0.0
 	var step_b := EncounterSequenceStep.new()
@@ -334,7 +334,7 @@ func _test_gameplay_wiring() -> void:
 	var zigzag := load(ZIGZAG_PRESET_PATH) as EncounterPreset
 	var wave := EncounterWave.new()
 	wave.wave_id = &"pair"
-	wave.encounter_presets = [drone, zigzag]
+	wave.encounter_preset_paths = PackedStringArray([DRONE_PRESET_PATH, ZIGZAG_PRESET_PATH])
 	wave.interval_min = 0.0
 	wave.interval_max = 0.0
 	var step_b := EncounterSequenceStep.new()
