@@ -89,6 +89,22 @@ func _run() -> void:
 	if not is_instance_valid(far) or far_stats.health != far_health_before:
 		failures.append("detonate should leave enemies outside blast radius untouched")
 
+	# Arming coroutine must not call get_tree() after the bomb leaves the tree.
+	var orphan_scene: PackedScene = load("res://enemies/bomb_enemy.tscn")
+	var orphan: Node2D = orphan_scene.instantiate() as Node2D
+	orphan.set("augment_registry", EnemyAugmentRegistry.new())
+	world.add_child(orphan)
+	orphan.global_position = Vector2(40, 40)
+	var orphan_fuse := orphan.get_node("BombProximityFuseComponent") as BombProximityFuseComponent
+	orphan_fuse.arm_duration = 0.2
+	orphan_fuse.flash_count = 2
+	orphan_fuse.call("_start_arming")
+	await process_frame
+	orphan.queue_free()
+	await create_timer(0.35).timeout
+	if is_instance_valid(orphan):
+		failures.append("armed bomb should free after queue_free during flash")
+
 	world.queue_free()
 	await process_frame
 	if failures.is_empty():
