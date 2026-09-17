@@ -15,8 +15,8 @@
 | trait_id | 카드 ID | 표시명(요지) |
 |----------|---------|--------------|
 | `aux_heavy_barrel` | `trait_aux_heavy_barrel` | 편대 증설 프레임 — 드론 +2 · 드론당 피해 ×0.7→0.9 |
-| `aux_auto_loader` | `trait_aux_auto_loader` | 자동 장전기 — 간격 ×0.65→0.45 · 피해 ×0.9 |
-| `aux_he_shell` | `trait_aux_he_shell` | 고폭탄 — AOE 80%→100% · 반경 28→44 |
-| `aux_hv_ap` | `trait_aux_hv_ap` | 초고속 철갑 — 피해 ×1.1→1.3 · 탄속 ×1.6→2.0 · 관통 +3→+5 |
+| `aux_auto_loader` | `trait_aux_auto_loader` | 자동 급탄 — 간격 ×0.65→0.45 · 피해 ×0.9 |
+| `aux_he_shell` | `trait_aux_he_shell` | 고폭 탄두 — 직격 ×0.95 · AOE 80%→100% · 반경 28→44 |
+| `aux_hv_ap` | `trait_aux_hv_ap` | 고속 철갑 — 피해 ×1.1→1.3 · 탄속 ×1.6→2.0 · 관통 +3→+5 |
 
 상위: [무기 모듈](index.md)

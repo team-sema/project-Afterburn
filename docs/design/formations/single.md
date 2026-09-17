@@ -19,4 +19,4 @@
 
 - `caster_single`
 - (대체) `sniper_reinforcement` 계열
-- `threat_elite_single`
+- `threat_elite_single` / `threat_elite_awl` (엘리트 전용)

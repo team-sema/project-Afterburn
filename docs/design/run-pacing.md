@@ -45,7 +45,7 @@ WAVE·ELITE·BOSS 스텝은 스폰/게이트 직전에 맵 중앙에 `WARNING` �
 - Phase `main`: `a a a a b a a a b a a a c a a a a b a a a a d`
 - 끝나면 같은 Phase를 반복 (`REPEAT_LAST_PHASE`). Phase는 패턴을 담는 단위일 뿐, opening/loop 고정 구조가 아니다.
 
-개발자는 `.tres`의 패턴 문자열·토큰 정의만 고쳐 시나리오를 바꾼다. 설계·AC: [encounter-sequence](history/encounter-sequence.md).
+개발자는 `.tres`의 패턴 문자열·토큰 정의만 고쳐 시나리오를 바꾼다. 현행 규칙·완료 조건은 이 문서를 따른다.
 
 ## 일반 Encounter 스폰 (타이머 — Director 미사용 시)
 
@@ -67,7 +67,7 @@ WAVE·ELITE·BOSS 스텝은 스폰/게이트 직전에 맵 중앙에 `WARNING` �
 | 오퍼 완료 | 게이트 닫힘 → 시퀀스 다음 스텝 (타이머 모드면 일반 스폰·다음 Threat 타이머 재개) |
 | 전투·오퍼 중 | Threat 시간 **누적 안 함** (연속 엘리트 방지) |
 
-첫 엘리트: Threat **2** 사격형. Threat **3** 돌격형, 이후 짝수 Threat 사격형·홀수 Threat 돌격형으로 교대한다. 공통 HP 공식은 [elite-fighter](enemies/elite-fighter.md), 돌격 규칙은 [elite-awl](enemies/elite-awl.md).
+첫 엘리트: Threat **2** 사격형. Threat **3** 돌격형, 이후 짝수 Threat 사격형·홀수 Threat 돌격형으로 교대한다. 여기서 Threat는 처치 후 도달할 관문 목표값이다. 공통 HP 공식은 [엘리트](elites/index.md), 돌격 규칙은 [elite-awl](elites/elite-awl.md).
 
 탄소거 보상 중에는 전투 전체와 플레이어 오그먼트 `C` 입력을 잠근다. 적탄 1발은 XP 1로 변환되며, 기존 XP와 엘리트 확정 드롭까지 실제로 수집된 뒤에만 적 오그먼트 오퍼가 열린다. 아직 미구현인 보스도 향후 같은 공용 보상 컨트롤러를 호출한다.
 
@@ -85,7 +85,7 @@ WAVE·ELITE·BOSS 스텝은 스폰/게이트 직전에 맵 중앙에 `WARNING` �
 ## 관련
 
 - [적](enemies/index.md) · [진형](formations/index.md) · [Encounter](encounters/index.md)
-- 설계 초안(TBD 보스): `docs/design/history/threat-elite-boss-loop.md`
+- 보스 콘텐츠의 미결정 사항: [미결정·확장 후보](gaps.md)
 
 ## 완료 조건·검증
 
@@ -95,16 +95,3 @@ WAVE·ELITE·BOSS 스텝은 스폰/게이트 직전에 맵 중앙에 `WARNING` �
 - WAVE는 WARNING 전에 선행 편대 클리어(또는 `clear_timeout`)와 `clear_min_wait` 호흡을 거친다.
 
 검증 참고: `tests/threat_elite_progression_smoke_test.gd` · `tests/encounter_sequence_smoke_test.gd`. Godot 실행은 `tools/run-godot.cmd`를 사용한다.
-
-## 변경 이력
-
-- 2026-09-15: WAVE 후 다음 NORMAL까지 `b` post_delay를 5.0~5.5초로 늘림.
-- 2026-09-15: WAVE 전 `wait_for_clear` + `clear_timeout`/`clear_min_wait`로 a→b 호흡을 주고, `drone_swarm_wave` 편대 간격을 0.55~0.7초로 줄임.
-- 2026-09-15: 주제별 통합 기획서와 Encounter 시퀀스 현황을 병합.
-- 2026-09-13: 기본 시퀀스를 요청 예시형 `a/b/c/d` 혼합 패턴 1개 + 반복으로 교체. 임의 opening(`a×20→c`)/loop 분리 폐기.
-- 2026-09-15: `EncounterWave` 편대 목록을 `encounter_preset_paths`로 작성해 프리셋 경로 목록을 데이터에서 관리.
-- 2026-09-15: `drone_swarm_wave`를 드론 편대 3연속(straight·triangle·zigzag)으로 구성.
-- 2026-09-13: Threat HUD를 시퀀스 진행도로 전환. `drone_swarm_wave`를 드론 1편대로 축소(테스트 난이도).
-- 2026-09-13: 주제별 통합 기획서로 이전하고 문서 링크·구현 기준 정리.
-- 2026-09-10: `EncounterDirector` + 데이터 시퀀스(토큰 패턴 Phase · NORMAL/WAVE/ELITE/BOSS 스텝 · 범위 랜덤 간격)가 타이머 스폰·60초 엘리트 타이머를 대체.
-- 2026-09-07: 사격형·돌격형 엘리트 교대 출현 규칙 반영.
