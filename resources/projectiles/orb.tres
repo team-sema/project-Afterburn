@@ -1,0 +1,7 @@
+[gd_resource type="Resource" script_class="BulletAppearance" load_steps=2 format=3]
+[ext_resource type="Script" path="res://projectiles/bullet_appearance.gd" id="1"]
+[resource]
+script = ExtResource("1")
+core_size = Vector2(20, 20)
+collision_radius = 8.0
+collision_height = 16.0

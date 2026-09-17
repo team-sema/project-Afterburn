@@ -31,17 +31,29 @@ func _run() -> void:
 	curved_enemy_bullet.global_position = collector.global_position + Vector2(80.0, -140.0)
 	deferred_enemy_bullet.global_position = collector.global_position + Vector2(110.0, -100.0)
 	player_bullet.global_position = collector.global_position + Vector2(0.0, -60.0)
+	for preset in ["round", "orb"]:
+		var foundation := (load("res://projectiles/foundation_bullet.tscn") as PackedScene).instantiate() as FoundationBullet
+		foundation.appearance = load("res://resources/projectiles/%s.tres" % preset)
+		foundation.behavior = load("res://resources/projectiles/wave_behavior.tres")
+		gameplay.add_child(foundation)
+		foundation.global_position = collector.global_position + Vector2(30, -100)
+		foundation.launch(Vector2.DOWN, 95)
 
+	var laser := (load("res://projectiles/curved_laser.tscn") as PackedScene).instantiate() as CurvedLaser
+	gameplay.add_child(laser)
+	laser.global_position = collector.global_position + Vector2(0, -120)
+	laser.launch(Vector2.DOWN, 90)
+	laser._physics_process(0.8)
 	paused = true
 	gameplay.add_child.call_deferred(deferred_enemy_bullet)
 	var converted_count := await reward.collect_projectiles_and_vacuum()
 	await process_frame
 
-	_expect(converted_count == 3, "every current and deferred enemy projectile becomes one XP orb")
+	_expect(converted_count == 6, "each projectile and whole curved laser becomes one XP orb")
 	_expect(get_nodes_in_group("enemy_projectiles").is_empty(), "converted enemy projectiles are cleared")
 	_expect(not is_instance_valid(deferred_enemy_bullet), "same-frame deferred enemy projectiles are cleared")
 	_expect(is_instance_valid(player_bullet), "player projectiles are preserved")
-	_expect(progression.current_experience == 7, "existing XP and converted bullets are collected")
+	_expect(progression.current_experience == 10, "existing XP and converted bullets are collected")
 	_expect(not reward.is_active, "reward sequence finishes after every attracted orb is collected")
 
 	paused = false

@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="BulletAppearance" format=3 uid="uid://cysktnb3jm3xc"]
+
+[ext_resource type="Script" uid="uid://n1p16eexhfwl" path="res://projectiles/bullet_appearance.gd" id="1"]
+[ext_resource type="Texture2D" uid="uid://c15miu6sde4so" path="res://assets/svg/player_blaster.svg" id="2"]
+
+[resource]
+script = ExtResource("1")
+form = 2
+core_size = Vector2(6, 8)
+tint = Color(1, 1, 1, 1)
+texture = ExtResource("2")
+collision_offset = Vector2(0, 1)

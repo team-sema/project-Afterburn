@@ -3,7 +3,15 @@ extends Node
 
 ## Periodic aimed fire used as the default enemy offense.
 
+@export_group("Pattern (takes precedence over legacy fire)")
+## Must extend BarrageSequence with a parameterless, data-only constructor.
+@export var pattern_script: Script
+## Passed to the pattern's build(params) after _init(); patterns read keys with defaults.
+@export var pattern_params: Dictionary = {}
+@export_group("Legacy fire (ignored when Pattern is set)")
 @export var projectile_scene: PackedScene
+## Optional new projectile recipe for directional fire; timers and gates stay here.
+@export var barrage_shot: BarrageShot
 ## Delay from the end of one burst to the start of the next burst.
 @export_range(0.2, 20.0, 0.05) var fire_interval := 2.0
 ## Number of aimed volleys fired in one burst. One preserves the original behavior.
@@ -13,6 +21,7 @@ extends Node
 @export_range(20.0, 400.0, 1.0) var projectile_speed := 100.0
 @export_range(1, 12, 1) var shot_count := 1
 @export_range(0.0, 90.0, 1.0) var spread_degrees := 0.0
+@export_group("Activation")
 @export_range(0.0, 5.0, 0.05) var initial_delay := 0.75
 ## Starts the fire window only after the actor center enters VisibleRect. Useful
 ## for one-pass encounters that must never attack from offscreen.
@@ -24,12 +33,14 @@ extends Node
 @export var apply_shot_threshold := false
 
 var enemy: Enemy
+@export_group("Legacy aiming (ignored when Pattern is set)")
 ## When enabled, projectiles receive launch(direction, speed). When disabled,
 ## projectile scenes are spawned without directional configuration.
 @export var inject_target_direction := true
 ## Overrides target aiming and launches along this actor-local forward axis.
 @export var use_actor_forward_direction := false
 @export var local_forward_direction := Vector2.DOWN
+@export_group("Target")
 @export var targeting_component: TargetingComponent
 var fire_timer: Timer
 var _base_fire_interval := 2.0
@@ -39,12 +50,21 @@ var _visible_pass_started := false
 var _fire_window_active := false
 var _active_elapsed := 0.0
 var _volleys_fired := 0
+var barrage_player: BarragePlayer
+var pattern_error := ""
+var _pattern: BarrageSequence
+var _pattern_summary := {"rate": 0.0, "speed": 0.0}
+var _pattern_action_rate := 1.0
 
 
 func _ready() -> void:
 	enemy = get_parent() as Enemy
 	assert(enemy != null, "EnemyShootComponent must be attached directly to an Enemy.")
-	assert(projectile_scene != null, "EnemyShootComponent requires projectile_scene.")
+	if pattern_script != null:
+		_prepare_pattern()
+		return
+	assert(projectile_scene != null or (barrage_shot != null and (inject_target_direction or use_actor_forward_direction)), "EnemyShootComponent requires a projectile source.")
+	assert(barrage_shot == null or barrage_shot.is_valid(), "Invalid BarrageShot.")
 	if inject_target_direction and not use_actor_forward_direction:
 		assert(targeting_component != null, "Targeted EnemyShootComponent requires TargetingComponent.")
 	if use_actor_forward_direction:
@@ -70,9 +90,11 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
-	if not activate_on_visible_entry or enemy == null or not is_instance_valid(enemy):
+	if enemy == null or not is_instance_valid(enemy):
 		return
-	if not _visible_pass_started:
+	if not activate_on_visible_entry and pattern_script == null:
+		return
+	if activate_on_visible_entry and not _visible_pass_started:
 		if enemy.get_viewport_rect().has_point(enemy.global_position):
 			_visible_pass_started = true
 			_fire_window_active = true
@@ -85,11 +107,13 @@ func _process(delta: float) -> void:
 	if active_duration > 0.0 and _active_elapsed >= active_duration:
 		_fire_window_active = false
 		_burst_volleys_remaining = 0
-		fire_timer.stop()
+		if fire_timer != null: fire_timer.stop()
+		if barrage_player != null: barrage_player.stop()
 		set_process(false)
 
 
 func configure_baseline(interval: float, speed: float = -1.0) -> void:
+	if pattern_script != null: return
 	_base_fire_interval = interval
 	fire_interval = interval
 	if speed > 0.0:
@@ -99,7 +123,12 @@ func configure_baseline(interval: float, speed: float = -1.0) -> void:
 
 
 func apply_action_rate_multiplier(multiplier: float) -> void:
+	if not is_finite(multiplier): return
 	var rate := maxf(0.01, multiplier)
+	_pattern_action_rate = rate
+	if pattern_script != null:
+		if barrage_player != null: barrage_player.time_scale = rate
+		return
 	fire_interval = _base_fire_interval / rate
 	burst_interval = _base_burst_interval / rate
 	if fire_timer != null:
@@ -107,6 +136,9 @@ func apply_action_rate_multiplier(multiplier: float) -> void:
 
 
 func _on_fire_timer_timeout() -> void:
+	if pattern_script != null:
+		_start_pattern.call_deferred()
+		return
 	if activate_on_visible_entry and not _fire_window_active:
 		return
 	if _burst_volleys_remaining > 0:
@@ -137,6 +169,8 @@ func _get_next_fire_delay() -> float:
 
 
 func fire() -> void:
+	# Pattern mode owns all fire scheduling; legacy manual fire must not overlap.
+	if pattern_script != null: return
 	if enemy == null or not is_instance_valid(enemy):
 		return
 	if activate_on_visible_entry and not _fire_window_active:
@@ -167,6 +201,11 @@ func _fire_projectiles(target_direction: Variant = null) -> void:
 		projectile_parent = get_tree().current_scene
 	if projectile_parent == null:
 		return
+	if barrage_shot != null and target_direction != null:
+		if projectile_parent is Node2D:
+			_volleys_fired += 1
+			_spawn_barrage_volley.call_deferred(projectile_parent, enemy.global_position, target_direction, projectile_speed, maxi(1, shot_count), spread_degrees)
+		return
 	_volleys_fired += 1
 
 	var count := maxi(1, shot_count)
@@ -193,6 +232,18 @@ func _fire_projectiles(target_direction: Variant = null) -> void:
 			projectile.call_deferred("launch", direction, projectile_speed)
 
 
+func _spawn_barrage_volley(parent: Node2D, origin: Vector2, direction: Vector2, speed: float, count: int, spread: float) -> void:
+	if not is_instance_valid(enemy) or enemy.is_queued_for_deletion() or not enemy.is_inside_tree():
+		return
+	if not is_instance_valid(parent) or parent.is_queued_for_deletion() or not parent.is_inside_tree() or parent.get_viewport() != enemy.get_viewport():
+		return
+	if barrage_shot == null:
+		return
+	for index in count:
+		var offset := lerpf(-spread * 0.5, spread * 0.5, float(index) / (count - 1)) if count > 1 else 0.0
+		barrage_shot.spawn(parent, origin, direction.rotated(deg_to_rad(offset)), speed)
+
+
 func has_visible_pass_started() -> bool:
 	return _visible_pass_started
 
@@ -206,6 +257,8 @@ func get_volleys_fired() -> int:
 
 
 func get_threat_projectile_rate() -> float:
+	if pattern_script != null:
+		return float(_pattern_summary.rate) * _pattern_action_rate if _pattern_can_fire() and _pattern_scheduled() else 0.0
 	if activate_on_visible_entry and not _fire_window_active:
 		return 0.0
 	if enemy != null and _is_below_shot_threshold():
@@ -215,6 +268,10 @@ func get_threat_projectile_rate() -> float:
 
 
 func get_threat_reaction_time() -> float:
+	if pattern_script != null:
+		if not _pattern_can_fire() or not _pattern_scheduled(): return -1.0
+		var size := enemy.get_viewport_rect().size
+		return minf(size.x, size.y) / maxf(1.0, _pattern_summary.speed)
 	if enemy == null or (activate_on_visible_entry and not _fire_window_active):
 		return -1.0
 	if _is_below_shot_threshold():
@@ -239,4 +296,74 @@ func _schedule_initial_burst() -> void:
 	if initial_delay > 0.0:
 		fire_timer.start(initial_delay)
 	else:
-		_start_burst()
+		if pattern_script != null: _start_pattern.call_deferred()
+		else: _start_burst()
+
+
+func _prepare_pattern() -> void:
+	var base := pattern_script
+	while base != null and base != preload("res://projectiles/barrage_sequence.gd"):
+		base = base.get_base_script()
+	if base == null or not pattern_script.can_instantiate():
+		pattern_error = "pattern_script must extend BarrageSequence."
+		push_error(pattern_error)
+		set_process(false)
+		return
+	for method in pattern_script.get_script_method_list():
+		if method.name == "_init" and method.args.size() > method.default_args.size():
+			pattern_error = "Pattern _init must not require arguments."
+			push_error(pattern_error)
+			set_process(false)
+			return
+	_pattern = pattern_script.new() as BarrageSequence
+	if _pattern != null:
+		_pattern.build(pattern_params)
+	pattern_error = "Pattern construction failed." if _pattern == null else _pattern.validation_error()
+	if not pattern_error.is_empty():
+		push_error(pattern_error)
+		set_process(false)
+		return
+	_pattern_summary = _pattern.emission_summary()
+	barrage_player = BarragePlayer.new()
+	barrage_player.name = "BarragePlayer"
+	barrage_player.may_fire = _pattern_can_fire
+	barrage_player.resolve_target = _pattern_target
+	barrage_player.time_scale = _pattern_action_rate
+	barrage_player.volley_fired.connect(_pattern_fired)
+	add_child(barrage_player)
+	# This timer is only the one-time activation delay, never the pattern clock.
+	fire_timer = Timer.new()
+	fire_timer.one_shot = true
+	fire_timer.timeout.connect(_on_fire_timer_timeout)
+	add_child(fire_timer)
+	process_priority = 20
+	set_process(true)
+	if not activate_on_visible_entry:
+		_fire_window_active = true
+		_schedule_initial_burst()
+
+
+func _start_pattern() -> void:
+	if _pattern == null or not _fire_window_active or not is_instance_valid(enemy) or enemy.is_queued_for_deletion() or not enemy.is_inside_tree(): return
+	var world := get_tree().get_first_node_in_group("gameplay_world") as Node2D
+	if world == null: world = get_tree().current_scene as Node2D
+	if not barrage_player.play(_pattern, enemy, world):
+		pattern_error = barrage_player.last_error
+		push_error(pattern_error)
+
+
+func _pattern_can_fire() -> bool:
+	return is_instance_valid(enemy) and enemy.is_inside_tree() and not enemy.is_queued_for_deletion() and _fire_window_active and not _is_below_shot_threshold() and (active_duration <= 0 or _active_elapsed < active_duration)
+
+
+func _pattern_target() -> Node2D:
+	if targeting_component == null: return null
+	var target := targeting_component.get_target()
+	return target if is_instance_valid(target) and target.is_inside_tree() and not target.is_queued_for_deletion() else null
+
+
+func _pattern_fired(projectiles: Array[Node2D]) -> void:
+	if not projectiles.is_empty(): _volleys_fired += 1
+
+func _pattern_scheduled() -> bool:
+	return barrage_player != null and (barrage_player.running or (fire_timer != null and not fire_timer.is_stopped()))

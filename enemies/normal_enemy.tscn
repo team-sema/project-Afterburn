@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://bhw7lkvyjx43v"]
 
 [ext_resource type="PackedScene" uid="uid://psmpwiapllcb" path="res://enemies/enemy.tscn" id="1_pg5ck"]
+[ext_resource type="Script" uid="uid://drqf88tg173gd" path="res://patterns/drone_pattern.gd" id="2_barrage"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_b0nf3"]
 radius = 8.0
@@ -23,6 +24,7 @@ shape = SubResource("CircleShape2D_b0nf3")
 shape = SubResource("CircleShape2D_7jo6o")
 
 [node name="EnemyShootComponent" parent="." index="16" unique_id=1768565056]
+pattern_script = ExtResource("2_barrage")
 fire_interval = 4.5
 projectile_speed = 105.0
 initial_delay = 1.5

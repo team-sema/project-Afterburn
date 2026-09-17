@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="BulletBehavior" format=3 uid="uid://d3wj8w4qnnmae"]
+
+[ext_resource type="Script" uid="uid://decidrufsjx8w" path="res://projectiles/bullet_behavior.gd" id="1"]
+[ext_resource type="Script" uid="uid://chw3u3xfqd8f4" path="res://projectiles/bullet_action.gd" id="2"]
+
+[sub_resource type="Resource" id="Action"]
+script = ExtResource("2")
+type = 4
+duration = 2.4
+value = 35
+period = 2.4
+
+[resource]
+script = ExtResource("1")
+actions = Array[ExtResource("2")]([SubResource("Action")])
+repeat_count = 0

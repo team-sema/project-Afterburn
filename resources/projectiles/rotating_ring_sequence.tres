@@ -1,0 +1,43 @@
+[gd_resource type="Resource" script_class="BarrageSequence" format=3 uid="uid://dns08p7y7bvyd"]
+
+[ext_resource type="Script" uid="uid://bqasoxh10bimp" path="res://projectiles/barrage_sequence.gd" id="1"]
+[ext_resource type="Script" uid="uid://c85squrtcqret" path="res://projectiles/barrage_step.gd" id="2"]
+[ext_resource type="Script" uid="uid://b7ji6bnvap1qe" path="res://projectiles/barrage_volley.gd" id="3"]
+[ext_resource type="Script" uid="uid://cllhljtf4jfsc" path="res://projectiles/barrage_shot.gd" id="4"]
+[ext_resource type="Resource" path="res://resources/projectiles/rice.tres" id="5"]
+[ext_resource type="Resource" path="res://resources/projectiles/straight_behavior.tres" id="6"]
+
+[sub_resource type="Resource" id="Shot"]
+script = ExtResource("4")
+appearance = ExtResource("5")
+behavior = ExtResource("6")
+
+[sub_resource type="Resource" id="Volley"]
+script = ExtResource("3")
+shot = SubResource("Shot")
+layout = 2
+count = 16
+
+[sub_resource type="Resource" id="Fire"]
+script = ExtResource("2")
+volley = SubResource("Volley")
+
+[sub_resource type="Resource" id="Wait"]
+script = ExtResource("2")
+action = 1
+value = 0.2
+
+[sub_resource type="Resource" id="Rotate"]
+script = ExtResource("2")
+action = 2
+value = 10.0
+
+[sub_resource type="Resource" id="Rest"]
+script = ExtResource("2")
+action = 1
+value = 1.2
+
+[resource]
+script = ExtResource("1")
+steps = Array[ExtResource("2")]([SubResource("Fire"), SubResource("Wait"), SubResource("Rotate"), SubResource("Fire"), SubResource("Wait"), SubResource("Rotate"), SubResource("Fire"), SubResource("Wait"), SubResource("Rotate"), SubResource("Fire"), SubResource("Wait"), SubResource("Rotate"), SubResource("Fire"), SubResource("Wait"), SubResource("Rotate"), SubResource("Fire"), SubResource("Rotate"), SubResource("Rest")])
+repeat_count = 0

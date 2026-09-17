@@ -11,6 +11,7 @@
 - [미결정·확장 후보](gaps.md) · [증강 아이디어](augment-todo.md)
 - [작업 방식](feature-workflow.md) · [새 기획서 양식](template.md)
 - [작업 체크리스트](tasks/README.md) · [과거 변경 이력](history/README.md)
+- [탄막 API 레퍼런스와 본 게임 이식 안내](../barrage-api.md)
 
 ## AI가 따르는 기준
 
