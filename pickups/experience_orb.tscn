@@ -14,7 +14,7 @@ size = Vector2(6, 6)
 [node name="ExperienceOrb" type="Area2D"]
 z_index = 4
 script = ExtResource("1_script")
-drift_speed = 70.0
+drift_speed = 140.0
 
 [node name="WideGlow" type="Sprite2D" parent="."]
 self_modulate = Color(1, 0.62, 0.12, 0.42)

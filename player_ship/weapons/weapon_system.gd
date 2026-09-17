@@ -205,6 +205,31 @@ func get_boss_damage_multiplier() -> float:
 	return _boss_damage_multiplier
 
 
+## Projectile damage is captured at launch so a timed buff never changes a
+## projectile that was already in flight.
+func get_projectile_damage_snapshot() -> Dictionary:
+	return {
+		"damage_multiplier": get_effective_damage_multiplier(),
+		"boss_damage_multiplier": _boss_damage_multiplier,
+	}
+
+
+static func resolve_projectile_snapshot_damage(
+	base_damage: int,
+	hurtbox: HurtboxComponent,
+	snapshot: Dictionary,
+) -> int:
+	var mult := float(snapshot.get("damage_multiplier", 1.0))
+	var boss_mult := float(snapshot.get("boss_damage_multiplier", 1.0))
+	if hurtbox != null and not is_equal_approx(boss_mult, 1.0):
+		var node: Node = hurtbox.get_parent()
+		while node != null and not (node is Enemy):
+			node = node.get_parent()
+		if node is Enemy and (node as Enemy).is_boss:
+			mult *= boss_mult
+	return maxi(1, roundi(float(base_damage) * mult))
+
+
 func resolve_hit_damage(base_damage: int, hurtbox: HurtboxComponent = null) -> int:
 	var mult := get_effective_damage_multiplier()
 	if hurtbox != null and not is_equal_approx(_boss_damage_multiplier, 1.0):

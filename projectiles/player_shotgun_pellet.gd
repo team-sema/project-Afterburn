@@ -4,7 +4,7 @@ extends Node2D
 @onready var flash_component: FlashComponent = $FlashComponent
 @onready var hitbox_component: HitboxComponent = $HitboxComponent
 
-var _weapon: WeaponSystem
+var _damage_snapshot: Dictionary = {}
 var _base_damage := 1
 var _origin := Vector2.ZERO
 var _max_lifetime := 1.27
@@ -22,7 +22,7 @@ func configure_shotgun_combat(
 	close_damage_mult: float,
 	close_range_px: float,
 ) -> void:
-	_weapon = weapon
+	_damage_snapshot = weapon.get_projectile_damage_snapshot() if weapon != null else {}
 	_base_damage = maxi(1, base_damage)
 	_origin = origin
 	_max_lifetime = maxf(0.05, max_lifetime)
@@ -37,7 +37,7 @@ func _ready() -> void:
 	scale_component.tween_scale()
 	flash_component.flash()
 	hitbox_component.hit_hurtbox.connect(queue_free.unbind(1))
-	if _pending_configure or _weapon != null:
+	if _pending_configure:
 		_apply_damage_resolver()
 
 
@@ -62,8 +62,6 @@ func _apply_damage_resolver() -> void:
 		if _close_damage_mult > 1.0 and global_position.distance_to(_origin) <= _close_range_px:
 			mult = _close_damage_mult
 		var raw := maxi(1, roundi(float(_base_damage) * mult))
-		if _weapon != null:
-			return _weapon.resolve_hit_damage(raw, hurtbox)
-		return raw
+		return WeaponSystem.resolve_projectile_snapshot_damage(raw, hurtbox, _damage_snapshot)
 	hitbox.damage = _base_damage
 	_pending_configure = false

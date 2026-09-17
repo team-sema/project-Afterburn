@@ -8,11 +8,11 @@ func _initialize() -> void:
 
 
 func _run() -> void:
-	_test_blaster_configuration()
-	_test_shotgun_configuration()
-	_test_cannon_configuration()
-	_test_homing_missile_configuration()
-	_test_plasma_bomb_configuration()
+	await _test_blaster_configuration()
+	await _test_shotgun_configuration()
+	await _test_cannon_configuration()
+	await _test_homing_missile_configuration()
+	await _test_plasma_bomb_configuration()
 
 	var world := Node2D.new()
 	root.add_child(world)
@@ -82,14 +82,21 @@ func _test_blaster_configuration() -> void:
 	var projectile: Node = load("res://projectiles/player_blaster.tscn").instantiate()
 	system.base_damage = 17
 	system.projectile_speed = 123.0
+	root.add_child(system)
+	await process_frame
+	(system.get_node("FireRateTimer") as Timer).stop()
 	system.call("_configure_projectile", projectile)
+	projectile.process_mode = Node.PROCESS_MODE_DISABLED
+	root.add_child(projectile)
+	await process_frame
 	_expect((projectile.get_node("HitboxComponent") as HitboxComponent).damage == 17, "blaster system owns damage")
 	_expect(
 		(projectile.get_node("MoveComponent") as MoveComponent).velocity == Vector2(0, -123),
 		"blaster system owns projectile speed",
 	)
-	projectile.free()
-	system.free()
+	projectile.queue_free()
+	system.queue_free()
+	await process_frame
 
 
 func _test_shotgun_configuration() -> void:
@@ -97,14 +104,21 @@ func _test_shotgun_configuration() -> void:
 	var projectile: Node = load("res://projectiles/player_shotgun_pellet.tscn").instantiate()
 	system.base_damage = 6
 	system.pellet_speed = 210.0
+	root.add_child(system)
+	await process_frame
+	(system.get_node("FireRateTimer") as Timer).stop()
 	system.call("_configure_projectile", projectile, Vector2.RIGHT)
+	projectile.process_mode = Node.PROCESS_MODE_DISABLED
+	root.add_child(projectile)
+	await process_frame
 	_expect((projectile.get_node("HitboxComponent") as HitboxComponent).damage == 6, "shotgun system owns pellet damage")
 	_expect(
 		(projectile.get_node("MoveComponent") as MoveComponent).velocity == Vector2(210, 0),
 		"shotgun system owns pellet speed",
 	)
-	projectile.free()
-	system.free()
+	projectile.queue_free()
+	system.queue_free()
+	await process_frame
 
 
 func _test_cannon_configuration() -> void:
@@ -112,14 +126,21 @@ func _test_cannon_configuration() -> void:
 	var projectile: Node = load("res://projectiles/aux_cannon_bolt.tscn").instantiate()
 	system.base_damage = 13
 	system.projectile_speed = 175.0
+	root.add_child(system)
+	await process_frame
+	(system.get_node("FireRateTimer") as Timer).stop()
 	system.call("_configure_projectile", projectile)
+	projectile.process_mode = Node.PROCESS_MODE_DISABLED
+	root.add_child(projectile)
+	await process_frame
 	_expect((projectile.get_node("HitboxComponent") as HitboxComponent).damage == 13, "cannon system owns damage")
 	_expect(
 		(projectile.get_node("MoveComponent") as MoveComponent).velocity == Vector2(0, -175),
 		"cannon system owns projectile speed",
 	)
-	projectile.free()
-	system.free()
+	projectile.queue_free()
+	system.queue_free()
+	await process_frame
 
 
 func _test_homing_missile_configuration() -> void:
@@ -129,13 +150,20 @@ func _test_homing_missile_configuration() -> void:
 	system.projectile_speed = 140.0
 	system.turn_rate = 4.2
 	system.retarget_interval = 0.23
+	root.add_child(system)
+	await process_frame
+	(system.get_node("FireRateTimer") as Timer).stop()
 	system.call("_configure_projectile", projectile)
+	projectile.process_mode = Node.PROCESS_MODE_DISABLED
+	root.add_child(projectile)
+	await process_frame
 	_expect((projectile.get_node("HitboxComponent") as HitboxComponent).damage == 19, "missile system owns damage")
 	_expect(is_equal_approx(projectile.speed, 140.0), "missile system owns projectile speed")
 	_expect(is_equal_approx(projectile.turn_rate, 4.2), "missile system owns turn rate")
 	_expect(is_equal_approx(projectile.retarget_interval, 0.23), "missile system owns retarget interval")
-	projectile.free()
-	system.free()
+	projectile.queue_free()
+	system.queue_free()
+	await process_frame
 
 
 func _test_plasma_bomb_configuration() -> void:
@@ -146,15 +174,22 @@ func _test_plasma_bomb_configuration() -> void:
 	system.fuse_time = 1.7
 	system.blast_radius = 39.0
 	system.damage_radius_margin = 7.0
+	root.add_child(system)
+	await process_frame
+	(system.get_node("FireRateTimer") as Timer).stop()
 	system.call("_configure_projectile", projectile)
+	projectile.process_mode = Node.PROCESS_MODE_DISABLED
+	root.add_child(projectile)
+	await process_frame
 	_expect(projectile.blast_damage == 31, "plasma bomb system owns damage")
 	_expect(is_equal_approx(projectile.flight_speed, 44.0), "plasma bomb system owns projectile speed")
 	_expect(is_equal_approx(projectile.fuse_time, 1.7), "plasma bomb system owns fuse time")
 	_expect(is_equal_approx(projectile.blast_radius, 39.0), "plasma bomb system owns blast radius")
 	_expect(is_equal_approx(projectile.damage_radius_margin, 7.0), "plasma bomb system owns damage radius margin")
 	_expect(is_equal_approx(projectile.get_damage_radius(), 46.0), "plasma bomb adds margin to its damage radius")
-	projectile.free()
-	system.free()
+	projectile.queue_free()
+	system.queue_free()
+	await process_frame
 
 
 func _expect(condition: bool, message: String) -> void:

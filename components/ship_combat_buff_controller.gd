@@ -34,6 +34,10 @@ var _emergency_remaining := 0.0
 var _last_hull := -1
 
 
+func _enter_tree() -> void:
+	add_to_group("player_combat_buff_controllers")
+
+
 func initialize(registry: PlayerAugmentRegistry) -> void:
 	facility_registry = registry
 	if stats_component != null:

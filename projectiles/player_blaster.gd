@@ -5,7 +5,7 @@ extends Node2D
 @onready var hitbox_component: HitboxComponent = $HitboxComponent
 @onready var move_component: MoveComponent = $MoveComponent
 
-var _weapon: WeaponSystem
+var _damage_snapshot: Dictionary = {}
 var _base_damage := 1
 var _pierce_remaining := 0
 var _pierce_falloff := 1.0
@@ -28,7 +28,7 @@ func configure_blaster_combat(
 	bounce_damage_mults: Array,
 	ricochet_radius: float,
 ) -> void:
-	_weapon = weapon
+	_damage_snapshot = weapon.get_projectile_damage_snapshot() if weapon != null else {}
 	_base_damage = maxi(1, base_damage)
 	_pierce_remaining = maxi(0, pierce_bonus)
 	_pierce_falloff = clampf(pierce_falloff, 0.05, 1.0)
@@ -46,7 +46,7 @@ func _ready() -> void:
 	scale_component.tween_scale()
 	flash_component.flash()
 	hitbox_component.hit_hurtbox.connect(_on_hit_hurtbox)
-	if _pending_configure or _weapon != null:
+	if _pending_configure:
 		_apply_damage_resolver()
 	elif hitbox_component.damage <= 0:
 		hitbox_component.damage = 1
@@ -73,9 +73,7 @@ func _apply_damage_resolver() -> void:
 		if _pierce_hits > 0:
 			damage_scale *= pow(_pierce_falloff, float(_pierce_hits))
 		var raw := maxi(1, roundi(float(_base_damage) * damage_scale))
-		if _weapon != null:
-			return _weapon.resolve_hit_damage(raw, hurtbox)
-		return raw
+		return WeaponSystem.resolve_projectile_snapshot_damage(raw, hurtbox, _damage_snapshot)
 	hitbox.damage = maxi(1, roundi(float(_base_damage) * _bounce_damage_scale))
 	_pending_configure = false
 
