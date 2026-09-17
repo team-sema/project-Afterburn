@@ -97,17 +97,33 @@ func _arm_and_detonate() -> void:
 	var on_time := period * 0.55
 	var off_time := period - on_time
 	for _i in flash_count:
-		if not is_instance_valid(self) or not is_instance_valid(actor):
+		if not _can_continue_arming():
 			return
 		_set_flash(true)
-		await get_tree().create_timer(on_time, false).timeout
-		if not is_instance_valid(self) or not is_instance_valid(actor):
+		if not await _wait_arming(on_time):
+			return
+		if not _can_continue_arming():
 			return
 		_set_flash(false)
-		await get_tree().create_timer(off_time, false).timeout
-	if not is_instance_valid(self) or not is_instance_valid(actor):
+		if not await _wait_arming(off_time):
+			return
+	if not _can_continue_arming():
 		return
 	_detonate()
+
+
+func _can_continue_arming() -> bool:
+	return is_instance_valid(self) and is_inside_tree() and is_instance_valid(actor)
+
+
+func _wait_arming(duration: float) -> bool:
+	if not _can_continue_arming():
+		return false
+	var tree := get_tree()
+	if tree == null:
+		return false
+	await tree.create_timer(duration, false).timeout
+	return _can_continue_arming()
 
 
 func _detonate() -> void:
