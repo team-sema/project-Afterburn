@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3]
+[gd_scene load_steps=15 format=3]
 
 [ext_resource type="Script" path="res://projectiles/aux_cannon_bolt.gd" id="1_script"]
 [ext_resource type="Material" path="res://effects/wide_glow_material.tres" id="2_wide"]
@@ -12,6 +12,7 @@
 [ext_resource type="Script" uid="uid://c1yamqkv7l4ue" path="res://components/scale_component.gd" id="10_scale"]
 [ext_resource type="Script" uid="uid://qfpbc4d4ijso" path="res://components/flash_component.gd" id="11_flash"]
 [ext_resource type="Script" uid="uid://cvmjafhyfx5xo" path="res://components/hitbox_component.gd" id="12_hitbox"]
+[ext_resource type="Script" path="res://components/overcharge_visual_component.gd" id="13_overcharge"]
 
 [sub_resource type="Gradient" id="Gradient_trail"]
 colors = PackedColorArray(0.45, 1, 0.35, 0.7, 0.1, 0.55, 0.15, 0)
@@ -98,3 +99,6 @@ script = ExtResource("12_hitbox")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="HitboxComponent"]
 position = Vector2(0, 1)
 shape = SubResource("RectangleShape2D_bolt")
+
+[node name="OverchargeVisualComponent" type="Node" parent="."]
+script = ExtResource("13_overcharge")

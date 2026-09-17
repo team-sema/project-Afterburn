@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3]
+[gd_scene load_steps=13 format=3]
 
 [ext_resource type="Script" path="res://projectiles/player_homing_missile.gd" id="1_script"]
 [ext_resource type="Material" path="res://effects/wide_glow_material.tres" id="2_wide"]
@@ -11,6 +11,7 @@
 [ext_resource type="Script" uid="uid://c1yamqkv7l4ue" path="res://components/scale_component.gd" id="9_scale"]
 [ext_resource type="Script" uid="uid://qfpbc4d4ijso" path="res://components/flash_component.gd" id="10_flash"]
 [ext_resource type="Script" uid="uid://cvmjafhyfx5xo" path="res://components/hitbox_component.gd" id="11_hitbox"]
+[ext_resource type="Script" path="res://components/overcharge_visual_component.gd" id="12_overcharge"]
 
 [sub_resource type="Gradient" id="Gradient_trail"]
 colors = PackedColorArray(1, 0.35, 0.55, 0.75, 0.7, 0.1, 0.35, 0)
@@ -92,3 +93,6 @@ script = ExtResource("11_hitbox")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="HitboxComponent"]
 shape = SubResource("CircleShape2D_missile")
+
+[node name="OverchargeVisualComponent" type="Node" parent="."]
+script = ExtResource("12_overcharge")

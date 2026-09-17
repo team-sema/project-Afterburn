@@ -5,6 +5,7 @@
 [ext_resource type="Texture2D" uid="uid://dkwofbfcu1lo2" path="res://assets/svg/beam_glow.svg" id="2_beam"]
 [ext_resource type="Script" uid="uid://cvmjafhyfx5xo" path="res://components/hitbox_component.gd" id="3_hitbox"]
 [ext_resource type="Script" path="res://player_ship/weapons/laser_refract_vfx.gd" id="4_refract"]
+[ext_resource type="Script" path="res://components/overcharge_visual_component.gd" id="5_overcharge"]
 
 [node name="LaserWeaponSystem" type="Node2D" unique_id=395281251]
 script = ExtResource("1_laser")
@@ -45,3 +46,7 @@ collision_layer = 0
 collision_mask = 0
 script = ExtResource("3_hitbox")
 metadata/_custom_type_script = "uid://cvmjafhyfx5xo"
+
+[node name="OverchargeVisualComponent" type="Node" parent="."]
+script = ExtResource("5_overcharge")
+follow_buff_state_changes = true

@@ -12,6 +12,7 @@
 [ext_resource type="Script" uid="uid://c1yamqkv7l4ue" path="res://components/scale_component.gd" id="10_xdjaq"]
 [ext_resource type="Script" uid="uid://qfpbc4d4ijso" path="res://components/flash_component.gd" id="11_asa48"]
 [ext_resource type="Script" uid="uid://cvmjafhyfx5xo" path="res://components/hitbox_component.gd" id="12_vsug7"]
+[ext_resource type="Script" path="res://components/overcharge_visual_component.gd" id="13_overcharge"]
 
 [sub_resource type="Gradient" id="Gradient_trail"]
 colors = PackedColorArray(0.35, 0.95, 1, 0.65, 0.1, 0.65, 1, 0)
@@ -102,3 +103,6 @@ metadata/_custom_type_script = "uid://cvmjafhyfx5xo"
 [node name="CollisionShape2D" type="CollisionShape2D" parent="HitboxComponent" unique_id=1963005471]
 position = Vector2(0, 1)
 shape = SubResource("RectangleShape2D_7jo6o")
+
+[node name="OverchargeVisualComponent" type="Node" parent="."]
+script = ExtResource("13_overcharge")
