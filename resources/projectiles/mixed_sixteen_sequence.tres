@@ -1,0 +1,36 @@
+[gd_resource type="Resource" script_class="BarrageSequence" format=3 uid="uid://bp4sdb1ormb1e"]
+
+[ext_resource type="Script" uid="uid://bqasoxh10bimp" path="res://projectiles/barrage_sequence.gd" id="1"]
+[ext_resource type="Script" uid="uid://c85squrtcqret" path="res://projectiles/barrage_step.gd" id="2"]
+[ext_resource type="Script" uid="uid://b7ji6bnvap1qe" path="res://projectiles/barrage_volley.gd" id="3"]
+[ext_resource type="Resource" uid="uid://calts8bej4ise" path="res://resources/projectiles/round_straight_shot.tres" id="4"]
+[ext_resource type="Resource" path="res://resources/projectiles/s_curve_laser_shot.tres" id="5"]
+
+[sub_resource type="Resource" id="Balls"]
+script = ExtResource("3")
+shot = ExtResource("4")
+layout = 2
+count = 8
+speed = 65.0
+
+[sub_resource type="Resource" id="Lasers"]
+script = ExtResource("3")
+shot = ExtResource("5")
+layout = 2
+count = 8
+angle_degrees = 22.5
+speed = 45.0
+
+[sub_resource type="Resource" id="Fire"]
+script = ExtResource("2")
+volleys = Array[ExtResource("3")]([SubResource("Balls"), SubResource("Lasers")])
+
+[sub_resource type="Resource" id="Wait"]
+script = ExtResource("2")
+action = 1
+value = 5.0
+
+[resource]
+script = ExtResource("1")
+steps = Array[ExtResource("2")]([SubResource("Fire"), SubResource("Wait")])
+repeat_count = 0

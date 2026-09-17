@@ -46,6 +46,8 @@ shape = SubResource("RectangleShape2D_hurt")
 shape = SubResource("RectangleShape2D_hit")
 
 [node name="EnemyShootComponent" parent="." index="15"]
+barrage_shot = null
+pattern_script = null
 fire_interval = 10.0
 burst_count = 10
 burst_interval = 0.05

@@ -1,0 +1,8 @@
+[gd_scene load_steps=4 format=3]
+[ext_resource type="Script" path="res://projectiles/foundation_bullet.gd" id="1"]
+[ext_resource type="Resource" path="res://resources/projectiles/round.tres" id="2"]
+[ext_resource type="Resource" path="res://resources/projectiles/straight_behavior.tres" id="3"]
+[node name="FoundationBullet" type="Node2D" groups=["enemy_projectiles"]]
+script = ExtResource("1")
+appearance = ExtResource("2")
+behavior = ExtResource("3")

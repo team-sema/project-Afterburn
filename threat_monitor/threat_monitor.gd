@@ -247,18 +247,29 @@ func _measure_pattern_space(projectiles: Array[Node], enemies: Array[Node]) -> D
 	)
 	var projectile_paths: Array[Dictionary] = []
 	var direction_bins: Dictionary = {}
+	var relevant_projectiles := 0
 	for projectile in projectiles:
 		var actor := projectile as Node2D
-		if actor == null:
+		if actor == null or actor.is_queued_for_deletion():
 			continue
 		var velocity := _get_projectile_velocity(actor)
-		if velocity.is_zero_approx():
+		var points := PackedVector2Array()
+		var radius := projectile_hazard_radius
+		if actor.has_method("get_threat_path"):
+			points = actor.call("get_threat_path", projectile_lookahead)
+			if actor.has_method("get_threat_radius"):
+				radius = float(actor.call("get_threat_radius")) + body_hazard_padding
+		elif not velocity.is_zero_approx():
+			points = PackedVector2Array([actor.global_position, actor.global_position + velocity * projectile_lookahead])
+		var relevant := false
+		for index in range(1, points.size()):
+			if not _segment_intersects_rect(points[index - 1], points[index], defense_rect.grow(radius)):
+				continue
+			relevant = true
+			projectile_paths.append({"start": points[index - 1], "end": points[index], "radius": radius})
+		if not relevant:
 			continue
-		var path_start := actor.global_position
-		var path_end := actor.global_position + velocity * projectile_lookahead
-		if not _segment_intersects_rect(path_start, path_end, defense_rect.grow(projectile_hazard_radius)):
-			continue
-		projectile_paths.append({"start": path_start, "end": path_end})
+		relevant_projectiles += 1
 		var normalized_angle := fposmod(velocity.angle(), TAU) / TAU
 		var bin_index := mini(DIRECTION_BIN_COUNT - 1, floori(normalized_angle * DIRECTION_BIN_COUNT))
 		direction_bins[bin_index] = true
@@ -284,6 +295,23 @@ func _measure_pattern_space(projectiles: Array[Node], enemies: Array[Node]) -> D
 	var blocked_cells := PackedByteArray()
 	var total_cells := maxi(1, grid_columns * grid_rows)
 	blocked_cells.resize(total_cells)
+	# Rasterize only cells within each swept segment's expanded bounds.
+	# The narrow phase remains the same center-to-segment distance test.
+	var cell_size := defense_rect.size / Vector2(grid_columns, grid_rows)
+	for path in projectile_paths:
+		var start: Vector2 = path.start
+		var end: Vector2 = path.end
+		var radius: float = path.radius
+		var low := (start.min(end) - Vector2.ONE * radius - defense_rect.position) / cell_size - Vector2.ONE * 0.5
+		var high := (start.max(end) + Vector2.ONE * radius - defense_rect.position) / cell_size - Vector2.ONE * 0.5
+		for row in range(maxi(0, ceili(low.y)), mini(grid_rows - 1, floori(high.y)) + 1):
+			for column in range(maxi(0, ceili(low.x)), mini(grid_columns - 1, floori(high.x)) + 1):
+				var index := row * grid_columns + column
+				if blocked_cells[index] != 0: continue
+				var center := defense_rect.position + Vector2(column + 0.5, row + 0.5) * cell_size
+				if Geometry2D.get_closest_point_to_segment(center, start, end).distance_squared_to(center) <= radius * radius:
+					blocked_cells[index] = 1
+	var no_projectile_paths: Array[Dictionary] = []
 	var blocked := 0
 	for row in grid_rows:
 		for column in grid_columns:
@@ -291,7 +319,7 @@ func _measure_pattern_space(projectiles: Array[Node], enemies: Array[Node]) -> D
 				defense_rect.position.x + defense_rect.size.x * (float(column) + 0.5) / float(grid_columns),
 				defense_rect.position.y + defense_rect.size.y * (float(row) + 0.5) / float(grid_rows),
 			)
-			if _is_point_blocked(point, projectile_paths, body_paths, bomb_areas):
+			if blocked_cells[row * grid_columns + column] != 0 or _is_point_blocked(point, no_projectile_paths, body_paths, bomb_areas):
 				blocked_cells[row * grid_columns + column] = 1
 				blocked += 1
 	var transitions := 0
@@ -320,7 +348,7 @@ func _measure_pattern_space(projectiles: Array[Node], enemies: Array[Node]) -> D
 		"pattern": pattern,
 		"passive_safe_ratio": 1.0 - space,
 		"fragmentation": fragmentation,
-		"relevant_projectile_count": projectile_paths.size(),
+		"relevant_projectile_count": relevant_projectiles,
 	}
 
 
@@ -355,7 +383,7 @@ func _is_point_blocked(
 	bomb_areas: Array[Dictionary],
 ) -> bool:
 	for path in projectile_paths:
-		if Geometry2D.get_closest_point_to_segment(point, path.start, path.end).distance_to(point) <= projectile_hazard_radius:
+		if Geometry2D.get_closest_point_to_segment(point, path.start, path.end).distance_to(point) <= float(path.get("radius", projectile_hazard_radius)):
 			return true
 	for path in body_paths:
 		if Geometry2D.get_closest_point_to_segment(point, path.start, path.end).distance_to(point) <= float(path.radius):

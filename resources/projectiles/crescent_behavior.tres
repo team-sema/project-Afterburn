@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="BulletBehavior" format=3 uid="uid://cv10kdq448n1y"]
+
+[ext_resource type="Script" uid="uid://decidrufsjx8w" path="res://projectiles/bullet_behavior.gd" id="1"]
+[ext_resource type="Script" uid="uid://chw3u3xfqd8f4" path="res://projectiles/bullet_action.gd" id="2"]
+
+[sub_resource type="Resource" id="Action"]
+script = ExtResource("2")
+type = 3
+duration = 1.5
+value = 70
+
+[resource]
+script = ExtResource("1")
+actions = Array[ExtResource("2")]([SubResource("Action")])

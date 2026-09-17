@@ -4,6 +4,8 @@
 
 ## 작업 기록
 
+- [탄막 작성 API](barrage-api-tasks.md)
+- [탄환 기본 종류 확장](bullet-foundations-tasks.md)
 - [Tasks: augment-selection-carousel](augment-selection-carousel-tasks.md)
 - [통합 증강 테스트 랩 Tasks](augment-test-lab-tasks.md)
 - [bomb-formation-escorts tasks](bomb-formation-escorts-tasks.md)

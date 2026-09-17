@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="BarrageShot" format=3 uid="uid://calts8bej4ise"]
+
+[ext_resource type="Script" uid="uid://cllhljtf4jfsc" path="res://projectiles/barrage_shot.gd" id="1"]
+[ext_resource type="Resource" path="res://resources/projectiles/straight_behavior.tres" id="2"]
+[ext_resource type="Resource" path="res://resources/projectiles/round.tres" id="3"]
+
+[resource]
+script = ExtResource("1")
+appearance = ExtResource("3")
+behavior = ExtResource("2")
+lifetime = 8

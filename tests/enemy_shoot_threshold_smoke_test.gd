@@ -24,6 +24,7 @@ func _run() -> void:
 
 	var normal := _instantiate_enemy("res://enemies/normal_enemy.tscn", augment_registry)
 	var shoot := normal.get_node("EnemyShootComponent") as EnemyShootComponent
+	shoot.pattern_script = null # Exercise the legacy threshold adapter separately.
 	_expect(shoot.apply_shot_threshold, "Drone enables the shot threshold")
 	shoot.projectile_scene = projectile_scene
 	shoot.inject_target_direction = false
@@ -75,12 +76,11 @@ func _run() -> void:
 		not (elite.get_node("EnemyShootComponent") as EnemyShootComponent).apply_shot_threshold,
 		"Elite forward fire opts out of the ordinary-enemy threshold",
 	)
-	_expect(
-		not (
-			elite.get_node("EliteBarrageShootComponent") as EnemyShootComponent
-		).apply_shot_threshold,
-		"Elite barrage opts out of the ordinary-enemy threshold",
-	)
+	# EliteBarrageShootComponent was removed from the scene. Check every
+	# remaining standard shooter rather than dereferencing that old node.
+	for child in elite.get_children():
+		if child is EnemyShootComponent:
+			_expect(not child.apply_shot_threshold, "Elite shooters opt out of the ordinary-enemy threshold")
 	elite.free()
 
 	gameplay_world.queue_free()

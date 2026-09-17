@@ -44,11 +44,14 @@
 
 ## Threat 1 사격
 
+- Drone은 `EnemyShootComponent.pattern_script`에 `patterns/drone_pattern.gd`를 지정한다. Kind.BULLET + needle.tres 외형 + 직진 Behavior를 사용한다. 기존 중심 텍스처·두 가산 발광층과 4×8px 직사각형 판정(로컬 y=1)을 새 배치 렌더러로 그린다. 다이아몬드 꼬리는 공통 입자 관리기로 재현하고 초기 확대/섬광은 포함하지 않는다. 조준 단발·4.5초 반복·105px/s는 유지한다.
+- 초기 지연·사격 안전선·강화 연결은 컴포넌트가 관리하고 발수·탄속·간격은 패턴을 따른다. Drone을 상속하는 Interceptor는 pattern_script를 null로 지정하여 기존 사격을 유지한다.
+
 | `fire_interval` | 볼리 | 발수 | 탄속 | `initial_delay` |
 |---|---|---|---|---|
 | 4.5 | 1 | 1 | 105 | 1.5 |
 
-이후 난이도는 적 오그먼트 `ACTION_RATE`가 `fire_interval`·`burst_interval`을 나눠 올린다. 탄속에는 배율이 없다.
+이후 난이도는 적 오그먼트 `ACTION_RATE`가 BarragePlayer의 일정 배속을 올린다. 탄속과 Behavior 시간에는 배율이 없다. 표의 4.5초는 패턴의 wait 값이며 레거시 fire_interval 필드는 패턴 모드에서 무시된다.
 
 전역 일반 적 사격 안전선을 사용하므로 중심점이 플레이필드 높이의 70% 아래로 내려가면 발사하지 않는다.
 
