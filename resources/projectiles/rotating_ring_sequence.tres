@@ -4,8 +4,8 @@
 [ext_resource type="Script" uid="uid://c85squrtcqret" path="res://projectiles/barrage_step.gd" id="2"]
 [ext_resource type="Script" uid="uid://b7ji6bnvap1qe" path="res://projectiles/barrage_volley.gd" id="3"]
 [ext_resource type="Script" uid="uid://cllhljtf4jfsc" path="res://projectiles/barrage_shot.gd" id="4"]
-[ext_resource type="Resource" path="res://resources/projectiles/rice.tres" id="5"]
-[ext_resource type="Resource" path="res://resources/projectiles/straight_behavior.tres" id="6"]
+[ext_resource type="Resource" uid="uid://bkkts06hily6g" path="res://resources/projectiles/rice.tres" id="5"]
+[ext_resource type="Resource" uid="uid://cxdyq4amjei44" path="res://resources/projectiles/straight_behavior.tres" id="6"]
 
 [sub_resource type="Resource" id="Shot"]
 script = ExtResource("4")
