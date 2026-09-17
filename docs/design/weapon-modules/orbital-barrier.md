@@ -14,9 +14,11 @@
 
 | trait_id | 카드 ID | 표시명(요지) |
 |----------|---------|--------------|
-| `barrier_multi` | `trait_barrier_multi` | 다중 궤도 — 방벽 +1→+3 · 피해 ×0.9→0.7 |
-| `barrier_fast_orbit` | `trait_barrier_fast_orbit` | 고속 공전 — 공전 ×1.5→2.1 · 재타격 쿨 ×0.7→0.4 |
-| `barrier_expand_axis` | `trait_barrier_expand_axis` | 확장형 궤도축 — 반경 ×1.45→1.95 · 크기 ×1.35→1.75 |
-| `barrier_repulse` | `trait_barrier_repulse` | 반발 역장 — 밀침 140→260 · 충격 피해 40%→70% |
+| `barrier_multi` | `trait_barrier_multi` | 다중 방벽 — 방벽 +1→+3 · 피해 ×0.9→0.7 |
+| `barrier_fast_orbit` | `trait_barrier_fast_orbit` | 고속 궤도 — 공전 ×1.5→2.1 · 재타격 쿨 ×0.7→0.4 · 피해 ×0.95 |
+| `barrier_expand_axis` | `trait_barrier_expand_axis` | 확장 축 — 반경 ×1.45→1.95 · 크기 ×1.35→1.75 |
+| `barrier_repulse` | `trait_barrier_repulse` | 반발 충격 — 밀침 140→260 · 충격 피해 40%→70% · 재타격 쿨 ×0.85 |
+
+기본 방벽은 같은 적에게 한 번만 피해를 준다. 고속 궤도 또는 반발 충격 장착 시 시간 기반 재타격을 허용하며, 기본 1초에 장착 모듈의 쿨다운 배율을 곱한다.
 
 상위: [무기 모듈](index.md)

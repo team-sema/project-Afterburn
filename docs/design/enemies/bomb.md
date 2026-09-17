@@ -8,17 +8,7 @@
 - 스프라이트: `assets/svg/enemy_bomb.svg`
 - 틴트: 분홍 네온 (베이스 상속). 기폭 시 붉은 범위 프리뷰 링이 추가로 보인다.
 
-## 엘리트 외형 시안
-
-![Elite Bomb concept](sprites/enemy_elite_bomb.svg)
-
-- 일반 Bomb의 덩어리감을 계승한 **중장갑 기뢰**. 상단 신관과 점화 팁을 제거하고, 사방이 대칭인 각진 외피로 압축된 폭발체를 표현한다.
-- 상하좌우 장갑의 안쪽에 짧고 각진 투명 절개를 배치한다. 중앙의 작은 마름모 절개와 넓은 흰색 몸체로 묵직한 덩어리를 유지한다.
-- 외곽은 낮은 턱이 있는 일체형 장갑이다. 위쪽 돌출부나 몸체와 떨어진 부유 부품은 두지 않는다.
-- 흰색 SVG 마스크에 기존 엘리트의 적색/분홍 글로우·연분홍 흰색 코어를 적용한다.
-- 에셋: `assets/svg/enemy_elite_bomb.svg` (128×128). 표시 배율 0.25 × 1.35에서 약 43×43px이며, 확대와 실제 표시 크기를 비교한다.
-- 외형 시안 단계다. 전용 씬·자폭 동작·보상·Threat 편성은 미정이며 실제 전투에는 연결하지 않는다.
-- 미리보기: `artifacts/elite_bomb_design.png`. 재생성: `tools/run-godot.cmd --rendering-method gl_compatibility --script res://artifacts/preview_elite_bomb.gd`.
+엘리트는 별도 [Elite Bomb](../elites/elite-bomb.md) 문서에서 관리한다.
 
 ## 의도
 
@@ -70,7 +60,7 @@
 
 - **Bomb 단독 Encounter는 없다.**
 - 풀 등록: `bomb_drone_diamond` — [Diamond5](../formations/diamond-5.md) 중앙 Bomb + Drone 호위
-- 레거시 `bomb_single` / `tanker_bomb_*`는 풀 미등록
+- 레거시 `tanker_bomb_*`는 풀 미등록. `bomb_single` 프리셋 파일은 현재 존재하지 않는다
 
 → [Encounter 카탈로그](../encounters/catalog.md)
 
@@ -79,16 +69,3 @@
 
 - 기획에 명시된 등장 조건, 공격 예고·실행·종료와 보상 처리를 확인한다.
 - 관련 씬의 수치와 위 규칙을 대조하고, 행동 변경 시 해당 적의 스모크 테스트를 실행한다.
-
-## 변경 이력
-
-- 2026-09-18: 점멸 `await` 중 트리 이탈 시 `get_tree()` null 오류를 막고 신관을 안전하게 중단.
-- 2026-09-15: Bomb 엘리트 외형 시안 추가. 피드백에 따라 상단 신관을 제거하고 사방 대칭의 중장갑 기뢰로 수정.
-- 2026-09-14: 외형(스프라이트 미리보기) 추가.
-- 2026-09-13: 기획 의도와 구현 규칙을 통합. 고속 기폭 시간은 Bomb 씬의 3초 기준으로 정정.
-
-
-| 날짜 | 변경 |
-|------|------|
-| 2026-08-30 | 한국어 문장 정리 |
-| 2026-08-30 | 기획 문서로 재작성 (표 한 줄이 아닌 의도 본문) |

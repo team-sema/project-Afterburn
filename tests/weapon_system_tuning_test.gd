@@ -171,7 +171,6 @@ func _test_plasma_bomb_configuration() -> void:
 	var projectile := load("res://projectiles/plasma_bomb_projectile.tscn").instantiate() as PlasmaBombProjectile
 	system.base_damage = 31
 	system.projectile_speed = 44.0
-	system.fuse_time = 1.7
 	system.blast_radius = 39.0
 	system.damage_radius_margin = 7.0
 	root.add_child(system)
@@ -183,7 +182,7 @@ func _test_plasma_bomb_configuration() -> void:
 	await process_frame
 	_expect(projectile.blast_damage == 31, "plasma bomb system owns damage")
 	_expect(is_equal_approx(projectile.flight_speed, 44.0), "plasma bomb system owns projectile speed")
-	_expect(is_equal_approx(projectile.fuse_time, 1.7), "plasma bomb system owns fuse time")
+	_expect(is_zero_approx(projectile.fuse_time), "plasma bomb main projectile has no timed fuse")
 	_expect(is_equal_approx(projectile.blast_radius, 39.0), "plasma bomb system owns blast radius")
 	_expect(is_equal_approx(projectile.damage_radius_margin, 7.0), "plasma bomb system owns damage radius margin")
 	_expect(is_equal_approx(projectile.get_damage_radius(), 46.0), "plasma bomb adds margin to its damage radius")

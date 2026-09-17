@@ -21,8 +21,8 @@ Menu (ui_accept)
 
 ## Menu (`menus/menu.tscn`)
 
-- 타이틀 표시: **Galaxy Mayhem**
-- `ui_accept` → `World` PackedScene으로 전환
+- 타이틀 표시: **갤럭시 메이헴**
+- 메뉴 진입 시 World를 비동기로 미리 로드한다. `ui_accept`로 시작을 요청하고 로딩이 끝나면 전환하며, 대기 중 준비 상태·진행률을 표시한다.
 
 ## World (`world.tscn` / `world.gd`)
 
@@ -32,7 +32,7 @@ Menu (ui_accept)
 
 | 구역 | 내용 |
 |------|------|
-| **왼쪽** | 타이틀 → 점수 → XP·Threat 바 → 선체·실드(미충전 시 실드 게이지) → 그 아래가 전장 뷰포트 안내 |
+| **왼쪽** | 타이틀 → 점수 → XP·STAGE 진행 바 → 선체·실드(미충전 시 실드 게이지) → 그 아래가 전장 뷰포트 안내 |
 | **중앙** | 플레이필드 `240×360` — 함선·적·탄·배경이 여기서 움직임 |
 | **오른쪽 STATUS** | 위: 함선 시설(5×3 범용 육각 슬롯, 호버 시 상세) · 아래: 장착 무기·모듈 벌집(클릭/호버로 포커스, 설명은 말줄임·패널 크기 고정) |
 
@@ -49,6 +49,10 @@ Menu (ui_accept)
 | 네온 글로우 | 월드 환경(블룸) — [이펙트](effects.md) |
 
 코드/씬 노드 이름(`Ship`, `EnemyGenerator`, `AugmentOfferController` 등)은 구현·디버그용이다. **기획서를 읽을 때는 위 역할 표를 우선**하고, 상세 동작은 플레이어·오그먼트·페이싱 문서로 간다.
+
+### 마스터 볼륨
+
+World 왼쪽 패널에 MasterVolumeControl을 표시한다. 슬라이더는 Master 버스에 즉시 적용되고 0이면 음소거한다. user://settings.cfg에 저장하며 일시정지 중에도 조절할 수 있다.
 
 ### 라이프사이클
 
@@ -67,7 +71,7 @@ Menu (ui_accept)
 
 1. 적 사망 시 경험치 오브 드롭 → 플레이어 접촉 시 경험치 획득
 2. XP가 요구량을 채워도 **자동으로 열리지 않음**. `open_augment_offer`(**C**)로 PLAYER 오퍼 요청 · 오퍼 UI가 이미 열려 있으면 XP 미소모
-3. 플레이 시간 60초 경과 → 다음 Threat 엘리트 1기 소환. 현재 Threat는 유지하고 일반 Encounter와 다음 Threat 타이머는 정지
+3. 시퀀스 ELITE 스텝 → 다음 Threat 엘리트 1기 소환. 현재 Threat는 유지하고 일반 Encounter와 시퀀스는 대기한다. Director 미사용 시에만 60초 타이머로 요청한다.
 4. 엘리트 처치 → 즉시 pause → 모든 `enemy_projectiles`를 탄 위치의 XP 1 오브로 변환. 기존 XP와 엘리트 확정 드롭도 함께 플레이어에게 강제 흡수하며 이 동안 `C` 플레이어 오퍼 입력을 잠금
 5. 모든 XP의 실제 정산 완료 → Threat 상승 → ENEMY 오퍼 요청. pause 소유권을 오퍼에 그대로 인계
 6. `AugmentOfferController.request_offer(type)` → `offer_started(type)` → pause. 강화 분기점 인트로는 PLAYER 청색 / ENEMY 적색 테마로 구분
@@ -75,7 +79,7 @@ Menu (ui_accept)
 8. 시설 카드 → 범용 빈 슬롯 설치(가득 차면 전체 슬롯 교체 모달). 무기 Kind(획득·모듈 강화) → 로드아웃에 직접 적용(만석 획득은 베이 교체 UI). `범용 슬롯 +1`은 Kind와 무관하게 선택 가능(포커스/호버 → 다음 육각 칸 점멸, 선택 → 용량 +1; 시작 5, 최대 15면 비활성)
 9. ENEMY 오퍼는 기존 3지선다 선택 → registry 반영
 10. **PLAYER 오퍼 종료 직후** 함선 주변 `enemy_projectiles` 제거 + `augment_resume_burst` VFX (`player_resume_clear_radius` 기본 36)
-11. unpause → `offer_completed(type)`. ENEMY 오퍼였다면 일반 Encounter와 새 60초 타이머 재개
+11. unpause → `offer_completed(type)`. ENEMY 오퍼였다면 게이트를 닫고 시퀀스 진행 재개 (Director 미사용 시에만 일반 스폰·새 60초 타이머 재개)
 12. 대기 중인 오퍼가 있으면 deferred로 재요청
 
 ---
@@ -94,13 +98,3 @@ Menu (ui_accept)
 - 방향 입력과 확인만으로 선택·교체를 완료하고 모달 복귀 시 유효 포커스를 복원한다.
 
 검증 참고: `tests/pause_smoke_test.gd`. Godot 실행은 `tools/run-godot.cmd`를 사용한다.
-
-## 변경 이력
-
-- 2026-09-15: Threat Monitor Lab 좌우 패널 여백·간격을 줄여 640×360 안에 맞추고 위아래 잘림 제거.
-- 2026-09-13: 주제별 통합 기획서로 이전하고 문서 링크·구현 기준 정리.
-
-
-| 날짜 | 변경 |
-|------|------|
-| 2026-08-30 | World「런타임 트리」식별자 나열 → 화면 구역·역할 표로 교체 |

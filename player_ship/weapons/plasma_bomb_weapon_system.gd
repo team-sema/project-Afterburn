@@ -4,7 +4,6 @@ extends WeaponSystem
 @export_range(0.02, 10.0, 0.01) var base_fire_interval := 2.2
 @export_range(1, 200, 1) var base_damage := 24
 @export_range(1.0, 200.0, 1.0) var projectile_speed := 38.0
-@export_range(0.05, 10.0, 0.05) var fuse_time := 1.25
 @export_range(4.0, 120.0, 1.0) var blast_radius := 34.0
 @export_range(0.0, 64.0, 1.0) var damage_radius_margin := 0.0
 @export_range(10.0, 400.0, 1.0) var pull_strength := 240.0
@@ -75,7 +74,7 @@ func _configure_projectile(projectile: Node) -> void:
 	projectile.call(
 		"configure_bomb",
 		projectile_speed,
-		fuse_time,
+		0.0,
 		radius,
 		damage_radius_margin,
 		damage,

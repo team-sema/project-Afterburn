@@ -30,6 +30,7 @@ func _run() -> void:
 		var instance := (load(path) as PackedScene).instantiate()
 		if instance is PlasmaBombProjectile:
 			(instance as PlasmaBombProjectile).configure_bomb(1.0, 1.0, 24.0, 0.0, 1)
+			(instance as PlasmaBombProjectile).position = Vector2(120, 180)
 		instances.append(instance)
 		var visual := _find_visual(instance)
 		_expect(visual != null, "%s has a render visual" % path)
