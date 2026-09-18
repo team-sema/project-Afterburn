@@ -7,14 +7,18 @@ func _initialize() -> void:
 
 func _run() -> void:
 	var failures: PackedStringArray = []
+	var world := Node2D.new()
+	world.add_to_group("gameplay_world")
+	root.add_child(world)
+	var registry := EnemyAugmentRegistry.new()
 	var scene: PackedScene = load("res://enemies/shooting_enemy.tscn")
 	var enemy: Node2D = scene.instantiate() as Node2D
-	enemy.set("augment_registry", EnemyAugmentRegistry.new())
-	root.add_child(enemy)
+	enemy.set("augment_registry", registry)
+	world.add_child(enemy)
 	enemy.global_position = Vector2(100, -16)
 
-	if enemy.get_node_or_null("EnemyShootComponent") != null:
-		failures.append("caster should remove EnemyShootComponent")
+	if enemy.get_node_or_null("RadialBarrageShootComponent") != null:
+		failures.append("caster should remove RadialBarrageShootComponent")
 	if enemy.get_node_or_null("StateMachine") != null:
 		failures.append("caster should remove StateMachine")
 	var stats: StatsComponent = enemy.get_node("StatsComponent") as StatsComponent
@@ -22,7 +26,7 @@ func _run() -> void:
 		failures.append("caster health should be raised")
 
 	var movement := enemy.get_node_or_null("MovementController") as MovementController
-	var barrage: Node = enemy.get_node_or_null("RadialBarrageShootComponent")
+	var barrage := enemy.get_node_or_null("EnemyShootComponent") as EnemyShootComponent
 	if movement == null or barrage == null:
 		failures.append("missing movement/barrage components")
 	if enemy.get_node_or_null("CasterHoverComponent") != null:
@@ -47,7 +51,11 @@ func _run() -> void:
 	if absf(enemy.global_position.x - x_at_hover) < 2.0:
 		failures.append("caster should patrol horizontally after entering")
 
-	enemy.queue_free()
+	if barrage != null and not barrage.pattern_error.is_empty():
+		failures.append(barrage.pattern_error)
+	world.queue_free()
+	await process_frame
+	registry.free()
 	if failures.is_empty():
 		print("caster_top_orb_barrage_smoke_test: OK")
 		quit(0)

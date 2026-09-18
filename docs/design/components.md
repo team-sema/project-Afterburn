@@ -16,7 +16,7 @@
 | `ForwardAttackRunMovementStep` | 목표 방향으로 회전한 뒤 local forward 축으로만 고속 이동. clamp·bounce·strafe 없음 |
 | `FormationSlot` / `FormationLayout` | 에디터에서 배치하는 명시적 슬롯과 검증·미리보기 전용 편대 모양 Scene |
 | `FormationController` | Scene 기반 슬롯 매핑, 단일 편대 중앙 이동, 멤버 위치·이탈·해제 후 개별 Sequence 전환 |
-| `RadialBarrageShootComponent` | 원형 다연발 링 탄막 |
+| `EnemyShootComponent.pattern_script` | 일반 조준 연발·Caster 링을 BarragePlayer로 실행 |
 | `BombProximityFuseComponent` | 근접 신관 → 적색 점멸 → 자폭. 판정·VFX·반투명 프리뷰가 동일 radius 사용 |
 | `BombBlastPreview` | Bomb 신관 무장 중 자폭 판정 범위를 옅은 원과 외곽선으로 표시 |
 
@@ -85,7 +85,7 @@
 | `EnemyAugmentGrantComponent` | 수동으로 적 오그먼트 grant *(씬 미연결)* |
 | `TargetingComponent` | `"player"` 그룹 타깃 |
 | `EnemyShootComponent` | 적 기본 조준 사격 · `fire_interval` + **`burst_count`/`burst_interval`** 연발 · 선택적 actor-forward 발사와 VisibleRect 진입 기반 제한 사격 창 · `apply_shot_threshold` 사용 시 Registry의 공통 Y 안전선 아래 발사 차단 · 기본 탄 `base_enemy_projectile` |
-| `RadialBarrageShootComponent` | Caster 원형 다연발 탄막 |
+| `EnemyShootComponent.pattern_script` | Caster 원형 다연발 탄막도 공통 패턴 경로 사용 |
 | `SniperAttackComponent` | 스나이퍼 이중선 조준·완전 조준 유지 · 고속탄 발사·반동 · 쿨다운 반복 |
 | `SniperAimCone` | 스나이퍼 조준 이중선 텔레그래프 `_draw` |
 | `HoldPositionMovementStep` | 위치 고정(무한) MovementStep |

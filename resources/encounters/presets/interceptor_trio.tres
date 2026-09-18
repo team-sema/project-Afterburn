@@ -4,7 +4,7 @@
 [ext_resource type="Script" uid="uid://cbtt1l1ekmuxi" path="res://resources/encounters/encounter_member.gd" id="2_member"]
 [ext_resource type="PackedScene" path="res://formations/layouts/v3_formation.tscn" id="3_layout"]
 [ext_resource type="Resource" uid="uid://d25arqhr5or0w" path="res://resources/enemy_movement/sequences/interceptor_attack_run.tres" id="4_movement"]
-[ext_resource type="PackedScene" path="res://enemies/interceptor_enemy.tscn" id="5_interceptor"]
+[ext_resource type="PackedScene" uid="uid://do68rrbgcm4pu" path="res://enemies/interceptor_enemy.tscn" id="5_interceptor"]
 
 [sub_resource type="Resource" id="Member_point"]
 script = ExtResource("2_member")

@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="BarrageShot" format=3]
+
+[ext_resource type="Script" path="res://projectiles/barrage_shot.gd" id="1"]
+[ext_resource type="Resource" path="res://resources/projectiles/needle.tres" id="2"]
+[ext_resource type="Resource" path="res://resources/projectiles/straight_behavior.tres" id="3"]
+[ext_resource type="Resource" path="res://resources/projectiles/diamond_trail.tres" id="4"]
+
+[resource]
+script = ExtResource("1")
+appearance = ExtResource("2")
+behavior = ExtResource("3")
+trail_effect = ExtResource("4")
+lifetime = 8.0

@@ -3,6 +3,7 @@
 [ext_resource type="PackedScene" uid="uid://psmpwiapllcb" path="res://enemies/enemy.tscn" id="1_i7e5m"]
 [ext_resource type="Texture2D" uid="uid://cqo8ule6bvype" path="res://assets/svg/enemy_striker.svg" id="3_2nfdr"]
 [ext_resource type="Resource" path="res://resources/enemy_movement/sequences/striker_entry_patrol.tres" id="4_movement"]
+[ext_resource type="Script" path="res://patterns/aimed_burst_pattern.gd" id="5_pattern"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_7jo6o"]
 size = Vector2(16, 8)
@@ -40,11 +41,9 @@ shape = SubResource("RectangleShape2D_shxo4")
 adjust_amount = 10
 
 [node name="EnemyShootComponent" parent="." index="16" unique_id=1768565056]
-fire_interval = 4.5
-burst_count = 2
-projectile_speed = 80.0
-shot_count = 5
-spread_degrees = 15.0
+pattern_script = ExtResource("5_pattern")
+pattern_fire_volume_boost = true
+pattern_params = {"ways": 5, "spread": 15.0, "shots": 2, "gap": 0.15, "rest": 4.5, "speed": 80.0}
 initial_delay = 1.5
 apply_shot_threshold = true
 

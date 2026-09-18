@@ -1,12 +1,10 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=2 format=3]
 
 [ext_resource type="Script" path="res://components/sniper_attack_component.gd" id="1_script"]
-[ext_resource type="PackedScene" path="res://projectiles/sniper_bullet.tscn" id="2_bullet"]
 
 [node name="SniperAttackComponent" type="Node" node_paths=PackedStringArray("aim_cone")]
 script = ExtResource("1_script")
 aim_cone = NodePath("../SniperAimCone")
-projectile_scene = ExtResource("2_bullet")
 aim_duration = 4.0
 focus_hold_duration = 0.18
 shot_recovery_duration = 0.1

@@ -5,10 +5,7 @@ extends Enemy
 
 
 func _enter_tree() -> void:
-	# Replace baseline aimed fire + old dive state machine.
-	var shoot := get_node_or_null("EnemyShootComponent")
-	if shoot != null:
-		shoot.free()
+	# Keep common pattern fire; remove only the obsolete dive state machine.
 	var state_machine := get_node_or_null("StateMachine")
 	if state_machine != null:
 		state_machine.free()

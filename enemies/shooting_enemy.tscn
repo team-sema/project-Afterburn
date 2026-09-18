@@ -3,8 +3,8 @@
 [ext_resource type="PackedScene" uid="uid://psmpwiapllcb" path="res://enemies/enemy.tscn" id="1_7jykc"]
 [ext_resource type="Script" uid="uid://duumbl2eoy0ot" path="res://enemies/shooting_enemy.gd" id="2_bxlr2"]
 [ext_resource type="Texture2D" uid="uid://cjhfuwqq2ffkl" path="res://assets/svg/enemy_caster.svg" id="3_gb8yh"]
-[ext_resource type="Resource" path="res://resources/enemy_movement/sequences/caster_entry_patrol.tres" id="4_movement"]
-[ext_resource type="PackedScene" path="res://components/radial_barrage_shoot_component.tscn" id="5_barrage"]
+[ext_resource type="Resource" uid="uid://b2k4anav4hxi4" path="res://resources/enemy_movement/sequences/caster_entry_patrol.tres" id="4_movement"]
+[ext_resource type="Script" uid="uid://bwl4d88rgyrqr" path="res://patterns/caster_pattern.gd" id="5_barrage"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_7jo6o"]
 size = Vector2(16, 16)
@@ -27,10 +27,10 @@ texture = ExtResource("3_gb8yh")
 [node name="StatsComponent" parent="." index="1" unique_id=1304120856]
 health = 110
 
-[node name="MovementController" parent="."]
+[node name="MovementController" parent="." index="3"]
 sequence = ExtResource("4_movement")
 
-[node name="VisibleOnScreenNotifier2D" parent="." index="3" unique_id=1344806211]
+[node name="VisibleOnScreenNotifier2D" parent="." index="4" unique_id=1344806211]
 rect = Rect2(-9, -9, 18, 18)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="HurtboxComponent" parent_id_path=PackedInt32Array(863455394) index="0" unique_id=1535794178]
@@ -39,9 +39,17 @@ shape = SubResource("RectangleShape2D_7jo6o")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="HitboxComponent" parent_id_path=PackedInt32Array(486674932) index="0" unique_id=823329422]
 shape = SubResource("RectangleShape2D_psv4m")
 
-[node name="ScoreComponent" parent="." index="12" unique_id=1849553207]
+[node name="ScoreComponent" parent="." index="13" unique_id=1849553207]
 adjust_amount = 25
 
-[node name="RadialBarrageShootComponent" parent="." index="20" unique_id=1609255132 instance=ExtResource("5_barrage")]
-pellets_per_ring = 16
-fire_interval = 4.8
+[node name="EnemyShootComponent" parent="." index="16" unique_id=1768565056]
+pattern_script = ExtResource("5_barrage")
+pattern_params = {
+"count": 16,
+"gap": 0.1,
+"rest": 4.8,
+"rings": 5,
+"speed": 95.0,
+"spin": 7.0
+}
+initial_delay = 1.2
