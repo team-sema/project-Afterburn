@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3]
+[gd_scene load_steps=15 format=3]
 
 [ext_resource type="Script" path="res://projectiles/plasma_bomb_projectile.gd" id="1_script"]
 [ext_resource type="PackedScene" path="res://effects/explosion_effect.tscn" id="2_explosion"]
@@ -10,6 +10,7 @@
 [ext_resource type="Material" path="res://effects/tight_glow_material.tres" id="8_tight"]
 [ext_resource type="Material" path="res://effects/core_unshaded_material.tres" id="9_core"]
 [ext_resource type="Material" path="res://effects/additive_unshaded_material.tres" id="10_add"]
+[ext_resource type="Script" path="res://components/overcharge_visual_component.gd" id="11_overcharge"]
 
 [sub_resource type="Gradient" id="Gradient_trail"]
 offsets = PackedFloat32Array(0, 0.45, 1)
@@ -72,3 +73,6 @@ process_material = SubResource("ParticleProcessMaterial_trail")
 
 [node name="FuseTimer" type="Timer" parent="."]
 one_shot = true
+
+[node name="OverchargeVisualComponent" type="Node" parent="."]
+script = ExtResource("11_overcharge")

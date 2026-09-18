@@ -42,7 +42,7 @@ const NAV = [
     children: [
       {
         id: "enemies",
-        title: "적",
+        title: "일반 적",
         desc: "유닛 개요",
         file: "enemies/index.md",
         children: [
@@ -58,12 +58,18 @@ const NAV = [
           { id: "enemies/tanker", title: "Tanker", file: "enemies/tanker.md" },
           { id: "enemies/caster", title: "Caster", file: "enemies/caster.md" },
           { id: "enemies/sniper", title: "Sniper", file: "enemies/sniper.md" },
-          {
-            id: "enemies/elite-fighter",
-            title: "Elite Fighter",
-            file: "enemies/elite-fighter.md",
-          },
-          { id: "enemies/elite-awl", title: "Elite Awl", file: "enemies/elite-awl.md" },
+        ],
+      },
+      {
+        id: "elites",
+        title: "엘리트",
+        desc: "독립 콘텐츠 · 구현/시안 구분",
+        file: "elites/index.md",
+        children: [
+          { id: "elites/elite-fighter", title: "Elite Fighter", file: "elites/elite-fighter.md" },
+          { id: "elites/elite-awl", title: "Elite Awl", file: "elites/elite-awl.md" },
+          { id: "elites/elite-bomb", title: "Elite Bomb (시안)", file: "elites/elite-bomb.md" },
+          { id: "elites/elite-caster", title: "Elite Caster (시안)", file: "elites/elite-caster.md" },
         ],
       },
       {
@@ -255,13 +261,11 @@ const NAV = [
   },
 ];
 
-NAV.push({ group: true, title: "작업·기록", children: [
+const REFERENCE_PAGES = [
   { id: "workflow", title: "작업 방식", file: "feature-workflow.md" },
   { id: "template", title: "기획서 양식", file: "template.md" },
   { id: "ideas", title: "증강 아이디어", file: "augment-todo.md" },
-  { id: "tasks", title: "작업 체크리스트", file: "tasks/README.md" },
-  { id: "history", title: "과거 변경 이력", file: "history/README.md" }
-] });
+];
 /** Flat id → page meta */
 const PAGES = (() => {
   const map = new Map();
@@ -274,19 +278,23 @@ const PAGES = (() => {
     if (entry.group) entry.children.forEach(add);
     else add(entry);
   }
+  REFERENCE_PAGES.forEach(add);
   // legacy hash #enemies used to mean enemies.md
   map.set("enemies-legacy", {
     id: "enemies-legacy",
     title: "적 (리다이렉트)",
     file: "enemies.md",
   });
-  for (const page of [{"id":"tasks/weapon-augment-acquisition-tasks","file":"tasks/weapon-augment-acquisition-tasks.md","title":"Tasks: weapon-augment-acquisition"},{"id":"tasks/augment-selection-carousel-tasks","file":"tasks/augment-selection-carousel-tasks.md","title":"Tasks: augment-selection-carousel"},{"id":"tasks/bomb-proximity-fuse-tasks","file":"tasks/bomb-proximity-fuse-tasks.md","title":"Tasks: bomb-proximity-fuse"},{"id":"tasks/facility-own-effects-tasks","file":"tasks/facility-own-effects-tasks.md","title":"Tasks: facility-own-effects"},{"id":"tasks/orbital-barrier-one-hit-tasks","file":"tasks/orbital-barrier-one-hit-tasks.md","title":"Tasks: orbital-barrier-one-hit"},{"id":"tasks/offer-category-mix-tasks","file":"tasks/offer-category-mix-tasks.md","title":"Tasks: offer-category-mix"},{"id":"tasks/weapon-replace-delete-reroll-tasks","file":"tasks/weapon-replace-delete-reroll-tasks.md","title":"Tasks: weapon-replace-delete-reroll"},{"id":"tasks/readme-docs-links-tasks","file":"tasks/readme-docs-links-tasks.md","title":"Task: README에 스펙·칸반 링크"},{"id":"tasks/fix-formation-viewport-before-tree-tasks","file":"tasks/fix-formation-viewport-before-tree-tasks.md","title":"Tasks — fix-formation-viewport-before-tree"},{"id":"tasks/tanker-hit-feedback-tasks","file":"tasks/tanker-hit-feedback-tasks.md","title":"tanker-hit-feedback tasks"},{"id":"tasks/unified-weapon-system-tasks","file":"tasks/unified-weapon-system-tasks.md","title":"Tasks: unified-weapon-system"},{"id":"tasks/docs-site-kanban-tasks","file":"tasks/docs-site-kanban-tasks.md","title":"Task: docs 사이트 · 칸반 · 워크플로 이식"},{"id":"tasks/early-game-pacing-tasks","file":"tasks/early-game-pacing-tasks.md","title":"Tasks: early-game-pacing"},{"id":"tasks/weapon-status-focus-detail-tasks","file":"tasks/weapon-status-focus-detail-tasks.md","title":"Tasks — weapon-status-focus-detail"},{"id":"tasks/early-enemy-fire-tuning-tasks","file":"tasks/early-enemy-fire-tuning-tasks.md","title":"Tasks — early-enemy-fire-tuning"},{"id":"tasks/weapon-stats-spec-only-tasks","file":"tasks/weapon-stats-spec-only-tasks.md","title":"Tasks: weapon-stats-spec-only"},{"id":"tasks/submission-copy-ko-tasks","file":"tasks/submission-copy-ko-tasks.md","title":"submission-copy-ko Task"},{"id":"tasks/submission-ai-usage-copy-tasks","file":"tasks/submission-ai-usage-copy-tasks.md","title":"submission-ai-usage-copy Task"},{"id":"tasks/laser-refraction-vfx-tasks","file":"tasks/laser-refraction-vfx-tasks.md","title":"Tasks: laser-refraction-vfx"},{"id":"tasks/weapon-module-levels-tasks","file":"tasks/weapon-module-levels-tasks.md","title":"Tasks: weapon-module-levels"},{"id":"tasks/bomb-formation-escorts-tasks","file":"tasks/bomb-formation-escorts-tasks.md","title":"bomb-formation-escorts tasks"},{"id":"tasks/striker-drone-diamond-tasks","file":"tasks/striker-drone-diamond-tasks.md","title":"Tasks: striker-drone-diamond"},{"id":"tasks/diamond-formation-sizes-tasks","file":"tasks/diamond-formation-sizes-tasks.md","title":"diamond-formation-sizes tasks"},{"id":"tasks/shield-regen-tasks","file":"tasks/shield-regen-tasks.md","title":"Tasks: shield-regen"},{"id":"tasks/docs-consistency-audit-tasks","file":"tasks/docs-consistency-audit-tasks.md","title":"docs-consistency-audit Task"},{"id":"tasks/elite-combat-patterns-tasks","file":"tasks/elite-combat-patterns-tasks.md","title":"엘리트 전투 패턴 개선 AC"},{"id":"tasks/augment-test-lab-tasks","file":"tasks/augment-test-lab-tasks.md","title":"통합 증강 테스트 랩 Tasks"},{"id":"tasks/player-augment-tiers-tasks","file":"tasks/player-augment-tiers-tasks.md","title":"Tasks: player-augment-tiers"},{"id":"tasks/support-cannon-drones-tasks","file":"tasks/support-cannon-drones-tasks.md","title":"보조 캐넌 옵션 드론 Task"},{"id":"tasks/sniper-enemy-tasks","file":"tasks/sniper-enemy-tasks.md","title":"Sniper Enemy Tasks"},{"id":"tasks/threat-elite-progression-tasks","file":"tasks/threat-elite-progression-tasks.md","title":"threat-elite-progression tasks"},{"id":"tasks/spec-enemy-hierarchy-tasks","file":"tasks/spec-enemy-hierarchy-tasks.md","title":"Tasks: spec-enemy-hierarchy"},{"id":"tasks/kanban-manual-cards-tasks","file":"tasks/kanban-manual-cards-tasks.md","title":"Tasks: kanban-manual-cards"},{"id":"tasks/unified-module-slots-tasks","file":"tasks/unified-module-slots-tasks.md","title":"Tasks: unified-module-slots"},{"id":"tasks/notion-kanban-skills-tasks","file":"tasks/notion-kanban-skills-tasks.md","title":"Tasks: notion-kanban-skills"},{"id":"tasks/shield-base-one-tasks","file":"tasks/shield-base-one-tasks.md","title":"Tasks: shield-base-one"},{"id":"tasks/status-ui-templates-tasks","file":"tasks/status-ui-templates-tasks.md","title":"Tasks: status-ui-templates"},{"id":"history/submission-copy-ko","file":"history/submission-copy-ko.md","title":"제출 문서 한국어 카피 정리"},{"id":"history/readme-docs-links","file":"history/readme-docs-links.md","title":"Feature: README에 스펙·칸반 링크"},{"id":"history/shield-regen","file":"history/shield-regen.md","title":"Feature: 실드 재생 · 충전 UI"},{"id":"history/augment-module-slots","file":"history/augment-module-slots.md","title":"Feature: 증강 모듈 슬롯"},{"id":"history/tanker-hit-feedback","file":"history/tanker-hit-feedback.md","title":"Tanker 피격 피드백 강화"},{"id":"history/weapon-augment-acquisition","file":"history/weapon-augment-acquisition.md","title":"Feature: 무기 증강 획득 · 필드 드롭 제거"},{"id":"history/kanban-manual-cards","file":"history/kanban-manual-cards.md","title":"Feature: 칸반 카드 수동 관리"},{"id":"history/offer-category-mix","file":"history/offer-category-mix.md","title":"오퍼 범주 혼합 (획득 / 모듈 / 시설)"},{"id":"history/status-ui-templates","file":"history/status-ui-templates.md","title":"Feature: STATUS HUD UI 템플릿 플레이스홀더"},{"id":"history/early-enemy-fire-tuning","file":"history/early-enemy-fire-tuning.md","title":"초반 적 사격 완화"},{"id":"history/facility-weapon-modules","file":"history/facility-weapon-modules.md","title":"시설 모듈 효과 (FacilityModuleEffect)"},{"id":"history/kanban-v2","file":"history/kanban-v2.md","title":"백로그 칸반 (v2)"},{"id":"history/unified-weapon-system","file":"history/unified-weapon-system.md","title":"Feature: 통합 무기 시스템"},{"id":"history/early-game-pacing","file":"history/early-game-pacing.md","title":"Feature: 초반 페이싱 조정"},{"id":"history/augment-selection-carousel","file":"history/augment-selection-carousel.md","title":"Feature: 증강 선택 캐러셀 UI"},{"id":"history/bomb-formation-escorts","file":"history/bomb-formation-escorts.md","title":"Bomb 편대 호위"},{"id":"history/weapon-status-focus-detail","file":"history/weapon-status-focus-detail.md","title":"Feature: 무기 STATUS 포커스 디테일"},{"id":"history/augment-test-lab","file":"history/augment-test-lab.md","title":"통합 증강 테스트 랩"},{"id":"history/striker-drone-diamond","file":"history/striker-drone-diamond.md","title":"Striker 드론 호위 마름모"},{"id":"history/shield-base-one","file":"history/shield-base-one.md","title":"Feature: 시작 실드 1"},{"id":"history/weapon-stats-spec-only","file":"history/weapon-stats-spec-only.md","title":"Feature: 무기 수치는 스펙만"},{"id":"history/bomb-proximity-fuse","file":"history/bomb-proximity-fuse.md","title":"Feature: 폭탄 근접 자폭"},{"id":"history/submission-ai-usage-copy","file":"history/submission-ai-usage-copy.md","title":"제출 AI 활용 문서 퇴고"},{"id":"history/notion-kanban-skills","file":"history/notion-kanban-skills.md","title":"Feature: Notion 칸반 스킬 연동"},{"id":"history/orbital-barrier-one-hit","file":"history/orbital-barrier-one-hit.md","title":"Feature: 궤도 방벽 적당 1회 피해"},{"id":"history/weapon-module-levels","file":"history/weapon-module-levels.md","title":"Feature: 무기 모듈 레벨 개편"},{"id":"history/laser-refraction-vfx","file":"history/laser-refraction-vfx.md","title":"Feature: 레이저 굴절빔 VFX"},{"id":"history/unified-module-slots","file":"history/unified-module-slots.md","title":"Feature: 범용 모듈 슬롯 통합"},{"id":"history/threat-elite-boss-loop","file":"history/threat-elite-boss-loop.md","title":"Threat 엘리트 · 보스 진행 루프 (초안)"},{"id":"history/fix-formation-viewport-before-tree","file":"history/fix-formation-viewport-before-tree.md","title":"Drone 편대 viewport 트리 가드"},{"id":"history/elite-combat-patterns","file":"history/elite-combat-patterns.md","title":"엘리트 전투 패턴 개선"},{"id":"history/weapon-replace-delete-reroll","file":"history/weapon-replace-delete-reroll.md","title":"Feature: 무기 교체 삭제 · 증강 리롤"},{"id":"history/sniper-enemy","file":"history/sniper-enemy.md","title":"Sniper 저격 적기"},{"id":"history/kanban-agent-prompt-copy","file":"history/kanban-agent-prompt-copy.md","title":"칸반 에이전트 프롬프트 복사"},{"id":"history/spec-enemy-hierarchy","file":"history/spec-enemy-hierarchy.md","title":"Feature: 적·진형·Encounter 스펙 계층 + Pages 가시성"},{"id":"history/diamond-formation-sizes","file":"history/diamond-formation-sizes.md","title":"다이아몬드 편대 크기 (5 / 13)"},{"id":"history/facility-own-effects","file":"history/facility-own-effects.md","title":"Feature: 시설이 효과 담당 (스탯 모듈 제거)"},{"id":"history/docs-site-kanban","file":"history/docs-site-kanban.md","title":"Feature: docs 사이트 · 칸반 · 워크플로 이식"},{"id":"history/docs-consistency-audit","file":"history/docs-consistency-audit.md","title":"문서 정합성 감사"},{"id":"history/player-augment-tiers","file":"history/player-augment-tiers.md","title":"플레이어 증강 티어 기반"},{"id":"history/support-cannon-drones","file":"history/support-cannon-drones.md","title":"보조 캐넌 옵션 드론"},{"id":"tasks/unify-design-docs-tasks","file":"tasks/unify-design-docs-tasks.md","title":"기획 문서 통합 작업"}]) map.set(page.id, page);
-  map.set('systems', { id: 'history', title: '과거 변경 이력', file: 'history/README.md' });
+  for (const page of [
+    { id: "enemies/elite-fighter", file: "enemies/elite-fighter.md", title: "Elite Fighter (이동됨)" },
+    { id: "enemies/elite-awl", file: "enemies/elite-awl.md", title: "Elite Awl (이동됨)" },
+  ]) map.set(page.id, page);
   return map;
 })();
 
 const LAYER_CHIPS = [
-  { id: "enemies", label: "① 적" },
+  { id: "enemies", label: "일반 적" },
+  { id: "elites", label: "엘리트" },
   { id: "formations", label: "② 진형" },
   { id: "encounters", label: "③ Encounter" },
   { id: "ship-modules", label: "함선 모듈" },

@@ -16,7 +16,7 @@ var speed := 0.0
 var turn_rate := 0.0
 var retarget_interval := 0.0
 
-var _weapon: WeaponSystem
+var _damage_snapshot: Dictionary = {}
 var _base_damage := 1
 var _aoe_radius := 0.0
 var _aoe_mult := 1.0
@@ -46,7 +46,7 @@ func configure_missile_combat(
 	terminal_max: float,
 	terminal_full_time: float,
 ) -> void:
-	_weapon = weapon
+	_damage_snapshot = weapon.get_projectile_damage_snapshot() if weapon != null else {}
 	_base_damage = maxi(1, base_damage)
 	_aoe_radius = maxf(0.0, aoe_radius)
 	_aoe_mult = maxf(0.0, aoe_mult)
@@ -64,7 +64,7 @@ func _ready() -> void:
 	flash_component.flash()
 	hitbox_component.hit_hurtbox.connect(_on_hit_hurtbox)
 	_acquire_target()
-	if _pending_configure or _weapon != null:
+	if _pending_configure:
 		_apply_damage_resolver()
 
 
@@ -111,9 +111,7 @@ func _apply_damage_resolver() -> void:
 		return
 	hitbox.damage_resolver = func(hurtbox: HurtboxComponent) -> int:
 		var raw := maxi(1, roundi(float(_base_damage) * _terminal_mult()))
-		if _weapon != null:
-			return _weapon.resolve_hit_damage(raw, hurtbox)
-		return raw
+		return WeaponSystem.resolve_projectile_snapshot_damage(raw, hurtbox, _damage_snapshot)
 	hitbox.damage = maxi(1, roundi(float(_base_damage) * _terminal_mult()))
 	_pending_configure = false
 
@@ -145,10 +143,11 @@ func _deal_aoe(exclude_hurtbox: HurtboxComponent) -> void:
 		var other := collider as HurtboxComponent
 		if other == exclude_hurtbox or other.is_invincible:
 			continue
-		if _weapon != null:
-			hitbox.damage = _weapon.resolve_hit_damage(aoe_damage, other)
-		else:
-			hitbox.damage = aoe_damage
+		hitbox.damage = WeaponSystem.resolve_projectile_snapshot_damage(
+			aoe_damage,
+			other,
+			_damage_snapshot,
+		)
 		other.hurt.emit(hitbox)
 	hitbox.free()
 

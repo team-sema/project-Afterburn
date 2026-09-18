@@ -1,7 +1,9 @@
-# 적
+# 일반 적
 
 각 적의 의도·역할·확정 규칙은 아래 상세 문서에서 함께 읽는다.
 진형 → [formations](../formations/index.md) · 조합 → [encounters](../encounters/index.md) · 언제 → [run-pacing](../run-pacing.md).
+
+엘리트는 독립된 [엘리트 목록](../elites/index.md)에서 관리한다.
 
 ## 타입 요약
 
@@ -14,9 +16,7 @@
 | Interceptor | 주황 네온 화살촉 | 1 | `interceptor_enemy.tscn` | 50 | 5 | [interceptor](interceptor.md) |
 | Tanker | 청백 가드 + 횡 실드 | 2 | `tanker_enemy.tscn` | 본체 35 · 실드 1000 | 5 | [tanker](tanker.md) |
 | Pink / Caster | 육각·크리스탈형 | 3 | `shooting_enemy.tscn` | 110 | 25 | [caster](caster.md) |
-| Sniper | 가느다란 창형 | 3 | `sniper_enemy.tscn` | 95 | 25 | [sniper](sniper.md) |
-| Elite Fighter | 대형 다익 포격기 | (타임 게이트) | `elite_fighter.tscn` | Threat 공식 | 40 | [elite-fighter](elite-fighter.md) |
-| Elite Awl | 대형 관통 용골 | (교대 타임 게이트) | `elite_awl.tscn` | Threat 공식 | 40 | [elite-awl](elite-awl.md) |
+| Sniper | 가느다란 창형 | 2 | `sniper_enemy.tscn` | 95 | 25 | [sniper](sniper.md) |
 
 스프라이트는 흰 마스크 SVG를 네온 글로우 레이어로 칠해 쓴다. 상세 문서의 **외형** 절에 미리보기와 설명이 있다.
 
@@ -48,12 +48,3 @@ HEALTH / MOVE_SPEED / ACTION_RATE (+ `EnemyShootComponent` / `SniperAttackCompon
 - [Tanker](tanker.md)
 - [Caster](caster.md)
 - [Sniper](sniper.md)
-- [Elite Fighter](elite-fighter.md)
-- [Elite Awl](elite-awl.md)
-
-## 변경 이력
-
-- 2026-09-15: 타입 요약·하위에 누락됐던 Tanker를 복구.
-- 2026-09-14: 타입 요약에 외형 한 줄 · 상세 문서 스프라이트 미리보기 추가.
-- 2026-09-13: 주제별 통합 기획서로 이전하고 문서 링크·구현 기준 정리.
-- 2026-09-07: 돌격형 Elite Awl 및 교대 엘리트 로스터 추가.

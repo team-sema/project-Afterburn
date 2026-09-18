@@ -41,7 +41,7 @@
 | `ExperienceDropComponent` | 적 사망 시 경험치 오브 스폰 |
 | XP drop tuning | 일반 적 XP 오브 드롭 확률은 0.45, 엘리트는 1.0 |
 | `ExperienceCollectorComponent` | 플레이어 XP 수집 반경 제공 |
-| `ExperienceOrb` | 드롭 후 아래로 이동하며, 기본 낙하 속도는 플레이어 기본 이동 속도의 절반인 70px/s. 강제 흡수 시 반경·넉백을 건너뛰고 일시정지 중에도 플레이어에게 이동 |
+| `ExperienceOrb` | 드롭 후 아래로 이동하며, 기본 낙하 속도는 플레이어 기본 이동 속도와 같은 140px/s. 강제 흡수 시 반경·넉백을 건너뛰고 일시정지 중에도 플레이어에게 이동 |
 | `BulletCancelRewardController` | 플레이필드 적탄을 1 XP 오브로 변환하고, 기존 오브와 함께 전부 실제 회수될 때까지 기다리는 엘리트 이상 공용 보상 연출 |
 | `EnemyHealthBarComponent` | 엘리트·보스급 적이 피해를 받으면 기체 위에 남은 HP를 표시하고, 마지막 피격 1.5초 후 페이드아웃 |
 
@@ -79,6 +79,7 @@
 | `PlayerAugmentApplier` | 설치된 모듈 → 이동 배수(+부스터) · 전역 연사/피해(레거시 STAT). `WEAPON_TRAIT`는 loadout trait API |
 | `ShipFacilityApplier` | `FacilityModuleEffect` Kind 합산 → 무기 피해·보스 피해·이동·선체·수집·실드·XP·충전속도 · 버프/부스터 컨트롤러 refresh |
 | `ShipCombatBuffController` | 과충전(주기) · 비상 출력(선체 피격) → temp 피해 배율 |
+| `OverchargeVisualComponent` | 과충전 중 탄/지속 무기 시각을 붉은 틴트로 표시. 탄은 발사 시점 고정, 레이저·궤도 방벽은 실시간 |
 | `EngineBoostComponent` | `engine_boost`(Shift) 액티브 이속 버프 · 쿨다운 시그널 |
 | `EnemyModifierFactory` | 스폰 시 적 스탯·행동 컴포넌트 적용 |
 | `EnemyAugmentGrantComponent` | 수동으로 적 오그먼트 grant *(씬 미연결)* |

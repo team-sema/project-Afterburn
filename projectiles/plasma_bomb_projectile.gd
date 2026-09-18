@@ -4,6 +4,7 @@ extends Node2D
 signal detonated(hit_count: int)
 
 const ENEMY_HURTBOX_MASK := 1 << 1
+const CONTACT_RADIUS := 4.0
 
 @export var explosion_effect_scene: PackedScene
 @export var explosion_color := Color(0.35, 0.9, 1.0, 1.0)
@@ -40,7 +41,8 @@ func configure_bomb(
 	configured_damage: int,
 ) -> void:
 	flight_speed = maxf(1.0, configured_speed)
-	fuse_time = maxf(0.05, configured_fuse_time)
+	# Zero disables the fuse; only cluster children use a timed detonation.
+	fuse_time = maxf(0.0, configured_fuse_time)
 	blast_radius = maxf(4.0, configured_blast_radius)
 	damage_radius_margin = maxf(0.0, configured_damage_radius_margin)
 	blast_damage = maxi(1, configured_damage)
@@ -90,19 +92,64 @@ func get_damage_radius() -> float:
 
 func _ready() -> void:
 	assert(explosion_effect_scene != null, "PlasmaBombProjectile requires an explosion effect scene.")
-	fuse_timer.wait_time = fuse_time
-	fuse_timer.timeout.connect(_detonate)
-	fuse_timer.start()
+	if fuse_time > 0.0:
+		fuse_timer.wait_time = fuse_time
+		fuse_timer.timeout.connect(_detonate)
+		fuse_timer.start()
 
 
 func _process(delta: float) -> void:
 	if _detonated:
 		return
 	_elapsed += delta
-	global_position += flight_direction * flight_speed * delta
 	visual.rotation += delta * 1.4
 	var pulse := 1.0 + sin(_elapsed * TAU * 3.0) * 0.08
 	visual.scale = Vector2.ONE * pulse
+
+
+func _physics_process(delta: float) -> void:
+	if _detonated:
+		return
+	var bounds := get_canvas_transform().affine_inverse() * get_viewport_rect()
+	var start := global_position
+	if not bounds.has_point(start):
+		global_position = start.clamp(bounds.position, bounds.end)
+		_detonate()
+		return
+	var motion := flight_direction * flight_speed * delta
+	var boundary_fraction := 1.0
+	for axis in 2:
+		if motion[axis] > 0.0:
+			boundary_fraction = minf(boundary_fraction, (bounds.end[axis] - start[axis]) / motion[axis])
+		elif motion[axis] < 0.0:
+			boundary_fraction = minf(boundary_fraction, (bounds.position[axis] - start[axis]) / motion[axis])
+	var reaches_boundary := not bounds.has_point(start + motion) or boundary_fraction < 1.0
+	# has_point includes the top/left boundary, so check exact arrival as well.
+	var destination := start + motion * boundary_fraction
+	reaches_boundary = reaches_boundary or destination.x <= bounds.position.x or destination.y <= bounds.position.y
+
+	var shape := CircleShape2D.new()
+	shape.radius = CONTACT_RADIUS
+	var query := PhysicsShapeQueryParameters2D.new()
+	query.shape = shape
+	query.transform = Transform2D(0.0, start)
+	query.collision_mask = ENEMY_HURTBOX_MASK
+	query.collide_with_areas = true
+	query.collide_with_bodies = false
+	var space := get_world_2d().direct_space_state
+	# cast_motion ignores initial overlaps.
+	if not space.intersect_shape(query, 1).is_empty():
+		_detonate()
+		return
+	query.motion = destination - start
+	var fractions := space.cast_motion(query)
+	if fractions[0] < 1.0:
+		global_position = start + query.motion * fractions[0]
+		_detonate()
+		return
+	global_position = destination
+	if reaches_boundary:
+		_detonate()
 
 
 func detonate_now() -> void:
@@ -113,6 +160,7 @@ func _detonate() -> void:
 	if _detonated:
 		return
 	_detonated = true
+	fuse_timer.stop()
 	if _pull_strength > 0.0:
 		_apply_gravity_pull()
 	var hit_count := _deal_blast_damage(blast_damage)
@@ -139,9 +187,20 @@ func _deal_blast_damage(damage: int) -> int:
 
 	var hitbox := HitboxComponent.new()
 	var hit_hurtboxes: Dictionary = {}
-	for result in world.direct_space_state.intersect_shape(query, 64):
+	# Gather every overlap before emitting damage: no occlusion or target cap.
+	var results: Array[Dictionary] = []
+	var excluded: Array[RID] = []
+	while true:
+		query.exclude = excluded
+		var batch := world.direct_space_state.intersect_shape(query, 64)
+		results.append_array(batch)
+		for result in batch:
+			excluded.append(result["rid"])
+		if batch.size() < 64:
+			break
+	for result in results:
 		var collider: Variant = result.get("collider")
-		if not collider is HurtboxComponent:
+		if not is_instance_valid(collider) or not collider is HurtboxComponent:
 			continue
 		var hurtbox := collider as HurtboxComponent
 		if hurtbox.is_invincible or hit_hurtboxes.has(hurtbox.get_instance_id()):
