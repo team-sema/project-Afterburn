@@ -1,10 +1,11 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=8 format=3]
 
 [ext_resource type="Script" path="res://player_ship/weapons/orbital_barrier_weapon_system.gd" id="1_script"]
 [ext_resource type="Script" path="res://components/hitbox_component.gd" id="2_hitbox"]
 [ext_resource type="Texture2D" uid="uid://djvqurciuxfie" path="res://assets/svg/radial_glow.svg" id="3_glow"]
 [ext_resource type="Material" path="res://effects/tight_glow_material.tres" id="4_mat"]
 [ext_resource type="Script" path="res://components/hurtbox_component.gd" id="5_hurtbox"]
+[ext_resource type="Script" path="res://components/overcharge_visual_component.gd" id="6_overcharge"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_seg"]
 radius = 4.0
@@ -110,3 +111,8 @@ script = ExtResource("5_hurtbox")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="OrbitRoot/Segment3/HurtboxComponent"]
 shape = SubResource("CircleShape2D_seg")
+
+[node name="OverchargeVisualComponent" type="Node" parent="."]
+script = ExtResource("6_overcharge")
+follow_buff_state_changes = true
+track_dynamic_descendants = true

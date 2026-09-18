@@ -51,8 +51,3 @@
 - 오프셋·슬롯 이름·배치 그림만 기록
 - 멤버 배치는 Encounter MD / [catalog](../encounters/catalog.md)에
 - 신규 진형 feature → 이 폴더에 페이지·SVG 추가 + `design.js` 등록 + Encounter에서 링크
-
-## 변경 이력
-
-- 2026-09-15: 레이아웃 배치 SVG와 드론 Encounter 대응 표를 카탈로그에 추가.
-- 2026-09-13: 주제별 통합 기획서로 이전.

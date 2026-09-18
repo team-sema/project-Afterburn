@@ -9,7 +9,6 @@ script = ExtResource("1_script")
 base_fire_interval = 1.2
 base_damage = 32
 projectile_speed = 66.0
-fuse_time = 1.0
 blast_radius = 32.0
 damage_radius_margin = 0.0
 
