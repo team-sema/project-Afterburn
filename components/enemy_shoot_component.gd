@@ -8,6 +8,8 @@ extends Node
 @export var pattern_script: Script
 ## Passed to the pattern's build(params) after _init(); patterns read keys with defaults.
 @export var pattern_params: Dictionary = {}
+## Opt in only for ordinary aimed patterns. Applied by spawn-time augments.
+@export var pattern_fire_volume_boost := false
 @export_group("Legacy fire (ignored when Pattern is set)")
 @export var projectile_scene: PackedScene
 ## Optional new projectile recipe for directional fire; timers and gates stay here.
@@ -55,6 +57,32 @@ var pattern_error := ""
 var _pattern: BarrageSequence
 var _pattern_summary := {"rate": 0.0, "speed": 0.0}
 var _pattern_action_rate := 1.0
+
+
+func apply_fire_volume_boost(extra_shots: int, min_spread: float) -> void:
+	if pattern_script == null:
+		shot_count = maxi(shot_count + extra_shots, 1)
+		spread_degrees = maxf(spread_degrees, min_spread)
+		return
+	if not pattern_fire_volume_boost or _pattern == null:
+		return
+	if barrage_player != null and barrage_player.running:
+		push_error("Pattern fire volume must be configured before playback starts.")
+		return
+	# Each step has its own snapshot, even when the builder reused a Volley.
+	_boost_pattern_volume(_pattern, extra_shots, min_spread)
+	_pattern_summary = _pattern.emission_summary()
+
+
+func _boost_pattern_volume(sequence: BarrageSequence, extra_shots: int, min_spread: float) -> void:
+	for step in sequence.steps:
+		if step.action != BarrageStep.Action.FIRE: continue
+		for volley in step.get_volleys():
+			if volley.layout == BarrageVolley.Layout.RING: continue
+			var count := 1 if volley.layout == BarrageVolley.Layout.SINGLE else volley.count
+			volley.layout = BarrageVolley.Layout.FAN
+			volley.count = maxi(1, count + extra_shots)
+			volley.spread_degrees = maxf(volley.spread_degrees, min_spread)
 
 
 func _ready() -> void:
@@ -323,6 +351,7 @@ func _prepare_pattern() -> void:
 		push_error(pattern_error)
 		set_process(false)
 		return
+	_pattern = _pattern.snapshot()
 	_pattern_summary = _pattern.emission_summary()
 	barrage_player = BarragePlayer.new()
 	barrage_player.name = "BarragePlayer"

@@ -31,7 +31,7 @@
 
 ## EnemyModifierFactory
 
-HEALTH / MOVE_SPEED / ACTION_RATE (+ `EnemyShootComponent` / `RadialBarrageShootComponent` / `SniperAttackComponent` 주기).
+HEALTH / MOVE_SPEED / ACTION_RATE (+ `EnemyShootComponent` / `SniperAttackComponent` 주기). Caster 링도 공통 `EnemyShootComponent`의 패턴으로 실행한다.
 
 ## 보스 플래그 (`is_boss`)
 

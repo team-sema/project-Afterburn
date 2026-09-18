@@ -25,6 +25,7 @@ shape = SubResource("CircleShape2D_7jo6o")
 
 [node name="EnemyShootComponent" parent="." index="16" unique_id=1768565056]
 pattern_script = ExtResource("2_barrage")
+pattern_fire_volume_boost = true
 fire_interval = 4.5
 projectile_speed = 105.0
 initial_delay = 1.5

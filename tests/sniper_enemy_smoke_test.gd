@@ -9,15 +9,19 @@ func _initialize() -> void:
 
 func _run() -> void:
 	var failures := PackedStringArray()
+	var world := Node2D.new()
+	world.add_to_group("gameplay_world")
+	root.add_child(world)
+	current_scene = world
 	var player := Node2D.new()
 	player.add_to_group("player")
 	player.global_position = Vector2(120.0, 280.0)
-	root.add_child(player)
+	world.add_child(player)
 
 	var enemy_scene := load("res://enemies/sniper_enemy.tscn") as PackedScene
 	var enemy := enemy_scene.instantiate() as Enemy
 	enemy.set("augment_registry", EnemyAugmentRegistry.new())
-	root.add_child(enemy)
+	world.add_child(enemy)
 	enemy.global_position = Vector2(120.0, -16.0)
 
 	if enemy.get_node_or_null("EnemyShootComponent") != null:
@@ -122,7 +126,7 @@ func _run() -> void:
 			first_bullet_dir = attack.get_aim_direction()
 			var bullet := _find_bullet()
 			if bullet != null:
-				await process_frame
+				await create_timer(0.025).timeout
 				var recoil_offset := visual_anchor.position - anchor_rest_position
 				var local_shot_direction := first_bullet_dir.rotated(-enemy.global_rotation)
 				_expect(

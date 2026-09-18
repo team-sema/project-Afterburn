@@ -47,9 +47,23 @@ func _draw() -> void:
 			var center := direction * (float(i) * 26.0 + offset)
 			draw_polyline(PackedVector2Array([center - side * 0.7, center + direction * 7.0, center + side * 0.7]), Color(1.0, 0.25, 0.42, 0.26 * strength), 1.2, true)
 	for ember in _embers:
+		var polygon := _ember_polygon(ember)
+		if polygon.is_empty():
+			continue
 		var age: float = ember.age / 0.55
-		var center := to_local(ember.position)
-		var velocity: Vector2 = ember.velocity
-		var tail := -velocity.normalized() * lerpf(9.0, 3.0, age)
-		var side := velocity.normalized().orthogonal() * float(ember.size) * (1.0 - age)
-		draw_colored_polygon(PackedVector2Array([center - tail * 0.25, center + tail + side, center + tail * 1.6, center + tail - side]), Color(1.0, lerpf(0.25, 0.08, age), lerpf(0.42, 0.2, age), 0.6 * (1.0 - age)))
+		# Keep tiny near-expiry widths out of large translated float coordinates.
+		draw_set_transform(to_local(ember.position))
+		draw_colored_polygon(polygon, Color(1.0, lerpf(0.25, 0.08, age), lerpf(0.42, 0.2, age), 0.6 * (1.0 - age)))
+	draw_set_transform(Vector2.ZERO)
+
+
+func _ember_polygon(ember: Dictionary) -> PackedVector2Array:
+	var age: float = ember.age / 0.55
+	var half_width := float(ember.size) * (1.0 - age)
+	var velocity: Vector2 = ember.velocity
+	if age < 0.0 or age >= 1.0 or half_width < 0.01 or velocity.is_zero_approx():
+		return PackedVector2Array()
+	var heading := velocity.normalized()
+	var tail := -heading * lerpf(9.0, 3.0, age)
+	var side := heading.orthogonal() * half_width
+	return PackedVector2Array([-tail * 0.25, tail + side, tail * 1.6, tail - side])

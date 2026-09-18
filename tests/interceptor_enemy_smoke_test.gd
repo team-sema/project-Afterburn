@@ -73,10 +73,10 @@ func _test_resources_and_roster() -> void:
 	)
 	var shoot := interceptor.get_node("EnemyShootComponent") as EnemyShootComponent
 	_expect(not shoot.use_actor_forward_direction, "Interceptor aims projectiles at the player")
-	_expect(shoot.burst_count >= 10, "Interceptor fires a denser single burst")
-	_expect(shoot.burst_interval <= 0.06, "Interceptor burst spacing is rapid")
+	_expect(shoot.pattern_params.shots == 5, "Interceptor fires a denser single burst")
+	_expect(is_equal_approx(shoot.pattern_params.gap, 0.1), "Interceptor burst spacing is rapid")
 	_expect(shoot.active_duration <= 0.85, "Interceptor fire window fits one burst only")
-	_expect(shoot.fire_interval >= 5.0, "Interceptor does not schedule a second burst")
+	_expect(shoot.pattern_params.rest == 10.0, "Interceptor does not schedule a second burst")
 	var warning := interceptor.get_node("EntryWarningComponent") as EntryWarningComponent
 	_expect(warning.warning_duration >= 0.85, "Interceptor warning lasts longer before entry")
 	_expect(warning.face_spawn_side, "Interceptor warning points at the spawn side")
@@ -135,7 +135,7 @@ func _test_pair_warning_attack_exit_and_reward() -> void:
 		_expect(warning != null and warning.is_warning_active(), "each entry lane has a warning")
 		var shoot := member.get_node("EnemyShootComponent") as EnemyShootComponent
 		_expect(shoot.get_volleys_fired() == 0, "offscreen Interceptor has not fired")
-		_expect(shoot.projectile_speed > 210.0, "projectile outruns the Interceptor")
+		_expect(shoot.pattern_params.speed > 210.0, "projectile outruns the Interceptor")
 
 	await process_frame
 	members = controller.get_members()
@@ -197,7 +197,7 @@ func _test_pair_warning_attack_exit_and_reward() -> void:
 	var projectile := _find_first_enemy_projectile()
 	_expect(projectile != null, "aimed burst spawns the shared enemy projectile")
 	if projectile != null:
-		var projectile_velocity := (projectile.get_node("MoveComponent") as MoveComponent).velocity
+		var projectile_velocity: Vector2 = projectile.get_threat_velocity()
 		var aim := projectile.global_position.direction_to(player.global_position)
 		_expect(
 			projectile_velocity.normalized().dot(aim) > 0.98,
@@ -216,7 +216,7 @@ func _test_pair_warning_attack_exit_and_reward() -> void:
 		var shoot := member.get_node("EnemyShootComponent") as EnemyShootComponent
 		_expect(not shoot.is_fire_window_active(), "fire window closes after the single burst")
 		_expect(
-			shoot.get_volleys_fired() == shoot.burst_count,
+			shoot.get_volleys_fired() == shoot.pattern_params.shots,
 			"Interceptor spent its full single burst",
 		)
 		volleys_after_burst.append(shoot.get_volleys_fired())

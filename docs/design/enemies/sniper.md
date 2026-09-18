@@ -46,6 +46,8 @@
 - `SniperAttackComponent`: AIMING(4.0s, 플레이어 추적 + 옅은 적색 이중선 cubic ease-out 수렴 → 0.18s 유지) → FIRING(900px/s + 5px 반동) → COOLDOWN(2.5s) 반복
 - 조준선: 반각 14°→0.05°, 알파 0.01→0.36. 발사 순간 선 소실, 탄은 마지막 경로를 추적 없이 이동
 - 재발사 시 재포지셔닝 없음. `EnemyShootComponent`는 `_enter_tree`에서 제거
+- 단발 생성은 `SniperBarrageShot` 어댑터를 사용한다. 기존 SniperBullet의 선형 외형·900px/s 기준 3×30px 판정·사거리·피해량·finished 신호를 보존한다. 조준선·반동·타이밍은 SniperAttackComponent가 소유한다. 어댑터 연결이며 일반 FoundationBullet 몸체로 바꾸지 않는다.
+- 반동은 ShakeComponent의 지속 위치 오프셋에 적용하고 피격 흔들림과 합산한다. 흔들림 갱신이 반동 위치를 원점으로 덮어쓰지 않는다.
 
 ## 조합
 

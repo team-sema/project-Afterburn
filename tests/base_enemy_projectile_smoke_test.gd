@@ -31,16 +31,16 @@ func _run() -> void:
 	var shooting_enemy_scene := load("res://enemies/shooting_enemy.tscn") as PackedScene
 	var shooting_enemy := shooting_enemy_scene.instantiate() as Node2D
 	shooting_enemy.set("augment_registry", EnemyAugmentRegistry.new())
-	var barrage: Node = shooting_enemy.get_node("RadialBarrageShootComponent")
+	var barrage := shooting_enemy.get_node("EnemyShootComponent") as EnemyShootComponent
 	_expect(
-		barrage.projectile_scene.resource_path == "res://projectiles/base_enemy_projectile.tscn",
-		"caster barrage reuses the straight base projectile",
+		barrage.pattern_script.resource_path == "res://patterns/caster_pattern.gd",
+		"caster uses the new ring pattern",
 	)
 	root.add_child(shooting_enemy)
 	await process_frame
 	_expect(
-		shooting_enemy.get_node_or_null("EnemyShootComponent") == null,
-		"caster replaces the baseline aimed fire component",
+		shooting_enemy.get_node_or_null("EnemyShootComponent") == barrage,
+		"caster retains the common pattern fire component",
 	)
 	projectile.queue_free()
 	default_shoot.free()

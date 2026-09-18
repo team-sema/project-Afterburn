@@ -7,7 +7,7 @@ enum Trigger {
 }
 
 @export var trigger: Trigger = Trigger.ON_HIT
-@export var projectile_scene: PackedScene
+@export var barrage_shot: BarrageShot
 @export_range(1, 16, 1) var shot_count := 1
 @export_range(0.0, 360.0, 1.0) var spread_degrees := 0.0
 @export_range(1.0, 1000.0, 1.0) var projectile_speed := 40.0
@@ -21,7 +21,7 @@ var cooldown_timer := Timer.new()
 func _ready() -> void:
 	enemy = get_parent() as Enemy
 	assert(enemy != null, "CounterShotComponent must be attached directly to an Enemy.")
-	assert(projectile_scene != null, "CounterShotComponent must have a projectile scene set.")
+	assert(barrage_shot != null and barrage_shot.is_valid(), "CounterShotComponent requires a valid BarrageShot.")
 
 	targeting_component = enemy.get_node_or_null("TargetingComponent") as TargetingComponent
 	assert(targeting_component != null, "CounterShotComponent requires a TargetingComponent on its Enemy.")
@@ -47,7 +47,10 @@ func _try_fire() -> void:
 		return
 
 	var target := targeting_component.get_target()
-	if target == null:
+	if not is_instance_valid(target):
+		return
+	# Transformed parents can leave a tiny rounding delta at the same position.
+	if enemy.global_position.distance_squared_to(target.global_position) < 0.0001:
 		return
 
 	var target_direction := targeting_component.get_direction_from(enemy.global_position)
@@ -61,25 +64,26 @@ func _try_fire() -> void:
 
 
 func _fire_projectiles(target_direction: Vector2) -> void:
-	var projectile_parent := get_tree().get_first_node_in_group("gameplay_world")
+	var projectile_parent := get_tree().get_first_node_in_group("gameplay_world") as Node2D
 	if projectile_parent == null:
-		projectile_parent = get_tree().current_scene
+		projectile_parent = get_tree().current_scene as Node2D
 	if projectile_parent == null:
 		return
+	var volley := BarrageVolley.new()
+	volley.shot = BarrageSequence.clone_settings(barrage_shot) as BarrageShot
+	volley.layout = BarrageVolley.Layout.FAN
+	volley.count = shot_count
+	volley.spread_degrees = spread_degrees
+	volley.speed = projectile_speed
+	volley.angle_degrees = rad_to_deg(Vector2.DOWN.angle_to(target_direction))
+	# A static callback survives emitter deletion (including ON_DEATH), but is
+	# scoped to the captured world. No live target/emitter is read after deferral.
+	CounterShotComponent._spawn_volley.call_deferred(weakref(projectile_parent), enemy.global_position, volley)
 
-	for index in shot_count:
-		var angle_offset := 0.0
-		if shot_count > 1:
-			var weight := float(index) / float(shot_count - 1)
-			angle_offset = lerpf(-spread_degrees * 0.5, spread_degrees * 0.5, weight)
 
-		var direction := target_direction.rotated(deg_to_rad(angle_offset))
-		var projectile := projectile_scene.instantiate() as Node2D
-		projectile.global_position = enemy.global_position
-
-		if projectile.has_method("launch"):
-			projectile_parent.add_child.call_deferred(projectile)
-			projectile.call_deferred("launch", direction, projectile_speed)
-		else:
-			push_error("Counter-shot projectile must implement launch(direction, speed).")
-			projectile.queue_free()
+static func _spawn_volley(world_ref: WeakRef, origin: Vector2, volley: BarrageVolley) -> void:
+	var parent := world_ref.get_ref() as Node2D
+	if not is_instance_valid(parent) or not parent.is_inside_tree() or parent.is_queued_for_deletion():
+		return
+	for direction in volley.directions():
+		volley.shot.spawn(parent, origin, direction, volley.speed)
