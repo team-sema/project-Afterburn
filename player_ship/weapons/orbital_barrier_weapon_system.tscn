@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://player_ship/weapons/orbital_barrier_weapon_system.gd" id="1_script"]
 [ext_resource type="Script" path="res://components/hitbox_component.gd" id="2_hitbox"]
-[ext_resource type="Texture2D" uid="uid://djvqurciuxfie" path="res://assets/svg/radial_glow.svg" id="3_glow"]
+[ext_resource type="Texture2D" uid="uid://bhgii3y28fy01" path="res://assets/svg/orbital_barrier_segment.svg" id="3_plate"]
 [ext_resource type="Material" path="res://effects/tight_glow_material.tres" id="4_mat"]
 [ext_resource type="Script" path="res://components/hurtbox_component.gd" id="5_hurtbox"]
 [ext_resource type="Script" path="res://components/overcharge_visual_component.gd" id="6_overcharge"]
@@ -15,7 +15,7 @@ script = ExtResource("1_script")
 orbit_radius = 22.0
 base_orbit_speed = 2.8
 base_damage = 6
-segment_arc_length = 11.33
+segment_arc_length = 12.0
 
 [node name="OrbitRoot" type="Node2D" parent="."]
 
@@ -24,13 +24,13 @@ segment_arc_length = 11.33
 [node name="Glow" type="Sprite2D" parent="OrbitRoot/Segment1"]
 self_modulate = Color(0.45, 0.95, 1, 0.55)
 material = ExtResource("4_mat")
-scale = Vector2(0.11, 0.11)
-texture = ExtResource("3_glow")
+scale = Vector2(0.055, 0.1)
+texture = ExtResource("3_plate")
 
 [node name="Core" type="Sprite2D" parent="OrbitRoot/Segment1"]
 self_modulate = Color(0.85, 1, 1, 0.95)
-scale = Vector2(0.045, 0.045)
-texture = ExtResource("3_glow")
+scale = Vector2(0.045, 0.075)
+texture = ExtResource("3_plate")
 
 [node name="HitboxComponent" type="Area2D" parent="OrbitRoot/Segment1"]
 collision_layer = 0
@@ -38,6 +38,7 @@ collision_mask = 2
 script = ExtResource("2_hitbox")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="OrbitRoot/Segment1/HitboxComponent"]
+rotation = 1.5708
 shape = SubResource("CircleShape2D_seg")
 
 [node name="HurtboxComponent" type="Area2D" parent="OrbitRoot/Segment1"]
@@ -48,6 +49,7 @@ monitoring = false
 script = ExtResource("5_hurtbox")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="OrbitRoot/Segment1/HurtboxComponent"]
+rotation = 1.5708
 shape = SubResource("CircleShape2D_seg")
 
 [node name="Segment2" type="Node2D" parent="OrbitRoot"]
@@ -55,13 +57,13 @@ shape = SubResource("CircleShape2D_seg")
 [node name="Glow" type="Sprite2D" parent="OrbitRoot/Segment2"]
 self_modulate = Color(0.45, 0.95, 1, 0.55)
 material = ExtResource("4_mat")
-scale = Vector2(0.11, 0.11)
-texture = ExtResource("3_glow")
+scale = Vector2(0.055, 0.1)
+texture = ExtResource("3_plate")
 
 [node name="Core" type="Sprite2D" parent="OrbitRoot/Segment2"]
 self_modulate = Color(0.85, 1, 1, 0.95)
-scale = Vector2(0.045, 0.045)
-texture = ExtResource("3_glow")
+scale = Vector2(0.045, 0.075)
+texture = ExtResource("3_plate")
 
 [node name="HitboxComponent" type="Area2D" parent="OrbitRoot/Segment2"]
 collision_layer = 0
@@ -69,6 +71,7 @@ collision_mask = 2
 script = ExtResource("2_hitbox")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="OrbitRoot/Segment2/HitboxComponent"]
+rotation = 1.5708
 shape = SubResource("CircleShape2D_seg")
 
 [node name="HurtboxComponent" type="Area2D" parent="OrbitRoot/Segment2"]
@@ -79,6 +82,7 @@ monitoring = false
 script = ExtResource("5_hurtbox")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="OrbitRoot/Segment2/HurtboxComponent"]
+rotation = 1.5708
 shape = SubResource("CircleShape2D_seg")
 
 [node name="Segment3" type="Node2D" parent="OrbitRoot"]
@@ -86,13 +90,13 @@ shape = SubResource("CircleShape2D_seg")
 [node name="Glow" type="Sprite2D" parent="OrbitRoot/Segment3"]
 self_modulate = Color(0.45, 0.95, 1, 0.55)
 material = ExtResource("4_mat")
-scale = Vector2(0.11, 0.11)
-texture = ExtResource("3_glow")
+scale = Vector2(0.055, 0.1)
+texture = ExtResource("3_plate")
 
 [node name="Core" type="Sprite2D" parent="OrbitRoot/Segment3"]
 self_modulate = Color(0.85, 1, 1, 0.95)
-scale = Vector2(0.045, 0.045)
-texture = ExtResource("3_glow")
+scale = Vector2(0.045, 0.075)
+texture = ExtResource("3_plate")
 
 [node name="HitboxComponent" type="Area2D" parent="OrbitRoot/Segment3"]
 collision_layer = 0
@@ -100,6 +104,7 @@ collision_mask = 2
 script = ExtResource("2_hitbox")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="OrbitRoot/Segment3/HitboxComponent"]
+rotation = 1.5708
 shape = SubResource("CircleShape2D_seg")
 
 [node name="HurtboxComponent" type="Area2D" parent="OrbitRoot/Segment3"]
@@ -110,6 +115,7 @@ monitoring = false
 script = ExtResource("5_hurtbox")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="OrbitRoot/Segment3/HurtboxComponent"]
+rotation = 1.5708
 shape = SubResource("CircleShape2D_seg")
 
 [node name="OverchargeVisualComponent" type="Node" parent="."]
