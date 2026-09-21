@@ -28,6 +28,9 @@ var _struck_targets: Dictionary = {}
 var _segment_states: Dictionary = {}
 var _template_segment: Node2D
 var _base_segment_count := 0
+## Gameplay seconds accumulated from _process delta. Respawn and rehit deadlines
+## use this so tree pause (augment pick, bullet cancel) freezes them with the run.
+var _clock := 0.0
 
 
 func _ready() -> void:
@@ -38,6 +41,7 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
+	_clock += delta
 	_update_respawns()
 	if is_shutdown or get_player_actor() == null or not is_instance_valid(get_player_actor()):
 		return
@@ -250,7 +254,7 @@ func _break_segment(segment: Node2D) -> void:
 	var state := _ensure_segment_state(segment)
 	state["hp"] = 0
 	state["broken"] = true
-	state["respawn_at"] = Time.get_ticks_msec() * 0.001 + respawn_delay
+	state["respawn_at"] = _clock + respawn_delay
 	_disable_segment_collision(segment)
 	_set_segment_visible(segment, false)
 
@@ -268,7 +272,7 @@ func _restore_segment(segment: Node2D) -> void:
 
 
 func _update_respawns() -> void:
-	var now := Time.get_ticks_msec() * 0.001
+	var now := _clock
 	for segment in _segments:
 		if segment == null or not is_instance_valid(segment):
 			continue
@@ -367,7 +371,7 @@ func _has_struck(target: Node) -> bool:
 			return false
 		if until < 0.0:
 			return true
-		return Time.get_ticks_msec() * 0.001 < until
+		return _clock < until
 	# Legacy forever mark
 	if entry != target or not is_instance_valid(entry):
 		_struck_targets.erase(id)
@@ -378,14 +382,14 @@ func _has_struck(target: Node) -> bool:
 func _mark_struck(target: Node) -> void:
 	var until := -1.0
 	if _uses_timed_rehit():
-		until = Time.get_ticks_msec() * 0.001 + _rehit_cooldown()
+		until = _clock + _rehit_cooldown()
 	_struck_targets[target.get_instance_id()] = {"node": target, "until": until}
 
 
 func _prune_struck() -> void:
 	if not _uses_timed_rehit():
 		return
-	var now := Time.get_ticks_msec() * 0.001
+	var now := _clock
 	var remove_ids: Array = []
 	for id in _struck_targets.keys():
 		var entry: Variant = _struck_targets[id]

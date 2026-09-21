@@ -55,6 +55,29 @@ func _run() -> void:
 	if hurtbox.is_invincible:
 		failures.append("respawned segment hurtbox should accept hits")
 
+	# Tree pause (augment pick / bullet cancel) must freeze the respawn timer.
+	hit = HitboxComponent.new()
+	hit.damage = 1
+	hurtbox.hurt.emit(hit)
+	hit.free()
+	await process_frame
+	if not barrier.is_segment_broken(segment):
+		failures.append("second break should register before pause")
+	paused = true
+	await create_timer(0.3).timeout
+	await process_frame
+	if not barrier.is_segment_broken(segment):
+		failures.append("paused tree must not advance the respawn timer")
+	paused = false
+	await process_frame
+	await process_frame
+	if not barrier.is_segment_broken(segment):
+		failures.append("respawn delay must not be consumed by wall-clock time spent paused")
+	await create_timer(0.25).timeout
+	await process_frame
+	if barrier.is_segment_broken(segment):
+		failures.append("respawn resumes after unpause")
+
 	world.queue_free()
 	await process_frame
 	if failures.is_empty():

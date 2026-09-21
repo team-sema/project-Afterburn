@@ -76,6 +76,8 @@ func _run() -> void:
 	await _test_resources()
 	await _test_director_flow()
 	await _test_wave_waits_for_clear()
+	await _test_pause_keeps_clear_min_wait()
+	await _test_leaves_tree_during_wait()
 	await _test_delay_and_boss_skip()
 	await _test_gameplay_wiring()
 
@@ -342,6 +344,93 @@ func _test_wave_waits_for_clear() -> void:
 
 	host.queue_free()
 	await process_frame
+
+
+func _test_pause_keeps_clear_min_wait() -> void:
+	var drone := load(DRONE_PRESET_PATH) as EncounterPreset
+	var step_b := EncounterSequenceStep.new()
+	step_b.token = &"b"
+	step_b.kind = EncounterSequenceStep.Kind.WAVE
+	step_b.wave = EncounterWave.new()
+	step_b.wave.wave_id = &"solo"
+	step_b.wave.encounter_preset_paths = PackedStringArray([DRONE_PRESET_PATH])
+	step_b.wave.interval_min = 0.0
+	step_b.wave.interval_max = 0.0
+	step_b.post_delay_min = 0.0
+	step_b.post_delay_max = 0.0
+	step_b.wait_for_clear = true
+	step_b.clear_timeout = 2.0
+	step_b.clear_min_wait = 0.25
+	var sequence := EncounterSequence.new()
+	sequence.sequence_id = &"pause_min_wait"
+	sequence.on_complete = EncounterSequence.OnComplete.STOP
+	sequence.shared_steps = [_normal_step(&"a", [drone]), step_b]
+	var phase := EncounterSequencePhase.new()
+	phase.phase_id = &"pause_min_wait"
+	phase.pattern = "a b"
+	sequence.phases = [phase]
+
+	var parts := _make_director(sequence)
+	var host: Node = parts[0]
+	var director: EncounterDirector = parts[1]
+	var generator: FakeGenerator = parts[2]
+	director.start_sequence()
+	await process_frame
+	await process_frame
+	_expect(generator.spawned_ids.size() == 1, "WAVE waits on clear before the pause")
+	# Augment pick / bullet cancel pause while the prior formation is still alive.
+	# Wall-clock time passes, gameplay time must not.
+	paused = true
+	await create_timer(0.35).timeout
+	paused = false
+	await process_frame
+	generator.complete_all_runs()
+	await process_frame
+	await process_frame
+	_expect(generator.spawned_ids.size() == 1, "clear_min_wait still holds WAVE after an unpaused clear")
+	await create_timer(0.35).timeout
+	_expect(generator.spawned_ids.size() == 2, "WAVE spawns once clear_min_wait elapses in gameplay time")
+
+	host.queue_free()
+	await process_frame
+
+
+func _test_leaves_tree_during_wait() -> void:
+	var drone := load(DRONE_PRESET_PATH) as EncounterPreset
+	var step_b := EncounterSequenceStep.new()
+	step_b.token = &"b"
+	step_b.kind = EncounterSequenceStep.Kind.WAVE
+	step_b.wave = EncounterWave.new()
+	step_b.wave.wave_id = &"solo"
+	step_b.wave.encounter_preset_paths = PackedStringArray([DRONE_PRESET_PATH])
+	step_b.wave.interval_min = 0.0
+	step_b.wave.interval_max = 0.0
+	step_b.post_delay_min = 0.0
+	step_b.post_delay_max = 0.0
+	step_b.wait_for_clear = true
+	step_b.clear_timeout = 2.0
+	step_b.clear_min_wait = 0.0
+	var sequence := EncounterSequence.new()
+	sequence.sequence_id = &"leave_tree"
+	sequence.on_complete = EncounterSequence.OnComplete.STOP
+	sequence.shared_steps = [_normal_step(&"a", [drone]), step_b]
+	var phase := EncounterSequencePhase.new()
+	phase.phase_id = &"leave_tree"
+	phase.pattern = "a b"
+	sequence.phases = [phase]
+
+	var parts := _make_director(sequence)
+	var host: Node = parts[0]
+	var director: EncounterDirector = parts[1]
+	director.start_sequence()
+	await process_frame
+	await process_frame
+	_expect(director.is_running, "director is waiting on clear before WAVE")
+	# Scene unload / menu transition: host leaves the tree while the coroutine is suspended.
+	host.queue_free()
+	await process_frame
+	await process_frame
+	_expect(not is_instance_valid(director) or not director.is_inside_tree(), "director left the tree without get_tree() null errors")
 
 
 func _test_delay_and_boss_skip() -> void:

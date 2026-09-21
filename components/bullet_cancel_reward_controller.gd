@@ -24,24 +24,45 @@ func collect_projectiles_and_vacuum() -> int:
 	# Enemy shots and elite XP can both be spawned deferred from the same frame
 	# as the no_health signal. Drain those additions before scanning so every
 	# projectile is converted and every orb joins the same screen-wide vacuum.
-	await get_tree().process_frame
-	var converted_count := _convert_enemy_projectiles()
-	var attracted_orbs := _start_experience_vacuum()
-	while _has_live_orb(attracted_orbs):
-		if not is_instance_valid(experience_collector):
-			break
-		await get_tree().process_frame
+	await _await_process_frame()
+	var converted_count := 0
+	if _can_run_vacuum():
+		converted_count = _convert_enemy_projectiles()
+		var attracted_orbs := _start_experience_vacuum()
+		while _has_live_orb(attracted_orbs):
+			if not _can_run_vacuum():
+				break
+			await _await_process_frame()
 
 	is_active = false
 	return converted_count
 
 
+func _can_run_vacuum() -> bool:
+	return (
+		is_inside_tree()
+		and is_instance_valid(gameplay_world)
+		and is_instance_valid(experience_collector)
+	)
+
+
+func _await_process_frame() -> void:
+	var tree := get_tree()
+	if tree == null:
+		return
+	await tree.process_frame
+
+
 func _convert_enemy_projectiles() -> int:
 	var converted_count := 0
-	for node in get_tree().get_nodes_in_group("enemy_projectiles"):
+	var tree := get_tree()
+	if tree == null or not is_instance_valid(gameplay_world):
+		return 0
+	for node in tree.get_nodes_in_group("enemy_projectiles"):
 		var projectile := node as Node2D
 		if (
 			projectile == null
+			or not is_instance_valid(projectile)
 			or projectile.is_queued_for_deletion()
 			or not gameplay_world.is_ancestor_of(projectile)
 		):
@@ -57,11 +78,18 @@ func _convert_enemy_projectiles() -> int:
 
 func _start_experience_vacuum() -> Array[ExperienceOrb]:
 	var attracted_orbs: Array[ExperienceOrb] = []
+	if not _can_run_vacuum():
+		return attracted_orbs
+	# Typed Area2D args reject previously-freed objects before the callee body runs,
+	# so validate the collector here rather than only inside ExperienceOrb.
+	var collector := experience_collector
 	for node in get_tree().get_nodes_in_group("experience_orbs"):
+		if not is_instance_valid(collector):
+			break
 		var orb := node as ExperienceOrb
-		if orb == null or not gameplay_world.is_ancestor_of(orb):
+		if orb == null or not is_instance_valid(orb) or not gameplay_world.is_ancestor_of(orb):
 			continue
-		if orb.start_forced_attraction(experience_collector):
+		if orb.start_forced_attraction(collector):
 			attracted_orbs.append(orb)
 	return attracted_orbs
 

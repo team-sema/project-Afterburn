@@ -17,7 +17,7 @@
 - 세그먼트는 궤도에 맞춘 짧은 판형으로 그린다. `segment_arc_length` **12**, 두께 **4.5**, 스프라이트 `orbital_barrier_segment.svg`.
 - 세그먼트마다 **내구 `segment_integrity` = 1**. 받은 피해(히트박스 `damage`)만큼 깎이며, 0 이하가 되면 그 세그먼트는 **파괴**된다.
 - 파괴된 세그먼트는 충돌·표시를 끄고, `respawn_delay` **3.0초** 뒤 내구 전부 회복하며 **리스폰**한다. 공전 궤적 자체는 유지한다.
-- 내구·리스폰 타이머는 `OrbitalBarrierWeaponSystem`이 세그먼트별로 소유한다.
+- 내구·리스폰 타이머는 `OrbitalBarrierWeaponSystem`이 세그먼트별로 소유한다. 리스폰·재타격 쿨다운은 `_process` 델타를 누적한 게임플레이 시계로 재므로 트리 일시정지(오그먼트 선택·탄소거) 동안 멈춘다.
 
 ## 강화 모듈 (WEAPON_TRAIT)
 
@@ -34,6 +34,7 @@
 
 - 세그먼트가 내구 한도만큼 피해를 받으면 깨지고, 지연 후 다시 나타난다.
 - 깨진 세그먼트는 적·적탄과 충돌하지 않는다.
+- 일시정지 중 흐른 시간은 리스폰 지연에서 차감되지 않는다 (해제 직후 즉시 리스폰 없음).
 - `tests/orbital_barrier_break_respawn_smoke_test.gd` 및 기존 방벽 관련 smoke로 확인한다.
 
 상위: [무기 모듈](index.md)
