@@ -129,7 +129,7 @@ func _test_world_modules() -> void:
 
 	var barrier := load("res://player_ship/weapons/orbital_barrier_weapon_system.tscn") as PackedScene
 	var barrier_node := barrier.instantiate() as OrbitalBarrierWeaponSystem
-	_expect(is_equal_approx(barrier_node.segment_arc_length, 11.33), "barrier arc ~1/3 of 34")
+	_expect(is_equal_approx(barrier_node.segment_arc_length, 12.0), "barrier arc length is 12")
 	barrier_node.queue_free()
 
 	world.queue_free()

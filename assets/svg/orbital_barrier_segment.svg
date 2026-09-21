@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="64" viewBox="0 0 256 64">
+  <!-- Soft shield plate facing the camera: wide along orbit, thin radially. -->
+  <ellipse cx="128" cy="32" rx="124" ry="30" fill="#fff" opacity="0.18"/>
+  <ellipse cx="128" cy="32" rx="118" ry="22" fill="#fff" opacity="0.32"/>
+  <ellipse cx="128" cy="32" rx="110" ry="14" fill="#fff" opacity="0.55"/>
+  <ellipse cx="128" cy="32" rx="102" ry="7" fill="#fff" opacity="0.9"/>
+  <ellipse cx="128" cy="32" rx="94" ry="2.5" fill="#fff"/>
+</svg>
