@@ -42,7 +42,7 @@
 | XP drop tuning | 일반 적 XP 오브 드롭 확률은 0.45, 엘리트는 1.0 |
 | `ExperienceCollectorComponent` | 플레이어 XP 수집 반경 제공 |
 | `ExperienceOrb` | 드롭 후 아래로 이동하며, 기본 낙하 속도는 플레이어 기본 이동 속도와 같은 140px/s. 강제 흡수 시 반경·넉백을 건너뛰고 일시정지 중에도 플레이어에게 이동 |
-| `BulletCancelRewardController` | 플레이필드 적탄을 1 XP 오브로 변환하고, 기존 오브와 함께 전부 실제 회수될 때까지 기다리는 엘리트 이상 공용 보상 연출 |
+| `BulletCancelRewardController` | 플레이필드 적탄을 1 XP 오브로 변환하고, 기존 오브와 함께 전부 실제 회수될 때까지 기다리는 엘리트 이상 공용 보상 연출. 수집기·월드가 free되면 진공을 중단 |
 | `EnemyHealthBarComponent` | 엘리트·보스급 적이 피해를 받으면 기체 위에 남은 HP를 표시하고, 마지막 피격 1.5초 후 페이드아웃 |
 
 ## 연출 · 스폰
@@ -59,10 +59,10 @@
 | `EncounterPreset` / `EncounterMember` | Layout, 편대·개별 Sequence, 슬롯별 적, 등장 지연, 반전, 편대 해제 조건을 조합하는 설정 Resource |
 | `EncounterPool` / `EncounterPoolEntry` | 라이브 Encounter 로스터. Entry는 `min_threat`만 두고, Preset `difficulty`로 `weight = 60 / sqrt(difficulty)` 산출(어려울수록 희귀·비율 완만). `EnemyGenerator`는 직전 2 id 제외 |
 | `EncounterSequence` / `EncounterSequencePhase` / `EncounterSequenceStep` / `EncounterWave` | 등장 시나리오 데이터. Phase = 토큰 패턴, Step = NORMAL/WAVE/ELITE/BOSS, Wave = `encounter_preset_paths` 순서 고정 편대 묶음 |
-| `EncounterDirector` | 시퀀스 재생 노드. 시작 시 `EnemyGenerator` 타이머·60초 엘리트 타이머를 끄고 스텝 순서대로 스폰·게이트 요청. `sequence_progress_changed`로 HUD에 Phase 스텝 진행을 알림 |
+| `EncounterDirector` | 시퀀스 재생 노드. 시작 시 `EnemyGenerator` 타이머·60초 엘리트 타이머를 끄고 스텝 순서대로 스폰·게이트 요청. `sequence_progress_changed`로 HUD에 Phase 스텝 진행을 알림. 씬 트리에서 빠지면 `get_tree()` await 없이 중단 |
 | `EncounterRun` | 스폰된 편대 1개의 적을 편대 해제 후까지 추적, 전부 사라지면 `completed` (ELITE `wait_for_clear` 판정) |
 | `OnetimeAnimatedEffect` | 애니 종료 시 free |
-| `VariablePitchAudioStreamPlayer` | 피치 랜덤 SFX |
+| `VariablePitchAudioStreamPlayer` | 피치 랜덤 SFX. 씬 트리 밖이면 `play_with_variance`는 no-op |
 
 ## 상태머신
 

@@ -8,6 +8,18 @@ func _initialize() -> void:
 
 
 func _run() -> void:
+	await _test_happy_path()
+	await _test_freed_collector_during_vacuum()
+	if failures.is_empty():
+		print("bullet cancel reward smoke test: PASS")
+		quit(0)
+		return
+	for failure in failures:
+		push_error("bullet cancel reward smoke test: %s" % failure)
+	quit(1)
+
+
+func _test_happy_path() -> void:
 	var gameplay := (load("res://gameplay.tscn") as PackedScene).instantiate()
 	root.add_child(gameplay)
 	var progression := gameplay.get_node("AugmentProgressionController") as AugmentProgressionController
@@ -59,13 +71,34 @@ func _run() -> void:
 	paused = false
 	gameplay.queue_free()
 	await process_frame
-	if failures.is_empty():
-		print("bullet cancel reward smoke test: PASS")
-		quit(0)
-		return
-	for failure in failures:
-		push_error("bullet cancel reward smoke test: %s" % failure)
-	quit(1)
+
+
+func _test_freed_collector_during_vacuum() -> void:
+	# Elite reward awaits one frame before vacuum. If the ship (and its collector)
+	# is freed in that window, typed Area2D args used to error at the call site.
+	var gameplay := (load("res://gameplay.tscn") as PackedScene).instantiate()
+	root.add_child(gameplay)
+	var reward := gameplay.get_node("BulletCancelRewardController") as BulletCancelRewardController
+	var ship := gameplay.get_node("Ship") as Node
+	gameplay.get_node("EnemyGenerator").spawn_timer.stop()
+	gameplay.get_node("AugmentProgressionController").set_process(false)
+
+	var orb := (load("res://pickups/experience_orb.tscn") as PackedScene).instantiate() as ExperienceOrb
+	gameplay.add_child(orb)
+	orb.setup(2, Vector2(40, 40))
+	paused = true
+	# Vacuum awaits one process frame first; free the ship in that gap.
+	ship.queue_free()
+	var converted_count := await reward.collect_projectiles_and_vacuum()
+	await process_frame
+
+	_expect(converted_count >= 0, "freed collector does not crash the vacuum coroutine")
+	_expect(not reward.is_active, "vacuum ends cleanly after collector is freed")
+	_expect(not is_instance_valid(orb) or not orb.start_forced_attraction(null), "orb rejects a null collector")
+	paused = false
+	if is_instance_valid(gameplay):
+		gameplay.queue_free()
+	await process_frame
 
 
 func _expect(condition: bool, message: String) -> void:

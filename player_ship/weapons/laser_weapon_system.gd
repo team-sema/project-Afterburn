@@ -25,6 +25,9 @@ var _base_glow_alpha: float
 var _beam_width_tween: Tween
 ## enemy instance id -> {stacks: int, last_time: float}
 var _heat_stacks: Dictionary = {}
+## Gameplay seconds accumulated from _physics_process delta. Heat stack
+## intervals use this so tree pause does not advance or expire them.
+var _clock := 0.0
 var _pulse_on := true
 var _pulse_elapsed := 0.0
 ## 0..1 visual intensity for pulse fade (damage still uses `_pulse_on`).
@@ -65,6 +68,7 @@ func _on_weapon_trait_changed(changed_weapon_id: StringName, _trait_id: StringNa
 
 
 func _physics_process(delta: float) -> void:
+	_clock += delta
 	if is_shutdown:
 		return
 	_update_pulse(delta)
@@ -217,7 +221,7 @@ func _heat_bonus_for(enemy: Node) -> float:
 	if not has_trait(&"laser_heat_stack") or enemy == null:
 		return 0.0
 	var id := enemy.get_instance_id()
-	var now := Time.get_ticks_msec() * 0.001
+	var now := _clock
 	var stack_interval := float(get_trait_param(&"laser_heat_stack", &"stack_interval", 0.5))
 	var stack_bonus := float(get_trait_param(&"laser_heat_stack", &"stack_bonus", 0.15))
 	var max_bonus := float(get_trait_param(&"laser_heat_stack", &"max_bonus", 0.9))
