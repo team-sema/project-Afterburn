@@ -23,7 +23,6 @@ enum CombatState {
 @export_range(1.0, 12.0, 0.5) var projectile_width := 3.0
 @export_range(64.0, 800.0, 1.0) var projectile_range := 480.0
 @export_range(1, 20, 1) var projectile_damage := 1
-@export var projectile_scene: PackedScene
 @export_range(0.0, 16.0, 0.5) var recoil_distance := 5.0
 @export_range(0.01, 0.2, 0.01) var recoil_kick_duration := 0.05
 @export_range(0.05, 0.5, 0.01) var recoil_return_duration := 0.18
@@ -36,12 +35,15 @@ var _base_aim_duration := 4.0
 var _base_focus_hold_duration := 0.18
 var _base_cooldown_duration := 2.5
 var _active_bullet: SniperBullet
+var _shot_pending := false
 var _shots_fired := 0
 var _hold_position := Vector2.ZERO
 var _hold_locked := false
 var _visual_anchor: Node2D
 var _visual_anchor_rest_position := Vector2.ZERO
 var _recoil_tween: Tween
+var _recoil_target: Object
+var _recoil_property := "position"
 
 
 func _ready() -> void:
@@ -56,6 +58,12 @@ func _ready() -> void:
 	_visual_anchor = enemy.get_node_or_null("Anchor") as Node2D
 	if _visual_anchor != null:
 		_visual_anchor_rest_position = _visual_anchor.position
+		_recoil_target = _visual_anchor
+		var shake := enemy.get_node_or_null("ShakeComponent") as ShakeComponent
+		if shake != null and shake.node == _visual_anchor:
+			_recoil_target = shake
+			_recoil_property = "position_offset"
+			shake.position_offset = _visual_anchor_rest_position
 	aim_cone.hide_telegraph()
 	aim_cone.set_cone_length(projectile_range)
 	_face_visual_direction(Vector2.DOWN)
@@ -263,19 +271,19 @@ func _play_recoil(direction: Vector2) -> void:
 		return
 	if _recoil_tween != null and _recoil_tween.is_valid():
 		_recoil_tween.kill()
-	_visual_anchor.position = _visual_anchor_rest_position
+	_recoil_target.set(_recoil_property, _visual_anchor_rest_position)
 	var local_direction := direction.rotated(-enemy.global_rotation).normalized()
 	var recoil_position := _visual_anchor_rest_position - local_direction * recoil_distance
 	_recoil_tween = create_tween()
 	_recoil_tween.tween_property(
-		_visual_anchor,
-		"position",
+		_recoil_target,
+		_recoil_property,
 		recoil_position,
 		recoil_kick_duration,
 	).set_trans(Tween.TRANS_EXPO).set_ease(Tween.EASE_OUT)
 	_recoil_tween.tween_property(
-		_visual_anchor,
-		"position",
+		_recoil_target,
+		_recoil_property,
 		_visual_anchor_rest_position,
 		recoil_return_duration,
 	).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
@@ -290,35 +298,28 @@ func _apply_cone_transform() -> void:
 
 
 func _spawn_bullet(direction: Vector2) -> void:
-	if has_active_bullet():
+	if _shot_pending or has_active_bullet():
 		return
-	# Same parenting path as EnemyShootComponent projectiles.
-	var projectile_parent := get_tree().get_first_node_in_group("gameplay_world")
+	var projectile_parent := get_tree().get_first_node_in_group("gameplay_world") as Node2D
 	if projectile_parent == null:
-		projectile_parent = get_tree().current_scene
+		projectile_parent = get_tree().current_scene as Node2D
 	if projectile_parent == null:
 		return
-	var bullet: SniperBullet
-	if projectile_scene != null:
-		bullet = projectile_scene.instantiate() as SniperBullet
-	else:
-		bullet = SniperBullet.new()
-	if bullet == null:
-		return
-	bullet.global_position = enemy.global_position
-	_active_bullet = bullet
-	bullet.finished.connect(_on_bullet_finished, CONNECT_ONE_SHOT)
-	# Mirror EnemyShootComponent: defer enter-tree, then apply launch-equivalent setup.
-	projectile_parent.add_child.call_deferred(bullet)
-	bullet.call_deferred(
-		"configure",
-		enemy.global_position,
-		direction,
-		projectile_speed,
-		projectile_width,
-		projectile_range,
-		projectile_damage,
-	)
+	var shot := SniperBarrageShot.new()
+	shot.bullet_width = projectile_width
+	shot.max_range = projectile_range
+	shot.damage = projectile_damage
+	_shot_pending = true
+	_spawn_shot.call_deferred(shot, projectile_parent, enemy.global_position, direction, projectile_speed)
+
+
+func _spawn_shot(shot: SniperBarrageShot, parent: Node2D, origin: Vector2, direction: Vector2, speed: float) -> void:
+	_shot_pending = false
+	if not is_instance_valid(enemy) or enemy.is_queued_for_deletion() or not enemy.is_inside_tree(): return
+	if not is_instance_valid(parent) or parent.get_viewport() != enemy.get_viewport(): return
+	_active_bullet = shot.spawn(parent, origin, direction, speed) as SniperBullet
+	if _active_bullet != null:
+		_active_bullet.finished.connect(_on_bullet_finished, CONNECT_ONE_SHOT)
 
 
 func _on_bullet_finished() -> void:
@@ -343,5 +344,7 @@ func _exit_tree() -> void:
 		_recoil_tween.kill()
 	if _visual_anchor != null and is_instance_valid(_visual_anchor):
 		_visual_anchor.position = _visual_anchor_rest_position
+	if is_instance_valid(_recoil_target):
+		_recoil_target.set(_recoil_property, _visual_anchor_rest_position)
 	if aim_cone != null and is_instance_valid(aim_cone):
 		aim_cone.hide_telegraph()

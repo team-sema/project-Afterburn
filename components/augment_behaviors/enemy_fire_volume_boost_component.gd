@@ -16,5 +16,4 @@ func _ready() -> void:
 	if shoot == null:
 		push_warning("EnemyFireVolumeBoostComponent: no EnemyShootComponent on '%s'." % enemy.name)
 		return
-	shoot.shot_count = maxi(shoot.shot_count + extra_shots, 1)
-	shoot.spread_degrees = maxf(shoot.spread_degrees, min_spread_degrees)
+	shoot.apply_fire_volume_boost(extra_shots, min_spread_degrees)

@@ -51,9 +51,9 @@ func _run() -> void:
 	var bullets := get_nodes_in_group("enemy_projectiles")
 	_expect(bullets.size() == 50, "full-health burst adds thirty bullets")
 	for i in 3:
-		var move := bullets[bullets.size() - 3 + i].get_node("MoveComponent") as MoveComponent
+		var velocity: Vector2 = bullets[bullets.size() - 3 + i].get_threat_velocity()
 		var expected := locked.rotated(deg_to_rad(-6.0 + 6.0 * i))
-		_expect(move.velocity.normalized().is_equal_approx(expected), "three bullet lanes match the warning")
+		_expect(velocity.normalized().is_equal_approx(expected), "three bullet lanes match the warning")
 	_expect(attack.phase == attack.Phase.RECOVERY, "ten shots enter recovery")
 	elite.stats_component.health = 100
 	var volleys: int = attack.get_volleys_fired()
@@ -61,8 +61,9 @@ func _run() -> void:
 	_expect(attack.get_volleys_fired() == volleys, "recovery does not fire")
 	attack._process(0.81)
 	attack.apply_action_rate_multiplier(10.0)
-	for i in 4:
-		attack._process(0.5)
+	attack._process(0.45)
+	for i in 3:
+		attack._process(0.18)
 	await process_frame
 	_expect(get_nodes_in_group("enemy_projectiles").size() == 70, "low-health fan still adds twenty bullets")
 	_expect(attack.phase == attack.Phase.AIM, "low-health fan still fires four volleys")
@@ -77,13 +78,14 @@ func _run() -> void:
 	attack.set_process(false)
 	attack._process(1.01)
 	for i in 9:
-		attack._process(0.09)
+		attack._process(0.08)
 	await process_frame
 	_expect(get_nodes_in_group("enemy_projectiles").size() == 100, "low-health burst still adds thirty bullets")
 	_expect(attack.phase == attack.Phase.RECOVERY, "low-health burst still fires ten volleys")
 	_expect(is_equal_approx(attack._remaining, 1.0), "action rate preserves minimum recovery")
 	attack.shot_count += 2
-	attack._shoot(locked, 3, 12.0, 195.0)
+	attack._begin_burst()
+	attack.barrage_player.stop()
 	await process_frame
 	_expect(get_nodes_in_group("enemy_projectiles").size() == 105, "volume augment adds two pellets to the three-lane baseline")
 	_expect(attack.shot_count == 3, "pattern preserves augment pellets")

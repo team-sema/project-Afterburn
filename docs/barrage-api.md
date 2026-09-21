@@ -408,31 +408,31 @@ fire_together(layers)
 - 위치·예측·레이저 과거 몸통은 같은 궤적 함수를 쓴다. 일반 이동 적분은 1/120초 중점 근사다. 직진·단일 일정 선회는 해석식, 단일 방향 파동은 직접 속도 평가를 사용한다.
 - 위협 반경은 Behavior 전체의 최대 판정 배율을 사용하므로 실제 현재 판정보다 보수적일 수 있다. 성능 측정 결과와 환경은 작업 기록을 참고한다.
 
-## 10. 본 게임 이식 — Drone 패턴 적용, Caster는 후속 작업
+## 10. 본 게임 이식 — Drone·Striker·Interceptor·Caster 적용 완료
 
 ### 현재 연결 지점
 
 [EnemyShootComponent](../components/enemy_shoot_component.gd)는 기본 조준/부채꼴 사격과 버스트를 담당한다. 화면 진입 후 활성화, 초기 지연, 활성 기간, 발사 금지선, actor 전방 발사, 표적 없음 처리, 행동 속도 배율, 위협도 보고를 함께 관리한다.
 
-[RadialBarrageShootComponent](../components/radial_barrage_shoot_component.gd)는 Caster의 링 연사·링별 회전을 담당한다. [EnemyModifierFactory](../components/enemy_modifier_factory.gd)는 기존 발사 컴포넌트 이름/타입을 통해 속도 배율을 전달한다. 따라서 Player를 추가하는 것만으로 기존 연결이 모두 대체되지는 않는다.
+Caster도 공통 EnemyShootComponent를 사용하며 Radial 전용 컴포넌트는 제거했다. [EnemyModifierFactory](../components/enemy_modifier_factory.gd)는 공통 발사 컴포넌트에 속도 배율을 전달한다. `pattern_fire_volume_boost`는 스폰 시 발수 증강을 적용할 패턴의 명시적 opt-in이며 Drone·Striker·Interceptor만 켠다. 증강은 시작 전 컴포넌트의 독립 snapshot에 적용하고 위협도 요약을 갱신한다. 실행 중 snapshot 수정이나 자동 재시작은 지원하지 않는다.
 
 ### 1단계: 탄 생성만 연결 — 호환 경로로 유지
 
-`EnemyShootComponent`의 선택적인 `barrage_shot: BarrageShot`은 pattern_script가 없는 호환 경로다. 설정이 있고 방향을 주입하는 발사이면 기존 fire가 계산한 월드 방향·속도로 shot.spawn을 호출하고, 그 외에는 기존 PackedScene 경로를 유지한다. Drone은 이 중간 연결에서 다음 단계의 pattern_script 경로로 전환했다. Interceptor는 두 설정을 모두 null로 지정하여 기존 탄을 유지한다.
+`EnemyShootComponent`의 선택적인 `barrage_shot: BarrageShot`은 pattern_script가 없는 호환 경로다. 설정이 있고 방향을 주입하는 발사이면 기존 fire가 계산한 월드 방향·속도로 shot.spawn을 호출하고, 그 외에는 기존 PackedScene 경로를 유지한다. Drone·Striker·Interceptor·Caster는 이제 pattern_script와 신규 BULLET 몸체를 사용한다.
 
 이 연결로 본 게임 적이 원탄·쌀탄·S자 레이저와 Behavior를 사용할 수 있다. 현재 Drone은 패턴 모드와 새 BULLET 몸체의 needle 외형을 사용한다. `inject_target_direction = false`이며 actor 전방 발사도 꺼진 전용 씬 경로는 자동 변환하지 않는다.
 
 직접 spawn은 즉시 add_child를 수행하므로 물리 콜백 안에서 호출하는 연결은 안전한 deferred 함수 전체로 넘긴다. 부모는 같은 Viewport의 `gameplay_world` Node2D로 정하고, 생성 전에 로컬/월드 좌표를 중복 변환하지 않는다.
 
-### 2단계: Caster의 발사 일정을 Sequence로 이관
+### Caster의 발사 일정 — 이관 완료
 
-기존 컴포넌트를 적의 발사 제어 어댑터로 남기고 내부 반복문·타이머를 Player로 교체한다. 초기 지연은 시작 시 한 번, 한 버스트는 `ring_count`개 FIRE, 중간 대기는 `ring_interval`, 마지막 링 후 휴식은 `fire_interval`이 되어야 한다. 마지막 링에도 ring_interval을 추가하면 기존 주기보다 느려진다.
+`patterns/caster_pattern.gd`와 EnemyShootComponent를 사용한다. `pattern_params`의 count/rings/gap/rest/speed/spin은 적 씬에서 정한다. 초기 지연은 시작 시 한 번, 중간 링 사이에만 gap을 넣고 마지막 링 후에는 rest만 기다린다. 확정 수치는 [Caster 기획서](design/enemies/caster.md)를 따른다.
 
 기존 Caster 링은 오른쪽=0°다. API는 아래=0°이므로 기존 모양을 보존할 때 `angle_degrees = -90 + spin_degrees`로 변환한다. 기존 링 회전은 **버스트 시작마다 0으로 초기화**된다. 전체 무한 Sequence에서 rotate를 누적하면 이 규칙이 달라지므로 각 FIRE에 절대 보정각을 넣거나 유한 버스트를 재생한다.
 
-### 3단계: 일반 적의 발사 일정 이관 — Drone 적용 완료
+### 일반 적의 발사 일정 — 이관 완료
 
-단발·부채꼴을 Volley로, 버스트를 Sequence로 변환한다. 현재 Drone은 pattern_script 경로를 사용한다. Player.may_fire가 매 FIRE의 허용 조건을 검사하므로 금지선에서 해당 발사만 건너뛴다. 기존 레거시 적은 pattern_script가 null이면 기존 Timer를 사용한다.
+Drone은 `drone_pattern.gd`, Striker·Interceptor는 `aimed_burst_pattern.gd`를 사용한다. 공통 연발은 ways/spread/shots/gap/rest/speed를 pattern_params로 받는다. Player.may_fire가 매 FIRE의 허용 조건을 검사하므로 금지선에서 해당 발사만 건너뛴다. Interceptor는 기존 휴식까지 일정에 유지하고 활성 기간 종료로 재공격을 막아 기존 주기 기반 위협 요약을 보존한다. 기존 레거시 적은 pattern_script가 null이면 기존 Timer를 사용한다.
 
 컴포넌트는 Player.resolve_target을 연결해 표적을 매 발사에 재조회한다. 대상이 사라져도 조준 발사만 건너뛴다. 콜백 없이 Player를 직접 사용하는 고정 표적 모드는 기존 중단 정책을 유지한다.
 
@@ -444,7 +444,15 @@ fire_together(layers)
 - 충돌·보상: `enemy_projectiles` 그룹, Hitbox/Hurtbox, 소거당 보상, 레이저 한 몸체당 보상, 무적 시간 중 접촉 규칙을 유지한다.
 - 특수 공격: Sniper의 전조/전용 configure, 화염탄, 반격탄은 각각의 계약을 검토한 뒤 별도로 옮긴다. 일반 탄 API로 일괄 대체하지 않는다.
 
-다음 이식 단위는 Caster Sequence 이관이다. Drone의 반복 일정은 Sequence로 이관했으며 Timer는 최초 활성화 지연에만 사용한다.
+이관한 일반 적의 Timer는 최초 활성화 지연에만 사용한다. Elite Awl은 `barrage_shot` 어댑터로 채택한 새 불꽃 몸체·꼬리를 연결하고 발사 타이밍·난수·이동은 기존 공격 제어자에 남겼다. 비교용 Legacy 구현은 제거했다.
+
+Elite Fighter는 `elite_fighter_pattern.gd`의 유한 Sequence로 부채꼴/집중 사격을 재생한다. 제어자는 이동 정지·재개와 고정 조준 예고를 담당하고 마지막 발사의 `finished`로 다음 단계에 진입한다. ACTION_RATE는 단계별 최소 간격을 반영한 Player.time_scale로 적용한다.
+
+Sniper는 `SniperBarrageShot`이 BarrageShot의 `is_valid()`와 `spawn()`을 재정의하는 특수 몸체 어댑터다. 폭·사거리·피해량은 Resource 설정으로 스냅샷되며 기존 SniperBullet의 Line2D 외형·판정·finished 계약을 유지한다. Appearance/Behavior/입자 꼬리는 지원하지 않는다. 탄 소멸의 finished는 Sequence의 발사 완료 신호와 별개다. 조준선·반동·재발사 일정은 SniperAttackComponent에 남는다.
+
+`labs/enemy_attack_lab.tscn`에서 세 기체의 예고·이동·사격을 재생할 수 있다. 비사격 적의 돌진·접촉·폭발은 기존 계약을 유지한다.
+
+반격 오그먼트는 CounterShotComponent가 `counter_wave_shot.tres`를 직접 발사한다. 피격/사망 트리거와 쿨다운은 제어자에 남기고, 파동은 BulletBehavior의 lateral_wave로 실행한다. 발사 요청은 위치·방향·설정을 복사하고 월드를 WeakRef로 보관하는 정적 지연 콜백이 처리한다. 사망 반격은 적 삭제 후에도 생성되지만 월드 삭제 시 취소된다. 일반 공격의 죽은 발사자 취소 규칙과 구별한다. Weapon Test Lab의 적 증강 목록에서 확인할 수 있으며 일반 오퍼 풀 제외는 유지한다.
 
 ### 최적화 적용 범위
 

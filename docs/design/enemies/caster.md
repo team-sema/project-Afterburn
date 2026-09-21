@@ -46,8 +46,10 @@
 ## 상단 체공 · 원형 탄막
 
 - `caster_entry_patrol.tres`: `MoveToPositionStep`으로 y=56 진입 후 `HorizontalPatrolMovementStep`
-- `RadialBarrageShootComponent`: 주기마다 링 5회 × 20발 (링마다 소각 회전), `base_enemy_projectile`
-- 레거시 상태머신 / `EnemyShootComponent`는 `_enter_tree`에서 제거
+- `EnemyShootComponent`와 `caster_pattern.gd`로 링 일정을 실행한다. 실제 씬의 기존 값인 16발 × 5링을 보존한다(이전 문서의 20발 표기를 정정).
+- 최초 지연 1.2초, 링 간격 0.1초, 마지막 링 뒤 휴식 4.8초, 탄속 95px/s. 오른쪽에서 시작해 링마다 7° 회전하며 묶음마다 초기화한다.
+- 신규 바늘탄 몸체를 사용한다. 화면 진입 대기·하단 사격 금지선은 적용하지 않는다. ACTION_RATE만 적용하며 포화 사격의 추가 발수·펼침각은 기존처럼 적용하지 않는다.
+- 레거시 상태머신은 제거하며 `EnemyShootComponent`는 유지한다. Radial 전용 컴포넌트는 제거한다.
 
 ## 조합
 
@@ -63,3 +65,4 @@
 
 - 기획에 명시된 등장 조건, 공격 예고·실행·종료와 보상 처리를 확인한다.
 - 관련 씬의 수치와 위 규칙을 대조하고, 행동 변경 시 해당 적의 스모크 테스트를 실행한다.
+- `enemy_pattern_migration_smoke_test.gd`에서 링 발수·주기·회전 초기화·ACTION_RATE·발수 증강 제외를 검증한다. `caster_top_orb_barrage_smoke_test.gd`에서 상단 진입·순찰과 공통 발사 연결을 검증한다.

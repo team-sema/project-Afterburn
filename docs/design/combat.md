@@ -115,7 +115,9 @@ Hitbox.area_entered
 - 실행 복사는 기본 BarrageSequence에 데이터만 복사하며 패턴 생성자를 재실행하지 않는다. 발사 금지선은 FIRE를 건너뛰고 일정은 진행한다. 컴포넌트의 표적 조회 경로에서는 표적 부재 시 조준 Volley만 건너뛰고 다음 발사에서 재조회한다. 기존 Player의 고정 표적 모드는 트리 이탈 시 중단 계약을 유지한다.
 - ACTION_RATE는 패턴 시간 배율에 적용하며 탄 이동/Behavior는 바꾸지 않는다. 초기 지연은 기존처럼 실제 게임 시간이다. 위협도 발사율은 한 주기의 FIRE 발수/WAIT 총합에 배속을 곱해 근사하고 대기가 없는 유한 패턴은 최소 0.05초로 평가한다. 반응 시간은 가장 빠른 초기 탄속으로 근사한다.
 
-- 본 게임 Drone은 `patterns/drone_pattern.gd`를 사용한다. pattern_script가 없는 레거시 모드에서는 `EnemyShootComponent.barrage_shot`을 선택해 새 탄만 연결할 수도 있다. 이때 방향 주입 없는 전용 씬 발사는 기존 projectile_scene 경로를 유지하고 새 탄 생성은 deferred 단계에서 수행한다.
+- 본 게임 Drone은 `patterns/drone_pattern.gd`, Striker·Interceptor는 `patterns/aimed_burst_pattern.gd`, Caster는 `patterns/caster_pattern.gd`를 사용한다. 모두 신규 바늘탄·직진 Behavior·공통 다이아몬드 꼬리·8초 수명을 사용한다. 기존 기본탄의 초기 확대/섬광과 시간당 파티클은 그대로 복제하지 않는다. 발사 수치·활성 조건은 각 적 기획서를 따른다. Radial 전용 컴포넌트는 제거했다. 패턴의 포화 사격 적용 범위는 [증강](augments.md)을 따른다.
+- pattern_script가 없는 레거시 모드에서는 `EnemyShootComponent.barrage_shot`을 선택해 새 탄만 연결할 수도 있다. 이때 방향 주입 없는 전용 씬 발사는 기존 projectile_scene 경로를 유지하고 새 탄 생성은 deferred 단계에서 수행한다.
+- Elite Awl은 이 단발 어댑터로 신규 불꽃탄을 사용한다. 이동 서브스텝·발사 난수·예고는 기존 공격 컴포넌트가 소유하며 Sequence 이식은 하지 않았다. 채택한 외형과 공격 재생 Lab은 [Elite Awl](elites/elite-awl.md#탄막-이식)을 따른다. 비교용 Legacy 구현은 제거했다.
 - 위협 격자 최적화는 레거시 탄에도 적용된다. 새 MultiMesh/레이저 메쉬·판정 표시 배칭은 FoundationBullet/CurvedLaser에 적용되며 `Kind.LEGACY`는 기존 Sprite/파티클 렌더링을 사용한다.
 
 ##### 발사 일정·Behavior 표현력 확장 · 구현 완료

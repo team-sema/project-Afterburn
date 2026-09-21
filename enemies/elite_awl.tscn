@@ -4,7 +4,7 @@
 [ext_resource type="Texture2D" path="res://assets/svg/enemy_elite_awl.svg" id="2_visual"]
 [ext_resource type="Script" path="res://components/elite_charge_attack_component.gd" id="3_attack"]
 [ext_resource type="Script" path="res://components/elite_charge_visual.gd" id="4_visual"]
-[ext_resource type="PackedScene" path="res://projectiles/elite_flame_projectile.tscn" id="5_flame"]
+[ext_resource type="Resource" path="res://resources/projectiles/elite_flame_shot.tres" id="6_shot"]
 
 [sub_resource type="RectangleShape2D" id="HurtShape"]
 size = Vector2(20, 34)
@@ -32,7 +32,8 @@ shape = SubResource("HitShape")
 [node name="EnemyShootComponent" parent="." index="15"]
 script = ExtResource("3_attack")
 projectile_speed = 100.0
-projectile_scene = ExtResource("5_flame")
+projectile_scene = null
+barrage_shot = ExtResource("6_shot")
 
 [node name="ChargeVisual" type="Node2D" parent="."]
 script = ExtResource("4_visual")

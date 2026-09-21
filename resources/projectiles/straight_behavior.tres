@@ -1,5 +1,7 @@
-[gd_resource type="Resource" script_class="BulletBehavior" format=3]
-[ext_resource type="Script" path="res://projectiles/bullet_behavior.gd" id="1"]
+[gd_resource type="Resource" script_class="BulletBehavior" format=3 uid="uid://cxdyq4amjei44"]
+
+[ext_resource type="Script" uid="uid://decidrufsjx8w" path="res://projectiles/bullet_behavior.gd" id="1"]
+[ext_resource type="Script" uid="uid://chw3u3xfqd8f4" path="res://projectiles/bullet_action.gd" id="1_ls3d0"]
+
 [resource]
 script = ExtResource("1")
-repeat_count = 1

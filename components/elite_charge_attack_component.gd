@@ -8,6 +8,9 @@ enum Phase { ENTRY, RECOVERY, AIM, DASH, REENTRY_WARNING, REENTRY }
 @export var aim_duration := 0.8
 @export var recovery_duration := 1.2
 @export var reentry_warning_duration := 0.7
+## Nonzero seeds allow repeatable legacy/new comparisons without VFX RNG interference.
+@export var shot_random_seed := 0
+var _shot_rng := RandomNumberGenerator.new()
 
 var phase := Phase.ENTRY
 var dash_direction := Vector2.DOWN
@@ -22,6 +25,8 @@ var _dash_intent := MovementIntent.new()
 
 
 func _ready() -> void:
+	if shot_random_seed == 0: _shot_rng.randomize()
+	else: _shot_rng.seed = shot_random_seed
 	super._ready()
 	fire_timer.stop()
 	_visual = enemy.get_node("ChargeVisual")
@@ -137,10 +142,10 @@ func _advance_dash(delta: float) -> void:
 		_shot_elapsed -= interval
 		if bounds.has_point(enemy.global_position):
 			var perpendicular := Vector2(-dash_direction.y, dash_direction.x)
-			projectile_speed = randf_range(90.0, 110.0)
-			_fire_projectiles(perpendicular.rotated(randf_range(-0.24, 0.24)))
-			projectile_speed = randf_range(90.0, 110.0)
-			_fire_projectiles((-perpendicular).rotated(randf_range(-0.24, 0.24)))
+			projectile_speed = _shot_rng.randf_range(90.0, 110.0)
+			_fire_projectiles(perpendicular.rotated(_shot_rng.randf_range(-0.24, 0.24)))
+			projectile_speed = _shot_rng.randf_range(90.0, 110.0)
+			_fire_projectiles((-perpendicular).rotated(_shot_rng.randf_range(-0.24, 0.24)))
 
 
 func _begin_reentry_warning() -> void:
