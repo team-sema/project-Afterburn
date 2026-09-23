@@ -2,7 +2,7 @@
 
 [ext_resource type="PackedScene" uid="uid://psmpwiapllcb" path="res://enemies/enemy.tscn" id="1_7jykc"]
 [ext_resource type="Script" uid="uid://duumbl2eoy0ot" path="res://enemies/shooting_enemy.gd" id="2_bxlr2"]
-[ext_resource type="Texture2D" uid="uid://cjhfuwqq2ffkl" path="res://assets/svg/enemy_caster.svg" id="3_gb8yh"]
+[ext_resource type="Texture2D" uid="uid://cjhfuwqq2ffkl" path="res://assets/enemies/enemy_caster.svg" id="3_gb8yh"]
 [ext_resource type="Resource" uid="uid://b2k4anav4hxi4" path="res://resources/enemy_movement/sequences/caster_entry_patrol.tres" id="4_movement"]
 [ext_resource type="Script" uid="uid://bwl4d88rgyrqr" path="res://patterns/caster_pattern.gd" id="5_barrage"]
 

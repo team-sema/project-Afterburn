@@ -1,8 +1,8 @@
 [gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://menus/master_volume_control.gd" id="1_script"]
-[ext_resource type="Texture2D" path="res://assets/svg/speaker.svg" id="2_speaker"]
-[ext_resource type="Texture2D" path="res://assets/svg/volume_grabber.svg" id="3_grabber"]
+[ext_resource type="Texture2D" path="res://assets/ui/speaker.svg" id="2_speaker"]
+[ext_resource type="Texture2D" path="res://assets/ui/volume_grabber.svg" id="3_grabber"]
 
 [sub_resource type="StyleBoxFlat" id="Style_slider"]
 content_margin_top = 1.0

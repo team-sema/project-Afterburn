@@ -5,7 +5,7 @@
 ![Elite Awl](../enemies/sprites/enemy_elite_awl.svg)
 
 일반 Awl을 키운 **대형 관통 용골**. 중앙 창끝에 좌우 장갑·측면 이미터가 달려 있다. Elite Fighter와 같은 크림슨 팔레트로, 돌진 경로 띠·재진입 화살표도 같은 계열이다.
-- 스프라이트: `assets/svg/enemy_elite_awl.svg`
+- 스프라이트: `assets/enemies/enemy_elite_awl.svg`
 - 틴트: 적색/분홍 글로우 · 연분홍 화이트 코어 (Elite Fighter 상속)
 
 Awl 강화형 돌격 엘리트. 일반 Encounter 풀과 분리된 Threat 관문이며, Threat 3·5·7…에서 사격형과 교대로 출현한다.

@@ -7,7 +7,7 @@ tag: `weapon_room`
 ![무기실](sprites/facility_weapon_room.svg)
 
 무기실 tag 모듈이 공유하는 시설 아이콘. 흰 마스크 SVG를 시안 글로우로 칠해 HUD·오퍼 카드에 쓴다.
-- 스프라이트: `assets/svg/facilities/facility_weapon_room.svg`
+- 스프라이트: `assets/facilities/facility_weapon_room.svg`
 
 | ID | 표시명 | Kind · 수치 |
 |----|--------|-------------|

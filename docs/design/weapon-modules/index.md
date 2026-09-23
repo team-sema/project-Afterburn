@@ -12,7 +12,7 @@
 - 특성은 `WeaponTraitDefinition` (`params` Lv.I + `rank_overrides` Lv.II·III)
 - 동일 카드 반복 등장으로 레벨업 · Lv.III면 후보 제외
 - 카드 ID = `trait_<trait_id>` · 함선 범용 슬롯 **미사용**
-- 획득·특성 카드는 모두 **해당 무기 SVG**를 아이콘으로 쓴다 (`assets/svg/weapons/`)
+- 획득·특성 카드는 모두 **해당 무기 SVG**를 아이콘으로 쓴다 (`assets/weapons/`)
 - 오퍼 필터·UI: [오그먼트](../augments.md)
 
 ## 무기별 문서

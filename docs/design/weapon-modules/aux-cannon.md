@@ -8,7 +8,7 @@
 ![보조 캐넌](sprites/weapon_aux_cannon.svg)
 
 획득·특성 카드가 공유하는 무기 아이콘.
-- 스프라이트: `assets/svg/weapons/weapon_aux_cannon.svg`
+- 스프라이트: `assets/weapons/weapon_aux_cannon.svg`
 
 ## 강화 모듈 (WEAPON_TRAIT)
 

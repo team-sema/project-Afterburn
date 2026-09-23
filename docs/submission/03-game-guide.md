@@ -152,13 +152,13 @@
 | 항목                                        | 출처                                                                                                            | 라이선스            | Afterburn에서의 사용                                        |
 | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------- | --------------- | ------------------------------------------------------ |
 | 컴포넌트 스크립트 (기반)                            | HeartBeast / Heart Gamedev LLC                                                                                | MIT             | 다수 사용·일부 수정·확장                                         |
-| 스프라이트 (레거시 PNG)                           | GrafxKid ([OpenGameArt](https://opengameart.org/content/arcade-space-shooter-game-assets)) via HeartBeast 리소스 | CC0             | `assets/*.png` (일부 `blaster_*`로 파일명 변경, 내용 동일)         |
+| 배경 스프라이트 (PNG)                           | GrafxKid ([OpenGameArt](https://opengameart.org/content/arcade-space-shooter-game-assets)) via HeartBeast 리소스 | CC0             | `assets/backgrounds/*.png` (패럴랙스 배경만 유지; 레거시 적·탄 PNG 제거)         |
 | Kenney Mini Square                        | [Kenney Fonts](https://kenney.nl/assets/kenney-fonts)                                                         | CC0             | `fonts/kenney_mini_square.ttf`                         |
 | SFX (`explosion`, `hit`, `blaster`←laser) | HeartBeast                                                                                                    | CC0             | `sounds/*.wav`                                         |
 | BGM `music.ogg`                           | HeartBeast 리소스 저장소 포함 파일                                                                                      | 튜토리얼 리소스와 동일 파일 | `sounds/music.ogg`                                     |
 | white flash 셰이더                           | HeartBeast 리소스                                                                                                | MIT 계열 스크립트/리소스 | `effects/white_flash_material.*`                       |
 | Mulmaru 폰트                                | [Mushsooni / Mulmaru](https://github.com/mushsooni/mulmaru)                                                   | SIL OFL 1.1     | UI 한글·타이틀                                              |
-| 네온 SVG·글로우 연출                             | 팀 제작 (+ Nova Drift **스타일 참고**, 에셋 복제 아님)                                                                      | 팀               | `assets/svg/` (레이저 `beam_glow.svg` 포함), `effects/` 확장분 |
+| 네온 SVG·글로우 연출                             | 팀 제작 (+ Nova Drift **스타일 참고**, 에셋 복제 아님)                                                                      | 팀               | `assets/` (분류: enemies·effects·weapons 등), `assets/effects/beam_glow.svg`, `effects/` 씬 |
 | Godot Engine                              | godotengine.org                                                                                               | MIT             | 엔진                                                     |
 
 

@@ -3,7 +3,7 @@ extends SceneTree
 
 func _initialize() -> void:
 	for asset in ["enemy_elite_fighter", "enemy_elite_awl", "enemy_awl"]:
-		var source := FileAccess.get_file_as_string("res://assets/svg/%s.svg" % asset)
+		var source := FileAccess.get_file_as_string("res://assets/enemies/%s.svg" % asset)
 		var image := Image.new()
 		var result := image.load_svg_from_string(source, 4.0)
 		if result != OK:

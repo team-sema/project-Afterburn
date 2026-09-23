@@ -2,11 +2,11 @@
 
 [ext_resource type="Script" path="res://projectiles/player_shotgun_pellet.gd" id="1_script"]
 [ext_resource type="Material" path="res://effects/wide_glow_material.tres" id="2_wide"]
-[ext_resource type="Texture2D" uid="uid://c15miu6sde4so" path="res://assets/svg/player_blaster.svg" id="3_tex"]
+[ext_resource type="Texture2D" uid="uid://c15miu6sde4so" path="res://assets/player/player_blaster.svg" id="3_tex"]
 [ext_resource type="Material" path="res://effects/tight_glow_material.tres" id="4_tight"]
 [ext_resource type="Material" path="res://effects/core_unshaded_material.tres" id="5_core"]
 [ext_resource type="Material" path="res://effects/additive_unshaded_material.tres" id="6_add"]
-[ext_resource type="Texture2D" uid="uid://bp1d64ncpt4rh" path="res://assets/svg/particle_diamond.svg" id="7_particle"]
+[ext_resource type="Texture2D" uid="uid://bp1d64ncpt4rh" path="res://assets/effects/particle_diamond.svg" id="7_particle"]
 [ext_resource type="Script" uid="uid://dbgfouplndi2j" path="res://components/move_component.gd" id="8_move"]
 [ext_resource type="Script" uid="uid://dx86ewq6s2alh" path="res://components/free_offscreen_component.gd" id="9_free"]
 [ext_resource type="Script" uid="uid://c1yamqkv7l4ue" path="res://components/scale_component.gd" id="10_scale"]

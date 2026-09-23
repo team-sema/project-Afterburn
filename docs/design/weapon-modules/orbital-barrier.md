@@ -8,8 +8,8 @@
 ![궤도 방벽](sprites/weapon_aux_orbital_barrier.svg)
 
 획득·특성 카드가 공유하는 무기 아이콘.
-- 스프라이트: `assets/svg/weapons/weapon_aux_orbital_barrier.svg`
-- 인게임 세그먼트 판: `assets/svg/orbital_barrier_segment.svg`
+- 스프라이트: `assets/weapons/weapon_aux_orbital_barrier.svg`
+- 인게임 세그먼트 판: `assets/effects/orbital_barrier_segment.svg`
 
 ## 기본 동작
 

@@ -7,7 +7,7 @@ tag: `hangar` (UI 표시명 **동력로**)
 ![동력로](sprites/facility_hangar.svg)
 
 동력로(hangar) tag 모듈이 공유하는 시설 아이콘. 비상 출력 장치도 같은 SVG를 쓴다.
-- 스프라이트: `assets/svg/facilities/facility_hangar.svg`
+- 스프라이트: `assets/facilities/facility_hangar.svg`
 
 | ID | 표시명 | Kind · 수치 |
 |----|--------|-------------|

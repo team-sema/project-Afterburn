@@ -21,7 +21,7 @@
 ![플라즈마](sprites/weapon_plasma_bomb.svg)
 
 획득·특성 카드가 공유하는 무기 아이콘.
-- 스프라이트: `assets/svg/weapons/weapon_plasma_bomb.svg`
+- 스프라이트: `assets/weapons/weapon_plasma_bomb.svg`
 
 ## 강화 모듈 (WEAPON_TRAIT)
 

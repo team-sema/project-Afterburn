@@ -13,7 +13,7 @@
 - 신관 덮개는 육각 **보강 칼라**와 그 위의 짧은 사다리꼴 **기폭 플러그**로 키운다. 도화선·스파크 같은 불꽃 요소는 두지 않고 기계적인 실루엣으로 마감한다.
 - 좌우에 구체를 감싸는 **스윕 장갑판**과 어깨 높이의 **이미터 날** 한 쌍을 몸체와 약 3px 띄워 배치한다. Elite Awl의 측면 장갑·이미터와 같은 각진 결을 사용한다.
 - 흰색 SVG 마스크에 기존 엘리트의 적색/분홍 글로우·연분홍 흰색 코어를 적용한다.
-- 에셋: `assets/svg/enemy_elite_bomb.svg` (128×128). 표시 배율 0.25 × 1.35에서 약 43×43px이며, 확대와 실제 표시 크기를 비교한다.
+- 에셋: `assets/enemies/enemy_elite_bomb.svg` (128×128). 표시 배율 0.25 × 1.35에서 약 43×43px이며, 확대와 실제 표시 크기를 비교한다.
 - 외형 시안 단계다. 전용 씬·자폭 동작·보상·Threat 편성은 미정이며 실제 전투에는 연결하지 않는다.
 - 미리보기: `artifacts/elite_bomb_design.png`. 재생성: `tools/run-godot.cmd --rendering-method gl_compatibility --script res://artifacts/preview_elite_bomb.gd`.
 

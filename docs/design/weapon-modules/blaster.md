@@ -8,7 +8,7 @@
 ![블래스터](sprites/weapon_main_blaster.svg)
 
 획득·특성 카드가 공유하는 무기 아이콘.
-- 스프라이트: `assets/svg/weapons/weapon_main_blaster.svg`
+- 스프라이트: `assets/weapons/weapon_main_blaster.svg`
 
 ## 강화 모듈 (WEAPON_TRAIT)
 

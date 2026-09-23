@@ -5,7 +5,7 @@
 ![Sniper](sprites/enemy_sniper.svg)
 
 아래로 매우 긴 **창·바늘** 실루엣. 몸통은 가늘고 날개 폭이 좁아, 조준선과 함께 “저격수”로 읽힌다.
-- 스프라이트: `assets/svg/enemy_sniper.svg`
+- 스프라이트: `assets/enemies/enemy_sniper.svg`
 - 틴트: 분홍 네온 (베이스 상속)
 
 ## 의도

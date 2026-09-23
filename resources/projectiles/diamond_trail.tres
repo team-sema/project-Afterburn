@@ -1,7 +1,7 @@
 [gd_resource type="Resource" script_class="BulletTrailEffect" format=3 uid="uid://cmw3ato8pgsv6"]
 
 [ext_resource type="Script" uid="uid://cgcyuul03ugxo" path="res://projectiles/bullet_trail_effect.gd" id="1"]
-[ext_resource type="Texture2D" uid="uid://bp1d64ncpt4rh" path="res://assets/svg/particle_diamond.svg" id="2"]
+[ext_resource type="Texture2D" uid="uid://bp1d64ncpt4rh" path="res://assets/effects/particle_diamond.svg" id="2"]
 
 [resource]
 script = ExtResource("1")

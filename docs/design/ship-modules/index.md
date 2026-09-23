@@ -10,7 +10,7 @@
 
 - Kind: `FACILITY_EFFECT` only · 범용 슬롯(시작 5 · 최대 15)에만 설치
 - primary tag `hangar` UI 표시명 = **동력로** (키·아이콘은 `hangar` 유지)
-- 부위별 모듈은 **같은 시설 SVG 아이콘**을 공유한다 (`assets/svg/facilities/`)
+- 부위별 모듈은 **같은 시설 SVG 아이콘**을 공유한다 (`assets/facilities/`)
 - 적용: `ShipFacilityApplier` · `ShipCombatBuffController` · `EngineBoostComponent` · `HurtComponent`
 - 오퍼·슬롯 규칙은 [오그먼트](../augments.md)
 

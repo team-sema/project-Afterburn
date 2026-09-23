@@ -7,7 +7,7 @@ tag: `hull`
 ![선체](sprites/facility_hull.svg)
 
 선체 tag 모듈이 공유하는 시설 아이콘.
-- 스프라이트: `assets/svg/facilities/facility_hull.svg`
+- 스프라이트: `assets/facilities/facility_hull.svg`
 
 | ID | 표시명 | Kind · 수치 |
 |----|--------|-------------|

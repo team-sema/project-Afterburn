@@ -2,11 +2,11 @@
 
 [ext_resource type="Script" uid="uid://dvbx3vf45ogeb" path="res://projectiles/curve_projectile.gd" id="1_cqv5r"]
 [ext_resource type="Material" path="res://effects/wide_glow_material.tres" id="2_y17g6"]
-[ext_resource type="Texture2D" uid="uid://d3odh03yjdlf8" path="res://assets/svg/enemy_projectile.svg" id="3_1pdhl"]
+[ext_resource type="Texture2D" uid="uid://d3odh03yjdlf8" path="res://assets/enemies/enemy_projectile.svg" id="3_1pdhl"]
 [ext_resource type="Material" path="res://effects/tight_glow_material.tres" id="4_u2hyf"]
 [ext_resource type="Material" path="res://effects/core_unshaded_material.tres" id="5_1h1n7"]
 [ext_resource type="Material" path="res://effects/additive_unshaded_material.tres" id="6_aq5d1"]
-[ext_resource type="Texture2D" uid="uid://bp1d64ncpt4rh" path="res://assets/svg/particle_diamond.svg" id="7_gql3r"]
+[ext_resource type="Texture2D" uid="uid://bp1d64ncpt4rh" path="res://assets/effects/particle_diamond.svg" id="7_gql3r"]
 [ext_resource type="Script" uid="uid://cvmjafhyfx5xo" path="res://components/hitbox_component.gd" id="8_fbtqa"]
 [ext_resource type="Script" uid="uid://dx86ewq6s2alh" path="res://components/free_offscreen_component.gd" id="9_pvwcr"]
 [ext_resource type="Script" uid="uid://dbgfouplndi2j" path="res://components/move_component.gd" id="10_vjn06"]
