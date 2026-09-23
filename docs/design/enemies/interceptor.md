@@ -5,7 +5,7 @@
 ![Interceptor](sprites/enemy_interceptor.svg)
 
 아래를 향한 **화살촉·전투기** 실루엣. 쓸린 날개와 중앙 코어 구멍이 있다. 일반 적과 달리 **주황 네온**이라 측면 진입 위협으로 눈에 띈다.
-- 스프라이트: `assets/svg/enemy_interceptor.svg`
+- 스프라이트: `assets/enemies/enemy_interceptor.svg`
 - 틴트: 주황 글로우 · 따뜻한 화이트 코어 (`interceptor_enemy.tscn`)
 
 ## 의도

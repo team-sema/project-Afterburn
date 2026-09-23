@@ -7,7 +7,7 @@ tag: `radar`
 ![레이더](sprites/facility_radar.svg)
 
 레이더 tag 모듈이 공유하는 시설 아이콘.
-- 스프라이트: `assets/svg/facilities/facility_radar.svg`
+- 스프라이트: `assets/facilities/facility_radar.svg`
 
 | ID | 표시명 | Kind · 수치 |
 |----|--------|-------------|

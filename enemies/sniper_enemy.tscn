@@ -2,7 +2,7 @@
 
 [ext_resource type="PackedScene" uid="uid://psmpwiapllcb" path="res://enemies/enemy.tscn" id="1_enemy"]
 [ext_resource type="Script" path="res://enemies/sniper_enemy.gd" id="2_script"]
-[ext_resource type="Texture2D" path="res://assets/svg/enemy_sniper.svg" id="3_tex"]
+[ext_resource type="Texture2D" path="res://assets/enemies/enemy_sniper.svg" id="3_tex"]
 [ext_resource type="Resource" path="res://resources/enemy_movement/sequences/sniper_entry_hold.tres" id="4_movement"]
 [ext_resource type="PackedScene" path="res://components/sniper_attack_component.tscn" id="5_attack"]
 [ext_resource type="PackedScene" path="res://components/sniper_aim_cone.tscn" id="6_cone"]

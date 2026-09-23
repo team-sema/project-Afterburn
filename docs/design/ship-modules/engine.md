@@ -7,7 +7,7 @@ tag: `engine`
 ![엔진](sprites/facility_engine.svg)
 
 엔진 tag 모듈이 공유하는 시설 아이콘.
-- 스프라이트: `assets/svg/facilities/facility_engine.svg`
+- 스프라이트: `assets/facilities/facility_engine.svg`
 
 | ID | 표시명 | Kind · 수치 |
 |----|--------|-------------|

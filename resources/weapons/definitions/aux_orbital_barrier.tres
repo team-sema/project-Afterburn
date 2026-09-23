@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://cpkr4w0d5rl5t" path="res://resources/weapons/weapon_definition.gd" id="1_def"]
 [ext_resource type="PackedScene" path="res://player_ship/weapons/orbital_barrier_weapon_system.tscn" id="2_scene"]
-[ext_resource type="Texture2D" uid="uid://b2rg3bjif8bql" path="res://assets/svg/weapons/weapon_aux_orbital_barrier.svg" id="3_icon"]
+[ext_resource type="Texture2D" uid="uid://b2rg3bjif8bql" path="res://assets/weapons/weapon_aux_orbital_barrier.svg" id="3_icon"]
 
 [resource]
 script = ExtResource("1_def")

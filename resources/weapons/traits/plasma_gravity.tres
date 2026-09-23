@@ -1,7 +1,7 @@
 [gd_resource type="Resource" script_class="WeaponTraitDefinition" format=3 uid="uid://cp6fe2tm2fqyi"]
 
 [ext_resource type="Script" uid="uid://dggpfusbxuib7" path="res://resources/weapons/weapon_trait_definition.gd" id="1_def"]
-[ext_resource type="Texture2D" uid="uid://dj7s045pab0js" path="res://assets/svg/weapons/weapon_plasma_bomb.svg" id="2_icon"]
+[ext_resource type="Texture2D" uid="uid://dj7s045pab0js" path="res://assets/weapons/weapon_plasma_bomb.svg" id="2_icon"]
 
 [resource]
 script = ExtResource("1_def")

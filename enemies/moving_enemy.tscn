@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://dxo5ywpsobagu"]
 
 [ext_resource type="PackedScene" uid="uid://psmpwiapllcb" path="res://enemies/enemy.tscn" id="1_i7e5m"]
-[ext_resource type="Texture2D" uid="uid://cqo8ule6bvype" path="res://assets/svg/enemy_striker.svg" id="3_2nfdr"]
+[ext_resource type="Texture2D" uid="uid://cqo8ule6bvype" path="res://assets/enemies/enemy_striker.svg" id="3_2nfdr"]
 [ext_resource type="Resource" path="res://resources/enemy_movement/sequences/striker_entry_patrol.tres" id="4_movement"]
 [ext_resource type="Script" path="res://patterns/aimed_burst_pattern.gd" id="5_pattern"]
 

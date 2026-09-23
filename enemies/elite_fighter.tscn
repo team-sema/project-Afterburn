@@ -1,7 +1,7 @@
 [gd_scene format=3]
 
 [ext_resource type="PackedScene" uid="uid://psmpwiapllcb" path="res://enemies/enemy.tscn" id="1_enemy"]
-[ext_resource type="Texture2D" uid="uid://h538i0rlgk46" path="res://assets/svg/enemy_elite_fighter.svg" id="2_visual"]
+[ext_resource type="Texture2D" uid="uid://h538i0rlgk46" path="res://assets/enemies/enemy_elite_fighter.svg" id="2_visual"]
 [ext_resource type="Resource" path="res://resources/enemy_movement/sequences/elite_entry_patrol.tres" id="3_movement"]
 [ext_resource type="Script" path="res://components/elite_attack_component.gd" id="4_attack"]
 [ext_resource type="PackedScene" path="res://components/sniper_aim_cone.tscn" id="5_cone"]

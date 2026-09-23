@@ -5,7 +5,7 @@ func _init() -> void:
 	lifetime = 0.9
 	appearance = BulletAppearance.new()
 	appearance.form = BulletAppearance.Form.TEXTURED
-	appearance.texture = preload("res://assets/svg/elite_flame_bullet.svg")
+	appearance.texture = preload("res://assets/effects/elite_flame_bullet.svg")
 	appearance.core_size = Vector2(12, 28)
 	appearance.wide_size = Vector2(14, 30)
 	appearance.tight_size = Vector2(12, 28)
@@ -16,7 +16,7 @@ func _init() -> void:
 	appearance.collision_size = Vector2(4, 8)
 	behavior = BulletBehavior.new().wait(0.55).opacity_to(0, 0.35).eased(Tween.TRANS_SINE)
 	trail_effect = BulletTrailEffect.new()
-	trail_effect.texture = preload("res://assets/svg/particle_diamond.svg")
+	trail_effect.texture = preload("res://assets/effects/particle_diamond.svg")
 	trail_effect.spacing = 1.5
 	trail_effect.lifetime = 0.18
 	trail_effect.size = 3.0

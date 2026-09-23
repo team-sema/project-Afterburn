@@ -2,7 +2,7 @@
 
 [ext_resource type="PackedScene" uid="uid://psmpwiapllcb" path="res://enemies/enemy.tscn" id="1_enemy"]
 [ext_resource type="Script" path="res://enemies/kamikaze_enemy.gd" id="2_script"]
-[ext_resource type="Texture2D" path="res://assets/svg/enemy_awl.svg" id="3_awl"]
+[ext_resource type="Texture2D" path="res://assets/enemies/enemy_awl.svg" id="3_awl"]
 [ext_resource type="Resource" path="res://resources/enemy_movement/sequences/individual_awl_charge.tres" id="4_charge"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_hurt"]

@@ -2,7 +2,7 @@
 
 [ext_resource type="PackedScene" uid="uid://psmpwiapllcb" path="res://enemies/enemy.tscn" id="1_enemy"]
 [ext_resource type="Script" uid="uid://c0gisxxbw04rk" path="res://enemies/bomb_enemy.gd" id="2_script"]
-[ext_resource type="Texture2D" uid="uid://c8cmh0u40cjec" path="res://assets/svg/enemy_bomb.svg" id="3_bomb"]
+[ext_resource type="Texture2D" uid="uid://c8cmh0u40cjec" path="res://assets/enemies/enemy_bomb.svg" id="3_bomb"]
 [ext_resource type="PackedScene" path="res://components/bomb_proximity_fuse_component.tscn" id="4_fuse"]
 [ext_resource type="Script" path="res://components/bomb_blast_preview.gd" id="5_preview"]
 [ext_resource type="Resource" path="res://resources/enemy_movement/sequences/bomb_straight_down.tres" id="6_movement"]

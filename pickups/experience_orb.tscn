@@ -1,9 +1,9 @@
 [gd_scene load_steps=9 format=3]
 
 [ext_resource type="Script" path="res://pickups/experience_orb.gd" id="1_script"]
-[ext_resource type="Texture2D" uid="uid://djvqurciuxfie" path="res://assets/svg/radial_glow.svg" id="2_glow"]
-[ext_resource type="Texture2D" uid="uid://f6hmnhx2tx54" path="res://assets/svg/supply_crate.svg" id="3_crate"]
-[ext_resource type="Texture2D" uid="uid://c0u2idixiwmj0" path="res://assets/svg/particle_square.svg" id="4_square"]
+[ext_resource type="Texture2D" uid="uid://djvqurciuxfie" path="res://assets/effects/radial_glow.svg" id="2_glow"]
+[ext_resource type="Texture2D" uid="uid://f6hmnhx2tx54" path="res://assets/pickups/supply_crate.svg" id="3_crate"]
+[ext_resource type="Texture2D" uid="uid://c0u2idixiwmj0" path="res://assets/effects/particle_square.svg" id="4_square"]
 [ext_resource type="Material" path="res://effects/wide_glow_material.tres" id="5_wide"]
 [ext_resource type="Material" path="res://effects/tight_glow_material.tres" id="6_tight"]
 [ext_resource type="Material" path="res://effects/core_unshaded_material.tres" id="7_core_material"]

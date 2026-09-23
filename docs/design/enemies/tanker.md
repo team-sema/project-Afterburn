@@ -5,8 +5,8 @@
 ![Tanker body](sprites/enemy_tanker_body.svg)
 
 전방 **횡 실드**를 든 청백 네온 가드. 본체는 작은 마름모 몸통 + 좌우 날개, 실드는 넓은 가로 막 레이어다.
-- 본체: `assets/svg/enemy_tanker_body.svg`
-- 실드: `assets/svg/enemy_tanker_shield.svg`
+- 본체: `assets/enemies/enemy_tanker_body.svg`
+- 실드: `assets/enemies/enemy_tanker_shield.svg`
 - 틴트: 청백 글로우 (분홍 잡몹과 구분)
 
 ![Tanker shield](sprites/enemy_tanker_shield.svg)
