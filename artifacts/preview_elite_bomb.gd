@@ -24,10 +24,10 @@ func _run() -> void:
 	background.size = Vector2(1200, 720)
 	world.add_child(background)
 	_label(world, "AFTERBURN / ELITE BOMB", Vector2(42, 26), 30, Color("fff0f3"))
-	_label(world, "AIRFRAME CONCEPT 02     /     compact armoured mine", Vector2(44, 70), 17, Color("9ba6bd"))
+	_label(world, "AIRFRAME CONCEPT 03     /     armoured charge, detonator cap", Vector2(44, 70), 17, Color("9ba6bd"))
 	var names := ["enemy_bomb", "enemy_elite_fighter", "enemy_elite_awl", "enemy_elite_bomb"]
 	var labels := ["BOMB", "ELITE FIGHTER", "ELITE AWL", "ELITE BOMB"]
-	var descriptions := ["Original body + fuse", "Broad artillery shoulders", "Long piercing keel", "Radial armour / sealed charge"]
+	var descriptions := ["Original body + fuse", "Broad artillery shoulders", "Long piercing keel", "Swept armour / cored charge"]
 	var scene := load("res://enemies/elite_fighter.tscn") as PackedScene
 	for column in names.size():
 		var source := FileAccess.get_file_as_string("res://assets/svg/%s.svg" % names[column])
