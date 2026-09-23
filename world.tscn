@@ -46,13 +46,6 @@ corner_radius_top_right = 2
 corner_radius_bottom_right = 2
 corner_radius_bottom_left = 2
 
-[sub_resource type="StyleBoxFlat" id="StyleBox_hull_fill"]
-bg_color = Color(0.2, 1, 0.68, 0.95)
-corner_radius_top_left = 2
-corner_radius_top_right = 2
-corner_radius_bottom_right = 2
-corner_radius_bottom_left = 2
-
 [sub_resource type="StyleBoxFlat" id="StyleBox_shield_fill"]
 bg_color = Color(0.6, 0.45, 1, 0.95)
 corner_radius_top_left = 2
@@ -193,28 +186,6 @@ layout_mode = 2
 theme_override_constants/separation = 3
 script = ExtResource("12_ship_status_hud")
 ship = NodePath("../../../../Playfield/ViewportContainer/PlayfieldViewport/Gameplay/Ship")
-
-[node name="HullLabel" type="Label" parent="Layout/LeftPanel/Margin/VBox/ShipStatusHud" unique_id=291241925]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(0.35, 1, 0.75, 1)
-text = "HULL   1 / 1"
-label_settings = ExtResource("3_default_label")
-
-[node name="HullBar" type="ProgressBar" parent="Layout/LeftPanel/Margin/VBox/ShipStatusHud" unique_id=1628443900]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 10)
-layout_mode = 2
-mouse_filter = 2
-theme_override_styles/background = SubResource("StyleBox_progress_background")
-theme_override_styles/fill = SubResource("StyleBox_hull_fill")
-max_value = 1.0
-value = 1.0
-show_percentage = false
-
-[node name="ShieldSpacer" type="Control" parent="Layout/LeftPanel/Margin/VBox/ShipStatusHud" unique_id=1702122888]
-custom_minimum_size = Vector2(0, 3)
-layout_mode = 2
 
 [node name="ShieldLabel" type="Label" parent="Layout/LeftPanel/Margin/VBox/ShipStatusHud" unique_id=1766376640]
 unique_name_in_owner = true
