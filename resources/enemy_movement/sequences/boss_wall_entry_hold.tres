@@ -1,8 +1,8 @@
-[gd_resource type="Resource" script_class="MovementSequence" format=3 uid="uid://dy1c2iae02y4m"]
+[gd_resource type="Resource" script_class="MovementSequence" format=3]
 
-[ext_resource type="Script" uid="uid://df54gp6payrqu" path="res://resources/enemy_movement/movement_sequence.gd" id="1_sequence"]
-[ext_resource type="Script" uid="uid://biufnl0ep3dyf" path="res://resources/enemy_movement/movement_step.gd" id="2_step"]
-[ext_resource type="Script" uid="uid://mn133gorohrs" path="res://resources/enemy_movement/steps/move_to_position_step.gd" id="3_move_to"]
+[ext_resource type="Script" path="res://resources/enemy_movement/movement_sequence.gd" id="1_sequence"]
+[ext_resource type="Script" path="res://resources/enemy_movement/movement_step.gd" id="2_step"]
+[ext_resource type="Script" path="res://resources/enemy_movement/steps/move_to_position_step.gd" id="3_move_to"]
 [ext_resource type="Script" path="res://resources/enemy_movement/steps/hold_position_movement_step.gd" id="4_hold"]
 
 [sub_resource type="Resource" id="MoveTo_wall_band"]
