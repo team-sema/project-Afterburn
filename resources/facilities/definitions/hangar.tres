@@ -1,6 +1,6 @@
-[gd_resource type="Resource" script_class="ShipFacilityDefinition" format=3]
+[gd_resource type="Resource" script_class="ShipFacilityDefinition" format=3 uid="uid://chmnabos1sjmx"]
 
-[ext_resource type="Script" path="res://resources/facilities/ship_facility_definition.gd" id="1_facility"]
+[ext_resource type="Script" uid="uid://di3gte031mtvs" path="res://resources/facilities/ship_facility_definition.gd" id="1_facility"]
 [ext_resource type="Texture2D" uid="uid://bouve7lok0f7b" path="res://assets/facilities/facility_hangar.svg" id="2_icon"]
 
 [resource]

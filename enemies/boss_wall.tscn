@@ -1,32 +1,36 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://4dw85uaqirtg"]
 
-[ext_resource type="PackedScene" path="res://enemies/enemy.tscn" id="1_enemy"]
-[ext_resource type="Script" path="res://enemies/boss_wall.gd" id="2_script"]
-[ext_resource type="Texture2D" path="res://assets/enemies/boss_wall.svg" id="3_wall"]
-[ext_resource type="Texture2D" path="res://assets/enemies/boss_wall_turret.svg" id="4_turret"]
-[ext_resource type="Texture2D" path="res://assets/enemies/boss_wall_core.svg" id="5_core"]
-[ext_resource type="Texture2D" path="res://assets/enemies/boss_wall_bay.svg" id="5b_bay"]
-[ext_resource type="Resource" path="res://resources/enemy_movement/sequences/boss_wall_entry_hold.tres" id="6_movement"]
-[ext_resource type="Script" path="res://components/boss_wall_turret_cycle_component.gd" id="7_cycle"]
-[ext_resource type="Shader" path="res://effects/elite_glow.gdshader" id="8_glow"]
+[ext_resource type="PackedScene" uid="uid://psmpwiapllcb" path="res://enemies/enemy.tscn" id="1_enemy"]
+[ext_resource type="Script" uid="uid://rl37di0sdsbg" path="res://enemies/boss_wall.gd" id="2_script"]
+[ext_resource type="Texture2D" uid="uid://bkung58jc2lvr" path="res://assets/enemies/boss_wall.svg" id="3_wall"]
+[ext_resource type="Texture2D" uid="uid://c7v4dgmmg77on" path="res://assets/enemies/boss_wall_turret.svg" id="4_turret"]
+[ext_resource type="Texture2D" uid="uid://pitm5k5we3nl" path="res://assets/enemies/boss_wall_bay.svg" id="5b_bay"]
+[ext_resource type="Texture2D" uid="uid://ci7qmx5lfm8xg" path="res://assets/enemies/boss_wall_core.svg" id="5_core"]
+[ext_resource type="Resource" uid="uid://dy1c2iae02y4m" path="res://resources/enemy_movement/sequences/boss_wall_entry_hold.tres" id="6_movement"]
+[ext_resource type="Script" uid="uid://bg30ha7n4frx3" path="res://components/boss_wall_turret_cycle_component.gd" id="7_cycle"]
+[ext_resource type="Shader" uid="uid://cvutwrdgx4epm" path="res://effects/elite_glow.gdshader" id="8_glow"]
 [ext_resource type="PackedScene" path="res://effects/elite_explosion_effect.tscn" id="9_explosion"]
-[ext_resource type="Script" path="res://components/hurtbox_component.gd" id="10_hurtbox"]
-[ext_resource type="Script" path="res://components/hurt_component.gd" id="11_hurt"]
-[ext_resource type="Script" path="res://components/stats_component.gd" id="12_stats"]
+[ext_resource type="Script" uid="uid://c70ifjbywa6cc" path="res://components/hurtbox_component.gd" id="10_hurtbox"]
+[ext_resource type="Script" uid="uid://dte0u84j5jjya" path="res://components/hurt_component.gd" id="11_hurt"]
+[ext_resource type="Script" uid="uid://cevdd3xts0btk" path="res://components/stats_component.gd" id="12_stats"]
 
-[sub_resource type="ShaderMaterial" id="BossTightGlow"]
+[sub_resource type="ShaderMaterial" id="BossDiffuseGlow"]
 shader = ExtResource("8_glow")
-shader_parameter/radius = 8.0
+shader_parameter/radius = 7.0
 shader_parameter/padding = 24.0
+shader_parameter/radial_halo = true
 
 [sub_resource type="ShaderMaterial" id="BossWideGlow"]
 shader = ExtResource("8_glow")
 shader_parameter/radius = 20.0
 shader_parameter/padding = 24.0
+shader_parameter/radial_halo = false
 
-[sub_resource type="ShaderMaterial" id="BossDiffuseGlow"]
+[sub_resource type="ShaderMaterial" id="BossTightGlow"]
 shader = ExtResource("8_glow")
-shader_parameter/radial_halo = true
+shader_parameter/radius = 8.0
+shader_parameter/padding = 24.0
+shader_parameter/radial_halo = false
 
 [sub_resource type="RectangleShape2D" id="BossHurtTop"]
 size = Vector2(236, 22)
@@ -46,330 +50,327 @@ size = Vector2(14, 16)
 [sub_resource type="CircleShape2D" id="CoreHurtShape"]
 radius = 11.0
 
-[node name="BossWall" instance=ExtResource("1_enemy")]
+[node name="BossWall" unique_id=45324070 instance=ExtResource("1_enemy")]
 script = ExtResource("2_script")
+body_damage_scale = 0.08
+turret_punch_scale = 1.2
+turret_punch_duration = 0.14
 
-[node name="Anchor" parent="." index="0"]
-scale = Vector2(1, 1)
-
-[node name="DiffuseGlow" parent="Anchor" index="0"]
+[node name="DiffuseGlow" parent="Anchor" parent_id_path=PackedInt32Array(93118890) index="0" unique_id=388585176]
 self_modulate = Color(1, 0.08, 0.2, 0.14)
 material = SubResource("BossDiffuseGlow")
 scale = Vector2(1.04, 0.7)
 texture = ExtResource("3_wall")
 
-[node name="WideGlow" parent="Anchor" index="1"]
+[node name="WideGlow" parent="Anchor" parent_id_path=PackedInt32Array(93118890) index="1" unique_id=1704439409]
 self_modulate = Color(1, 0.08, 0.2, 0.3)
 material = SubResource("BossWideGlow")
 scale = Vector2(1.02, 1.02)
 texture = ExtResource("3_wall")
 
-[node name="TightGlow" parent="Anchor" index="2"]
+[node name="TightGlow" parent="Anchor" parent_id_path=PackedInt32Array(93118890) index="2" unique_id=1479335934]
 self_modulate = Color(1, 0.22, 0.32, 0.7)
 material = SubResource("BossTightGlow")
 scale = Vector2(1, 1)
 texture = ExtResource("3_wall")
 
-[node name="Core" parent="Anchor" index="3"]
+[node name="Core" parent="Anchor" parent_id_path=PackedInt32Array(93118890) index="3" unique_id=1004814504]
 self_modulate = Color(1, 0.92, 0.94, 1)
 scale = Vector2(1, 1)
 texture = ExtResource("3_wall")
 
-[node name="StatsComponent" parent="." index="1"]
+[node name="StatsComponent" parent="." index="1" unique_id=1304120856]
 health = 900
 
 [node name="MovementController" parent="." index="3"]
 sequence = ExtResource("6_movement")
 
-[node name="VisibleOnScreenNotifier2D" parent="." index="4"]
+[node name="VisibleOnScreenNotifier2D" parent="." index="4" unique_id=1344806211]
 rect = Rect2(-120, -34, 240, 68)
 
-[node name="ScaleComponent" parent="." index="5"]
+[node name="ScaleComponent" parent="." index="5" unique_id=391399757]
 scale_amount = Vector2(1.02, 1.02)
 scale_duration = 0.16
 
-[node name="ShakeComponent" parent="." index="7"]
+[node name="ShakeComponent" parent="." index="7" unique_id=53854399]
 shake_amount = 0.35
 shake_duration = 0.12
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="HurtboxComponent" index="0"]
-position = Vector2(0, -21)
-shape = SubResource("BossHurtTop")
-
-[node name="HurtLeft" type="CollisionShape2D" parent="HurtboxComponent" index="1"]
-position = Vector2(-106, 6)
-shape = SubResource("BossHurtWing")
-
-[node name="HurtMidLeft" type="CollisionShape2D" parent="HurtboxComponent" index="2"]
-position = Vector2(-40, 6)
-shape = SubResource("BossHurtMid")
-
-[node name="HurtMidRight" type="CollisionShape2D" parent="HurtboxComponent" index="3"]
-position = Vector2(40, 6)
-shape = SubResource("BossHurtMid")
-
-[node name="HurtRight" type="CollisionShape2D" parent="HurtboxComponent" index="4"]
-position = Vector2(106, 6)
-shape = SubResource("BossHurtWing")
-
-[node name="HurtboxComponent" parent="." index="8"]
+[node name="HurtboxComponent" parent="." index="8" unique_id=863455394]
 blocks_pierce = true
 metadata/incoming_damage_scale = 0.08
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="HitboxComponent" index="0"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HurtboxComponent" index="0" unique_id=1395078473]
+position = Vector2(0, -21)
+shape = SubResource("BossHurtTop")
+
+[node name="HurtLeft" type="CollisionShape2D" parent="HurtboxComponent" index="1" unique_id=733445503]
+position = Vector2(-106, 6)
+shape = SubResource("BossHurtWing")
+
+[node name="HurtMidLeft" type="CollisionShape2D" parent="HurtboxComponent" index="2" unique_id=294757830]
+position = Vector2(-40, 6)
+shape = SubResource("BossHurtMid")
+
+[node name="HurtMidRight" type="CollisionShape2D" parent="HurtboxComponent" index="3" unique_id=1531051766]
+position = Vector2(40, 6)
+shape = SubResource("BossHurtMid")
+
+[node name="HurtRight" type="CollisionShape2D" parent="HurtboxComponent" index="4" unique_id=1368924919]
+position = Vector2(106, 6)
+shape = SubResource("BossHurtWing")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HitboxComponent" parent_id_path=PackedInt32Array(486674932) index="0" unique_id=527856311]
 shape = SubResource("BossHitShape")
 
-[node name="ScoreComponent" parent="." index="12"]
-adjust_amount = 100
-
-[node name="SpawnerComponent" parent="." index="10"]
+[node name="SpawnerComponent" parent="." index="11" unique_id=1072333631]
 scene = ExtResource("9_explosion")
 
-[node name="ExperienceDropComponent" parent="." index="18"]
+[node name="ScoreComponent" parent="." index="13" unique_id=1849553207]
+adjust_amount = 100
+
+[node name="Turrets" type="Node2D" parent="." index="19" unique_id=1444176596]
+
+[node name="SlotLeft" type="Node2D" parent="Turrets" index="0" unique_id=1275830839]
+visible = false
+position = Vector2(-80, 18)
+
+[node name="Bay" type="Sprite2D" parent="Turrets/SlotLeft" index="0" unique_id=1767472756]
+self_modulate = Color(0.15, 0.95, 1, 1)
+position = Vector2(0, -4)
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("5b_bay")
+
+[node name="Turret" type="Node2D" parent="Turrets/SlotLeft" index="1" unique_id=361613195]
+visible = false
+position = Vector2(0, 4)
+
+[node name="Glow" type="Sprite2D" parent="Turrets/SlotLeft/Turret" index="0" unique_id=511144608]
+self_modulate = Color(0.2, 0.95, 1, 0.5)
+show_behind_parent = true
+scale = Vector2(1.15, 1.15)
+texture = ExtResource("4_turret")
+
+[node name="Sprite" type="Sprite2D" parent="Turrets/SlotLeft/Turret" index="1" unique_id=293986492]
+self_modulate = Color(0.35, 1, 1, 1)
+texture = ExtResource("4_turret")
+
+[node name="Muzzle" type="Marker2D" parent="Turrets/SlotLeft/Turret" index="2" unique_id=240945143]
+position = Vector2(0, 12)
+
+[node name="StatsComponent" type="Node" parent="Turrets/SlotLeft/Turret" index="3" unique_id=820244008]
+script = ExtResource("12_stats")
+health = 40
+
+[node name="HurtboxComponent" type="Area2D" parent="Turrets/SlotLeft/Turret" index="4" unique_id=139026699]
+collision_layer = 2
+collision_mask = 0
+monitoring = false
+monitorable = false
+script = ExtResource("10_hurtbox")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Turrets/SlotLeft/Turret/HurtboxComponent" index="0" unique_id=1733323992]
+shape = SubResource("TurretHurtShape")
+disabled = true
+
+[node name="HurtComponent" type="Node" parent="Turrets/SlotLeft/Turret" index="5" unique_id=2135724264 node_paths=PackedStringArray("stats_component", "hurtbox_component")]
+script = ExtResource("11_hurt")
+stats_component = NodePath("../StatsComponent")
+hurtbox_component = NodePath("../HurtboxComponent")
+
+[node name="Core" type="Node2D" parent="Turrets/SlotLeft" index="2" unique_id=1507914100]
+visible = false
+position = Vector2(0, 22)
+
+[node name="Glow" type="Sprite2D" parent="Turrets/SlotLeft/Core" index="0" unique_id=427993464]
+self_modulate = Color(1, 0.2, 0.55, 0.65)
+show_behind_parent = true
+scale = Vector2(1.35, 1.35)
+texture = ExtResource("5_core")
+
+[node name="Sprite" type="Sprite2D" parent="Turrets/SlotLeft/Core" index="1" unique_id=995893058]
+self_modulate = Color(1, 0.45, 0.85, 1)
+scale = Vector2(0.95, 0.95)
+texture = ExtResource("5_core")
+
+[node name="HurtboxComponent" type="Area2D" parent="Turrets/SlotLeft/Core" index="2" unique_id=1239285818]
+collision_layer = 2
+collision_mask = 0
+monitoring = false
+monitorable = false
+script = ExtResource("10_hurtbox")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Turrets/SlotLeft/Core/HurtboxComponent" index="0" unique_id=1414286119]
+shape = SubResource("CoreHurtShape")
+disabled = true
+
+[node name="HurtComponent" type="Node" parent="Turrets/SlotLeft/Core" index="3" unique_id=720768711 node_paths=PackedStringArray("stats_component", "hurtbox_component")]
+script = ExtResource("11_hurt")
+stats_component = NodePath("../../../../StatsComponent")
+hurtbox_component = NodePath("../HurtboxComponent")
+
+[node name="SlotCenter" type="Node2D" parent="Turrets" index="1" unique_id=1664855336]
+visible = false
+position = Vector2(0, 18)
+
+[node name="Bay" type="Sprite2D" parent="Turrets/SlotCenter" index="0" unique_id=1986286382]
+self_modulate = Color(0.15, 0.95, 1, 1)
+position = Vector2(0, -4)
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("5b_bay")
+
+[node name="Turret" type="Node2D" parent="Turrets/SlotCenter" index="1" unique_id=94904311]
+visible = false
+position = Vector2(0, 4)
+
+[node name="Glow" type="Sprite2D" parent="Turrets/SlotCenter/Turret" index="0" unique_id=849394722]
+self_modulate = Color(0.2, 0.95, 1, 0.5)
+show_behind_parent = true
+scale = Vector2(1.15, 1.15)
+texture = ExtResource("4_turret")
+
+[node name="Sprite" type="Sprite2D" parent="Turrets/SlotCenter/Turret" index="1" unique_id=768798237]
+self_modulate = Color(0.35, 1, 1, 1)
+texture = ExtResource("4_turret")
+
+[node name="Muzzle" type="Marker2D" parent="Turrets/SlotCenter/Turret" index="2" unique_id=1738720855]
+position = Vector2(0, 12)
+
+[node name="StatsComponent" type="Node" parent="Turrets/SlotCenter/Turret" index="3" unique_id=522793810]
+script = ExtResource("12_stats")
+health = 40
+
+[node name="HurtboxComponent" type="Area2D" parent="Turrets/SlotCenter/Turret" index="4" unique_id=1400025244]
+collision_layer = 2
+collision_mask = 0
+monitoring = false
+monitorable = false
+script = ExtResource("10_hurtbox")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Turrets/SlotCenter/Turret/HurtboxComponent" index="0" unique_id=569410667]
+shape = SubResource("TurretHurtShape")
+disabled = true
+
+[node name="HurtComponent" type="Node" parent="Turrets/SlotCenter/Turret" index="5" unique_id=1648291864 node_paths=PackedStringArray("stats_component", "hurtbox_component")]
+script = ExtResource("11_hurt")
+stats_component = NodePath("../StatsComponent")
+hurtbox_component = NodePath("../HurtboxComponent")
+
+[node name="Core" type="Node2D" parent="Turrets/SlotCenter" index="2" unique_id=375432237]
+visible = false
+position = Vector2(0, 22)
+
+[node name="Glow" type="Sprite2D" parent="Turrets/SlotCenter/Core" index="0" unique_id=285661372]
+self_modulate = Color(1, 0.2, 0.55, 0.65)
+show_behind_parent = true
+scale = Vector2(1.35, 1.35)
+texture = ExtResource("5_core")
+
+[node name="Sprite" type="Sprite2D" parent="Turrets/SlotCenter/Core" index="1" unique_id=1874645024]
+self_modulate = Color(1, 0.45, 0.85, 1)
+scale = Vector2(0.95, 0.95)
+texture = ExtResource("5_core")
+
+[node name="HurtboxComponent" type="Area2D" parent="Turrets/SlotCenter/Core" index="2" unique_id=1005896517]
+collision_layer = 2
+collision_mask = 0
+monitoring = false
+monitorable = false
+script = ExtResource("10_hurtbox")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Turrets/SlotCenter/Core/HurtboxComponent" index="0" unique_id=368391376]
+shape = SubResource("CoreHurtShape")
+disabled = true
+
+[node name="HurtComponent" type="Node" parent="Turrets/SlotCenter/Core" index="3" unique_id=1481419755 node_paths=PackedStringArray("stats_component", "hurtbox_component")]
+script = ExtResource("11_hurt")
+stats_component = NodePath("../../../../StatsComponent")
+hurtbox_component = NodePath("../HurtboxComponent")
+
+[node name="SlotRight" type="Node2D" parent="Turrets" index="2" unique_id=1207323192]
+visible = false
+position = Vector2(80, 18)
+
+[node name="Bay" type="Sprite2D" parent="Turrets/SlotRight" index="0" unique_id=469987026]
+self_modulate = Color(0.15, 0.95, 1, 1)
+position = Vector2(0, -4)
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("5b_bay")
+
+[node name="Turret" type="Node2D" parent="Turrets/SlotRight" index="1" unique_id=137907193]
+visible = false
+position = Vector2(0, 4)
+
+[node name="Glow" type="Sprite2D" parent="Turrets/SlotRight/Turret" index="0" unique_id=373561812]
+self_modulate = Color(0.2, 0.95, 1, 0.5)
+show_behind_parent = true
+scale = Vector2(1.15, 1.15)
+texture = ExtResource("4_turret")
+
+[node name="Sprite" type="Sprite2D" parent="Turrets/SlotRight/Turret" index="1" unique_id=554723135]
+self_modulate = Color(0.35, 1, 1, 1)
+texture = ExtResource("4_turret")
+
+[node name="Muzzle" type="Marker2D" parent="Turrets/SlotRight/Turret" index="2" unique_id=872532003]
+position = Vector2(0, 12)
+
+[node name="StatsComponent" type="Node" parent="Turrets/SlotRight/Turret" index="3" unique_id=1042791944]
+script = ExtResource("12_stats")
+health = 40
+
+[node name="HurtboxComponent" type="Area2D" parent="Turrets/SlotRight/Turret" index="4" unique_id=611651424]
+collision_layer = 2
+collision_mask = 0
+monitoring = false
+monitorable = false
+script = ExtResource("10_hurtbox")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Turrets/SlotRight/Turret/HurtboxComponent" index="0" unique_id=135824545]
+shape = SubResource("TurretHurtShape")
+disabled = true
+
+[node name="HurtComponent" type="Node" parent="Turrets/SlotRight/Turret" index="5" unique_id=1915972238 node_paths=PackedStringArray("stats_component", "hurtbox_component")]
+script = ExtResource("11_hurt")
+stats_component = NodePath("../StatsComponent")
+hurtbox_component = NodePath("../HurtboxComponent")
+
+[node name="Core" type="Node2D" parent="Turrets/SlotRight" index="2" unique_id=121308000]
+visible = false
+position = Vector2(0, 22)
+
+[node name="Glow" type="Sprite2D" parent="Turrets/SlotRight/Core" index="0" unique_id=1084230021]
+self_modulate = Color(1, 0.2, 0.55, 0.65)
+show_behind_parent = true
+scale = Vector2(1.35, 1.35)
+texture = ExtResource("5_core")
+
+[node name="Sprite" type="Sprite2D" parent="Turrets/SlotRight/Core" index="1" unique_id=2111798596]
+self_modulate = Color(1, 0.45, 0.85, 1)
+scale = Vector2(0.95, 0.95)
+texture = ExtResource("5_core")
+
+[node name="HurtboxComponent" type="Area2D" parent="Turrets/SlotRight/Core" index="2" unique_id=256452881]
+collision_layer = 2
+collision_mask = 0
+monitoring = false
+monitorable = false
+script = ExtResource("10_hurtbox")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Turrets/SlotRight/Core/HurtboxComponent" index="0" unique_id=1409647739]
+shape = SubResource("CoreHurtShape")
+disabled = true
+
+[node name="HurtComponent" type="Node" parent="Turrets/SlotRight/Core" index="3" unique_id=53755332 node_paths=PackedStringArray("stats_component", "hurtbox_component")]
+script = ExtResource("11_hurt")
+stats_component = NodePath("../../../../StatsComponent")
+hurtbox_component = NodePath("../HurtboxComponent")
+
+[node name="BossWallTurretCycle" type="Node" parent="." index="20" unique_id=761094665]
+script = ExtResource("7_cycle")
+
+[node name="ExperienceDropComponent" parent="." index="21" unique_id=1254377119]
 drop_chance = 1.0
 
-[node name="EnemyHealthBar" parent="." index="17"]
+[node name="EnemyHealthBar" parent="." index="23"]
+visible = false
 enabled = false
-visible = false
-
-[node name="Turrets" type="Node2D" parent="." index="19"]
-
-[node name="SlotLeft" type="Node2D" parent="Turrets"]
-position = Vector2(-80, 18)
-visible = false
-
-[node name="Bay" type="Sprite2D" parent="Turrets/SlotLeft"]
-self_modulate = Color(0.15, 0.95, 1, 1)
-position = Vector2(0, -4)
-scale = Vector2(0.85, 0.85)
-texture = ExtResource("5b_bay")
-
-[node name="Turret" type="Node2D" parent="Turrets/SlotLeft"]
-position = Vector2(0, 4)
-visible = false
-
-[node name="Glow" type="Sprite2D" parent="Turrets/SlotLeft/Turret"]
-self_modulate = Color(0.2, 0.95, 1, 0.5)
-show_behind_parent = true
-scale = Vector2(1.15, 1.15)
-texture = ExtResource("4_turret")
-
-[node name="Sprite" type="Sprite2D" parent="Turrets/SlotLeft/Turret"]
-self_modulate = Color(0.35, 1, 1, 1)
-scale = Vector2(1, 1)
-texture = ExtResource("4_turret")
-
-[node name="Muzzle" type="Marker2D" parent="Turrets/SlotLeft/Turret"]
-position = Vector2(0, 12)
-
-[node name="StatsComponent" type="Node" parent="Turrets/SlotLeft/Turret"]
-script = ExtResource("12_stats")
-health = 40
-
-[node name="HurtboxComponent" type="Area2D" parent="Turrets/SlotLeft/Turret"]
-collision_layer = 2
-collision_mask = 0
-monitoring = false
-monitorable = false
-script = ExtResource("10_hurtbox")
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Turrets/SlotLeft/Turret/HurtboxComponent"]
-disabled = true
-shape = SubResource("TurretHurtShape")
-
-[node name="HurtComponent" type="Node" parent="Turrets/SlotLeft/Turret" node_paths=PackedStringArray("stats_component", "hurtbox_component")]
-script = ExtResource("11_hurt")
-stats_component = NodePath("../StatsComponent")
-hurtbox_component = NodePath("../HurtboxComponent")
-
-[node name="Core" type="Node2D" parent="Turrets/SlotLeft"]
-position = Vector2(0, 22)
-visible = false
-
-[node name="Glow" type="Sprite2D" parent="Turrets/SlotLeft/Core"]
-self_modulate = Color(1, 0.2, 0.55, 0.65)
-show_behind_parent = true
-scale = Vector2(1.35, 1.35)
-texture = ExtResource("5_core")
-
-[node name="Sprite" type="Sprite2D" parent="Turrets/SlotLeft/Core"]
-self_modulate = Color(1, 0.45, 0.85, 1)
-scale = Vector2(0.95, 0.95)
-texture = ExtResource("5_core")
-
-[node name="HurtboxComponent" type="Area2D" parent="Turrets/SlotLeft/Core"]
-collision_layer = 2
-collision_mask = 0
-monitoring = false
-monitorable = false
-script = ExtResource("10_hurtbox")
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Turrets/SlotLeft/Core/HurtboxComponent"]
-disabled = true
-shape = SubResource("CoreHurtShape")
-
-[node name="HurtComponent" type="Node" parent="Turrets/SlotLeft/Core" node_paths=PackedStringArray("stats_component", "hurtbox_component")]
-script = ExtResource("11_hurt")
-stats_component = NodePath("../../../../StatsComponent")
-hurtbox_component = NodePath("../HurtboxComponent")
-
-[node name="SlotCenter" type="Node2D" parent="Turrets"]
-position = Vector2(0, 18)
-visible = false
-
-[node name="Bay" type="Sprite2D" parent="Turrets/SlotCenter"]
-self_modulate = Color(0.15, 0.95, 1, 1)
-position = Vector2(0, -4)
-scale = Vector2(0.85, 0.85)
-texture = ExtResource("5b_bay")
-
-[node name="Turret" type="Node2D" parent="Turrets/SlotCenter"]
-position = Vector2(0, 4)
-visible = false
-
-[node name="Glow" type="Sprite2D" parent="Turrets/SlotCenter/Turret"]
-self_modulate = Color(0.2, 0.95, 1, 0.5)
-show_behind_parent = true
-scale = Vector2(1.15, 1.15)
-texture = ExtResource("4_turret")
-
-[node name="Sprite" type="Sprite2D" parent="Turrets/SlotCenter/Turret"]
-self_modulate = Color(0.35, 1, 1, 1)
-scale = Vector2(1, 1)
-texture = ExtResource("4_turret")
-
-[node name="Muzzle" type="Marker2D" parent="Turrets/SlotCenter/Turret"]
-position = Vector2(0, 12)
-
-[node name="StatsComponent" type="Node" parent="Turrets/SlotCenter/Turret"]
-script = ExtResource("12_stats")
-health = 40
-
-[node name="HurtboxComponent" type="Area2D" parent="Turrets/SlotCenter/Turret"]
-collision_layer = 2
-collision_mask = 0
-monitoring = false
-monitorable = false
-script = ExtResource("10_hurtbox")
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Turrets/SlotCenter/Turret/HurtboxComponent"]
-disabled = true
-shape = SubResource("TurretHurtShape")
-
-[node name="HurtComponent" type="Node" parent="Turrets/SlotCenter/Turret" node_paths=PackedStringArray("stats_component", "hurtbox_component")]
-script = ExtResource("11_hurt")
-stats_component = NodePath("../StatsComponent")
-hurtbox_component = NodePath("../HurtboxComponent")
-
-[node name="Core" type="Node2D" parent="Turrets/SlotCenter"]
-position = Vector2(0, 22)
-visible = false
-
-[node name="Glow" type="Sprite2D" parent="Turrets/SlotCenter/Core"]
-self_modulate = Color(1, 0.2, 0.55, 0.65)
-show_behind_parent = true
-scale = Vector2(1.35, 1.35)
-texture = ExtResource("5_core")
-
-[node name="Sprite" type="Sprite2D" parent="Turrets/SlotCenter/Core"]
-self_modulate = Color(1, 0.45, 0.85, 1)
-scale = Vector2(0.95, 0.95)
-texture = ExtResource("5_core")
-
-[node name="HurtboxComponent" type="Area2D" parent="Turrets/SlotCenter/Core"]
-collision_layer = 2
-collision_mask = 0
-monitoring = false
-monitorable = false
-script = ExtResource("10_hurtbox")
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Turrets/SlotCenter/Core/HurtboxComponent"]
-disabled = true
-shape = SubResource("CoreHurtShape")
-
-[node name="HurtComponent" type="Node" parent="Turrets/SlotCenter/Core" node_paths=PackedStringArray("stats_component", "hurtbox_component")]
-script = ExtResource("11_hurt")
-stats_component = NodePath("../../../../StatsComponent")
-hurtbox_component = NodePath("../HurtboxComponent")
-
-[node name="SlotRight" type="Node2D" parent="Turrets"]
-position = Vector2(80, 18)
-visible = false
-
-[node name="Bay" type="Sprite2D" parent="Turrets/SlotRight"]
-self_modulate = Color(0.15, 0.95, 1, 1)
-position = Vector2(0, -4)
-scale = Vector2(0.85, 0.85)
-texture = ExtResource("5b_bay")
-
-[node name="Turret" type="Node2D" parent="Turrets/SlotRight"]
-position = Vector2(0, 4)
-visible = false
-
-[node name="Glow" type="Sprite2D" parent="Turrets/SlotRight/Turret"]
-self_modulate = Color(0.2, 0.95, 1, 0.5)
-show_behind_parent = true
-scale = Vector2(1.15, 1.15)
-texture = ExtResource("4_turret")
-
-[node name="Sprite" type="Sprite2D" parent="Turrets/SlotRight/Turret"]
-self_modulate = Color(0.35, 1, 1, 1)
-scale = Vector2(1, 1)
-texture = ExtResource("4_turret")
-
-[node name="Muzzle" type="Marker2D" parent="Turrets/SlotRight/Turret"]
-position = Vector2(0, 12)
-
-[node name="StatsComponent" type="Node" parent="Turrets/SlotRight/Turret"]
-script = ExtResource("12_stats")
-health = 40
-
-[node name="HurtboxComponent" type="Area2D" parent="Turrets/SlotRight/Turret"]
-collision_layer = 2
-collision_mask = 0
-monitoring = false
-monitorable = false
-script = ExtResource("10_hurtbox")
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Turrets/SlotRight/Turret/HurtboxComponent"]
-disabled = true
-shape = SubResource("TurretHurtShape")
-
-[node name="HurtComponent" type="Node" parent="Turrets/SlotRight/Turret" node_paths=PackedStringArray("stats_component", "hurtbox_component")]
-script = ExtResource("11_hurt")
-stats_component = NodePath("../StatsComponent")
-hurtbox_component = NodePath("../HurtboxComponent")
-
-[node name="Core" type="Node2D" parent="Turrets/SlotRight"]
-position = Vector2(0, 22)
-visible = false
-
-[node name="Glow" type="Sprite2D" parent="Turrets/SlotRight/Core"]
-self_modulate = Color(1, 0.2, 0.55, 0.65)
-show_behind_parent = true
-scale = Vector2(1.35, 1.35)
-texture = ExtResource("5_core")
-
-[node name="Sprite" type="Sprite2D" parent="Turrets/SlotRight/Core"]
-self_modulate = Color(1, 0.45, 0.85, 1)
-scale = Vector2(0.95, 0.95)
-texture = ExtResource("5_core")
-
-[node name="HurtboxComponent" type="Area2D" parent="Turrets/SlotRight/Core"]
-collision_layer = 2
-collision_mask = 0
-monitoring = false
-monitorable = false
-script = ExtResource("10_hurtbox")
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Turrets/SlotRight/Core/HurtboxComponent"]
-disabled = true
-shape = SubResource("CoreHurtShape")
-
-[node name="HurtComponent" type="Node" parent="Turrets/SlotRight/Core" node_paths=PackedStringArray("stats_component", "hurtbox_component")]
-script = ExtResource("11_hurt")
-stats_component = NodePath("../../../../StatsComponent")
-hurtbox_component = NodePath("../HurtboxComponent")
-
-[node name="BossWallTurretCycle" type="Node" parent="." index="20"]
-script = ExtResource("7_cycle")

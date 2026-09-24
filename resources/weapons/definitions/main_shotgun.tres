@@ -1,7 +1,7 @@
 [gd_resource type="Resource" script_class="WeaponDefinition" format=3 uid="uid://comw1xtg060l4"]
 
 [ext_resource type="Script" uid="uid://cpkr4w0d5rl5t" path="res://resources/weapons/weapon_definition.gd" id="1_def"]
-[ext_resource type="PackedScene" path="res://player_ship/weapons/shotgun_weapon_system.tscn" id="2_scene"]
+[ext_resource type="PackedScene" uid="uid://cc1g2u4qv4wi8" path="res://player_ship/weapons/shotgun_weapon_system.tscn" id="2_scene"]
 [ext_resource type="Texture2D" uid="uid://bhsri7kh1kskh" path="res://assets/weapons/weapon_main_shotgun.svg" id="3_icon"]
 
 [resource]

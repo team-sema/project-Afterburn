@@ -1,11 +1,11 @@
-[gd_resource type="Resource" script_class="EncounterPreset" format=3]
+[gd_resource type="Resource" script_class="EncounterPreset" format=3 uid="uid://desaf2xju88rc"]
 
-[ext_resource type="Script" path="res://resources/encounters/encounter_preset.gd" id="1_preset"]
-[ext_resource type="Script" path="res://resources/encounters/encounter_member.gd" id="2_member"]
+[ext_resource type="Script" uid="uid://c6t14vfypdxop" path="res://resources/encounters/encounter_preset.gd" id="1_preset"]
+[ext_resource type="Script" uid="uid://cbtt1l1ekmuxi" path="res://resources/encounters/encounter_member.gd" id="2_member"]
 [ext_resource type="PackedScene" path="res://formations/layouts/single_formation.tscn" id="3_layout"]
-[ext_resource type="Resource" path="res://resources/enemy_movement/sequences/single_release.tres" id="4_release"]
-[ext_resource type="Resource" path="res://resources/enemy_movement/sequences/boss_wall_entry_hold.tres" id="5_individual"]
-[ext_resource type="PackedScene" path="res://enemies/boss_wall.tscn" id="6_boss"]
+[ext_resource type="Resource" uid="uid://ciw8jhdxct5qd" path="res://resources/enemy_movement/sequences/single_release.tres" id="4_release"]
+[ext_resource type="Resource" uid="uid://dy1c2iae02y4m" path="res://resources/enemy_movement/sequences/boss_wall_entry_hold.tres" id="5_individual"]
+[ext_resource type="PackedScene" uid="uid://4dw85uaqirtg" path="res://enemies/boss_wall.tscn" id="6_boss"]
 
 [sub_resource type="Resource" id="Member_boss"]
 script = ExtResource("2_member")
