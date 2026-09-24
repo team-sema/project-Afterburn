@@ -1,0 +1,7 @@
+interface:
+  display_name: "Afterburn Push"
+  short_description: "Finish feature and merge to main"
+  default_prompt: "Use $afterburn-push to commit and merge this Afterburn feature to main."
+
+policy:
+  allow_implicit_invocation: true
