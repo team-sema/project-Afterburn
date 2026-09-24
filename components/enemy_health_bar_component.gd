@@ -3,6 +3,7 @@ extends Node2D
 
 @export var actor: Enemy
 @export var stats_component: StatsComponent
+@export var enabled := true
 @export_range(0.1, 10.0, 0.1, "suffix:s") var visible_duration := 1.5
 @export_range(0.05, 2.0, 0.05, "suffix:s") var fade_duration := 0.25
 @export var screen_offset := Vector2(0.0, -22.0)
@@ -83,7 +84,7 @@ func _show_temporarily() -> void:
 
 
 func _is_eligible() -> bool:
-	return actor.is_elite or actor.is_boss
+	return enabled and (actor.is_elite or actor.is_boss)
 
 
 func _sync_transform() -> void:

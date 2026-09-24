@@ -40,9 +40,9 @@ WAVE·ELITE·BOSS 스텝은 스폰/게이트 직전에 맵 중앙에 `WARNING` �
 | `a` | NORMAL | `MainEncounterPool` 랜덤 | 2.8 ~ 3.1초 |
 | `b` | WAVE | `drone_swarm_wave`: 드론 편대 3연속 (straight → triangle → zigzag), 편대 간격 0.55~0.7초 | 5.0 ~ 5.5초 · clear_timeout 6.0 · clear_min_wait 2.5 |
 | `c` | ELITE | 교대 규칙 · wait_for_clear (timeout 없음) | 2.8 ~ 3.1초 |
-| `d` | BOSS | 비움 (보스 미구현 → 건너뜀) | — |
+| `d` | BOSS | `boss_wall` (거대 벽 + 출몰 포탑) | 2.8 ~ 3.1초 |
 
-- Phase `main`: `a a a a b a a a b a a a c a a a a b a a a a d`
+- Phase `main`: `a a d` (플레이테스트용 · 정식 패턴으로 되돌릴 예정)
 - 끝나면 같은 Phase를 반복 (`REPEAT_LAST_PHASE`). Phase는 패턴을 담는 단위일 뿐, opening/loop 고정 구조가 아니다.
 
 개발자는 `.tres`의 패턴 문자열·토큰 정의만 고쳐 시나리오를 바꾼다. 현행 규칙·완료 조건은 이 문서를 따른다.
@@ -56,7 +56,7 @@ WAVE·ELITE·BOSS 스텝은 스폰/게이트 직전에 맵 중앙에 `WARNING` �
 
 ## Threat · 엘리트 게이트
 
-우선순위(겹칠 때): `boss > elite > augment offer > normal encounter` (보스는 미구현).
+우선순위(겹칠 때): `boss > elite > augment offer > normal encounter`.
 
 | 단계 | 동작 |
 |------|------|
@@ -78,8 +78,8 @@ WAVE·ELITE·BOSS 스텝은 스폰/게이트 직전에 맵 중앙에 `WARNING` �
 
 ## Threat별 로스터 요지
 
-- **Threat 1:** Drone·Striker 호위·Awl·Bomb 다이아·Interceptor pair 등 (catalog)
-- **Threat 2+:** `tanker_guard_sniper` (탱커 생존 시 sniper reinforcement)
+- **Threat 1:** Drone·Striker 호위·Awl 등 (Bomb·Interceptor pair 제외)
+- **Threat 2+:** `tanker_guard_sniper` · `bomb_drone_diamond` · `interceptor_pair`
 - **Threat 3+:** Caster · V7/X9 하강 · X9 orbit · Interceptor trio
 
 ## 관련

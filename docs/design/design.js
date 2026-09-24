@@ -73,6 +73,15 @@ const NAV = [
         ],
       },
       {
+        id: "bosses",
+        title: "보스",
+        desc: "BOSS 관문 전용",
+        file: "bosses/index.md",
+        children: [
+          { id: "bosses/wall", title: "Wall (프로토타입)", file: "bosses/wall.md" },
+        ],
+      },
+      {
         id: "formations",
         title: "진형",
         desc: "슬롯 기하만",
@@ -295,6 +304,7 @@ const PAGES = (() => {
 const LAYER_CHIPS = [
   { id: "enemies", label: "일반 적" },
   { id: "elites", label: "엘리트" },
+  { id: "bosses", label: "보스" },
   { id: "formations", label: "② 진형" },
   { id: "encounters", label: "③ Encounter" },
   { id: "ship-modules", label: "함선 모듈" },

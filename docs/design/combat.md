@@ -252,7 +252,7 @@ player.play(mixed, emitter, world)
 - 제거한 적탄 1발마다 XP 1짜리 `ExperienceOrb`를 탄 위치에 생성한다.
 - 엘리트의 확정 드롭을 포함해 플레이필드에 있던 모든 XP 오브를 플레이어 수집기로 강제 흡수한다. 강제 흡수는 일시정지 중에도 이동하며, 전부 실제 XP로 정산될 때까지 기다린다.
 - 흡수 중에는 플레이어 오그먼트 `C` 입력과 HUD 힌트를 잠근다. 흡수가 끝난 뒤 Threat를 올리고 적 오그먼트 오퍼를 연다.
-- BOSS 스텝의 게이트·보상 경로는 구현되어 같은 `BulletCancelRewardController`를 호출한다. 현재 기본 시퀀스에는 boss_preset이 없어 건너뛰며 전용 보스 콘텐츠는 미구현이다.
+- BOSS 스텝의 게이트·보상 경로는 구현되어 같은 `BulletCancelRewardController`를 호출한다. 기본 시퀀스 `d`는 [Boss Wall](bosses/wall.md)을 스폰한다.
 
 ## 점수·난이도 상수
 
