@@ -79,6 +79,7 @@ const NAV = [
         file: "bosses/index.md",
         children: [
           { id: "bosses/wall", title: "Wall (프로토타입)", file: "bosses/wall.md" },
+          { id: "bosses/carrier", title: "거대 항모 · Boss Lab", file: "bosses/carrier.md" },
         ],
       },
       {
