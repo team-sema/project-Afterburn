@@ -19,15 +19,15 @@ chmod +x tools/start-feature.sh 2>/dev/null || true
 
 3. If the working tree is not clean, stop and tell the user to commit or stash first.
 4. After the branch is created, report the branch name.
-5. Read `docs/design/README.md` and `docs/design/feature-workflow.md`. Identify the smallest existing topic document(s) that own the requested rules; `docs/design/history/` and old Task files are context only.
+5. Read `docs/design/README.md` and `docs/design/feature-workflow.md`. Identify the smallest existing topic document(s) that own the requested rules; `docs/design/history/` is context only.
 6. Infer the likely code paths and canonical design documents this slug should touch. Report both after creating the branch; do not ask the user to produce the path list.
-7. Plan to update existing prose, tables, numbers, and completion criteria in place. Do not create a separate implementation-spec tree, a per-feature system spec, or a history entry. Create a new topic document only for a genuinely independent, durable subject; then register it in `docs/design/README.md` and `docs/design/design.js`.
-8. Create `docs/design/tasks/<slug>-tasks.md` when implementation begins. It links the canonical design documents and records ordered work, scope, and verification without copying gameplay rules or numbers.
-9. **Kanban ticket:** Follow `.cursor/rules/kanban-tickets.mdc`. Optionally query Notion for an existing card; if none, **recommend title and body only**. Do **not** auto-create or move cards.
-10. Keep later edits within the inferred feature scope unless the user expands it.
+7. Plan to update existing prose, tables, numbers, and completion criteria in place. Do not create a separate implementation-spec tree, a per-feature system spec, a history entry, or `docs/design/tasks/`. Create a new topic document only for a genuinely independent, durable subject; then register it in `docs/design/README.md` and `docs/design/design.js`.
+8. **Kanban ticket:** Follow `.cursor/rules/kanban-tickets.mdc`. Optionally query Notion for an existing card; if none, **recommend title and body only**. Do **not** auto-create or move cards.
+9. Keep later edits within the inferred feature scope unless the user expands it.
 
 ## Never Do
 
 - Do not finish or merge the feature here.
 - Do not create or use a `develop` branch.
+- Do not create `docs/design/tasks/` checklists.
 - Do not change `git config`.

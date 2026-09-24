@@ -83,6 +83,10 @@ func _on_hit_hurtbox(hurtbox: HurtboxComponent) -> void:
 	if target != null:
 		_hit_ids[target.get_instance_id()] = true
 
+	if hurtbox.blocks_pierce:
+		queue_free()
+		return
+
 	if _pierce_remaining > 0:
 		_pierce_remaining -= 1
 		_pierce_hits += 1

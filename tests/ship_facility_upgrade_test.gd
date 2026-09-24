@@ -169,8 +169,9 @@ func _check_facility_effect_modules(
 	_expect(hangar_def.display_name == "동력로", "hangar facility display is renamed to 동력로")
 	_expect(hangar.display_name.contains("과충전"), "hangar module is the periodic overcharge reactor")
 	_expect(is_equal_approx(hangar_def.get_value_for_module_count(1), 0.0), "hangar definition curve stays inert")
-	_expect(applier.get_max_hull() == base_hull + 1, "hull module increases maximum hull")
-	_expect(stats.health == applier.get_max_hull(), "maximum hull increase also raises current hull")
+	_expect(hull.facility_module_effect == null, "hull module is a blank card with no effect")
+	_expect(applier.get_max_hull() == base_hull, "blank hull module does not raise maximum hull")
+	_expect(stats.health == base_hull, "blank hull module leaves current hull unchanged")
 	_expect(
 		is_equal_approx(applier.get_collection_radius(), base_radius * 1.5),
 		"radar module increases collection radius",

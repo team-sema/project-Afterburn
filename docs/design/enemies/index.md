@@ -18,7 +18,7 @@
 | Pink / Caster | 육각·크리스탈형 | 3 | `shooting_enemy.tscn` | 110 | 25 | [caster](caster.md) |
 | Sniper | 가느다란 창형 | 2 | `sniper_enemy.tscn` | 95 | 25 | [sniper](sniper.md) |
 
-스프라이트는 흰 마스크 SVG를 네온 글로우 레이어로 칠해 쓴다. 상세 문서의 **외형** 절에 미리보기와 설명이 있다.
+스프라이트는 `assets/enemies/`의 흰 마스크 SVG를 네온 글로우 레이어로 칠해 쓴다. 상세 문서의 **외형** 절에 미리보기와 설명이 있다.
 
 베이스 `enemies/enemy.tscn`: 네온 레이어, 전투/VFX, `TargetingComponent`, `EnemyShootComponent`, `EnemyModifierFactory`, XP 드롭.
 
@@ -36,7 +36,7 @@ HEALTH / MOVE_SPEED / ACTION_RATE (+ `EnemyShootComponent` / `SniperAttackCompon
 ## 보스 플래그 (`is_boss`)
 
 - `Enemy.is_boss == true`이면 `bosses` 그룹에 들어가며, 시설 **대형 표적 해석기**(`BOSS_DAMAGE_MULT`) 피해 배율 대상이 된다
-- 현재 스폰 세트에는 보스 적을 넣는 콘텐츠가 **없음** (플래그·배율만 구현) — [gaps](../gaps.md)
+- 현재 기본 시퀀스의 BOSS 토큰 `d`는 [Boss Wall](../bosses/wall.md) preset을 사용한다.
 
 ## 하위 문서
 

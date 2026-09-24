@@ -128,8 +128,10 @@ func _run_sequence() -> void:
 					step.kind,
 				)
 				await _run_step(step)
-			# Guard against zero-delay patterns spinning inside one frame.
-			await get_tree().process_frame
+			# Zero-delay patterns: yield one frame between phase passes.
+			# After scene unload the director may already be outside the tree.
+			if _can_continue():
+				await _await_process_frame()
 		phase_index += 1
 		if (
 			phase_index >= phases.size()
@@ -146,6 +148,13 @@ func _run_sequence() -> void:
 
 func _can_continue() -> bool:
 	return not _stop_requested and is_inside_tree()
+
+
+func _await_process_frame() -> void:
+	var tree := get_tree()
+	if tree == null:
+		return
+	await tree.process_frame
 
 
 func _run_step(step: EncounterSequenceStep) -> void:
@@ -262,11 +271,9 @@ func _run_gate(step: EncounterSequenceStep) -> bool:
 func _wait_for_clear_gated(step: EncounterSequenceStep) -> void:
 	if not step.wait_for_clear:
 		return
-	var started_msec := Time.get_ticks_msec()
-	await _wait_for_clear_or_timeout(step.clear_timeout)
+	var elapsed: float = await _wait_for_clear_or_timeout(step.clear_timeout)
 	if not _can_continue():
 		return
-	var elapsed := float(Time.get_ticks_msec() - started_msec) / 1000.0
 	var remaining := step.clear_min_wait - elapsed
 	if remaining > 0.0:
 		await _wait_seconds(remaining)
@@ -276,15 +283,22 @@ func _wait_for_clear() -> void:
 	await _wait_for_clear_or_timeout(0.0)
 
 
-func _wait_for_clear_or_timeout(timeout: float) -> void:
+## Returns gameplay seconds spent waiting. Frames where this node cannot process
+## (tree paused for augment pick / bullet cancel) do not count, so clear_min_wait
+## keeps its full breathing room after a pause.
+func _wait_for_clear_or_timeout(timeout: float) -> float:
+	var elapsed := 0.0
 	if timeout > 0.0:
 		_wait_timer.start(timeout)
 	while _can_continue() and not _active_runs.is_empty():
 		if timeout > 0.0 and _wait_timer.is_stopped():
-			return
-		await get_tree().process_frame
-	if timeout > 0.0 and not _wait_timer.is_stopped():
+			return elapsed
+		await _await_process_frame()
+		if _can_continue() and can_process():
+			elapsed += get_process_delta_time()
+	if timeout > 0.0 and _wait_timer != null and is_instance_valid(_wait_timer) and not _wait_timer.is_stopped():
 		_wait_timer.stop()
+	return elapsed
 
 
 func _wait_seconds(duration: float) -> void:

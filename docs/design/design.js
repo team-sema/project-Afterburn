@@ -3,7 +3,6 @@
  * Markdown `#id` / relative `*.md` links resolve to the same routes.
  */
 const NAV = [
-  { id: 'bosses/carrier', title: '거대 항모 · Boss Lab', file: 'bosses/carrier.md' },
   { id: 'guide', title: '기획서 안내', file: 'README.md' },
   { id: 'vision', title: '게임 방향', file: 'vision.md' },
   {
@@ -71,6 +70,16 @@ const NAV = [
           { id: "elites/elite-awl", title: "Elite Awl", file: "elites/elite-awl.md" },
           { id: "elites/elite-bomb", title: "Elite Bomb (시안)", file: "elites/elite-bomb.md" },
           { id: "elites/elite-caster", title: "Elite Caster (시안)", file: "elites/elite-caster.md" },
+        ],
+      },
+      {
+        id: "bosses",
+        title: "보스",
+        desc: "BOSS 관문 전용",
+        file: "bosses/index.md",
+        children: [
+          { id: "bosses/wall", title: "Wall (프로토타입)", file: "bosses/wall.md" },
+          { id: "bosses/carrier", title: "거대 항모 · Boss Lab", file: "bosses/carrier.md" },
         ],
       },
       {
@@ -296,6 +305,7 @@ const PAGES = (() => {
 const LAYER_CHIPS = [
   { id: "enemies", label: "일반 적" },
   { id: "elites", label: "엘리트" },
+  { id: "bosses", label: "보스" },
   { id: "formations", label: "② 진형" },
   { id: "encounters", label: "③ Encounter" },
   { id: "ship-modules", label: "함선 모듈" },

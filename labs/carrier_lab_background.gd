@@ -1,6 +1,6 @@
 extends CanvasLayer
 ## Screen-space Lab starfield: camera pullback must never expose its edges.
-const TEXTURES = [preload("res://assets/space.png"), preload("res://assets/far_stars.png"), preload("res://assets/close_stars.png")]
+const TEXTURES = [preload("res://assets/backgrounds/space.png"), preload("res://assets/backgrounds/far_stars.png"), preload("res://assets/backgrounds/close_stars.png")]
 const SPEEDS = [2.0,5.0,20.0]
 var scroll := PackedFloat32Array([0,0,0])
 var tiles: Array[TextureRect] = []

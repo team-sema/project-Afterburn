@@ -5,7 +5,7 @@
 ## 콘텐츠·동작 결정
 
 - **엘리트 시안:** [Elite Bomb](elites/elite-bomb.md)·[Elite Caster](elites/elite-caster.md)는 외형만 있다. 공격·수치·로스터 연결을 각 문서에서 먼저 확정한다.
-- **보스:** [런 페이싱](run-pacing.md)의 BOSS 게이트·보상 경로는 구현됐으나 전용 보스 콘텐츠와 기본 boss_preset은 없다.
+- **보스:** [Wall](bosses/wall.md) 프로토타입이 메인 시퀀스 `d`에 연결됐다. 수치·패턴·포탑 파괴 등은 체감 후 조정.
 - **Striker 편대 해제:** [Striker의 확인 필요](enemies/striker.md#확인-필요). 기존 의도와 현재 이동 완료 기반 해제가 다르다.
 - **샷건 설명:** [샷건](weapon-modules/shotgun.md). 리소스 카드 문구의 사거리 배율은 실제로 수명 배율이다. 표시 문자열을 실제 계산에 맞출 필요가 있다.
 - **플레이어 행동 증강:** PlayerAugment.behavior_components는 있으나 PlayerAugmentApplier가 부착하지 않는다. 후보는 [오그먼트](augments.md#미결정-후보).

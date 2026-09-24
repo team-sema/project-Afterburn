@@ -5,7 +5,7 @@
 ![Elite Fighter](../enemies/sprites/enemy_elite_fighter.svg)
 
 일반 적보다 훨씬 큰 **다익·포격기**. 중앙 용골에 좌우 날개·측면 포대가 붙은 형태로, Threat 관문임을 실루엣만으로 구분한다. **진한 적색/분홍** 글로우.
-- 스프라이트: `assets/svg/enemy_elite_fighter.svg`
+- 스프라이트: `assets/enemies/enemy_elite_fighter.svg`
 - 틴트: 크림슨 글로우 · 밝은 코어 (`elite_fighter.tscn`). 피격 시 확대·폭발 스케일이 일반보다 큼.
 
 ## 의도

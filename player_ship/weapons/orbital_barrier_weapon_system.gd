@@ -4,23 +4,33 @@ extends WeaponSystem
 @export var orbit_radius := 22.0
 @export var base_orbit_speed := 2.8
 @export var base_damage := 6
-## Capsule half-width (thickness of the shield arc).
-@export var segment_thickness := 5.0
-## Capsule length along the orbit (covers most of a 120° sector). Base ~1/3 of prior 34.
-@export var segment_arc_length := 11.33
+## Capsule half-width (radial thickness of the shield plate).
+@export var segment_thickness := 4.5
+## Capsule length along the orbit (short plate face).
+@export var segment_arc_length := 12.0
 @export_range(0.05, 5.0, 0.05) var base_rehit_cooldown := 1.0
 @export_range(10.0, 400.0, 1.0) var knockback_strength := 140.0
+## Damage a segment can absorb before it breaks.
+@export_range(1, 40, 1) var segment_integrity := 1
+## Seconds before a broken segment respawns at full integrity.
+@export_range(0.25, 30.0, 0.05) var respawn_delay := 3.0
 
-const BASE_GLOW_SCALE := Vector2(0.08, 0.073)
-const BASE_CORE_SCALE := Vector2(0.035, 0.04)
+## Plate texture: X = orbit length, Y = radial thickness.
+const BASE_GLOW_SCALE := Vector2(0.055, 0.1)
+const BASE_CORE_SCALE := Vector2(0.045, 0.075)
 
 @onready var orbit_root: Node2D = $OrbitRoot
 
 var _segments: Array[Node2D] = []
 ## Enemies already struck: id -> {node, until}  until<0 means forever (no rehit trait).
 var _struck_targets: Dictionary = {}
+## segment instance_id -> {hp, broken, respawn_at}
+var _segment_states: Dictionary = {}
 var _template_segment: Node2D
 var _base_segment_count := 0
+## Gameplay seconds accumulated from _process delta. Respawn and rehit deadlines
+## use this so tree pause (augment pick, bullet cancel) freezes them with the run.
+var _clock := 0.0
 
 
 func _ready() -> void:
@@ -31,6 +41,8 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
+	_clock += delta
+	_update_respawns()
 	if is_shutdown or get_player_actor() == null or not is_instance_valid(get_player_actor()):
 		return
 	global_position = (get_player_actor() as Node2D).global_position
@@ -48,7 +60,7 @@ func _on_weapon_setup() -> void:
 	_rebuild_segment_count()
 	_apply_stat_multipliers()
 	for segment in _segments:
-		_enable_segment_collision(segment)
+		_restore_segment(segment)
 
 
 func _on_weapon_trait_changed(changed_weapon_id: StringName, _trait_id: StringName, _new_rank: int) -> void:
@@ -117,12 +129,18 @@ func _rebuild_segment_count() -> void:
 		orbit_root.add_child(clone)
 		_segments.append(clone)
 		_wire_one_segment(clone)
+		_restore_segment(clone)
 	while _segments.size() > desired:
 		var extra := _segments.pop_back() as Node2D
-		if is_instance_valid(extra) and extra != _template_segment:
-			extra.queue_free()
+		if is_instance_valid(extra):
+			_segment_states.erase(extra.get_instance_id())
+			if extra != _template_segment:
+				extra.queue_free()
 	_layout_segments()
 	_apply_stat_multipliers()
+	for segment in _segments:
+		if not _is_segment_broken(segment):
+			_enable_segment_collision(segment)
 
 
 func _layout_segments() -> void:
@@ -143,12 +161,14 @@ func _layout_segments_at(radius: float, size_mult: float) -> void:
 		segment.position = Vector2(cos(angle), sin(angle)) * radius
 		segment.rotation = angle + PI * 0.5
 		_apply_segment_shapes(segment, size_mult)
+		# Local +X is tangential (orbit face width); +Y is radial.
+		var face_scale := Vector2(size_mult, size_mult)
 		var glow := segment.get_node_or_null("Glow") as Sprite2D
 		if glow != null:
-			glow.scale = BASE_GLOW_SCALE * Vector2(1.0, size_mult)
+			glow.scale = BASE_GLOW_SCALE * face_scale
 		var core := segment.get_node_or_null("Core") as Sprite2D
 		if core != null:
-			core.scale = BASE_CORE_SCALE * Vector2(1.0, size_mult)
+			core.scale = BASE_CORE_SCALE * face_scale
 
 
 func _apply_segment_shapes(segment: Node2D, size_mult: float = 1.0) -> void:
@@ -162,12 +182,15 @@ func _apply_segment_shapes(segment: Node2D, size_mult: float = 1.0) -> void:
 		var shape_node := area.get_node_or_null("CollisionShape2D") as CollisionShape2D
 		if shape_node == null:
 			continue
+		# Capsule height is local Y; rotate so the long axis follows the orbit tangent (local X).
+		shape_node.rotation = PI * 0.5
 		shape_node.shape = capsule
 
 
 func _wire_segments() -> void:
 	for segment in _segments:
 		_wire_one_segment(segment)
+		_restore_segment(segment)
 
 
 func _wire_one_segment(segment: Node2D) -> void:
@@ -182,7 +205,89 @@ func _wire_one_segment(segment: Node2D) -> void:
 	var bound := _on_barrier_hitbox_entered.bind(hitbox)
 	if not hitbox.area_entered.is_connected(bound):
 		hitbox.area_entered.connect(bound)
+	var hurt_bound := _on_segment_hurt.bind(segment)
+	if not hurtbox.hurt.is_connected(hurt_bound):
+		hurtbox.hurt.connect(hurt_bound)
 	_enable_segment_collision(segment)
+
+
+func _ensure_segment_state(segment: Node2D) -> Dictionary:
+	var id := segment.get_instance_id()
+	if not _segment_states.has(id):
+		_segment_states[id] = {
+			"hp": segment_integrity,
+			"broken": false,
+			"respawn_at": -1.0,
+		}
+	return _segment_states[id]
+
+
+func _is_segment_broken(segment: Node2D) -> bool:
+	if segment == null or not is_instance_valid(segment):
+		return true
+	return bool(_ensure_segment_state(segment).get("broken", false))
+
+
+func get_segment_integrity(segment: Node2D) -> int:
+	return int(_ensure_segment_state(segment).get("hp", 0))
+
+
+func is_segment_broken(segment: Node2D) -> bool:
+	return _is_segment_broken(segment)
+
+
+func _on_segment_hurt(hitbox: Variant, segment: Node2D) -> void:
+	if segment == null or not is_instance_valid(segment):
+		return
+	if _is_segment_broken(segment):
+		return
+	var damage := 1
+	if hitbox is HitboxComponent:
+		damage = maxi(1, (hitbox as HitboxComponent).damage)
+	var state := _ensure_segment_state(segment)
+	state["hp"] = int(state.get("hp", segment_integrity)) - damage
+	if int(state["hp"]) <= 0:
+		_break_segment(segment)
+
+
+func _break_segment(segment: Node2D) -> void:
+	var state := _ensure_segment_state(segment)
+	state["hp"] = 0
+	state["broken"] = true
+	state["respawn_at"] = _clock + respawn_delay
+	_disable_segment_collision(segment)
+	_set_segment_visible(segment, false)
+
+
+func _restore_segment(segment: Node2D) -> void:
+	if segment == null or not is_instance_valid(segment):
+		return
+	var state := _ensure_segment_state(segment)
+	state["hp"] = segment_integrity
+	state["broken"] = false
+	state["respawn_at"] = -1.0
+	_set_segment_visible(segment, true)
+	if not is_shutdown:
+		_enable_segment_collision(segment)
+
+
+func _update_respawns() -> void:
+	var now := _clock
+	for segment in _segments:
+		if segment == null or not is_instance_valid(segment):
+			continue
+		var state := _ensure_segment_state(segment)
+		if not bool(state.get("broken", false)):
+			continue
+		var respawn_at := float(state.get("respawn_at", -1.0))
+		if respawn_at >= 0.0 and now >= respawn_at:
+			_restore_segment(segment)
+
+
+func _set_segment_visible(segment: Node2D, enabled: bool) -> void:
+	for child in segment.get_children():
+		if child is CanvasItem:
+			(child as CanvasItem).visible = enabled
 
 
 func _uses_timed_rehit() -> bool:
@@ -198,6 +303,9 @@ func _rehit_cooldown() -> float:
 
 func _on_barrier_hitbox_entered(hurtbox: Area2D, hitbox: HitboxComponent) -> void:
 	if not hurtbox is HurtboxComponent:
+		return
+	var segment := hitbox.get_parent() as Node2D
+	if segment != null and _is_segment_broken(segment):
 		return
 	var enemy_hurtbox := hurtbox as HurtboxComponent
 	if enemy_hurtbox.is_invincible:
@@ -263,7 +371,7 @@ func _has_struck(target: Node) -> bool:
 			return false
 		if until < 0.0:
 			return true
-		return Time.get_ticks_msec() * 0.001 < until
+		return _clock < until
 	# Legacy forever mark
 	if entry != target or not is_instance_valid(entry):
 		_struck_targets.erase(id)
@@ -274,14 +382,14 @@ func _has_struck(target: Node) -> bool:
 func _mark_struck(target: Node) -> void:
 	var until := -1.0
 	if _uses_timed_rehit():
-		until = Time.get_ticks_msec() * 0.001 + _rehit_cooldown()
+		until = _clock + _rehit_cooldown()
 	_struck_targets[target.get_instance_id()] = {"node": target, "until": until}
 
 
 func _prune_struck() -> void:
 	if not _uses_timed_rehit():
 		return
-	var now := Time.get_ticks_msec() * 0.001
+	var now := _clock
 	var remove_ids: Array = []
 	for id in _struck_targets.keys():
 		var entry: Variant = _struck_targets[id]
@@ -307,6 +415,8 @@ func _disable_segment_collision(segment: Node2D) -> void:
 
 
 func _enable_segment_collision(segment: Node2D) -> void:
+	if _is_segment_broken(segment):
+		return
 	var hitbox := segment.get_node_or_null("HitboxComponent") as HitboxComponent
 	if hitbox != null:
 		hitbox.set_deferred("monitoring", true)

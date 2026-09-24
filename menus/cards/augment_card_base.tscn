@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://dy8pm46rut7f1" path="res://menus/augment_card_art.gd" id="1"]
 [ext_resource type="Shader" uid="uid://cf5l5svfu4h12" path="res://menus/augment_card_surface.gdshader" id="2"]
 [ext_resource type="FontFile" uid="uid://dhbb73hkpge3y" path="res://fonts/Mulmaru.ttf" id="3"]
-[ext_resource type="Texture2D" uid="uid://dil5ki5jurkbf" path="res://assets/svg/weapons/weapon_aux_homing_missile.svg" id="4"]
+[ext_resource type="Texture2D" uid="uid://dil5ki5jurkbf" path="res://assets/weapons/weapon_aux_homing_missile.svg" id="4"]
 
 [sub_resource type="ShaderMaterial" id="Surface"]
 resource_local_to_scene = true

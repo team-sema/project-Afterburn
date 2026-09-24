@@ -18,6 +18,10 @@ func _ready() -> void:
 
 # This is the function for playing the sound using a variance in the pitch
 func play_with_variance(from_position: float = 0.0) -> void:
+	# Formation reparent and other tree moves can flush Area2D overlaps while this
+	# player is briefly outside the scene tree; AudioStreamPlayer.play requires it.
+	if not is_inside_tree():
+		return
 	# Set the pitch scale before playing the sound (picking a random amount between the minimum and maximum)
 	pitch_scale = randf_range(pitch_min, pitch_max)
 	play(from_position)

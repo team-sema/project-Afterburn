@@ -45,12 +45,17 @@ func setup(amount: int, spawn_position: Vector2) -> void:
 	global_position = spawn_position
 
 
-func start_forced_attraction(collector: Area2D) -> bool:
+func start_forced_attraction(collector: Node) -> bool:
+	# Accept Node so a previously-freed export ref fails here instead of at the
+	# typed Area2D call boundary (which never reaches is_instance_valid).
 	if _state == CollectionState.COLLECTED or not is_instance_valid(collector):
+		return false
+	var area := collector as Area2D
+	if area == null:
 		return false
 	if _knockback_tween != null and _knockback_tween.is_valid():
 		_knockback_tween.kill()
-	_collector = collector
+	_collector = area
 	_attraction_speed = maximum_attraction_speed
 	_state = CollectionState.ATTRACTING
 	process_mode = Node.PROCESS_MODE_ALWAYS

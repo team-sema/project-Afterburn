@@ -5,7 +5,7 @@
 ![Drone](sprites/enemy_drone.svg)
 
 분홍 네온의 빛나는 **작은 다이아몬드** 실루엣. 몸통 안에 마름모 구멍이 있고, 좌우에 짧은 날개 팁이 있다. 화면에서 가장 흔한 “잡몹” 실루엣이다.
-- 스프라이트: `assets/svg/enemy_drone.svg`
+- 스프라이트: `assets/enemies/enemy_drone.svg`
 - 틴트: 분홍 글로우 · 거의 흰 코어 (베이스 `enemy.tscn`)
 
 ## 의도

@@ -30,7 +30,7 @@ func _run() -> void:
 	var descriptions := ["Original ring + crystal", "Broad artillery shoulders", "Long piercing keel", "Floating arcs / crystal core"]
 	var scene := load("res://enemies/elite_fighter.tscn") as PackedScene
 	for column in names.size():
-		var source := FileAccess.get_file_as_string("res://assets/svg/%s.svg" % names[column])
+		var source := FileAccess.get_file_as_string("res://assets/enemies/%s.svg" % names[column])
 		var raster := Image.new()
 		if raster.load_svg_from_string(source, 4.0) != OK:
 			push_error("SVG render failed: " + names[column])

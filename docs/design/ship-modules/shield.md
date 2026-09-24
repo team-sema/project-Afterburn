@@ -7,7 +7,7 @@ tag: `shield`
 ![실드](sprites/facility_shield.svg)
 
 실드 tag 모듈이 공유하는 시설 아이콘.
-- 스프라이트: `assets/svg/facilities/facility_shield.svg`
+- 스프라이트: `assets/facilities/facility_shield.svg`
 
 | ID | 표시명 | Kind · 수치 |
 |----|--------|-------------|

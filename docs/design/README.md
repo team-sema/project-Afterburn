@@ -6,7 +6,7 @@
 
 - [게임 방향](vision.md) · [전체 개요](overview.md)
 - [플레이어](player.md) · [함선 모듈](ship-modules/index.md) · [무기 모듈](weapon-modules/index.md) · [오그먼트](augments.md) · [전투](combat.md)
-- [일반 적](enemies/index.md) · [엘리트](elites/index.md) · [진형](formations/index.md) · [Encounter](encounters/index.md) · [런 페이싱](run-pacing.md)
+- [일반 적](enemies/index.md) · [엘리트](elites/index.md) · [보스](bosses/index.md) · [진형](formations/index.md) · [Encounter](encounters/index.md) · [런 페이싱](run-pacing.md)
 - [거대 항모 · Boss Lab](bosses/carrier.md)
 - [씬·UI 흐름](scene-flow.md) · [컴포넌트](components.md) · [이펙트](effects.md)
 - [미결정·확장 후보](gaps.md)

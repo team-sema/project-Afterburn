@@ -65,6 +65,10 @@ func _run() -> void:
 			segment.get_node_or_null("HurtboxComponent") != null,
 			"orbital barrier segments keep HurtboxComponent to absorb bullets",
 		)
+		_expect(
+			barrier.segment_integrity == 1 and is_equal_approx(barrier.respawn_delay, 3.0),
+			"orbital barrier uses integrity 1 and 3s respawn delay",
+		)
 
 	world.queue_free()
 	await process_frame

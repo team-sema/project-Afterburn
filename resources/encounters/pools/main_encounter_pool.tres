@@ -44,10 +44,12 @@ min_threat = 2
 [sub_resource type="Resource" id="Entry_bomb_diamond"]
 script = ExtResource("2_entry")
 preset = ExtResource("7_bomb_diamond")
+min_threat = 2
 
 [sub_resource type="Resource" id="Entry_interceptor_pair"]
 script = ExtResource("2_entry")
 preset = ExtResource("14_interceptor_pair")
+min_threat = 2
 
 [sub_resource type="Resource" id="Entry_caster"]
 script = ExtResource("2_entry")

@@ -62,6 +62,10 @@ func _ready() -> void:
 		if remaining <= 0:
 			_try_apply_iframes(false)
 			return
+		var scale := float(hurtbox_component.get_meta("incoming_damage_scale", 1.0))
+		if not is_equal_approx(scale, 1.0):
+			# Chip-damage parts (e.g. boss wall body) keep at least 1 so hits still read.
+			remaining = maxi(1, roundi(float(remaining) * maxf(0.0, scale)))
 		stats_component.health -= remaining
 		_on_hull_damaged()
 	)

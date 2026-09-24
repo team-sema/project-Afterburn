@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://t087fb28aj6r"]
 
 [ext_resource type="Script" uid="uid://cyxv6tprooxdq" path="res://pickups/weapon_pickup.gd" id="1_script"]
-[ext_resource type="Texture2D" uid="uid://djvqurciuxfie" path="res://assets/svg/radial_glow.svg" id="3_glow"]
+[ext_resource type="Texture2D" uid="uid://djvqurciuxfie" path="res://assets/effects/radial_glow.svg" id="3_glow"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_pickup"]
 radius = 7.0

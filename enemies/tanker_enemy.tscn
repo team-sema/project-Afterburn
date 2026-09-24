@@ -2,8 +2,8 @@
 
 [ext_resource type="PackedScene" path="res://enemies/enemy.tscn" id="1_enemy"]
 [ext_resource type="Script" path="res://enemies/tanker_enemy.gd" id="2_script"]
-[ext_resource type="Texture2D" path="res://assets/svg/enemy_tanker_body.svg" id="3_body"]
-[ext_resource type="Texture2D" path="res://assets/svg/enemy_tanker_shield.svg" id="4_shield"]
+[ext_resource type="Texture2D" path="res://assets/enemies/enemy_tanker_body.svg" id="3_body"]
+[ext_resource type="Texture2D" path="res://assets/enemies/enemy_tanker_shield.svg" id="4_shield"]
 [ext_resource type="Script" path="res://components/stats_component.gd" id="5_stats"]
 [ext_resource type="Script" path="res://components/hurtbox_component.gd" id="6_hurtbox"]
 [ext_resource type="Script" path="res://components/hurt_component.gd" id="7_hurt"]

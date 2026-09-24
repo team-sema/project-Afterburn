@@ -1,6 +1,6 @@
 extends SceneTree
 
-## 실드 충전: 깎이면 즉시 게이지, 풀이면 +1, 피격 시 리셋.
+## 실드 충전: 깎이면 경과 초를 세고, 필요 초 이상이면 +1, 피격 시 리셋.
 
 var failures: PackedStringArray = []
 
@@ -42,6 +42,14 @@ func _run() -> void:
 	_expect(shield.get_current_shield() == 1, "full charge restores +1")
 	_expect(is_equal_approx(shield.get_charge_progress(), 0.0), "charge clears at max")
 	_expect(not shield.is_processing(), "regen stops at max")
+
+	# Elapsed-near-duration must still restore (old 0~1 clamp approx could stall).
+	_expect(shield.absorb_damage(1) == 0, "second empty for near-duration case")
+	shield.set("_charge_elapsed", 0.999995)
+	shield.set_process(true)
+	shield._process(1.0 / 60.0)
+	_expect(shield.get_current_shield() == 1, "crossing duration from near-full restores +1")
+	_expect(is_equal_approx(shield.get_charge_progress(), 0.0), "near-duration restore clears charge")
 
 	shield.queue_free()
 	await process_frame

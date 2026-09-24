@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://cx2rlsi2idbph" path="res://player_ship/player_hit_point.gd" id="1_hit_point"]
 [ext_resource type="Script" uid="uid://c70ifjbywa6cc" path="res://components/hurtbox_component.gd" id="2_hurtbox"]
-[ext_resource type="Texture2D" uid="uid://djvqurciuxfie" path="res://assets/svg/radial_glow.svg" id="3_radial_glow"]
+[ext_resource type="Texture2D" uid="uid://djvqurciuxfie" path="res://assets/effects/radial_glow.svg" id="3_radial_glow"]
 [ext_resource type="Material" uid="uid://c75j508nnunik" path="res://effects/diffuse_glow_material.tres" id="5_diffuse"]
 [ext_resource type="Material" path="res://effects/tight_glow_material.tres" id="6_tight"]
 

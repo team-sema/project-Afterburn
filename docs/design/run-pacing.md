@@ -29,7 +29,7 @@
 | `ELITE` | 아래 엘리트 게이트를 연다 | `elite_preset` 지정 시 그 preset, 비우면 교대 규칙 |
 | `BOSS` | 엘리트 게이트와 같은 흐름 + `is_boss` (엘리트 HP 공식 미적용) | `boss_preset` 비어 있으면 경고 후 **건너뜀** |
 
-`WAVE`/`ELITE`/`BOSS`는 `wait_for_clear`(기본 true)면 WARNING·게이트 전에 Director가 추적 중인 편대가 비울 때까지 기다린다. `clear_timeout` > 0이면 **클리어 또는 타임아웃 중 먼저** 온 쪽으로 진행하고, `clear_min_wait`가 있으면 그 대기 시작부터 최소 그 초만큼은 쉰 뒤 진행한다 (빨리 클리어해도 WAVE 호흡을 남김). `clear_timeout` 0은 클리어만 본다(무한 대기).
+`WAVE`/`ELITE`/`BOSS`는 `wait_for_clear`(기본 true)면 WARNING·게이트 전에 Director가 추적 중인 편대가 비울 때까지 기다린다. `clear_timeout` > 0이면 **클리어 또는 타임아웃 중 먼저** 온 쪽으로 진행하고, `clear_min_wait`가 있으면 그 대기 시작부터 최소 그 초만큼은 쉰 뒤 진행한다 (빨리 클리어해도 WAVE 호흡을 남김). `clear_timeout` 0은 클리어만 본다(무한 대기). 대기 시간은 게임플레이 시간(프로세스 델타)으로 계산하므로 오그먼트 선택·탄소거 등 트리 일시정지 동안은 흐르지 않는다.
 
 WAVE·ELITE·BOSS 스텝은 스폰/게이트 직전에 맵 중앙에 `WARNING` 텍스트가 점멸한다 (NORMAL은 없음).
 
@@ -40,9 +40,9 @@ WAVE·ELITE·BOSS 스텝은 스폰/게이트 직전에 맵 중앙에 `WARNING` �
 | `a` | NORMAL | `MainEncounterPool` 랜덤 | 2.8 ~ 3.1초 |
 | `b` | WAVE | `drone_swarm_wave`: 드론 편대 3연속 (straight → triangle → zigzag), 편대 간격 0.55~0.7초 | 5.0 ~ 5.5초 · clear_timeout 6.0 · clear_min_wait 2.5 |
 | `c` | ELITE | 교대 규칙 · wait_for_clear (timeout 없음) | 2.8 ~ 3.1초 |
-| `d` | BOSS | 비움 (보스 미구현 → 건너뜀) | — |
+| `d` | BOSS | `boss_wall` (거대 벽 + 출몰 포탑) | 2.8 ~ 3.1초 |
 
-- Phase `main`: `a a a a b a a a b a a a c a a a a b a a a a d`
+- Phase `main`: `a a d` (플레이테스트용 · 정식 패턴으로 되돌릴 예정)
 - 끝나면 같은 Phase를 반복 (`REPEAT_LAST_PHASE`). Phase는 패턴을 담는 단위일 뿐, opening/loop 고정 구조가 아니다.
 
 개발자는 `.tres`의 패턴 문자열·토큰 정의만 고쳐 시나리오를 바꾼다. 현행 규칙·완료 조건은 이 문서를 따른다.
@@ -56,7 +56,7 @@ WAVE·ELITE·BOSS 스텝은 스폰/게이트 직전에 맵 중앙에 `WARNING` �
 
 ## Threat · 엘리트 게이트
 
-우선순위(겹칠 때): `boss > elite > augment offer > normal encounter` (보스는 미구현).
+우선순위(겹칠 때): `boss > elite > augment offer > normal encounter`.
 
 | 단계 | 동작 |
 |------|------|
@@ -78,8 +78,8 @@ WAVE·ELITE·BOSS 스텝은 스폰/게이트 직전에 맵 중앙에 `WARNING` �
 
 ## Threat별 로스터 요지
 
-- **Threat 1:** Drone·Striker 호위·Awl·Bomb 다이아·Interceptor pair 등 (catalog)
-- **Threat 2+:** `tanker_guard_sniper` (탱커 생존 시 sniper reinforcement)
+- **Threat 1:** Drone·Striker 호위·Awl 등 (Bomb·Interceptor pair 제외)
+- **Threat 2+:** `tanker_guard_sniper` · `bomb_drone_diamond` · `interceptor_pair`
 - **Threat 3+:** Caster · V7/X9 하강 · X9 orbit · Interceptor trio
 
 ## 관련
@@ -93,5 +93,6 @@ WAVE·ELITE·BOSS 스텝은 스폰/게이트 직전에 맵 중앙에 `WARNING` �
 - 처치 보상 정산 후 Threat 상승·적 오퍼·다음 구간 순서가 지켜진다.
 - 엘리트·오퍼 중 다음 관문 시간이 누적되지 않는다.
 - WAVE는 WARNING 전에 선행 편대 클리어(또는 `clear_timeout`)와 `clear_min_wait` 호흡을 거친다.
+- 클리어 대기 중 일시정지된 시간은 `clear_min_wait`에서 차감되지 않는다.
 
 검증 참고: `tests/threat_elite_progression_smoke_test.gd` · `tests/encounter_sequence_smoke_test.gd`. Godot 실행은 `tools/run-godot.cmd`를 사용한다.

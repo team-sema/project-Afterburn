@@ -50,16 +50,16 @@ func destruction_radius() -> float:
 
 func _ready() -> void:
 	health = maximum
-	var texture: Texture2D = preload("res://assets/svg/carrier_turret.svg")
+	var texture: Texture2D = preload("res://assets/enemies/carrier_turret.svg")
 	var visual_scale := 0.25
 	if mode == 1:
-		texture = preload("res://assets/svg/carrier_hangar.svg")
+		texture = preload("res://assets/enemies/carrier_hangar.svg")
 		visual_scale = 0.65
 	elif mode == 2:
-		texture = preload("res://assets/svg/enemy_elite_fighter.svg")
+		texture = preload("res://assets/enemies/enemy_elite_fighter.svg")
 		visual_scale = 0.72
 	elif mode == 3:
-		texture = preload("res://assets/svg/enemy_interceptor.svg")
+		texture = preload("res://assets/enemies/enemy_interceptor.svg")
 		visual_scale = 0.4
 		flight_origin = position
 	visual = Neon.make(texture, visual_scale, Color(1.0, 0.08, 0.26) if mode != 3 else Color(1.0, 0.4, 0.08))
@@ -74,7 +74,7 @@ func _ready() -> void:
 		pivot = Node2D.new()
 		add_child(pivot)
 		gun_scale = 0.52 if mode == 2 else 0.36
-		gun = Neon.make(preload("res://assets/svg/carrier_gun.svg"), gun_scale, Color(1.0,0.12,0.3))
+		gun = Neon.make(preload("res://assets/enemies/carrier_gun.svg"), gun_scale, Color(1.0,0.12,0.3))
 		pivot.add_child(gun)
 		muzzle = Node2D.new()
 		muzzle.position.y = 52 * gun_scale

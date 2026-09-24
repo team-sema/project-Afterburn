@@ -5,7 +5,7 @@
 ![Awl](sprites/enemy_awl.svg)
 
 아래(+Y)를 향한 **세로로 긴 송곳**. 윗부분은 쐐기, 아랫부분은 뾰족한 돌진 팁. “탄이 아니라 몸이 온다”는 읽기를 실루엣으로 준다.
-- 스프라이트: `assets/svg/enemy_awl.svg`
+- 스프라이트: `assets/enemies/enemy_awl.svg`
 - 틴트: 분홍 네온 (베이스 상속)
 
 ## 의도

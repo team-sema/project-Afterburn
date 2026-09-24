@@ -5,7 +5,7 @@
 ![Striker](sprites/enemy_striker.svg)
 
 Drone보다 **가로로 넓은 다이아몬드**. 양옆으로 펼친 날개감이 있어 편대 핵으로 읽힌다. 같은 분홍 네온 팔레트.
-- 스프라이트: `assets/svg/enemy_striker.svg`
+- 스프라이트: `assets/enemies/enemy_striker.svg`
 - 틴트: 분홍 글로우 (베이스 `enemy.tscn` 상속)
 
 ## 의도

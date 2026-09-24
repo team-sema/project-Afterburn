@@ -5,7 +5,7 @@
 ![Bomb](sprites/enemy_bomb.svg)
 
 **원형 본체** 위에 짧은 사각형 신관·깃털 팁이 달린 폭탄형. 다른 전투기형과 달리 둥글어 근접 폭발 위협으로 바로 구분된다.
-- 스프라이트: `assets/svg/enemy_bomb.svg`
+- 스프라이트: `assets/enemies/enemy_bomb.svg`
 - 틴트: 분홍 네온 (베이스 상속). 기폭 시 붉은 범위 프리뷰 링이 추가로 보인다.
 
 엘리트는 별도 [Elite Bomb](../elites/elite-bomb.md) 문서에서 관리한다.

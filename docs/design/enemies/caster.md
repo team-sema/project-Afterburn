@@ -5,7 +5,7 @@
 ![Caster](sprites/enemy_caster.svg)
 
 **육각·크리스탈**에 가까운 실루엣. 바깥 고리와 안쪽 마름모가 겹쳐 “탄막 포탑”처럼 보인다. Drone보다 덩치감이 있다.
-- 스프라이트: `assets/svg/enemy_caster.svg`
+- 스프라이트: `assets/enemies/enemy_caster.svg`
 - 틴트: 분홍 네온 (베이스 상속)
 
 엘리트는 별도 [Elite Caster](../elites/elite-caster.md) 문서에서 관리한다.

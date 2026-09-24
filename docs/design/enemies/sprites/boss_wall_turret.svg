@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="22" viewBox="0 0 16 22">
+  <!-- Compact wall gun: small mount + short barrel. -->
+  <g fill="#fff">
+    <path d="M3 6H13L14 9V13L11 16H5L2 13V9Z"/>
+    <path d="M6 15H10V22H6Z"/>
+    <path d="M7 0H9L10 6H6Z"/>
+  </g>
+</svg>

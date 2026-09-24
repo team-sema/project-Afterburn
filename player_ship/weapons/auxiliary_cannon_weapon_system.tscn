@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://player_ship/weapons/auxiliary_cannon_weapon_system.gd" id="1_script"]
 [ext_resource type="Script" path="res://components/spawner_component.gd" id="2_spawner"]
 [ext_resource type="PackedScene" path="res://projectiles/aux_cannon_bolt.tscn" id="3_projectile"]
-[ext_resource type="Texture2D" uid="uid://c6sy3i51i2bei" path="res://assets/svg/weapons/weapon_aux_cannon.svg" id="4_drone"]
+[ext_resource type="Texture2D" uid="uid://c6sy3i51i2bei" path="res://assets/weapons/weapon_aux_cannon.svg" id="4_drone"]
 [ext_resource type="Material" path="res://effects/wide_glow_material.tres" id="5_wide"]
 [ext_resource type="Material" path="res://effects/tight_glow_material.tres" id="6_tight"]
 [ext_resource type="Material" path="res://effects/core_unshaded_material.tres" id="7_core"]

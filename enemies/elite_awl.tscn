@@ -1,7 +1,7 @@
 [gd_scene format=3]
 
 [ext_resource type="PackedScene" path="res://enemies/elite_fighter.tscn" id="1_elite"]
-[ext_resource type="Texture2D" path="res://assets/svg/enemy_elite_awl.svg" id="2_visual"]
+[ext_resource type="Texture2D" path="res://assets/enemies/enemy_elite_awl.svg" id="2_visual"]
 [ext_resource type="Script" path="res://components/elite_charge_attack_component.gd" id="3_attack"]
 [ext_resource type="Script" path="res://components/elite_charge_visual.gd" id="4_visual"]
 [ext_resource type="Resource" path="res://resources/projectiles/elite_flame_shot.tres" id="6_shot"]

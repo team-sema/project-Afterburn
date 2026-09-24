@@ -75,6 +75,10 @@ func _on_hit_hurtbox(hurtbox: HurtboxComponent) -> void:
 	if _aoe_radius > 0.0:
 		_deal_aoe(hurtbox)
 
+	if hurtbox.blocks_pierce:
+		queue_free()
+		return
+
 	if _pierce_remaining > 0:
 		_pierce_remaining -= 1
 		_pierce_hits += 1
