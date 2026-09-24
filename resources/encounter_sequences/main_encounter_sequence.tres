@@ -6,11 +6,12 @@
 [ext_resource type="Resource" uid="uid://bx6mvihopc5mq" path="res://resources/encounters/pools/main_encounter_pool.tres" id="4_main_pool"]
 [ext_resource type="Script" uid="uid://c6t14vfypdxop" path="res://resources/encounters/encounter_preset.gd" id="5_1p4mw"]
 [ext_resource type="Resource" path="res://resources/encounter_sequences/waves/drone_swarm_wave.tres" id="5_drone_swarm_wave"]
+[ext_resource type="Resource" path="res://resources/encounters/presets/boss_wall.tres" id="6_boss_wall"]
 
 [sub_resource type="Resource" id="Resource_phase_main"]
 script = ExtResource("3_phase_script")
 phase_id = &"main"
-pattern = "a a a a b a a a b a a a c a a a a b a a a a d"
+pattern = "a a d"
 
 [sub_resource type="Resource" id="Resource_step_a"]
 script = ExtResource("2_step_script")
@@ -36,6 +37,7 @@ kind = 2
 script = ExtResource("2_step_script")
 token = &"d"
 kind = 3
+boss_preset = ExtResource("6_boss_wall")
 
 [resource]
 script = ExtResource("1_sequence_script")

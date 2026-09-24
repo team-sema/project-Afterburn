@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="64" viewBox="0 0 240 64">
+  <!-- Solid top barrier flush to playfield top when centered at y=32. -->
+  <g fill="#fff">
+    <path d="M0 0H240V52L220 64H20L0 52Z"/>
+    <path d="M16 10H224V14H16Z"/>
+    <path d="M24 36H48V42H24Z"/>
+    <path d="M96 36H144V42H96Z"/>
+    <path d="M192 36H216V42H192Z"/>
+  </g>
+</svg>

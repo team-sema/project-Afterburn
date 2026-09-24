@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20">
+  <!-- Weak core: bright diamond telegraph. -->
+  <g fill="#fff">
+    <path d="M10 0L18 10L10 20L2 10Z"/>
+    <path d="M10 5L14 10L10 15L6 10Z"/>
+  </g>
+</svg>
