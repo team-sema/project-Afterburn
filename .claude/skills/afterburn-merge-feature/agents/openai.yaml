@@ -1,0 +1,7 @@
+interface:
+  display_name: "Afterburn Merge Feature"
+  short_description: "Merge-only for committed feature branch"
+  default_prompt: "Use $afterburn-merge-feature to merge an already-committed Afterburn feature branch."
+
+policy:
+  allow_implicit_invocation: true
