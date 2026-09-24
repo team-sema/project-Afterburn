@@ -42,7 +42,7 @@ WAVE·ELITE·BOSS 스텝은 스폰/게이트 직전에 맵 중앙에 `WARNING` �
 | `c` | ELITE | 교대 규칙 · wait_for_clear (timeout 없음) | 2.8 ~ 3.1초 |
 | `d` | BOSS | `boss_wall` (거대 벽 + 출몰 포탑) | 2.8 ~ 3.1초 |
 
-- Phase `main`: `a a d` (플레이테스트용 · 정식 패턴으로 되돌릴 예정)
+- Phase `main`: `a a a a b a a a b a a a c a a a a b a a a a d`
 - 끝나면 같은 Phase를 반복 (`REPEAT_LAST_PHASE`). Phase는 패턴을 담는 단위일 뿐, opening/loop 고정 구조가 아니다.
 
 개발자는 `.tres`의 패턴 문자열·토큰 정의만 고쳐 시나리오를 바꾼다. 현행 규칙·완료 조건은 이 문서를 따른다.

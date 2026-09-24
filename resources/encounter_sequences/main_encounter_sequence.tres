@@ -11,7 +11,7 @@
 [sub_resource type="Resource" id="Resource_phase_main"]
 script = ExtResource("3_phase_script")
 phase_id = &"main"
-pattern = "a a d"
+pattern = "a a a a b a a a b a a a c a a a a b a a a a d"
 
 [sub_resource type="Resource" id="Resource_step_a"]
 script = ExtResource("2_step_script")
