@@ -3,6 +3,7 @@
  * Markdown `#id` / relative `*.md` links resolve to the same routes.
  */
 const NAV = [
+  { id: 'bosses/carrier', title: '거대 항모 · Boss Lab', file: 'bosses/carrier.md' },
   { id: 'guide', title: '기획서 안내', file: 'README.md' },
   { id: 'vision', title: '게임 방향', file: 'vision.md' },
   {
