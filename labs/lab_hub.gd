@@ -5,7 +5,6 @@ const LABS := [
 	["거대 항모 · Boss Lab", "res://labs/carrier_boss_lab.tscn"],
 	["엘리트 · 스나이퍼 공격 패턴", "res://labs/enemy_attack_lab.tscn"],
 	["무기 · 증강 · 적 소환", "res://weapon_test/weapon_test_lab.tscn"],
-	["실제 전투 · 위협도 분석", "res://threat_monitor/threat_monitor_lab.tscn"],
 	["증강 카드 · UI", "res://menus/augment_frame_test.tscn"],
 ]
 var _opening := false

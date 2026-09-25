@@ -45,19 +45,6 @@ static func _is_setting(resource: Resource) -> bool:
 		or resource is BulletAppearance or resource is BulletBehavior or resource is BulletAction
 		or resource is BulletTrailEffect)
 
-func emission_summary() -> Dictionary:
-	var count := 0
-	var seconds := 0.0
-	var speed := 0.0
-	for step in steps:
-		if step.action == BarrageStep.Action.WAIT:
-			seconds += step.value
-		elif step.action == BarrageStep.Action.FIRE:
-			for volley in step.get_volleys():
-				count += 1 if volley.layout == BarrageVolley.Layout.SINGLE else volley.count
-				speed = maxf(speed, volley.speed)
-	return {"rate": count / maxf(0.05, seconds), "speed": speed}
-
 func fire(volley: BarrageVolley) -> BarrageSequence:
 	var step := BarrageStep.new()
 	step.volley = volley

@@ -114,7 +114,7 @@ func run() -> void:
 	var laser := spawn(shot(BulletBehavior.new().homing(90, 4), BarrageShot.Kind.TRAIL_LASER)) as CurvedLaser
 	update(laser, 0.4)
 	var tail := laser.position_at(0.2)
-	var forecast := laser.get_threat_path(0.2)
+	var forecast := laser.get_predicted_path(0.2)
 	update(laser, 0.6)
 	expect(forecast[-1].distance_to(laser.global_position) < 0.001, "laser forecast endpoint agrees with actual head")
 	target.position = Vector2(-100, 100)

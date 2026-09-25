@@ -50,7 +50,7 @@ XP를 모은 뒤 플레이어가 선택 시점을 정하며, 무기·모듈·시
 
 반격탄은 CounterShotComponent가 피격/사망 이벤트에서 BarrageShot을 직접 발사한다. 기본 카드의 탄속 200px/s·1발·쿨다운 0.25초를 유지한다. 다발 설정은 지정한 펼침각으로 발사한다. 신규 반격탄은 반지름 4px 원형 판정과 공통 입자 꼬리를 사용하며, 발사 방향의 수직축으로 진폭 4px·주기 1초의 lateral_wave를 반복한다. 기존 화면 X축 왕복에서 발사 방향 기준 파동으로 바뀌고 발사점에서 시작한다. 수명은 8초다. 타깃이 없거나 겹치면 발사하지 않는다. 발동 순간 위치·방향·설정을 고정해 물리 콜백 밖에서 생성하며, 적이 바로 삭제되어도 요청한 반격은 남지만 월드가 제거되면 취소한다. 일반 오퍼 풀 제외는 유지한다.
 
-포화 사격의 발수·펼침각은 Drone·Striker·Interceptor의 패턴에도 스폰 시 적용한다. 패턴의 `pattern_fire_volume_boost` 명시적 opt-in으로 연결하며 시작 전에 적용하고 위협도 요약도 갱신한다. Caster는 기존처럼 ACTION_RATE만 적용한다. 기존 엘리트의 발수 증가 경로는 유지한다.
+포화 사격의 발수·펼침각은 Drone·Striker·Interceptor의 패턴에도 스폰 시 적용한다. 패턴의 `pattern_fire_volume_boost` 명시적 opt-in으로 연결하며 시작 전에 적용한다. Caster는 기존처럼 ACTION_RATE만 적용한다. 기존 엘리트의 발수 증가 경로는 유지한다.
 
 `max_stacks` 0=무제한 · 1=one-time. `target_spawn_id` / `additional_spawn_count`는 Encounter 한정 보너스.
 

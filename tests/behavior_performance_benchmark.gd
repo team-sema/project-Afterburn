@@ -33,13 +33,13 @@ func run() -> void:
 		bullet.set_physics_process(false)
 	var renderer = bullets[0].get_parent().get_node("ProjectileBatchRenderer")
 	renderer.set_process(false)
-	var monitors := [lab.monitor]
+	var meters := [lab.safety_meter]
 	var result := {}
 	for debug in [false, true]:
 		lab._toggle_hitboxes(debug)
 		var pose := 0
 		var batch := 0
-		var threat := 0
+		var safety := 0
 		for frame in 120:
 			var start := Time.get_ticks_usec()
 			for bullet in bullets:
@@ -49,14 +49,14 @@ func run() -> void:
 			var updated := Time.get_ticks_usec()
 			renderer.refresh()
 			var rendered := Time.get_ticks_usec()
-			for monitor in monitors: monitor.take_sample_now()
+			for meter in meters: meter.measure()
 			var sampled := Time.get_ticks_usec()
 			if frame >= 20:
 				pose += updated - start
 				batch += rendered - updated
-				threat += sampled - rendered
-		result[str(debug)] = {"pose_ms": pose / 100000.0, "batch_ms": batch / 100000.0, "threat_sample_ms": threat / 100000.0}
-	print("BEHAVIOR_BENCHMARK ", JSON.stringify(result), " monitors=", monitors.size())
+				safety += sampled - rendered
+		result[str(debug)] = {"pose_ms": pose / 100000.0, "batch_ms": batch / 100000.0, "safety_sample_ms": safety / 100000.0}
+	print("BEHAVIOR_BENCHMARK ", JSON.stringify(result), " meters=", meters.size())
 	lab.queue_free()
 	await process_frame
 	quit()

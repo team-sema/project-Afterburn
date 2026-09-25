@@ -40,18 +40,6 @@ func apply_action_rate_multiplier(multiplier: float) -> void:
 	_action_rate = maxf(0.01, multiplier)
 
 
-func get_threat_projectile_rate() -> float:
-	if phase != Phase.DASH:
-		return 0.0
-	return 2.0 / maxf(0.1, 0.18 / _action_rate)
-
-
-func get_threat_reaction_time() -> float:
-	if phase == Phase.AIM or phase == Phase.DASH:
-		return aim_duration
-	return -1.0
-
-
 func _process(delta: float) -> void:
 	if enemy.is_queued_for_deletion() or enemy.stats_component.health <= 0:
 		return

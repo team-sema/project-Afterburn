@@ -8,7 +8,7 @@
 
 편집기에서 저장하고 **실행 창에서 F5**를 누르면 새 생성자로 패턴을 다시 만들고 탄·꼬리·계측을 초기화한다. 문법/상속/설정 오류는 화면에 표시하며 취소하면 마지막 정상 실행으로 복귀한다. `_init` 내부의 임의 런타임 오류는 Godot Output에서도 확인한다. 재로드 대상은 선택한 `.gd`이며 참조한 외부 리소스는 Godot의 기본 캐시 정책을 따른다. 외형·이동은 스크립트가 정하고 Lab의 해당 선택기는 비활성화된다.
 
-WASD 표적, 위협 계산 ON/OFF, FPS/ms, 판정 표시, pause, 탄소거를 함께 쓸 수 있다. 허브에서 열었다면 F1로 목록에 돌아온다. Inspector의 `test_pattern_path` 지정 또는 `tools/run-godot.cmd res://projectiles/bullet_lab.tscn -- --pattern=res://patterns/lab_example_pattern.gd`로 바로 실행해도 된다. 기존 특화 Lab 씬은 동일 화면의 예제별 바로가기다.
+WASD 표적, 안전 비율 ON/OFF, FPS/ms, 판정 표시, pause, 탄소거를 함께 쓸 수 있다. 허브에서 열었다면 F1로 목록에 돌아온다. Inspector의 `test_pattern_path` 지정 또는 `tools/run-godot.cmd res://projectiles/bullet_lab.tscn -- --pattern=res://patterns/lab_example_pattern.gd`로 바로 실행해도 된다. 기존 특화 Lab 씬은 동일 화면의 예제별 바로가기다.
 
 기본 작성 방식은 BarrageSequence를 직접 상속하는 `.gd`다. 실행 중 await하는 스크립트가 아니라 발사 일정을 구성하는 스크립트다. 인자 없는 `_init()`에서 설정만 만들며 월드 접근·실제 발사 같은 부수 효과를 넣지 않는다.
 
@@ -52,12 +52,10 @@ func build(params: Dictionary) -> void:
 - 16방향 혼합 시험: [mixed_sixteen_pattern.gd](../patterns/mixed_sixteen_pattern.gd). 이 `.gd`가 현재 시험 씬의 실행 원본이다. 예전 `.tres`는 저장 형식 호환 예제로 남겨 둔다.
 - 발사 금지선에서는 FIRE를 건너뛰고 다음 일정으로 진행한다. 표적 부재 시 조준 Volley만 건너뛰며 다음 FIRE에서 재조회한다. 공격 기간 종료·적 제거는 미래 발사를 중단하고 기존 탄은 유지한다.
 - ACTION_RATE는 Player.time_scale에 적용한다. 초기 지연과 활성 기간은 게임 시간이며 이미 발사한 탄의 이동은 바뀌지 않는다.
-- 위협 보고는 한 주기 발수/대기 총합(최소 0.05초)에 배속을 곱하고 가장 빠른 초기 탄속을 사용한다. 초기 대기 중에도 예정 공격을 보고하며 자연 종료 후에는 0이다. 이것은 실제 발사 실적이나 임의 Behavior의 정확한 위험도 계산이 아니다.
 
 ### Player / Sequence 추가 API
 
 - `BarrageSequence.snapshot()`: 기본 BarrageSequence에 단계와 외부 프리셋(Shot·Appearance·Behavior·Action·Volley·TrailEffect)까지 복사한다. 텍스처 같은 자산 Resource는 복사하지 않고 공유한다. 배치 렌더러와 꼬리 관리기가 텍스처 RID로 묶음을 나누므로, 텍스처를 복제하면 발사자마다 별도 드로우콜로 갈라지고 재생마다 GPU 업로드가 생긴다. 상속 Sequence 생성자를 다시 실행하지 않는다. 유효한 Sequence에서 호출한다. `BarrageSequence.clone_settings(resource)`는 같은 규칙의 단일 Resource 복사다.
-- `BarrageSequence.emission_summary()`: 유효한 일정의 `rate`, `speed` 요약을 반환한다.
 - `BarrageSequence.build(params)`: 기본 구현은 빈 훅. 파생 패턴이 재정의하면 컴포넌트/Lab이 `_init()` 다음에 호출한다.
 - `BarrageSequence.needs_target()`: `aim()` 단계 또는 `aim != NONE`인 Volley가 있으면 true. Player가 표적 요구 검증에 사용한다.
 - `BarragePlayer.time_scale = 1.0`: 양수 배속. 비유한/0 이하이면 진행하지 않는다.
@@ -135,7 +133,7 @@ BULLET과 TRAIL_LASER의 머리에 적용한다. 기본값 null은 효과 없음
 - `spread_degrees = 6`: 반대 방향 기준 ±퍼짐각, 0~180°.
 - `color`, `end_color`: 시작/끝 색과 투명도. 선형 보간하며 기본은 분홍에서 어두운 투명색으로 감쇠한다. 탄 Behavior의 tint/opacity와 별개다.
 
-관리기는 월드당 하나이며 같은 텍스처·색·크기 설정끼리 한 MultiMesh로 묶는다. 입자 이동·색·크기 감쇠는 셰이더, 수명/방출 예산은 CPU가 관리한다. 트리 일시정지에서 정지하며 탄이 없어져도 기존 입자는 남는다. 장식 입자는 충돌·탄소거 보상·위협도에 포함하지 않는다.
+관리기는 월드당 하나이며 같은 텍스처·색·크기 설정끼리 한 MultiMesh로 묶는다. 입자 이동·색·크기 감쇠는 셰이더, 수명/방출 예산은 CPU가 관리한다. 트리 일시정지에서 정지하며 탄이 없어져도 기존 입자는 남는다. 장식 입자는 충돌·탄소거 보상·안전 비율에 포함하지 않는다.
 
 최대 4096입자/월드, 신규 256개/물리 틱, 탄당 64개/갱신. 초과 방출은 버리고 다음 틱에 보충하지 않는다. 한 번에 1024px 넘는 이동은 순간이동으로 취급한다. 굴곡은 물리 틱의 이전/현재 위치 사이 선분으로 근사한다. `ProjectileTrailManager.clear()`로 잔여 입자를 즉시 지울 수 있고 Lab 재시작은 이를 호출한다. 일반 탄 소거는 꼬리가 자연스럽게 사라지게 둔다.
 
@@ -230,7 +228,7 @@ shot.behavior = BulletBehavior.new().wait(0.3).parallel([
 
 이 예제의 판정 두께는 유지된다. 발사 후 외부에서 Behavior를 교체·취소하거나 임의 콜백을 실행하는 API는 아직 없다.
 
-실행기는 Action 경계의 누적 상태와 탄별 궤적 표본을 재사용한다. 과거·미래 조회는 실제 탄 나이를 전진시키지 않으며, 몸체·판정·위협도는 같은 위치 계산을 사용한다. 경계의 1e-10초 이내 부동소수점 오차는 경계 시각으로 처리한다. 외부 효과 적용 API는 아직 제공하지 않는다.
+실행기는 Action 경계의 누적 상태와 탄별 궤적 표본을 재사용한다. 과거·미래 조회는 실제 탄 나이를 전진시키지 않으며, 몸체·판정·경로 예측은 같은 위치 계산을 사용한다. 경계의 1e-10초 이내 부동소수점 오차는 경계 시각으로 처리한다. 외부 효과 적용 API는 아직 제공하지 않는다.
 
 ### 비행 중 표적 추적
 
@@ -356,7 +354,7 @@ if not runner.play(sequence, emitter, world):
 
 시험 진입점: [bullet_behavior_lab.tscn](../projectiles/bullet_behavior_lab.tscn). Godot에서 F6 또는 저장소 루트에서 `tools/run-godot.cmd res://projectiles/bullet_behavior_lab.tscn`.
 
-공통 Lab의 **위협 계산 ON/OFF**로 자동 위협도 샘플링 비용을 비교할 수 있다. OFF는 실제 계산을 중단하며 다시 발사/패턴 변경에도 유지된다. 오른쪽 위의 **FPS | ms**는 최근 0.5초 구간의 화면 프레임률과 평균 프레임 간격이며 GPU 실행 시간은 아니다. pause 중에도 표시된다.
+공통 Lab의 **안전 비율 ON/OFF**로 정지 안전 비율 샘플링 비용을 비교할 수 있다. OFF는 실제 계산을 중단하며 다시 발사/패턴 변경에도 유지된다. 오른쪽 위의 **FPS | ms**는 최근 0.5초 구간의 화면 프레임률과 평균 프레임 간격이며 GPU 실행 시간은 아니다. pause 중에도 표시된다.
 
 ## 작성 관용구
 
@@ -406,15 +404,15 @@ fire_together(layers)
 - 중첩 Behavior 그룹, 액션 단위 반복, 외부 이벤트 대기, 외부 궤도 효과, 실행 중 Behavior 교체는 제공하지 않는다.
 - 탄 노드와 물리 판정은 탄마다 존재한다. 배치 렌더링은 노드/충돌 처리 비용까지 제거하지 않는다.
 - 위치·예측·레이저 과거 몸통은 같은 궤적 함수를 쓴다. 일반 이동 적분은 1/120초 중점 근사다. 직진·단일 일정 선회는 해석식, 단일 방향 파동은 직접 속도 평가를 사용한다.
-- 위협 반경은 Behavior 전체의 최대 판정 배율을 사용하므로 실제 현재 판정보다 보수적일 수 있다. 성능 측정 결과와 환경은 작업 기록을 참고한다.
+- 예측 반경(`get_hazard_radius`)은 Behavior 전체의 최대 판정 배율을 사용하므로 실제 현재 판정보다 보수적일 수 있다. 성능 측정 결과와 환경은 작업 기록을 참고한다.
 
 ## 10. 본 게임 이식 — Drone·Striker·Interceptor·Caster 적용 완료
 
 ### 현재 연결 지점
 
-[EnemyShootComponent](../components/enemy_shoot_component.gd)는 기본 조준/부채꼴 사격과 버스트를 담당한다. 화면 진입 후 활성화, 초기 지연, 활성 기간, 발사 금지선, actor 전방 발사, 표적 없음 처리, 행동 속도 배율, 위협도 보고를 함께 관리한다.
+[EnemyShootComponent](../components/enemy_shoot_component.gd)는 기본 조준/부채꼴 사격과 버스트를 담당한다. 화면 진입 후 활성화, 초기 지연, 활성 기간, 발사 금지선, actor 전방 발사, 표적 없음 처리, 행동 속도 배율을 함께 관리한다.
 
-Caster도 공통 EnemyShootComponent를 사용하며 Radial 전용 컴포넌트는 제거했다. [EnemyModifierFactory](../components/enemy_modifier_factory.gd)는 공통 발사 컴포넌트에 속도 배율을 전달한다. `pattern_fire_volume_boost`는 스폰 시 발수 증강을 적용할 패턴의 명시적 opt-in이며 Drone·Striker·Interceptor만 켠다. 증강은 시작 전 컴포넌트의 독립 snapshot에 적용하고 위협도 요약을 갱신한다. 실행 중 snapshot 수정이나 자동 재시작은 지원하지 않는다.
+Caster도 공통 EnemyShootComponent를 사용하며 Radial 전용 컴포넌트는 제거했다. [EnemyModifierFactory](../components/enemy_modifier_factory.gd)는 공통 발사 컴포넌트에 속도 배율을 전달한다. `pattern_fire_volume_boost`는 스폰 시 발수 증강을 적용할 패턴의 명시적 opt-in이며 Drone·Striker·Interceptor만 켠다. 증강은 시작 전 컴포넌트의 독립 snapshot에 적용한다. 실행 중 snapshot 수정이나 자동 재시작은 지원하지 않는다.
 
 ### 1단계: 탄 생성만 연결 — 호환 경로로 유지
 
@@ -432,14 +430,13 @@ Caster도 공통 EnemyShootComponent를 사용하며 Radial 전용 컴포넌트�
 
 ### 일반 적의 발사 일정 — 이관 완료
 
-Drone은 `drone_pattern.gd`, Striker·Interceptor는 `aimed_burst_pattern.gd`를 사용한다. 공통 연발은 ways/spread/shots/gap/rest/speed를 pattern_params로 받는다. Player.may_fire가 매 FIRE의 허용 조건을 검사하므로 금지선에서 해당 발사만 건너뛴다. Interceptor는 기존 휴식까지 일정에 유지하고 활성 기간 종료로 재공격을 막아 기존 주기 기반 위협 요약을 보존한다. 기존 레거시 적은 pattern_script가 null이면 기존 Timer를 사용한다.
+Drone은 `drone_pattern.gd`, Striker·Interceptor는 `aimed_burst_pattern.gd`를 사용한다. 공통 연발은 ways/spread/shots/gap/rest/speed를 pattern_params로 받는다. Player.may_fire가 매 FIRE의 허용 조건을 검사하므로 금지선에서 해당 발사만 건너뛴다. Interceptor는 기존 휴식까지 일정에 유지하고 활성 기간 종료로 재공격을 막는다. 기존 레거시 적은 pattern_script가 null이면 기존 Timer를 사용한다.
 
 컴포넌트는 Player.resolve_target을 연결해 표적을 매 발사에 재조회한다. 대상이 사라져도 조준 발사만 건너뛴다. 콜백 없이 Player를 직접 사용하는 고정 표적 모드는 기존 중단 정책을 유지한다.
 
 ### 보존해야 하는 게임 연결
 
 - 행동 속도 배율: 기존 `apply_action_rate_multiplier` 계약 유지. 패턴 모드는 Player.time_scale을 변경하며 원본 wait나 탄 이동 속도를 수정하지 않는다.
-- 위협도: 기존 `get_threat_projectile_rate()` / `get_threat_reaction_time()` 유지. 패턴 모드의 계산 근사와 한계는 이 문서의 시작하기 절을 따른다.
 - 수명: 적 아래의 Player는 적과 함께 제거되게 하고 탄은 독립된 월드 부모에 둔다. 전투 종료·화면 전환·일시정지·적 죽음 때 미래 발사가 멈추는지 확인한다.
 - 충돌·보상: `enemy_projectiles` 그룹, Hitbox/Hurtbox, 소거당 보상, 레이저 한 몸체당 보상, 무적 시간 중 접촉 규칙을 유지한다.
 - 특수 공격: Sniper의 전조/전용 configure, 화염탄, 반격탄은 각각의 계약을 검토한 뒤 별도로 옮긴다. 일반 탄 API로 일괄 대체하지 않는다.
@@ -456,4 +453,4 @@ Sniper는 `SniperBarrageShot`이 BarrageShot의 `is_valid()`와 `spawn()`을 재
 
 ### 최적화 적용 범위
 
-위협도 격자 계산 개선은 레거시 탄에도 적용된다. MultiMesh·레이저 메쉬·판정 표시 배칭과 Behavior 계산 최적화는 새 FoundationBullet/CurvedLaser 경로에 적용된다. `Kind.LEGACY`는 기존 Sprite·파티클·컴포넌트를 사용하므로 API로 발사해도 새 배치 렌더러로 전환되지 않는다. 반대로 기존 Timer에서 새 BarrageShot을 발사하면 새 렌더링 최적화가 적용된다.
+안전 비율 격자 계산 개선은 레거시 탄에도 적용된다. MultiMesh·레이저 메쉬·판정 표시 배칭과 Behavior 계산 최적화는 새 FoundationBullet/CurvedLaser 경로에 적용된다. `Kind.LEGACY`는 기존 Sprite·파티클·컴포넌트를 사용하므로 API로 발사해도 새 배치 렌더러로 전환되지 않는다. 반대로 기존 Timer에서 새 BarrageShot을 발사하면 새 렌더링 최적화가 적용된다.

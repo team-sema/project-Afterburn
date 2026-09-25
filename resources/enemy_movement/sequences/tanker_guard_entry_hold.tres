@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://df54gp6payrqu" path="res://resources/enemy_movement/movement_sequence.gd" id="1_sequence"]
 [ext_resource type="Script" uid="uid://biufnl0ep3dyf" path="res://resources/enemy_movement/movement_step.gd" id="2_step"]
 [ext_resource type="Script" uid="uid://mn133gorohrs" path="res://resources/enemy_movement/steps/move_to_position_step.gd" id="3_move_to"]
-[ext_resource type="Script" path="res://resources/enemy_movement/steps/hold_position_movement_step.gd" id="4_hold"]
+[ext_resource type="Script" uid="uid://b46kvxl6socj4" path="res://resources/enemy_movement/steps/hold_position_movement_step.gd" id="4_hold"]
 
 [sub_resource type="Resource" id="MoveTo_top_band"]
 script = ExtResource("3_move_to")

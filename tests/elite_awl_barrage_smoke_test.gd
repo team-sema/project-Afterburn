@@ -35,7 +35,7 @@ func sample_scene(path: String) -> Array:
 		expect(bullet is FoundationBullet, "Awl always uses the adopted barrage body")
 		var velocity: Vector2
 		if bullet is FoundationBullet:
-			velocity = bullet.get_threat_velocity()
+			velocity = bullet.get_travel_velocity()
 			expect(is_equal_approx(bullet.lifetime, 0.9), "new flame lifetime")
 			expect(bullet.appearance.collision_size == Vector2(4, 8), "legacy collision size retained")
 			expect(bullet.trail_effect != null, "new flame has shared particles")

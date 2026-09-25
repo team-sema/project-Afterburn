@@ -161,7 +161,7 @@ func run() -> void:
 		expect(balls[i]._direction.is_equal_approx(Vector2.DOWN.rotated(deg_to_rad(45.0 * i))), "ball ring axes")
 		expect(lasers[i]._direction.is_equal_approx(Vector2.DOWN.rotated(deg_to_rad(45.0 * i + 22.5))), "laser ring interleaves at 22.5 degrees")
 	for laser in lasers:
-		var future := laser.get_threat_path(2.8)
+		var future := laser.get_predicted_path(2.8)
 		var old_point := laser.position_at(0.4)
 		laser.age = 2.8
 		laser._update_body()
