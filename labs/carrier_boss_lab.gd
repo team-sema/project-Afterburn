@@ -189,10 +189,11 @@ func toggle_pause() -> void:
 	pause_button.text = "계속  [P]" if get_tree().paused else "일시정지  [P]"
 
 func return_to_hub() -> void:
-	get_tree().paused = false
-	get_tree().change_scene_to_file("res://labs/lab_hub.tscn")
-	var navigation := get_tree().root.get_node_or_null("LabReturn")
+	var tree := get_tree()
+	var navigation := tree.root.get_node_or_null("LabReturn")
 	if navigation != null: navigation.queue_free()
+	tree.paused = false
+	tree.change_scene_to_file("res://labs/lab_hub.tscn")
 
 func _input(event: InputEvent) -> void:
 	if not event is InputEventKey or not event.pressed or event.echo: return

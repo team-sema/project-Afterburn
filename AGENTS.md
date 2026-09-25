@@ -1,5 +1,9 @@
 # Project Afterburn agent instructions
 
+## 응답 언어
+
+- 사용자에게 하는 모든 응답은 항상 한글로 작성한다. 코드·명령어·파일 경로·식별자는 원문 그대로 둔다.
+
 ## Running Godot
 
 - Run Godot commands through `tools/run-godot.cmd`. Do not invoke the Godot executable directly from an agent sandbox.
