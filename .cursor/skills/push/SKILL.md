@@ -88,10 +88,6 @@ chmod +x tools/push-feature.sh tools/merge-feature.sh 2>/dev/null || true
 
 **force push 금지.** feature에서 `git merge main` → 충돌 해결·Godot 확인 → `/push` 재실행.
 
-### 6. 성공 시
-
-팀원: `git checkout main && git pull`
-
 ## 하지 않음
 
 - `git push --force`, `git config` 변경
