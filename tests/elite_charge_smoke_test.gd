@@ -55,8 +55,8 @@ func _run() -> void:
 	var bullets := get_nodes_in_group("enemy_projectiles")
 	_expect(bullets.size() == 2, "dash emits one pair")
 	if bullets.size() == 2:
-		var a: Vector2 = bullets[0].get_threat_velocity()
-		var b: Vector2 = bullets[1].get_threat_velocity()
+		var a: Vector2 = bullets[0].get_travel_velocity()
+		var b: Vector2 = bullets[1].get_travel_velocity()
 		_expect(absf(a.normalized().dot(direction)) < 0.25 and absf(b.normalized().dot(direction)) < 0.25, "flames stay close to perpendicular")
 		_expect(a.dot(direction.orthogonal()) * b.dot(direction.orthogonal()) < 0.0, "flames spread to opposite sides")
 		_expect(a.length() >= 90.0 and a.length() <= 110.0, "flame speed stays bounded")

@@ -51,7 +51,7 @@ func _run() -> void:
 	var bullets := get_nodes_in_group("enemy_projectiles")
 	_expect(bullets.size() == 50, "full-health burst adds thirty bullets")
 	for i in 3:
-		var velocity: Vector2 = bullets[bullets.size() - 3 + i].get_threat_velocity()
+		var velocity: Vector2 = bullets[bullets.size() - 3 + i].get_travel_velocity()
 		var expected := locked.rotated(deg_to_rad(-6.0 + 6.0 * i))
 		_expect(velocity.normalized().is_equal_approx(expected), "three bullet lanes match the warning")
 	_expect(attack.phase == attack.Phase.RECOVERY, "ten shots enter recovery")

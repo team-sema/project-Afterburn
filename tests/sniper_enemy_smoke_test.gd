@@ -62,8 +62,6 @@ func _run() -> void:
 	_expect(failures, attack.is_telegraph_visible(), "AIMING shows dual-line telegraph")
 	var initial_telegraph_angle := attack.aim_cone.half_angle_degrees
 	var initial_telegraph_alpha := attack.aim_cone.get_line_alpha()
-	var initial_threat_response := attack.get_threat_response_pressure()
-	var initial_reaction_time := attack.get_threat_reaction_time()
 	var hold_pos := enemy.global_position
 
 	# Track player during AIMING.
@@ -73,16 +71,6 @@ func _run() -> void:
 	player.global_position = Vector2(200.0, 300.0)
 	await create_timer(0.12).timeout
 	var aim_right := attack.get_aim_direction()
-	_expect(
-		failures,
-		attack.get_threat_response_pressure() > initial_threat_response,
-		"sniper response pressure rises while aim closes",
-	)
-	_expect(
-		failures,
-		attack.get_threat_reaction_time() < initial_reaction_time,
-		"sniper reports remaining reaction time",
-	)
 	_expect(
 		failures,
 		aim_left.x < -0.05 and aim_right.x > 0.05,

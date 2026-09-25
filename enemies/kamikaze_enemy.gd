@@ -87,12 +87,6 @@ func get_captured_target_position() -> Vector2:
 	return _captured_target_position
 
 
-func get_threat_reaction_time() -> float:
-	if _behavior_state == BehaviorState.CHARGING or _behavior_state == BehaviorState.DASHING:
-		return charge_duration
-	return -1.0
-
-
 func _update_formation_aim() -> void:
 	if not _aim_during_formation or not is_formation_member():
 		return

@@ -41,12 +41,12 @@ func run() -> void:
 	var lab = load("res://projectiles/bullet_lab.tscn").instantiate()
 	root.add_child(lab)
 	await process_frame
-	lab.threat_button.button_pressed = false
+	lab.safety_button.button_pressed = false
 	expect(lab.apply_script(fixture, 1), "valid project pattern loads")
 	await process_frame
 	expect(lab._custom_sequence.steps[0].volley.count == 2, "loaded constructor executes once")
 	expect(lab.emitter.position == Vector2(208, 144), "custom emitter placement")
-	expect(lab.pattern_choice.selected == 10 and not lab.threat_button.button_pressed, "script mode retains diagnostics options")
+	expect(lab.pattern_choice.selected == 10 and not lab.safety_button.button_pressed, "script mode retains diagnostics options")
 	var old_sequence: BarrageSequence = lab._custom_sequence
 	write_pattern(source(7))
 	await key(KEY_F5)
@@ -100,7 +100,7 @@ func run() -> void:
 	await key(KEY_F1)
 	await process_frame
 	expect(current_scene.scene_file_path == "res://labs/lab_hub.tscn" and not root.has_node("LabReturn"), "F1 returns to hub and removes navigation")
-	for path in ["res://weapon_test/weapon_test_lab.tscn", "res://threat_monitor/threat_monitor_lab.tscn", "res://menus/augment_frame_test.tscn"]:
+	for path in ["res://weapon_test/weapon_test_lab.tscn", "res://menus/augment_frame_test.tscn"]:
 		current_scene.open_lab(path)
 		await process_frame
 		await process_frame

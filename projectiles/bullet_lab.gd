@@ -32,13 +32,13 @@ const FIELD_SIZE := Vector2i(416, 288)
 var world: Node2D
 var target: Node2D
 var hurtbox: HurtboxComponent
-var monitor: ThreatMonitor
+var safety_meter: SafeSpaceMeter
 var shape_choice: OptionButton
 var motion_choice: OptionButton
 var pattern_choice: OptionButton
 var pause_button: Button
 var hitbox_button: CheckButton
-var threat_button: CheckButton
+var safety_button: CheckButton
 var fps_label: Label
 var _fps_started_usec := 0
 var _fps_frames := 0
@@ -144,10 +144,10 @@ func _build_field() -> void:
 	core.polygon = PackedVector2Array([Vector2(0, -2), Vector2(2, 0), Vector2(0, 2), Vector2(-2, 0)])
 	core.color = Color.WHITE
 	target.add_child(core)
-	monitor = ThreatMonitor.new()
-	monitor.monitored_root = world
-	monitor.player = target
-	world.add_child(monitor)
+	safety_meter = SafeSpaceMeter.new()
+	safety_meter.monitored_root = world
+	safety_meter.player = target
+	world.add_child(safety_meter)
 	emitter = Node2D.new()
 	emitter.name = "Emitter"
 	world.add_child(emitter)
@@ -182,12 +182,12 @@ func _build_panel() -> void:
 	panel.add_child(hitbox_button)
 	_controls.append(hitbox_button)
 	hitbox_button.toggled.connect(_toggle_hitboxes)
-	threat_button = CheckButton.new()
-	threat_button.text = "위협 계산 ON"
-	threat_button.button_pressed = true
-	panel.add_child(threat_button)
-	_controls.append(threat_button)
-	threat_button.toggled.connect(_toggle_threat)
+	safety_button = CheckButton.new()
+	safety_button.text = "안전 비율 ON"
+	safety_button.button_pressed = true
+	panel.add_child(safety_button)
+	_controls.append(safety_button)
+	safety_button.toggled.connect(_toggle_safety)
 	_button(panel, "화면의 탄 소거", clear_bullets)
 	details_label = Label.new()
 	details_label.add_theme_font_size_override("font_size", 12)
@@ -298,7 +298,7 @@ func restart() -> void:
 	_invincible_left = 0.0
 	hurtbox.is_invincible = false
 	target.position = Vector2(FIELD_SIZE.x * 0.5, FIELD_SIZE.y - 30)
-	monitor.reset_measurements()
+	safety_meter.reset_measurements()
 	get_tree().paused = false
 	pause_button.text = "일시정지"
 	start_pattern()
@@ -395,10 +395,10 @@ func toggle_pause() -> void:
 	_reset_fps()
 
 
-func _toggle_threat(enabled: bool) -> void:
-	monitor.set_process(enabled)
-	monitor.reset_measurements()
-	threat_button.text = "위협 계산 ON" if enabled else "위협 계산 OFF"
+func _toggle_safety(enabled: bool) -> void:
+	safety_meter.set_process(enabled)
+	safety_meter.reset_measurements()
+	safety_button.text = "안전 비율 ON" if enabled else "안전 비율 OFF"
 	_reset_fps()
 	_update_status()
 
@@ -420,10 +420,10 @@ func _update_fps() -> void:
 
 func _update_status() -> void:
 	status_label.text = "피격 %d   소거 %d   " % [hits, cleared]
-	if threat_button.button_pressed:
-		status_label.text += "SPACE %.0f%%   위협 %.1f" % [float(monitor.latest_sample.get("space", 0.0)) * 100, monitor.current_threat]
+	if safety_button.button_pressed:
+		status_label.text += "정지 안전 %.0f%%" % (safety_meter.passive_safe_ratio * 100)
 	else:
-		status_label.text += "위협 계산 OFF"
+		status_label.text += "안전 비율 OFF"
 
 
 func _toggle_hitboxes(enabled: bool) -> void:
