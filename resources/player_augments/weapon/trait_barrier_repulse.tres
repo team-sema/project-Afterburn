@@ -8,7 +8,7 @@
 script = ExtResource("1_aug")
 augment_id = &"trait_barrier_repulse"
 display_name = "반발 충격"
-description = "타격 시 넉백 + 충격 피해 ×0.4, 재타격 쿨다운 ×0.85."
+tier = 1
 augment_type = 3
 offer_weight = 1.0
 weapon_definition = ExtResource("2_weapon")

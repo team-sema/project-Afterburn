@@ -7,10 +7,9 @@
 script = ExtResource("1_def")
 trait_id = &"missile_multi_rack"
 display_name = "다중 런처"
-description = "미사일 +1발, 피해 ×0.9."
+description = "미사일 +{count_bonus}발, 피해 ×{damage_mult}."
 icon = ExtResource("2_icon")
 target_weapon_id = &"aux_homing_missile"
-next_rank_hint = "발사 수 증가"
 params = {
 "count_bonus": 1,
 "damage_mult": 0.9

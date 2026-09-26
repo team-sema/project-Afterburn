@@ -6,6 +6,12 @@ extends VBoxContainer
 
 const MODULE_SLOT_COUNT := 4
 const ROMAN := ["", "I", "II", "III", "IV", "V"]
+## Module hex border per tier (Silver, Gold, Prismatic).
+const MODULE_TIER_BORDER_COLORS: Array[Color] = [
+	Color(0.72, 0.82, 0.92, 0.95),
+	Color(0.95, 0.7, 0.24, 0.95),
+	Color(0.95, 0.45, 1.0, 0.95),
+]
 
 @export var ship: Node2D
 
@@ -41,6 +47,8 @@ var _preview_session_active := false
 var _preview_restore_bay_index := -1
 var _preview_restore_weapon_id: StringName = &""
 var _preview_restore_trait_id: StringName = &""
+## Current module hex side; shrinks when a weapon has more than MODULE_SLOT_COUNT modules.
+var _module_side := 0.0
 
 
 func _ready() -> void:
@@ -373,6 +381,7 @@ func _show_empty_detail() -> void:
 	if selected_name != null:
 		selected_name.text = "무기를 선택하세요"
 	_clear_runtime_children(modules_grid)
+	_set_module_side(_module_hex_side())
 	_add_empty_module_placeholders()
 	_hover_trait_id = &""
 	_set_description("")
@@ -393,7 +402,7 @@ func _show_trait_description(loadout: PlayerWeaponLoadout, trait_id: StringName)
 	var title := loadout.get_trait_display_name(trait_id)
 	if rank > 0:
 		title = "%s %s" % [title, _rank_roman(rank)]
-	var body := loadout.get_trait_description(trait_id)
+	var body := loadout.get_trait_description(trait_id, maxi(1, rank))
 	if body == "":
 		_set_description(title)
 	else:
@@ -433,7 +442,18 @@ func _rebuild_module_cards(loadout: PlayerWeaponLoadout) -> void:
 	for key in traits.keys():
 		if int(traits[key]) > 0:
 			ids.append(key as StringName)
-	ids.sort_custom(func(a: StringName, b: StringName) -> bool: return String(a) < String(b))
+	# Prismatic → Gold → Silver, then id.
+	ids.sort_custom(func(a: StringName, b: StringName) -> bool:
+		var tier_a := _get_trait_tier(loadout, a)
+		var tier_b := _get_trait_tier(loadout, b)
+		if tier_a != tier_b:
+			return tier_a > tier_b
+		return String(a) < String(b)
+	)
+	var module_count := ids.size()
+	if preview_trait_id != &"" and not ids.has(preview_trait_id):
+		module_count += 1
+	_set_module_side(_fit_module_hex_side(module_count))
 	for trait_id in ids:
 		var is_preview := trait_id == preview_trait_id
 		var rank := int(traits[trait_id]) + (preview_rank_increase if is_preview else 0)
@@ -469,6 +489,32 @@ func _add_empty_module_placeholders() -> void:
 		modules_grid.add_child(_make_module_hex("", 0, null, &"", true))
 
 
+## Keeps a row of more than MODULE_SLOT_COUNT hexes inside the default row width.
+func _fit_module_hex_side(module_count: int) -> float:
+	var base := _module_hex_side()
+	if module_count <= MODULE_SLOT_COUNT:
+		return base
+	var inset := HexHoneycombContainer.FRAME_INSET * 2.0
+	var row_width := base + (base - inset) * 0.75 * float(MODULE_SLOT_COUNT - 1)
+	var steps := float(module_count - 1)
+	return (row_width + inset * 0.75 * steps) / (1.0 + 0.75 * steps)
+
+
+func _set_module_side(side: float) -> void:
+	_module_side = side
+	if modules_grid != null:
+		modules_grid.hex_side = side
+
+
+func get_module_hex_side() -> float:
+	return _module_side if _module_side > 0.0 else _module_hex_side()
+
+
+func _get_trait_tier(loadout: PlayerWeaponLoadout, trait_id: StringName) -> int:
+	var definition := loadout.get_trait_definition(trait_id) if loadout != null else null
+	return int(definition.tier) if definition != null else int(PlayerAugment.Tier.GOLD)
+
+
 func _make_module_hex(
 	_label_text: String,
 	_rank: int,
@@ -480,7 +526,7 @@ func _make_module_hex(
 	assert(module_hex_template != null, "WeaponLoadoutHud requires %ModuleHexTemplate placeholder.")
 	var hex := module_hex_template.duplicate() as HexModuleFrame
 	hex.visible = true
-	hex.apply_fixed_size(_module_hex_side())
+	hex.apply_fixed_size(get_module_hex_side())
 	hex.border_width = 1.0
 	hex.interactive = not empty
 	hex.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
@@ -505,7 +551,7 @@ func _make_module_hex(
 			hex.set_module_text("", _rank_roman(_rank))
 		hex.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		return hex
-	hex.border_color = Color(0.5, 0.92, 1.0, 0.95)
+	hex.border_color = MODULE_TIER_BORDER_COLORS[_get_trait_tier(_get_loadout(), trait_id)]
 	hex.fill_color = Color(0.06, 0.18, 0.3, 0.95)
 	if _rank > 0:
 		hex.set_module_text("", _rank_roman(_rank))

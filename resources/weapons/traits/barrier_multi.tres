@@ -7,10 +7,9 @@
 script = ExtResource("1_def")
 trait_id = &"barrier_multi"
 display_name = "다중 방벽"
-description = "세그먼트 +1, 피해 ×0.9."
+description = "세그먼트 +{count_bonus}, 피해 ×{damage_mult}."
 icon = ExtResource("2_icon")
 target_weapon_id = &"aux_orbital_barrier"
-next_rank_hint = "세그먼트 수 증가"
 params = {
 "count_bonus": 1,
 "damage_mult": 0.9,

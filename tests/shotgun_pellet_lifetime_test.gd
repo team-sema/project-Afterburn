@@ -51,7 +51,7 @@ func _test_trait_lifetime_multipliers(world: Node2D) -> void:
 	var choke_pellet: Node = load("res://projectiles/player_shotgun_pellet.tscn").instantiate()
 	system.call("_configure_projectile", choke_pellet, Vector2.UP)
 	_expect(
-		is_equal_approx(float(choke_pellet.get("_max_lifetime")), 0.7),
+		is_equal_approx(float(choke_pellet.get("_max_lifetime")), 0.55),
 		"choke range modifier extends pellet lifetime",
 	)
 	choke_pellet.free()

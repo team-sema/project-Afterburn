@@ -37,9 +37,16 @@ enum Tier {
 @export_range(1, 3, 1) var trait_rank_increase := 1
 @export var trait_definition: WeaponTraitDefinition
 
+## SHIP_RULE: which run rule AugmentOfferController applies on pick.
+@export var rule_id: StringName
+
 
 func get_tier_label() -> String:
-	match tier:
+	return tier_label(tier)
+
+
+static func tier_label(value: Tier) -> String:
+	match value:
 		Tier.GOLD:
 			return "GOLD"
 		Tier.PRISMATIC:
@@ -80,21 +87,16 @@ func get_offer_title(loadout: PlayerWeaponLoadout = null) -> String:
 			var trait_name := display_name
 			if trait_definition != null and trait_definition.display_name != "":
 				trait_name = trait_definition.display_name
-			var next_rank := trait_rank_increase
-			if loadout != null:
-				var current_rank := int(
-					loadout.get_weapon_traits(get_weapon_id()).get(trait_id, 0)
-				)
-				next_rank = mini(
-					current_rank + trait_rank_increase,
-					loadout.get_trait_max_rank(trait_id),
-				)
+			# Level-less (prismatic) modules name their weapon instead of a level.
+			if trait_definition != null and trait_definition.max_rank <= 1:
+				return "%s\n%s 전용" % [trait_name, _weapon_display_name()]
+			var next_rank := _get_trait_rank_step(loadout).y
 			return "%s\n모듈 Lv.%s" % [trait_name, ROMAN[clampi(next_rank, 1, ROMAN.size() - 1)]]
 		_:
 			return display_name
 
 
-func get_offer_description(_loadout: PlayerWeaponLoadout = null) -> String:
+func get_offer_description(loadout: PlayerWeaponLoadout = null) -> String:
 	match augment_type:
 		PlayerAugmentKind.Kind.WEAPON_ACQUIRE:
 			if weapon_definition != null and weapon_definition.description != "":
@@ -102,10 +104,20 @@ func get_offer_description(_loadout: PlayerWeaponLoadout = null) -> String:
 			return description
 		PlayerAugmentKind.Kind.WEAPON_TRAIT:
 			if trait_definition != null and trait_definition.description != "":
-				return trait_definition.description
+				var step := _get_trait_rank_step(loadout)
+				return trait_definition.format_description(step.y, step.x)
 			return description
 		_:
 			return description
+
+
+## x = current module level on the target weapon, y = level after taking this card.
+func _get_trait_rank_step(loadout: PlayerWeaponLoadout) -> Vector2i:
+	if loadout == null:
+		return Vector2i(0, trait_rank_increase)
+	var current_rank := int(loadout.get_weapon_traits(get_weapon_id()).get(trait_id, 0))
+	var next_rank := mini(current_rank + trait_rank_increase, loadout.get_trait_max_rank(trait_id))
+	return Vector2i(current_rank, next_rank)
 
 
 func get_offer_icon() -> Texture2D:

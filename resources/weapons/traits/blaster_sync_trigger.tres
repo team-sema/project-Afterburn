@@ -7,10 +7,9 @@
 script = ExtResource("1_def")
 trait_id = &"blaster_sync_trigger"
 display_name = "동기화 방아쇠"
-description = "좌우 동시 발사. 피해 ×0.85, 연사 간격 ×1.15."
+description = "좌우 동시 발사. 피해 ×{damage_mult}, 연사 간격 ×{fire_interval_mult}."
 icon = ExtResource("2_icon")
 target_weapon_id = &"main_blaster"
-next_rank_hint = "동시 발사 안정화"
 params = {
 "simultaneous": true,
 "damage_mult": 0.85,

@@ -8,7 +8,7 @@
 script = ExtResource("1_aug")
 augment_id = &"trait_shotgun_burst_device"
 display_name = "버스트 장치"
-description = "3발마다 추가 발사(딜레이 0.12초, 피해 ×0.9)."
+tier = 1
 augment_type = 3
 offer_weight = 1.0
 weapon_definition = ExtResource("2_weapon")

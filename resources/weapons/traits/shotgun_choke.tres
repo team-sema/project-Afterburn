@@ -1,27 +1,31 @@
-[gd_resource type="Resource" script_class="WeaponTraitDefinition" format=3 uid="uid://cbsvbdk0ytsvn"]
+[gd_resource type="Resource" script_class="WeaponTraitDefinition" load_steps=3 format=3]
 
-[ext_resource type="Script" uid="uid://dggpfusbxuib7" path="res://resources/weapons/weapon_trait_definition.gd" id="1_def"]
+[ext_resource type="Script" path="res://resources/weapons/weapon_trait_definition.gd" id="1_def"]
 [ext_resource type="Texture2D" uid="uid://bhsri7kh1kskh" path="res://assets/weapons/weapon_main_shotgun.svg" id="2_icon"]
 
 [resource]
 script = ExtResource("1_def")
 trait_id = &"shotgun_choke"
 display_name = "초크"
-description = "스프레드 ×0.5, 사거리 ×1.4, 탄속 ×1.2."
+description = "산탄각 ×{spread_mult}, 탄 수명 ×{lifetime_mult}."
 icon = ExtResource("2_icon")
 target_weapon_id = &"main_shotgun"
-next_rank_hint = "집탄 추가 강화"
+tier = 0
+max_rank = 5
 params = {
-"lifetime_mult": 1.4,
-"speed_mult": 1.2,
-"spread_mult": 0.5
+"spread_mult": 0.9,
+"lifetime_mult": 1.1,
 }
 rank_overrides = Array[Dictionary]([{
-"lifetime_mult": 1.6,
-"speed_mult": 1.3,
-"spread_mult": 0.4,
+"spread_mult": 0.8,
+"lifetime_mult": 1.2,
 }, {
-"lifetime_mult": 1.8,
-"speed_mult": 1.4,
-"spread_mult": 0.3,
+"spread_mult": 0.7,
+"lifetime_mult": 1.3,
+}, {
+"spread_mult": 0.6,
+"lifetime_mult": 1.4,
+}, {
+"spread_mult": 0.5,
+"lifetime_mult": 1.5,
 }])

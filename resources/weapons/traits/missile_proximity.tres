@@ -7,10 +7,9 @@
 script = ExtResource("1_def")
 trait_id = &"missile_proximity"
 display_name = "근접신관"
-description = "직격 ×0.95 + 반경 24 AOE(×0.8)."
+description = "직격 ×{direct_mult} + 반경 {aoe_radius} 폭발(×{aoe_mult})."
 icon = ExtResource("2_icon")
 target_weapon_id = &"aux_homing_missile"
-next_rank_hint = "AOE 반경 증가"
 params = {
 "direct_mult": 0.95,
 "aoe_mult": 0.8,

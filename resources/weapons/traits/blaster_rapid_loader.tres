@@ -7,16 +7,20 @@
 script = ExtResource("1_def")
 trait_id = &"blaster_rapid_loader"
 display_name = "고속 급탄기"
-description = "연사 간격 ×0.72, 피해 ×0.95."
+description = "연사 간격 ×{fire_interval_mult}."
 icon = ExtResource("2_icon")
 target_weapon_id = &"main_blaster"
-next_rank_hint = "연사 속도 추가 증가"
+tier = 0
+max_rank = 5
 params = {
-"fire_interval_mult": 0.72,
-"damage_mult": 0.95,
+"fire_interval_mult": 0.93,
 }
 rank_overrides = Array[Dictionary]([{
-"fire_interval_mult": 0.62,
+"fire_interval_mult": 0.87,
 }, {
-"fire_interval_mult": 0.52,
+"fire_interval_mult": 0.81,
+}, {
+"fire_interval_mult": 0.76,
+}, {
+"fire_interval_mult": 0.71,
 }])

@@ -8,7 +8,7 @@
 script = ExtResource("1_aug")
 augment_id = &"trait_missile_multi_rack"
 display_name = "다중 런처"
-description = "미사일 +1발, 피해 ×0.9."
+tier = 1
 augment_type = 3
 offer_weight = 1.0
 weapon_definition = ExtResource("2_weapon")

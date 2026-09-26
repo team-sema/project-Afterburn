@@ -123,6 +123,8 @@ func complete_elite_milestone(threat_level: int) -> bool:
 		return false
 	_awaiting_elite_enemy_offer = true
 	enemy_augment_tier += 1
+	# Elite kill reward: the next player offer is Gold or better.
+	offer_controller.grant_gold_offer_guarantee()
 	assert(get_threat_level() == threat_level, "Elite defeat must advance exactly one Threat level.")
 	threat_level_changed.emit(get_threat_level())
 	enemy_augment_progress_changed.emit(

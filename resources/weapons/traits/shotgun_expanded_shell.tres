@@ -7,10 +7,9 @@
 script = ExtResource("1_def")
 trait_id = &"shotgun_expanded_shell"
 display_name = "확장 산탄"
-description = "펠릿 +4, 피해 ×0.85."
+description = "펠릿 +{pellet_bonus}, 피해 ×{damage_mult}."
 icon = ExtResource("2_icon")
 target_weapon_id = &"main_shotgun"
-next_rank_hint = "펠릿 수 증가"
 params = {
 "damage_mult": 0.85,
 "pellet_bonus": 4

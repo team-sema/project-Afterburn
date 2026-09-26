@@ -21,12 +21,15 @@
 
 ## 강화 모듈 (WEAPON_TRAIT)
 
-| trait_id | 카드 ID | 표시명(요지) |
-|----------|---------|--------------|
-| `barrier_multi` | `trait_barrier_multi` | 다중 방벽 — 방벽 +1→+3 · 피해 ×0.9→0.7 |
-| `barrier_fast_orbit` | `trait_barrier_fast_orbit` | 고속 궤도 — 공전 ×1.5→2.1 · 재타격 쿨 ×0.7→0.4 · 피해 ×0.95 |
-| `barrier_expand_axis` | `trait_barrier_expand_axis` | 확장 — 반경 ×1.45→1.95 · 크기 ×1.35→1.75 |
-| `barrier_repulse` | `trait_barrier_repulse` | 반발 충격 — 밀침 140→260 · 충격 피해 40%→70% · 재타격 쿨 ×0.85 |
+| trait_id | 카드 ID | 등급 | 표시명(요지) |
+|----------|---------|------|--------------|
+| `barrier_expand_axis` | `trait_barrier_expand_axis` | 실버 | 확장 축 — 반경 ×1.1→1.5 · 크기 ×1.07→1.35 |
+| `aux_orbital_barrier_power` | `trait_aux_orbital_barrier_power` | 실버 | 충격 판금 — 피해 ×1.08→1.40 |
+| `barrier_multi` | `trait_barrier_multi` | 골드 | 다중 방벽 — 방벽 +1→+3 · 피해 ×0.9→0.7 |
+| `barrier_fast_orbit` | `trait_barrier_fast_orbit` | 골드 | 고속 궤도 — 공전 ×1.5→2.1 · 재타격 쿨 ×0.7→0.4 · 피해 ×0.95 |
+| `barrier_repulse` | `trait_barrier_repulse` | 골드 | 반발 충격 — 밀침 140→260 · 충격 피해 40%→70% · 재타격 쿨 ×0.85 |
+
+실버 수치는 Lv.I→V, 골드는 Lv.I→III이다.
 
 기본 방벽은 같은 적에게 한 번만 피해를 준다. 고속 궤도 또는 반발 충격 장착 시 시간 기반 재타격을 허용하며, 기본 1초에 장착 모듈의 쿨다운 배율을 곱한다.
 

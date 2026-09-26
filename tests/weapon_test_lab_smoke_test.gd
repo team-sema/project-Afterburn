@@ -34,7 +34,7 @@ func _run() -> void:
 		"lab discovers core encounter spawn controls",
 	)
 	_expect(weapon_buttons.get_child_count() == 7, "all seven weapon controls are present")
-	_expect(trait_buttons.get_child_count() == 4, "default blaster exposes its four traits")
+	_expect(trait_buttons.get_child_count() == 6, "default blaster exposes 2 silver + 3 gold + 1 prismatic modules")
 	_expect(lab.get_player_augment_count() == 13, "all 13 facility augments are discovered")
 	_expect(
 		lab.get_enemy_augment_count() == 7,
@@ -197,8 +197,8 @@ func _run() -> void:
 			"weapon control equips %s" % String(weapon_id),
 		)
 		_expect(
-			trait_buttons.get_child_count() == 4,
-			"%s exposes its four traits" % String(weapon_id),
+			trait_buttons.get_child_count() == (6 if weapon_id == &"main_blaster" else 5),
+			"%s exposes its silver, gold and prismatic modules" % String(weapon_id),
 		)
 		for child in trait_buttons.get_children():
 			var definition := child.get_meta("definition") as WeaponTraitDefinition

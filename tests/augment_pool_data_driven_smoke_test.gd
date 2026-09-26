@@ -18,7 +18,7 @@ func _initialize() -> void:
 func _run() -> void:
 	var player_pool := AugmentPoolLoader.load_player_offer_pool()
 	var enemy_pool := AugmentPoolLoader.load_enemy_offer_pool()
-	_expect(player_pool.size() == 48, "player offer pool scans 48 cards")
+	_expect(player_pool.size() == 57, "player offer pool scans 57 cards")
 	_expect(enemy_pool.size() == 6, "enemy offer pool scans 6 cards")
 	_expect(enemy_pool.has(DRONE_REINFORCEMENT), "drone reinforcement is in offer pool")
 	_expect(not enemy_pool.has(COUNTER_SHOT), "counter shot stays out of offer pool")
@@ -27,7 +27,7 @@ func _run() -> void:
 	root.add_child(gameplay)
 	await process_frame
 	var offer := gameplay.get_node("AugmentOfferController") as AugmentOfferController
-	_expect(offer.player_augment_pool.size() == 48, "gameplay auto-loads 48 player cards")
+	_expect(offer.player_augment_pool.size() == 57, "gameplay auto-loads 57 player cards")
 	_expect(offer.enemy_augment_pool.size() == 6, "gameplay auto-loads 6 enemy cards")
 	_expect(
 		offer.enemy_augment_pool.has(DRONE_REINFORCEMENT),

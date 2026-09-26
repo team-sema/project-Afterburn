@@ -78,6 +78,7 @@ func _trait_damage_mult() -> float:
 	var mult := 1.0
 	mult *= float(get_trait_param(&"blaster_rapid_loader", &"damage_mult", 1.0))
 	mult *= float(get_trait_param(&"blaster_sync_trigger", &"damage_mult", 1.0))
+	mult *= float(get_trait_param(&"blaster_split_prism", &"damage_mult", 1.0))
 	return mult
 
 
@@ -111,6 +112,13 @@ func _configure_projectile(projectile: Node) -> void:
 			bounce_mults,
 			ricochet_search_radius,
 		)
+		if has_trait(&"blaster_split_prism") and projectile.has_method("configure_split"):
+			projectile.call(
+				"configure_split",
+				int(get_trait_param(&"blaster_split_prism", &"split_count", 3)),
+				int(get_trait_param(&"blaster_split_prism", &"split_generations", 2)),
+				float(get_trait_param(&"blaster_split_prism", &"split_spread_deg", 90.0)),
+			)
 	else:
 		hitbox.damage = resolve_hit_damage(base)
 		hitbox.damage_resolver = func(hurtbox: HurtboxComponent) -> int:

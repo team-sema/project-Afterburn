@@ -7,10 +7,9 @@
 script = ExtResource("1_def")
 trait_id = &"missile_terminal"
 display_name = "종말 가속"
-description = "비행 시간에 따라 피해 +20%~+100%(2.5초 만개)."
+description = "비행 시간에 따라 피해 +{min_bonus%}~{max_bonus%}%({full_bonus_flight_time}초 만개)."
 icon = ExtResource("2_icon")
 target_weapon_id = &"aux_homing_missile"
-next_rank_hint = "최대 보너스 증가"
 params = {
 "min_bonus": 0.2,
 "max_bonus": 1,

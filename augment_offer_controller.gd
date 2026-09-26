@@ -2,6 +2,9 @@ class_name AugmentOfferController
 extends Node
 
 const AUGMENT_RESUME_BURST_SCENE := preload("res://effects/augment_resume_burst.tscn")
+const FOURTH_WEAPON_BAY_RULE := &"fourth_weapon_bay"
+const FOURTH_WEAPON_BAY_DAMAGE_MULTIPLIER := 0.85
+const FOURTH_WEAPON_BAY_COUNT := 4
 
 signal offer_started(offer_type: OfferType)
 signal offer_completed(offer_type: OfferType)
@@ -29,16 +32,27 @@ enum OfferType {
 @export_range(8.0, 120.0, 1.0) var player_resume_clear_radius := 36.0
 ## Run-wide reroll budget (temporary balance; tune via export only).
 @export_range(0, 20, 1) var max_reroll_count := 2
-## Category multipliers on top of each card's offer_weight.
+## Offer-level tier odds: one roll per player offer (temporary balance).
+@export_range(0.0, 100.0, 0.1) var silver_offer_weight := 55.0
+@export_range(0.0, 100.0, 0.1) var gold_offer_weight := 40.0
+@export_range(0.0, 100.0, 0.1) var prismatic_offer_weight := 5.0
+@export_range(0, 10, 1) var max_prismatic_picks_per_run := 2
+## Category multipliers on top of each card's offer_weight, inside the offer tier.
 @export_range(0.01, 10.0, 0.01) var acquire_weight_has_empty_bay := 1.8
 @export_range(0.01, 10.0, 0.01) var acquire_weight_bays_full := 0.55
-@export_range(0.01, 10.0, 0.01) var trait_weight_has_empty_bay := 0.45
-@export_range(0.01, 10.0, 0.01) var trait_weight_bays_full := 0.25
+@export_range(0.01, 10.0, 0.01) var trait_weight_has_empty_bay := 1.0
+@export_range(0.01, 10.0, 0.01) var trait_weight_bays_full := 1.0
 @export_range(0.01, 10.0, 0.01) var facility_weight_multiplier := 1.0
 
 var is_offer_active := false
 var active_offer_type := OfferType.PLAYER
 var remaining_reroll_count := 0
+## Highest tier among the current player offer's cards (shown in the title).
+var current_offer_tier := PlayerAugment.Tier.SILVER
+var prismatic_pick_count := 0
+## Elite rewards: each one lifts one later player offer to Gold or above.
+var pending_gold_guarantees := 0
+var _applied_rules: Dictionary = {}
 var _current_player_choices: Array[PlayerAugment] = []
 var _awaiting_final_choice := false
 
@@ -91,7 +105,7 @@ func _start_offer() -> void:
 		selection_ui.configure_weapon_loadout(_get_loadout())
 		_current_player_choices = _pick_player_choices()
 		choices = _current_player_choices
-		title = "강화 선택"
+		title = "강화 선택 · %s" % PlayerAugment.tier_label(current_offer_tier)
 		accent_color = selection_ui.player_accent_color
 		show_ship_modules = true
 		_awaiting_final_choice = true
@@ -117,6 +131,11 @@ func _get_loadout() -> PlayerWeaponLoadout:
 	return null
 
 
+## Elite reward hook: the next player offer rolls at least Gold. Stacks per call.
+func grant_gold_offer_guarantee() -> void:
+	pending_gold_guarantees += 1
+
+
 func _pick_player_choices() -> Array[PlayerAugment]:
 	_ensure_offer_pools_loaded()
 	var loadout := _get_loadout()
@@ -124,7 +143,53 @@ func _pick_player_choices() -> Array[PlayerAugment]:
 	for augment in player_augment_pool:
 		if _is_player_augment_available(augment, loadout):
 			valid.append(augment)
-	return _pick_category_mixed(valid, choices_per_offer, loadout)
+	var picks := _pick_tiered(valid, choices_per_offer, _roll_offer_tier(), loadout)
+	current_offer_tier = PlayerAugment.Tier.SILVER
+	for pick in picks:
+		current_offer_tier = maxi(current_offer_tier, pick.tier) as PlayerAugment.Tier
+	return picks
+
+
+## One roll per offer; a pending elite guarantee lifts Silver to Gold.
+func _roll_offer_tier() -> PlayerAugment.Tier:
+	var weights: Array[float] = [
+		maxf(0.0, silver_offer_weight),
+		maxf(0.0, gold_offer_weight),
+		maxf(0.0, prismatic_offer_weight),
+	]
+	var total := weights[0] + weights[1] + weights[2]
+	var tier := PlayerAugment.Tier.SILVER
+	if total > 0.0:
+		var roll := randf() * total
+		var cursor := 0.0
+		for index in weights.size():
+			cursor += weights[index]
+			if roll < cursor:
+				tier = index as PlayerAugment.Tier
+				break
+	if pending_gold_guarantees > 0:
+		pending_gold_guarantees -= 1
+		tier = maxi(tier, PlayerAugment.Tier.GOLD) as PlayerAugment.Tier
+	return tier
+
+
+## Fills the offer from `tier`, topping up from each lower tier when it runs short.
+func _pick_tiered(
+	pool: Array[PlayerAugment],
+	count: int,
+	tier: PlayerAugment.Tier,
+	loadout: PlayerWeaponLoadout,
+) -> Array[PlayerAugment]:
+	var picked: Array[PlayerAugment] = []
+	for current_tier in range(int(tier), -1, -1):
+		if picked.size() >= count:
+			break
+		var tier_pool: Array[PlayerAugment] = []
+		for augment in pool:
+			if int(augment.tier) == current_tier and not picked.has(augment):
+				tier_pool.append(augment)
+		picked.append_array(_pick_weighted(tier_pool, count - picked.size(), loadout))
+	return picked
 
 
 func _pick_enemy_choices() -> Array[EnemyAugment]:
@@ -141,13 +206,6 @@ func _pick_enemy_choices() -> Array[EnemyAugment]:
 func _is_enemy_augment_available(augment: EnemyAugment) -> bool:
 	return augment != null and enemy_registry.can_add_augment(augment)
 
-
-func _pick_category_mixed(
-	pool: Array[PlayerAugment],
-	count: int,
-	loadout: PlayerWeaponLoadout,
-) -> Array[PlayerAugment]:
-	return _pick_weighted(pool, count, loadout)
 
 func _category_weight_multiplier(
 	augment: PlayerAugment,
@@ -204,6 +262,11 @@ func _pick_weighted(
 func _is_player_augment_available(augment: PlayerAugment, loadout: PlayerWeaponLoadout) -> bool:
 	if augment == null:
 		return false
+	if (
+		augment.tier == PlayerAugment.Tier.PRISMATIC
+		and prismatic_pick_count >= max_prismatic_picks_per_run
+	):
+		return false
 	match augment.augment_type:
 		PlayerAugmentKind.Kind.WEAPON_ACQUIRE:
 			if loadout == null or augment.weapon_definition == null:
@@ -224,6 +287,21 @@ func _is_player_augment_available(augment: PlayerAugment, loadout: PlayerWeaponL
 		PlayerAugmentKind.Kind.FACILITY_EFFECT:
 			var primary_tag := augment.get_primary_module_tag()
 			return primary_tag != &"" and player_registry.has_facility(primary_tag)
+		PlayerAugmentKind.Kind.SHIP_RULE:
+			return _is_ship_rule_available(augment, loadout)
+		_:
+			return false
+
+
+func _is_ship_rule_available(augment: PlayerAugment, loadout: PlayerWeaponLoadout) -> bool:
+	if augment.rule_id == &"" or _applied_rules.has(augment.rule_id):
+		return false
+	match augment.rule_id:
+		FOURTH_WEAPON_BAY_RULE:
+			return (
+				loadout != null
+				and loadout.get_max_equipped_weapon_count() < FOURTH_WEAPON_BAY_COUNT
+			)
 		_:
 			return false
 
@@ -236,6 +314,8 @@ func _on_choice_selected(choice: Resource) -> void:
 			if not await _resolve_player_augment(player_augment):
 				selection_ui.resume_choices()
 				return
+			if player_augment.tier == PlayerAugment.Tier.PRISMATIC:
+				prismatic_pick_count += 1
 			await _finish_offer(player_augment)
 		OfferType.ENEMY:
 			var enemy_augment := choice as EnemyAugment
@@ -253,8 +333,26 @@ func _resolve_player_augment(player_augment: PlayerAugment) -> bool:
 			return _resolve_weapon_trait(player_augment, loadout)
 		PlayerAugmentKind.Kind.STAT_MULTIPLIER, PlayerAugmentKind.Kind.FACILITY_EFFECT:
 			return await _resolve_facility_module(player_augment)
+		PlayerAugmentKind.Kind.SHIP_RULE:
+			return _resolve_ship_rule(player_augment, loadout)
 		_:
 			return false
+
+
+func _resolve_ship_rule(player_augment: PlayerAugment, loadout: PlayerWeaponLoadout) -> bool:
+	if not _is_ship_rule_available(player_augment, loadout):
+		return false
+	match player_augment.rule_id:
+		FOURTH_WEAPON_BAY_RULE:
+			loadout.add_weapon_bays(FOURTH_WEAPON_BAY_COUNT - loadout.get_max_equipped_weapon_count())
+			loadout.set_rule_damage_multiplier(
+				loadout.get_rule_damage_multiplier() * FOURTH_WEAPON_BAY_DAMAGE_MULTIPLIER
+			)
+		_:
+			return false
+	_applied_rules[player_augment.rule_id] = true
+	selection_ui.restore_for_result()
+	return true
 
 
 func _resolve_weapon_acquire(player_augment: PlayerAugment, loadout: PlayerWeaponLoadout) -> bool:
@@ -385,8 +483,8 @@ func _on_reroll_requested(choice_index: int) -> void:
 	for choice in _current_player_choices:
 		if choice != null:
 			excluded_ids[choice.augment_id] = true
-	var preferred_kind := _current_player_choices[choice_index].augment_type
-	var replacement := _pick_player_replacement(excluded_ids, preferred_kind)
+	var focused := _current_player_choices[choice_index]
+	var replacement := _pick_player_replacement(excluded_ids, focused.augment_type, focused.tier)
 	if replacement == null:
 		return
 	remaining_reroll_count -= 1
@@ -397,25 +495,33 @@ func _on_reroll_requested(choice_index: int) -> void:
 	selection_ui.set_reroll_state(remaining_reroll_count, remaining_reroll_count > 0)
 
 
+## Same tier as the rerolled card (lower tiers only when it runs dry), same Kind first.
 func _pick_player_replacement(
 	excluded_ids: Dictionary,
 	preferred_kind: PlayerAugmentKind.Kind = PlayerAugmentKind.Kind.STAT_MULTIPLIER,
+	max_tier: PlayerAugment.Tier = PlayerAugment.Tier.PRISMATIC,
 ) -> PlayerAugment:
 	var loadout := _get_loadout()
-	var preferred: Array[PlayerAugment] = []
 	var valid: Array[PlayerAugment] = []
 	for augment in player_augment_pool:
 		if (
-			not _is_player_augment_available(augment, loadout)
-			or excluded_ids.has(augment.augment_id)
+			_is_player_augment_available(augment, loadout)
+			and not excluded_ids.has(augment.augment_id)
 		):
-			continue
-		valid.append(augment)
-		if augment.augment_type == preferred_kind:
-			preferred.append(augment)
-	var pool := preferred if not preferred.is_empty() else valid
-	var picked := _pick_weighted(pool, 1, loadout)
-	return picked[0] if not picked.is_empty() else null
+			valid.append(augment)
+	for current_tier in range(int(max_tier), -1, -1):
+		var tier_pool: Array[PlayerAugment] = []
+		var preferred: Array[PlayerAugment] = []
+		for augment in valid:
+			if int(augment.tier) != current_tier:
+				continue
+			tier_pool.append(augment)
+			if augment.augment_type == preferred_kind:
+				preferred.append(augment)
+		var picked := _pick_weighted(preferred if not preferred.is_empty() else tier_pool, 1, loadout)
+		if not picked.is_empty():
+			return picked[0]
+	return null
 
 
 func _trigger_player_resume_burst() -> int:

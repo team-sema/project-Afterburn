@@ -12,6 +12,7 @@ const OFFER_PLAYER_KINDS: Array[PlayerAugmentKind.Kind] = [
 	PlayerAugmentKind.Kind.FACILITY_EFFECT,
 	PlayerAugmentKind.Kind.WEAPON_ACQUIRE,
 	PlayerAugmentKind.Kind.WEAPON_TRAIT,
+	PlayerAugmentKind.Kind.SHIP_RULE,
 ]
 
 

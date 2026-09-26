@@ -8,7 +8,7 @@
 script = ExtResource("1_aug")
 augment_id = &"trait_blaster_accel_ap"
 display_name = "가속 철갑탄"
-description = "관통 +1, 탄속 ×1.3, 관통 피해 감쇠 0.7."
+tier = 1
 augment_type = 3
 offer_weight = 1.0
 weapon_definition = ExtResource("2_weapon")

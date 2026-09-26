@@ -8,7 +8,7 @@
 script = ExtResource("1_aug")
 augment_id = &"trait_aux_heavy_barrel"
 display_name = "편대 증설 프레임"
-description = "보조 드론을 2기 추가하고 드론당 피해를 ×0.7로 조정합니다."
+tier = 1
 augment_type = 3
 offer_weight = 1.0
 weapon_definition = ExtResource("2_weapon")

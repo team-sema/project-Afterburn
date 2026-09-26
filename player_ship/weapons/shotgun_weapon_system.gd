@@ -67,7 +67,8 @@ func _fire_internal(count_as_real: bool) -> void:
 		var every_nth := maxi(1, int(get_trait_param(&"shotgun_burst_device", &"every_nth", 3)))
 		if _real_shot_count % every_nth == 0:
 			var delay := float(get_trait_param(&"shotgun_burst_device", &"delay", 0.12))
-			get_tree().create_timer(delay).timeout.connect(_fire_burst_extra, CONNECT_ONE_SHOT)
+			# process_always = false: the delay freezes while the tree is paused.
+			get_tree().create_timer(delay, false).timeout.connect(_fire_burst_extra, CONNECT_ONE_SHOT)
 
 
 func _pellet_direction(index: int, count: int) -> Vector2:

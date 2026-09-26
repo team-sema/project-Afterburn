@@ -8,7 +8,6 @@
 script = ExtResource("1_aug")
 augment_id = &"trait_laser_wide_lens"
 display_name = "광각 렌즈"
-description = "빔 폭 ×1.8, 피해 ×0.9."
 augment_type = 3
 offer_weight = 1.0
 weapon_definition = ExtResource("2_weapon")

@@ -7,10 +7,9 @@
 script = ExtResource("1_def")
 trait_id = &"blaster_ricochet"
 display_name = "도탄 탄자"
-description = "최대 2회 도탄. 1회차 ×0.7, 2회차 ×0.4."
+description = "최대 {max_bounces}회 도탄. 1회차 ×{bounce1_damage_mult}, 2회차 ×{bounce2_damage_mult}."
 icon = ExtResource("2_icon")
 target_weapon_id = &"main_blaster"
-next_rank_hint = "도탄 횟수 증가"
 params = {
 "max_bounces": 2,
 "bounce1_damage_mult": 0.7,

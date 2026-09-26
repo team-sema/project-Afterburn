@@ -536,12 +536,19 @@ func _refresh_status_preview() -> void:
 			_status_ship_panel.set_augment_preview(null)
 		if _status_weapon_hud != null:
 			_status_weapon_hud.show_augment_preview(augment)
-	else:
+	elif PlayerAugmentKind.is_facility_offer(augment.augment_type):
 		if _status_weapon_hud != null:
 			_status_weapon_hud.clear_augment_preview()
 		if _status_ship_panel != null:
 			_status_ship_panel.set_highlighted_facility(augment.get_primary_module_tag())
 			_status_ship_panel.set_augment_preview(augment)
+	else:
+		# Rule cards take no slot or bay, so nothing blinks.
+		if _status_weapon_hud != null:
+			_status_weapon_hud.clear_augment_preview()
+		if _status_ship_panel != null:
+			_status_ship_panel.set_highlighted_facility(&"")
+			_status_ship_panel.set_augment_preview(null)
 	_refresh_expansion_preview()
 	if is_accepting_input:
 		_configure_focus_navigation()
@@ -635,7 +642,7 @@ func _refresh_expansion_preview() -> void:
 	_status_ship_panel.set_expansion_preview(expansion_enabled)
 	if not expansion_enabled:
 		var augment := _get_focused_player_augment()
-		if augment != null and not PlayerAugmentKind.is_weapon_offer(augment.augment_type):
+		if augment != null and PlayerAugmentKind.is_facility_offer(augment.augment_type):
 			_status_ship_panel.set_augment_preview(augment)
 
 

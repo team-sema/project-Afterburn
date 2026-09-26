@@ -29,6 +29,7 @@ var _facility_damage_multiplier := 1.0
 var _facility_fire_rate_multiplier := 1.0
 var _temp_damage_multiplier := 1.0
 var _boss_damage_multiplier := 1.0
+var _rule_damage_multiplier := 1.0
 
 
 func _ready() -> void:
@@ -62,6 +63,16 @@ func _ensure_bays_and_mounts() -> void:
 
 func get_max_equipped_weapon_count() -> int:
 	return maxi(1, max_equipped_weapon_count)
+
+
+## Run rule: adds empty bays (e.g. prismatic fourth bay). Existing bays keep their weapons.
+func add_weapon_bays(count: int) -> void:
+	if count <= 0:
+		return
+	max_equipped_weapon_count += count
+	_ensure_bays_and_mounts()
+	weapon_slots_changed.emit()
+	loadout_changed.emit()
 
 
 func get_equipped_weapons() -> Array[WeaponDefinition]:
@@ -181,10 +192,11 @@ func get_trait_display_name(trait_id: StringName) -> String:
 	return String(trait_id)
 
 
-func get_trait_description(trait_id: StringName) -> String:
+## Description filled with `rank` values; previous_rank > 0 shows changes as old→new.
+func get_trait_description(trait_id: StringName, rank: int = 1, previous_rank: int = 0) -> String:
 	var definition := get_trait_definition(trait_id)
 	if definition != null:
-		return definition.description
+		return definition.format_description(rank, previous_rank)
 	return ""
 
 
@@ -276,6 +288,16 @@ func set_temp_damage_multiplier(multiplier: float) -> void:
 func set_boss_damage_multiplier(multiplier: float) -> void:
 	_boss_damage_multiplier = maxf(0.01, multiplier)
 	_refresh_all_weapon_multipliers()
+
+
+## Run rule cards: applies to every equipped and future weapon.
+func set_rule_damage_multiplier(multiplier: float) -> void:
+	_rule_damage_multiplier = maxf(0.01, multiplier)
+	_refresh_all_weapon_multipliers()
+
+
+func get_rule_damage_multiplier() -> float:
+	return _rule_damage_multiplier
 
 
 ## Compatibility alias used by older facility applier call sites during migration.
@@ -469,6 +491,7 @@ func _apply_multipliers_to_weapon(weapon: WeaponSystem) -> void:
 	weapon.set_facility_fire_rate_multiplier(_facility_fire_rate_multiplier)
 	weapon.set_temp_damage_multiplier(_temp_damage_multiplier)
 	weapon.set_boss_damage_multiplier(_boss_damage_multiplier)
+	weapon.set_rule_damage_multiplier(_rule_damage_multiplier)
 	weapon.set_consumable_capacity_bonus(0)
 
 

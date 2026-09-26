@@ -16,10 +16,10 @@ func _run() -> void:
 	var drop_table := load("res://resources/weapons/default_weapon_drop_table.tres")
 	_expect(is_equal_approx(acquire_plasma.offer_weight, 1.0), "plasma acquire keeps default offer weight")
 	_expect(acquire_plasma.weapon_definition == plasma_bomb, "plasma acquire keeps its weapon link")
-	_expect(plasma_expand.max_rank == 3, "plasma module supports three levels")
+	_expect(plasma_expand.max_rank == 5, "plasma silver module supports five levels")
 	_expect(
-		is_equal_approx(float(plasma_expand.get_param_for_rank(3, &"radius_mult")), 2.2),
-		"plasma module keeps its Lv.III override",
+		is_equal_approx(float(plasma_expand.get_param_for_rank(5, &"radius_mult")), 1.5),
+		"plasma module keeps its Lv.V override",
 	)
 	_expect(drop_table.weapons.has(plasma_bomb), "default drop table keeps plasma bomb")
 

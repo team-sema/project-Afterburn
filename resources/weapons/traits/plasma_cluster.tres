@@ -7,10 +7,9 @@
 script = ExtResource("1_def")
 trait_id = &"plasma_cluster"
 display_name = "클러스터"
-description = "주 피해 ×0.9, 폭발 시 소형 폭탄 3개(×0.4)."
+description = "주 피해 ×{damage_mult}, 폭발 시 소형 폭탄 {cluster_count}개(×{cluster_damage_mult})."
 icon = ExtResource("2_icon")
 target_weapon_id = &"plasma_bomb"
-next_rank_hint = "클러스터 수 증가"
 params = {
 "damage_mult": 0.9,
 "cluster_count": 3,

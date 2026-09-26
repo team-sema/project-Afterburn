@@ -8,7 +8,7 @@
 script = ExtResource("1_aug")
 augment_id = &"trait_laser_pulse"
 display_name = "펄스 발진"
-description = "0.7초 ON / 0.35초 OFF. ON 중 피해 ×2."
+tier = 1
 augment_type = 3
 offer_weight = 1.0
 weapon_definition = ExtResource("2_weapon")
