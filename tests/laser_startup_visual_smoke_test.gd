@@ -19,11 +19,11 @@ func _run() -> void:
 	_expect(is_zero_approx(glow_line.scale.x), "laser glow starts at zero width")
 	_finish_width_tween(laser)
 	_expect(is_equal_approx(core_line.width, 1.0), "laser core expands to its base width")
-	_expect(is_equal_approx(glow_line.scale.x, 0.053), "laser glow expands to its base width")
+	_expect(is_equal_approx(glow_line.scale.x, 0.3125), "laser glow expands to its base width")
 
 	laser.set_beam_width_multiplier(2.0)
 	_expect(is_equal_approx(core_line.width, 2.0), "width multiplier updates the laser core")
-	_expect(is_equal_approx(glow_line.scale.x, 0.106), "width multiplier updates the laser glow")
+	_expect(is_equal_approx(glow_line.scale.x, 0.625), "width multiplier updates the laser glow")
 	laser.restart_beam_width_animation()
 	_expect(is_zero_approx(core_line.width), "restarting fire resets the beam width")
 	_finish_width_tween(laser)

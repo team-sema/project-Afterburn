@@ -14,6 +14,7 @@ extends WeaponSystem
 @export_range(1, 40, 1) var segment_integrity := 1
 ## Seconds before a broken segment respawns at full integrity.
 @export_range(0.25, 30.0, 0.05) var respawn_delay := 3.0
+@export var impact_profile: ImpactProfile = preload("res://effects/impact_profiles/orbital_barrier.tres")
 
 ## Plate texture: X = orbit length, Y = radial thickness.
 const BASE_GLOW_SCALE := Vector2(0.055, 0.1)
@@ -323,6 +324,15 @@ func _on_barrier_hitbox_entered(hurtbox: Area2D, hitbox: HitboxComponent) -> voi
 	hitbox.damage = resolve_hit_damage(raw, enemy_hurtbox)
 	hitbox.hit_hurtbox.emit(enemy_hurtbox)
 	enemy_hurtbox.hurt.emit(hitbox)
+	if segment != null:
+		# Contact sits between the segment and the enemy; sparks bounce back
+		# toward the barrier.
+		ImpactVfx.emit_from(
+			self,
+			segment.global_position.lerp(enemy_hurtbox.global_position, 0.5),
+			impact_profile,
+			segment.global_position - enemy_hurtbox.global_position,
+		)
 
 	if has_trait(&"barrier_repulse"):
 		_apply_repulse(target, enemy_hurtbox, raw)

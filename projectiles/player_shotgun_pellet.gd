@@ -1,5 +1,7 @@
 extends Node2D
 
+@export var impact_profile: ImpactProfile = preload("res://effects/impact_profiles/shotgun.tres")
+
 @onready var scale_component: ScaleComponent = $ScaleComponent
 @onready var flash_component: FlashComponent = $FlashComponent
 @onready var hitbox_component: HitboxComponent = $HitboxComponent
@@ -36,9 +38,14 @@ func configure_shotgun_combat(
 func _ready() -> void:
 	scale_component.tween_scale()
 	flash_component.flash()
-	hitbox_component.hit_hurtbox.connect(queue_free.unbind(1))
+	hitbox_component.hit_hurtbox.connect(_on_hit_hurtbox)
 	if _pending_configure:
 		_apply_damage_resolver()
+
+
+func _on_hit_hurtbox(_hurtbox: HurtboxComponent) -> void:
+	ImpactVfx.emit_from(self, global_position, impact_profile, ImpactVfx.against_travel(self))
+	queue_free()
 
 
 func _process(delta: float) -> void:
