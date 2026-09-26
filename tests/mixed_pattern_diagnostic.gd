@@ -5,7 +5,7 @@ func _initialize() -> void:
 	run.call_deferred()
 
 func run() -> void:
-	var lab = load("res://projectiles/bullet_behavior_lab.tscn").instantiate()
+	var lab = load("res://labs/bullet/presets/bullet_behavior_lab.tscn").instantiate()
 	root.add_child(lab)
 	lab.pattern_player.stop()
 	await process_frame

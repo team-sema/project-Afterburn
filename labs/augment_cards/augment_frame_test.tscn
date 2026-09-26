@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://c8r0yevjy11gl"]
 
-[ext_resource type="Script" uid="uid://b8s2du2lo6nv" path="res://menus/augment_frame_test.gd" id="1"]
+[ext_resource type="Script" uid="uid://b8s2du2lo6nv" path="res://labs/augment_cards/augment_frame_test.gd" id="1"]
 [ext_resource type="PackedScene" uid="uid://503oqsi4rpuh" path="res://menus/augment_selection_overlay.tscn" id="2"]
 [ext_resource type="FontFile" uid="uid://dhbb73hkpge3y" path="res://fonts/Mulmaru.ttf" id="3"]
 

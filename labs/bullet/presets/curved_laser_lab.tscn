@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://tclnkwukincc"]
 
-[ext_resource type="Script" uid="uid://bab2l3twu77u4" path="res://projectiles/bullet_lab.gd" id="1"]
+[ext_resource type="Script" uid="uid://bab2l3twu77u4" path="res://labs/bullet/bullet_lab.gd" id="1"]
 
 [node name="CurvedLaserLab" type="Control" unique_id=280226020]
 layout_mode = 3

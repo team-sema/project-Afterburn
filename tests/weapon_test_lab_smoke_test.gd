@@ -1,6 +1,6 @@
 extends SceneTree
 
-const LAB_SCENE := preload("res://weapon_test/weapon_test_lab.tscn")
+const LAB_SCENE := preload("res://labs/weapons/weapon_test_lab.tscn")
 
 var failures: PackedStringArray = []
 

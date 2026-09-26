@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://bhi2q4xjyslnd"]
 
-[ext_resource type="Script" uid="uid://ugmk5krcjkiy" path="res://labs/lab_hub.gd" id="1"]
+[ext_resource type="Script" uid="uid://ugmk5krcjkiy" path="res://lab_hub.gd" id="1"]
 
 [node name="LabHub" type="Control" unique_id=999550657]
 layout_mode = 3

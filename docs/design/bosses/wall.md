@@ -75,9 +75,19 @@
 
 시퀀스 `BOSS` 스텝. 처치 후 처리는 [런 페이싱](../run-pacing.md)과 같다.
 
+## Lab
+
+독립 시험 장면 `labs/bosses/wall/wall_boss_lab.tscn` (허브: `보스 · 벽`). 본 게임과 같은 `enemies/boss_wall.tscn`·진입 이동을 쓰고 `is_boss`를 켠다. Encounter·게이트·XP·Threat·오퍼에는 연결하지 않는다.
+
+- 화면: 좌측 조작 안내·재시작·일시정지·허브 복귀, 중앙 240×360 전장, 우측 포탑 단계(진입/회피/등장/사격/코어 추가 노출/퇴장)·피격 횟수·경과 시간·보스 HP. 전장 상단에 Lab 전용 보스 HP바만 표시한다(본 게임 보스 체력바는 계속 없음). 벽이 상단을 가리므로 단계 글자는 우측에 둔다.
+- 함선은 실제 함선·자동 사격이며 시험용으로 생존을 보장하고 실제 피격 이벤트 수를 센다.
+- 입력: WASD/방향키 이동, R 재시작, P 일시정지, F1 허브. 버튼은 방향 입력+확인으로도 접근한다.
+- 격파하면 경과 시간을 멈추고 `격파`를 표시한다. R로 다시 시작한다.
+
 ## 관련 코드
 
 - `enemies/boss_wall.tscn`, `enemies/boss_wall.gd`
+- `labs/bosses/wall/wall_boss_lab.gd`
 - `components/boss_wall_turret_cycle_component.gd`
 - `patterns/boss_wall_turret_pattern.gd`
 - `resources/encounters/presets/boss_wall.tres`
@@ -88,5 +98,6 @@
 - 벽 피격 시 소량만 깎이고, 코어 피격 시 풀 데미지
 - 포탑 1개 사이클: 휴식(4~6초) → 등장 → 나선 사격(~4초) → 퇴장
 - 포탑 파괴 시 코어 추가 노출
-- 체력바 없음
+- 본 게임에서 보스 체력바 없음
 - `tests/boss_wall_smoke_test.gd`
+- Lab: 허브에서 열고 돌아오기, 실제 함선 사격으로 보스 HP 감소, 포탑 단계 표시, 격파 시 시간 정지, 재시작·일시정지 — `tests/wall_boss_lab_smoke_test.gd`

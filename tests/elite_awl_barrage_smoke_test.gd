@@ -59,7 +59,7 @@ func run() -> void:
 	for i in mini(baseline.size(), modern.size()):
 		expect(baseline[i][0].is_equal_approx(modern[i][0]), "same seeded velocity %d" % i)
 		expect(baseline[i][1].is_equal_approx(modern[i][1]), "same substep emission position %d" % i)
-	var lab := preload("res://labs/enemy_attack_lab.tscn").instantiate()
+	var lab := preload("res://labs/enemy_attack/enemy_attack_lab.tscn").instantiate()
 	root.add_child(lab)
 	await process_frame
 	expect(lab.world != null and lab.mode == 0, "lab starts with Awl")

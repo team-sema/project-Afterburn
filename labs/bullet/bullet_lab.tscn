@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://chmlnclklbpxe"]
 
-[ext_resource type="Script" uid="uid://bab2l3twu77u4" path="res://projectiles/bullet_lab.gd" id="1"]
+[ext_resource type="Script" uid="uid://bab2l3twu77u4" path="res://labs/bullet/bullet_lab.gd" id="1"]
 
 [node name="BulletLab" type="Control" unique_id=2124514759]
 layout_mode = 3

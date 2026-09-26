@@ -82,5 +82,5 @@ func _process(delta: float) -> void:
 
 func _unhandled_key_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F1:
-		get_tree().change_scene_to_file("res://labs/lab_hub.tscn")
+		get_tree().change_scene_to_file("res://lab_hub.tscn")
 		get_viewport().set_input_as_handled()
