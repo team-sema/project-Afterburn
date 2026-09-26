@@ -1,6 +1,6 @@
 extends SceneTree
 
-const LAB := preload("res://projectiles/curved_laser_lab.tscn")
+const LAB := preload("res://labs/bullet/presets/curved_laser_lab.tscn")
 const LASER := preload("res://projectiles/curved_laser.tscn")
 var failures := PackedStringArray()
 
@@ -41,11 +41,11 @@ func _run() -> void:
 	laser.get_node("HitboxComponent").apply_contacts()
 	_expect(lab.hits == 2, "body can hit again after immunity expires without leaving the laser")
 	laser._physics_process(0.6)
-	var path := laser.get_threat_path(0.8)
-	_expect(path[0].distance_to(laser.position_at(0.3)) < 0.001, "threat prediction includes the current tail")
-	_expect(path[path.size() - 1].distance_to(laser.position_at(2.5)) < 0.001, "threat prediction includes the future head")
-	var sample: Dictionary = lab.monitor.take_sample_now()
-	_expect(sample.relevant_projectile_count <= 1, "body segments never inflate the bullet count")
+	var path := laser.get_predicted_path(0.8)
+	_expect(path[0].distance_to(laser.position_at(0.3)) < 0.001, "path prediction includes the current tail")
+	_expect(path[path.size() - 1].distance_to(laser.position_at(2.5)) < 0.001, "path prediction includes the future head")
+	lab.safety_meter.measure()
+	_expect(lab.safety_meter.relevant_projectile_count <= 1, "body segments never inflate the bullet count")
 	laser.show_hitbox = true
 	lab.toggle_pause()
 	var frozen := laser.age

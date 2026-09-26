@@ -130,4 +130,4 @@ else
 fi
 
 
-echo "done. tell teammate: git checkout main && git pull"
+echo "done."

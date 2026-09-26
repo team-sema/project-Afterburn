@@ -197,7 +197,7 @@ func _test_pair_warning_attack_exit_and_reward() -> void:
 	var projectile := _find_first_enemy_projectile()
 	_expect(projectile != null, "aimed burst spawns the shared enemy projectile")
 	if projectile != null:
-		var projectile_velocity: Vector2 = projectile.get_threat_velocity()
+		var projectile_velocity: Vector2 = projectile.get_travel_velocity()
 		var aim := projectile.global_position.direction_to(player.global_position)
 		_expect(
 			projectile_velocity.normalized().dot(aim) > 0.98,

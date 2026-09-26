@@ -29,16 +29,6 @@ func _update_phase_rate() -> void:
 	var minimum := 0.08 if phase == Phase.BURST else 0.18
 	barrage_player.time_scale = gap / maxf(minimum, gap / _action_rate)
 
-func get_threat_projectile_rate() -> float:
-	if phase == Phase.ENTRY: return 0.0
-	var cycle := 0.45 + 3.0 * maxf(0.18, 0.34 / _action_rate) + 1.0
-	cycle += 9.0 * maxf(0.08, 0.13 / _action_rate) + maxf(1.0, 1.6 / _action_rate)
-	return 50.0 / maxf(0.05, cycle)
-
-func get_threat_reaction_time() -> float:
-	if phase == Phase.AIM or phase == Phase.BURST: return 1.0
-	return super.get_threat_reaction_time()
-
 func _process(delta: float) -> void:
 	if enemy.is_queued_for_deletion() or enemy.stats_component.health <= 0:
 		barrage_player.stop()

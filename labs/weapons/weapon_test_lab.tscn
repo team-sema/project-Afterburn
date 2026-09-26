@@ -1,0 +1,386 @@
+[gd_scene format=3 uid="uid://dgphfeyp1p7dl"]
+
+[ext_resource type="Script" uid="uid://ow87j188wimb" path="res://labs/weapons/weapon_test_lab.gd" id="1_script"]
+[ext_resource type="PackedScene" uid="uid://cj6atpgfbbki0" path="res://player_ship/ship.tscn" id="2_ship"]
+[ext_resource type="Script" uid="uid://cpkr4w0d5rl5t" path="res://resources/weapons/weapon_definition.gd" id="2_wn358"]
+[ext_resource type="PackedScene" uid="uid://da58jpbo01r7q" path="res://effects/space_background.tscn" id="3_background"]
+[ext_resource type="Script" uid="uid://tgkx11lah8ro" path="res://enemy_augment_registry.gd" id="4_enemy_registry"]
+[ext_resource type="Script" uid="uid://b1vehes3nnrj2" path="res://player_augment_registry.gd" id="5_player_registry"]
+[ext_resource type="LabelSettings" uid="uid://x33lbqidu7sv" path="res://fonts/default_label_settings.tres" id="6_default_label"]
+[ext_resource type="LabelSettings" uid="uid://c0rnshv8jeh2e" path="res://fonts/title_label_settings.tres" id="7_title_label"]
+[ext_resource type="Script" uid="uid://r8a6m4303af1" path="res://menus/neon_corner_frame.gd" id="8_corner_frame"]
+[ext_resource type="Script" uid="uid://di3gte031mtvs" path="res://resources/facilities/ship_facility_definition.gd" id="9_facility_definition"]
+[ext_resource type="Resource" path="res://resources/facilities/definitions/weapon_room.tres" id="10_weapon_room"]
+[ext_resource type="Resource" path="res://resources/facilities/definitions/hangar.tres" id="11_hangar"]
+[ext_resource type="Resource" path="res://resources/facilities/definitions/engine.tres" id="12_engine"]
+[ext_resource type="Resource" path="res://resources/facilities/definitions/hull.tres" id="13_hull"]
+[ext_resource type="Resource" path="res://resources/facilities/definitions/radar.tres" id="14_radar"]
+[ext_resource type="Resource" path="res://resources/facilities/definitions/shield.tres" id="15_shield"]
+[ext_resource type="Resource" uid="uid://st2okeo4r2qj" path="res://resources/weapons/definitions/main_blaster.tres" id="21_blaster"]
+[ext_resource type="Resource" uid="uid://cpn54ll1emgyw" path="res://resources/weapons/definitions/main_laser.tres" id="22_laser"]
+[ext_resource type="Resource" uid="uid://comw1xtg060l4" path="res://resources/weapons/definitions/main_shotgun.tres" id="23_shotgun"]
+[ext_resource type="Resource" uid="uid://cjsxqoqtuwyct" path="res://resources/weapons/definitions/aux_test_cannon.tres" id="24_cannon"]
+[ext_resource type="Resource" uid="uid://c6ivjjlwgdgb" path="res://resources/weapons/definitions/plasma_bomb.tres" id="25_plasma"]
+[ext_resource type="Resource" uid="uid://btckhxu7at2sl" path="res://resources/weapons/definitions/aux_homing_missile.tres" id="26_missile"]
+[ext_resource type="Resource" uid="uid://bfa38sv3dsbmk" path="res://resources/weapons/definitions/aux_orbital_barrier.tres" id="27_barrier"]
+[ext_resource type="Script" uid="uid://c8sivsbaqtrjs" path="res://enemies/enemy_spawner.gd" id="28_enemy_spawner"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_left_panel"]
+bg_color = Color(0.018, 0.035, 0.075, 1)
+border_width_right = 2
+border_color = Color(1, 0.18, 0.45, 0.85)
+
+[sub_resource type="Environment" id="Environment_neon"]
+background_mode = 3
+glow_enabled = true
+glow_levels/1 = 0.35
+glow_levels/2 = 0.2
+glow_levels/3 = 0.08
+glow_normalized = true
+glow_intensity = 0.45
+glow_strength = 0.65
+glow_bloom = 0.06
+glow_hdr_threshold = 1.05
+glow_hdr_scale = 1.4
+glow_hdr_luminance_cap = 2.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_control_box"]
+bg_color = Color(0.012, 0.05, 0.1, 0.9)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.14, 0.48, 0.72, 0.75)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_right_panel"]
+bg_color = Color(0.018, 0.035, 0.075, 1)
+border_width_left = 2
+border_color = Color(0.1, 0.65, 0.95, 0.85)
+
+[node name="WeaponTestLab" type="Control" unique_id=372107095]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+weapon_definitions = Array[ExtResource("2_wn358")]([ExtResource("21_blaster"), ExtResource("22_laser"), ExtResource("23_shotgun"), ExtResource("24_cannon"), ExtResource("25_plasma"), ExtResource("26_missile"), ExtResource("27_barrier")])
+
+[node name="Layout" type="HBoxContainer" parent="." unique_id=836867244]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 0
+
+[node name="LeftPanel" type="PanelContainer" parent="Layout" unique_id=1603756471]
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBox_left_panel")
+
+[node name="Margin" type="MarginContainer" parent="Layout/LeftPanel" unique_id=658008727]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 6
+
+[node name="VBox" type="VBoxContainer" parent="Layout/LeftPanel/Margin" unique_id=587491158]
+layout_mode = 2
+theme_override_constants/separation = 3
+
+[node name="Eyebrow" type="Label" parent="Layout/LeftPanel/Margin/VBox" unique_id=842581251]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.35, 0.58, 1)
+text = "TARGET CONTROL  ·  적 스폰"
+label_settings = ExtResource("6_default_label")
+
+[node name="Title" type="Label" parent="Layout/LeftPanel/Margin/VBox" unique_id=936756450]
+visible = false
+layout_mode = 2
+text = "적 스폰"
+label_settings = ExtResource("7_title_label")
+
+[node name="Rule" type="ColorRect" parent="Layout/LeftPanel/Margin/VBox" unique_id=732709541]
+custom_minimum_size = Vector2(0, 1)
+layout_mode = 2
+color = Color(1, 0.18, 0.45, 0.85)
+
+[node name="SpawnCountRow" type="HBoxContainer" parent="Layout/LeftPanel/Margin/VBox" unique_id=347739040]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Layout/LeftPanel/Margin/VBox/SpawnCountRow" unique_id=1274336127]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "스폰 횟수"
+label_settings = ExtResource("6_default_label")
+
+[node name="SpawnCount" type="SpinBox" parent="Layout/LeftPanel/Margin/VBox/SpawnCountRow" unique_id=1440882004]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(58, 24)
+layout_mode = 2
+min_value = 1.0
+max_value = 10.0
+value = 1.0
+
+[node name="EnemyScroll" type="ScrollContainer" parent="Layout/LeftPanel/Margin/VBox" unique_id=1850172699]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="EnemyButtons" type="VBoxContainer" parent="Layout/LeftPanel/Margin/VBox/EnemyScroll" unique_id=898560564]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 1
+
+[node name="ContinuousIntervalRow" type="HBoxContainer" parent="Layout/LeftPanel/Margin/VBox" unique_id=2138361646]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Layout/LeftPanel/Margin/VBox/ContinuousIntervalRow" unique_id=432852383]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "반복 간격"
+label_settings = ExtResource("6_default_label")
+
+[node name="ContinuousSpawnInterval" type="SpinBox" parent="Layout/LeftPanel/Margin/VBox/ContinuousIntervalRow" unique_id=658159369]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(68, 24)
+layout_mode = 2
+min_value = 0.5
+max_value = 30.0
+step = 0.5
+value = 2.0
+suffix = " 초"
+
+[node name="ContinuousSpawnButton" type="Button" parent="Layout/LeftPanel/Margin/VBox" unique_id=1319724574]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+disabled = true
+toggle_mode = true
+text = "지속 스폰 시작"
+
+[node name="Spacer" type="Control" parent="Layout/LeftPanel/Margin/VBox" unique_id=1176295365]
+visible = false
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="TargetCount" type="Label" parent="Layout/LeftPanel/Margin/VBox" unique_id=651435635]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.55, 0.7, 1)
+text = "활성 표적  00"
+label_settings = ExtResource("6_default_label")
+
+[node name="ClearTargetsButton" type="Button" parent="Layout/LeftPanel/Margin/VBox" unique_id=1678463888]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+text = "표적 / 적 탄환 정리"
+
+[node name="CornerFrame" type="Control" parent="Layout/LeftPanel" unique_id=1785209959]
+layout_mode = 2
+mouse_filter = 2
+script = ExtResource("8_corner_frame")
+
+[node name="Playfield" type="Control" parent="Layout" unique_id=569368475]
+custom_minimum_size = Vector2(240, 360)
+layout_mode = 2
+
+[node name="ViewportContainer" type="SubViewportContainer" parent="Layout/Playfield" unique_id=609596826]
+texture_filter = 1
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+stretch = true
+
+[node name="PlayfieldViewport" type="SubViewport" parent="Layout/Playfield/ViewportContainer" unique_id=352724131]
+handle_input_locally = false
+use_hdr_2d = true
+size = Vector2i(240, 360)
+render_target_update_mode = 4
+
+[node name="WeaponTestGameplay" type="Node2D" parent="Layout/Playfield/ViewportContainer/PlayfieldViewport" unique_id=1991976863 groups=["gameplay_world"]]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="Layout/Playfield/ViewportContainer/PlayfieldViewport/WeaponTestGameplay" unique_id=1016356593]
+environment = SubResource("Environment_neon")
+
+[node name="EnemyAugmentRegistry" type="Node" parent="Layout/Playfield/ViewportContainer/PlayfieldViewport/WeaponTestGameplay" unique_id=298830115]
+script = ExtResource("4_enemy_registry")
+
+[node name="EnemySpawner" type="Node" parent="Layout/Playfield/ViewportContainer/PlayfieldViewport/WeaponTestGameplay" unique_id=1788155167]
+script = ExtResource("28_enemy_spawner")
+
+[node name="PlayerAugmentRegistry" type="Node" parent="Layout/Playfield/ViewportContainer/PlayfieldViewport/WeaponTestGameplay" unique_id=2027811793]
+script = ExtResource("5_player_registry")
+facilities = Array[ExtResource("9_facility_definition")]([ExtResource("10_weapon_room"), ExtResource("11_hangar"), ExtResource("12_engine"), ExtResource("13_hull"), ExtResource("14_radar"), ExtResource("15_shield")])
+
+[node name="Ship" parent="Layout/Playfield/ViewportContainer/PlayfieldViewport/WeaponTestGameplay" unique_id=1687994001 node_paths=PackedStringArray("augment_registry") instance=ExtResource("2_ship")]
+position = Vector2(80, 196)
+augment_registry = NodePath("../PlayerAugmentRegistry")
+
+[node name="SpaceBackground" parent="Layout/Playfield/ViewportContainer/PlayfieldViewport/WeaponTestGameplay" unique_id=830073888 instance=ExtResource("3_background")]
+
+[node name="ModeBadge" type="PanelContainer" parent="Layout/Playfield" unique_id=1015776412]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 48.0
+offset_top = 8.0
+offset_right = -48.0
+offset_bottom = 34.0
+grow_horizontal = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBox_control_box")
+
+[node name="Label" type="Label" parent="Layout/Playfield/ModeBadge" unique_id=1095171759]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.5, 0.9, 1, 0.95)
+text = "AUGMENT TEST LAB  ·  C PLAYER / V ENEMY"
+label_settings = ExtResource("6_default_label")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CornerFrame" type="Control" parent="Layout/Playfield" unique_id=1447359422]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("8_corner_frame")
+inset = 5.0
+
+[node name="RightPanel" type="PanelContainer" parent="Layout" unique_id=98881361]
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBox_right_panel")
+
+[node name="Margin" type="MarginContainer" parent="Layout/RightPanel" unique_id=435746792]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 6
+
+[node name="VBox" type="VBoxContainer" parent="Layout/RightPanel/Margin" unique_id=1606378844]
+layout_mode = 2
+theme_override_constants/separation = 3
+
+[node name="Eyebrow" type="Label" parent="Layout/RightPanel/Margin/VBox" unique_id=109877203]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.35, 0.82, 1, 1)
+text = "LOADOUT  ·  장비 / 증강"
+label_settings = ExtResource("6_default_label")
+
+[node name="Title" type="Label" parent="Layout/RightPanel/Margin/VBox" unique_id=254436229]
+visible = false
+layout_mode = 2
+text = "장비 선택"
+label_settings = ExtResource("7_title_label")
+
+[node name="Rule" type="ColorRect" parent="Layout/RightPanel/Margin/VBox" unique_id=635088517]
+custom_minimum_size = Vector2(0, 1)
+layout_mode = 2
+color = Color(0.1, 0.65, 0.95, 0.85)
+
+[node name="SelectedSlotLabel" type="Label" parent="Layout/RightPanel/Margin/VBox" unique_id=2024908602]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.88, 1, 1)
+text = "선택 슬롯 1"
+label_settings = ExtResource("6_default_label")
+
+[node name="SlotButtons" type="HBoxContainer" parent="Layout/RightPanel/Margin/VBox" unique_id=1809241973]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 3
+
+[node name="WeaponScroll" type="ScrollContainer" parent="Layout/RightPanel/Margin/VBox" unique_id=390071745]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="WeaponButtons" type="VBoxContainer" parent="Layout/RightPanel/Margin/VBox/WeaponScroll" unique_id=1905140652]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 3
+
+[node name="TraitRule" type="ColorRect" parent="Layout/RightPanel/Margin/VBox" unique_id=1179782728]
+custom_minimum_size = Vector2(0, 1)
+layout_mode = 2
+color = Color(0.48, 0.22, 0.7, 0.8)
+
+[node name="TraitEyebrow" type="Label" parent="Layout/RightPanel/Margin/VBox" unique_id=563658139]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.72, 0.5, 1, 1)
+text = "WEAPON AUGMENTS"
+label_settings = ExtResource("6_default_label")
+
+[node name="TraitWeaponLabel" type="Label" parent="Layout/RightPanel/Margin/VBox" unique_id=1935905326]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.82, 0.7, 1, 1)
+text = "무기를 장착하면 특성이 표시됩니다."
+label_settings = ExtResource("6_default_label")
+autowrap_mode = 3
+
+[node name="TraitScroll" type="ScrollContainer" parent="Layout/RightPanel/Margin/VBox" unique_id=471065612]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="TraitButtons" type="VBoxContainer" parent="Layout/RightPanel/Margin/VBox/TraitScroll" unique_id=1284898085]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 3
+
+[node name="ClearTraitsButton" type="Button" parent="Layout/RightPanel/Margin/VBox" unique_id=2010255053]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+disabled = true
+text = "선택 무기 모듈 초기화"
+
+[node name="ActionRow" type="HBoxContainer" parent="Layout/RightPanel/Margin/VBox" unique_id=358552544]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="UnequipButton" type="Button" parent="Layout/RightPanel/Margin/VBox/ActionRow" unique_id=1392668733]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "슬롯 비우기"
+
+[node name="Hint" type="Label" parent="Layout/RightPanel/Margin/VBox" unique_id=62142708]
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(0.45, 0.7, 0.85, 0.8)
+text = "C 플레이어 증강 · V 적 증강
+슬롯 선택 → 무기 선택"
+label_settings = ExtResource("6_default_label")
+autowrap_mode = 3
+
+[node name="CornerFrame" type="Control" parent="Layout/RightPanel" unique_id=1207856922]
+layout_mode = 2
+mouse_filter = 2
+script = ExtResource("8_corner_frame")
+
+[node name="ContinuousSpawnTimer" type="Timer" parent="." unique_id=1109161890]
+unique_name_in_owner = true
+wait_time = 2.0

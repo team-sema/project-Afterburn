@@ -55,7 +55,6 @@ var _volleys_fired := 0
 var barrage_player: BarragePlayer
 var pattern_error := ""
 var _pattern: BarrageSequence
-var _pattern_summary := {"rate": 0.0, "speed": 0.0}
 var _pattern_action_rate := 1.0
 
 
@@ -71,7 +70,6 @@ func apply_fire_volume_boost(extra_shots: int, min_spread: float) -> void:
 		return
 	# Each step has its own snapshot, even when the builder reused a Volley.
 	_boost_pattern_volume(_pattern, extra_shots, min_spread)
-	_pattern_summary = _pattern.emission_summary()
 
 
 func _boost_pattern_volume(sequence: BarrageSequence, extra_shots: int, min_spread: float) -> void:
@@ -284,31 +282,6 @@ func get_volleys_fired() -> int:
 	return _volleys_fired
 
 
-func get_threat_projectile_rate() -> float:
-	if pattern_script != null:
-		return float(_pattern_summary.rate) * _pattern_action_rate if _pattern_can_fire() and _pattern_scheduled() else 0.0
-	if activate_on_visible_entry and not _fire_window_active:
-		return 0.0
-	if enemy != null and _is_below_shot_threshold():
-		return 0.0
-	var cycle_duration := fire_interval + maxf(0.0, float(burst_count - 1) * burst_interval)
-	return float(maxi(1, burst_count) * maxi(1, shot_count)) / maxf(0.05, cycle_duration)
-
-
-func get_threat_reaction_time() -> float:
-	if pattern_script != null:
-		if not _pattern_can_fire() or not _pattern_scheduled(): return -1.0
-		var size := enemy.get_viewport_rect().size
-		return minf(size.x, size.y) / maxf(1.0, _pattern_summary.speed)
-	if enemy == null or (activate_on_visible_entry and not _fire_window_active):
-		return -1.0
-	if _is_below_shot_threshold():
-		return -1.0
-	var playfield_size := enemy.get_viewport_rect().size
-	var response_distance := minf(playfield_size.x, playfield_size.y)
-	return response_distance / maxf(1.0, projectile_speed)
-
-
 func _is_below_shot_threshold() -> bool:
 	if not apply_shot_threshold:
 		return false
@@ -352,7 +325,6 @@ func _prepare_pattern() -> void:
 		set_process(false)
 		return
 	_pattern = _pattern.snapshot()
-	_pattern_summary = _pattern.emission_summary()
 	barrage_player = BarragePlayer.new()
 	barrage_player.name = "BarragePlayer"
 	barrage_player.may_fire = _pattern_can_fire
@@ -393,6 +365,3 @@ func _pattern_target() -> Node2D:
 
 func _pattern_fired(projectiles: Array[Node2D]) -> void:
 	if not projectiles.is_empty(): _volleys_fired += 1
-
-func _pattern_scheduled() -> bool:
-	return barrage_player != null and (barrage_player.running or (fire_timer != null and not fire_timer.is_stopped()))

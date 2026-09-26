@@ -48,8 +48,8 @@ pickups/        XP 오브 · 무기 픽업
 components/     재사용 커스텀 노드 (augment_behaviors/)
 resources/      GameStats · 오그먼트 · 무기 · 시설 Resource
 effects/        배경 · 폭발 · 머티리얼 · 셰이더
-weapon_test/    무기 테스트장
-threat_monitor/ 실시간 위협도 계측기 · F6 전용 플레이 장면
+lab_hub.tscn    개발 Lab 입구
+labs/           주제별 개발 Lab (배치 규칙: scene-flow.md)
 tests/          headless 스모크 테스트
 assets/         PNG(레거시) + svg/(네온)
 fonts/ sounds/

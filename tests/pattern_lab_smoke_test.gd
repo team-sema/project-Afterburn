@@ -17,6 +17,15 @@ func write_pattern(source: String) -> void:
 func source(count: int) -> String:
 	return "extends BarrageSequence\nfunc _init():\n\tvar shot = BarrageShot.new()\n\tshot.appearance = preload(\"res://resources/projectiles/round.tres\")\n\tshot.behavior = BulletBehavior.new().homing(60, 2)\n\tfire_fan(shot, %d, 60, 70)\n\twait(1)\n\trepeat()\n" % count
 
+## Lab entry scenes: every .tscn under labs/ except the bullet example shortcuts.
+func lab_scene_paths(directory: String) -> Array:
+	var paths := []
+	for file in DirAccess.get_files_at(directory):
+		if file.ends_with(".tscn"): paths.append(directory.path_join(file))
+	for child in DirAccess.get_directories_at(directory):
+		if child != "presets": paths.append_array(lab_scene_paths(directory.path_join(child)))
+	return paths
+
 func key(code: Key) -> void:
 	var event := InputEventKey.new()
 	event.keycode = code
@@ -38,15 +47,15 @@ func capture(path: String) -> void:
 func run() -> void:
 	fixture = "res://tests/fixtures/lab_reload_%d.gd" % Time.get_ticks_usec()
 	write_pattern(source(2))
-	var lab = load("res://projectiles/bullet_lab.tscn").instantiate()
+	var lab = load("res://labs/bullet/bullet_lab.tscn").instantiate()
 	root.add_child(lab)
 	await process_frame
-	lab.threat_button.button_pressed = false
+	lab.safety_button.button_pressed = false
 	expect(lab.apply_script(fixture, 1), "valid project pattern loads")
 	await process_frame
 	expect(lab._custom_sequence.steps[0].volley.count == 2, "loaded constructor executes once")
 	expect(lab.emitter.position == Vector2(208, 144), "custom emitter placement")
-	expect(lab.pattern_choice.selected == 10 and not lab.threat_button.button_pressed, "script mode retains diagnostics options")
+	expect(lab.pattern_choice.selected == 10 and not lab.safety_button.button_pressed, "script mode retains diagnostics options")
 	var old_sequence: BarrageSequence = lab._custom_sequence
 	write_pattern(source(7))
 	await key(KEY_F5)
@@ -62,7 +71,7 @@ func run() -> void:
 		expect(not paused and not lab._script_shade.visible, "Escape resumes previous run")
 	expect(not lab.apply_script("res://does-not-exist.gd", 0), "missing file reported")
 	await key(KEY_ESCAPE)
-	var loader = load("res://labs/pattern_loader.gd")
+	var loader = load("res://labs/bullet/pattern_loader.gd")
 	expect(not loader.load_pattern("C:/outside.gd").error.is_empty(), "outside project path rejected")
 	write_pattern(source(3))
 	lab.apply_script(fixture, 0)
@@ -85,29 +94,39 @@ func run() -> void:
 	DirAccess.remove_absolute(fixture)
 	if FileAccess.file_exists(fixture + ".uid"): DirAccess.remove_absolute(fixture + ".uid")
 	# Hub switches real scenes. Its F1 navigator survives a Lab scene reload.
-	var hub = load("res://labs/lab_hub.tscn").instantiate()
+	var hub = load("res://lab_hub.tscn").instantiate()
 	root.add_child(hub)
 	current_scene = hub
 	await capture("res://artifacts/lab_hub.png")
-	hub.open_lab("res://projectiles/bullet_lab.tscn")
+	hub.open_lab("res://labs/bullet/bullet_lab.tscn")
 	await process_frame
 	await process_frame
-	expect(current_scene.scene_file_path == "res://projectiles/bullet_lab.tscn", "hub opens selected Lab")
+	expect(current_scene.scene_file_path == "res://labs/bullet/bullet_lab.tscn", "hub opens selected Lab")
 	reload_current_scene()
 	await process_frame
 	await process_frame
 	expect(root.has_node("LabReturn"), "navigation survives scene restart")
 	await key(KEY_F1)
 	await process_frame
-	expect(current_scene.scene_file_path == "res://labs/lab_hub.tscn" and not root.has_node("LabReturn"), "F1 returns to hub and removes navigation")
-	for path in ["res://weapon_test/weapon_test_lab.tscn", "res://threat_monitor/threat_monitor_lab.tscn", "res://menus/augment_frame_test.tscn"]:
+	expect(current_scene.scene_file_path == "res://lab_hub.tscn" and not root.has_node("LabReturn"), "F1 returns to hub and removes navigation")
+	var hub_paths: Array = current_scene.LABS.map(func(entry): return entry[1])
+	for path in lab_scene_paths("res://labs"):
+		expect(hub_paths.has(path), "hub lists " + path)
+	for path in hub_paths.slice(1):
 		current_scene.open_lab(path)
 		await process_frame
 		await process_frame
 		expect(current_scene.scene_file_path == path, "hub opens " + path)
 		await key(KEY_F1)
 		await process_frame
-		expect(current_scene.scene_file_path == "res://labs/lab_hub.tscn", "F1 returns from " + path)
+		expect(current_scene.scene_file_path == "res://lab_hub.tscn", "F1 returns from " + path)
+	current_scene.open_lab("res://labs/bosses/carrier/carrier_boss_lab.tscn")
+	await process_frame
+	await process_frame
+	current_scene.return_to_hub()
+	await process_frame
+	await process_frame
+	expect(current_scene.scene_file_path == "res://lab_hub.tscn" and not root.has_node("LabReturn"), "carrier back button returns to hub")
 	current_scene.queue_free()
 	await process_frame
 	if failures.is_empty(): print("pattern lab smoke test: PASS")

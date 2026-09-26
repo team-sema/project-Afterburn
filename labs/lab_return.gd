@@ -12,5 +12,5 @@ func _input(event: InputEvent) -> void:
 func return_to_hub() -> void:
 	get_tree().paused = false
 	get_tree().debug_collisions_hint = false
-	get_tree().change_scene_to_file("res://labs/lab_hub.tscn")
+	get_tree().change_scene_to_file("res://lab_hub.tscn")
 	queue_free()

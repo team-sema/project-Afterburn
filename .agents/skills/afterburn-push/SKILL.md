@@ -47,12 +47,6 @@ Do not force push. Tell the user to merge main into the feature branch, resolve/
 
 If scenes/resources/gameplay changed, briefly confirm the flow and check for contradictions with the topic design documents.
 
-## Success
-
-```bash
-git checkout main && git pull
-```
-
 ## Never Do
 
 - `git push --force`, change `git config`, use `develop`, create a PR unless asked.

@@ -2,7 +2,7 @@
 
 ## 구현 범위
 
-독립 시험 장면 `labs/carrier_boss_lab.tscn`에서 거대 항모의 함미 → 비행갑판 → 함교를 공략한다. 본 게임 BOSS 스텝·Threat·보상에는 연결하지 않는다. 기존 함선과 기본 자동 사격, BarrageSequence/BarragePlayer 탄막을 사용한다. 비주얼은 기존 네온 마스크·코어·글로우 계열을 따른다.
+독립 시험 장면 `labs/bosses/carrier/carrier_boss_lab.tscn`에서 거대 항모의 함미 → 비행갑판 → 함교를 공략한다. 본 게임 BOSS 스텝·Threat·보상에는 연결하지 않는다. 기존 함선과 기본 자동 사격, BarrageSequence/BarragePlayer 탄막을 사용한다. 비주얼은 기존 네온 마스크·코어·글로우 계열을 따른다.
 
 ## 구역과 체력
 
@@ -63,6 +63,6 @@
 
 검증 진입점: `tests/carrier_boss_lab_smoke_test.gd`. 구역 밖 피해 차단, 과잉 피해·중복 파괴, 실제 블래스터와 적 탄 피격, 선회 속도 제한·조준 고정·실제 포구 발사, 격납고 독립 피해·문 개방·편대 전개·동시 상한·파괴 시 예약 취소, 호위포 파괴 조건, 3구역 종료, 재시작·일시정지·상단 HP바를 확인한다.
 
-파괴 연출은 `labs/carrier_destruction_effect.gd`, 격침 진행은 `labs/carrier_lab_boss.gd`, 카메라·전경은 `labs/carrier_boss_lab.gd`, 줌과 독립된 배경은 `labs/carrier_lab_background.gd`에서 관리한다. 줌아웃·HP바 고정·폭발/카메라 동시 일시정지·침강 완료·효과 자동 정리·연출 중 재시작도 검증한다.
+파괴 연출은 `labs/bosses/carrier/carrier_destruction_effect.gd`, 격침 진행은 `labs/bosses/carrier/carrier_boss.gd`, 카메라·전경은 `labs/bosses/carrier/carrier_boss_lab.gd`, 줌과 독립된 배경은 `labs/bosses/carrier/carrier_background.gd`에서 관리한다. 줌아웃·HP바 고정·폭발/카메라 동시 일시정지·침강 완료·효과 자동 정리·연출 중 재시작도 검증한다.
 
 수치와 패턴은 Lab 검증용이다. 실제 보스 피해 시설·다중 무기 빌드·격침 보상·본 게임 밸런스 연결은 후속 범위다.

@@ -6,7 +6,7 @@ func _initialize() -> void:
 
 
 func _run() -> void:
-	var lab := preload("res://menus/augment_frame_test.tscn").instantiate()
+	var lab := preload("res://labs/augment_cards/augment_frame_test.tscn").instantiate()
 	root.add_child(lab)
 	var deadline := Time.get_ticks_msec() + 15000
 	while lab.busy and Time.get_ticks_msec() < deadline:

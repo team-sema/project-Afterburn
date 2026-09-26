@@ -114,7 +114,7 @@ func run() -> void:
 	var laser := spawn(shot(BulletBehavior.new().homing(90, 4), BarrageShot.Kind.TRAIL_LASER)) as CurvedLaser
 	update(laser, 0.4)
 	var tail := laser.position_at(0.2)
-	var forecast := laser.get_threat_path(0.2)
+	var forecast := laser.get_predicted_path(0.2)
 	update(laser, 0.6)
 	expect(forecast[-1].distance_to(laser.global_position) < 0.001, "laser forecast endpoint agrees with actual head")
 	target.position = Vector2(-100, 100)
@@ -190,7 +190,7 @@ func test_player_and_collision() -> void:
 	await process_frame
 
 func test_lab() -> void:
-	var lab = load("res://projectiles/homing_bullet_lab.tscn").instantiate()
+	var lab = load("res://labs/bullet/presets/homing_bullet_lab.tscn").instantiate()
 	root.add_child(lab)
 	lab.pattern_player.stop()
 	expect(lab.pattern_choice.selected == 8 and root.gui_get_focus_owner() == lab.shape_choice, "homing Lab starts with keyboard focus and homing selected")

@@ -6,9 +6,20 @@
 
 ## 확정된 현재 동작
 
-거대 항모 독립 시험은 `labs/carrier_boss_lab.tscn`을 F6으로 열거나 Lab 허브에서 선택한다. 중앙 전장 상단에 보스 전체 HP를 고정 표시하고 좌측에는 재시작·일시정지·허브 복귀, 우측에는 피격 횟수와 경과 시간을 표시한다. 규칙은 [거대 항모](bosses/carrier.md)를 따른다. 본 게임 HUD와 엘리트 추적형 HP바는 그대로 유지한다.
+거대 항모 독립 시험은 `labs/bosses/carrier/carrier_boss_lab.tscn`을 F6으로 열거나 Lab 허브에서 선택한다. 중앙 전장 상단에 보스 전체 HP를 고정 표시하고 좌측에는 재시작·일시정지·허브 복귀, 우측에는 피격 횟수와 경과 시간을 표시한다. 규칙은 [거대 항모](bosses/carrier.md)를 따른다. 본 게임 HUD와 엘리트 추적형 HP바는 그대로 유지한다.
 
-개발 시험의 공통 입구는 `labs/lab_hub.tscn`이다. 탄막·패턴, 무기·증강, 실제 전투 위협도, 증강 카드 UI를 목록에서 방향키/Enter로 선택한다. 허브에서 연 Lab은 F1로 목록에 복귀하며, 씬은 하나씩 실행한다. 기존 개별 씬의 F6 실행도 유지한다. 본 게임 시작 씬은 변경하지 않는다. 탄막 스크립트 작업 규칙은 [전투](combat.md)를 따른다.
+개발 시험의 공통 입구는 저장소 루트의 `lab_hub.tscn`이다. 아래 Lab을 목록에서 방향키/Enter로 선택한다. 허브에서 연 Lab은 F1로 목록에 복귀하며, 씬은 하나씩 실행한다. 기존 개별 씬의 F6 실행도 유지한다. 본 게임 시작 씬은 변경하지 않는다. 탄막 스크립트 작업 규칙은 [전투](combat.md)를 따른다.
+
+Lab 배치: 허브만 루트에 두고 각 Lab은 `labs/<주제>/` 아래에 둔다. 새 Lab을 만들면 `lab_hub.gd`의 `LABS` 목록에도 등록한다. 보스 Lab은 보스마다 `labs/bosses/<보스>/` 폴더를 두고 허브에 `보스 · <이름>`으로 등록한다. 허브 복귀용 공용 스크립트는 `labs/lab_return.gd`다.
+
+| 허브 항목 | 진입 씬 |
+|---|---|
+| 탄막 · 패턴 스크립트 | `labs/bullet/bullet_lab.tscn` (예제별 바로가기 `labs/bullet/presets/`는 허브에 따로 두지 않는다) |
+| 보스 · 거대 항모 | `labs/bosses/carrier/carrier_boss_lab.tscn` |
+| 보스 · 벽 | `labs/bosses/wall/wall_boss_lab.tscn` |
+| 엘리트 · 스나이퍼 공격 패턴 | `labs/enemy_attack/enemy_attack_lab.tscn` |
+| 무기 · 증강 · 적 소환 | `labs/weapons/weapon_test_lab.tscn` |
+| 증강 카드 · UI | `labs/augment_cards/augment_frame_test.tscn` |
 
 ## 전이
 
@@ -85,13 +96,6 @@ World 왼쪽 패널에 MasterVolumeControl을 표시한다. 슬라이더는 Mast
 12. 대기 중인 오퍼가 있으면 deferred로 재요청
 
 ---
-
-
-## 위협도 모니터 장면
-
-`threat_monitor/threat_monitor_lab.tscn`을 에디터에서 열고 **F6**으로 실행한다. 화면 중앙은 본 게임과 같은 240×360 플레이 영역이며, 왼쪽에는 현재값·완화값·최근 최고값·누적량과 실시간 그래프, 오른쪽에는 다섯 구성 값·동시 공격원·공격 종류·표본 개수가 표시된다. 좌우 패널·플레이필드 합쳐 **640×360 뷰포트 안에 들어가** 위아래가 잘리지 않아야 한다. 함선은 계측 도중 파괴되지 않으며, **R** 또는 다시 시작 버튼으로 장면을 초기화할 수 있다.
-
-세부 계산식과 기준값은 [전투](combat.md)의 「개발용 실시간 위협도 계측」을 따른다.
 
 ## 완료 조건·검증
 

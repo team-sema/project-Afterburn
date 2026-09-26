@@ -35,7 +35,7 @@ func sample_scene(path: String) -> Array:
 		expect(bullet is FoundationBullet, "Awl always uses the adopted barrage body")
 		var velocity: Vector2
 		if bullet is FoundationBullet:
-			velocity = bullet.get_threat_velocity()
+			velocity = bullet.get_travel_velocity()
 			expect(is_equal_approx(bullet.lifetime, 0.9), "new flame lifetime")
 			expect(bullet.appearance.collision_size == Vector2(4, 8), "legacy collision size retained")
 			expect(bullet.trail_effect != null, "new flame has shared particles")
@@ -59,7 +59,7 @@ func run() -> void:
 	for i in mini(baseline.size(), modern.size()):
 		expect(baseline[i][0].is_equal_approx(modern[i][0]), "same seeded velocity %d" % i)
 		expect(baseline[i][1].is_equal_approx(modern[i][1]), "same substep emission position %d" % i)
-	var lab := preload("res://labs/enemy_attack_lab.tscn").instantiate()
+	var lab := preload("res://labs/enemy_attack/enemy_attack_lab.tscn").instantiate()
 	root.add_child(lab)
 	await process_frame
 	expect(lab.world != null and lab.mode == 0, "lab starts with Awl")
