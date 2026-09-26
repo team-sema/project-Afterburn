@@ -147,7 +147,7 @@ func run() -> void:
 	world.queue_free()
 	await process_frame
 	# Saved mixed pattern: two rings in one atomic fire step.
-	var lab = load("res://projectiles/bullet_behavior_lab.tscn").instantiate()
+	var lab = load("res://labs/bullet/presets/bullet_behavior_lab.tscn").instantiate()
 	root.add_child(lab)
 	lab.pattern_player.stop()
 	var balls: Array[FoundationBullet] = []

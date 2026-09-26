@@ -4,7 +4,7 @@ func _initialize() -> void:
 	run.call_deferred()
 
 func run() -> void:
-	var lab = load("res://projectiles/bullet_behavior_lab.tscn").instantiate()
+	var lab = load("res://labs/bullet/presets/bullet_behavior_lab.tscn").instantiate()
 	root.add_child(lab)
 	if "--live" in OS.get_cmdline_user_args():
 		DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)

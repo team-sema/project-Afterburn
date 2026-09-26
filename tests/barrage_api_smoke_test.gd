@@ -256,7 +256,7 @@ func run() -> void:
 	expect(saved != null and saved.validation_error().is_empty(), "saved Resource is executable")
 	world.queue_free()
 	await process_frame
-	var lab = load("res://projectiles/barrage_api_lab.tscn").instantiate()
+	var lab = load("res://labs/bullet/presets/barrage_api_lab.tscn").instantiate()
 	root.add_child(lab)
 	expect(lab.pattern_choice.selected == 5, "dedicated scene opens the API demonstration")
 	lab.pattern_choice.select(5)

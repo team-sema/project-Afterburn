@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://dgphfeyp1p7dl"]
 
-[ext_resource type="Script" uid="uid://ow87j188wimb" path="res://weapon_test/weapon_test_lab.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://ow87j188wimb" path="res://labs/weapons/weapon_test_lab.gd" id="1_script"]
 [ext_resource type="PackedScene" uid="uid://cj6atpgfbbki0" path="res://player_ship/ship.tscn" id="2_ship"]
 [ext_resource type="Script" uid="uid://cpkr4w0d5rl5t" path="res://resources/weapons/weapon_definition.gd" id="2_wn358"]
 [ext_resource type="PackedScene" uid="uid://da58jpbo01r7q" path="res://effects/space_background.tscn" id="3_background"]

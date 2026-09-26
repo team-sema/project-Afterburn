@@ -190,7 +190,7 @@ func test_player_and_collision() -> void:
 	await process_frame
 
 func test_lab() -> void:
-	var lab = load("res://projectiles/homing_bullet_lab.tscn").instantiate()
+	var lab = load("res://labs/bullet/presets/homing_bullet_lab.tscn").instantiate()
 	root.add_child(lab)
 	lab.pattern_player.stop()
 	expect(lab.pattern_choice.selected == 8 and root.gui_get_focus_owner() == lab.shape_choice, "homing Lab starts with keyboard focus and homing selected")

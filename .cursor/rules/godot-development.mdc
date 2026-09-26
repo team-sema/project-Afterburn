@@ -43,7 +43,8 @@ res://pickups/             XP 오브·무기 픽업
 res://menus/               메뉴·오그먼트 UI·STATUS HUD
 res://resources/           GameStats·오그먼트·무기·시설 Resource
 res://effects/             배경·폭발·머티리얼
-res://weapon_test/         무기 테스트장
+res://lab_hub.tscn         개발 Lab 입구
+res://labs/                주제별 개발 Lab (배치: docs/design/scene-flow.md)
 res://tests/               headless 스모크 테스트
 res://assets/  fonts/  sounds/
 ```

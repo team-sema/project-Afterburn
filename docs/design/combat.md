@@ -59,20 +59,20 @@ Hitbox.area_entered
 
 #### 확정된 1차 구현 · 비교 실험용
 
-2026-09-16: 원탄·쌀탄·대형 구탄과 직선·파동 이동을 조합하는 공통 적탄 및 `projectiles/bullet_lab.tscn` 비교 장면을 구현했다. 아래 1차 실험 수치를 사용한다. 최초 구현은 비교 시험용이었으며 현재 Drone은 BarrageSequence와 공통 탄을 사용한다. 선회·가감속·호밍과 곡선 레이저도 아래 구현 완료 절을 따른다. 새 적탄의 이동/예측은 동일한 시간 함수로 계산하고, 정지 안전 비율은 궤적 표본과 탄별 판정 외접 반지름 + 6px 여유를 사용한다. 기존 탄은 기존 직선 예측을 유지한다.
+2026-09-16: 원탄·쌀탄·대형 구탄과 직선·파동 이동을 조합하는 공통 적탄 및 `labs/bullet/bullet_lab.tscn` 비교 장면을 구현했다. 아래 1차 실험 수치를 사용한다. 최초 구현은 비교 시험용이었으며 현재 Drone은 BarrageSequence와 공통 탄을 사용한다. 선회·가감속·호밍과 곡선 레이저도 아래 구현 완료 절을 따른다. 새 적탄의 이동/예측은 동일한 시간 함수로 계산하고, 정지 안전 비율은 궤적 표본과 탄별 판정 외접 반지름 + 6px 여유를 사용한다. 기존 탄은 기존 직선 예측을 유지한다.
 
 시험 장면은 외형·이동·발사 패턴 선택, 일시정지·재시작·판정 표시·탄소거를 제공한다. 방향키와 Enter로 UI를 조작하고 WASD로 시험 기체를 움직인다. 시험 기체 피격은 횟수를 세며 0.6초 무적을 적용한다. 실제 성장/체력 소모를 대신하는 비교용 기체다.
 
 통합 패턴 작업 환경 · 구현 완료:
 
-- 공통 입구는 `labs/lab_hub.tscn`, 탄막 시험의 기본 진입점은 기존 `projectiles/bullet_lab.tscn`이다. 원탄·레이저·Behavior·호밍 등은 화면의 예제 메뉴로 선택한다. 예전 특화 씬은 기존 테스트와 F6 즐겨찾기 호환용 바로가기로 유지한다.
+- 공통 입구는 `lab_hub.tscn`, 탄막 시험의 기본 진입점은 `labs/bullet/bullet_lab.tscn`이다. 원탄·레이저·Behavior·호밍 등은 화면의 예제 메뉴로 선택한다. 예전 특화 씬은 `labs/bullet/presets/`에 두고 기존 테스트와 F6용 바로가기로 유지한다.
 - 탄막 Lab 상단의 스크립트 버튼에서 `patterns/` 하위 `.gd`를 고르거나 프로젝트 안의 `res://...gd` 경로를 입력한다. `BarrageSequence` 상속·무인자 생성·sequence validation을 확인한 뒤 적용한다. 외부 파일 실행은 지원하지 않는다. 스크립트는 신뢰하는 프로젝트 코드이며 임의 생성자의 런타임 오류를 격리하는 샌드박스는 아니다.
 - 에디터에서 저장 후 실행 창의 F5 또는 대화창의 적용 버튼으로 파일을 다시 읽고 새 패턴을 생성한다. 성공 시 기존 탄/꼬리/계측을 초기화하고 재생한다. 실패 시 오류를 표시하고 마지막 정상 패턴을 보존한다. 대화창 동안 전장을 일시정지하며 취소하면 이전 pause 상태와 포커스를 복구한다. 문자 입력 중 WASD로 표적을 움직이지 않는다.
 - 발사 위치는 상단/중앙/하단 중 선택하며 표적은 기존 WASD 기체다. 스크립트 모드에서도 안전 비율 ON/OFF·FPS·판정 표시·pause·탄소거를 유지한다. Inspector의 `test_pattern_path` 또는 명령행 `-- --pattern=res://patterns/...gd`로 바로 시작할 수 있다. 작성용 예제는 `patterns/lab_example_pattern.gd`다.
 - 스크립트 모드에서는 외형·이동 선택을 비활성화하고 포커스 경로에서 제외한다. 외형·이동은 스크립트의 Shot/Behavior가 결정한다. 기본 예제 선택으로 돌아가면 두 설정을 다시 사용할 수 있다.
 - 완료 조건: 저장본 재로드 반영, 파일 없음/문법/상속/생성자/설정 오류 시 기존 실행 유지, 모달 pause/키보드/포커스, 발사 위치·표적 전달, 640×360 배치와 기존 Lab 회귀.
 
-- 실행: 에디터에서 `projectiles/bullet_lab.tscn`을 열고 F6, 또는 `tools/run-godot.cmd res://projectiles/bullet_lab.tscn`.
+- 실행: 에디터에서 `labs/bullet/bullet_lab.tscn`을 열고 F6, 또는 `tools/run-godot.cmd res://labs/bullet/bullet_lab.tscn`.
 - 루트 640×360, 시험 필드 416×288. 시험 기체 속도 150px/s, 코어 반지름 2px. 메뉴는 방향키/Enter, 기체 이동은 WASD로 분리한다.
 - 부채꼴 5발/48°, 링 16발, 아래 단발, 대각선 단발을 선택한다. 모든 비교는 속도 95px/s·주기 0.9초다. 설정 변경/초기화는 기존 탄·피격·소거 횟수를 지우고 자동 재생한다. 기존 기본탄에서 파동을 선택하면 새 원탄으로 전환한다.
 - 일시정지는 탄·발사·기체·무적 시간·계측을 함께 멈추며 메뉴는 계속 조작할 수 있다. 시험 장면의 탄소거는 제거한 발 수만 표시한다. 실제 XP 전환은 기존 `BulletCancelRewardController` 계약을 사용하며 별도 회귀 테스트로 검증한다.
@@ -93,7 +93,7 @@ Hitbox.area_entered
 - 몸통 전체에 구간별 캡슐 판정을 둔다. 겹친 구간은 같은 물리 프레임에 같은 Hurtbox를 한 번만 때리며, 레이저는 피격으로 사라지지 않는다. 기존 Hurtbox 무적을 따른다.
 - 그림·판정·경로 예측은 같은 곡선 표본을 사용한다. 화면 밖으로 머리가 나가도 몸통이 남으면 유지한다. 소거/XP는 구간 수와 무관하게 레이저 한 줄당 1회다.
 - 시험 UI는 기존 이동·일시정지·초기화·판정 표시·소거를 재사용하며 단일 레이저와 꽃잎, 좌우 선회를 비교한다.
-- 실행: `tools/run-godot.cmd res://projectiles/curved_laser_lab.tscn` 또는 해당 씬에서 F6. 일반 탄으로 돌아가려면 첫 선택에서 원탄 등을 고른다. 기체 WASD / 메뉴 방향키·Enter는 기존과 같다.
+- 실행: `tools/run-godot.cmd res://labs/bullet/presets/curved_laser_lab.tscn` 또는 해당 씬에서 F6. 일반 탄으로 돌아가려면 첫 선택에서 원탄 등을 고른다. 기체 WASD / 메뉴 방향키·Enter는 기존과 같다.
 - 구현은 `curved_laser.gd`의 시간별 머리 위치를 다시 표본화해 최근 경로를 구성한다. 36개 구간을 한 Hitbox에 모으고 연속 리본으로 그린다. 경로 예측(`get_predicted_path`)은 현재 꼬리부터 미래 머리까지를 보수적으로 포함한다. 구간별 판정 표시는 실제 캡슐 모양을 그린다.
 - `curved_laser_smoke_test.gd`에서 머리와 떨어진 몸통 피격, 무적 종료 후 재피격, 화면 밖 머리/남은 몸통 유지, 완전 이탈 제거, 경로 예측, 일시정지·소거·메뉴 전환을 PASS로 확인했다. 기존 기본탄 시험과 탄소거 XP 회귀도 PASS. 실제 렌더링은 `artifacts/curved_laser_lab.png`에서 확인했다. 원작의 시간별 패턴 일치와 본 게임 밸런스는 확정하지 않았다.
 
@@ -174,7 +174,7 @@ if not player.play(sequence, emitter, world):
 - 레이저는 `shot.kind = BarrageShot.Kind.TRAIL_LASER`와 `behavior`, `trail_duration`, `core_width`, `hit_width`, `lifetime`으로 구성한다. 일반 탄도 같은 `behavior`를 사용한다. `CURVED_LASER`는 이전 저장 자료를 위한 별칭이며 별도 몸체가 아니다. 레거시 기본탄은 `Kind.LEGACY`로 비교할 수 있다.
 - `player.pause()`/`resume()`은 **발사 진행만** 멈추고 재개한다. 게임 전체를 멈추려면 트리 일시정지를 사용한다. `stop()`은 미래 발사만 취소한다. 자연 종료 시 `finished` 신호가 한 번 발생하며 stop/재생 교체에는 발생하지 않는다. `volley_fired(projectiles)`는 생성된 탄 목록을 반환하는 신호다. 잘못된 play는 이전 재생을 중단하고 false와 `last_error`를 반환한다.
 - `steps: Array[BarrageStep]`와 `repeat_count`는 인스펙터에서도 편집할 수 있다. 실행 중 원본 변경은 다음 play에 반영한다. `.tres`의 예제는 `resources/projectiles/rotating_ring_sequence.tres`다.
-- 시험: `projectiles/barrage_api_lab.tscn`에서 F6 또는 `tools/run-godot.cmd res://projectiles/barrage_api_lab.tscn`. 16발 링을 0.2초 간격으로 6회, 매회 기준각 +10°, 마지막 발사 후 1.2초 휴식하며 반복한다. 기존 시험 장면의 패턴 메뉴에서도 **API · 회전 링 연속 발사**를 선택할 수 있다.
+- 시험: `labs/bullet/presets/barrage_api_lab.tscn`에서 F6 또는 `tools/run-godot.cmd res://labs/bullet/presets/barrage_api_lab.tscn`. 16발 링을 0.2초 간격으로 6회, 매회 기준각 +10°, 마지막 발사 후 1.2초 휴식하며 반복한다. 기존 시험 장면의 패턴 메뉴에서도 **API · 회전 링 연속 발사**를 선택할 수 있다.
 
 #### 탄별 Behavior와 몸체 분리 · 구현 완료
 
@@ -194,7 +194,7 @@ if not player.play(sequence, emitter, world):
 - `BarrageShot.spawn(..., debug, target, target_resolver)`의 선택적 끝 인자로 표적과 `Callable() -> Node2D` 공급자를 전달한다. `BarragePlayer`는 play의 표적과 resolve_target을 발사된 탄에도 전달한다. `aimed`는 발사각에만 관여하며 호밍은 표적이 없어도 발사된다. 유효 표적은 같은 viewport에서 트리 안에 있고 삭제 대기 중이 아니며 위치가 유한한 Node2D다. 소실 시 실제 틱마다 공급자를 최대 한 번 호출하며 무효 결과는 무표적으로 처리한다. 발사자/공급자 소멸은 잔존 탄을 제거하지 않는다.
 - 일반 탄과 TRAIL_LASER에 동일하게 적용한다. 호밍을 포함한 Behavior만 동적 실행 경로를 사용한다. 입력은 발사 시와 각 실제 갱신 구간의 시작에 한 번 관측한다. 최대 1/120초 소구간 및 Action 경계에서 적분하며, 지나온 실행 상태·위치·입력 기록을 보존한다. 조회만으로 표적 콜백을 호출하거나 실제 시간을 전진시키지 않는다. 서로 다른 입력 관측 간격은 다른 경로를 만들 수 있다.
 - 예측은 마지막 관측 위치를 고정하고 다음 실제 관측 시 미래만 폐기한다. 같은 입력 기록의 과거/몸체/판정/경로 예측 조회는 동일한 궤적을 사용한다. pause 중 실제 관측과 이동을 멈춘다. 표적 선택 정책은 공급자에 두며 이번에는 플레이어 무기·적 배정을 바꾸지 않는다.
-- Lab에 **호밍 · 원탄**과 **호밍 · 레이저**를 추가한다. 90°/s·추적 4초·수명 6초·속도 70px/s·3발 부채꼴·2초 간격의 비교 예제이며 WASD로 표적을 움직인다. `projectiles/homing_bullet_lab.tscn`에서 바로 연다.
+- Lab에 **호밍 · 원탄**과 **호밍 · 레이저**를 추가한다. 90°/s·추적 4초·수명 6초·속도 70px/s·3발 부채꼴·2초 간격의 비교 예제이며 WASD로 표적을 움직인다. `labs/bullet/presets/homing_bullet_lab.tscn`에서 바로 연다.
 - 완료 조건: 선회 제한·180도 동률·표적 겹침/소실/재획득/다른 viewport 거부·유한/반복/병렬 조합·탄별 격리·예측/실제 일치·과거 꼬리 보존·pause·실제 충돌·발사자 소멸 회귀. 외부 증강 효과 API는 후속 범위다.
 
 - 대체 표적이 없으면 현재 방향으로 진행하고 다음 틱에 다시 시도한다. 표적과 탄의 위치가 같으면 방향을 유지한다. 선회는 도/초 단위 최대 선회율로 최단각을 제한하며 180도 동률은 양의 회전 방향이다. speed·시각·판정·lateral 채널과는 병렬 실행할 수 있다. lateral Action은 기존 발사 축 기준 변위를 유지한다.
@@ -223,7 +223,7 @@ if not player.play(sequence, emitter, world):
 - `heading_wave(진폭 도, 주기 초)`는 Action 시작 시점의 heading을 중심으로 한 주기 동안 방향을 왕복한다(2026-09-17 규칙 변경, 위 확장 절 참고). 계속 S자를 그리려면 `.repeat()`를 붙인다. `lateral_wave(진폭 px, 주기 초, 위상 라디안)`는 최초 발사 방향의 수직 축으로 흔들리는 변위를 추가한다.
 - `tint_to`는 일반 탄의 기본색, 레이저의 기존 금색 팔레트에 곱할 색을 보간한다. 레이저의 초기 tint는 흰색이다. `opacity_to`는 전체 투명도, `visual_scale_to`는 시각 크기, `hitbox_scale_to`는 판정 크기를 독립적으로 바꾼다. 투명해져도 판정은 유지된다.
 - Behavior는 최대 128단계, 병렬은 중첩 없는 최대 16개 액션이며 같은 속성에 중복으로 쓸 수 없다. 무한 반복 주기는 최소 0.1초, 배율은 0 초과 16 이하, 투명도는 0~1이다. 일반 이동 적분은 1/120초 간격 중점 근사이며 직진·기존 단일 각속도 선회는 해석식을 사용한다. 예측 반경(`get_hazard_radius`)은 전체 Behavior의 최대 판정 배율로 보수적으로 계산한다.
-- 시험 진입점은 `projectiles/bullet_behavior_lab.tscn`이다. **16방향 · 원탄 + S 레이저**는 직선 원탄 8발과 +22.5° 어긋난 S 레이저 8줄을 동시에 발사한다. **Behavior · 색/크기 변화**에서는 선회·색·시각 확대를 병렬 실행하고 판정 크기는 유지한다.
+- 시험 진입점은 `labs/bullet/presets/bullet_behavior_lab.tscn`이다. **16방향 · 원탄 + S 레이저**는 직선 원탄 8발과 +22.5° 어긋난 S 레이저 8줄을 동시에 발사한다. **Behavior · 색/크기 변화**에서는 선회·색·시각 확대를 병렬 실행하고 판정 크기는 유지한다.
 
 **작성 예제** — 아래 설정을 `BarrageShot.behavior`에 연결한다:
 
@@ -265,7 +265,7 @@ player.play(mixed, emitter, world)
 
 ## 개발용 정지 안전 비율
 
-공통 Bullet Lab은 `labs/safe_space_meter.gd`(`SafeSpaceMeter`)로 **정지 안전 비율**을 0.2초마다 측정해 상태줄에 표시한다. 패턴이 가만히 있는 플레이어에게 피할 자리를 얼마나 남기는지 보는 개발 참고값이며, 본 게임의 적 능력·스폰 규칙에는 연결하지 않는다.
+공통 Bullet Lab은 `labs/bullet/safe_space_meter.gd`(`SafeSpaceMeter`)로 **정지 안전 비율**을 0.2초마다 측정해 상태줄에 표시한다. 패턴이 가만히 있는 플레이어에게 피할 자리를 얼마나 남기는지 보는 개발 참고값이며, 본 게임의 적 능력·스폰 규칙에는 연결하지 않는다.
 
 - 측정 범위는 감시 루트 아래의 적과 적탄이며, 플레이 영역 아래 45%(방어 구역)를 12×18 격자로 나눈다.
 - 적탄의 1.2초 예상 경로(`get_predicted_path`가 없으면 `get_travel_velocity` 직선), 접촉 피해 몸체의 1.2초 이동선, Bomb 접근 영역이 닿는 칸을 위험 칸으로 본다. 탄은 `get_hazard_radius`(없으면 10px), 몸체는 충돌 크기에 6px 여유를 더한다.

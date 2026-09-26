@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://bck2bbpwbhmbu"]
 
-[ext_resource type="Script" uid="uid://b5ilhg67ap6h2" path="res://labs/carrier_boss_lab.gd" id="1"]
+[ext_resource type="Script" uid="uid://b5ilhg67ap6h2" path="res://labs/bosses/carrier/carrier_boss_lab.gd" id="1"]
 
 [node name="CarrierBossLab" type="Control" unique_id=1377015533]
 layout_mode = 3

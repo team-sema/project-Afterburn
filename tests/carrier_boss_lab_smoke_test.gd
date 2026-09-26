@@ -9,7 +9,7 @@ func check(value: bool, message: String) -> void:
 		push_error(message)
 
 func run() -> void:
-	var lab := preload("res://labs/carrier_boss_lab.tscn").instantiate()
+	var lab := preload("res://labs/bosses/carrier/carrier_boss_lab.tscn").instantiate()
 	root.add_child(lab)
 	await process_frame
 	var boss: Node2D = lab.boss
@@ -150,7 +150,7 @@ func run() -> void:
 	await create_timer(7.9).timeout
 	check(boss.destruction_complete and not boss.visible and boss.position.y > 750, "Carrier finishes its sinking sequence and fades out")
 	check(lab.camera.zoom.is_equal_approx(Vector2.ONE*0.28), "Pullback reveals the full hull")
-	var backgrounds: Array = lab.world.get_children().filter(func(child): return child.get_script() == preload("res://labs/carrier_lab_background.gd"))
+	var backgrounds: Array = lab.world.get_children().filter(func(child): return child.get_script() == preload("res://labs/bosses/carrier/carrier_background.gd"))
 	check(backgrounds.size() == 1 and backgrounds[0].tiles[0].get_global_transform_with_canvas().get_scale().is_equal_approx(Vector2.ONE), "Starfield keeps screen coverage at the smallest camera zoom")
 	check(get_nodes_in_group("carrier_destruction_effects").is_empty(), "All explosion and debris effects clean themselves up")
 	lab.toggle_pause()

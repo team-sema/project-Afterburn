@@ -1,6 +1,6 @@
 extends SceneTree
 
-const LAB := preload("res://projectiles/curved_laser_lab.tscn")
+const LAB := preload("res://labs/bullet/presets/curved_laser_lab.tscn")
 const LASER := preload("res://projectiles/curved_laser.tscn")
 var failures := PackedStringArray()
 

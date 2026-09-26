@@ -92,7 +92,7 @@ func run() -> void:
 	await process_frame
 	expect(not is_instance_valid(manager) and not is_instance_valid(other_manager), "world removal cleans managers")
 	if "--capture" in OS.get_cmdline_user_args():
-		var lab := preload("res://projectiles/textured_bullet_lab.tscn").instantiate()
+		var lab := preload("res://labs/bullet/presets/textured_bullet_lab.tscn").instantiate()
 		root.add_child(lab)
 		await create_timer(1.5).timeout
 		lab.toggle_pause()

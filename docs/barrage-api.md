@@ -4,11 +4,11 @@
 
 ## 시작하기: 적에 .gd 패턴 지정하기 (2026-09-17)
 
-먼저 패턴만 시험하려면 [`labs/lab_hub.tscn`](../labs/lab_hub.tscn)을 F6으로 열고 **탄막 · 패턴 스크립트**를 선택한다. 왼쪽 위 **스크립트 열기**에서 `patterns/` 파일이나 `res://...gd` 경로, 발사 위치를 지정한다. [`lab_example_pattern.gd`](../patterns/lab_example_pattern.gd)를 복사해 작성할 수 있다.
+먼저 패턴만 시험하려면 [`lab_hub.tscn`](../lab_hub.tscn)을 F6으로 열고 **탄막 · 패턴 스크립트**를 선택한다. 왼쪽 위 **스크립트 열기**에서 `patterns/` 파일이나 `res://...gd` 경로, 발사 위치를 지정한다. [`lab_example_pattern.gd`](../patterns/lab_example_pattern.gd)를 복사해 작성할 수 있다.
 
 편집기에서 저장하고 **실행 창에서 F5**를 누르면 새 생성자로 패턴을 다시 만들고 탄·꼬리·계측을 초기화한다. 문법/상속/설정 오류는 화면에 표시하며 취소하면 마지막 정상 실행으로 복귀한다. `_init` 내부의 임의 런타임 오류는 Godot Output에서도 확인한다. 재로드 대상은 선택한 `.gd`이며 참조한 외부 리소스는 Godot의 기본 캐시 정책을 따른다. 외형·이동은 스크립트가 정하고 Lab의 해당 선택기는 비활성화된다.
 
-WASD 표적, 안전 비율 ON/OFF, FPS/ms, 판정 표시, pause, 탄소거를 함께 쓸 수 있다. 허브에서 열었다면 F1로 목록에 돌아온다. Inspector의 `test_pattern_path` 지정 또는 `tools/run-godot.cmd res://projectiles/bullet_lab.tscn -- --pattern=res://patterns/lab_example_pattern.gd`로 바로 실행해도 된다. 기존 특화 Lab 씬은 동일 화면의 예제별 바로가기다.
+WASD 표적, 안전 비율 ON/OFF, FPS/ms, 판정 표시, pause, 탄소거를 함께 쓸 수 있다. 허브에서 열었다면 F1로 목록에 돌아온다. Inspector의 `test_pattern_path` 지정 또는 `tools/run-godot.cmd res://labs/bullet/bullet_lab.tscn -- --pattern=res://patterns/lab_example_pattern.gd`로 바로 실행해도 된다. 기존 특화 Lab 씬은 동일 화면의 예제별 바로가기다.
 
 기본 작성 방식은 BarrageSequence를 직접 상속하는 `.gd`다. 실행 중 await하는 스크립트가 아니라 발사 일정을 구성하는 스크립트다. 인자 없는 `_init()`에서 설정만 만들며 월드 접근·실제 발사 같은 부수 효과를 넣지 않는다.
 
@@ -141,7 +141,7 @@ Drone과 바늘탄 시험에 연결되어 있다. 기존 GPUParticles2D를 그�
 
 TEXTURED 외형이 추가되었다. `form = BulletAppearance.Form.TEXTURED`, `texture: Texture2D`를 지정하면 기존 스프라이트를 새 BULLET 몸체와 Behavior에서 사용할 수 있다. `core_size`, `wide_size`, `tight_size`는 세 층의 px 크기, `core_color`, `wide_color`, `tight_color`는 각 층 색이다. `tint`와 Behavior의 tint는 이 층 색에 곱한다. 기본 tint를 흰색으로 두면 원래 층 색을 유지한다.
 
-TEXTURED는 `collision_size`(양수 Vector2)의 직사각형 판정과 `collision_offset`을 사용한다. 시각 확대는 판정을 바꾸지 않고 hitbox_scale은 판정 크기와 오프셋을 함께 확대한다. 현재 발광 블러/강도는 기존 효과와 동일한 넓은 층 9/0.8, 좁은 층 2.5/1.15로 고정이다. 새 프리셋은 `resources/projectiles/needle.tres`, 시험 씬은 `projectiles/textured_bullet_lab.tscn`이다.
+TEXTURED는 `collision_size`(양수 Vector2)의 직사각형 판정과 `collision_offset`을 사용한다. 시각 확대는 판정을 바꾸지 않고 hitbox_scale은 판정 크기와 오프셋을 함께 확대한다. 현재 발광 블러/강도는 기존 효과와 동일한 넓은 층 9/0.8, 좁은 층 2.5/1.15로 고정이다. 새 프리셋은 `resources/projectiles/needle.tres`, 시험 씬은 `labs/bullet/presets/textured_bullet_lab.tscn`이다.
 
 Drone은 이제 Kind.BULLET + needle 외형 + 직진 Behavior를 사용한다. 다이아몬드 꼬리는 공통 입자 관리기로 재현하며 초기 확대/섬광은 포함하지 않는다. Kind.LEGACY는 기존 전체 씬 비교가 필요한 경우에만 사용하며 새 외형의 이름은 ‘바늘탄’이다.
 
@@ -247,7 +247,7 @@ runner.play(sequence, emitter, world, target)
 
 표적은 탄마다 유지하며 사라지거나 트리/viewport를 이탈하면 공급자를 실제 틱당 최대 한 번 호출한다. 공급자도 사라지면 현재 방향으로 계속 비행한다. 살아 있는 표적의 교체 정책은 이 API에 포함하지 않는다. `aimed`는 발사각 조준만 제어하며 호밍과 독립이다. 일반 탄과 TRAIL_LASER 모두 사용할 수 있다.
 
-예측은 마지막으로 관측한 표적 위치를 고정한 근사다. 표적의 다음 움직임을 미리 알지는 못한다. 실제 관측이 갱신되면 미래만 재계산하고 과거 경로/레이저 꼬리는 유지한다. 자세한 계약은 [호밍 규칙](design/combat.md#호밍-런타임--구현-완료)을 따른다. 시험은 `projectiles/homing_bullet_lab.tscn`에서 WASD로 표적을 움직이고 메뉴에서 원탄/레이저를 선택한다. 본 게임의 플레이어 호밍 무기 이식이나 피해 대상 변경은 포함하지 않는다.
+예측은 마지막으로 관측한 표적 위치를 고정한 근사다. 표적의 다음 움직임을 미리 알지는 못한다. 실제 관측이 갱신되면 미래만 재계산하고 과거 경로/레이저 꼬리는 유지한다. 자세한 계약은 [호밍 규칙](design/combat.md#호밍-런타임--구현-완료)을 따른다. 시험은 `labs/bullet/presets/homing_bullet_lab.tscn`에서 WASD로 표적을 움직이고 메뉴에서 원탄/레이저를 선택한다. 본 게임의 플레이어 호밍 무기 이식이나 피해 대상 변경은 포함하지 않는다.
 
 ## 5. BarrageVolley
 
@@ -352,7 +352,7 @@ if not runner.play(sequence, emitter, world):
 
 프리셋: `round_straight_shot.tres`, `rice_wave_shot.tres`, `crescent_laser_shot.tres`, `s_curve_laser_shot.tres`. 공유 프리셋을 수정하려면 먼저 `duplicate(true)`한다. 실제 실행은 설정을 복제하므로 원본 변경이 이미 실행 중인 탄에 소급 적용되지 않는다.
 
-시험 진입점: [bullet_behavior_lab.tscn](../projectiles/bullet_behavior_lab.tscn). Godot에서 F6 또는 저장소 루트에서 `tools/run-godot.cmd res://projectiles/bullet_behavior_lab.tscn`.
+시험 진입점: [bullet_behavior_lab.tscn](../labs/bullet/presets/bullet_behavior_lab.tscn). Godot에서 F6 또는 저장소 루트에서 `tools/run-godot.cmd res://labs/bullet/presets/bullet_behavior_lab.tscn`.
 
 공통 Lab의 **안전 비율 ON/OFF**로 정지 안전 비율 샘플링 비용을 비교할 수 있다. OFF는 실제 계산을 중단하며 다시 발사/패턴 변경에도 유지된다. 오른쪽 위의 **FPS | ms**는 최근 0.5초 구간의 화면 프레임률과 평균 프레임 간격이며 GPU 실행 시간은 아니다. pause 중에도 표시된다.
 
@@ -447,7 +447,7 @@ Elite Fighter는 `elite_fighter_pattern.gd`의 유한 Sequence로 부채꼴/집�
 
 Sniper는 `SniperBarrageShot`이 BarrageShot의 `is_valid()`와 `spawn()`을 재정의하는 특수 몸체 어댑터다. 폭·사거리·피해량은 Resource 설정으로 스냅샷되며 기존 SniperBullet의 Line2D 외형·판정·finished 계약을 유지한다. Appearance/Behavior/입자 꼬리는 지원하지 않는다. 탄 소멸의 finished는 Sequence의 발사 완료 신호와 별개다. 조준선·반동·재발사 일정은 SniperAttackComponent에 남는다.
 
-`labs/enemy_attack_lab.tscn`에서 세 기체의 예고·이동·사격을 재생할 수 있다. 비사격 적의 돌진·접촉·폭발은 기존 계약을 유지한다.
+`labs/enemy_attack/enemy_attack_lab.tscn`에서 세 기체의 예고·이동·사격을 재생할 수 있다. 비사격 적의 돌진·접촉·폭발은 기존 계약을 유지한다.
 
 반격 오그먼트는 CounterShotComponent가 `counter_wave_shot.tres`를 직접 발사한다. 피격/사망 트리거와 쿨다운은 제어자에 남기고, 파동은 BulletBehavior의 lateral_wave로 실행한다. 발사 요청은 위치·방향·설정을 복사하고 월드를 WeakRef로 보관하는 정적 지연 콜백이 처리한다. 사망 반격은 적 삭제 후에도 생성되지만 월드 삭제 시 취소된다. 일반 공격의 죽은 발사자 취소 규칙과 구별한다. Weapon Test Lab의 적 증강 목록에서 확인할 수 있으며 일반 오퍼 풀 제외는 유지한다.
 

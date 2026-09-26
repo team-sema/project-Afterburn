@@ -8,7 +8,7 @@ var bursts: Array[Dictionary] = []
 var next_burst := 0
 
 static func spawn(parent: Node2D, origin: Vector2, blast_radius: float, internal_blast := false) -> Node2D:
-	var effect: Node2D = load("res://labs/carrier_destruction_effect.gd").new()
+	var effect: Node2D = load("res://labs/bosses/carrier/carrier_destruction_effect.gd").new()
 	effect.radius = blast_radius
 	effect.secondary = internal_blast
 	effect.position = parent.to_local(origin)

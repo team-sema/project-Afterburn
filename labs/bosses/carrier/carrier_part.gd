@@ -4,7 +4,7 @@ signal damaged(amount: int)
 signal destroyed
 signal launch_requested(slot: int)
 
-const Neon = preload("res://labs/carrier_neon_visual.gd")
+const Neon = preload("res://labs/bosses/carrier/carrier_neon_visual.gd")
 var maximum := 120
 var health := 120
 var mode := 0
@@ -124,7 +124,7 @@ func take_damage(amount: int) -> void:
 	damaged.emit(applied)
 	if health == 0:
 		set_active(false)
-		preload("res://labs/carrier_destruction_effect.gd").spawn(world, global_position, destruction_radius(), mode in [1,2])
+		preload("res://labs/bosses/carrier/carrier_destruction_effect.gd").spawn(world, global_position, destruction_radius(), mode in [1,2])
 		destroyed.emit()
 	queue_redraw()
 

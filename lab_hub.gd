@@ -1,11 +1,12 @@
 extends Control
 
 const LABS := [
-	["탄막 · 패턴 스크립트", "res://projectiles/bullet_lab.tscn"],
-	["거대 항모 · Boss Lab", "res://labs/carrier_boss_lab.tscn"],
-	["엘리트 · 스나이퍼 공격 패턴", "res://labs/enemy_attack_lab.tscn"],
-	["무기 · 증강 · 적 소환", "res://weapon_test/weapon_test_lab.tscn"],
-	["증강 카드 · UI", "res://menus/augment_frame_test.tscn"],
+	["탄막 · 패턴 스크립트", "res://labs/bullet/bullet_lab.tscn"],
+	["보스 · 거대 항모", "res://labs/bosses/carrier/carrier_boss_lab.tscn"],
+	["보스 · 벽", "res://labs/bosses/wall/wall_boss_lab.tscn"],
+	["엘리트 · 스나이퍼 공격 패턴", "res://labs/enemy_attack/enemy_attack_lab.tscn"],
+	["무기 · 증강 · 적 소환", "res://labs/weapons/weapon_test_lab.tscn"],
+	["증강 카드 · UI", "res://labs/augment_cards/augment_frame_test.tscn"],
 ]
 var _opening := false
 

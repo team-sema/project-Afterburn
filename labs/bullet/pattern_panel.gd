@@ -60,7 +60,7 @@ func _ready() -> void:
 
 func refresh(path: String, origin_index: int) -> void:
 	choices.clear()
-	var paths := preload("res://labs/pattern_loader.gd").list_patterns()
+	var paths := preload("res://labs/bullet/pattern_loader.gd").list_patterns()
 	for item in paths:
 		choices.add_item(item.trim_prefix("res://patterns/"))
 		choices.set_item_metadata(choices.item_count - 1, item)

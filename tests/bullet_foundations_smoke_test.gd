@@ -7,7 +7,7 @@ const ORB := preload("res://resources/projectiles/orb.tres")
 # Use an explicit nonzero wave fixture: the editable Lab preset may be flat.
 var WAVE := BulletBehavior.new().lateral_wave(12.0, 1.2).repeat()
 const STRAIGHT := preload("res://resources/projectiles/straight_behavior.tres")
-const LAB := preload("res://projectiles/bullet_lab.tscn")
+const LAB := preload("res://labs/bullet/bullet_lab.tscn")
 
 var failures := PackedStringArray()
 

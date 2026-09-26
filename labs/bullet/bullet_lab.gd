@@ -6,7 +6,7 @@ extends Control
 @export var start_with_needle := false
 @export var start_with_homing := false
 @export_file("*.gd") var test_pattern_path := ""
-const PATTERN_LOADER = preload("res://labs/pattern_loader.gd")
+const PATTERN_LOADER = preload("res://labs/bullet/pattern_loader.gd")
 var _custom_sequence: BarrageSequence
 var _custom_path := ""
 var _custom_origin := 0
@@ -492,7 +492,7 @@ func _build_script_panel() -> void:
 	_script_shade.hide()
 	add_child(_script_shade)
 	_script_panel = PanelContainer.new()
-	_script_panel.set_script(preload("res://labs/pattern_panel.gd"))
+	_script_panel.set_script(preload("res://labs/bullet/pattern_panel.gd"))
 	_script_shade.add_child(_script_panel)
 	_script_panel.apply_requested.connect(apply_script)
 	_script_panel.close_requested.connect(_close_script_panel)
