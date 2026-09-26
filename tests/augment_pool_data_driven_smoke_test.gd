@@ -6,6 +6,7 @@ const COUNTER_SHOT := preload("res://resources/enemy_augments/enemy_counter_shot
 const DRONE_REINFORCEMENT := preload(
 	"res://resources/enemy_augments/enemy_drone_formation_reinforcement.tres"
 )
+const NEAR_DEATH := preload("res://resources/enemy_augments/enemy_near_death_experience.tres")
 
 
 var failures: PackedStringArray = []
@@ -33,6 +34,7 @@ func _run() -> void:
 		offer.enemy_augment_pool.has(DRONE_REINFORCEMENT),
 		"gameplay enemy pool includes drone reinforcement",
 	)
+	_expect(offer.enemy_augment_pool.has(NEAR_DEATH), "gameplay enemy pool includes near-death")
 	_expect(
 		not offer.enemy_augment_pool.has(COUNTER_SHOT),
 		"gameplay enemy pool excludes counter shot",
