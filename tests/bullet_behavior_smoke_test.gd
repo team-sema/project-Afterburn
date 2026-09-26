@@ -147,7 +147,7 @@ func run() -> void:
 	world.queue_free()
 	await process_frame
 	# Saved mixed pattern: two rings in one atomic fire step.
-	var lab = load("res://projectiles/bullet_behavior_lab.tscn").instantiate()
+	var lab = load("res://labs/bullet/presets/bullet_behavior_lab.tscn").instantiate()
 	root.add_child(lab)
 	lab.pattern_player.stop()
 	var balls: Array[FoundationBullet] = []
@@ -161,7 +161,7 @@ func run() -> void:
 		expect(balls[i]._direction.is_equal_approx(Vector2.DOWN.rotated(deg_to_rad(45.0 * i))), "ball ring axes")
 		expect(lasers[i]._direction.is_equal_approx(Vector2.DOWN.rotated(deg_to_rad(45.0 * i + 22.5))), "laser ring interleaves at 22.5 degrees")
 	for laser in lasers:
-		var future := laser.get_threat_path(2.8)
+		var future := laser.get_predicted_path(2.8)
 		var old_point := laser.position_at(0.4)
 		laser.age = 2.8
 		laser._update_body()

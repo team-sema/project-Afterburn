@@ -164,15 +164,15 @@ func _update_body() -> void:
 		queue_redraw()
 
 
-func get_threat_velocity() -> Vector2:
+func get_travel_velocity() -> Vector2:
 	return behavior_state.velocity_at(age)
 
 
-func get_threat_radius() -> float:
+func get_hazard_radius() -> float:
 	return hit_width * 0.5 * (behavior_state.max_hitbox_scale(lifetime) if behavior_state != null else 1.0)
 
 
-func get_threat_path(seconds: float) -> PackedVector2Array:
+func get_predicted_path(seconds: float) -> PackedVector2Array:
 	if not _active or is_queued_for_deletion():
 		return PackedVector2Array()
 	# The swept body is a contiguous interval of the same stored trajectory:

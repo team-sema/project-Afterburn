@@ -7,7 +7,7 @@ const ORB := preload("res://resources/projectiles/orb.tres")
 # Use an explicit nonzero wave fixture: the editable Lab preset may be flat.
 var WAVE := BulletBehavior.new().lateral_wave(12.0, 1.2).repeat()
 const STRAIGHT := preload("res://resources/projectiles/straight_behavior.tres")
-const LAB := preload("res://projectiles/bullet_lab.tscn")
+const LAB := preload("res://labs/bullet/bullet_lab.tscn")
 
 var failures := PackedStringArray()
 
@@ -47,7 +47,7 @@ func _run() -> void:
 		stepped._physics_process(0.01)
 	single._physics_process(0.6)
 	_expect(stepped.global_position.distance_to(single.global_position) < 0.001, "frame partition does not change the trajectory")
-	_expect(absf(angle_difference(single.global_rotation, single.get_threat_velocity().angle() + PI * 0.5)) < 0.001, "rice follows instantaneous travel direction")
+	_expect(absf(angle_difference(single.global_rotation, single.get_travel_velocity().angle() + PI * 0.5)) < 0.001, "rice follows instantaneous travel direction")
 	var first_shape := stepped.get_node("HitboxComponent/CollisionShape2D") as CollisionShape2D
 	var second_shape := single.get_node("HitboxComponent/CollisionShape2D") as CollisionShape2D
 	_expect(first_shape.shape != second_shape.shape, "collision shapes are per projectile")
@@ -65,7 +65,7 @@ func _run() -> void:
 	straight.free()
 	wave.free()
 	var predictor := _bullet(root, ROUND, WAVE, origin, Vector2.DOWN, 95)
-	var points := predictor.get_threat_path(0.6)
+	var points := predictor.get_predicted_path(0.6)
 	predictor._physics_process(0.6)
 	_expect(points[points.size() - 1].distance_to(predictor.global_position) < 0.001, "future path ends at actual future position")
 	_expect(points.size() > 2 and absf(points[6].x - origin.x) > 10, "prediction includes the wave bulge, not just the chord")
@@ -100,23 +100,23 @@ func _test_lab() -> void:
 	_expect(root.gui_get_focus_owner() == lab.shape_choice, "lab starts with keyboard focus")
 	var help: Control = lab.get_node("Controls").get_children().back()
 	_expect(help.get_global_rect().end.y <= 360, "all lab instructions fit inside the viewport")
-	lab.threat_button.grab_focus()
+	lab.safety_button.grab_focus()
 	await _tap(KEY_ENTER)
 	await create_timer(0.25).timeout
-	_expect(lab.monitor.sample_count == 0 and "OFF" in lab.status_label.text, "threat toggle stops real sampling and hides stale values")
+	_expect(lab.safety_meter.sample_count == 0 and "OFF" in lab.status_label.text, "safe ratio toggle stops real sampling and hides stale values")
 	lab.restart()
 	lab.pattern_player.stop()
 	lab.clear_bullets()
 	await create_timer(0.25).timeout
-	_expect(not lab.threat_button.button_pressed and lab.monitor.sample_count == 0, "restart preserves threat OFF")
+	_expect(not lab.safety_button.button_pressed and lab.safety_meter.sample_count == 0, "restart preserves safe ratio OFF")
 	lab.toggle_pause()
 	await create_timer(0.55, true).timeout
 	_expect(not "--" in lab.fps_label.text, "FPS display updates while gameplay is paused")
 	lab.toggle_pause()
-	lab.threat_button.grab_focus()
+	lab.safety_button.grab_focus()
 	await _tap(KEY_ENTER)
 	await create_timer(0.25).timeout
-	_expect(lab.monitor.sample_count > 0, "threat toggle resumes sampling")
+	_expect(lab.safety_meter.sample_count > 0, "safe ratio toggle resumes sampling")
 	lab.shape_choice.grab_focus()
 	await _tap(KEY_DOWN)
 	_expect(root.gui_get_focus_owner() == lab.motion_choice, "Down moves to the next setting")
@@ -160,13 +160,13 @@ func _test_lab() -> void:
 	lab.clear_bullets()
 	await process_frame
 	var stationary := _bullet(lab.world, ORB, STRAIGHT, Vector2(190.667, 220), Vector2.DOWN, 0)
-	var sample: Dictionary = lab.monitor.take_sample_now()
-	_expect(sample.relevant_projectile_count == 1 and sample.space > 0, "stationary large bullet still occupies danger space")
+	lab.safety_meter.measure()
+	_expect(lab.safety_meter.relevant_projectile_count == 1 and lab.safety_meter.passive_safe_ratio < 1.0, "stationary large bullet still occupies danger space")
 	stationary.queue_free()
 	await process_frame
 	var wave_bullet := _bullet(lab.world, ROUND, WAVE, Vector2(208, 190), Vector2.DOWN, 95)
-	sample = lab.monitor.take_sample_now()
-	_expect(sample.relevant_projectile_count == 1, "wave segments count as one projectile")
+	lab.safety_meter.measure()
+	_expect(lab.safety_meter.relevant_projectile_count == 1, "wave segments count as one projectile")
 	var frozen := wave_bullet.global_position
 	wave_bullet.set_physics_process(true)
 	lab.toggle_pause()

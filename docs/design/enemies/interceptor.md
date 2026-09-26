@@ -48,7 +48,7 @@
 - `start_delay=0.9` 동안 `EntryWarningComponent`가 좌/우 등장 가장자리에 경고 (화살표는 스폰 쪽)
 - `ForwardAttackRunMovementStep`: 편대 루트를 진행 방향으로 회전 후 local forward 210px/s. clamp·bounce·재추적 없음
 - 화면 진입 후 **0.7초** 사격 창 · **5발 burst 1회만** (`gap` 0.1, `rest` 10으로 재공격 차단)
-- 탄: 매 볼리 플레이어 재조준 · **250px/s**. `aimed_burst_pattern.gd`와 신규 바늘탄을 사용한다. 마지막 볼리 뒤 10초 휴식도 일정에 남겨 활성 기간 중 기존 위협도 보고를 보존하며, 0.7초 사격 창이 다음 묶음을 차단한다.
+- 탄: 매 볼리 플레이어 재조준 · **250px/s**. `aimed_burst_pattern.gd`와 신규 바늘탄을 사용한다. 마지막 볼리 뒤 10초 휴식도 일정에 남기며, 0.7초 사격 창이 다음 묶음을 차단한다.
 - Drone에서 상속한 전역 일반 적 사격 안전선을 사용하며, 플레이필드 높이의 70% 아래에서는 남은 볼리를 발사하지 않음
 - 생존 기체는 DespawnArea 이탈 시 보상 없음 (`no_health` 없음)
 
@@ -68,4 +68,4 @@
 
 - 기획에 명시된 등장 조건, 공격 예고·실행·종료와 보상 처리를 확인한다.
 - 관련 씬의 수치와 위 규칙을 대조하고, 행동 변경 시 해당 적의 스모크 테스트를 실행한다.
-- `enemy_pattern_migration_smoke_test.gd`에서 진입 활성화·발수·탄속·위협도·사격 창 종료를 검증하고, `interceptor_enemy_smoke_test.gd`에서 실제 편대의 경고·패스·발사·화면 이탈·보상을 검증한다.
+- `enemy_pattern_migration_smoke_test.gd`에서 진입 활성화·발수·탄속·사격 창 종료를 검증하고, `interceptor_enemy_smoke_test.gd`에서 실제 편대의 경고·패스·발사·화면 이탈·보상을 검증한다.

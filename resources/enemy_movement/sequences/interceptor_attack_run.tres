@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://df54gp6payrqu" path="res://resources/enemy_movement/movement_sequence.gd" id="1_sequence"]
 [ext_resource type="Script" uid="uid://biufnl0ep3dyf" path="res://resources/enemy_movement/movement_step.gd" id="2_step"]
-[ext_resource type="Script" path="res://resources/enemy_movement/steps/forward_attack_run_movement_step.gd" id="3_run"]
+[ext_resource type="Script" uid="uid://cnb7eovg7dm61" path="res://resources/enemy_movement/steps/forward_attack_run_movement_step.gd" id="3_run"]
 
 [sub_resource type="Resource" id="ForwardAttackRun_interceptor"]
 script = ExtResource("3_run")

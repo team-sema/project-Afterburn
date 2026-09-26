@@ -123,7 +123,7 @@ func _update_pose() -> void:
 	_hitbox.get_child(0).position = appearance.collision_offset * hitbox_scale
 	if not use_batched_rendering:
 		queue_redraw()
-	var velocity := get_threat_velocity()
+	var velocity := get_travel_velocity()
 	if not velocity.is_zero_approx():
 		global_rotation = velocity.angle() + PI * 0.5
 
@@ -134,15 +134,15 @@ func _on_hit(_hurtbox: HurtboxComponent) -> void:
 	queue_free()
 
 
-func get_threat_velocity() -> Vector2:
+func get_travel_velocity() -> Vector2:
 	return behavior_state.velocity_at(age) if _active else Vector2.ZERO
 
 
-func get_threat_radius() -> float:
+func get_hazard_radius() -> float:
 	return appearance.bounding_radius() * (behavior_state.max_hitbox_scale(lifetime) if behavior_state != null else 1.0)
 
 
-func get_threat_path(seconds: float) -> PackedVector2Array:
+func get_predicted_path(seconds: float) -> PackedVector2Array:
 	var points := PackedVector2Array()
 	if not _active or is_queued_for_deletion():
 		return points

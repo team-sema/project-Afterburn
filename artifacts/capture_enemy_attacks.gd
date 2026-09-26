@@ -4,7 +4,7 @@ func _initialize() -> void:
 	run.call_deferred()
 
 func run() -> void:
-	var lab := preload("res://labs/enemy_attack_lab.tscn").instantiate()
+	var lab := preload("res://labs/enemy_attack/enemy_attack_lab.tscn").instantiate()
 	root.add_child(lab)
 	current_scene = lab
 	for mode in 3:

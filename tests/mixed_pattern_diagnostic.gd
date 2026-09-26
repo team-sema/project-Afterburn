@@ -5,12 +5,12 @@ func _initialize() -> void:
 	run.call_deferred()
 
 func run() -> void:
-	var lab = load("res://projectiles/bullet_behavior_lab.tscn").instantiate()
+	var lab = load("res://labs/bullet/presets/bullet_behavior_lab.tscn").instantiate()
 	root.add_child(lab)
 	lab.pattern_player.stop()
 	await process_frame
 	lab.set_process(false)
-	lab.monitor.set_physics_process(false)
+	lab.safety_meter.set_physics_process(false)
 	var bullets := get_nodes_in_group("enemy_projectiles")
 	for bullet in bullets:
 		bullet.set_physics_process(false)
@@ -27,7 +27,7 @@ func run() -> void:
 		for age in [0.5, 2.0, 3.5, 6.0, 7.5]:
 			var pose := 0
 			var batch := 0
-			var threat := 0
+			var safety := 0
 			for frame in 50:
 				var start := Time.get_ticks_usec()
 				for bullet in bullets:
@@ -37,13 +37,13 @@ func run() -> void:
 				var updated := Time.get_ticks_usec()
 				renderer.refresh()
 				var rendered := Time.get_ticks_usec()
-				lab.monitor.take_sample_now()
+				lab.safety_meter.measure()
 				var sampled := Time.get_ticks_usec()
 				if frame >= 10:
 					pose += updated - start
 					batch += rendered - updated
-					threat += sampled - rendered
-			print("MIXED_DIAGNOSTIC ", JSON.stringify({"variant": variant, "age": age, "speed": probe.sample(age).speed, "pose_ms": pose / 40000.0, "batch_ms": batch / 40000.0, "threat_sample_ms": threat / 40000.0, "bullets": bullets.size()}))
+					safety += sampled - rendered
+			print("MIXED_DIAGNOSTIC ", JSON.stringify({"variant": variant, "age": age, "speed": probe.sample(age).speed, "pose_ms": pose / 40000.0, "batch_ms": batch / 40000.0, "safety_sample_ms": safety / 40000.0, "bullets": bullets.size()}))
 	lab.queue_free()
 	await process_frame
 	quit()

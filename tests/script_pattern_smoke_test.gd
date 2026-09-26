@@ -79,7 +79,6 @@ func run() -> void:
 	a.barrage_player.advance(4.5)
 	expect(a.get_volleys_fired() == 3, "target automatically reacquired")
 	a.apply_action_rate_multiplier(2)
-	expect(is_equal_approx(a.get_threat_projectile_rate(), 2.0 / 4.5), "threat rate derived from pattern and scale")
 	a.barrage_player.advance(2.25)
 	expect(a.get_volleys_fired() == 4 and b.get_volleys_fired() == 1, "scaled schedule and independent clocks")
 	a.barrage_player.pause()
@@ -141,7 +140,6 @@ func run() -> void:
 	param_shoot._start_pattern()
 	param_shoot.barrage_player.set_physics_process(false)
 	expect(param_shoot.pattern_error.is_empty() and param_sizes == [5], "pattern_params reach build() through the component")
-	expect(is_equal_approx(param_shoot.get_threat_projectile_rate(), 5.0), "threat summary reflects the built pattern")
 	# Reject an incompatible script before instantiating it; no legacy fallback.
 	var invalid_enemy := preload("res://enemies/normal_enemy.tscn").instantiate() as Enemy
 	invalid_enemy.augment_registry = registry

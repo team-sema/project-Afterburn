@@ -118,31 +118,6 @@ func has_active_bullet() -> bool:
 	return is_instance_valid(_active_bullet)
 
 
-func get_threat_projectile_rate() -> float:
-	if _state == CombatState.POSITIONING:
-		return 0.0
-	var cycle_duration := aim_duration + focus_hold_duration + shot_recovery_duration + cooldown_duration
-	return 1.0 / maxf(0.05, cycle_duration)
-
-
-func get_threat_reaction_time() -> float:
-	if _state == CombatState.AIMING:
-		return maxf(0.0, aim_duration + focus_hold_duration - _state_elapsed)
-	if _state == CombatState.FIRING:
-		return 0.0
-	return -1.0
-
-
-func get_threat_response_pressure() -> float:
-	if _state == CombatState.AIMING:
-		var total_aim_time := maxf(0.05, aim_duration + focus_hold_duration)
-		var aim_progress := clampf(_state_elapsed / total_aim_time, 0.0, 1.0)
-		return lerpf(0.25, 1.0, aim_progress)
-	if _state == CombatState.FIRING:
-		return 1.0
-	return 0.0
-
-
 func _process(delta: float) -> void:
 	if enemy == null or not is_instance_valid(enemy):
 		return
