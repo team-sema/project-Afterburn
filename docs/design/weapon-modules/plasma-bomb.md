@@ -25,12 +25,15 @@
 
 ## 강화 모듈 (WEAPON_TRAIT)
 
-| trait_id | 카드 ID | 표시명(요지) |
-|----------|---------|--------------|
-| `plasma_expand` | `trait_plasma_expand` | 확장 폭심 — 반경 ×1.6→2.2 · 피해 ×1.1→1.3 |
-| `plasma_cluster` | `trait_plasma_cluster` | 클러스터 — 주 피해 ×0.9 · 소형 3→5발 · 각 40%→50% |
-| `plasma_field` | `trait_plasma_field` | 잔류 장 — 피해 ×0.95 · 지속 3→5초 · 최대 보너스 ×1.0→1.5 |
-| `plasma_gravity` | `trait_plasma_gravity` | 중력 수축 — 피해 ×1.35→1.65 · 흡인 240→360 · 폭발 반경 ×0.9 · 흡인 반경 배율 ×1.6→2.0 |
+| trait_id | 카드 ID | 등급 | 표시명(요지) |
+|----------|---------|------|--------------|
+| `plasma_expand` | `trait_plasma_expand` | 실버 | 확장 폭심 — 폭발 반경 ×1.1→1.5 |
+| `plasma_bomb_power` | `trait_plasma_bomb_power` | 실버 | 고밀도 코어 — 피해 ×1.08→1.40 |
+| `plasma_cluster` | `trait_plasma_cluster` | 골드 | 클러스터 — 주 피해 ×0.9 · 소형 3→5발 · 각 40%→50% |
+| `plasma_field` | `trait_plasma_field` | 골드 | 잔류 장 — 피해 ×0.95 · 지속 3→5초 · 최대 보너스 ×1.0→1.5 |
+| `plasma_gravity` | `trait_plasma_gravity` | 골드 | 중력 수축 — 피해 ×1.35→1.65 · 흡인 240→360 · 폭발 반경 ×0.9 · 흡인 반경 배율 ×1.6→2.0 |
+
+실버 수치는 Lv.I→V, 골드는 Lv.I→III이다.
 
 플라즈마 본체·자탄·잔류장은 발사 시점의 일반/보스 피해 배율을 값으로 보존한다.
 

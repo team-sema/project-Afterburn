@@ -4,6 +4,8 @@
 
 XP를 모은 뒤 플레이어가 선택 시점을 정하며, 무기·모듈·시설로 빌드를 바꾼다. 적 증강은 다음 구간의 압력을 높인다.
 
+카드 등급은 효과의 성격을 나눈다. 실버는 기본기(무기 획득·스탯 소폭 강화), 골드는 동작 변화, 프리즘은 규칙 파괴다. 등급은 오퍼 단위로 정해지므로 프리즘 오퍼가 뜨는 순간 자체가 이벤트가 된다.
+
 카드 **목록·아이콘·수치** 정본:
 
 - 플레이어 시설 → [함선 모듈](ship-modules/index.md)
@@ -16,11 +18,11 @@ XP를 모은 뒤 플레이어가 선택 시점을 정하며, 무기·모듈·시
 
 | 타입 | 요지 |
 |------|------|
-| `PlayerAugment` | `tier` · `augment_type` · `offer_weight` · 시설/무기 필드 |
+| `PlayerAugment` | `tier` · `augment_type` · `offer_weight` · 시설/무기/규칙(`rule_id`) 필드 |
 | `FacilityModuleEffect` | Kind + primary/secondary/tertiary |
-| `WeaponTraitDefinition` | `max_rank` 3 · `params` / `rank_overrides` |
+| `WeaponTraitDefinition` | `tier` · `max_rank`(실버 5 · 골드 3 · 프리즘 1) · `params` / `rank_overrides` |
 | `EnemyAugment` | `icon` · `max_stacks` · modifiers · spawn 보너스 |
-| `PlayerAugmentKind` | `FACILITY_EFFECT` · `WEAPON_ACQUIRE` · `WEAPON_TRAIT` |
+| `PlayerAugmentKind` | `FACILITY_EFFECT` · `WEAPON_ACQUIRE` · `WEAPON_TRAIT` · `SHIP_RULE` |
 
 ## 풀
 
@@ -28,11 +30,10 @@ XP를 모은 뒤 플레이어가 선택 시점을 정하며, 무기·모듈·시
 
 | 대상 | 경로 | 포함 |
 |------|------|------|
-| 플레이어 | `resources/player_augments/` | Kind 3종 · `offer_weight > 0` → **48종** (시설 13 + 획득 7 + 특성 28) |
+| 플레이어 | `resources/player_augments/` | Kind 4종 · `offer_weight > 0` → **57종** (시설 13 + 획득 7 + 무기 모듈 36 + 규칙 1) |
 | 적 | `resources/enemy_augments/` | `include_in_offer_pool == true` → **6종** |
 
-- 티어 필드(`SILVER`/`GOLD`/`PRISMATIC`)는 카드 UI에만 반영 · 등장 확률 미분기
-- 리롤: `max_reroll_count`(임시 2) · **포커스 카드 1장만** 교체
+- 리롤: `max_reroll_count`(임시 2) · **포커스 카드 1장만** 교체 · 포커스 카드와 같은 등급(없으면 아래 등급)에서 같은 Kind 우선
 - 무기 Kind는 함선 범용 슬롯을 **쓰지 않음**
 
 ### 적 풀
@@ -54,24 +55,47 @@ XP를 모은 뒤 플레이어가 선택 시점을 정하며, 무기·모듈·시
 
 `max_stacks` 0=무제한 · 1=one-time. `target_spawn_id` / `additional_spawn_count`는 Encounter 한정 보너스.
 
+## 등급
+
+| 등급 | 성격 | 성장 | 카드 (57) |
+|------|------|------|-----------|
+| 실버 | 기본기 — 무기 획득, 기본 스탯 소폭 강화. 부작용 없음 | 무기 실버 Lv.I~V 누적 | 획득 7 · 무기 실버 14 · 시설 8 |
+| 골드 | 동작 — 무기·함선이 하는 일을 바꿈. 가벼운 대가 가능 | Lv.I~III | 무기 골드 21 · 시설 5 |
+| 프리즘 | 규칙 — 무기 정체성·게임 규칙을 깸. 큰 대가 | 레벨 없음 | 연쇄 분열탄 · 제4 베이 |
+
+- 무기 모듈 등급 배치는 [무기 모듈](weapon-modules/index.md), 시설 등급 배치는 [함선 모듈](ship-modules/index.md)이 정본이다. 무기 모듈 카드의 `tier`는 연결된 `WeaponTraitDefinition.tier`와 같다.
+- **오퍼 등급**: 플레이어 오퍼를 열 때 등급을 한 번 뽑는다. 가중치는 실버 55 · 골드 40 · 프리즘 5(임시값, `AugmentOfferController` export)다. 3장 모두 그 등급의 유효 카드에서 고르고, 3장이 안 되면 한 단계 아래 등급에서 채운다(프리즘→골드→실버). 오퍼 제목(`강화 선택 · GOLD` 등)에는 실제로 나온 카드 중 가장 높은 등급을 표시한다.
+- **엘리트 보상**: 엘리트 처치 1회마다 다음 플레이어 오퍼 1회의 등급 하한을 골드로 올린다(실버가 뽑히면 골드). 적립은 누적되고 플레이어 오퍼를 열 때 하나씩 쓴다.
+- **프리즘 한도**: 런당 2장까지 고를 수 있다. 한도에 닿으면 프리즘 카드는 후보에서 빠지고, 프리즘이 뽑힌 오퍼는 골드로 채운다.
+
+### 규칙 카드 (`SHIP_RULE`)
+
+| ID | 등급 | 표시명 | 효과 | 조건 |
+|----|------|--------|------|------|
+| `prism_fourth_weapon_bay` | 프리즘 | 제4 베이 | 무기 베이 3→4칸 · 모든 무기 피해 ×0.85 | 베이가 3칸일 때만 |
+
+규칙 카드는 범용 슬롯과 무기 베이를 쓰지 않으며, 고르면 런 끝까지 유지된다. 늘어난 베이는 빈 칸으로 추가되고, 이후 획득 오퍼는 빈 베이 기준 배율을 쓴다.
+
 ## 트리거
 
 ### AugmentProgressionController
 
 - 플레이어: XP ≥ 요구량 → HUD `AUGMENT READY [C]` · **C**로만 오픈 · 성공 시 XP 차감·레벨+1
 - 첫 요구 5, 레벨마다 +3 · 레이더 `XP_GAIN_MULT` 적용
+- 엘리트 처치 시 다음 플레이어 오퍼 1회의 골드 하한을 적립한다([등급](#등급)).
 - 적: 시퀀스 ELITE 관문 → 엘리트 **처치·XP 정산 후** ENEMY 오퍼. 선택 완료까지 시퀀스/일반 스폰 정지. Director 미사용 시에만 60초 타이머를 쓴다. 정본: [런 페이싱](run-pacing.md).
 
 ### AugmentOfferController
 
-- PLAYER 3장: `offer_weight` × 범주 배율 (획득 ×1.8 / 모듈 ×0.45 / 시설 ×1.0 · 베이 만석 시 획득·모듈 하향)
+- PLAYER 3장: 오퍼 등급을 정한 뒤 그 등급 안에서 `offer_weight` × 범주 배율 (획득 ×1.8 · 베이 만석 시 ×0.55 / 무기 모듈 ×1.0 / 시설 ×1.0 / 규칙 ×1.0)
 - `WEAPON_ACQUIRE` 만석 → 교체 UI · 피교체 무기 성장 삭제
-- `WEAPON_TRAIT` → 장착 중 무기만 · Lv.III 제외
+- `WEAPON_TRAIT` → 장착 중 무기만 · 최대 레벨(실버 V · 골드 III · 프리즘 I) 제외
+- `SHIP_RULE` → 카드별 조건 충족 시만 · 선택 즉시 적용
 
 ### UI 요약
 
 - 중앙 플레이필드 3장 캐러셀 · 포커스 미리보기는 우측 STATUS
-- 시설: 빈 범용 슬롯 아이콘 점멸 · 무기: 베이/모듈 칸 점멸
+- 시설: 빈 범용 슬롯 아이콘 점멸 · 무기: 베이/모듈 칸 점멸 · 규칙: 미리보기 없음
 - 하단 `범용 슬롯 +1` 항상 표시(최대 15면 비활성) · `[R] 리롤`
 - 랩: `weapon_test_lab` · C=시설 목록 · V=적 증강 전체
 
@@ -84,11 +108,15 @@ XP를 모은 뒤 플레이어가 선택 시점을 정하며, 무기·모듈·시
 
 - 플레이어 피격 범위 감소, 공용 관통 강화, 투사체형 무기에 호밍 추가. 기존 전용 특성과의 중첩·대상·수치는 미정이다.
 - 적 파괴 후 지연 폭발, 풀에서 제외된 반격 증강 재도입. Bomb와의 역할 구분·적용 대상·보상을 먼저 정한다.
+- 프리즘 후보: 군집 탄두(유도탄), 전방위 산탄(샷건), 자율 편대(보조 캐넌), 과부하 베이, 공명 사격. 태양 창(레이저 빔이 적탄 소거)·특이점(플라즈마 블랙홀이 적탄 흡입)·시간 왜곡장(함선 주변 적탄 감속)은 [외부 궤도 개입](combat.md#외부-궤도-개입-설계--후속-구현) API가 먼저 필요하다. 반사 장갑(방벽이 적탄을 되쏨)은 적탄 소유권 전환 설계가 필요하다.
 - 위 항목은 아이디어이며 구현 지시가 아니다.
 
 ## 완료 조건·검증
 
 - XP만으로 오퍼가 자동 열리지 않고 C로 연다.
-- 풀·장착·Lv.III·리롤 규칙이 위와 같다.
+- 풀·장착·최대 레벨·리롤 규칙이 위와 같다.
+- 한 오퍼의 카드는 뽑힌 등급으로 채워지고, 부족분만 아래 등급에서 채운다. 리롤은 등급을 유지한다.
+- 엘리트 처치 뒤 첫 플레이어 오퍼는 골드 이상이다. 프리즘은 런당 2장을 넘지 않는다.
+- 제4 베이를 고르면 베이가 4칸이 되고 네 번째 무기를 장착·교체할 수 있으며, 모든 무기 피해가 ×0.85가 된다.
 
-검증 참고: `tests/augment_pool_data_driven_smoke_test.gd`.
+검증 참고: `tests/augment_pool_data_driven_smoke_test.gd` · `tests/augment_offer_tier_test.gd` · `tests/fourth_weapon_bay_test.gd`.

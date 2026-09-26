@@ -8,7 +8,7 @@
 script = ExtResource("1_aug")
 augment_id = &"trait_laser_heat_stack"
 display_name = "열 축적"
-description = "동일 적 지속 피격 시 0.5초마다 +15% 피해(최대 +90%)."
+tier = 1
 augment_type = 3
 offer_weight = 1.0
 weapon_definition = ExtResource("2_weapon")

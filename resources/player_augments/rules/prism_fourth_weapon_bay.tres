@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="PlayerAugment" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://resources/player_augments/player_augment.gd" id="1_aug"]
+[ext_resource type="Texture2D" uid="uid://cg1d7qjv0e5oj" path="res://assets/facilities/facility_weapon_room.svg" id="2_icon"]
+
+[resource]
+script = ExtResource("1_aug")
+augment_id = &"prism_fourth_weapon_bay"
+display_name = "제4 베이"
+description = "무기 베이가 3칸에서 4칸이 됩니다. 모든 무기 피해 ×0.85."
+tier = 2
+augment_type = 7
+icon = ExtResource("2_icon")
+offer_weight = 1.0
+rule_id = &"fourth_weapon_bay"

@@ -9,6 +9,7 @@ script = ExtResource("1_aug")
 augment_id = &"facility_hangar"
 display_name = "과충전 반응로"
 description = "20초마다 5초간 무기 공격력이 40% 증가합니다."
+tier = 1
 augment_type = 6
 icon = ExtResource("2_icon")
 facility_id = &"hangar"

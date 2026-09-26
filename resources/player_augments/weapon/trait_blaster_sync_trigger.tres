@@ -8,7 +8,7 @@
 script = ExtResource("1_aug")
 augment_id = &"trait_blaster_sync_trigger"
 display_name = "동기화 방아쇠"
-description = "좌우 동시 발사. 피해 ×0.85, 연사 간격 ×1.15."
+tier = 1
 augment_type = 3
 offer_weight = 1.0
 weapon_definition = ExtResource("2_weapon")

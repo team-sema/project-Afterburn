@@ -7,18 +7,20 @@
 script = ExtResource("1_def")
 trait_id = &"laser_wide_lens"
 display_name = "광각 렌즈"
-description = "빔 폭 ×1.8, 피해 ×0.9."
+description = "빔 폭·판정 폭 ×{width_mult}."
 icon = ExtResource("2_icon")
 target_weapon_id = &"main_laser"
-next_rank_hint = "빔 폭 추가 증가"
+tier = 0
+max_rank = 5
 params = {
-"width_mult": 1.8,
-"damage_mult": 0.9,
+"width_mult": 1.2,
 }
 rank_overrides = Array[Dictionary]([{
-"width_mult": 2.1,
-"damage_mult": 0.95,
+"width_mult": 1.4,
 }, {
-"width_mult": 2.4,
-"damage_mult": 1.0,
+"width_mult": 1.6,
+}, {
+"width_mult": 1.8,
+}, {
+"width_mult": 2.0,
 }])

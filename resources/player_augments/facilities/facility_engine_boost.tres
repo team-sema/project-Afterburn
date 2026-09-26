@@ -9,6 +9,7 @@ script = ExtResource("1_aug")
 augment_id = &"facility_engine_boost"
 display_name = "비상 부스터"
 description = "Shift로 0.8초간 이동속도가 2.5배가 됩니다. (쿨다운 7초)"
+tier = 1
 augment_type = 6
 icon = ExtResource("2_icon")
 facility_id = &"engine"

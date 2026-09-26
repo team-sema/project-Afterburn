@@ -15,6 +15,8 @@ var _facility_damage_multiplier := 1.0
 var _temp_damage_multiplier := 1.0
 ## Extra multiplier when the hit target is a boss enemy.
 var _boss_damage_multiplier := 1.0
+## Run rule cards (e.g. fourth weapon bay trade-off).
+var _rule_damage_multiplier := 1.0
 ## Deprecated hangar ammo bonus (always 0 under unified weapons).
 var _consumable_capacity_bonus := 0
 
@@ -171,6 +173,12 @@ func set_boss_damage_multiplier(multiplier: float) -> void:
 	_apply_stat_multipliers()
 
 
+func set_rule_damage_multiplier(multiplier: float) -> void:
+	assert(multiplier > 0.0, "Rule damage multiplier must be greater than zero.")
+	_rule_damage_multiplier = multiplier
+	_apply_stat_multipliers()
+
+
 ## Hangar bonus. Only consumables react; the base weapon ignores it.
 func set_consumable_capacity_bonus(bonus: int) -> void:
 	var clamped_bonus := maxi(0, bonus)
@@ -198,7 +206,16 @@ func get_effective_damage_multiplier() -> float:
 		_global_damage_multiplier
 		* _facility_damage_multiplier
 		* _temp_damage_multiplier
+		* _rule_damage_multiplier
+		* get_power_damage_multiplier()
 	)
+
+
+## Silver power module `<weapon_id>_power`: this weapon's own damage channel.
+func get_power_damage_multiplier() -> float:
+	if _bound_weapon_id == &"":
+		return 1.0
+	return float(get_trait_param(StringName("%s_power" % _bound_weapon_id), &"damage_mult", 1.0))
 
 
 func get_boss_damage_multiplier() -> float:

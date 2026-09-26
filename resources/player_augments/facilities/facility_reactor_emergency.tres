@@ -9,6 +9,7 @@ script = ExtResource("1_aug")
 augment_id = &"facility_reactor_emergency"
 display_name = "비상 출력 장치"
 description = "선체가 피해를 입으면 5초간 무기 공격력이 30% 증가합니다. (쿨다운 15초)"
+tier = 1
 augment_type = 6
 icon = ExtResource("2_icon")
 facility_id = &"hangar"

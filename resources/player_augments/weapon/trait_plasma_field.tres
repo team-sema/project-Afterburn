@@ -8,7 +8,7 @@
 script = ExtResource("1_aug")
 augment_id = &"trait_plasma_field"
 display_name = "잔류 장"
-description = "피해 ×0.95, 3초 잔류장(최대 보너스 ×1.0)."
+tier = 1
 augment_type = 3
 offer_weight = 1.0
 weapon_definition = ExtResource("2_weapon")

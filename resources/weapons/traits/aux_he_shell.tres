@@ -7,10 +7,9 @@
 script = ExtResource("1_def")
 trait_id = &"aux_he_shell"
 display_name = "고폭 탄두"
-description = "직격 ×0.95 + 반경 28 AOE(×0.8)."
+description = "직격 ×{direct_damage_mult} + 반경 {aoe_radius} 폭발(×{aoe_damage_mult})."
 icon = ExtResource("2_icon")
 target_weapon_id = &"aux_test_cannon"
-next_rank_hint = "AOE 반경 증가"
 params = {
 "direct_damage_mult": 0.95,
 "aoe_damage_mult": 0.8,

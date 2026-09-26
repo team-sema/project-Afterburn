@@ -2,12 +2,16 @@ class_name LaserWeaponSystem
 extends WeaponSystem
 
 ## Piercing beam that always reaches the top of the playfield and damages every
-## enemy hurtbox along its path each tick.
+## enemy hurtbox inside its hit width each tick.
 
 const BEAM_LOCAL_START := Vector2(0, -6)
 const PLAYFIELD_TOP_MARGIN := 8.0
+const ENEMY_HURTBOX_MASK := 1 << 1
+const HIT_QUERY_BATCH := 64
 
 @export_range(0.1, 8.0, 0.1) var beam_width_multiplier := 1.0
+## Damage band width before width multipliers; matches the visible glow width.
+@export_range(0.5, 32.0, 0.5) var beam_hit_width := 3.0
 @export_range(0.0, 1.0, 0.01) var beam_expand_duration := 0.18
 @export_range(0.02, 10.0, 0.01) var base_tick_interval := 0.1
 @export_range(1, 200, 1) var base_tick_damage := 3
@@ -23,7 +27,7 @@ var base_glow_width_scale: float
 var _base_core_alpha: float
 var _base_glow_alpha: float
 var _beam_width_tween: Tween
-## enemy instance id -> {stacks: int, last_time: float}
+## enemy instance id -> {start: float, last_hit: float} of the current contact run.
 var _heat_stacks: Dictionary = {}
 ## Gameplay seconds accumulated from _physics_process delta. Heat stack
 ## intervals use this so tree pause does not advance or expire them.
@@ -84,14 +88,23 @@ func apply_damage_tick() -> void:
 	var endpoint := _full_beam_endpoint()
 	_update_beam_visual(endpoint)
 	_damage_all_along_beam(endpoint)
+	_prune_heat_stacks()
+
+
+## Shared by the visual beam and the damage band.
+func get_beam_width_multiplier() -> float:
+	return beam_width_multiplier * float(get_trait_param(&"laser_wide_lens", &"width_mult", 1.0))
+
+
+func get_beam_hit_width() -> float:
+	return beam_hit_width * get_beam_width_multiplier()
 
 
 func _apply_stat_multipliers() -> void:
 	if not is_node_ready():
 		return
 	damage_tick_timer.wait_time = base_tick_interval / get_effective_fire_rate_multiplier()
-	var width_mult := beam_width_multiplier
-	width_mult *= float(get_trait_param(&"laser_wide_lens", &"width_mult", 1.0))
+	var width_mult := get_beam_width_multiplier()
 	_stop_beam_width_tween()
 	core_line.width = base_core_width * width_mult
 	glow_line.scale.x = base_glow_width_scale * width_mult
@@ -108,7 +121,7 @@ func restart_beam_width_animation() -> void:
 	if not is_node_ready():
 		return
 	_stop_beam_width_tween()
-	var width_mult := beam_width_multiplier * float(get_trait_param(&"laser_wide_lens", &"width_mult", 1.0))
+	var width_mult := get_beam_width_multiplier()
 	core_line.width = 0.0
 	glow_line.scale.x = 0.0
 	if beam_expand_duration <= 0.0:
@@ -222,21 +235,28 @@ func _heat_bonus_for(enemy: Node) -> float:
 		return 0.0
 	var id := enemy.get_instance_id()
 	var now := _clock
-	var stack_interval := float(get_trait_param(&"laser_heat_stack", &"stack_interval", 0.5))
+	var grace := float(get_trait_param(&"laser_heat_stack", &"contact_grace", 0.5))
+	var stack_interval := maxf(0.01, float(get_trait_param(&"laser_heat_stack", &"stack_interval", 0.5)))
 	var stack_bonus := float(get_trait_param(&"laser_heat_stack", &"stack_bonus", 0.15))
 	var max_bonus := float(get_trait_param(&"laser_heat_stack", &"max_bonus", 0.9))
-	var entry: Dictionary = _heat_stacks.get(id, {"stacks": 0, "last_time": -999.0})
-	var last_time := float(entry.get("last_time", -999.0))
-	var stacks := int(entry.get("stacks", 0))
-	if now - last_time >= stack_interval:
-		stacks += 1
-		entry["stacks"] = stacks
-		entry["last_time"] = now
-		_heat_stacks[id] = entry
-	else:
-		entry["last_time"] = now
-		_heat_stacks[id] = entry
-	return minf(max_bonus, float(maxi(0, stacks - 1)) * stack_bonus)
+	var entry: Dictionary = _heat_stacks.get(id, {})
+	# A gap longer than the grace window ends the contact run; restart from zero.
+	if entry.is_empty() or now - float(entry["last_hit"]) > grace:
+		entry = {"start": now}
+	entry["last_hit"] = now
+	_heat_stacks[id] = entry
+	# Small epsilon keeps accumulated float deltas from landing just under a step.
+	var stacks := floori((now - float(entry["start"])) / stack_interval + 0.0001)
+	return minf(max_bonus, float(stacks) * stack_bonus)
+
+
+func _prune_heat_stacks() -> void:
+	if _heat_stacks.is_empty():
+		return
+	var grace := float(get_trait_param(&"laser_heat_stack", &"contact_grace", 0.5))
+	for id in _heat_stacks.keys():
+		if _clock - float(_heat_stacks[id]["last_hit"]) > grace:
+			_heat_stacks.erase(id)
 
 
 func _damage_all_along_beam(endpoint: Vector2) -> void:
@@ -245,25 +265,48 @@ func _damage_all_along_beam(endpoint: Vector2) -> void:
 		return
 	var from_global := to_global(BEAM_LOCAL_START)
 	var endpoint_global := to_global(endpoint)
-	var exclude: Array[RID] = []
-	var primary_hits: Array[Dictionary] = []
+	var beam := endpoint_global - from_global
+	if beam.length_squared() < 0.0001:
+		return
+	var shape := RectangleShape2D.new()
+	shape.size = Vector2(get_beam_hit_width(), beam.length())
+	var query := PhysicsShapeQueryParameters2D.new()
+	query.shape = shape
+	# Rectangle local +Y runs along the beam.
+	query.transform = Transform2D(beam.angle() - PI * 0.5, from_global + beam * 0.5)
+	query.collision_mask = ENEMY_HURTBOX_MASK
+	query.collide_with_areas = true
+	query.collide_with_bodies = false
 
-	for _i in 32:
-		var query := PhysicsRayQueryParameters2D.create(from_global, endpoint_global)
-		query.collide_with_areas = true
-		query.collide_with_bodies = false
-		query.collision_mask = 2
+	# Gather every overlap first; one hurtbox may report several shapes.
+	var hurtboxes: Array[HurtboxComponent] = []
+	var seen: Dictionary = {}
+	var exclude: Array[RID] = []
+	while true:
 		query.exclude = exclude
-		var hit := space.intersect_ray(query)
-		if hit.is_empty():
+		var batch := space.intersect_shape(query, HIT_QUERY_BATCH)
+		for result in batch:
+			exclude.append(result["rid"])
+			var hurtbox := result.get("collider") as HurtboxComponent
+			if hurtbox == null or seen.has(hurtbox.get_instance_id()):
+				continue
+			seen[hurtbox.get_instance_id()] = true
+			hurtboxes.append(hurtbox)
+		if batch.size() < HIT_QUERY_BATCH:
 			break
-		var collider: Object = hit.get("collider")
-		if collider is CollisionObject2D:
-			exclude.append((collider as CollisionObject2D).get_rid())
-		var hurtbox := collider as HurtboxComponent
-		if hurtbox == null or hurtbox.is_invincible:
+
+	var primary_hits: Array[Dictionary] = []
+	for hurtbox in hurtboxes:
+		if not is_instance_valid(hurtbox) or hurtbox.is_invincible:
 			continue
-		primary_hits.append(hit)
+		primary_hits.append({
+			"collider": hurtbox,
+			"position": Geometry2D.get_closest_point_to_segment(
+				hurtbox.global_position,
+				from_global,
+				endpoint_global,
+			),
+		})
 		_apply_beam_hit(hurtbox, 1.0)
 
 	if has_trait(&"laser_refract") and not primary_hits.is_empty():

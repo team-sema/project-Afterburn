@@ -8,7 +8,7 @@
 script = ExtResource("1_aug")
 augment_id = &"trait_missile_terminal"
 display_name = "종말 가속"
-description = "비행 시간에 따라 피해 +20%~+100%(2.5초 만개)."
+tier = 1
 augment_type = 3
 offer_weight = 1.0
 weapon_definition = ExtResource("2_weapon")

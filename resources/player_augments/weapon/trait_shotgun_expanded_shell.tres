@@ -8,7 +8,7 @@
 script = ExtResource("1_aug")
 augment_id = &"trait_shotgun_expanded_shell"
 display_name = "확장 산탄"
-description = "펠릿 +4, 피해 ×0.85."
+tier = 1
 augment_type = 3
 offer_weight = 1.0
 weapon_definition = ExtResource("2_weapon")

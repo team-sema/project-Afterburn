@@ -9,6 +9,7 @@ script = ExtResource("1_aug")
 augment_id = &"facility_shield_charge"
 display_name = "급속 재충전기"
 description = "실드 충전 속도가 2배가 됩니다."
+tier = 1
 augment_type = 6
 icon = ExtResource("2_icon")
 facility_id = &"shield"

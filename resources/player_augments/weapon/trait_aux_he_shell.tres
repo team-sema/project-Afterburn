@@ -8,7 +8,7 @@
 script = ExtResource("1_aug")
 augment_id = &"trait_aux_he_shell"
 display_name = "고폭 탄두"
-description = "직격 ×0.95 + 반경 28 AOE(×0.8)."
+tier = 1
 augment_type = 3
 offer_weight = 1.0
 weapon_definition = ExtResource("2_weapon")

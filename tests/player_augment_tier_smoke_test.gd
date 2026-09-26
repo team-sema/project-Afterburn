@@ -17,9 +17,14 @@ func _run() -> void:
 	root.add_child(gameplay)
 	await process_frame
 	var offer_controller := gameplay.get_node("AugmentOfferController") as AugmentOfferController
-	_expect(offer_controller.player_augment_pool.size() == 48, "the current player augment pool remains intact")
+	_expect(offer_controller.player_augment_pool.size() == 57, "the current player augment pool remains intact")
+	# Silver 7 acquire + 14 weapon + 8 facility · Gold 21 weapon + 5 facility · Prismatic 2.
+	var tier_counts := [0, 0, 0]
 	for augment in offer_controller.player_augment_pool:
-		_expect(augment.tier == PlayerAugment.Tier.SILVER, "%s defaults to Silver" % augment.augment_id)
+		tier_counts[int(augment.tier)] += 1
+		if augment.augment_type == PlayerAugmentKind.Kind.WEAPON_ACQUIRE:
+			_expect(augment.tier == PlayerAugment.Tier.SILVER, "%s acquisition is Silver" % augment.augment_id)
+	_expect(tier_counts == [29, 26, 2], "pool splits into 29 Silver / 26 Gold / 2 Prismatic (got %s)" % str(tier_counts))
 	gameplay.free()
 
 	var silver := _make_augment(&"tier_silver", "Silver Test", PlayerAugment.Tier.SILVER)

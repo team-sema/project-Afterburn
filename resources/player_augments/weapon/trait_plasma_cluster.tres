@@ -8,7 +8,7 @@
 script = ExtResource("1_aug")
 augment_id = &"trait_plasma_cluster"
 display_name = "클러스터"
-description = "주 피해 ×0.9, 폭발 시 소형 폭탄 3개(×0.4)."
+tier = 1
 augment_type = 3
 offer_weight = 1.0
 weapon_definition = ExtResource("2_weapon")

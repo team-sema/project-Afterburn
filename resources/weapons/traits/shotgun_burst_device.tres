@@ -7,10 +7,9 @@
 script = ExtResource("1_def")
 trait_id = &"shotgun_burst_device"
 display_name = "버스트 장치"
-description = "3발마다 추가 발사(딜레이 0.12초, 피해 ×0.9)."
+description = "{every_nth}발마다 추가 사격(지연 {delay}초, 피해 ×{extra_damage_mult})."
 icon = ExtResource("2_icon")
 target_weapon_id = &"main_shotgun"
-next_rank_hint = "버스트 주기 단축"
 params = {
 "every_nth": 3,
 "delay": 0.12,

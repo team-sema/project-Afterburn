@@ -7,10 +7,9 @@
 script = ExtResource("1_def")
 trait_id = &"plasma_field"
 display_name = "잔류 장"
-description = "피해 ×0.95, 3초 잔류장(최대 보너스 ×1.0)."
+description = "피해 ×{damage_mult}, {field_duration}초 잔류장(최대 보너스 ×{field_max_bonus_mult})."
 icon = ExtResource("2_icon")
 target_weapon_id = &"plasma_bomb"
-next_rank_hint = "잔류장 지속 증가"
 params = {
 "damage_mult": 0.95,
 "field_duration": 3,

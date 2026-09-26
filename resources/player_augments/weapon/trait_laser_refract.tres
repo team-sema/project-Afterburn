@@ -8,7 +8,7 @@
 script = ExtResource("1_aug")
 augment_id = &"trait_laser_refract"
 display_name = "굴절 빔"
-description = "주 히트에서 최근접 다른 적으로 2차 광선(피해 ×0.55)."
+tier = 1
 augment_type = 3
 offer_weight = 1.0
 weapon_definition = ExtResource("2_weapon")

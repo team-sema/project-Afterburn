@@ -7,10 +7,9 @@
 script = ExtResource("1_def")
 trait_id = &"aux_heavy_barrel"
 display_name = "편대 증설 프레임"
-description = "보조 드론 +2, 드론당 피해 ×0.7."
+description = "보조 드론 +{drone_count_bonus}, 드론당 피해 ×{damage_mult}."
 icon = ExtResource("2_icon")
 target_weapon_id = &"aux_test_cannon"
-next_rank_hint = "추가 편대 확장"
 params = {
 "damage_mult": 0.7,
 "drone_count_bonus": 2,

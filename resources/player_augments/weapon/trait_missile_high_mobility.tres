@@ -8,7 +8,6 @@
 script = ExtResource("1_aug")
 augment_id = &"trait_missile_high_mobility"
 display_name = "고기동"
-description = "탄속 ×2.0, 연사 간격 ×0.7(선회율 불변)."
 augment_type = 3
 offer_weight = 1.0
 weapon_definition = ExtResource("2_weapon")

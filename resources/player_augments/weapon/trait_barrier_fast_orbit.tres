@@ -8,7 +8,7 @@
 script = ExtResource("1_aug")
 augment_id = &"trait_barrier_fast_orbit"
 display_name = "고속 궤도"
-description = "공전 ×1.5, 재타격 쿨다운 ×0.7, 피해 ×0.95."
+tier = 1
 augment_type = 3
 offer_weight = 1.0
 weapon_definition = ExtResource("2_weapon")

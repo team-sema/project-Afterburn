@@ -15,6 +15,7 @@ signal selection_finished(slot_index: int)
 	%SlotButton1,
 	%SlotButton2,
 	%SlotButton3,
+	%SlotButton4,
 ]
 
 var _accepting := false
@@ -69,6 +70,12 @@ func _open(loadout: PlayerWeaponLoadout, title: String, prompt: String, allow_ca
 		if weapon_name.is_empty():
 			weapon_name = String(weapon_id)
 		var traits := loadout.get_weapon_traits(weapon_id)
+		if loadout.get_max_equipped_weapon_count() > 3:
+			# Four bays (prismatic rule) only fit the 360px screen as two-line buttons.
+			button.text = "베이 %d · %s\n모듈 %d개 · 교체 시 삭제" % [index + 1, weapon_name, traits.size()]
+			button.icon = loadout.get_weapon_icon(weapon_id)
+			button.disabled = not _valid_indices.has(index)
+			continue
 		var trait_text := "모듈 없음"
 		if not traits.is_empty():
 			var parts: PackedStringArray = []

@@ -644,7 +644,7 @@ func _rebuild_trait_buttons(weapon_id: StringName) -> void:
 	if weapon_id == &"":
 		trait_weapon_label.text = "무기를 장착하면 모듈이 표시됩니다."
 		return
-	trait_weapon_label.text = "%s 전용 모듈 · 클릭 시 Lv.I→III→해제" % _loadout.get_weapon_display_name(weapon_id)
+	trait_weapon_label.text = "%s 전용 모듈 · 클릭 시 Lv.I→최대→해제" % _loadout.get_weapon_display_name(weapon_id)
 	for definition in _trait_definitions:
 		if definition.target_weapon_id != weapon_id:
 			continue
@@ -654,7 +654,7 @@ func _rebuild_trait_buttons(weapon_id: StringName) -> void:
 		button.icon = definition.icon
 		button.expand_icon = true
 		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
-		button.tooltip_text = definition.description
+		button.tooltip_text = definition.format_description(1)
 		button.set_meta("definition", definition)
 		button.pressed.connect(func() -> void: _toggle_selected_weapon_trait(definition))
 		trait_buttons.add_child(button)

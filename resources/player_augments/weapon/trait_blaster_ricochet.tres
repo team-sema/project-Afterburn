@@ -8,7 +8,7 @@
 script = ExtResource("1_aug")
 augment_id = &"trait_blaster_ricochet"
 display_name = "도탄 탄자"
-description = "최대 2회 도탄. 1회차 ×0.7, 2회차 ×0.4."
+tier = 1
 augment_type = 3
 offer_weight = 1.0
 weapon_definition = ExtResource("2_weapon")

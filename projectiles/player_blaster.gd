@@ -17,6 +17,13 @@ var _ricochet_radius := 96.0
 var _hit_ids: Dictionary = {}
 var _bounce_damage_scale := 1.0
 var _pending_configure := false
+## Prismatic split: fragments per split and how many more split steps remain.
+var _split_count := 0
+var _split_generations_left := 0
+var _split_spread_deg := 90.0
+var _has_split := false
+## Enemy instance ids this shot and its split ancestors already hit.
+var _ignored_ids: Dictionary = {}
 
 
 func configure_blaster_combat(
@@ -40,6 +47,39 @@ func configure_blaster_combat(
 	_pending_configure = true
 	if is_node_ready():
 		_apply_damage_resolver()
+
+
+## Enables the prismatic split on the first enemy hit; `ignored_ids` are never hit.
+func configure_split(
+	count: int,
+	generations_left: int,
+	spread_deg: float,
+	ignored_ids: Dictionary = {},
+) -> void:
+	_split_count = maxi(0, count)
+	_split_generations_left = maxi(0, generations_left)
+	_split_spread_deg = spread_deg
+	_ignored_ids = ignored_ids.duplicate()
+	var hitbox := _hitbox()
+	if hitbox != null and not _ignored_ids.is_empty():
+		hitbox.hit_filter = func(hurtbox: HurtboxComponent) -> bool:
+			var target := _enemy_from_hurtbox(hurtbox)
+			return target == null or not _ignored_ids.has(target.get_instance_id())
+
+
+## Split fragment: inherits the parent's launch snapshot and damage, no pierce or ricochet.
+func configure_split_fragment(
+	damage_snapshot: Dictionary,
+	base_damage: int,
+	count: int,
+	generations_left: int,
+	spread_deg: float,
+	ignored_ids: Dictionary,
+) -> void:
+	_damage_snapshot = damage_snapshot.duplicate()
+	_base_damage = maxi(1, base_damage)
+	_pending_configure = true
+	configure_split(count, generations_left, spread_deg, ignored_ids)
 
 
 func _ready() -> void:
@@ -82,6 +122,7 @@ func _on_hit_hurtbox(hurtbox: HurtboxComponent) -> void:
 	var target := _enemy_from_hurtbox(hurtbox)
 	if target != null:
 		_hit_ids[target.get_instance_id()] = true
+	_try_split()
 
 	if hurtbox.blocks_pierce:
 		queue_free()
@@ -106,6 +147,43 @@ func _on_hit_hurtbox(hurtbox: HurtboxComponent) -> void:
 		return
 
 	queue_free()
+
+
+## First enemy hit only: fan `_split_count` fragments around the travel direction.
+## Fragments are added deferred because this runs inside a physics callback.
+func _try_split() -> void:
+	if _has_split or _split_generations_left <= 0 or _split_count <= 0:
+		return
+	_has_split = true
+	var parent := get_parent() as Node2D
+	var scene := load(scene_file_path) as PackedScene
+	if parent == null or scene == null:
+		return
+	var move := _move()
+	var velocity := move.velocity if move != null else Vector2.ZERO
+	if velocity.length_squared() < 0.0001:
+		velocity = Vector2.UP * 200.0
+	var ignored := _ignored_ids.duplicate()
+	ignored.merge(_hit_ids)
+	for index in _split_count:
+		var t := 0.0 if _split_count == 1 else float(index) / float(_split_count - 1) - 0.5
+		var direction := velocity.rotated(deg_to_rad(_split_spread_deg * t))
+		var fragment := scene.instantiate()
+		fragment.call(
+			"configure_split_fragment",
+			_damage_snapshot,
+			_base_damage,
+			_split_count,
+			_split_generations_left - 1,
+			_split_spread_deg,
+			ignored,
+		)
+		var fragment_move := fragment.get_node_or_null("MoveComponent") as MoveComponent
+		if fragment_move != null:
+			fragment_move.velocity = direction
+		fragment.rotation = direction.angle() + PI * 0.5
+		fragment.position = parent.to_local(global_position)
+		parent.add_child.call_deferred(fragment)
 
 
 func _start_ricochet(exclude: Node) -> void:
@@ -136,7 +214,7 @@ func _start_ricochet(exclude: Node) -> void:
 	rotation = direction.angle() + PI * 0.5
 	if hitbox != null:
 		hitbox.set_deferred("monitoring", false)
-		get_tree().create_timer(0.03).timeout.connect(_reenable_hitbox, CONNECT_ONE_SHOT)
+		get_tree().create_timer(0.03, false).timeout.connect(_reenable_hitbox, CONNECT_ONE_SHOT)
 
 
 func _reenable_hitbox() -> void:

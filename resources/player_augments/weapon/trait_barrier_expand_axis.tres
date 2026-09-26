@@ -8,7 +8,6 @@
 script = ExtResource("1_aug")
 augment_id = &"trait_barrier_expand_axis"
 display_name = "확장 축"
-description = "궤도 반경 ×1.45, 크기 ×1.35, 공전 ×0.9."
 augment_type = 3
 offer_weight = 1.0
 weapon_definition = ExtResource("2_weapon")

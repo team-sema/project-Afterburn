@@ -8,7 +8,7 @@
 script = ExtResource("1_aug")
 augment_id = &"trait_shotgun_cut_barrel"
 display_name = "단축 총열"
-description = "스프레드 ×1.5, 근거리 피해 ×1.8, 사거리 ×0.85."
+tier = 1
 augment_type = 3
 offer_weight = 1.0
 weapon_definition = ExtResource("2_weapon")

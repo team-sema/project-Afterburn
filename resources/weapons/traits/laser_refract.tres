@@ -7,10 +7,9 @@
 script = ExtResource("1_def")
 trait_id = &"laser_refract"
 display_name = "굴절 빔"
-description = "주 히트에서 최근접 다른 적으로 2차 광선(피해 ×0.55)."
+description = "주 히트에서 최근접 다른 적으로 2차 광선(피해 ×{fork_damage_mult})."
 icon = ExtResource("2_icon")
 target_weapon_id = &"main_laser"
-next_rank_hint = "굴절 피해 증가"
 params = {
 "fork_damage_mult": 0.55,
 }

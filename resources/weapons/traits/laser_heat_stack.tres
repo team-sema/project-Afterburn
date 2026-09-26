@@ -7,12 +7,12 @@
 script = ExtResource("1_def")
 trait_id = &"laser_heat_stack"
 display_name = "열 축적"
-description = "동일 적 지속 피격 시 0.5초마다 +15% 피해(최대 +90%)."
+description = "같은 적 연속 조사 {stack_interval}초마다 피해 +{stack_bonus%}%(최대 +{max_bonus%}%)."
 icon = ExtResource("2_icon")
 target_weapon_id = &"main_laser"
-next_rank_hint = "축적 상한 증가"
 params = {
 "stack_interval": 0.5,
+"contact_grace": 0.5,
 "stack_bonus": 0.15,
 "max_bonus": 0.9,
 }

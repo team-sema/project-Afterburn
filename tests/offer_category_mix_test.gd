@@ -33,9 +33,14 @@ func _run() -> void:
 		"full-bay acquire multiplier is reduced but non-zero",
 	)
 	_expect(
-		offer.trait_weight_bays_full < offer.trait_weight_has_empty_bay,
-		"full-bay trait multiplier is reduced",
+		offer.trait_weight_bays_full >= offer.trait_weight_has_empty_bay,
+		"full-bay module multiplier is not reduced (growth matters once bays are set)",
 	)
+	# Category multipliers act inside one offer tier; pin the offer to Silver,
+	# where acquisition cards live, so the mix below measures the multipliers.
+	offer.silver_offer_weight = 100.0
+	offer.gold_offer_weight = 0.0
+	offer.prismatic_offer_weight = 0.0
 
 	var empty_acquire := 0
 	var empty_trait := 0

@@ -22,26 +22,26 @@ func _run() -> void:
 	_expect(loadout.is_weapon_equipped(&"main_blaster"), "blaster starts equipped")
 	_expect(not loadout.has_method("get_weapon_level"), "weapon core level API is removed")
 	_expect(
-		loadout.add_or_upgrade_weapon_trait(&"main_blaster", &"blaster_rapid_loader", 1) == 1,
+		loadout.add_or_upgrade_weapon_trait(&"main_blaster", &"blaster_accel_ap", 1) == 1,
 		"module starts at Lv.I",
 	)
 	_expect(
-		loadout.add_or_upgrade_weapon_trait(&"main_blaster", &"blaster_rapid_loader", 1) == 2,
+		loadout.add_or_upgrade_weapon_trait(&"main_blaster", &"blaster_accel_ap", 1) == 2,
 		"module reaches Lv.II",
 	)
 	_expect(
-		loadout.add_or_upgrade_weapon_trait(&"main_blaster", &"blaster_rapid_loader", 1) == 3,
+		loadout.add_or_upgrade_weapon_trait(&"main_blaster", &"blaster_accel_ap", 1) == 3,
 		"module reaches Lv.III",
 	)
 	_expect(
-		not loadout.can_upgrade_weapon_trait(&"main_blaster", &"blaster_rapid_loader"),
+		not loadout.can_upgrade_weapon_trait(&"main_blaster", &"blaster_accel_ap"),
 		"maxed module cannot upgrade",
 	)
 	var blaster := loadout.get_bay(0).equipped_weapon_instance as WeaponSystem
 	_expect(
 		is_equal_approx(
-			float(blaster.get_trait_param(&"blaster_rapid_loader", &"fire_interval_mult", 1.0)),
-			0.52
+			float(blaster.get_trait_param(&"blaster_accel_ap", &"pierce_bonus", 0)),
+			3.0
 		),
 		"module Lv.III resolves its explicit combat params",
 	)

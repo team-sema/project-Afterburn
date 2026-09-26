@@ -24,7 +24,7 @@ XP 오브 수집 → 요구량 충족 시 `AUGMENT READY [C]` → **C**로 오�
 
 | 슬롯 | 규칙 | 정본 |
 |------|------|------|
-| 무기 베이 3 | 시작 블래스터 · 동시 사격 · 만석 시 교체(피교체 모듈 삭제) | [무기 모듈](weapon-modules/index.md) |
+| 무기 베이 3 (프리즘 제4 베이로 4) | 시작 블래스터 · 동시 사격 · 만석 시 교체(피교체 모듈 삭제) | [무기 모듈](weapon-modules/index.md) · [오그먼트](augments.md#규칙-카드-ship_rule) |
 | 범용 시설 5→15 | `FACILITY_EFFECT`만 · 카드 대신 슬롯 확장 선택 시 +1 칸 · tag는 시너지용 | [함선 모듈](ship-modules/index.md) |
 
 ## 생존

@@ -10,16 +10,7 @@ func _initialize() -> void:
 
 
 func _run() -> void:
-	var gameplay := (load("res://gameplay.tscn") as PackedScene).instantiate() as Node
-	var offer_controller := gameplay.get_node("AugmentOfferController") as AugmentOfferController
-	var registered := false
-	for augment in offer_controller.enemy_augment_pool:
-		if augment.augment_id == &"enemy_near_death_experience":
-			registered = true
-			break
-	_expect(registered, "near-death augment is registered in the gameplay pool")
-	gameplay.free()
-
+	# Offer pool membership is covered by augment_pool_data_driven_smoke_test.
 	var world := Node2D.new()
 	world.add_to_group("gameplay_world")
 	root.add_child(world)

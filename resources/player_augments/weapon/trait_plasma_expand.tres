@@ -8,7 +8,6 @@
 script = ExtResource("1_aug")
 augment_id = &"trait_plasma_expand"
 display_name = "확장 폭심"
-description = "폭발 반경 ×1.6, 피해 ×1.1."
 augment_type = 3
 offer_weight = 1.0
 weapon_definition = ExtResource("2_weapon")

@@ -32,8 +32,9 @@ func _run() -> void:
 	await lab.show_mode(PlayerAugment.Tier.PRISMATIC)
 	for choice in lab.overlay.current_choices:
 		assert(choice.tier == PlayerAugment.Tier.PRISMATIC)
+	# The lab styles duplicates only; source cards keep their module tier.
 	for source in lab.SAMPLES:
-		assert(source.tier == PlayerAugment.Tier.SILVER)
+		assert(source.tier == source.trait_definition.tier)
 	if DisplayServer.get_name() != "headless":
 		await RenderingServer.frame_post_draw
 		var result := root.get_texture().get_image().save_png("res://artifacts/augment_frame_lab.png")

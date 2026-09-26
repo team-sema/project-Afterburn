@@ -81,7 +81,7 @@ func _check_initial_slots(registry: PlayerAugmentRegistry, panel: ShipPanel) -> 
 
 func _check_pool_targets(offer: AugmentOfferController, registry: PlayerAugmentRegistry) -> void:
 	for augment in offer.player_augment_pool:
-		if PlayerAugmentKind.is_weapon_offer(augment.augment_type):
+		if not PlayerAugmentKind.is_facility_offer(augment.augment_type):
 			continue
 		_expect(not augment.module_tags.is_empty(), "%s declares an explicit module tag" % augment.augment_id)
 		_expect(

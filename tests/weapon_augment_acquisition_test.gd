@@ -24,6 +24,7 @@ func _run() -> void:
 	var acquire_count := 0
 	var trait_count := 0
 	var facility_count := 0
+	var rule_count := 0
 	for augment in offer.player_augment_pool:
 		match augment.augment_type:
 			PlayerAugmentKind.Kind.WEAPON_ACQUIRE:
@@ -32,10 +33,13 @@ func _run() -> void:
 				trait_count += 1
 			PlayerAugmentKind.Kind.FACILITY_EFFECT:
 				facility_count += 1
+			PlayerAugmentKind.Kind.SHIP_RULE:
+				rule_count += 1
 	_expect(acquire_count == 7, "gameplay pool keeps seven weapon acquisition cards")
-	_expect(trait_count == 28, "gameplay pool keeps 28 levelled weapon modules")
+	_expect(trait_count == 36, "gameplay pool keeps 36 levelled weapon modules")
 	_expect(facility_count == 13, "gameplay pool includes 13 facility modules")
-	_expect(offer.player_augment_pool.size() == 48, "legacy weapon level cards are removed")
+	_expect(rule_count == 1, "gameplay pool includes the fourth-bay rule card")
+	_expect(offer.player_augment_pool.size() == 57, "legacy weapon level cards are removed")
 
 	_expect(loadout.is_weapon_equipped(&"main_blaster"), "starts with blaster")
 	var laser_acq := load("res://resources/player_augments/weapon/acquire_main_laser.tres") as PlayerAugment
@@ -47,7 +51,15 @@ func _run() -> void:
 	) as PlayerAugment
 	_expect(offer._is_player_augment_available(rapid_loader, loadout), "module card is available")
 	_expect(rapid_loader.get_offer_title(loadout).contains("Lv.I"), "new module card previews Lv.I")
-	for expected_rank in range(1, 4):
+	_expect(rapid_loader.tier == PlayerAugment.Tier.SILVER, "rapid loader is a silver module")
+	_expect(
+		rapid_loader.get_offer_description(loadout) == "연사 간격 ×0.93.",
+		"new module card describes Lv.I values",
+	)
+	# Silver modules stack to Lv.V without trade-offs.
+	var intervals := ["0.93", "0.87", "0.81", "0.76", "0.71"]
+	var roman := ["", "I", "II", "III", "IV", "V"]
+	for expected_rank in range(1, 6):
 		_expect(
 			loadout.add_or_upgrade_weapon_trait(
 				&"main_blaster",
@@ -56,13 +68,17 @@ func _run() -> void:
 			) == expected_rank,
 			"module advances to expected level",
 		)
-		if expected_rank < 3:
-			var next_rank_label := "II" if expected_rank == 1 else "III"
+		if expected_rank < 5:
 			_expect(
 				rapid_loader.get_offer_title(loadout).contains(
-					"Lv.%s" % next_rank_label
+					"Lv.%s" % roman[expected_rank + 1]
 				),
 				"module card previews its next level",
+			)
+			_expect(
+				rapid_loader.get_offer_description(loadout)
+				== "연사 간격 ×%s→%s." % [intervals[expected_rank - 1], intervals[expected_rank]],
+				"module card shows current→next values for Lv.%d" % (expected_rank + 1),
 			)
 	_expect(
 		not offer._is_player_augment_available(rapid_loader, loadout),

@@ -7,10 +7,9 @@
 script = ExtResource("1_def")
 trait_id = &"barrier_fast_orbit"
 display_name = "고속 궤도"
-description = "공전 ×1.5, 재타격 쿨다운 ×0.7, 피해 ×0.95."
+description = "공전 ×{orbit_speed_mult}, 재타격 쿨다운 ×{rehit_cooldown_mult}, 피해 ×{damage_mult}."
 icon = ExtResource("2_icon")
 target_weapon_id = &"aux_orbital_barrier"
-next_rank_hint = "공전 속도 증가"
 params = {
 "orbit_speed_mult": 1.5,
 "rehit_cooldown_mult": 0.7,
