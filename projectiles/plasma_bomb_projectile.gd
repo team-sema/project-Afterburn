@@ -8,6 +8,8 @@ const CONTACT_RADIUS := 4.0
 
 @export var explosion_effect_scene: PackedScene
 @export var explosion_color := Color(0.35, 0.9, 1.0, 1.0)
+## Radial sparks layered on the explosion effect (the profile skips the flare).
+@export var impact_profile: ImpactProfile = preload("res://effects/impact_profiles/plasma_bomb.tres")
 @export var cluster_bomb_scene: PackedScene
 
 @onready var visual: Node2D = $Visual
@@ -165,6 +167,7 @@ func _detonate() -> void:
 		_apply_gravity_pull()
 	var hit_count := _deal_blast_damage(blast_damage)
 	_spawn_explosion_effect()
+	ImpactVfx.emit_from(self, global_position, impact_profile, Vector2.DOWN, 0.5 if _is_cluster_child else 1.0)
 	if not _is_cluster_child:
 		_spawn_clusters()
 		_spawn_residual_field()

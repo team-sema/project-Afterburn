@@ -6,6 +6,11 @@
 [ext_resource type="Script" uid="uid://cvmjafhyfx5xo" path="res://components/hitbox_component.gd" id="3_hitbox"]
 [ext_resource type="Script" path="res://player_ship/weapons/laser_refract_vfx.gd" id="4_refract"]
 [ext_resource type="Script" path="res://components/overcharge_visual_component.gd" id="5_overcharge"]
+[ext_resource type="Shader" path="res://effects/laser_beam.gdshader" id="6_beam_shader"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_beam"]
+resource_local_to_scene = true
+shader = ExtResource("6_beam_shader")
 
 [node name="LaserWeaponSystem" type="Node2D" unique_id=395281251]
 script = ExtResource("1_laser")
@@ -15,12 +20,11 @@ base_tick_interval = 0.1
 base_tick_damage = 3
 
 [node name="GlowLine" type="Sprite2D" parent="." unique_id=2107826507]
-self_modulate = Color(0.1, 0.75, 1, 0.35)
 z_index = 1
-material = ExtResource("2_additive")
+material = SubResource("ShaderMaterial_beam")
 position = Vector2(0, -133)
 rotation = 3.14159
-scale = Vector2(0.053, 0.992)
+scale = Vector2(0.3125, 0.992)
 texture = ExtResource("2_beam")
 
 [node name="CoreLine" type="Line2D" parent="." unique_id=1816449984]

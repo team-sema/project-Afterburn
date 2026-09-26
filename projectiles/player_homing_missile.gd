@@ -4,6 +4,7 @@ extends Node2D
 const ENEMY_HURTBOX_MASK := 1 << 1
 
 @export var enemy_group: StringName = &"enemies"
+@export var impact_profile: ImpactProfile = preload("res://effects/impact_profiles/homing_missile.tres")
 
 @onready var hitbox_component: HitboxComponent = $HitboxComponent
 @onready var scale_component: ScaleComponent = $ScaleComponent
@@ -117,6 +118,7 @@ func _apply_damage_resolver() -> void:
 
 
 func _on_hit_hurtbox(hurtbox: HurtboxComponent) -> void:
+	ImpactVfx.emit_from(self, global_position, impact_profile, -_velocity, 1.0, _aoe_radius)
 	if _aoe_radius > 0.0:
 		_deal_aoe(hurtbox)
 	queue_free()

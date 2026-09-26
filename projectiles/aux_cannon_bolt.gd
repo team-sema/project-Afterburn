@@ -1,6 +1,10 @@
 extends Node2D
 
 const ENEMY_HURTBOX_MASK := 1 << 1
+## Impact scale for hits the shot continues through (pierce/ricochet).
+const PASS_THROUGH_IMPACT_STRENGTH := 0.6
+
+@export var impact_profile: ImpactProfile = preload("res://effects/impact_profiles/aux_cannon.tres")
 
 @onready var scale_component: ScaleComponent = $ScaleComponent
 @onready var flash_component: FlashComponent = $FlashComponent
@@ -72,6 +76,15 @@ func _apply_damage_resolver() -> void:
 
 
 func _on_hit_hurtbox(hurtbox: HurtboxComponent) -> void:
+	var passes_through := not hurtbox.blocks_pierce and _pierce_remaining > 0
+	ImpactVfx.emit_from(
+		self,
+		global_position,
+		impact_profile,
+		ImpactVfx.against_travel(self),
+		PASS_THROUGH_IMPACT_STRENGTH if passes_through else 1.0,
+		_aoe_radius,
+	)
 	if _aoe_radius > 0.0:
 		_deal_aoe(hurtbox)
 

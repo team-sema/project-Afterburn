@@ -84,7 +84,7 @@ func _set_overcharge_active(active: bool) -> void:
 			stale_ids.append(instance_id)
 			continue
 		var base_color := entry.get("self_modulate", Color.WHITE) as Color
-		item.self_modulate = _tinted(base_color) if active else base_color
+		item.self_modulate = tint_color(base_color) if active else base_color
 	for instance_id in stale_ids:
 		_tracked_visuals.erase(instance_id)
 
@@ -108,7 +108,7 @@ func _capture_visual(node: Node) -> void:
 		"self_modulate": base_color,
 	}
 	if _overcharge_active:
-		item.self_modulate = _tinted(base_color)
+		item.self_modulate = tint_color(base_color)
 
 
 func _is_render_visual(node: Node) -> bool:
@@ -126,7 +126,12 @@ func _on_tree_node_added(node: Node) -> void:
 		_capture_visual(node)
 
 
-func _tinted(base_color: Color) -> Color:
+func is_overcharge_active() -> bool:
+	return _overcharge_active
+
+
+## Overcharge tint for colors drawn outside tracked nodes (e.g. ImpactVfx).
+static func tint_color(base_color: Color) -> Color:
 	return Color(
 		base_color.r * OVERCHARGE_TINT.r,
 		base_color.g * OVERCHARGE_TINT.g,

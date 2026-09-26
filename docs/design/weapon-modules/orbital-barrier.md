@@ -9,6 +9,7 @@
 
 획득·특성 카드가 공유하는 무기 아이콘.
 - 스프라이트: `assets/weapons/weapon_aux_orbital_barrier.svg`
+- 타격 이펙트: [공용 규칙](../effects.md#타격-이펙트) · 프로필 `effects/impact_profiles/orbital_barrier.tres`
 - 인게임 세그먼트 판: `assets/effects/orbital_barrier_segment.svg`
 
 ## 기본 동작

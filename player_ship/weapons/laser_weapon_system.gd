@@ -10,11 +10,15 @@ const ENEMY_HURTBOX_MASK := 1 << 1
 const HIT_QUERY_BATCH := 64
 
 @export_range(0.1, 8.0, 0.1) var beam_width_multiplier := 1.0
-## Damage band width before width multipliers; matches the visible glow width.
+## Damage band width before width multipliers; matches the bright core + tight
+## glow of the beam shader. The faint wide glow outside it is visual only.
 @export_range(0.5, 32.0, 0.5) var beam_hit_width := 3.0
 @export_range(0.0, 1.0, 0.01) var beam_expand_duration := 0.18
 @export_range(0.02, 10.0, 0.01) var base_tick_interval := 0.1
 @export_range(1, 200, 1) var base_tick_damage := 3
+@export var impact_profile: ImpactProfile = preload("res://effects/impact_profiles/laser.tres")
+## Impact flare/spark scale at refract fork targets relative to primary hits.
+@export_range(0.0, 2.0, 0.05) var refract_impact_strength := 0.6
 
 @onready var glow_line: Sprite2D = $GlowLine
 @onready var core_line: Line2D = $CoreLine
@@ -26,6 +30,7 @@ var base_core_width: float
 var base_glow_width_scale: float
 var _base_core_alpha: float
 var _base_glow_alpha: float
+var _beam_material: ShaderMaterial
 var _beam_width_tween: Tween
 ## enemy instance id -> {start: float, last_hit: float} of the current contact run.
 var _heat_stacks: Dictionary = {}
@@ -43,6 +48,7 @@ func _ready() -> void:
 	base_glow_width_scale = glow_line.scale.x
 	_base_core_alpha = core_line.default_color.a
 	_base_glow_alpha = glow_line.self_modulate.a
+	_beam_material = glow_line.material as ShaderMaterial
 	damage_hitbox.damage = base_tick_damage
 	damage_tick_timer.timeout.connect(apply_damage_tick)
 	_apply_stat_multipliers()
@@ -181,6 +187,9 @@ func _update_glow_beam(endpoint: Vector2) -> void:
 	glow_line.position = (BEAM_LOCAL_START + endpoint) * 0.5
 	glow_line.rotation = direction.angle() - PI * 0.5
 	glow_line.scale.y = direction.length() / texture_size.y
+	if _beam_material != null:
+		_beam_material.set_shader_parameter(&"beam_length", direction.length())
+		_beam_material.set_shader_parameter(&"beam_time", _clock)
 
 
 func _update_pulse(delta: float) -> void:
@@ -299,15 +308,14 @@ func _damage_all_along_beam(endpoint: Vector2) -> void:
 	for hurtbox in hurtboxes:
 		if not is_instance_valid(hurtbox) or hurtbox.is_invincible:
 			continue
-		primary_hits.append({
-			"collider": hurtbox,
-			"position": Geometry2D.get_closest_point_to_segment(
-				hurtbox.global_position,
-				from_global,
-				endpoint_global,
-			),
-		})
+		var contact := Geometry2D.get_closest_point_to_segment(
+			hurtbox.global_position,
+			from_global,
+			endpoint_global,
+		)
+		primary_hits.append({"collider": hurtbox, "position": contact})
 		_apply_beam_hit(hurtbox, 1.0)
+		ImpactVfx.emit_from(self, contact, impact_profile, Vector2.DOWN)
 
 	if has_trait(&"laser_refract") and not primary_hits.is_empty():
 		_apply_refract(primary_hits)
@@ -340,6 +348,13 @@ func _apply_refract(primary_hits: Array[Dictionary]) -> void:
 			continue
 		_apply_beam_hit(hurtbox, fork_mult)
 		_show_refract_visual(origin, hurtbox.global_position)
+		ImpactVfx.emit_from(
+			self,
+			hurtbox.global_position,
+			impact_profile,
+			origin - hurtbox.global_position,
+			refract_impact_strength,
+		)
 
 
 func _show_refract_visual(from_global: Vector2, target_global: Vector2) -> void:

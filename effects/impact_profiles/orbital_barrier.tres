@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ImpactProfile" format=3]
+
+[ext_resource type="Script" path="res://effects/impact_profile.gd" id="1_profile"]
+
+[resource]
+script = ExtResource("1_profile")
+glow_color = Color(0.45, 0.95, 1, 0.55)
+core_color = Color(0.85, 1, 1, 0.95)
+flare_radius = 4.0
+spark_count = 3
+spark_speed_min = 100.0
+spark_speed_max = 200.0
+spark_spread_degrees = 60.0
+spark_length = 6.0
+spark_lifetime = 0.25

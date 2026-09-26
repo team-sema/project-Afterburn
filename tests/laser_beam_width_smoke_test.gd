@@ -53,6 +53,7 @@ func _run() -> void:
 	_expect(_hurt_counts["off_axis"] == 1, "beam hits a target inside the band but off its axis")
 	_expect(_hurt_counts["wide_only"] == 0, "base beam misses a target outside its band")
 	_expect(_hurt_counts["far"] == 0, "beam misses a distant target")
+	_expect(ImpactVfx.get_or_create(laser).get_active_flare_count() == 2, "each beam hit shows one contact flare")
 
 	loadout.traits = {&"laser_wide_lens": 5}
 	_expect(is_equal_approx(laser.get_beam_hit_width(), 3.0 * 2.0), "wide lens Lv.V widens the hit band")

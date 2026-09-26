@@ -9,6 +9,7 @@
 
 획득·특성 카드가 공유하는 무기 아이콘.
 - 스프라이트: `assets/weapons/weapon_aux_homing_missile.svg`
+- 타격 이펙트: [공용 규칙](../effects.md#타격-이펙트) · 프로필 `effects/impact_profiles/homing_missile.tres`
 
 ## 강화 모듈 (WEAPON_TRAIT)
 
