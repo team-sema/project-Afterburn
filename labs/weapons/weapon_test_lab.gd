@@ -370,7 +370,7 @@ func _build_enemy_buttons() -> void:
 		var button := Button.new()
 		button.name = "Spawn_%s" % String(preset.encounter_id)
 		button.text = String(preset.encounter_id)
-		button.tooltip_text = "선택한 수만큼 이 스폰 패턴을 실행합니다."
+		button.tooltip_text = "%s\n선택한 수만큼 이 스폰 패턴을 실행합니다." % String(preset.encounter_id)
 		_style_button(button, Color(1.0, 0.22, 0.48, 1.0), true)
 		button.pressed.connect(func() -> void: _spawn_batches(preset))
 		row.add_child(button)
@@ -431,6 +431,9 @@ func _build_weapon_buttons() -> void:
 func _style_button(button: Button, accent: Color, compact := false) -> void:
 	button.custom_minimum_size = Vector2(0, 16 if compact else 24)
 	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	# Side panels are 170px; long names trim instead of widening the panel.
+	button.clip_text = true
+	button.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	if compact:
 		button.add_theme_font_size_override("font_size", 10)
 	button.add_theme_color_override("font_color", Color(0.82, 0.93, 1.0))

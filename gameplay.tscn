@@ -82,7 +82,7 @@ script = ExtResource("9_progression")
 offer_controller = NodePath("../AugmentOfferController")
 
 [node name="Ship" parent="." unique_id=1048269092 node_paths=PackedStringArray("augment_registry") instance=ExtResource("2_ship")]
-position = Vector2(80, 216)
+position = Vector2(100, 216)
 augment_registry = NodePath("../PlayerAugmentRegistry")
 
 [node name="SpaceBackground" parent="." unique_id=370541693 instance=ExtResource("4_background")]

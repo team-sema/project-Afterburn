@@ -1,4 +1,5 @@
 extends CanvasLayer
+const Playfield := preload("res://menus/playfield_layout.gd")
 ## Screen-space Lab starfield: camera pullback must never expose its edges.
 const TEXTURES = [preload("res://assets/backgrounds/space.png"), preload("res://assets/backgrounds/far_stars.png"), preload("res://assets/backgrounds/close_stars.png")]
 const SPEEDS = [2.0,5.0,20.0]
@@ -13,7 +14,7 @@ func _ready() -> void:
 			tile.texture = texture
 			tile.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 			tile.stretch_mode = TextureRect.STRETCH_TILE
-			tile.size = Vector2(240,360)
+			tile.size = Vector2(Playfield.SIZE)
 			tile.position.y = -360 * copy
 			tile.mouse_filter = Control.MOUSE_FILTER_IGNORE
 			add_child(tile)

@@ -31,7 +31,7 @@ func run() -> void:
 	await create_timer(1.2).timeout
 	check(boss.phase == 0 and not boss.transitioning, "Intro arrives at aft defense")
 	# Real ship + real projectile/Hurtbox integration, not only direct HP mutation.
-	lab.ship.position = Vector2(62,280)
+	lab.ship.position = Vector2(boss.parts[0].global_position.x, 280)
 	await create_timer(2.0).timeout
 	check(boss.health < 800, "Player's actual blaster damages the exposed turret")
 	lab.ship.position = Vector2(10,320)
@@ -158,7 +158,7 @@ func run() -> void:
 	await process_frame
 	await process_frame
 	check(not paused and lab.boss.health == 800 and lab.hits == 0, "Restart while paused resets world and counters")
-	check(lab.camera.zoom == Vector2.ONE and lab.camera.position == Vector2(120,180), "Restart restores normal camera framing")
+	check(lab.camera.zoom == Vector2.ONE and lab.camera.position == Vector2(150,180), "Restart restores normal camera framing")
 	check(lab.ship.process_mode != Node.PROCESS_MODE_DISABLED, "Restart restores player control")
 	# Also dispose the world while its camera tween and chain explosions are live.
 	for section in 3:
