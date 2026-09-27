@@ -24,7 +24,7 @@ func run() -> void:
 	var phase: StringName = lab.cycle.get("_phase")
 	check(phase != &"entry" and lab.phase_label.text.ends_with(lab.PHASE_TITLES[phase]), "Phase label follows the running turret cycle")
 	# The ship's real blaster chips the wall body.
-	lab.ship.position = Vector2(60,200)
+	lab.ship.position = Vector2(75,200)
 	await create_timer(1.5).timeout
 	check(boss.stats_component.health < 900, "Player's actual blaster damages the wall")
 	check(lab.bar.value == boss.stats_component.health, "HP bar follows boss HP")

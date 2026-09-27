@@ -1,4 +1,5 @@
 extends Control
+const Playfield := preload("res://menus/playfield_layout.gd")
 ## Standalone Boss Wall fight: the in-game enemies/boss_wall.tscn against the real ship.
 const WALL_SCENE := preload("res://enemies/boss_wall.tscn")
 const ENTRY := preload("res://resources/enemy_movement/sequences/boss_wall_entry_hold.tres")
@@ -25,18 +26,18 @@ func _ready() -> void:
 	backdrop.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(backdrop)
 	var container := SubViewportContainer.new()
-	container.position = Vector2(200,0)
-	container.size = Vector2(240,360)
+	container.position = Vector2(Playfield.SIDE_PANEL_WIDTH, 0)
+	container.size = Vector2(Playfield.SIZE)
 	container.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(container)
 	viewport = SubViewport.new()
-	viewport.size = Vector2i(240,360)
+	viewport.size = Playfield.SIZE
 	viewport.use_hdr_2d = true
 	viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 	container.add_child(viewport)
 	var left := VBoxContainer.new()
 	left.position = Vector2(12,16)
-	left.size = Vector2(176,310)
+	left.size = Vector2(Playfield.SIDE_PANEL_WIDTH - 24, 310)
 	left.add_theme_constant_override("separation",8)
 	add_child(left)
 	add_label(left,"AFTERBURN\nBOSS LAB",18)
@@ -62,8 +63,8 @@ func _ready() -> void:
 		buttons[i].focus_neighbor_bottom = buttons[i].get_path_to(buttons[(i+1)%3])
 	restart_button.grab_focus()
 	var right := VBoxContainer.new()
-	right.position = Vector2(454,24)
-	right.size = Vector2(174,310)
+	right.position = Vector2(Playfield.SIDE_PANEL_WIDTH + Playfield.SIZE.x + 14, 24)
+	right.size = Vector2(Playfield.SIDE_PANEL_WIDTH - 26, 310)
 	add_child(right)
 	add_label(right,"WALL / 00",18)
 	add_label(right,"회피 → 포탑·코어 등장 → 코어 공격\n\n벽 본체는 피해 8%만 받습니다.\n열린 슬롯의 마젠타 코어를 노리세요.\n포탑을 모두 부수면 코어가 더 오래 노출됩니다.",12)
@@ -71,12 +72,12 @@ func _ready() -> void:
 	phase_label = add_label(right,"",14)
 	metrics = add_label(right,"",14)
 	var hud := VBoxContainer.new()
-	hud.position = Vector2(208,6)
-	hud.size.x = 224
+	hud.position = Vector2(Playfield.SIDE_PANEL_WIDTH + 8, 6)
+	hud.size.x = Playfield.SIZE.x - 16
 	hud.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(hud)
 	bar = ProgressBar.new()
-	bar.custom_minimum_size = Vector2(224,8)
+	bar.custom_minimum_size = Vector2(Playfield.SIZE.x - 16, 8)
 	bar.show_percentage = false
 	var fill := StyleBoxFlat.new()
 	fill.bg_color = Color("ff426d")
@@ -125,7 +126,7 @@ func restart() -> void:
 	world.add_child(player_registry)
 	ship = preload("res://player_ship/ship.tscn").instantiate()
 	ship.augment_registry = player_registry
-	ship.position = Vector2(120,300)
+	ship.position = Vector2(Playfield.CENTER.x, 300)
 	world.add_child(ship)
 	ship.get_node("StatsComponent").health = 1000000
 	ship.get_node("PlayerHitPoint/HurtboxComponent").hurt.connect(func(_hit): hits += 1)
@@ -134,7 +135,7 @@ func restart() -> void:
 	boss = WALL_SCENE.instantiate() as Enemy
 	boss.augment_registry = enemy_registry
 	boss.is_boss = true
-	boss.position = Vector2(120,-32)
+	boss.position = Vector2(Playfield.CENTER.x, -32)
 	world.add_child(boss)
 	boss.set_movement_sequence(ENTRY)
 	cycle = boss.get_node("BossWallTurretCycle") as BossWallTurretCycleComponent

@@ -1,4 +1,5 @@
 extends Control
+const Playfield := preload("res://menus/playfield_layout.gd")
 const Boss = preload("res://labs/bosses/carrier/carrier_boss.gd")
 var viewport: SubViewport
 var world: Node2D
@@ -23,18 +24,18 @@ func _ready() -> void:
 	backdrop.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(backdrop)
 	var container := SubViewportContainer.new()
-	container.position = Vector2(200,0)
-	container.size = Vector2(240,360)
+	container.position = Vector2(Playfield.SIDE_PANEL_WIDTH, 0)
+	container.size = Vector2(Playfield.SIZE)
 	container.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(container)
 	viewport = SubViewport.new()
-	viewport.size = Vector2i(240,360)
+	viewport.size = Playfield.SIZE
 	viewport.use_hdr_2d = true
 	viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 	container.add_child(viewport)
 	var left := VBoxContainer.new()
 	left.position = Vector2(12,16)
-	left.size = Vector2(176,310)
+	left.size = Vector2(Playfield.SIDE_PANEL_WIDTH - 24, 310)
 	left.add_theme_constant_override("separation",8)
 	add_child(left)
 	add_label(left,"AFTERBURN\nBOSS LAB",18)
@@ -60,20 +61,20 @@ func _ready() -> void:
 		buttons[i].focus_neighbor_bottom = buttons[i].get_path_to(buttons[(i+1)%3])
 	restart_button.grab_focus()
 	var right := VBoxContainer.new()
-	right.position = Vector2(454,24)
-	right.size = Vector2(174,310)
+	right.position = Vector2(Playfield.SIDE_PANEL_WIDTH + Playfield.SIZE.x + 14, 24)
+	right.size = Vector2(Playfield.SIDE_PANEL_WIDTH - 26, 310)
 	add_child(right)
 	add_label(right,"CARRIER / 01",18)
 	add_label(right,"함미 → 격납고 → 함교\n\n밝은 부위를 공격하세요.\n갑판 위로 비행할 수 있습니다.\n\n부위 파괴 시 공격 중단\n격납고 파괴 시 출격 중단\n\n상단 바 = 필수 부위 HP 합계\n함재기는 전체 HP에서 제외",12)
 	metrics = add_label(right,"",14)
 	var hud := VBoxContainer.new()
-	hud.position = Vector2(208,3)
-	hud.size.x = 224
+	hud.position = Vector2(Playfield.SIDE_PANEL_WIDTH + 8, 3)
+	hud.size.x = Playfield.SIZE.x - 16
 	hud.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(hud)
 	phase_label = add_label(hud,"",10)
 	bar = ProgressBar.new()
-	bar.custom_minimum_size = Vector2(224,8)
+	bar.custom_minimum_size = Vector2(Playfield.SIZE.x - 16, 8)
 	bar.show_percentage = false
 	bar.max_value = 800
 	var fill := StyleBoxFlat.new()
@@ -88,7 +89,7 @@ func _ready() -> void:
 	for ratio in [0.3, 0.7]:
 		var divider := ColorRect.new()
 		divider.color = Color("090e18")
-		divider.position = Vector2(224 * ratio,0)
+		divider.position = Vector2((Playfield.SIZE.x - 16) * ratio, 0)
 		divider.size = Vector2(1,8)
 		divider.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		bar.add_child(divider)
@@ -117,7 +118,7 @@ func restart() -> void:
 	shake_strength = 0
 	shake_age = 0
 	camera = Camera2D.new()
-	camera.position = Vector2(120,180)
+	camera.position = Playfield.CENTER
 	world.add_child(camera)
 	camera.make_current()
 	camera.force_update_scroll()
@@ -138,7 +139,7 @@ func restart() -> void:
 	world.add_child(registry)
 	ship = preload("res://player_ship/ship.tscn").instantiate()
 	ship.augment_registry = registry
-	ship.position = Vector2(120,300)
+	ship.position = Vector2(Playfield.CENTER.x, 300)
 	world.add_child(ship)
 	ship.get_node("StatsComponent").health = 1000000
 	ship.get_node("PlayerHitPoint/HurtboxComponent").hurt.connect(func(_hit): hits += 1)
@@ -176,7 +177,7 @@ func _process(delta: float) -> void:
 	if restarting or not is_instance_valid(ship): return
 	if not get_tree().paused:
 		if not boss.defeated: elapsed += delta
-		if not boss.defeated: ship.position = ship.position.clamp(Vector2(10,55),Vector2(230,346))
+		if not boss.defeated: ship.position = ship.position.clamp(Vector2(10, 55), Vector2(Playfield.SIZE.x - 10, 346))
 		shake_age += delta
 		shake_strength = move_toward(shake_strength,0,delta*4)
 		camera.offset = Vector2(sin(shake_age*71),cos(shake_age*57)) * shake_strength / camera.zoom.x

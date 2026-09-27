@@ -33,16 +33,16 @@ shader_parameter/padding = 24.0
 shader_parameter/radial_halo = false
 
 [sub_resource type="RectangleShape2D" id="BossHurtTop"]
-size = Vector2(236, 22)
+size = Vector2(296, 22)
 
 [sub_resource type="RectangleShape2D" id="BossHurtWing"]
 size = Vector2(28, 40)
 
 [sub_resource type="RectangleShape2D" id="BossHurtMid"]
-size = Vector2(48, 40)
+size = Vector2(60, 40)
 
 [sub_resource type="RectangleShape2D" id="BossHitShape"]
-size = Vector2(236, 58)
+size = Vector2(296, 58)
 
 [sub_resource type="RectangleShape2D" id="TurretHurtShape"]
 size = Vector2(14, 16)
@@ -86,7 +86,7 @@ health = 900
 sequence = ExtResource("6_movement")
 
 [node name="VisibleOnScreenNotifier2D" parent="." index="4" unique_id=1344806211]
-rect = Rect2(-120, -34, 240, 68)
+rect = Rect2(-150, -34, 300, 68)
 
 [node name="ScaleComponent" parent="." index="5" unique_id=391399757]
 scale_amount = Vector2(1.02, 1.02)
@@ -105,19 +105,19 @@ position = Vector2(0, -21)
 shape = SubResource("BossHurtTop")
 
 [node name="HurtLeft" type="CollisionShape2D" parent="HurtboxComponent" index="1" unique_id=733445503]
-position = Vector2(-106, 6)
+position = Vector2(-136, 6)
 shape = SubResource("BossHurtWing")
 
 [node name="HurtMidLeft" type="CollisionShape2D" parent="HurtboxComponent" index="2" unique_id=294757830]
-position = Vector2(-40, 6)
+position = Vector2(-50, 6)
 shape = SubResource("BossHurtMid")
 
 [node name="HurtMidRight" type="CollisionShape2D" parent="HurtboxComponent" index="3" unique_id=1531051766]
-position = Vector2(40, 6)
+position = Vector2(50, 6)
 shape = SubResource("BossHurtMid")
 
 [node name="HurtRight" type="CollisionShape2D" parent="HurtboxComponent" index="4" unique_id=1368924919]
-position = Vector2(106, 6)
+position = Vector2(136, 6)
 shape = SubResource("BossHurtWing")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="HitboxComponent" parent_id_path=PackedInt32Array(486674932) index="0" unique_id=527856311]
@@ -133,7 +133,7 @@ adjust_amount = 100
 
 [node name="SlotLeft" type="Node2D" parent="Turrets" index="0" unique_id=1275830839]
 visible = false
-position = Vector2(-80, 18)
+position = Vector2(-100, 18)
 
 [node name="Bay" type="Sprite2D" parent="Turrets/SlotLeft" index="0" unique_id=1767472756]
 self_modulate = Color(0.15, 0.95, 1, 1)
@@ -289,7 +289,7 @@ hurtbox_component = NodePath("../HurtboxComponent")
 
 [node name="SlotRight" type="Node2D" parent="Turrets" index="2" unique_id=1207323192]
 visible = false
-position = Vector2(80, 18)
+position = Vector2(100, 18)
 
 [node name="Bay" type="Sprite2D" parent="Turrets/SlotRight" index="0" unique_id=469987026]
 self_modulate = Color(0.15, 0.95, 1, 1)
