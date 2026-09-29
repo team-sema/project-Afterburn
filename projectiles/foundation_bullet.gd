@@ -134,6 +134,22 @@ func _on_hit(_hurtbox: HurtboxComponent) -> void:
 	queue_free()
 
 
+## External trajectory effect (see EnemyBullets.apply_effect). Applies from the
+## bullet's current age; false before launch or after it ends.
+func apply_trajectory_effect(handle: StringName, speed_mult: float, heading_offset: float, duration: float) -> bool:
+	if not _active or behavior_state == null:
+		return false
+	return behavior_state.apply_effect(handle, speed_mult, heading_offset, duration)
+
+
+func remove_trajectory_effect(handle: StringName) -> bool:
+	return _active and behavior_state != null and behavior_state.remove_effect(handle)
+
+
+func get_trajectory_effect(handle: StringName) -> Dictionary:
+	return behavior_state.get_effect(handle) if behavior_state != null else {}
+
+
 func get_travel_velocity() -> Vector2:
 	return behavior_state.velocity_at(age) if _active else Vector2.ZERO
 

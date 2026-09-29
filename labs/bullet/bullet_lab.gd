@@ -200,7 +200,7 @@ func _build_panel() -> void:
 	details_label.add_theme_font_size_override("font_size", 12)
 	panel.add_child(details_label)
 	var help := Label.new()
-	help.text = "WASD 이동 · Q 원형/E 빔 소거\n방향키 + Enter  메뉴\n피격 코어 2px / 무적 0.6초"
+	help.text = "WASD 이동 · Q 원형/E 빔 소거\nR 감속장 · F 흡인점 · 방향키 메뉴\n피격 코어 2px / 무적 0.6초"
 	help.add_theme_font_size_override("font_size", 11)
 	panel.add_child(help)
 	for index in _controls.size():
@@ -432,7 +432,9 @@ func _update_status() -> void:
 		status_label.text += "정지 안전 %.0f%%" % (safety_meter.passive_safe_ratio * 100)
 	else:
 		status_label.text += "안전 비율 OFF"
-	status_label.text += "   " + api_probe.summary()
+	var api_summary: String = api_probe.summary()
+	if not api_summary.is_empty():
+		status_label.text += "   " + api_summary
 
 
 func _toggle_hitboxes(enabled: bool) -> void:
