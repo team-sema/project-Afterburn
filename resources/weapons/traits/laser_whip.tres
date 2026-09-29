@@ -1,0 +1,32 @@
+[gd_resource type="Resource" script_class="WeaponTraitDefinition" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://resources/weapons/weapon_trait_definition.gd" id="1_def"]
+[ext_resource type="Texture2D" uid="uid://bvhbc0sja5xx" path="res://assets/weapons/weapon_main_laser.svg" id="2_icon"]
+
+[resource]
+script = ExtResource("1_def")
+trait_id = &"laser_whip"
+display_name = "채찍 광선"
+description = "움직이면 빔이 줄처럼 흔들리며 쓸어낸다(흔들림 한도 빔 길이의 {max_sway_ratio%}%, 휘어짐 {bend%}%). 피해 ×{damage_mult}."
+icon = ExtResource("2_icon")
+target_weapon_id = &"main_laser"
+params = {
+"damage_mult": 0.9,
+"tip_stiffness": 90.0,
+"tip_damping": 12.0,
+"mid_stiffness_mult": 2.2,
+"mid_damping_mult": 1.4,
+"sway_gain": 3.0,
+"bend": 0.25,
+"max_sway_ratio": 0.18,
+"segments": 12,
+}
+rank_overrides = Array[Dictionary]([{
+"damage_mult": 0.95,
+"bend": 0.3,
+"max_sway_ratio": 0.21,
+}, {
+"damage_mult": 1.0,
+"bend": 0.35,
+"max_sway_ratio": 0.24,
+}])
