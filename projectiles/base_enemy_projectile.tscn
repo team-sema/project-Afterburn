@@ -93,7 +93,7 @@ sprite = NodePath("../Sprite2D/Core")
 flash_duration = 0.1
 
 [node name="HitboxComponent" type="Area2D" parent="."]
-collision_layer = 0
+collision_layer = 8
 collision_mask = 1
 script = ExtResource("12_hitbox")
 

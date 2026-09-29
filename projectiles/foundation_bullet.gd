@@ -41,7 +41,7 @@ func _ready() -> void:
 	_render_key = appearance.render_key()
 	_hitbox = HitboxComponent.new()
 	_hitbox.name = "HitboxComponent"
-	_hitbox.collision_layer = 0
+	_hitbox.collision_layer = EnemyBullets.LAYER
 	_hitbox.collision_mask = 1
 	var collision := CollisionShape2D.new()
 	collision.name = "CollisionShape2D"

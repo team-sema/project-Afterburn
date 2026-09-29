@@ -85,7 +85,6 @@ Sequence의 시간은 발사 일정, Behavior의 시간은 **각 탄이 발사�
 - `kind = Kind.BULLET`: 일반 탄. `appearance`와 `behavior`를 지정한다.
 - `Kind.TRAIL_LASER`: 머리의 과거 궤적을 몸통으로 남기는 레이저. 직선·선회·S자 이동 모두 같은 몸체다. `appearance`는 적용하지 않는다.
 - `Kind.LEGACY`: 기존 `base_enemy_projectile.tscn` 비교용 어댑터. Behavior를 지정할 수 없다.
-- `Kind.CURVED_LASER`: `TRAIL_LASER`와 같은 값인 호환 별칭. 새 코드에는 `TRAIL_LASER`를 사용한다.
 - `behavior: BulletBehavior`: 발사 후 행동. 빈 `BulletBehavior.new()`는 직진이다.
 - `lifetime = 5.0`: 수명. 유한한 양수. Behavior가 끝나도 탄은 마지막 상태로 수명까지 움직인다. 기존 화면 이탈 제거도 적용된다.
 
@@ -438,7 +437,7 @@ Drone은 `drone_pattern.gd`, Striker·Interceptor는 `aimed_burst_pattern.gd`를
 
 - 행동 속도 배율: 기존 `apply_action_rate_multiplier` 계약 유지. 패턴 모드는 Player.time_scale을 변경하며 원본 wait나 탄 이동 속도를 수정하지 않는다.
 - 수명: 적 아래의 Player는 적과 함께 제거되게 하고 탄은 독립된 월드 부모에 둔다. 전투 종료·화면 전환·일시정지·적 죽음 때 미래 발사가 멈추는지 확인한다.
-- 충돌·보상: `enemy_projectiles` 그룹, Hitbox/Hurtbox, 소거당 보상, 레이저 한 몸체당 보상, 무적 시간 중 접촉 규칙을 유지한다.
+- 충돌·보상: `enemy_projectiles` 그룹, 적탄 판정 레이어 4, Hitbox/Hurtbox, 소거당 보상, 레이저 한 몸체당 보상, 무적 시간 중 접촉 규칙을 유지한다. 적탄 조회·소거는 [11절](#11-적탄-조회소거--enemybullets)의 `EnemyBullets`를 쓴다.
 - 특수 공격: Sniper의 전조/전용 configure, 화염탄, 반격탄은 각각의 계약을 검토한 뒤 별도로 옮긴다. 일반 탄 API로 일괄 대체하지 않는다.
 
 이관한 일반 적의 Timer는 최초 활성화 지연에만 사용한다. Elite Awl은 `barrage_shot` 어댑터로 채택한 새 불꽃 몸체·꼬리를 연결하고 발사 타이밍·난수·이동은 기존 공격 제어자에 남겼다. 비교용 Legacy 구현은 제거했다.
@@ -454,3 +453,28 @@ Sniper는 `SniperBarrageShot`이 BarrageShot의 `is_valid()`와 `spawn()`을 재
 ### 최적화 적용 범위
 
 안전 비율 격자 계산 개선은 레거시 탄에도 적용된다. MultiMesh·레이저 메쉬·판정 표시 배칭과 Behavior 계산 최적화는 새 FoundationBullet/CurvedLaser 경로에 적용된다. `Kind.LEGACY`는 기존 Sprite·파티클·컴포넌트를 사용하므로 API로 발사해도 새 배치 렌더러로 전환되지 않는다. 반대로 기존 Timer에서 새 BarrageShot을 발사하면 새 렌더링 최적화가 적용된다.
+
+## 11. 적탄 조회·소거 — EnemyBullets
+
+소스: [enemy_bullets.gd](../projectiles/enemy_bullets.gd) · [enemy_bullet_hub.gd](../projectiles/enemy_bullet_hub.gd)
+
+플레이어 효과와 증강은 날아가는 적탄을 이 정적 API로 찾고 지운다. 그룹을 직접 순회하거나 `queue_free`하지 않는다.
+
+- 모든 적탄 몸체는 `enemy_projectiles` 그룹에 속한다. `FoundationBullet`·`CurvedLaser`·레거시 기본탄의 판정은 물리 레이어 4(`enemy_projectile`, `EnemyBullets.LAYER`)에 올라간다. 이 레이어를 감지하는 영역은 기본적으로 없으므로 명시적인 쿼리만 적탄을 본다.
+- `SniperBullet`은 판정을 감지 불가로 두므로 `query_shape`에 잡히지 않는다. 그룹 기반 조회·소거는 동일하게 적용된다.
+
+```gdscript
+EnemyBullets.get_all(world) -> Array[Node2D]
+EnemyBullets.query_circle(world, center, radius) -> Array[Node2D]
+EnemyBullets.query_shape(world, shape, global_transform) -> Array[Node2D]
+EnemyBullets.cancel(world, bullet, reason) -> bool
+EnemyBullets.cancel_all(world, bullets, reason) -> int
+EnemyBullets.get_hub(world) -> EnemyBulletHub
+```
+
+- `world`는 적탄이 사는 게임플레이 월드다. 그 아래의 살아 있는(삭제 예약되지 않은) 적탄만 대상이다.
+- `query_circle`은 탄 중심(레이저는 머리)까지의 거리로 판단한다. `query_shape`는 물리 판정으로 판단하므로 레이저는 몸통 어느 마디가 겹쳐도 잡힌다. 방금 생성된 탄은 첫 물리 프레임 이후에 잡힌다.
+- `cancel`은 탄을 삭제 예약하고, 월드에 허브가 있으면 `bullet_cancelled(position, reason, bullet)`을 먼저 발행한다. 발행 중에는 탄이 아직 유효하다. 이미 지워졌거나 월드 밖인 탄은 false를 반환한다. 레이저는 몸체 하나가 한 번의 소거다.
+- 허브는 `get_hub(world)`로 처음 구독할 때 월드 아래에 생기고 월드와 함께 사라진다. 소거 보상·충전 같은 증강은 이 신호를 구독한다.
+- 게임이 쓰는 소거 이유: `augment_resume`(오퍼 재개 버스트) · `elite_reward`(엘리트 탄소거) · `boss`(보스 페이즈 정리) · `lab`(랩 정리).
+- 직접 시험: Bullet Lab(`labs/bullet/bullet_lab.tscn`)에서 아무 패턴이나 재생한 채 **Q**를 누르면 기체 반경 40px 원형 소거(`query_circle`), **E**를 누르는 동안 기체에서 필드 위끝까지 폭 8px 빔 소거(`query_shape`)가 실행된다. 레이저는 몸통이 빔에 닿아도 지워진다. 허브 신호로 받은 소거 지점에 0.5초간 ✕ 표시가 뜨고, 하단 상태줄에 이유별 누계(`lab_circle`·`lab_beam`·`lab`)가 나온다. 도구는 [enemy_bullet_api_probe.gd](../labs/bullet/enemy_bullet_api_probe.gd), 검증은 `tests/bullet_lab_api_probe_test.gd` · `tests/enemy_bullets_api_test.gd`.

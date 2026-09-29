@@ -28,7 +28,7 @@ func is_valid() -> bool:
 		and aim in [Aim.NONE, Aim.EACH_SHOT, Aim.LOCKED]
 		and count >= 1 and count <= 2048 and is_finite(spread_degrees) and spread_degrees >= 0 and spread_degrees <= 360
 		and is_finite(angle_degrees) and is_finite(speed) and speed >= 0 and origin_offset.is_finite()
-		and (shot.kind != BarrageShot.Kind.CURVED_LASER or speed > 0))
+		and (shot.kind != BarrageShot.Kind.TRAIL_LASER or speed > 0))
 
 func directions(rotation_degrees := 0.0, aim_direction := Vector2.DOWN) -> PackedVector2Array:
 	var result := PackedVector2Array()

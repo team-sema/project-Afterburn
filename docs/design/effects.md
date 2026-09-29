@@ -57,7 +57,7 @@ Nova Drift 풍: **밝은 기하 코어 + 다중 글로우 레이어 + 어두운 
 
 ## 오퍼 재개 버스트
 
-`effects/augment_resume_burst.tscn` — 플레이어 오그먼트 선택 직후 함선 주변 연출. 실제 탄 제거는 `AugmentOfferController`가 `enemy_projectiles` 그룹을 반경 내 `queue_free`.
+`effects/augment_resume_burst.tscn` — 플레이어 오그먼트 선택 직후 함선 주변 연출. 실제 탄 제거는 `AugmentOfferController`가 `EnemyBullets.query_circle`로 반경 내 적탄을 찾아 이유 `augment_resume`으로 `cancel_all`한다.
 
 - 반경은 `player_resume_clear_radius` **36px**이고, 연출의 글로우·링도 같은 반경과 플레이어 강조색으로 퍼진다.
 - 제거 대상은 게임플레이 월드 안에서 탄 중심이 반경 안에 있는 적탄이다. 플레이어 탄은 남긴다.

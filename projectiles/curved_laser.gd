@@ -44,7 +44,7 @@ func _ready() -> void:
 		_profile.append(maxf(0.08, pow(sin(PI * float(index) / SEGMENTS), 0.55)) * 0.5)
 	_hitbox = LASER_HITBOX.new()
 	_hitbox.name = "HitboxComponent"
-	_hitbox.collision_layer = 0
+	_hitbox.collision_layer = EnemyBullets.LAYER
 	_hitbox.collision_mask = 1
 	for index in SEGMENTS:
 		var collision := CollisionShape2D.new()

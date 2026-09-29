@@ -535,22 +535,8 @@ func _trigger_player_resume_burst() -> int:
 	burst.call("setup", player_resume_clear_radius, selection_ui.player_accent_color)
 	gameplay_world.add_child(burst)
 	burst.global_position = ship.global_position
-	return _clear_enemy_projectiles_near(ship.global_position, gameplay_world)
-
-
-## Removes enemy projectiles whose centre is within player_resume_clear_radius.
-func _clear_enemy_projectiles_near(center: Vector2, gameplay_world: Node2D) -> int:
-	var radius_squared := player_resume_clear_radius * player_resume_clear_radius
-	var cleared := 0
-	for node in get_tree().get_nodes_in_group("enemy_projectiles"):
-		var projectile := node as Node2D
-		if (
-			projectile == null
-			or projectile.is_queued_for_deletion()
-			or not gameplay_world.is_ancestor_of(projectile)
-			or center.distance_squared_to(projectile.global_position) > radius_squared
-		):
-			continue
-		projectile.queue_free()
-		cleared += 1
-	return cleared
+	return EnemyBullets.cancel_all(
+		gameplay_world,
+		EnemyBullets.query_circle(gameplay_world, ship.global_position, player_resume_clear_radius),
+		EnemyBullets.REASON_AUGMENT_RESUME,
+	)
