@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+ <!-- Rotating housing of the bridge main cannon: armored ring around a lens hub. -->
+ <g fill="#fff">
+  <path d="M20 2 44 2 62 20 62 44 44 62 20 62 2 44 2 20Z M24 12 40 12 52 24 52 40 40 52 24 52 12 40 12 24Z" fill-rule="evenodd"/>
+  <path d="M28 22 36 22 42 28 42 36 36 42 28 42 22 36 22 28Z"/>
+ </g>
+</svg>

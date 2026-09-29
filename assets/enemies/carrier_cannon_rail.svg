@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="200" viewBox="0 0 24 100">
+ <!-- Left rail of the bridge main cannon; the right rail is this art mirrored.
+      The flat inner edge (x=24) meets its twin when closed and frames the charge channel when split. -->
+ <g fill="#fff">
+  <path d="M24 2 24 94 20 100 14 94 14 64 10 60 10 50 14 46 14 22 7 16 7 6 12 0 20 0Z M18 24 21 24 21 86 18 86Z" fill-rule="evenodd"/>
+  <path d="M3 24 10 27 10 36 3 38Z M3 44 7 46 7 56 3 58Z M5 68 11 70 11 84 5 80Z"/>
+ </g>
+</svg>
