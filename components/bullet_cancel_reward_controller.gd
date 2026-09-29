@@ -55,23 +55,14 @@ func _await_process_frame() -> void:
 
 func _convert_enemy_projectiles() -> int:
 	var converted_count := 0
-	var tree := get_tree()
-	if tree == null or not is_instance_valid(gameplay_world):
+	if not is_inside_tree() or not is_instance_valid(gameplay_world):
 		return 0
-	for node in tree.get_nodes_in_group("enemy_projectiles"):
-		var projectile := node as Node2D
-		if (
-			projectile == null
-			or not is_instance_valid(projectile)
-			or projectile.is_queued_for_deletion()
-			or not gameplay_world.is_ancestor_of(projectile)
-		):
-			continue
+	for projectile in EnemyBullets.get_all(gameplay_world):
 		var orb := experience_orb_scene.instantiate() as ExperienceOrb
 		assert(orb != null, "Bullet cancel reward requires an ExperienceOrb scene.")
 		gameplay_world.add_child(orb)
 		orb.setup(EXPERIENCE_PER_PROJECTILE, projectile.global_position)
-		projectile.queue_free()
+		EnemyBullets.cancel(gameplay_world, projectile, EnemyBullets.REASON_ELITE_REWARD)
 		converted_count += 1
 	return converted_count
 

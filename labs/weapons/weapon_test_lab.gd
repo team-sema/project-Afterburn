@@ -521,9 +521,7 @@ func _clear_targets() -> void:
 	for enemy in get_tree().get_nodes_in_group("enemies"):
 		if gameplay.is_ancestor_of(enemy):
 			enemy.queue_free()
-	for projectile in get_tree().get_nodes_in_group("enemy_projectiles"):
-		if gameplay.is_ancestor_of(projectile):
-			projectile.queue_free()
+	EnemyBullets.cancel_all(gameplay, EnemyBullets.get_all(gameplay), EnemyBullets.REASON_LAB)
 	for child in gameplay.get_children():
 		if child is ExperienceOrb:
 			child.queue_free()

@@ -159,8 +159,7 @@ func clear_danger() -> void:
 			craft.queue_free()
 	fighters.clear()
 	raiders.clear()
-	for projectile in get_tree().get_nodes_in_group("enemy_projectiles"):
-		if world.is_ancestor_of(projectile): projectile.queue_free()
+	EnemyBullets.cancel_all(world, EnemyBullets.get_all(world), EnemyBullets.REASON_BOSS)
 
 func _physics_process(delta: float) -> void:
 	deck_age += delta

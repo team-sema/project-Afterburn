@@ -2,7 +2,7 @@ class_name BarrageShot
 extends Resource
 ## Serializable projectile recipe. No live projectile state belongs here.
 
-enum Kind { BULLET, TRAIL_LASER, LEGACY, CURVED_LASER = 1 } # Legacy name aliases the same body.
+enum Kind { BULLET, TRAIL_LASER, LEGACY }
 @export var kind: Kind = Kind.BULLET
 @export var appearance: BulletAppearance
 @export var behavior: BulletBehavior
@@ -23,7 +23,7 @@ func is_valid() -> bool:
 			return appearance != null and appearance.is_valid() and behavior != null and is_finite(lifetime) and lifetime > 0
 		Kind.LEGACY:
 			return behavior == null # Comparison adapter has no Behavior runtime.
-		Kind.CURVED_LASER:
+		Kind.TRAIL_LASER:
 			return (is_finite(turn_degrees) and is_finite(turn_duration) and turn_duration >= 0
 				and is_finite(trail_duration) and trail_duration > 0
 				and is_finite(core_width) and core_width > 0
@@ -34,7 +34,7 @@ func is_valid() -> bool:
 func spawn(parent: Node2D, origin: Vector2, direction: Vector2, speed: float, debug := false, target: Node2D = null, target_resolver := Callable()) -> Node2D:
 	if not is_valid() or not is_instance_valid(parent) or not parent.is_inside_tree() or parent.is_queued_for_deletion():
 		return null
-	if not origin.is_finite() or not direction.is_finite() or direction.is_zero_approx() or not is_finite(speed) or speed < 0 or (kind == Kind.CURVED_LASER and speed == 0):
+	if not origin.is_finite() or not direction.is_finite() or direction.is_zero_approx() or not is_finite(speed) or speed < 0 or (kind == Kind.TRAIL_LASER and speed == 0):
 		return null
 	var projectile: Node2D
 	match kind:
@@ -46,7 +46,7 @@ func spawn(parent: Node2D, origin: Vector2, direction: Vector2, speed: float, de
 			bullet.lifetime = lifetime
 			bullet.show_hitbox = debug
 			projectile = bullet
-		Kind.CURVED_LASER:
+		Kind.TRAIL_LASER:
 			var laser := preload("res://projectiles/curved_laser.tscn").instantiate() as CurvedLaser
 			laser.turn_degrees = turn_degrees
 			laser.behavior = behavior

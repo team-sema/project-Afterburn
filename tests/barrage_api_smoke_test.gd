@@ -177,7 +177,7 @@ func run() -> void:
 	expect(compat.aim == BarrageVolley.Aim.LOCKED, "aimed=true never downgrades LOCKED")
 	# Laser recipe and emitter lifetime.
 	var laser_volley := recipe()
-	laser_volley.shot.kind = BarrageShot.Kind.CURVED_LASER
+	laser_volley.shot.kind = BarrageShot.Kind.TRAIL_LASER
 	laser_volley.shot.turn_degrees = -70
 	laser_volley.layout = BarrageVolley.Layout.RING
 	laser_volley.count = 12

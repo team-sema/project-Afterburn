@@ -7,6 +7,7 @@ extends Control
 @export var start_with_homing := false
 @export_file("*.gd") var test_pattern_path := ""
 const PATTERN_LOADER = preload("res://labs/bullet/pattern_loader.gd")
+const API_PROBE = preload("res://labs/bullet/enemy_bullet_api_probe.gd")
 var _custom_sequence: BarrageSequence
 var _custom_path := ""
 var _custom_origin := 0
@@ -33,6 +34,8 @@ var world: Node2D
 var target: Node2D
 var hurtbox: HurtboxComponent
 var safety_meter: SafeSpaceMeter
+## Q/E EnemyBullets tools (see enemy_bullet_api_probe.gd).
+var api_probe: Node2D
 var shape_choice: OptionButton
 var motion_choice: OptionButton
 var pattern_choice: OptionButton
@@ -151,6 +154,10 @@ func _build_field() -> void:
 	emitter = Node2D.new()
 	emitter.name = "Emitter"
 	world.add_child(emitter)
+	api_probe = API_PROBE.new()
+	api_probe.name = "EnemyBulletApiProbe"
+	world.add_child(api_probe)
+	api_probe.setup(world, target)
 	pattern_player = BarragePlayer.new()
 	world.add_child(pattern_player)
 	status_label = Label.new()
@@ -193,7 +200,7 @@ func _build_panel() -> void:
 	details_label.add_theme_font_size_override("font_size", 12)
 	panel.add_child(details_label)
 	var help := Label.new()
-	help.text = "WASD  기체 이동\n방향키 + Enter  메뉴\n피격 코어 2px / 무적 0.6초"
+	help.text = "WASD 이동 · Q 원형/E 빔 소거\n방향키 + Enter  메뉴\n피격 코어 2px / 무적 0.6초"
 	help.add_theme_font_size_override("font_size", 11)
 	panel.add_child(help)
 	for index in _controls.size():
@@ -295,6 +302,7 @@ func restart() -> void:
 	pattern_player.stop()
 	hits = 0
 	cleared = 0
+	api_probe.reset()
 	_invincible_left = 0.0
 	hurtbox.is_invincible = false
 	target.position = Vector2(FIELD_SIZE.x * 0.5, FIELD_SIZE.y - 30)
@@ -424,6 +432,7 @@ func _update_status() -> void:
 		status_label.text += "정지 안전 %.0f%%" % (safety_meter.passive_safe_ratio * 100)
 	else:
 		status_label.text += "안전 비율 OFF"
+	status_label.text += "   " + api_probe.summary()
 
 
 func _toggle_hitboxes(enabled: bool) -> void:
@@ -447,12 +456,7 @@ func clear_bullets() -> void:
 
 
 func _clear_world_bullets() -> int:
-	var count := 0
-	for bullet in get_tree().get_nodes_in_group("enemy_projectiles"):
-		if world.is_ancestor_of(bullet) and not bullet.is_queued_for_deletion():
-			bullet.queue_free()
-			count += 1
-	return count
+	return EnemyBullets.cancel_all(world, EnemyBullets.get_all(world), EnemyBullets.REASON_LAB)
 
 
 func _on_hurt(_hitbox: HitboxComponent) -> void:

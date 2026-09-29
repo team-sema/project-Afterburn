@@ -171,7 +171,7 @@ if not player.play(sequence, emitter, world):
 
 - `fire(volley)`는 한 묶음을 발사한다. `wait(seconds)`는 다음 단계까지 기다린다. `rotate(degrees)`는 **이후 발사 기준각**에 더하며 이미 날아가는 탄을 돌리지 않는다. `repeat(6)`은 전체 단계를 총 6번, `repeat()`/`repeat(0)`은 무한 반복한다. 마지막 wait도 수행한 뒤 완료한다.
 - `BarrageVolley.aimed = true`이면 `play(sequence, emitter, world, target)`으로 표적을 전달한다. 표적과 발사점이 일치하면 아래 방향을 사용한다. `origin_offset`은 발사자 로컬 좌표이며 발사 각도는 월드 방향 기준이다.
-- 레이저는 `shot.kind = BarrageShot.Kind.TRAIL_LASER`와 `behavior`, `trail_duration`, `core_width`, `hit_width`, `lifetime`으로 구성한다. 일반 탄도 같은 `behavior`를 사용한다. `CURVED_LASER`는 이전 저장 자료를 위한 별칭이며 별도 몸체가 아니다. 레거시 기본탄은 `Kind.LEGACY`로 비교할 수 있다.
+- 레이저는 `shot.kind = BarrageShot.Kind.TRAIL_LASER`와 `behavior`, `trail_duration`, `core_width`, `hit_width`, `lifetime`으로 구성한다. 일반 탄도 같은 `behavior`를 사용한다. 레거시 기본탄은 `Kind.LEGACY`로 비교할 수 있다.
 - `player.pause()`/`resume()`은 **발사 진행만** 멈추고 재개한다. 게임 전체를 멈추려면 트리 일시정지를 사용한다. `stop()`은 미래 발사만 취소한다. 자연 종료 시 `finished` 신호가 한 번 발생하며 stop/재생 교체에는 발생하지 않는다. `volley_fired(projectiles)`는 생성된 탄 목록을 반환하는 신호다. 잘못된 play는 이전 재생을 중단하고 false와 `last_error`를 반환한다.
 - `steps: Array[BarrageStep]`와 `repeat_count`는 인스펙터에서도 편집할 수 있다. 실행 중 원본 변경은 다음 play에 반영한다. `.tres`의 예제는 `resources/projectiles/rotating_ring_sequence.tres`다.
 - 시험: `labs/bullet/presets/barrage_api_lab.tscn`에서 F6 또는 `tools/run-godot.cmd res://labs/bullet/presets/barrage_api_lab.tscn`. 16발 링을 0.2초 간격으로 6회, 매회 기준각 +10°, 마지막 발사 후 1.2초 휴식하며 반복한다. 기존 시험 장면의 패턴 메뉴에서도 **API · 회전 링 연속 발사**를 선택할 수 있다.
@@ -200,6 +200,8 @@ if not player.play(sequence, emitter, world):
 - 대체 표적이 없으면 현재 방향으로 진행하고 다음 틱에 다시 시도한다. 표적과 탄의 위치가 같으면 방향을 유지한다. 선회는 도/초 단위 최대 선회율로 최단각을 제한하며 180도 동률은 양의 회전 방향이다. speed·시각·판정·lateral 채널과는 병렬 실행할 수 있다. lateral Action은 기존 발사 축 기준 변위를 유지한다.
 
 ##### 외부 궤도 개입 설계 · 후속 구현
+
+- 증강의 대상 선택은 [`EnemyBullets`](../barrage-api.md#11-적탄-조회소거--enemybullets)의 `query_circle`·`query_shape`로 하고, 적탄 제거는 `cancel(world, bullet, reason)`으로 한다. 소거는 월드 허브의 `bullet_cancelled` 신호로 알려진다.
 
 - 한 틱의 적용 순서는 Behavior/호밍의 기본 heading·speed 평가 → 외부 효과 합성 → 위치 적분 → 몸체·판정 갱신이다. 외부 효과는 탄별 핸들로 등록/해제하고 활성 시간 동안 방향 오프셋 합과 비음수 속도 배율 곱을 적용한다. 서로 다른 효과는 등록 순서에 영향받지 않는다. 같은 핸들 재등록은 교체한다. 순간 반사·소유권 전환·Behavior 교체는 이 설계 범위 밖이다.
 - 동적 입력은 실제 시각의 경계에 기록하고 이미 지나온 위치/레이저 꼬리를 다시 계산하지 않는다. 표적 관측이나 효과 변경 시 경계 이후 예측만 폐기한다. 호밍 예측에서는 마지막 관측 위치를 고정하며 미래의 표적 이동·재획득·새 외부 효과 발생을 가정하지 않는다. 알려진 효과 만료는 예측에 반영한다. 이 예측은 보장된 미래 경로가 아닌 현재 입력 기준 근사다.

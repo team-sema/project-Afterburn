@@ -33,14 +33,14 @@ func _test_happy_path() -> void:
 	existing_orb.setup(4, collector.global_position + Vector2(90.0, -80.0))
 
 	var straight_enemy_bullet := (load("res://projectiles/base_enemy_projectile.tscn") as PackedScene).instantiate() as Node2D
-	var curved_enemy_bullet := (load("res://projectiles/curve_projectile.tscn") as PackedScene).instantiate() as Node2D
+	var second_enemy_bullet := (load("res://projectiles/base_enemy_projectile.tscn") as PackedScene).instantiate() as Node2D
 	var deferred_enemy_bullet := (load("res://projectiles/base_enemy_projectile.tscn") as PackedScene).instantiate() as Node2D
 	var player_bullet := (load("res://projectiles/player_blaster.tscn") as PackedScene).instantiate() as Node2D
 	gameplay.add_child(straight_enemy_bullet)
-	gameplay.add_child(curved_enemy_bullet)
+	gameplay.add_child(second_enemy_bullet)
 	gameplay.add_child(player_bullet)
 	straight_enemy_bullet.global_position = collector.global_position + Vector2(-70.0, -120.0)
-	curved_enemy_bullet.global_position = collector.global_position + Vector2(80.0, -140.0)
+	second_enemy_bullet.global_position = collector.global_position + Vector2(80.0, -140.0)
 	deferred_enemy_bullet.global_position = collector.global_position + Vector2(110.0, -100.0)
 	player_bullet.global_position = collector.global_position + Vector2(0.0, -60.0)
 	for preset in ["round", "orb"]:
