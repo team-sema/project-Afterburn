@@ -50,6 +50,20 @@ func build(params: Dictionary) -> void:
 - 조준 고정 연발 예제: [locked_burst_pattern.gd](../patterns/locked_burst_pattern.gd). `aim()` 뒤 `Aim.LOCKED` 바늘탄 3발(0.12초 간격) → 2초 휴식 → 반복. `build(params)`로 `shots`, `gap`, `rest`, `speed`를 씬에서 조정할 수 있다. 본 게임 적에는 배정하지 않았다.
 - 조준 부채꼴 연발 예제: [aimed_fan_burst_pattern.gd](../patterns/aimed_fan_burst_pattern.gd). 5방향 40° 부채꼴의 중앙 탄이 매 발사 표적을 향하는 `Aim.EACH_SHOT`, 0.15초 간격 5연발 → 1.6초 휴식 → 반복. `ways`, `spread`, `shots`, `gap`, `rest`, `speed`를 `build(params)`로 조정. 본 게임 적에는 배정하지 않았다.
 - 16방향 혼합 시험: [mixed_sixteen_pattern.gd](../patterns/mixed_sixteen_pattern.gd). 이 `.gd`가 현재 시험 씬의 실행 원본이다. 예전 `.tres`는 저장 형식 호환 예제로 남겨 둔다.
+- 쇼케이스 패턴: [`patterns/showcase/`](../patterns/showcase/) 8종. Lab 패턴 목록에 `showcase/…`로 나온다. 본 게임 적에는 배정하지 않았다. 색만 바꾼 탄은 [`labs/bullet/showcase_shots.gd`](../labs/bullet/showcase_shots.gd)로 만든다(외형 복제 후 `tint` 변경, 텍스처 공유).
+
+  | 파일 | 형태 | 쓰는 기능 |
+  |------|------|-----------|
+  | `quadratic_spiral_pattern.gd` | 각도가 시간의 제곱으로 변해 팔이 벌어졌다 되감기는 나선 | 링마다 절대 각도(`fire_ring` 각도 인자) |
+  | `counter_spiral_pattern.gd` | 두 색 팔이 반대로 도는 격자 나선 | `fire_together` · Volley별 각도 |
+  | `petal_rose_pattern.gd` | 두 링이 반대로 120° 휘며 겹치는 꽃잎 | `wait` → `turn_by` · `eased` |
+  | `stop_and_aim_pattern.gd` | 바늘탄 링이 멈추고 붉게 변한 뒤 표적으로 재조준해 돌진 | `speed_to(0)` → `tint_to` → `homing` → `speed_to` |
+  | `star_burst_pattern.gd` | 모양을 유지하며 커지는 오각별 | SINGLE Volley 60개를 거리 비례 속도로 `fire_together` |
+  | `wave_curtain_pattern.gd` | 반 주기 어긋난 두 줄이 좌우로 흔들리는 커튼 | `lateral_wave(…, phase).repeat()` |
+  | `laser_whirl_pattern.gd` | 번갈아 반대로 말리는 궤적 레이저와 원탄 링 | `TRAIL_LASER` · `turn_at` |
+  | `bloom_burst_pattern.gd` | 큰 탄이 멈춰 부풀고 하얗게 경고한 뒤 비틀며 폭발 가속 | `parallel`(색·시각 배율, 속도·선회) |
+
+  검증: `tests/showcase_patterns_smoke_test.gd` (Lab 로더로 모두 불러와 3초 재생 시 발사·반복 유지).
 - 발사 금지선에서는 FIRE를 건너뛰고 다음 일정으로 진행한다. 표적 부재 시 조준 Volley만 건너뛰며 다음 FIRE에서 재조회한다. 공격 기간 종료·적 제거는 미래 발사를 중단하고 기존 탄은 유지한다.
 - ACTION_RATE는 Player.time_scale에 적용한다. 초기 지연과 활성 기간은 게임 시간이며 이미 발사한 탄의 이동은 바뀌지 않는다.
 
