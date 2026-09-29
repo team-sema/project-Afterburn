@@ -11,7 +11,11 @@ const API_PROBE = preload("res://labs/bullet/enemy_bullet_api_probe.gd")
 var _custom_sequence: BarrageSequence
 var _custom_path := ""
 var _custom_origin := 0
-var _last_pattern := 0
+## Pattern catalog: one dropdown grouped into combos (shape + motion + layout),
+## fixed demos, and scripts from patterns/. Each item's metadata indexes here.
+var _entries: Array[Dictionary] = []
+var _entry: Dictionary = {}
+var _last_item := 0
 var _script_panel: PanelContainer
 var _script_shade: ColorRect
 var _script_button: Button
@@ -29,6 +33,24 @@ const BEHAVIORS: Array[BulletBehavior] = [
 	preload("res://resources/projectiles/wave_behavior.tres"),
 ]
 const FIELD_SIZE := Vector2i(416, 288)
+const SHAPES := ["원탄 · 8px", "쌀탄 · 6×12px", "대형 구탄 · 20px", "기존 기본탄", "궤적 레이저", "바늘탄 · 텍스처"]
+const SHAPE_LEGACY := 3
+const SHAPE_LASER := 4
+const SHAPE_NEEDLE := 5
+const COMBOS := [
+	{"id": &"fan5", "label": "부채꼴 · 5발"},
+	{"id": &"ring16", "label": "원형 · 16발"},
+	{"id": &"single_down", "label": "단발 · 아래"},
+	{"id": &"single_diagonal", "label": "단발 · 대각선"},
+]
+const DEMOS := [
+	{"id": &"laser_flower", "label": "꽃잎 · 레이저 12줄", "details": "레이저 12줄 · 90px/s\n70°/s 선회 · 4초마다 15° 회전"},
+	{"id": &"rotating_ring", "label": "회전 링 연속 발사", "details": "쌀탄 16발 × 6회 / 0.2초\n매회 10° 회전 → 1.2초 대기"},
+	{"id": &"mixed_sixteen", "label": "16방향 · 원탄 + S 레이저", "details": "원탄 8 + 레이저 8 / 22.5°\nS자 ±35° · 주기 2.4초"},
+	{"id": &"behavior_morph", "label": "Behavior · 색/크기 변화", "details": "선회 + 색 + 시각 확대\n판정은 그대로 / 3초 주기"},
+	{"id": &"homing_round", "label": "호밍 · 원탄", "details": "호밍 90°/s · 추적 4초\n70px/s · WASD로 회피"},
+	{"id": &"homing_laser", "label": "호밍 · 레이저", "details": "호밍 90°/s · 추적 4초\n70px/s · WASD로 회피"},
+]
 
 var world: Node2D
 var target: Node2D
@@ -62,22 +84,21 @@ func _ready() -> void:
 	_build_field()
 	_build_panel()
 	_build_script_panel()
+	var start_id := &"fan5"
 	if start_with_laser:
-		shape_choice.select(4)
-		motion_choice.select(2)
-		pattern_choice.select(4)
+		start_id = &"laser_flower"
 	elif start_with_api_demo:
-		shape_choice.select(1)
-		pattern_choice.select(5)
+		start_id = &"rotating_ring"
 	elif start_with_behavior_demo:
-		pattern_choice.select(6)
-	elif start_with_needle:
-		shape_choice.select(5)
-		motion_choice.select(1)
+		start_id = &"mixed_sixteen"
 	elif start_with_homing:
-		pattern_choice.select(8)
-	restart()
-	shape_choice.grab_focus()
+		start_id = &"homing_round"
+	elif start_with_needle:
+		shape_choice.select(SHAPE_NEEDLE)
+		_refresh_motion_items()
+		motion_choice.select(1)
+	select_pattern(start_id)
+	pattern_choice.grab_focus()
 	for argument in OS.get_cmdline_user_args():
 		if argument.begins_with("--pattern="): test_pattern_path = argument.trim_prefix("--pattern=")
 	if not test_pattern_path.is_empty(): apply_script(test_pattern_path, 0)
@@ -174,14 +195,16 @@ func _build_panel() -> void:
 	panel.add_theme_constant_override("separation", 1)
 	panel.add_theme_font_size_override("font_size", 13)
 	add_child(panel)
-	_script_button = _button(panel, "스크립트 열기 · F5 재실행", _open_script_panel)
+	pattern_choice = _choice(panel, [])
+	_build_pattern_items()
+	shape_choice = _choice(panel, SHAPES)
+	motion_choice = _choice(panel, [])
+	_refresh_motion_items()
+	_script_button = _button(panel, "스크립트 경로 · F5 재실행", _open_script_panel)
 	_script_button.add_theme_font_size_override("font_size", 12)
-	shape_choice = _choice(panel, ["원탄 · 8px", "쌀탄 · 6×12px", "대형 구탄 · 20px", "기존 기본탄", "곡선 레이저", "바늘탄 · 텍스처"])
-	motion_choice = _choice(panel, ["직선 이동", "파동 이동", "레이저 · 오른쪽 선회", "레이저 · 왼쪽 선회"])
-	pattern_choice = _choice(panel, ["부채꼴 · 5발", "원형 · 16발", "단발 · 아래", "단발 · 대각선", "꽃잎 · 레이저 12줄", "API · 회전 링 연속 발사", "16방향 · 원탄 + S 레이저", "Behavior · 색/크기 변화", "호밍 · 원탄", "호밍 · 레이저", "스크립트 · 사용자 패턴"])
+	pattern_choice.item_selected.connect(_selection_changed)
 	shape_choice.item_selected.connect(_shape_changed)
 	motion_choice.item_selected.connect(_motion_changed)
-	pattern_choice.item_selected.connect(_selection_changed)
 	_button(panel, "다시 발사 / 초기화", restart)
 	pause_button = _button(panel, "일시정지", toggle_pause)
 	hitbox_button = CheckButton.new()
@@ -198,6 +221,7 @@ func _build_panel() -> void:
 	_button(panel, "화면의 탄 소거", clear_bullets)
 	details_label = Label.new()
 	details_label.add_theme_font_size_override("font_size", 12)
+	details_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	panel.add_child(details_label)
 	var help := Label.new()
 	help.text = "WASD 이동 · Q 원형/E 빔 소거\nR 감속장 · F 흡인점 · 방향키 메뉴\n피격 코어 2px / 무적 0.6초"
@@ -222,6 +246,11 @@ func _refresh_focus_chain() -> void:
 
 func _choice(panel: VBoxContainer, items: Array) -> OptionButton:
 	var choice := OptionButton.new()
+	# Long script names must not widen the side panel over the field.
+	choice.fit_to_longest_item = false
+	choice.clip_text = true
+	choice.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	choice.custom_minimum_size.x = 184
 	for item in items:
 		choice.add_item(item)
 	panel.add_child(choice)
@@ -238,62 +267,101 @@ func _button(panel: VBoxContainer, text: String, action: Callable) -> Button:
 	return button
 
 
-func _selection_changed(_index: int) -> void:
-	if pattern_choice.selected == 10:
-		pattern_choice.select(_last_pattern)
-		_open_script_panel()
-		return
-	if pattern_choice.selected >= 6:
-		shape_choice.select(0)
-		motion_choice.select(0)
-		restart()
-		return
-	if pattern_choice.selected == 5:
-		shape_choice.select(1)
-		motion_choice.select(0)
-		restart()
-		return
-	if shape_choice.selected == 4:
-		if motion_choice.selected < 2:
-			motion_choice.select(2)
-	elif pattern_choice.selected == 4:
-		shape_choice.select(4)
-		motion_choice.select(2)
-	elif motion_choice.selected >= 2:
-		motion_choice.select(0)
-	if shape_choice.selected == 3:
-		motion_choice.select(0)
+func _build_pattern_items() -> void:
+	_entries.clear()
+	pattern_choice.clear()
+	pattern_choice.add_separator("조합 · 모양과 이동을 고름")
+	for combo in COMBOS:
+		_add_entry({"kind": &"combo", "id": combo.id, "label": combo.label})
+	pattern_choice.add_separator("데모")
+	for demo in DEMOS:
+		_add_entry({"kind": &"demo", "id": demo.id, "label": demo.label, "details": demo.details})
+	pattern_choice.add_separator("스크립트 · patterns/")
+	for path in PATTERN_LOADER.list_patterns():
+		_add_entry({"kind": &"script", "id": StringName(path), "label": path.trim_prefix("res://patterns/").trim_suffix(".gd").trim_suffix("_pattern"), "path": path})
+	_add_entry({"kind": &"open_panel", "id": &"open_panel", "label": "경로 직접 열기…"})
+
+
+func _add_entry(entry: Dictionary) -> void:
+	_entries.append(entry)
+	pattern_choice.add_item(entry.label)
+	pattern_choice.set_item_metadata(pattern_choice.item_count - 1, _entries.size() - 1)
+
+
+func _entry_at(item: int) -> Dictionary:
+	var index = pattern_choice.get_item_metadata(item) if item >= 0 and item < pattern_choice.item_count else null
+	return _entries[index] if index is int else {}
+
+
+func _item_for(id: StringName) -> int:
+	for item in pattern_choice.item_count:
+		var entry := _entry_at(item)
+		if not entry.is_empty() and entry.id == id:
+			return item
+	return -1
+
+
+## Selected catalog id: a combo/demo id, or the res:// path of a script.
+func get_pattern_id() -> StringName:
+	return _entry.get("id", &"")
+
+
+func is_combo() -> bool:
+	return _entry.get("kind", &"") == &"combo"
+
+
+## Selects and plays a catalog entry by id (combo/demo id or script path).
+func select_pattern(id: StringName) -> bool:
+	var item := _item_for(id)
+	if item < 0:
+		return false
+	pattern_choice.select(item)
+	_selection_changed(item)
+	return true
+
+
+func _selection_changed(item: int) -> void:
+	var entry := _entry_at(item)
+	match entry.get("kind", &""):
+		&"open_panel":
+			pattern_choice.select(_last_item)
+			_open_script_panel()
+		&"script":
+			if not apply_script(entry.path, _custom_origin):
+				pattern_choice.select(_last_item)
+		_:
+			_entry = entry
+			_last_item = item
+			restart()
+
+
+## Motion options follow the shape: lasers turn, bullets go straight or wave,
+## the legacy projectile only goes straight.
+func _refresh_motion_items() -> void:
+	var previous := motion_choice.selected
+	motion_choice.clear()
+	var items: Array
+	match shape_choice.selected:
+		SHAPE_LASER: items = ["오른쪽 선회", "왼쪽 선회"]
+		SHAPE_LEGACY: items = ["직선 이동"]
+		_: items = ["직선 이동", "파동 이동"]
+	for text in items:
+		motion_choice.add_item(text)
+	motion_choice.select(clampi(previous, 0, items.size() - 1))
+
+
+func _shape_changed(_index: int) -> void:
+	_refresh_motion_items()
 	restart()
 
 
-func _shape_changed(index: int) -> void:
-	if pattern_choice.selected >= 5:
-		pattern_choice.select(0)
-	if index == 4:
-		pattern_choice.select(4)
-	elif pattern_choice.selected == 4:
-		pattern_choice.select(0)
-	_selection_changed(index)
-
-
-func _motion_changed(index: int) -> void:
-	if pattern_choice.selected >= 5:
-		pattern_choice.select(0)
-	if index >= 2:
-		shape_choice.select(4)
-	elif shape_choice.selected == 4:
-		shape_choice.select(0)
-		if pattern_choice.selected == 4:
-			pattern_choice.select(0)
-	if shape_choice.selected == 3 and index == 1:
-		shape_choice.select(0)
+func _motion_changed(_index: int) -> void:
 	restart()
 
 
 func restart() -> void:
-	_last_pattern = pattern_choice.selected
-	shape_choice.disabled = pattern_choice.selected == 10
-	motion_choice.disabled = pattern_choice.selected == 10
+	shape_choice.disabled = not is_combo()
+	motion_choice.disabled = not is_combo()
 	_refresh_focus_chain()
 	if world.has_meta("projectile_trails"):
 		var trails = world.get_meta("projectile_trails")
@@ -310,19 +378,7 @@ func restart() -> void:
 	get_tree().paused = false
 	pause_button.text = "일시정지"
 	start_pattern()
-	details_label.text = "속도 95px/s · 간격 0.9초\n파동: 진폭 12px / 주기 1.2초"
-	if shape_choice.selected == 4:
-		details_label.text = "90px/s · 몸통 1.4초\n70°/s 선회 · 4초마다 발사"
-	if pattern_choice.selected == 5:
-		details_label.text = "API: 16발 × 6회 / 0.2초\n매회 10° 회전 → 1.2초 대기"
-	elif pattern_choice.selected == 6:
-		details_label.text = "원탄 8 + 레이저 8 / 22.5°\nS자 ±35° · 주기 2.4초"
-	elif pattern_choice.selected == 7:
-		details_label.text = "선회 + 색 + 시각 확대\n판정은 그대로 / 3초 주기"
-	elif pattern_choice.selected in [8, 9]:
-		details_label.text = "호밍 90°/s · 추적 4초\n70px/s · WASD로 회피"
-	elif pattern_choice.selected == 10:
-		details_label.text = _custom_path.get_file() + "\n저장 후 F5 · 표적 WASD"
+	details_label.text = _details_text()
 	details_label.clip_text = true
 	details_label.custom_minimum_size.x = 184
 	_toggle_hitboxes(hitbox_button.button_pressed)
@@ -330,69 +386,114 @@ func restart() -> void:
 	_update_status()
 
 
+func _details_text() -> String:
+	match _entry.get("kind", &""):
+		&"demo":
+			return _entry.details
+		&"script":
+			var summary := _script_summary(_custom_path)
+			return _custom_path.get_file() + "\n" + (summary if not summary.is_empty() else "저장 후 F5 · 표적 WASD")
+	if shape_choice.selected == SHAPE_LASER:
+		return "90px/s · 몸통 1.4초\n70°/s 선회 · 4초마다 발사"
+	return "속도 95px/s · 간격 0.9초\n파동: 진폭 12px / 주기 1.2초"
+
+
+## First `##` doc line of a pattern script, for the details line.
+func _script_summary(path: String) -> String:
+	var file := FileAccess.open(path, FileAccess.READ)
+	if file == null:
+		return ""
+	while not file.eof_reached():
+		var line := file.get_line().strip_edges()
+		if line.begins_with("##"):
+			return line.trim_prefix("##").strip_edges().trim_prefix("Showcase:").strip_edges()
+	return ""
+
+
 func start_pattern() -> void:
 	pattern_player.show_hitbox = hitbox_button.button_pressed
-	emitter.position = Vector2(FIELD_SIZE.x * 0.5, 85 if shape_choice.selected == 4 else 28)
+	emitter.position = Vector2(FIELD_SIZE.x * 0.5, 28)
 	var sequence: BarrageSequence
-	if pattern_choice.selected == 10 and _custom_sequence != null:
-		emitter.position = [Vector2(208, 28), Vector2(208, 144), Vector2(208, 260)][_custom_origin]
-		sequence = _custom_sequence
-	elif pattern_choice.selected == 5:
-		sequence = ROTATING_RING
-	elif pattern_choice.selected == 6:
-		emitter.position = Vector2(FIELD_SIZE) * 0.5
-		sequence = MIXED_SIXTEEN.new()
-	elif pattern_choice.selected == 7:
-		var shot := preload("res://resources/projectiles/round_straight_shot.tres").duplicate(true) as BarrageShot
-		shot.behavior = BulletBehavior.new().wait(0.3).parallel([
-			BulletAction.turn_by(90, 1.2),
-			BulletAction.tint_to(Color(0.15, 0.7, 1.0), 1.2),
-			BulletAction.visual_scale_to(2.5, 1.2),
-		]).wait(0.3).opacity_to(0.15, 0.7)
-		sequence = BarrageSequence.new().fire_fan(shot, 5, 48, 70).wait(3).repeat()
-	elif pattern_choice.selected in [8, 9]:
-		var shot := BarrageShot.new()
-		shot.appearance = APPEARANCES[0]
-		shot.behavior = BulletBehavior.new().homing(90, 4)
-		shot.lifetime = 6
-		if pattern_choice.selected == 9:
-			shot.kind = BarrageShot.Kind.TRAIL_LASER
-			shot.trail_duration = 0.7
-		sequence = BarrageSequence.new().fire_fan(shot, 3, 80, 70).wait(2).repeat()
-	else:
-		sequence = BarrageSequence.new().fire(_make_volley())
-		sequence.wait(4.0 if shape_choice.selected == 4 else 0.9)
-		if shape_choice.selected == 4 and pattern_choice.selected in [1, 4]:
-			sequence.rotate(15)
-		sequence.repeat()
-	if not pattern_player.play(sequence, emitter, world, target):
+	match _entry.get("kind", &""):
+		&"script":
+			emitter.position = [Vector2(208, 28), Vector2(208, 144), Vector2(208, 260)][_custom_origin]
+			sequence = _custom_sequence
+		&"demo":
+			sequence = _demo_sequence(_entry.id)
+		_:
+			if shape_choice.selected == SHAPE_LASER:
+				emitter.position.y = 85
+			sequence = BarrageSequence.new().fire(_make_volley())
+			sequence.wait(4.0 if shape_choice.selected == SHAPE_LASER else 0.9)
+			if shape_choice.selected == SHAPE_LASER and _entry.id == &"ring16":
+				sequence.rotate(15)
+			sequence.repeat()
+	if sequence == null or not pattern_player.play(sequence, emitter, world, target):
 		push_error(pattern_player.last_error)
+
+
+func _demo_sequence(id: StringName) -> BarrageSequence:
+	match id:
+		&"laser_flower":
+			emitter.position.y = 85
+			var laser := BarrageShot.new()
+			laser.kind = BarrageShot.Kind.TRAIL_LASER
+			laser.behavior = BulletBehavior.new().turn_at(70, 1.5)
+			var flower := BarrageVolley.new()
+			flower.shot = laser
+			flower.layout = BarrageVolley.Layout.RING
+			flower.count = 12
+			flower.speed = 90
+			return BarrageSequence.new().fire(flower).wait(4.0).rotate(15).repeat()
+		&"rotating_ring":
+			return ROTATING_RING
+		&"mixed_sixteen":
+			emitter.position = Vector2(FIELD_SIZE) * 0.5
+			return MIXED_SIXTEEN.new()
+		&"behavior_morph":
+			var shot := preload("res://resources/projectiles/round_straight_shot.tres").duplicate(true) as BarrageShot
+			shot.behavior = BulletBehavior.new().wait(0.3).parallel([
+				BulletAction.turn_by(90, 1.2),
+				BulletAction.tint_to(Color(0.15, 0.7, 1.0), 1.2),
+				BulletAction.visual_scale_to(2.5, 1.2),
+			]).wait(0.3).opacity_to(0.15, 0.7)
+			return BarrageSequence.new().fire_fan(shot, 5, 48, 70).wait(3).repeat()
+		&"homing_round", &"homing_laser":
+			var shot := BarrageShot.new()
+			shot.appearance = APPEARANCES[0]
+			shot.behavior = BulletBehavior.new().homing(90, 4)
+			shot.lifetime = 6
+			if id == &"homing_laser":
+				shot.kind = BarrageShot.Kind.TRAIL_LASER
+				shot.trail_duration = 0.7
+			return BarrageSequence.new().fire_fan(shot, 3, 80, 70).wait(2).repeat()
+	return null
 
 
 func _make_volley() -> BarrageVolley:
 	var shot := BarrageShot.new()
-	if shape_choice.selected == 4:
+	if shape_choice.selected == SHAPE_LASER:
 		shot.kind = BarrageShot.Kind.TRAIL_LASER
-		shot.behavior = BulletBehavior.new().turn_at(-70 if motion_choice.selected == 3 else 70, 1.5)
-	elif shape_choice.selected == 3:
+		shot.behavior = BulletBehavior.new().turn_at(-70 if motion_choice.selected == 1 else 70, 1.5)
+	elif shape_choice.selected == SHAPE_LEGACY:
 		shot.kind = BarrageShot.Kind.LEGACY
 	else:
-		shot.appearance = preload("res://resources/projectiles/needle.tres") if shape_choice.selected == 5 else APPEARANCES[shape_choice.selected]
+		shot.appearance = preload("res://resources/projectiles/needle.tres") if shape_choice.selected == SHAPE_NEEDLE else APPEARANCES[shape_choice.selected]
 		shot.behavior = BEHAVIORS[motion_choice.selected]
 		shot.lifetime = 8.0
-		if shape_choice.selected == 5:
+		if shape_choice.selected == SHAPE_NEEDLE:
 			shot.trail_effect = preload("res://resources/projectiles/diamond_trail.tres")
 	var volley := BarrageVolley.new()
 	volley.shot = shot
-	volley.speed = 90 if shape_choice.selected == 4 else 95
-	match pattern_choice.selected:
-		0:
+	volley.speed = 90 if shape_choice.selected == SHAPE_LASER else 95
+	match _entry.get("id", &""):
+		&"fan5":
 			volley.layout = BarrageVolley.Layout.FAN
 			volley.count = 5
-		1, 4:
+		&"ring16":
 			volley.layout = BarrageVolley.Layout.RING
-			volley.count = 12 if pattern_choice.selected == 4 else 16
-		3:
+			volley.count = 16
+		&"single_diagonal":
 			volley.angle_degrees = rad_to_deg(Vector2.DOWN.angle_to(Vector2(0.5, 1)))
 	return volley
 
@@ -440,11 +541,12 @@ func _update_status() -> void:
 func _toggle_hitboxes(enabled: bool) -> void:
 	pattern_player.show_hitbox = enabled
 	# New projectiles share a single instanced debug renderer.
-	get_tree().debug_collisions_hint = enabled and shape_choice.selected == 3
+	var legacy := is_combo() and shape_choice.selected == SHAPE_LEGACY
+	get_tree().debug_collisions_hint = enabled and legacy
 	var renderer = world.get_meta("projectile_renderer", null)
 	if is_instance_valid(renderer):
 		renderer.extra_debug_shapes.clear()
-		if enabled and shape_choice.selected != 3:
+		if enabled and not legacy:
 			renderer.extra_debug_shapes.append(hurtbox.get_child(0))
 	for bullet in get_tree().get_nodes_in_group("enemy_projectiles"):
 		if world.is_ancestor_of(bullet) and bullet is FoundationBullet:
@@ -535,11 +637,32 @@ func apply_script(path: String, origin_index: int) -> bool:
 	_custom_path = result.path
 	_custom_origin = clampi(origin_index, 0, 2)
 	_script_shade.hide()
-	_refresh_focus_chain()
-	pattern_choice.select(10)
+	_select_script_entry(_custom_path)
 	restart()
 	_script_button.grab_focus()
 	return true
+
+
+## Points the dropdown at a script path, adding a "직접 · file" item for paths
+## outside patterns/ (reused for the next such path).
+func _select_script_entry(path: String) -> void:
+	var item := _item_for(StringName(path))
+	if item < 0:
+		item = _item_for(&"custom")
+		if item < 0:
+			var open_item := _item_for(&"open_panel")
+			_entries.append({"kind": &"script", "id": &"custom", "label": "", "path": path})
+			pattern_choice.add_item("", -1)
+			# Move the new item above "경로 직접 열기…".
+			pattern_choice.set_item_text(pattern_choice.item_count - 1, pattern_choice.get_item_text(open_item))
+			pattern_choice.set_item_metadata(pattern_choice.item_count - 1, pattern_choice.get_item_metadata(open_item))
+			item = open_item
+			pattern_choice.set_item_metadata(item, _entries.size() - 1)
+		_entries[pattern_choice.get_item_metadata(item)].path = path
+		pattern_choice.set_item_text(item, "직접 · " + path.get_file())
+	pattern_choice.select(item)
+	_entry = _entry_at(item)
+	_last_item = item
 
 
 func _input(event: InputEvent) -> void:

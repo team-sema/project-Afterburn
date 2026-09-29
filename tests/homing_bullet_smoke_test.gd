@@ -193,12 +193,11 @@ func test_lab() -> void:
 	var lab = load("res://labs/bullet/presets/homing_bullet_lab.tscn").instantiate()
 	root.add_child(lab)
 	lab.pattern_player.stop()
-	expect(lab.pattern_choice.selected == 8 and root.gui_get_focus_owner() == lab.shape_choice, "homing Lab starts with keyboard focus and homing selected")
+	expect(lab.get_pattern_id() == &"homing_round" and root.gui_get_focus_owner() == lab.pattern_choice, "homing Lab starts with keyboard focus and homing selected")
 	for node in get_nodes_in_group("enemy_projectiles"):
 		node.set_physics_process(false)
-	for selection in [8, 9]:
-		lab.pattern_choice.select(selection)
-		lab._selection_changed(selection)
+	for selection in [&"homing_round", &"homing_laser"]:
+		lab.select_pattern(selection)
 		lab.pattern_player.stop()
 		await process_frame
 		var bullets := get_nodes_in_group("enemy_projectiles")
@@ -212,7 +211,7 @@ func test_lab() -> void:
 			lab.toggle_pause()
 			await process_frame
 			await RenderingServer.frame_post_draw
-			root.get_texture().get_image().save_png("res://artifacts/homing_" + ("bullet" if selection == 8 else "laser") + "_lab.png")
+			root.get_texture().get_image().save_png("res://artifacts/homing_" + ("bullet" if selection == &"homing_round" else "laser") + "_lab.png")
 			lab.toggle_pause()
 	lab.queue_free()
 	await process_frame

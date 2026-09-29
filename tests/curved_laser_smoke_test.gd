@@ -13,7 +13,7 @@ func _run() -> void:
 	var lab := LAB.instantiate()
 	root.add_child(lab)
 	await process_frame
-	_expect(lab.shape_choice.selected == 4 and lab.pattern_choice.selected == 4, "direct-entry scene starts with the laser flower")
+	_expect(lab.get_pattern_id() == &"laser_flower" and lab.shape_choice.disabled, "direct-entry scene starts with the laser flower demo")
 	lab.pattern_player.stop()
 	_expect(get_nodes_in_group("enemy_projectiles").size() == 12, "flower emits twelve laser objects, not individual trail bullets")
 	lab.clear_bullets()
@@ -67,13 +67,15 @@ func _run() -> void:
 	straight._physics_process(2)
 	_expect(straight.is_queued_for_deletion(), "laser is removed when the entire body exits")
 	await process_frame
+	lab.select_pattern(&"ring16")
 	lab.shape_choice.select(0)
 	lab._shape_changed(0)
-	_expect(lab.shape_choice.selected == 0 and lab.motion_choice.selected == 0, "ordinary bullets remain selectable after the flower")
+	_expect(not lab.shape_choice.disabled and lab.motion_choice.selected == 0, "ordinary bullets remain selectable after the flower")
 	lab.shape_choice.select(4)
 	lab._shape_changed(4)
-	lab.motion_choice.select(3)
-	lab._motion_changed(3)
+	_expect(lab.motion_choice.item_count == 2 and lab.motion_choice.get_item_text(1) == "왼쪽 선회", "laser shape offers turn directions only")
+	lab.motion_choice.select(1)
+	lab._motion_changed(1)
 	await process_frame
 	for bullet in get_nodes_in_group("enemy_projectiles"):
 		if bullet is CurvedLaser and not bullet.is_queued_for_deletion():
@@ -81,8 +83,7 @@ func _run() -> void:
 	var help: Control = lab.get_node("Controls").get_children().back()
 	_expect(help.get_global_rect().end.y <= 360, "laser controls fit the viewport")
 	if "--capture" in OS.get_cmdline_user_args():
-		lab.motion_choice.select(2)
-		lab.restart()
+		lab.select_pattern(&"laser_flower")
 		await create_timer(1.55).timeout
 		lab.toggle_pause()
 		await RenderingServer.frame_post_draw

@@ -258,11 +258,10 @@ func run() -> void:
 	await process_frame
 	var lab = load("res://labs/bullet/presets/barrage_api_lab.tscn").instantiate()
 	root.add_child(lab)
-	expect(lab.pattern_choice.selected == 5, "dedicated scene opens the API demonstration")
-	lab.pattern_choice.select(5)
-	lab._selection_changed(5)
+	expect(lab.get_pattern_id() == &"rotating_ring", "dedicated scene opens the API demonstration")
+	lab.select_pattern(&"rotating_ring")
 	lab.pattern_player.set_physics_process(false)
-	expect(lab.shape_choice.selected == 1 and lab.pattern_player.running, "API example is selectable in lab")
+	expect(lab.shape_choice.disabled and lab.pattern_player.running, "API example is selectable in lab with shape locked")
 	lab.pattern_player.advance(1.0)
 	var live := 0
 	for node in get_nodes_in_group("enemy_projectiles"):

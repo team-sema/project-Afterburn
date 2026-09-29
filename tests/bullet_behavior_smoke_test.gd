@@ -176,8 +176,7 @@ func run() -> void:
 		lab.toggle_pause()
 		await RenderingServer.frame_post_draw
 		root.get_texture().get_image().save_png("res://artifacts/mixed_sixteen_lab.png")
-		lab.pattern_choice.select(7)
-		lab._selection_changed(7)
+		lab.select_pattern(&"behavior_morph")
 		lab.pattern_player.stop()
 		for node in get_nodes_in_group("enemy_projectiles"):
 			if node is FoundationBullet and not node.is_queued_for_deletion():

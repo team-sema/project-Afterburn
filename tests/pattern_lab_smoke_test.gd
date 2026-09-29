@@ -55,7 +55,7 @@ func run() -> void:
 	await process_frame
 	expect(lab._custom_sequence.steps[0].volley.count == 2, "loaded constructor executes once")
 	expect(lab.emitter.position == Vector2(208, 144), "custom emitter placement")
-	expect(lab.pattern_choice.selected == 10 and not lab.safety_button.button_pressed, "script mode retains diagnostics options")
+	expect(lab.get_pattern_id() == &"custom" and lab.shape_choice.disabled and not lab.safety_button.button_pressed, "script mode retains diagnostics options")
 	var old_sequence: BarrageSequence = lab._custom_sequence
 	write_pattern(source(7))
 	await key(KEY_F5)
