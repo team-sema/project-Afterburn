@@ -33,6 +33,13 @@ var _finished := false
 var _heading_actions: Array[BulletAction] = []
 var _speed_actions: Array[BulletAction] = []
 var _homing: RefCounted
+## External trajectory effects (augments), keyed by handle:
+## handle -> {speed_mult, heading_offset, until}. See combat.md 외부 궤도 개입.
+var _effects: Dictionary = {}
+## Stretches of bullet age with one combined effect set, oldest first:
+## {time, speed_mult, heading_offset, anchor, has_anchor, cache}. Each stretch
+## integrates from its anchor, so positions before a change never move.
+var _events: Array[Dictionary] = []
 
 func _init(behavior: BulletBehavior, direction: Vector2, speed: float, tint: Color, lifetime: float) -> void:
 	_behavior = behavior.duplicate(true) as BulletBehavior
@@ -85,9 +92,12 @@ func advance_to(time: float) -> void:
 	# Only the actual body update commits time. Prediction queries never do.
 	if _homing != null and time > playback_time:
 		_homing.advance_to(clampf(time, 0, _limit))
+		# A new homing observation changes the base velocity ahead of it.
+		_trim_effect_caches(playback_time)
 	playback_time = maxf(playback_time, clampf(time, 0, _limit))
 
 func invalidate_prediction() -> void:
+	_trim_effect_caches(playback_time)
 	if _homing != null:
 		_homing.invalidate_prediction()
 		cached_until = playback_time
@@ -168,8 +178,148 @@ func _apply(action: BulletAction, elapsed: float, initial: Dictionary, state: Di
 			state.hitbox_scale = lerpf(initial.hitbox_scale, action.value, weight)
 
 func velocity_at(time: float) -> Vector2:
+	var t := clampf(time, 0, _limit)
+	var index := _event_index(t)
+	if index < 0:
+		return _base_velocity_at(t)
+	return _effective_velocity(t, _events[index])
+
+func _base_velocity_at(time: float) -> Vector2:
 	var state := sample(time)
 	return _direction.rotated(deg_to_rad(state.heading)) * float(state.speed) + _direction.orthogonal() * float(state.lateral_velocity)
+
+
+# --- External trajectory effects -------------------------------------------
+
+## Registers or replaces effect `handle` at the current playback time. Heading
+## offsets add up and speed multipliers multiply across handles. duration <= 0
+## keeps the effect until remove_effect(). Returns false for invalid input.
+func apply_effect(handle: StringName, speed_mult := 1.0, heading_offset := 0.0, duration := 0.0) -> bool:
+	if handle == &"" or not is_finite(speed_mult) or speed_mult < 0.0 or not is_finite(heading_offset) or not is_finite(duration):
+		return false
+	var now := playback_time
+	var anchor := position_at(now)
+	_drop_expired(now)
+	_effects[handle] = {
+		"speed_mult": speed_mult,
+		"heading_offset": heading_offset,
+		"until": now + duration if duration > 0.0 else INF,
+	}
+	_rebuild_effect_events(now, anchor)
+	return true
+
+## Ends effect `handle` now. The bullet keeps its current position and
+## continues with the remaining effects.
+func remove_effect(handle: StringName) -> bool:
+	var now := playback_time
+	_drop_expired(now)
+	if not _effects.has(handle):
+		return false
+	var anchor := position_at(now)
+	_effects.erase(handle)
+	_rebuild_effect_events(now, anchor)
+	return true
+
+## The effect active now for `handle`, or an empty Dictionary.
+func get_effect(handle: StringName) -> Dictionary:
+	var effect: Dictionary = _effects.get(handle, {})
+	if effect.is_empty() or float(effect.until) <= playback_time:
+		return {}
+	return effect.duplicate()
+
+func has_effects() -> bool:
+	return not _events.is_empty()
+
+func _drop_expired(now: float) -> void:
+	for handle in _effects.keys():
+		if float(_effects[handle].until) <= now + BOUNDARY_EPSILON:
+			_effects.erase(handle)
+
+func _rebuild_effect_events(now: float, anchor: Vector2) -> void:
+	# Keep every stretch that started before now; replace the future.
+	while not _events.is_empty() and float(_events[-1].time) >= now - BOUNDARY_EPSILON:
+		_events.pop_back()
+	_events.append(_make_event(now, _effects, anchor, true))
+	# Known expiries become future stretches so prediction already includes them.
+	var ends: Array[float] = []
+	for effect in _effects.values():
+		var until := float(effect.until)
+		if is_finite(until) and until > now and not ends.has(until):
+			ends.append(until)
+	ends.sort()
+	var remaining := _effects.duplicate()
+	for end in ends:
+		for handle in remaining.keys():
+			if float(remaining[handle].until) <= end + BOUNDARY_EPSILON:
+				remaining.erase(handle)
+		_events.append(_make_event(end, remaining, Vector2.ZERO, false))
+	for time in _position_queries.keys():
+		if time > now: _position_queries.erase(time)
+	cached_until = now
+
+func _make_event(time: float, effects: Dictionary, anchor: Vector2, has_anchor: bool) -> Dictionary:
+	var speed_mult := 1.0
+	var heading_offset := 0.0
+	for effect in effects.values():
+		speed_mult *= float(effect.speed_mult)
+		heading_offset += float(effect.heading_offset)
+	return {
+		"time": time,
+		"speed_mult": speed_mult,
+		"heading_offset": heading_offset,
+		"anchor": anchor,
+		"has_anchor": has_anchor,
+		"fixed_anchor": has_anchor,
+		"cache": PackedVector2Array(),
+	}
+
+func _event_index(time: float) -> int:
+	if _events.is_empty() or time < float(_events[0].time) - BOUNDARY_EPSILON:
+		return -1
+	var index := _events.size() - 1
+	while index > 0 and float(_events[index].time) > time + BOUNDARY_EPSILON:
+		index -= 1
+	return index
+
+func _effective_velocity(time: float, event: Dictionary) -> Vector2:
+	return _base_velocity_at(time).rotated(deg_to_rad(float(event.heading_offset))) * float(event.speed_mult)
+
+func _event_position(index: int, time: float) -> Vector2:
+	var event := _events[index]
+	if not event.has_anchor:
+		event.anchor = _event_position(index - 1, float(event.time))
+		event.has_anchor = true
+	var start := float(event.time)
+	var cache: PackedVector2Array = event.cache
+	if cache.is_empty():
+		cache.append(event.anchor)
+	var local := maxf(0.0, time - start)
+	var step_index := floori(local / STEP)
+	while cache.size() <= step_index:
+		var step_start := start + (cache.size() - 1) * STEP
+		cache.append(cache[-1] + _effective_velocity(step_start + STEP * 0.5, event) * STEP)
+	event.cache = cache
+	var remainder := local - step_index * STEP
+	if remainder <= BOUNDARY_EPSILON:
+		return cache[step_index]
+	var step_start := start + step_index * STEP
+	return cache[step_index] + _effective_velocity(step_start + remainder * 0.5, event) * remainder
+
+## Drops integrated positions after `after`; earlier ones stay fixed. Future
+## expiry stretches recompute their anchor from the stretch before them.
+func _trim_effect_caches(after: float) -> void:
+	for event in _events:
+		var start := float(event.time)
+		if start > after + BOUNDARY_EPSILON:
+			if not event.fixed_anchor:
+				event.has_anchor = false
+			event.cache = PackedVector2Array()
+			continue
+		var cache: PackedVector2Array = event.cache
+		var keep := floori((after - start) / STEP + BOUNDARY_EPSILON) + 1
+		if cache.size() > keep:
+			cache.resize(keep)
+			event.cache = cache
 
 func _forward_velocity(time: float) -> Vector2:
 	if _single_wave != null:
@@ -215,6 +365,9 @@ func _integral(start: float, duration: float) -> Vector2:
 func position_at(time: float) -> Vector2:
 	var t := clampf(time, 0, _limit)
 	cached_until = maxf(cached_until, t)
+	var effect_index := _event_index(t)
+	if effect_index >= 0:
+		return _event_position(effect_index, t)
 	if _homing != null: return _homing.position_at(t)
 	# Analytic/simple wave paths cost less than dictionary cache bookkeeping.
 	if _constant_velocity or _single_turn != null or _single_wave != null:

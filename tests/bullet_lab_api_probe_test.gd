@@ -45,6 +45,25 @@ func _run() -> void:
 	lab.call("_update_status")
 	_expect(String(lab.status_label.text).contains("lab_beam 1"), "the status line shows API cancel counts")
 
+	# R slow field and F gravity well act on launched bullets through apply_effect.
+	var shot := BarrageShot.new()
+	shot.appearance = preload("res://resources/projectiles/round.tres")
+	shot.behavior = BulletBehavior.new()
+	shot.lifetime = 10.0
+	var in_field := shot.spawn(world, ship.position + Vector2(0, -30), Vector2.RIGHT, 60.0)
+	var passing := shot.spawn(world, Vector2(ship.position.x - 60, 80), Vector2.RIGHT, 60.0)
+	await physics_frame
+	_expect(probe.apply_slow_field() == 1, "R slows only the bullet inside the field")
+	_expect(
+		is_equal_approx(float(EnemyBullets.get_effect(in_field, &"lab_slow").get("speed_mult", 1.0)), 0.35),
+		"the slow field applies x0.35",
+	)
+	_expect(EnemyBullets.get_effect(passing, &"lab_slow").is_empty(), "a bullet outside the field is not slowed")
+	probe.place_well(Vector2(ship.position.x - 20, 120))
+	_expect(probe.pull_step(1.0 / 60.0) >= 1, "F pulls bullets inside the well radius")
+	var offset := float(EnemyBullets.get_effect(passing, &"lab_pull").get("heading_offset", 0.0))
+	_expect(absf(offset) > 0.1 and absf(offset) <= 4.0 + 0.01, "the pull turns a bullet by at most 240 deg/s per tick (got %.2f)" % offset)
+
 	lab.queue_free()
 	await process_frame
 	if failures.is_empty():

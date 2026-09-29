@@ -96,6 +96,32 @@ static func cancel_all(world: Node, bullets: Array, reason: StringName) -> int:
 	return count
 
 
+## Registers (or replaces) trajectory effect `handle` on one bullet from now on.
+## Heading offsets (degrees) add up and speed multipliers multiply across
+## handles; duration <= 0 lasts until remove_effect. Past positions and the
+## laser tail already drawn never change. Only FoundationBullet and CurvedLaser
+## support effects; other bodies return false.
+static func apply_effect(
+	bullet: Node2D,
+	handle: StringName,
+	speed_mult := 1.0,
+	heading_offset_degrees := 0.0,
+	duration := 0.0,
+) -> bool:
+	if not _supports_effects(bullet):
+		return false
+	return bullet.call("apply_trajectory_effect", handle, speed_mult, heading_offset_degrees, duration)
+
+
+static func remove_effect(bullet: Node2D, handle: StringName) -> bool:
+	return _supports_effects(bullet) and bullet.call("remove_trajectory_effect", handle)
+
+
+## {speed_mult, heading_offset, until} of the active effect, or empty.
+static func get_effect(bullet: Node2D, handle: StringName) -> Dictionary:
+	return bullet.call("get_trajectory_effect", handle) if _supports_effects(bullet) else {}
+
+
 ## Signal source for cancellations under `world`, created on first use.
 static func get_hub(world: Node) -> EnemyBulletHub:
 	var hub := world.get_node_or_null(NodePath(HUB_NAME)) as EnemyBulletHub
@@ -114,6 +140,15 @@ static func _is_live(world: Node, bullet: Node2D) -> bool:
 		and bullet.is_in_group(GROUP)
 		and world != null
 		and world.is_ancestor_of(bullet)
+	)
+
+
+static func _supports_effects(bullet: Node2D) -> bool:
+	return (
+		bullet != null
+		and is_instance_valid(bullet)
+		and not bullet.is_queued_for_deletion()
+		and bullet.has_method("apply_trajectory_effect")
 	)
 
 

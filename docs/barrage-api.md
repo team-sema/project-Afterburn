@@ -241,7 +241,7 @@ shot.behavior = BulletBehavior.new().wait(0.3).parallel([
 
 이 예제의 판정 두께는 유지된다. 발사 후 외부에서 Behavior를 교체·취소하거나 임의 콜백을 실행하는 API는 아직 없다.
 
-실행기는 Action 경계의 누적 상태와 탄별 궤적 표본을 재사용한다. 과거·미래 조회는 실제 탄 나이를 전진시키지 않으며, 몸체·판정·경로 예측은 같은 위치 계산을 사용한다. 경계의 1e-10초 이내 부동소수점 오차는 경계 시각으로 처리한다. 외부 효과 적용 API는 아직 제공하지 않는다.
+실행기는 Action 경계의 누적 상태와 탄별 궤적 표본을 재사용한다. 과거·미래 조회는 실제 탄 나이를 전진시키지 않으며, 몸체·판정·경로 예측은 같은 위치 계산을 사용한다. 경계의 1e-10초 이내 부동소수점 오차는 경계 시각으로 처리한다. 발사 후 외부에서 속도·방향을 바꾸는 효과는 11절의 `EnemyBullets.apply_effect`를 쓴다.
 
 ### 비행 중 표적 추적
 
@@ -414,7 +414,7 @@ fire_together(layers)
 - 레이저는 발사점에 계속 붙어 있는 빔이 아니라 이동하는 머리의 과거 궤적이다. 제어점으로 몸통을 직접 변형하는 API는 없다.
 - 발사 시점 난수(각도·속도·대기 jitter)는 없다. 필요하면 시드 RNG를 Player가 소유하는 방식으로 추가한다.
 - 탄이 탄을 발사하는 분열·정지 후 재조준은 `BulletAction.Type.SPAWN`(payload Volley, 탄의 현재 위치·heading 기준 즉시 발사, 재귀 깊이 1)으로 자리를 정했고 미구현이다. 정본: [전투](design/combat.md#발사-일정behavior-표현력-확장--구현-완료).
-- 중첩 Behavior 그룹, 액션 단위 반복, 외부 이벤트 대기, 외부 궤도 효과, 실행 중 Behavior 교체는 제공하지 않는다.
+- 중첩 Behavior 그룹, 액션 단위 반복, 외부 이벤트 대기, 실행 중 Behavior 교체는 제공하지 않는다. 외부 궤도 효과는 속도 배율·방향 오프셋만 제공한다(11절).
 - 탄 노드와 물리 판정은 탄마다 존재한다. 배치 렌더링은 노드/충돌 처리 비용까지 제거하지 않는다.
 - 위치·예측·레이저 과거 몸통은 같은 궤적 함수를 쓴다. 일반 이동 적분은 1/120초 중점 근사다. 직진·단일 일정 선회는 해석식, 단일 방향 파동은 직접 속도 평가를 사용한다.
 - 예측 반경(`get_hazard_radius`)은 Behavior 전체의 최대 판정 배율을 사용하므로 실제 현재 판정보다 보수적일 수 있다. 성능 측정 결과와 환경은 작업 기록을 참고한다.
@@ -491,4 +491,30 @@ EnemyBullets.get_hub(world) -> EnemyBulletHub
 - `cancel`은 탄을 삭제 예약하고, 월드에 허브가 있으면 `bullet_cancelled(position, reason, bullet)`을 먼저 발행한다. 발행 중에는 탄이 아직 유효하다. 이미 지워졌거나 월드 밖인 탄은 false를 반환한다. 레이저는 몸체 하나가 한 번의 소거다.
 - 허브는 `get_hub(world)`로 처음 구독할 때 월드 아래에 생기고 월드와 함께 사라진다. 소거 보상·충전 같은 증강은 이 신호를 구독한다.
 - 게임이 쓰는 소거 이유: `augment_resume`(오퍼 재개 버스트) · `elite_reward`(엘리트 탄소거) · `boss`(보스 페이즈 정리) · `lab`(랩 정리).
-- 직접 시험: Bullet Lab(`labs/bullet/bullet_lab.tscn`)에서 아무 패턴이나 재생한 채 **Q**를 누르면 기체 반경 40px 원형 소거(`query_circle`), **E**를 누르는 동안 기체에서 필드 위끝까지 폭 8px 빔 소거(`query_shape`)가 실행된다. 레이저는 몸통이 빔에 닿아도 지워진다. 허브 신호로 받은 소거 지점에 0.5초간 ✕ 표시가 뜨고, 하단 상태줄에 이유별 누계(`lab_circle`·`lab_beam`·`lab`)가 나온다. 도구는 [enemy_bullet_api_probe.gd](../labs/bullet/enemy_bullet_api_probe.gd), 검증은 `tests/bullet_lab_api_probe_test.gd` · `tests/enemy_bullets_api_test.gd`.
+
+
+### 궤도 개입 (감속·방향 오프셋)
+
+```gdscript
+EnemyBullets.apply_effect(bullet, handle, speed_mult := 1.0, heading_offset_degrees := 0.0, duration := 0.0) -> bool
+EnemyBullets.remove_effect(bullet, handle) -> bool
+EnemyBullets.get_effect(bullet, handle) -> Dictionary   # {speed_mult, heading_offset, until}
+```
+
+- 탄의 현재 나이부터 적용한다. 핸들마다 하나이며 같은 핸들은 교체한다. 속도 배율은 핸들끼리 곱하고 방향 오프셋(도)은 더한다. `duration <= 0`은 해제할 때까지 유지한다.
+- 적용·교체·해제·만료 순간의 위치에서 새 구간이 시작되므로 탄이 튀지 않고, 지나온 위치와 레이저 몸통은 그대로다. 만료는 경로 예측에 미리 반영된다. 모두 해제하면 현재 위치에서 기본 속도로 이어 간다(원래 궤적으로 되돌아가지 않음).
+- 흡인처럼 위치에 따라 방향이 바뀌는 효과는 매 틱 같은 핸들을 새 오프셋으로 재등록한다. 현재 이동 방향은 탄의 `get_travel_velocity()`로 읽는다.
+- `FoundationBullet`·`CurvedLaser`만 지원한다. 호밍 탄은 효과가 없는 자기 궤적 위치 기준으로 표적 방향을 계산한다. 규칙 정본: [전투 — 외부 궤도 개입](design/combat.md#외부-궤도-개입--구현-완료).
+
+### 직접 시험
+
+Bullet Lab(`labs/bullet/bullet_lab.tscn`)에서 아무 패턴이나 재생한 채 조작한다. 도구는 [enemy_bullet_api_probe.gd](../labs/bullet/enemy_bullet_api_probe.gd)다.
+
+| 키 | 동작 | API |
+|----|------|-----|
+| Q | 기체 반경 40px 원형 소거 | `query_circle` · `cancel_all` |
+| E (누름) | 기체에서 위끝까지 폭 8px 빔 소거. 레이저는 몸통이 닿아도 지워짐 | `query_shape` · `cancel_all` |
+| R (누름) | 기체 반경 60px 감속장. 속도 ×0.35, 벗어나면 0.15초 뒤 해제 | `apply_effect` (짧은 지속시간 재등록) |
+| F | 기체 위치에 3초간 흡인점. 반경 90px 안의 탄을 초당 최대 240°씩 흡인점 쪽으로 틀고 속도 ×0.85 | `apply_effect` (방향 오프셋 누적) |
+
+소거 지점에는 허브 신호로 받은 ✕ 표시가 0.5초 뜨고, 하단 상태줄에 이유별 소거 누계와 감속·흡인 중인 탄 수가 나온다. 검증: `tests/bullet_lab_api_probe_test.gd` · `tests/enemy_bullets_api_test.gd` · `tests/bullet_intervention_test.gd`.
