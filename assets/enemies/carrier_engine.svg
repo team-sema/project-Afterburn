@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+ <!-- Stern thruster bell seen from above; exhaust leaves through the open bottom. -->
+ <g fill="#fff">
+  <path d="M18 6 46 6 50 18 14 18Z"/>
+  <path d="M12 22 26 22 24 58 8 50Z M52 22 38 22 40 58 56 50Z"/>
+  <path d="M28 24 36 24 35 40 29 40Z"/>
+ </g>
+</svg>

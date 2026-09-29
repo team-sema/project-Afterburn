@@ -1,8 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="128" height="160" viewBox="0 0 128 160">
+<svg xmlns="http://www.w3.org/2000/svg" width="136" height="168" viewBox="0 0 136 168">
+ <!-- Deck elevator bay: roof block, pocket walls and outer armor around an open
+      bay (x 40..96, y 32..150). Blast doors, lift and aircraft are drawn by code
+      beneath this frame so the door leaves retract into the wall pockets. -->
  <g fill="#fff">
-  <path d="M64 5 102 34 99 102 82 139 80 57 64 34 48 57 46 139 29 102 26 34Z"/>
-  <path d="M19 38 24 102 36 139 20 124 6 91 8 55Z M109 38 104 102 92 139 108 124 122 91 120 55Z"/>
-  <path d="M54 63 59 57 59 78 54 87Z M74 63 69 57 69 78 74 87Z M54 97 59 91 59 111 54 120Z M74 97 69 91 69 111 74 120Z"/>
-  <path d="M50 133 58 142 58 153 49 145Z M78 133 70 142 70 153 79 145Z"/>
+  <path d="M30 6 106 6 114 18 108 30 28 30 22 18Z M50 14 86 14 86 21 50 21Z" fill-rule="evenodd"/>
+  <path d="M24 34 39 34 39 144 31 152 22 142 18 52Z M28 62 33 62 33 128 28 128Z" fill-rule="evenodd"/>
+  <path d="M112 34 97 34 97 144 105 152 114 142 118 52Z M108 62 103 62 103 128 108 128Z" fill-rule="evenodd"/>
+  <path d="M12 30 18 40 14 122 6 112 4 50Z M124 30 118 40 122 122 130 112 132 50Z"/>
+  <path d="M34 154 50 158 48 166 32 162Z M102 154 86 158 88 166 104 162Z"/>
  </g>
 </svg>

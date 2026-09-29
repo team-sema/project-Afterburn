@@ -22,7 +22,7 @@ Nova Drift 풍: **밝은 기하 코어 + 다중 글로우 레이어 + 어두운 
 | `diffuse_glow` / `tight_glow` / `wide_glow` | 글로우 단계 |
 | `white_flash_material` | 피격 플래시 |
 | `glow_blur.gdshader` | 블러 글로우 |
-| `laser_beam.gdshader` | 플레이어 레이저 빔 본체 (글로우 + 흐르는 줄무늬, [레이저](weapon-modules/laser.md)) |
+| `laser_beam.gdshader` | 플레이어 레이저 빔 본체 (글로우 + 흐르는 줄무늬, [레이저](weapon-modules/laser.md)). 항모 선미 배기·함교 레이저도 색만 바꿔 재사용 ([거대 항모](bosses/carrier.md)) |
 | `impact_vfx.gd` · `impact_profiles/` | 플레이어 무기 공용 타격 이펙트 ([타격 이펙트](#타격-이펙트)) |
 
 ## 폭발

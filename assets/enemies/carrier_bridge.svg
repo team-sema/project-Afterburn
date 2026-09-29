@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 160 160">
+ <!-- Command tower: split armor, window ring and rear mast; the main cannon takes the forward slot. -->
+ <g fill="#fff">
+  <path d="M80 30 110 48 110 98 80 116 50 98 50 48Z M80 46 96 56 96 90 80 100 64 90 64 56Z" fill-rule="evenodd"/>
+  <path d="M80 53 91 59.5 91 86.5 80 93 69 86.5 69 59.5Z"/>
+  <path d="M44 40 46 102 30 126 14 106 20 58Z M116 40 114 102 130 126 146 106 140 58Z"/>
+  <path d="M24 64 38 60 38 72 26 76Z M136 64 122 60 122 72 134 76Z M22 84 38 80 38 92 24 96Z M138 84 122 80 122 92 136 96Z"/>
+  <path d="M76 4 84 4 86 26 74 26Z M56 12 72 16 72 22 56 20Z M104 12 88 16 88 22 104 20Z"/>
+ </g>
+</svg>

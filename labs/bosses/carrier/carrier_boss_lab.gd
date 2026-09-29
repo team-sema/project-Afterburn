@@ -16,6 +16,7 @@ var camera: Camera2D
 var camera_tween: Tween
 var shake_strength := 0.0
 var shake_age := 0.0
+var dividers: Array[ColorRect] = []
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -65,7 +66,7 @@ func _ready() -> void:
 	right.size = Vector2(Playfield.SIDE_PANEL_WIDTH - 26, 310)
 	add_child(right)
 	add_label(right,"CARRIER / 01",18)
-	add_label(right,"함미 → 격납고 → 함교\n\n밝은 부위를 공격하세요.\n갑판 위로 비행할 수 있습니다.\n\n부위 파괴 시 공격 중단\n격납고 파괴 시 출격 중단\n\n상단 바 = 필수 부위 HP 합계\n함재기는 전체 HP에서 제외",12)
+	add_label(right,"함미 → 격납고 → 함교\n\n밝은 부위를 공격하세요.\n갑판 위로 비행할 수 있습니다.\n\n선미 엔진: 배기 레인 차단\n격납고: 문 열릴 때 큰 피해\n함교 50%: 레이저 개방\n\n상단 바 = 필수 부위 HP 합계",12)
 	metrics = add_label(right,"",14)
 	var hud := VBoxContainer.new()
 	hud.position = Vector2(Playfield.SIDE_PANEL_WIDTH + 8, 3)
@@ -76,7 +77,6 @@ func _ready() -> void:
 	bar = ProgressBar.new()
 	bar.custom_minimum_size = Vector2(Playfield.SIZE.x - 16, 8)
 	bar.show_percentage = false
-	bar.max_value = 800
 	var fill := StyleBoxFlat.new()
 	fill.bg_color = Color("ff426d")
 	bar.add_theme_stylebox_override("fill",fill)
@@ -86,13 +86,13 @@ func _ready() -> void:
 	track.set_border_width_all(1)
 	bar.add_theme_stylebox_override("background",track)
 	hud.add_child(bar)
-	for ratio in [0.3, 0.7]:
+	for i in 2:
 		var divider := ColorRect.new()
 		divider.color = Color("090e18")
-		divider.position = Vector2((Playfield.SIZE.x - 16) * ratio, 0)
 		divider.size = Vector2(1,8)
 		divider.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		bar.add_child(divider)
+		dividers.append(divider)
 	restart()
 
 func add_label(parent: Node, text: String, font_size: int) -> Label:
@@ -152,9 +152,19 @@ func restart() -> void:
 	boss.destruction_pulse.connect(func(strength: float): shake_strength = maxf(shake_strength,strength))
 	world.add_child(boss)
 	world.move_child(boss,0)
+	var dust := preload("res://labs/bosses/carrier/carrier_dust.gd").new()
+	dust.boss = boss
+	world.add_child(dust)
+	world.move_child(dust,1)
+	# Section dividers follow the real required-HP split of the hull.
+	bar.max_value = boss.maximum
+	var drained := 0
+	for i in 2:
+		drained += boss.section_maximum(i)
+		dividers[i].position = Vector2((Playfield.SIZE.x - 16) * (1.0 - float(drained) / boss.maximum), 0)
 	hits = 0
 	elapsed = 0
-	bar.value = 800
+	bar.value = boss.maximum
 	restarting = false
 
 func _begin_destruction_shot() -> void:
@@ -181,9 +191,11 @@ func _process(delta: float) -> void:
 		shake_age += delta
 		shake_strength = move_toward(shake_strength,0,delta*4)
 		camera.offset = Vector2(sin(shake_age*71),cos(shake_age*57)) * shake_strength / camera.zoom.x
+		# WARNING titles blink; other section titles stay steady.
+		phase_label.modulate.a = 0.35 + 0.65 * float(fmod(elapsed * 3.0, 1.0) < 0.6) if phase_label.text.begins_with("WARNING") else 1.0
 		if ship.get_node("StatsComponent").health < 1000000:
 			ship.get_node("StatsComponent").health = 1000000
-	metrics.text = "\n피격  %d\n시간  %.1fs\nHP  %d / 800" % [hits,elapsed,boss.health]
+	metrics.text = "\n피격  %d\n시간  %.1fs\nHP  %d / %d" % [hits,elapsed,boss.health,boss.maximum]
 
 func toggle_pause() -> void:
 	get_tree().paused = not get_tree().paused
