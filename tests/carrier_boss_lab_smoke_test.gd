@@ -57,7 +57,7 @@ func run() -> void:
 	engine.take_damage(9999)
 	check(not engine.beam.firing and boss.health == 1920, "Destroyed engine stops its plume without touching the shared bar")
 	# Real ship + real projectile/Hurtbox integration, not only direct HP mutation.
-	lab.ship.position = Vector2(62,280)
+	lab.ship.position = Vector2(boss.parts[0].global_position.x, 280)
 	await create_timer(2.0).timeout
 	check(boss.health < 1920, "Player's actual blaster damages the exposed turret")
 	lab.ship.position = Vector2(10,320)
@@ -107,7 +107,7 @@ func run() -> void:
 	boss.parts[1].take_damage(9999)
 	for turret in turrets: turret.take_damage(9999)
 	# Park the live blaster in the deck gap between escort guns and hangars.
-	lab.ship.position = Vector2(38,320)
+	lab.ship.position = Vector2(boss.global_position.x - 82,320)
 	await create_timer(1.5).timeout
 	check(boss.transitioning and not hangars[0].active, "Hangars descend before their combat phase")
 	check(boss.raiders_sent, "Transit raiders cut in while the hull advances")
@@ -184,7 +184,7 @@ func run() -> void:
 	check(boss.phase == 1 and not boss.transitioning and boss.health == 960, "Remaining escort guns must also be destroyed")
 	for escort in escorts: escort.take_damage(9999)
 	# Bridge gap: between the left fuel tank and the bridge tower.
-	lab.ship.position = Vector2(70,320)
+	lab.ship.position = Vector2(boss.global_position.x - 80,320)
 	await create_timer(2.5).timeout
 	check(boss.phase == 2 and boss.health == 800, "Bridge section is reachable")
 	check(boss.fighters.is_empty(), "Transition removes surviving fighters")
@@ -235,7 +235,7 @@ func run() -> void:
 	await process_frame
 	await process_frame
 	check(not paused and lab.boss.health == 1920 and lab.hits == 0, "Restart while paused resets world and counters")
-	check(lab.camera.zoom == Vector2.ONE and lab.camera.position == Vector2(120,180), "Restart restores normal camera framing")
+	check(lab.camera.zoom == Vector2.ONE and lab.camera.position == Vector2(150,180), "Restart restores normal camera framing")
 	check(lab.ship.process_mode != Node.PROCESS_MODE_DISABLED, "Restart restores player control")
 	# Also dispose the world while its camera tween and chain explosions are live.
 	for section in 3:

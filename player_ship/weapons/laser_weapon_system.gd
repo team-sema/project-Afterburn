@@ -41,11 +41,27 @@ var _pulse_on := true
 var _pulse_elapsed := 0.0
 ## 0..1 visual intensity for pulse fade (damage still uses `_pulse_on`).
 var _pulse_beam_alpha := 1.0
+## laser_whip springs, in global x scaled by sway_gain. Tip and mid-beam chase
+## the ship; their offsets from it bend the beam (laser.md 채찍 광선).
+var _whip_active := false
+var _whip_tip_x := 0.0
+var _whip_tip_v := 0.0
+var _whip_mid_x := 0.0
+var _whip_mid_v := 0.0
+## Glow sprite width scale for the straight beam body. The startup tween drives
+## this; the whip curve widens the sprite on top of it.
+var glow_body_scale_x := 0.0:
+	set(value):
+		glow_body_scale_x = value
+		if glow_line != null:
+			glow_line.scale.x = value + _glow_extra_scale_x
+var _glow_extra_scale_x := 0.0
 
 
 func _ready() -> void:
 	base_core_width = core_line.width
 	base_glow_width_scale = glow_line.scale.x
+	glow_body_scale_x = glow_line.scale.x
 	_base_core_alpha = core_line.default_color.a
 	_base_glow_alpha = glow_line.self_modulate.a
 	_beam_material = glow_line.material as ShaderMaterial
@@ -64,6 +80,7 @@ func _on_weapon_setup() -> void:
 	_pulse_on = true
 	_pulse_elapsed = 0.0
 	_pulse_beam_alpha = 1.0
+	_whip_active = false
 	refract_vfx.clear_segments()
 	_apply_stat_multipliers()
 	_apply_pulse_beam_alpha()
@@ -82,6 +99,7 @@ func _physics_process(delta: float) -> void:
 	if is_shutdown:
 		return
 	_update_pulse(delta)
+	_update_whip(delta)
 	_update_beam_visual(_full_beam_endpoint())
 	_apply_pulse_beam_alpha()
 
@@ -113,7 +131,7 @@ func _apply_stat_multipliers() -> void:
 	var width_mult := get_beam_width_multiplier()
 	_stop_beam_width_tween()
 	core_line.width = base_core_width * width_mult
-	glow_line.scale.x = base_glow_width_scale * width_mult
+	glow_body_scale_x = base_glow_width_scale * width_mult
 
 
 func set_beam_width_multiplier(multiplier: float) -> void:
@@ -129,10 +147,10 @@ func restart_beam_width_animation() -> void:
 	_stop_beam_width_tween()
 	var width_mult := get_beam_width_multiplier()
 	core_line.width = 0.0
-	glow_line.scale.x = 0.0
+	glow_body_scale_x = 0.0
 	if beam_expand_duration <= 0.0:
 		core_line.width = base_core_width * width_mult
-		glow_line.scale.x = base_glow_width_scale * width_mult
+		glow_body_scale_x = base_glow_width_scale * width_mult
 		return
 
 	_beam_width_tween = create_tween().set_parallel(true)
@@ -143,8 +161,8 @@ func restart_beam_width_animation() -> void:
 		beam_expand_duration,
 	).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	_beam_width_tween.tween_property(
-		glow_line,
-		"scale:x",
+		self,
+		"glow_body_scale_x",
 		base_glow_width_scale * width_mult,
 		beam_expand_duration,
 	).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
@@ -173,23 +191,91 @@ func _full_beam_endpoint() -> Vector2:
 	return Vector2(0.0, minf(BEAM_LOCAL_START.y, top_local.y))
 
 
-func _update_beam_visual(endpoint: Vector2) -> void:
-	core_line.set_point_position(0, BEAM_LOCAL_START)
-	core_line.set_point_position(1, endpoint)
-	_update_glow_beam(endpoint)
-
-
-func _update_glow_beam(endpoint: Vector2) -> void:
-	var direction := endpoint - BEAM_LOCAL_START
-	var texture_size := glow_line.texture.get_size()
-	if texture_size.y <= 0.0:
+func _update_whip(delta: float) -> void:
+	var gain := float(get_trait_param(&"laser_whip", &"sway_gain", 3.0))
+	var ship_x := global_position.x * gain
+	var active := has_trait(&"laser_whip")
+	if not active or not _whip_active:
+		# Start (or stay) straight: springs rest on the ship.
+		_whip_active = active
+		_whip_tip_x = ship_x
+		_whip_mid_x = ship_x
+		_whip_tip_v = 0.0
+		_whip_mid_v = 0.0
 		return
-	glow_line.position = (BEAM_LOCAL_START + endpoint) * 0.5
+	var stiffness := float(get_trait_param(&"laser_whip", &"tip_stiffness", 90.0))
+	var damping := float(get_trait_param(&"laser_whip", &"tip_damping", 12.0))
+	var mid_stiffness := stiffness * float(get_trait_param(&"laser_whip", &"mid_stiffness_mult", 2.2))
+	var mid_damping := damping * float(get_trait_param(&"laser_whip", &"mid_damping_mult", 1.4))
+	# Substeps keep the stiffer mid spring stable at low frame rates.
+	var step := delta / 4.0
+	for _i in 4:
+		_whip_tip_v += ((ship_x - _whip_tip_x) * stiffness - _whip_tip_v * damping) * step
+		_whip_tip_x += _whip_tip_v * step
+		_whip_mid_v += ((ship_x - _whip_mid_x) * mid_stiffness - _whip_mid_v * mid_damping) * step
+		_whip_mid_x += _whip_mid_v * step
+
+
+## x = beam tip lateral offset, y = mid-beam curve height (local px, both 0 when straight).
+func get_whip_shape(endpoint: Vector2 = _full_beam_endpoint()) -> Vector2:
+	if not _whip_active:
+		return Vector2.ZERO
+	var ship_x := global_position.x * float(get_trait_param(&"laser_whip", &"sway_gain", 3.0))
+	var limit := BEAM_LOCAL_START.distance_to(endpoint) * float(
+		get_trait_param(&"laser_whip", &"max_sway_ratio", 0.18)
+	)
+	var tip := clampf(_whip_tip_x - ship_x, -limit, limit)
+	var mid := clampf(_whip_mid_x - ship_x, -limit, limit)
+	return Vector2(tip, (mid - tip * 0.5) * float(get_trait_param(&"laser_whip", &"bend", 0.25)))
+
+
+## Beam centre line in local space: straight chord to the swayed tip plus the
+## mid-beam curve. Two points when the beam is straight.
+func get_beam_points(endpoint: Vector2 = _full_beam_endpoint()) -> PackedVector2Array:
+	var shape := get_whip_shape(endpoint)
+	if shape.is_zero_approx():
+		return PackedVector2Array([BEAM_LOCAL_START, endpoint])
+	var segments := maxi(1, int(get_trait_param(&"laser_whip", &"segments", 12)))
+	var points := PackedVector2Array()
+	for index in segments + 1:
+		var u := float(index) / float(segments)
+		var point := BEAM_LOCAL_START.lerp(endpoint, u)
+		point.x += shape.x * u + shape.y * 4.0 * u * (1.0 - u)
+		points.append(point)
+	return points
+
+
+func _update_beam_visual(endpoint: Vector2) -> void:
+	var points := get_beam_points(endpoint)
+	core_line.points = points
+	_update_glow_beam(points[0], points[points.size() - 1], get_whip_shape(endpoint).y)
+
+
+func _update_glow_beam(start: Vector2, end: Vector2, curve: float = 0.0) -> void:
+	var direction := end - start
+	var texture_size := glow_line.texture.get_size()
+	if texture_size.y <= 0.0 or texture_size.x <= 0.0:
+		return
+	glow_line.position = (start + end) * 0.5
 	glow_line.rotation = direction.angle() - PI * 0.5
 	glow_line.scale.y = direction.length() / texture_size.y
+	# Widen the sprite so the shader can draw the curve inside its quad.
+	var curve_px := Vector2(curve, 0.0).dot(Vector2.RIGHT.rotated(glow_line.rotation))
+	var body_px := glow_body_scale_x * texture_size.x
+	var sprite_px := body_px + 2.0 * absf(curve_px)
+	_glow_extra_scale_x = (sprite_px - body_px) / texture_size.x
+	glow_line.scale.x = glow_body_scale_x + _glow_extra_scale_x
 	if _beam_material != null:
 		_beam_material.set_shader_parameter(&"beam_length", direction.length())
 		_beam_material.set_shader_parameter(&"beam_time", _clock)
+		_beam_material.set_shader_parameter(
+			&"body_fraction",
+			body_px / sprite_px if sprite_px > 0.0 else 1.0,
+		)
+		_beam_material.set_shader_parameter(
+			&"curve_offset",
+			curve_px / (sprite_px * 0.5) if sprite_px > 0.0 else 0.0,
+		)
 
 
 func _update_pulse(delta: float) -> void:
@@ -234,6 +320,7 @@ func _apply_pulse_beam_alpha() -> void:
 
 func _trait_damage_mult() -> float:
 	var mult := float(get_trait_param(&"laser_wide_lens", &"damage_mult", 1.0))
+	mult *= float(get_trait_param(&"laser_whip", &"damage_mult", 1.0))
 	if has_trait(&"laser_pulse") and _pulse_on:
 		mult *= float(get_trait_param(&"laser_pulse", &"active_damage_mult", 2.0))
 	return mult
@@ -272,53 +359,65 @@ func _damage_all_along_beam(endpoint: Vector2) -> void:
 	var space := get_world_2d().direct_space_state
 	if space == null:
 		return
-	var from_global := to_global(BEAM_LOCAL_START)
-	var endpoint_global := to_global(endpoint)
-	var beam := endpoint_global - from_global
-	if beam.length_squared() < 0.0001:
-		return
-	var shape := RectangleShape2D.new()
-	shape.size = Vector2(get_beam_hit_width(), beam.length())
-	var query := PhysicsShapeQueryParameters2D.new()
-	query.shape = shape
-	# Rectangle local +Y runs along the beam.
-	query.transform = Transform2D(beam.angle() - PI * 0.5, from_global + beam * 0.5)
-	query.collision_mask = ENEMY_HURTBOX_MASK
-	query.collide_with_areas = true
-	query.collide_with_bodies = false
+	var points := PackedVector2Array()
+	for point in get_beam_points(endpoint):
+		points.append(to_global(point))
 
-	# Gather every overlap first; one hurtbox may report several shapes.
+	# One hit-width rectangle per beam segment (a single one when straight).
+	# Gather every overlap first; one hurtbox may report several shapes or
+	# segments but is hit once per tick.
 	var hurtboxes: Array[HurtboxComponent] = []
 	var seen: Dictionary = {}
-	var exclude: Array[RID] = []
-	while true:
-		query.exclude = exclude
-		var batch := space.intersect_shape(query, HIT_QUERY_BATCH)
-		for result in batch:
-			exclude.append(result["rid"])
-			var hurtbox := result.get("collider") as HurtboxComponent
-			if hurtbox == null or seen.has(hurtbox.get_instance_id()):
-				continue
-			seen[hurtbox.get_instance_id()] = true
-			hurtboxes.append(hurtbox)
-		if batch.size() < HIT_QUERY_BATCH:
-			break
+	for index in points.size() - 1:
+		var segment := points[index + 1] - points[index]
+		if segment.length_squared() < 0.0001:
+			continue
+		var shape := RectangleShape2D.new()
+		shape.size = Vector2(get_beam_hit_width(), segment.length())
+		var query := PhysicsShapeQueryParameters2D.new()
+		query.shape = shape
+		# Rectangle local +Y runs along the segment.
+		query.transform = Transform2D(segment.angle() - PI * 0.5, points[index] + segment * 0.5)
+		query.collision_mask = ENEMY_HURTBOX_MASK
+		query.collide_with_areas = true
+		query.collide_with_bodies = false
+		var exclude: Array[RID] = []
+		while true:
+			query.exclude = exclude
+			var batch := space.intersect_shape(query, HIT_QUERY_BATCH)
+			for result in batch:
+				exclude.append(result["rid"])
+				var hurtbox := result.get("collider") as HurtboxComponent
+				if hurtbox == null or seen.has(hurtbox.get_instance_id()):
+					continue
+				seen[hurtbox.get_instance_id()] = true
+				hurtboxes.append(hurtbox)
+			if batch.size() < HIT_QUERY_BATCH:
+				break
 
 	var primary_hits: Array[Dictionary] = []
 	for hurtbox in hurtboxes:
 		if not is_instance_valid(hurtbox) or hurtbox.is_invincible:
 			continue
-		var contact := Geometry2D.get_closest_point_to_segment(
-			hurtbox.global_position,
-			from_global,
-			endpoint_global,
-		)
+		var contact := _closest_point_on_beam(hurtbox.global_position, points)
 		primary_hits.append({"collider": hurtbox, "position": contact})
 		_apply_beam_hit(hurtbox, 1.0)
 		ImpactVfx.emit_from(self, contact, impact_profile, Vector2.DOWN)
 
 	if has_trait(&"laser_refract") and not primary_hits.is_empty():
 		_apply_refract(primary_hits)
+
+
+func _closest_point_on_beam(target: Vector2, points: PackedVector2Array) -> Vector2:
+	var best := points[0]
+	var best_distance := INF
+	for index in points.size() - 1:
+		var candidate := Geometry2D.get_closest_point_to_segment(target, points[index], points[index + 1])
+		var distance := candidate.distance_squared_to(target)
+		if distance < best_distance:
+			best_distance = distance
+			best = candidate
+	return best
 
 
 func _apply_beam_hit(hurtbox: HurtboxComponent, extra_mult: float) -> void:

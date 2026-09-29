@@ -1,6 +1,7 @@
 extends Node2D
 ## Faint drifting dust above the hull: forward motion stays readable even
 ## when the carrier fills the screen and hides the starfield.
+const Playfield := preload("res://menus/playfield_layout.gd")
 const COUNT := 34
 const SPEED := 60.0
 var boss: Node2D
@@ -16,7 +17,7 @@ func _physics_process(delta: float) -> void:
 func _draw() -> void:
 	if fade <= 0: return
 	for i in COUNT:
-		var seed_x := float(hash(i * 31) % 240)
+		var seed_x := float(hash(i * 31) % Playfield.SIZE.x)
 		var lane_speed := SPEED * (0.7 + float(hash(i * 17) % 60) / 100.0)
 		var y := fposmod(float(hash(i * 13) % 360) + clock * lane_speed, 380.0) - 10.0
 		var alpha := (0.08 + float(hash(i * 5) % 10) / 100.0) * fade

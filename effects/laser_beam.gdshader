@@ -22,6 +22,11 @@ uniform float streak_strength = 0.7;
 uniform float flicker_hz = 23.0;
 uniform float flicker_amount = 0.08;
 uniform float tail_fade = 10.0;
+// laser_whip bend: the sprite is widened to fit the curve. body_fraction is the
+// beam body width over the sprite width; curve_offset is the mid-beam lateral
+// shift in half-width units. Defaults draw the straight beam unchanged.
+uniform float body_fraction = 1.0;
+uniform float curve_offset = 0.0;
 
 varying vec4 vertex_tint;
 
@@ -40,7 +45,8 @@ void fragment() {
 		0.6 * sin(beam_time * TAU * flicker_hz)
 		+ 0.4 * sin(beam_time * TAU * flicker_hz * 1.61 + 1.3)
 	);
-	float d = abs(UV.x - 0.5) * 2.0 / wobble;
+	float center = curve_offset * 4.0 * UV.y * (1.0 - UV.y);
+	float d = abs((UV.x - 0.5) * 2.0 - center) / max(body_fraction, 0.001) / wobble;
 	float tight = exp(-pow(d / tight_radius, 2.0));
 	float wide = exp(-pow(d / wide_radius, 2.0));
 

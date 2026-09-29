@@ -1,4 +1,5 @@
 extends Node2D
+const Playfield := preload("res://menus/playfield_layout.gd")
 signal health_changed(current: int, maximum: int)
 signal section_changed(title: String)
 signal destruction_started
@@ -41,7 +42,7 @@ var aftershock_index := 0
 var detail: Node2D
 
 func _ready() -> void:
-	position = Vector2(120, -170)
+	position = Vector2(Playfield.CENTER.x, -170)
 	var hull_visual := preload("res://labs/bosses/carrier/carrier_neon_visual.gd").make(preload("res://assets/enemies/carrier_hull.svg"), 0.5, Color(1.0,0.08,0.26))
 	hull_visual.position.y = -350
 	hull_visual.get_node("Core").self_modulate = Color(0.35,0.12,0.2,0.8)

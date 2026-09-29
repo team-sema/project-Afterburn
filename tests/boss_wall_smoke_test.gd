@@ -21,7 +21,7 @@ func _run() -> void:
 	current_scene = world
 	var player := Node2D.new()
 	player.add_to_group("player")
-	player.position = Vector2(120, 260)
+	player.position = Vector2(150, 260)
 	world.add_child(player)
 	var registry := EnemyAugmentRegistry.new()
 	world.add_child(registry)
@@ -30,7 +30,7 @@ func _run() -> void:
 	_expect(scene != null, "boss_wall.tscn loads")
 	var boss := scene.instantiate() as Enemy
 	boss.augment_registry = registry
-	boss.global_position = Vector2(120, 32)
+	boss.global_position = Vector2(150, 32)
 	boss.is_boss = true
 	world.add_child(boss)
 	await process_frame

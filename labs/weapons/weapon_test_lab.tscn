@@ -81,7 +81,7 @@ grow_vertical = 2
 theme_override_constants/separation = 0
 
 [node name="LeftPanel" type="PanelContainer" parent="Layout" unique_id=1603756471]
-custom_minimum_size = Vector2(200, 0)
+custom_minimum_size = Vector2(170, 0)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBox_left_panel")
 
@@ -185,6 +185,8 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 24)
 layout_mode = 2
 text = "표적 / 적 탄환 정리"
+clip_text = true
+text_overrun_behavior = 3
 
 [node name="CornerFrame" type="Control" parent="Layout/LeftPanel" unique_id=1785209959]
 layout_mode = 2
@@ -192,7 +194,7 @@ mouse_filter = 2
 script = ExtResource("8_corner_frame")
 
 [node name="Playfield" type="Control" parent="Layout" unique_id=569368475]
-custom_minimum_size = Vector2(240, 360)
+custom_minimum_size = Vector2(300, 360)
 layout_mode = 2
 
 [node name="ViewportContainer" type="SubViewportContainer" parent="Layout/Playfield" unique_id=609596826]
@@ -208,7 +210,7 @@ stretch = true
 [node name="PlayfieldViewport" type="SubViewport" parent="Layout/Playfield/ViewportContainer" unique_id=352724131]
 handle_input_locally = false
 use_hdr_2d = true
-size = Vector2i(240, 360)
+size = Vector2i(300, 360)
 render_target_update_mode = 4
 
 [node name="WeaponTestGameplay" type="Node2D" parent="Layout/Playfield/ViewportContainer/PlayfieldViewport" unique_id=1991976863 groups=["gameplay_world"]]
@@ -227,7 +229,7 @@ script = ExtResource("5_player_registry")
 facilities = Array[ExtResource("9_facility_definition")]([ExtResource("10_weapon_room"), ExtResource("11_hangar"), ExtResource("12_engine"), ExtResource("13_hull"), ExtResource("14_radar"), ExtResource("15_shield")])
 
 [node name="Ship" parent="Layout/Playfield/ViewportContainer/PlayfieldViewport/WeaponTestGameplay" unique_id=1687994001 node_paths=PackedStringArray("augment_registry") instance=ExtResource("2_ship")]
-position = Vector2(80, 196)
+position = Vector2(100, 196)
 augment_registry = NodePath("../PlayerAugmentRegistry")
 
 [node name="SpaceBackground" parent="Layout/Playfield/ViewportContainer/PlayfieldViewport/WeaponTestGameplay" unique_id=830073888 instance=ExtResource("3_background")]
@@ -264,7 +266,7 @@ script = ExtResource("8_corner_frame")
 inset = 5.0
 
 [node name="RightPanel" type="PanelContainer" parent="Layout" unique_id=98881361]
-custom_minimum_size = Vector2(200, 0)
+custom_minimum_size = Vector2(170, 0)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBox_right_panel")
 
@@ -355,6 +357,8 @@ custom_minimum_size = Vector2(0, 24)
 layout_mode = 2
 disabled = true
 text = "선택 무기 모듈 초기화"
+clip_text = true
+text_overrun_behavior = 3
 
 [node name="ActionRow" type="HBoxContainer" parent="Layout/RightPanel/Margin/VBox" unique_id=358552544]
 layout_mode = 2

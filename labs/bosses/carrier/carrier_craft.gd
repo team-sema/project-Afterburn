@@ -5,6 +5,7 @@ signal destroyed
 
 enum Kind { FIGHTER, STRIKER, RAIDER }
 const Neon = preload("res://labs/bosses/carrier/carrier_neon_visual.gd")
+const Playfield := preload("res://menus/playfield_layout.gd")
 const RAIL_LOCK := 0.55
 const STRIKER_SPEED := 280.0
 const RAIDER_SPEED := 260.0
@@ -101,7 +102,7 @@ func _physics_process(delta: float) -> void:
 func _fly_fighter(delta: float) -> void:
 	var velocity := Vector2(0, lerpf(24, 78, clampf(age / 0.65, 0, 1)))
 	if age > 0.65:
-		var lane := clampf(flight_origin.x + (formation_slot - 1) * 34 + firing_side * 12, 18, 222)
+		var lane := clampf(flight_origin.x + (formation_slot - 1) * 34 + firing_side * 12, 18, Playfield.SIZE.x - 18)
 		velocity.x = clampf((lane - position.x) * 2.5, -65, 65)
 	position += velocity * delta
 	visual.rotation = lerp_angle(visual.rotation, Vector2.DOWN.angle_to(velocity), delta * 5)
