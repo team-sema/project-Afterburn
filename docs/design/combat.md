@@ -61,7 +61,7 @@ Hitbox.area_entered
 
 2026-09-16: 원탄·쌀탄·대형 구탄과 직선·파동 이동을 조합하는 공통 적탄 및 `labs/bullet/bullet_lab.tscn` 비교 장면을 구현했다. 아래 1차 실험 수치를 사용한다. 최초 구현은 비교 시험용이었으며 현재 Drone은 BarrageSequence와 공통 탄을 사용한다. 선회·가감속·호밍과 곡선 레이저도 아래 구현 완료 절을 따른다. 새 적탄의 이동/예측은 동일한 시간 함수로 계산하고, 정지 안전 비율은 궤적 표본과 탄별 판정 외접 반지름 + 6px 여유를 사용한다. 기존 탄은 기존 직선 예측을 유지한다.
 
-시험 장면은 외형·이동·발사 패턴 선택, 일시정지·재시작·판정 표시·탄소거를 제공한다. 방향키와 Enter로 UI를 조작하고 WASD로 시험 기체를 움직인다. 시험 기체 피격은 횟수를 세며 0.6초 무적을 적용한다. 실제 성장/체력 소모를 대신하는 비교용 기체다.
+시험 장면(Bullet Lab)은 패턴 목록 하나를 **조합**(부채꼴·원형·단발 + 탄 모양·이동 선택) · **데모**(꽃잎 레이저·회전 링·16방향·색/크기 변화·호밍) · **스크립트**(`patterns/` 자동 목록, 끝에 경로 직접 열기) 구역으로 나눠 보여 준다. 탄 모양·이동은 조합일 때만 켜지고, 이동 목록은 모양에 따라 탄은 직선·파동, 레이저는 오른쪽·왼쪽 선회, 기존 기본탄은 직선만 둔다. 설명 줄은 고른 항목의 수치나 스크립트 파일명·첫 `##` 주석을 보여 준다. 긴 이름은 패널 폭 안에서 말줄임한다. 이 밖에 일시정지·재시작·판정 표시·탄소거를 제공한다. 검증: `tests/bullet_lab_pattern_picker_test.gd`. 방향키와 Enter로 UI를 조작하고 WASD로 시험 기체를 움직인다. 시험 기체 피격은 횟수를 세며 0.6초 무적을 적용한다. 실제 성장/체력 소모를 대신하는 비교용 기체다.
 
 통합 패턴 작업 환경 · 구현 완료:
 
@@ -174,7 +174,7 @@ if not player.play(sequence, emitter, world):
 - 레이저는 `shot.kind = BarrageShot.Kind.TRAIL_LASER`와 `behavior`, `trail_duration`, `core_width`, `hit_width`, `lifetime`으로 구성한다. 일반 탄도 같은 `behavior`를 사용한다. 레거시 기본탄은 `Kind.LEGACY`로 비교할 수 있다.
 - `player.pause()`/`resume()`은 **발사 진행만** 멈추고 재개한다. 게임 전체를 멈추려면 트리 일시정지를 사용한다. `stop()`은 미래 발사만 취소한다. 자연 종료 시 `finished` 신호가 한 번 발생하며 stop/재생 교체에는 발생하지 않는다. `volley_fired(projectiles)`는 생성된 탄 목록을 반환하는 신호다. 잘못된 play는 이전 재생을 중단하고 false와 `last_error`를 반환한다.
 - `steps: Array[BarrageStep]`와 `repeat_count`는 인스펙터에서도 편집할 수 있다. 실행 중 원본 변경은 다음 play에 반영한다. `.tres`의 예제는 `resources/projectiles/rotating_ring_sequence.tres`다.
-- 시험: `labs/bullet/presets/barrage_api_lab.tscn`에서 F6 또는 `tools/run-godot.cmd res://labs/bullet/presets/barrage_api_lab.tscn`. 16발 링을 0.2초 간격으로 6회, 매회 기준각 +10°, 마지막 발사 후 1.2초 휴식하며 반복한다. 기존 시험 장면의 패턴 메뉴에서도 **API · 회전 링 연속 발사**를 선택할 수 있다.
+- 시험: `labs/bullet/presets/barrage_api_lab.tscn`에서 F6 또는 `tools/run-godot.cmd res://labs/bullet/presets/barrage_api_lab.tscn`. 16발 링을 0.2초 간격으로 6회, 매회 기준각 +10°, 마지막 발사 후 1.2초 휴식하며 반복한다. Bullet Lab 패턴 목록의 데모 **회전 링 연속 발사**로도 고를 수 있다.
 
 #### 탄별 Behavior와 몸체 분리 · 구현 완료
 

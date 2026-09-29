@@ -97,7 +97,7 @@ func _test_lab() -> void:
 	lab.pattern_player.stop()
 	lab.clear_bullets()
 	await process_frame
-	_expect(root.gui_get_focus_owner() == lab.shape_choice, "lab starts with keyboard focus")
+	_expect(root.gui_get_focus_owner() == lab.pattern_choice, "lab starts with keyboard focus on the pattern list")
 	var help: Control = lab.get_node("Controls").get_children().back()
 	_expect(help.get_global_rect().end.y <= 360, "all lab instructions fit inside the viewport")
 	lab.safety_button.grab_focus()
