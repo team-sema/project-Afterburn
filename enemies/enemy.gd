@@ -1,6 +1,10 @@
 class_name Enemy
 extends Node2D
 
+## Nodes in this group get on_enemy_defeated(enemy) when any enemy's health
+## reaches zero (e.g. the resonance fire rule).
+const DEFEAT_LISTENER_GROUP := &"enemy_defeat_listeners"
+
 enum MovementMode {
 	INDIVIDUAL,
 	FORMATION_MEMBER,
@@ -69,6 +73,7 @@ func _on_no_health() -> void:
 	if _is_dying:
 		return
 	_is_dying = true
+	get_tree().call_group(DEFEAT_LISTENER_GROUP, &"on_enemy_defeated", self)
 	movement_controller.stop()
 	score_component.adjust_score()
 	destroyed_component.spawn_destroy_effect()

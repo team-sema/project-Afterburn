@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="WeaponTraitDefinition" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://resources/weapons/weapon_trait_definition.gd" id="1_def"]
+[ext_resource type="Texture2D" uid="uid://bvhbc0sja5xx" path="res://assets/weapons/weapon_main_laser.svg" id="2_icon"]
+
+[resource]
+script = ExtResource("1_def")
+trait_id = &"laser_spectrum_prism"
+display_name = "분광 프리즘"
+description = "빔이 좌우 {side_angle_deg}°로 갈라져 3줄이 됩니다. 빔마다 피해 ×{damage_mult}."
+icon = ExtResource("2_icon")
+target_weapon_id = &"main_laser"
+tier = 2
+max_rank = 1
+params = {
+"damage_mult": 0.45,
+"side_angle_deg": 12
+}
+rank_overrides = Array[Dictionary]([])

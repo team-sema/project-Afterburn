@@ -2,8 +2,8 @@ extends SceneTree
 
 const TRAIT_DIR := "res://resources/weapons/traits"
 const CARD_DIR := "res://resources/player_augments/weapon"
-## Silver 14 + Gold 22 + Prismatic 1.
-const EXPECTED_TRAIT_COUNTS := [14, 22, 1]
+## Silver 14 + Gold 22 + Prismatic 4.
+const EXPECTED_TRAIT_COUNTS := [14, 22, 4]
 const MAX_RANK_BY_TIER := [5, 3, 1]
 
 var failures: PackedStringArray = []

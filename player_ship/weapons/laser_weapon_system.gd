@@ -56,6 +56,8 @@ var glow_body_scale_x := 0.0:
 		if glow_line != null:
 			glow_line.scale.x = value + _glow_extra_scale_x
 var _glow_extra_scale_x := 0.0
+## laser_spectrum_prism side beams: {angle, core: Line2D, glow: Sprite2D, material}.
+var _side_beams: Array[Dictionary] = []
 
 
 func _ready() -> void:
@@ -67,6 +69,7 @@ func _ready() -> void:
 	_beam_material = glow_line.material as ShaderMaterial
 	damage_hitbox.damage = base_tick_damage
 	damage_tick_timer.timeout.connect(apply_damage_tick)
+	_sync_side_beams()
 	_apply_stat_multipliers()
 	damage_tick_timer.start()
 	_update_beam_visual(_full_beam_endpoint())
@@ -82,6 +85,7 @@ func _on_weapon_setup() -> void:
 	_pulse_beam_alpha = 1.0
 	_whip_active = false
 	refract_vfx.clear_segments()
+	_sync_side_beams()
 	_apply_stat_multipliers()
 	_apply_pulse_beam_alpha()
 	restart_beam_width_animation()
@@ -90,6 +94,7 @@ func _on_weapon_setup() -> void:
 func _on_weapon_trait_changed(changed_weapon_id: StringName, _trait_id: StringName, _new_rank: int) -> void:
 	if changed_weapon_id != get_weapon_id():
 		return
+	_sync_side_beams()
 	_apply_stat_multipliers()
 	restart_beam_width_animation()
 
@@ -113,6 +118,14 @@ func apply_damage_tick() -> void:
 	_update_beam_visual(endpoint)
 	_damage_all_along_beam(endpoint)
 	_prune_heat_stacks()
+
+
+## Resonance bonus: one extra damage tick (nothing while the pulse is off).
+func fire_bonus_shot() -> bool:
+	if is_shutdown or (has_trait(&"laser_pulse") and not _pulse_on):
+		return false
+	apply_damage_tick()
+	return true
 
 
 ## Shared by the visual beam and the damage band.
@@ -245,37 +258,104 @@ func get_beam_points(endpoint: Vector2 = _full_beam_endpoint()) -> PackedVector2
 	return points
 
 
+## Every beam centre line in local space: the main beam first, then the
+## laser_spectrum_prism side beams (the main beam turned about the muzzle and
+## stretched by 1/cos so their tips reach the same height).
+func get_beam_paths(endpoint: Vector2 = _full_beam_endpoint()) -> Array[PackedVector2Array]:
+	var main := get_beam_points(endpoint)
+	var paths: Array[PackedVector2Array] = [main]
+	for side in _side_beams:
+		paths.append(_side_beam_points(main, float(side["angle"])))
+	return paths
+
+
+func _side_beam_points(main: PackedVector2Array, angle: float) -> PackedVector2Array:
+	var stretch := 1.0 / cos(angle)
+	var points := PackedVector2Array()
+	for point in main:
+		points.append(BEAM_LOCAL_START + (point - BEAM_LOCAL_START).rotated(angle) * stretch)
+	return points
+
+
+func _sync_side_beams() -> void:
+	var wanted := has_trait(&"laser_spectrum_prism") and is_node_ready()
+	if wanted != _side_beams.is_empty():
+		return
+	for side in _side_beams:
+		(side["core"] as Node).queue_free()
+		(side["glow"] as Node).queue_free()
+	_side_beams.clear()
+	if not wanted:
+		return
+	var angle := deg_to_rad(float(get_trait_param(&"laser_spectrum_prism", &"side_angle_deg", 12.0)))
+	for sign_value in [-1.0, 1.0]:
+		var glow := glow_line.duplicate() as Sprite2D
+		var material := (glow_line.material as ShaderMaterial).duplicate() as ShaderMaterial
+		glow.material = material
+		var core := core_line.duplicate() as Line2D
+		add_child(glow)
+		add_child(core)
+		_side_beams.append({"angle": angle * sign_value, "core": core, "glow": glow, "material": material})
+
+
 func _update_beam_visual(endpoint: Vector2) -> void:
 	var points := get_beam_points(endpoint)
 	core_line.points = points
-	_update_glow_beam(points[0], points[points.size() - 1], get_whip_shape(endpoint).y)
+	var curve := get_whip_shape(endpoint).y
+	_update_glow_beam(points[0], points[points.size() - 1], curve)
+	for side in _side_beams:
+		var angle := float(side["angle"])
+		var side_points := _side_beam_points(points, angle)
+		var core := side["core"] as Line2D
+		core.points = side_points
+		core.width = core_line.width
+		_layout_glow(
+			side["glow"],
+			side["material"],
+			side_points[0],
+			side_points[side_points.size() - 1],
+			Vector2(curve, 0.0).rotated(angle) / cos(angle),
+		)
 
 
 func _update_glow_beam(start: Vector2, end: Vector2, curve: float = 0.0) -> void:
+	_glow_extra_scale_x = _layout_glow(glow_line, _beam_material, start, end, Vector2(curve, 0.0))
+
+
+## Places one glow sprite along start->end and returns the extra width scale
+## that leaves room for the curve inside its quad.
+func _layout_glow(
+	sprite: Sprite2D,
+	material: ShaderMaterial,
+	start: Vector2,
+	end: Vector2,
+	curve: Vector2,
+) -> float:
 	var direction := end - start
-	var texture_size := glow_line.texture.get_size()
+	var texture_size := sprite.texture.get_size()
 	if texture_size.y <= 0.0 or texture_size.x <= 0.0:
-		return
-	glow_line.position = (start + end) * 0.5
-	glow_line.rotation = direction.angle() - PI * 0.5
-	glow_line.scale.y = direction.length() / texture_size.y
+		return 0.0
+	sprite.position = (start + end) * 0.5
+	sprite.rotation = direction.angle() - PI * 0.5
+	sprite.scale.y = direction.length() / texture_size.y
 	# Widen the sprite so the shader can draw the curve inside its quad.
-	var curve_px := Vector2(curve, 0.0).dot(Vector2.RIGHT.rotated(glow_line.rotation))
+	var curve_px := curve.dot(Vector2.RIGHT.rotated(sprite.rotation))
 	var body_px := glow_body_scale_x * texture_size.x
 	var sprite_px := body_px + 2.0 * absf(curve_px)
-	_glow_extra_scale_x = (sprite_px - body_px) / texture_size.x
-	glow_line.scale.x = glow_body_scale_x + _glow_extra_scale_x
-	if _beam_material != null:
-		_beam_material.set_shader_parameter(&"beam_length", direction.length())
-		_beam_material.set_shader_parameter(&"beam_time", _clock)
-		_beam_material.set_shader_parameter(
+	var extra := (sprite_px - body_px) / texture_size.x
+	sprite.scale.x = glow_body_scale_x + extra
+	if material != null:
+		material.set_shader_parameter(&"beam_length", direction.length())
+		material.set_shader_parameter(&"beam_time", _clock)
+		material.set_shader_parameter(
 			&"body_fraction",
 			body_px / sprite_px if sprite_px > 0.0 else 1.0,
 		)
-		_beam_material.set_shader_parameter(
+		material.set_shader_parameter(
 			&"curve_offset",
 			curve_px / (sprite_px * 0.5) if sprite_px > 0.0 else 0.0,
 		)
+	return extra
 
 
 func _update_pulse(delta: float) -> void:
@@ -316,11 +396,19 @@ func _apply_pulse_beam_alpha() -> void:
 	var show_beam := intensity > 0.001
 	core_line.visible = show_beam
 	glow_line.visible = show_beam
+	for side in _side_beams:
+		var core := side["core"] as Line2D
+		var glow := side["glow"] as Sprite2D
+		core.default_color = core_color
+		glow.self_modulate = glow_mod
+		core.visible = show_beam
+		glow.visible = show_beam
 
 
 func _trait_damage_mult() -> float:
 	var mult := float(get_trait_param(&"laser_wide_lens", &"damage_mult", 1.0))
 	mult *= float(get_trait_param(&"laser_whip", &"damage_mult", 1.0))
+	mult *= float(get_trait_param(&"laser_spectrum_prism", &"damage_mult", 1.0))
 	if has_trait(&"laser_pulse") and _pulse_on:
 		mult *= float(get_trait_param(&"laser_pulse", &"active_damage_mult", 2.0))
 	return mult
@@ -359,10 +447,23 @@ func _damage_all_along_beam(endpoint: Vector2) -> void:
 	var space := get_world_2d().direct_space_state
 	if space == null:
 		return
-	var points := PackedVector2Array()
-	for point in get_beam_points(endpoint):
-		points.append(to_global(point))
+	# Each beam hits on its own: a hurtbox under two spectrum beams takes two hits.
+	var primary_hits: Array[Dictionary] = []
+	for path in get_beam_paths(endpoint):
+		var points := PackedVector2Array()
+		for point in path:
+			points.append(to_global(point))
+		_damage_along_path(space, points, primary_hits)
 
+	if has_trait(&"laser_refract") and not primary_hits.is_empty():
+		_apply_refract(primary_hits)
+
+
+func _damage_along_path(
+	space: PhysicsDirectSpaceState2D,
+	points: PackedVector2Array,
+	primary_hits: Array[Dictionary],
+) -> void:
 	# One hit-width rectangle per beam segment (a single one when straight).
 	# Gather every overlap first; one hurtbox may report several shapes or
 	# segments but is hit once per tick.
@@ -395,17 +496,15 @@ func _damage_all_along_beam(endpoint: Vector2) -> void:
 			if batch.size() < HIT_QUERY_BATCH:
 				break
 
-	var primary_hits: Array[Dictionary] = []
+	# Sparks fly back toward the muzzle along this beam.
+	var back := (points[0] - points[points.size() - 1]).normalized()
 	for hurtbox in hurtboxes:
 		if not is_instance_valid(hurtbox) or hurtbox.is_invincible:
 			continue
 		var contact := _closest_point_on_beam(hurtbox.global_position, points)
 		primary_hits.append({"collider": hurtbox, "position": contact})
 		_apply_beam_hit(hurtbox, 1.0)
-		ImpactVfx.emit_from(self, contact, impact_profile, Vector2.DOWN)
-
-	if has_trait(&"laser_refract") and not primary_hits.is_empty():
-		_apply_refract(primary_hits)
+		ImpactVfx.emit_from(self, contact, impact_profile, back)
 
 
 func _closest_point_on_beam(target: Vector2, points: PackedVector2Array) -> Vector2:

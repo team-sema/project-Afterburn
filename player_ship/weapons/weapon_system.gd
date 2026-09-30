@@ -17,6 +17,7 @@ var _temp_damage_multiplier := 1.0
 var _boss_damage_multiplier := 1.0
 ## Run rule cards (e.g. fourth weapon bay trade-off).
 var _rule_damage_multiplier := 1.0
+var _rule_fire_rate_multiplier := 1.0
 ## Deprecated hangar ammo bonus (always 0 under unified weapons).
 var _consumable_capacity_bonus := 0
 
@@ -179,6 +180,12 @@ func set_rule_damage_multiplier(multiplier: float) -> void:
 	_apply_stat_multipliers()
 
 
+func set_rule_fire_rate_multiplier(multiplier: float) -> void:
+	assert(multiplier > 0.0, "Rule fire rate multiplier must be greater than zero.")
+	_rule_fire_rate_multiplier = multiplier
+	_apply_stat_multipliers()
+
+
 ## Hangar bonus. Only consumables react; the base weapon ignores it.
 func set_consumable_capacity_bonus(bonus: int) -> void:
 	var clamped_bonus := maxi(0, bonus)
@@ -198,7 +205,7 @@ func _on_consumable_capacity_bonus_changed(_delta: int) -> void:
 
 
 func get_effective_fire_rate_multiplier() -> float:
-	return _global_fire_rate_multiplier * _facility_fire_rate_multiplier
+	return _global_fire_rate_multiplier * _facility_fire_rate_multiplier * _rule_fire_rate_multiplier
 
 
 func get_effective_damage_multiplier() -> float:
@@ -256,6 +263,15 @@ func resolve_hit_damage(base_damage: int, hurtbox: HurtboxComponent = null) -> i
 		if node is Enemy and (node as Enemy).is_boss:
 			mult *= _boss_damage_multiplier
 	return maxi(1, roundi(base_damage * mult))
+
+
+## One extra firing on top of the normal cadence (resonance fire rule).
+## Weapons with fire() fire once; others override or return false.
+func fire_bonus_shot() -> bool:
+	if is_shutdown or not has_method(&"fire"):
+		return false
+	call(&"fire")
+	return true
 
 
 func _apply_stat_multipliers() -> void:

@@ -30,6 +30,7 @@ var _facility_fire_rate_multiplier := 1.0
 var _temp_damage_multiplier := 1.0
 var _boss_damage_multiplier := 1.0
 var _rule_damage_multiplier := 1.0
+var _rule_fire_rate_multiplier := 1.0
 
 
 func _ready() -> void:
@@ -300,6 +301,15 @@ func get_rule_damage_multiplier() -> float:
 	return _rule_damage_multiplier
 
 
+func set_rule_fire_rate_multiplier(multiplier: float) -> void:
+	_rule_fire_rate_multiplier = maxf(0.01, multiplier)
+	_refresh_all_weapon_multipliers()
+
+
+func get_rule_fire_rate_multiplier() -> float:
+	return _rule_fire_rate_multiplier
+
+
 ## Compatibility alias used by older facility applier call sites during migration.
 func set_facility_main_damage_multiplier(multiplier: float) -> void:
 	set_facility_damage_multiplier(multiplier)
@@ -492,6 +502,7 @@ func _apply_multipliers_to_weapon(weapon: WeaponSystem) -> void:
 	weapon.set_temp_damage_multiplier(_temp_damage_multiplier)
 	weapon.set_boss_damage_multiplier(_boss_damage_multiplier)
 	weapon.set_rule_damage_multiplier(_rule_damage_multiplier)
+	weapon.set_rule_fire_rate_multiplier(_rule_fire_rate_multiplier)
 	weapon.set_consumable_capacity_bonus(0)
 
 

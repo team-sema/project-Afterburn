@@ -10,6 +10,8 @@ var base_move_speed_multiplier: float
 var facility_move_speed_multiplier := 1.0
 ## Temporary ENGINE_BOOST surge from EngineBoostComponent.
 var boost_move_speed_multiplier := 1.0
+## Run rule cards (e.g. time warp field trade-off).
+var rule_move_speed_multiplier := 1.0
 
 
 func _ready() -> void:
@@ -33,6 +35,11 @@ func set_facility_move_speed_multiplier(multiplier: float) -> void:
 
 func set_boost_move_speed_multiplier(multiplier: float) -> void:
 	boost_move_speed_multiplier = maxf(0.01, multiplier)
+	refresh()
+
+
+func set_rule_move_speed_multiplier(multiplier: float) -> void:
+	rule_move_speed_multiplier = maxf(0.01, multiplier)
 	refresh()
 
 
@@ -63,6 +70,7 @@ func refresh() -> void:
 		* move_speed_multiplier
 		* facility_move_speed_multiplier
 		* boost_move_speed_multiplier
+		* rule_move_speed_multiplier
 	)
 	if weapon_loadout != null:
 		weapon_loadout.set_global_stat_multipliers(weapon_damage_multiplier, fire_rate_multiplier)

@@ -19,6 +19,8 @@ extends WeaponSystem
 ## Plate texture: X = orbit length, Y = radial thickness.
 const BASE_GLOW_SCALE := Vector2(0.055, 0.1)
 const BASE_CORE_SCALE := Vector2(0.045, 0.075)
+const STASIS_HANDLE := &"barrier_stasis"
+const STASIS_COLOR := Color(0.35, 0.95, 0.9, 1.0)
 
 @onready var orbit_root: Node2D = $OrbitRoot
 
@@ -32,6 +34,9 @@ var _base_segment_count := 0
 ## Gameplay seconds accumulated from _process delta. Respawn and rehit deadlines
 ## use this so tree pause (augment pick, bullet cancel) freezes them with the run.
 var _clock := 0.0
+## barrier_stasis_prism slow field around the ship; null while the module is off.
+var _stasis_field: BulletSlowField
+var _stasis_radius := 0.0
 
 
 func _ready() -> void:
@@ -52,6 +57,7 @@ func _process(delta: float) -> void:
 	speed *= float(get_trait_param(&"barrier_expand_axis", &"orbit_speed_mult", 1.0))
 	orbit_root.rotation += speed * delta
 	_prune_struck()
+	_update_stasis()
 
 
 func _on_weapon_setup() -> void:
@@ -69,14 +75,25 @@ func _on_weapon_trait_changed(changed_weapon_id: StringName, _trait_id: StringNa
 		return
 	_rebuild_segment_count()
 	_apply_stat_multipliers()
+	if _has_stasis():
+		# Unbreakable from now on: bring back any segment already down.
+		for segment in _segments:
+			if _is_segment_broken(segment):
+				_restore_segment(segment)
 
 
 func _on_weapon_shutdown() -> void:
 	disconnect_weapon_trait_changed(_on_weapon_trait_changed)
 	set_process(false)
 	_struck_targets.clear()
+	_release_stasis()
 	for segment in _segments:
 		_disable_segment_collision(segment)
+
+
+## The barrier has no shot to repeat; resonance skips it.
+func fire_bonus_shot() -> bool:
+	return false
 
 
 func get_consumable_remaining() -> int:
@@ -240,7 +257,7 @@ func is_segment_broken(segment: Node2D) -> bool:
 func _on_segment_hurt(hitbox: Variant, segment: Node2D) -> void:
 	if segment == null or not is_instance_valid(segment):
 		return
-	if _is_segment_broken(segment):
+	if _is_segment_broken(segment) or _has_stasis():
 		return
 	var damage := 1
 	if hitbox is HitboxComponent:
@@ -303,7 +320,8 @@ func _rehit_cooldown() -> float:
 
 
 func _on_barrier_hitbox_entered(hurtbox: Area2D, hitbox: HitboxComponent) -> void:
-	if not hurtbox is HurtboxComponent:
+	# Stasis segments only guard; they never strike enemies.
+	if not hurtbox is HurtboxComponent or _has_stasis():
 		return
 	var segment := hitbox.get_parent() as Node2D
 	if segment != null and _is_segment_broken(segment):
@@ -436,3 +454,52 @@ func _enable_segment_collision(segment: Node2D) -> void:
 		hurtbox.is_invincible = false
 		hurtbox.set_deferred("monitoring", false)
 		hurtbox.set_deferred("monitorable", true)
+
+
+func _has_stasis() -> bool:
+	return has_trait(&"barrier_stasis_prism")
+
+
+func get_stasis_radius() -> float:
+	return (
+		orbit_radius
+		* float(get_trait_param(&"barrier_expand_axis", &"radius_mult", 1.0))
+		* float(get_trait_param(&"barrier_stasis_prism", &"field_radius_mult", 2.0))
+	)
+
+
+func get_stasis_count() -> int:
+	return _stasis_field.get_count() if _stasis_field != null else 0
+
+
+func _update_stasis() -> void:
+	if not _has_stasis():
+		_release_stasis()
+		return
+	var world := get_tree().get_first_node_in_group("gameplay_world")
+	if world == null:
+		return
+	if _stasis_field == null:
+		_stasis_field = BulletSlowField.new(
+			STASIS_HANDLE,
+			float(get_trait_param(&"barrier_stasis_prism", &"bullet_speed_mult", 0.4)),
+		)
+	_stasis_radius = get_stasis_radius()
+	_stasis_field.update(world, global_position, _stasis_radius)
+	queue_redraw()
+
+
+func _release_stasis() -> void:
+	if _stasis_field != null:
+		_stasis_field.release()
+		_stasis_field = null
+	if _stasis_radius > 0.0:
+		_stasis_radius = 0.0
+		queue_redraw()
+
+
+func _draw() -> void:
+	if _stasis_radius <= 0.0:
+		return
+	draw_circle(Vector2.ZERO, _stasis_radius, Color(STASIS_COLOR, 0.05))
+	draw_arc(Vector2.ZERO, _stasis_radius, 0.0, TAU, 48, Color(STASIS_COLOR, 0.35), 1.0)
