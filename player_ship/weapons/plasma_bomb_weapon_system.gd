@@ -8,6 +8,19 @@ extends WeaponSystem
 @export_range(0.0, 64.0, 1.0) var damage_radius_margin := 0.0
 @export_range(10.0, 400.0, 1.0) var pull_strength := 240.0
 
+## plasma_singularity_prism params handed to each bomb (plasma-bomb.md 특이점).
+const SINGULARITY_KEYS: Array[StringName] = [
+	&"duration",
+	&"pull_radius_mult",
+	&"enemy_pull",
+	&"bullet_turn_deg",
+	&"bullet_speed_mult",
+	&"swallow_radius",
+	&"collapse_radius_mult",
+	&"bonus_per_bullet",
+	&"max_bonus",
+]
+
 @onready var muzzle: Marker2D = $Muzzle
 @onready var spawner_component: SpawnerComponent = $SpawnerComponent
 @onready var fire_rate_timer: Timer = $FireRateTimer
@@ -44,7 +57,8 @@ func fire() -> void:
 func _apply_stat_multipliers() -> void:
 	if not is_node_ready():
 		return
-	fire_rate_timer.wait_time = base_fire_interval / get_effective_fire_rate_multiplier()
+	var interval_mult := float(get_trait_param(&"plasma_singularity_prism", &"fire_interval_mult", 1.0))
+	fire_rate_timer.wait_time = base_fire_interval * interval_mult / get_effective_fire_rate_multiplier()
 
 
 func _on_weapon_shutdown() -> void:
@@ -105,3 +119,9 @@ func _configure_projectile(projectile: Node) -> void:
 			gravity_pull,
 			gravity_radius_mult,
 		)
+
+	if has_trait(&"plasma_singularity_prism") and projectile.has_method("configure_singularity"):
+		var config := {}
+		for key in SINGULARITY_KEYS:
+			config[key] = get_trait_param(&"plasma_singularity_prism", key)
+		projectile.call("configure_singularity", config)

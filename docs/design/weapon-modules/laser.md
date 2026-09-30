@@ -37,8 +37,16 @@
 | `laser_refract` | `trait_laser_refract` | 골드 | 굴절 빔 — 보조 빔 피해 55%→85% · 경로 VFX 0.13초 |
 | `laser_pulse` | `trait_laser_pulse` | 골드 | 펄스 발진 — ON 0.7→0.9초 · 피해 ×2→2.5 · OFF 0.35초 |
 | `laser_whip` | `trait_laser_whip` | 골드 | 채찍 광선 — 흔들림 한도 빔 길이의 18%→24% · 휘어짐 25%→35% · 피해 ×0.9→1.0 |
+| `laser_spectrum_prism` | `trait_laser_spectrum_prism` | 프리즘 | 분광 프리즘 — 빔 3줄(±12°) · 빔마다 피해 ×0.45 |
 
 실버 수치는 Lv.I→V, 골드는 Lv.I→III이다.
+
+### 분광 프리즘 (프리즘)
+
+- 빔이 가운데 빔과 좌우 `side_angle_deg` **12°** 빔, 3줄이 된다. 빔마다 피해 ×`damage_mult` **0.45**다.
+- 좌우 빔은 가운데 빔(채찍 곡선 포함)을 총구 기준으로 ±12° 돌리고 1/cos(12°)배 늘려 끝이 가운데 빔 끝과 같은 높이에 닿게 한 것이다. 시각·판정 폭·셰이더·펄스 밝기는 가운데 빔과 같다.
+- 빔마다 따로 판정한다. 가까운 큰 적처럼 여러 빔에 걸린 피격 부위는 빔마다 한 번씩 맞는다. 열 축적·굴절은 빔별 적중마다 적용된다.
+- 대가: 정면 한 표적에는 가운데 빔 하나만 닿아 피해가 ×0.45로 떨어진다. 넓게 퍼진 적과 가까운 거대 표적에 강하다.
 
 `laser_heat_stack`은 같은 적을 연속 조사한 시간 `stack_interval` **0.5초**마다 `stack_bonus`를 더하며 `max_bonus`에서 멈춘다. 첫 피격은 보너스 0이다. 피격 간격이 `contact_grace` **0.5초** 이하면 연속으로 보고 그 사이 시간도 축적에 넣으므로, 펄스 OFF(0.35초)나 굴절 2차 광선 피격도 연속을 유지한다. 간격이 0.5초를 넘으면 다음 피격에서 0부터 다시 쌓는다. 시간은 `_physics_process` 델타를 누적한 게임플레이 시계로 재므로 트리 일시정지(오그먼트 선택·탄소거) 동안 멈춘다.
 
@@ -59,6 +67,7 @@
 - 빔 중심에서 비켜난 적도 판정 폭 안이면 맞고, 광각 렌즈를 장착하면 판정 폭이 넓어진다.
 - 빔 셰이더는 빔 길이와 게임플레이 시계를 받아 흐르고, 적을 맞힌 틱마다 피격 부위별로 섬광이 하나씩 생긴다.
 - 채찍 광선을 장착하고 함선이 움직이면 빔 끝이 이동 반대쪽으로 뒤처지고, 이탈은 한도를 넘지 않으며, 멈추면 직선으로 돌아온다. 휘어진 빔 위의 적도 맞는다 (`tests/laser_whip_smoke_test.gd`).
+- 분광 프리즘을 장착하면 좌우 12° 빔이 보이고 그 위의 적이 맞으며, 정면 적은 ×0.45 피해를 받는다 (`tests/prism_weapon_modules_test.gd`).
 - `tests/laser_heat_stack_smoke_test.gd` · `tests/laser_beam_width_smoke_test.gd` · `tests/laser_heat_clock_smoke_test.gd` · `tests/laser_pulse_fade_smoke_test.gd` · `tests/laser_startup_visual_smoke_test.gd` · `tests/laser_beam_shader_smoke_test.gd`로 확인한다.
 
 상위: [무기 모듈](index.md)

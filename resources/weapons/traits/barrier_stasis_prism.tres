@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="WeaponTraitDefinition" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://resources/weapons/weapon_trait_definition.gd" id="1_def"]
+[ext_resource type="Texture2D" uid="uid://b2rg3bjif8bql" path="res://assets/weapons/weapon_aux_orbital_barrier.svg" id="2_icon"]
+
+[resource]
+script = ExtResource("1_def")
+trait_id = &"barrier_stasis_prism"
+display_name = "정체 궤도"
+description = "세그먼트가 깨지지 않고, 공전 반경 ×{field_radius_mult} 안의 적탄 속도 ×{bullet_speed_mult}. 적에게 접촉 피해를 주지 않습니다."
+icon = ExtResource("2_icon")
+target_weapon_id = &"aux_orbital_barrier"
+tier = 2
+max_rank = 1
+params = {
+"bullet_speed_mult": 0.4,
+"field_radius_mult": 2.0
+}
+rank_overrides = Array[Dictionary]([])

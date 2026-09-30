@@ -20,6 +20,7 @@ const REASON_AUGMENT_RESUME := &"augment_resume"
 const REASON_ELITE_REWARD := &"elite_reward"
 const REASON_BOSS := &"boss"
 const REASON_LAB := &"lab"
+const REASON_SINGULARITY := &"augment_singularity"
 
 
 ## Live bullets under `world`, excluding ones already queued for deletion.

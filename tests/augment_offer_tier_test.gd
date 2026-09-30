@@ -37,8 +37,20 @@ func _run() -> void:
 	for _n in 30:
 		_expect(_all_tier(offer._pick_player_choices(), PlayerAugment.Tier.SILVER), "a silver offer only holds silver cards")
 
-	# Only two prismatic cards exist: the third slot falls back to Gold.
+	# With only the blaster: its split module plus the four rule cards.
 	_set_tier_weights(offer, 0.0, 0.0, 100.0)
+	for _n in 20:
+		var all_prism := offer._pick_player_choices()
+		_expect(_all_tier(all_prism, PlayerAugment.Tier.PRISMATIC), "a prismatic offer with enough cards holds only prismatic cards")
+		for augment in all_prism:
+			_expect(
+				augment.augment_type == PlayerAugmentKind.Kind.SHIP_RULE or augment.target_weapon_id == &"main_blaster",
+				"prismatic weapon modules appear only for equipped weapons (%s)" % augment.augment_id,
+			)
+
+	# Rules already taken leave two prismatic cards: the third slot falls back to Gold.
+	for rule_id in [&"time_warp", &"brink", &"resonance_fire"]:
+		offer._applied_rules[rule_id] = true
 	var prism_picks := offer._pick_player_choices()
 	var ids := prism_picks.map(func(augment: PlayerAugment) -> StringName: return augment.augment_id)
 	_expect(ids.has(SPLIT_PRISM) and ids.has(FOURTH_BAY), "prismatic offer shows both prismatic cards")
@@ -58,6 +70,7 @@ func _run() -> void:
 	var capped := offer._pick_player_choices()
 	_expect(_all_tier(capped, PlayerAugment.Tier.GOLD), "the run prismatic cap turns prismatic offers into gold")
 	offer.prismatic_pick_count = 0
+	offer._applied_rules.clear()
 
 	# Elite guarantee lifts exactly one Silver roll to Gold.
 	_set_tier_weights(offer, 100.0, 0.0, 0.0)

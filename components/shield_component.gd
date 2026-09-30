@@ -22,6 +22,8 @@ var _current_shield := 0
 var _charge_elapsed := 0.0
 ## Facility SHIELD_CHARGE_SPEED_MULT product. Higher = shorter charge duration.
 var charge_speed_multiplier := 1.0
+## Run rule cards (e.g. brink trade-off). Multiplies the facility channel.
+var rule_charge_speed_multiplier := 1.0
 
 
 func _ready() -> void:
@@ -72,6 +74,10 @@ func set_charge_speed_multiplier(multiplier: float) -> void:
 	charge_speed_multiplier = maxf(0.01, multiplier)
 
 
+func set_rule_charge_speed_multiplier(multiplier: float) -> void:
+	rule_charge_speed_multiplier = maxf(0.01, multiplier)
+
+
 ## 시설 강화가 최대 실드를 바꾸는 유일한 경로.
 func set_facility_bonus(bonus: int) -> void:
 	var previous_max := get_max_shield()
@@ -109,7 +115,10 @@ func absorb_damage(damage: int) -> int:
 
 
 func _charge_duration() -> float:
-	return maxf(0.05, regen_charge_duration / maxf(0.01, charge_speed_multiplier))
+	return maxf(
+		0.05,
+		regen_charge_duration / maxf(0.01, charge_speed_multiplier * rule_charge_speed_multiplier),
+	)
 
 
 func _needs_regen() -> bool:

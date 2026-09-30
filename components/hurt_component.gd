@@ -27,6 +27,9 @@ signal invincibility_ended
 @export var flash_component: FlashComponent
 
 var _iframe_timer: Timer
+## Handles keeping the hurtbox invincible regardless of the iframe timer
+## (e.g. standing inside a plasma singularity). Iframes ending never clear a hold.
+var _invincibility_holds: Dictionary = {}
 var _base_visual_modulate := Color.WHITE
 
 
@@ -102,9 +105,29 @@ func start_invincibility(duration: float) -> void:
 
 
 func end_invincibility() -> void:
-	if hurtbox_component == null:
+	if hurtbox_component == null or not _invincibility_holds.is_empty():
 		return
 	hurtbox_component.is_invincible = false
+
+
+## Keeps the hurtbox invincible while any handle holds it. Releasing the last
+## hold ends invincibility unless iframes are still running.
+func set_invincibility_hold(handle: StringName, held: bool) -> void:
+	if hurtbox_component == null or handle == &"":
+		return
+	if held:
+		_invincibility_holds[handle] = true
+		hurtbox_component.is_invincible = true
+		return
+	if not _invincibility_holds.has(handle):
+		return
+	_invincibility_holds.erase(handle)
+	if _invincibility_holds.is_empty() and (_iframe_timer == null or _iframe_timer.is_stopped()):
+		hurtbox_component.is_invincible = false
+
+
+func is_invincibility_held() -> bool:
+	return not _invincibility_holds.is_empty()
 
 
 func _get_iframe_duration(include_facility: bool) -> float:

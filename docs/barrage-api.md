@@ -505,6 +505,7 @@ EnemyBullets.get_effect(bullet, handle) -> Dictionary   # {speed_mult, heading_o
 - 적용·교체·해제·만료 순간의 위치에서 새 구간이 시작되므로 탄이 튀지 않고, 지나온 위치와 레이저 몸통은 그대로다. 만료는 경로 예측에 미리 반영된다. 모두 해제하면 현재 위치에서 기본 속도로 이어 간다(원래 궤적으로 되돌아가지 않음).
 - 흡인처럼 위치에 따라 방향이 바뀌는 효과는 매 틱 같은 핸들을 새 오프셋으로 재등록한다. 현재 이동 방향은 탄의 `get_travel_velocity()`로 읽는다.
 - `FoundationBullet`·`CurvedLaser`만 지원한다. 호밍 탄은 효과가 없는 자기 궤적 위치 기준으로 표적 방향을 계산한다. 규칙 정본: [전투 — 외부 궤도 개입](design/combat.md#외부-궤도-개입--구현-완료).
+- 원 안에 머무는 동안만 감속하는 장은 `BulletSlowField`([bullet_slow_field.gd](../projectiles/bullet_slow_field.gd))를 쓴다. 들어올 때 한 번 걸고 나갈 때 풀어, 머무는 탄에 구간이 쌓이지 않는다.
 
 ### 직접 시험
 

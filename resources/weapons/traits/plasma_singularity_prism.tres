@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="WeaponTraitDefinition" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://resources/weapons/weapon_trait_definition.gd" id="1_def"]
+[ext_resource type="Texture2D" uid="uid://dj7s045pab0js" path="res://assets/weapons/weapon_plasma_bomb.svg" id="2_icon"]
+
+[resource]
+script = ExtResource("1_def")
+trait_id = &"plasma_singularity_prism"
+display_name = "특이점"
+description = "본탄이 {duration}초간 특이점이 되어 적과 적탄을 끌어당기고 붕괴합니다. 흡인 범위 안의 함선은 무적. 삼킨 적탄 1발마다 붕괴 피해 +{bonus_per_bullet%}%(최대 +{max_bonus%}%). 발사 간격 ×{fire_interval_mult}."
+icon = ExtResource("2_icon")
+target_weapon_id = &"plasma_bomb"
+tier = 2
+max_rank = 1
+params = {
+"bonus_per_bullet": 0.08,
+"bullet_speed_mult": 0.85,
+"bullet_turn_deg": 450,
+"collapse_radius_mult": 1.25,
+"duration": 2.0,
+"enemy_pull": 1500,
+"fire_interval_mult": 2.5,
+"max_bonus": 2.0,
+"pull_radius_mult": 1.75,
+"swallow_radius": 14
+}
+rank_overrides = Array[Dictionary]([])

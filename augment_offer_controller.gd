@@ -2,9 +2,6 @@ class_name AugmentOfferController
 extends Node
 
 const AUGMENT_RESUME_BURST_SCENE := preload("res://effects/augment_resume_burst.tscn")
-const FOURTH_WEAPON_BAY_RULE := &"fourth_weapon_bay"
-const FOURTH_WEAPON_BAY_DAMAGE_MULTIPLIER := 0.85
-const FOURTH_WEAPON_BAY_COUNT := 4
 
 signal offer_started(offer_type: OfferType)
 signal offer_completed(offer_type: OfferType)
@@ -296,14 +293,7 @@ func _is_player_augment_available(augment: PlayerAugment, loadout: PlayerWeaponL
 func _is_ship_rule_available(augment: PlayerAugment, loadout: PlayerWeaponLoadout) -> bool:
 	if augment.rule_id == &"" or _applied_rules.has(augment.rule_id):
 		return false
-	match augment.rule_id:
-		FOURTH_WEAPON_BAY_RULE:
-			return (
-				loadout != null
-				and loadout.get_max_equipped_weapon_count() < FOURTH_WEAPON_BAY_COUNT
-			)
-		_:
-			return false
+	return ShipRules.is_available(augment.rule_id, ship, loadout)
 
 
 func _on_choice_selected(choice: Resource) -> void:
@@ -342,14 +332,8 @@ func _resolve_player_augment(player_augment: PlayerAugment) -> bool:
 func _resolve_ship_rule(player_augment: PlayerAugment, loadout: PlayerWeaponLoadout) -> bool:
 	if not _is_ship_rule_available(player_augment, loadout):
 		return false
-	match player_augment.rule_id:
-		FOURTH_WEAPON_BAY_RULE:
-			loadout.add_weapon_bays(FOURTH_WEAPON_BAY_COUNT - loadout.get_max_equipped_weapon_count())
-			loadout.set_rule_damage_multiplier(
-				loadout.get_rule_damage_multiplier() * FOURTH_WEAPON_BAY_DAMAGE_MULTIPLIER
-			)
-		_:
-			return false
+	if not ShipRules.apply(player_augment.rule_id, ship, loadout):
+		return false
 	_applied_rules[player_augment.rule_id] = true
 	selection_ui.restore_for_result()
 	return true

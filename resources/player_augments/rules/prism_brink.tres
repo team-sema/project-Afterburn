@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="PlayerAugment" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://resources/player_augments/player_augment.gd" id="1_aug"]
+[ext_resource type="Texture2D" uid="uid://gu5kw837vx6o" path="res://assets/facilities/facility_shield.svg" id="2_icon"]
+
+[resource]
+script = ExtResource("1_aug")
+augment_id = &"prism_brink"
+display_name = "벼랑 끝"
+description = "실드가 깨지는 순간 화면의 적탄이 2초간 속도 ×0.2. 실드 충전 속도 ×0.5."
+tier = 2
+augment_type = 7
+icon = ExtResource("2_icon")
+offer_weight = 1.0
+rule_id = &"brink"
