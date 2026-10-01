@@ -4,7 +4,7 @@
 
 ## 구현 상태
 
-- [Wall](wall.md): 프로토타입. 메인 시퀀스 `d` 토큰에 연결. 독립 시험은 `labs/bosses/wall/`.
+- [Wall · 리사이클러](wall.md): 자동 해체구역 3단계 공략(압착 격벽 → 광학 절단기 → 압착 프레스)과 관제 코어 정지 연출을 `labs/bosses/wall/`에서 독립 시험. 메인 시퀀스 `d` 토큰은 이식 전까지 기존 프로토타입(`enemies/boss_wall.tscn`)을 사용.
 - [거대 항모 · Boss Lab](carrier.md): 독립 시험 장면. 본 게임 시퀀스·보상에 연결하지 않는다.
 
 ## 공통 규칙

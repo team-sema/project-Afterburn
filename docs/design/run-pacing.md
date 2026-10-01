@@ -82,6 +82,27 @@ WAVE·ELITE·BOSS 스텝은 스폰/게이트 직전에 맵 중앙에 `WARNING` �
 - **Threat 2+:** `tanker_guard_sniper` · `bomb_drone_diamond` · `interceptor_pair`
 - **Threat 3+:** Caster · V7/X9 하강 · X9 orbit · Interceptor trio
 
+## 페이즈(장) 구성 — 이번 변경
+
+한 판은 여러 페이즈로 나뉘고 페이즈마다 보스가 다르다. 페이즈 = 등장 패턴 1회 + 그 페이즈의 보스. 페이즈 순서와 무작위 여부는 미결정이다.
+
+토큰 패턴(`a a a a b a a a b a a a c a a a a b a a a a` + 보스)과 유닛은 페이즈 간에 공유한다. 페이즈의 정체성은 **배경(항로)**, **패턴 뒤쪽 `a`의 후보 목록**, **보스 진입 연출**로 만들고, 이야기는 화면으로만 전달한다.
+
+### 리사이클러 페이즈 — 해체구역 접근로
+
+마지막에 만나는 것이 [리사이클러](bosses/wall.md)(이동 요새의 자동 해체구역)임을 전투 중 화면만으로 납득시키는 구성이다. 패턴 진행도(스텝 n / 23, 보스 토큰이 23)에 배경 비트를 묶는다.
+
+| 비트 | 패턴 구간 | 배경(항로) | 조우 |
+|---|---|---|---|
+| 접근 | 1~8 (`a a a a b a a a`) | 열린 우주. 진행 6%부터 화면 위 멀리 요새 실루엣이 점처럼 보이고 점점 커지며 항행등이 깜빡인다. | 공용 풀(Threat 1): 드론·스트라이커·송곳 편대 = 요새 앞 초계. |
+| 외벽 | 9~13 (`b a a a c`) | 두 번째 웨이브부터 요새 외벽 판이 위에서 내려와 화면을 채운다(별이 가려짐). `c` 엘리트는 외벽 입구의 문지기. | 엘리트 처치 → 탄소거 → 적 오퍼(기존 게이트 흐름) = 외벽 돌파. |
+| 내부 | 14~22 (`a a a a b a a a a`) | 통로 내부: 좌우 벽면과 유도등이 흐르고 폭이 좁아진 인상. | 후보 고정 `a`: `tanker_guard_sniper`(경비 초소) · `interceptor_pair`(순찰) · `bomb_drone_diamond`(기뢰) · `striker_drone_diamond_5`(호위) — 모두 기존 유닛. `b` 드론 웨이브는 격납 편대. |
+| 해체구역 | 23 (보스) | 통로가 넓은 구역으로 열리고 스크롤이 멈춘다 → 리사이클러 진입(천장·격벽이 닫힘). | [리사이클러](bosses/wall.md) |
+
+- 내부 구간의 `a` 후보 고정은 시퀀스 데이터로만 만든다: 이 페이즈를 `recycler_approach`(패턴 `a a a a b a a a b a a a c`)와 `recycler_interior`(패턴 `a a a a b a a a a d`, 로컬 `a`의 `encounter_presets` = 위 4개) 두 EncounterSequencePhase로 나눈다. 토큰 글자·유닛·엘리트 게이트 흐름은 그대로다. HUD `STAGE`는 Phase 패스마다 오르므로 페이즈 단위 표시로 바꾸는 작업이 따른다.
+- 배경 비트는 `EncounterDirector.sequence_progress_changed`(스텝 진행도)와 ELITE 게이트 신호에 묶는다. 본 게임 항로 아트는 미구현이며, [리사이클러 Lab](bosses/wall.md#lab)의 자리표시 레이어로 흐름을 먼저 확인한다.
+- 미결정: 페이즈 순서·무작위, 페이즈 간 전환 연출(보스 격파 후 다음 항로), 페이즈별 Threat 리셋 여부.
+
 ## 관련
 
 - [적](enemies/index.md) · [진형](formations/index.md) · [Encounter](encounters/index.md)

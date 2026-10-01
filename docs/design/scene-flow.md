@@ -16,7 +16,7 @@ Lab 배치: 허브만 루트에 두고 각 Lab은 `labs/<주제>/` 아래에 둔
 |---|---|
 | 탄막 · 패턴 스크립트 | `labs/bullet/bullet_lab.tscn` (예제별 바로가기 `labs/bullet/presets/`는 허브에 따로 두지 않는다) |
 | 보스 · 거대 항모 | `labs/bosses/carrier/carrier_boss_lab.tscn` |
-| 보스 · 벽 | `labs/bosses/wall/wall_boss_lab.tscn` |
+| 보스 · 벽 | `labs/bosses/wall/wall_boss_lab.tscn` — 보스 즉시 / 페이즈 처음부터 선택 |
 | 엘리트 · 스나이퍼 공격 패턴 | `labs/enemy_attack/enemy_attack_lab.tscn` |
 | 무기 · 증강 · 적 소환 | `labs/weapons/weapon_test_lab.tscn` |
 | 증강 카드 · UI | `labs/augment_cards/augment_frame_test.tscn` |

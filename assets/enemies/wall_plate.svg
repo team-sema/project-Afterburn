@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="44" height="56" viewBox="0 0 44 56">
+<!-- White geometry only; transparent cuts separate parts. Runtime supplies core and glow colors. -->
+<g fill="#fff" fill-rule="evenodd">
+  <path d="M8 0H36L44 9V39L33 56H11L0 39V9Z M10 5L5 11V37L14 51H30L39 37V11L34 5Z"/>
+  <path d="M9 14H15V35L20 43H12L9 38Z M29 14H35V38L32 43H24L29 35Z M19 9H25V30L22 36L19 30Z M18 47H26V50H18Z"/>
+</g>
+</svg>
