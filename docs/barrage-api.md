@@ -239,7 +239,7 @@ shot.behavior = BulletBehavior.new().wait(0.3).parallel([
 ]).wait(0.3).opacity_to(0.0, 0.7)
 ```
 
-이 예제의 판정 두께는 유지된다. 발사 후 외부에서 Behavior를 교체·취소하거나 임의 콜백을 실행하는 API는 아직 없다.
+이 예제의 판정 두께는 유지된다. 발사 후 Behavior 자체를 교체하거나 임의 콜백을 실행하는 API는 없다. 탄 제거는 11절의 `EnemyBullets.cancel`을 쓴다.
 
 실행기는 Action 경계의 누적 상태와 탄별 궤적 표본을 재사용한다. 과거·미래 조회는 실제 탄 나이를 전진시키지 않으며, 몸체·판정·경로 예측은 같은 위치 계산을 사용한다. 경계의 1e-10초 이내 부동소수점 오차는 경계 시각으로 처리한다. 발사 후 외부에서 속도·방향을 바꾸는 효과는 11절의 `EnemyBullets.apply_effect`를 쓴다.
 
