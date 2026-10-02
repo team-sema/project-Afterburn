@@ -26,7 +26,7 @@
 |---|---|---|
 | `NORMAL` | 편대 1개 | `encounter_presets` 지정 시 균등 랜덤(직전 id 회피, **Threat 무시**) · 비었으면 `encounter_pool.choose(현재 Threat)` (weight·min_threat·직전 2 id 제외 그대로) |
 | `WAVE` | `EncounterWave` 의 `encounter_preset_paths`를 **순서대로**, 편대 사이 `interval_min~max` 랜덤 | 고정 순서 |
-| `ELITE` | 아래 엘리트 게이트를 연다 | `elite_preset` 지정 시 그 preset, 비우면 교대 규칙 |
+| `ELITE` | 아래 엘리트 게이트를 연다 | `elite_preset` 지정 시 그 preset, 비우면 엘리트 로테이션 |
 | `BOSS` | 엘리트 게이트와 같은 흐름 + `is_boss` (엘리트 HP 공식 미적용) | `boss_preset` 비어 있으면 경고 후 **건너뜀** |
 
 `WAVE`/`ELITE`/`BOSS`는 `wait_for_clear`(기본 true)면 WARNING·게이트 전에 Director가 추적 중인 편대가 비울 때까지 기다린다. `clear_timeout` > 0이면 **클리어 또는 타임아웃 중 먼저** 온 쪽으로 진행하고, `clear_min_wait`가 있으면 그 대기 시작부터 최소 그 초만큼은 쉰 뒤 진행한다 (빨리 클리어해도 WAVE 호흡을 남김). `clear_timeout` 0은 클리어만 본다(무한 대기). 대기 시간은 게임플레이 시간(프로세스 델타)으로 계산하므로 오그먼트 선택·탄소거 등 트리 일시정지 동안은 흐르지 않는다.
@@ -39,7 +39,7 @@ WAVE·ELITE·BOSS 스텝은 스폰/게이트 직전에 맵 중앙에 `WARNING` �
 |---|---|---|---|
 | `a` | NORMAL | `MainEncounterPool` 랜덤 | 2.8 ~ 3.1초 |
 | `b` | WAVE | `drone_swarm_wave`: 드론 편대 3연속 (straight → triangle → zigzag), 편대 간격 0.55~0.7초 | 5.0 ~ 5.5초 · clear_timeout 6.0 · clear_min_wait 2.5 |
-| `c` | ELITE | 교대 규칙 · wait_for_clear (timeout 없음) | 2.8 ~ 3.1초 |
+| `c` | ELITE | 엘리트 로테이션 · wait_for_clear (timeout 없음) | 2.8 ~ 3.1초 |
 | `d` | BOSS | `boss_wall` (거대 벽 + 출몰 포탑) | 2.8 ~ 3.1초 |
 
 - Phase `main`: `a a a a b a a a b a a a c a a a a b a a a a d`
@@ -60,14 +60,14 @@ WAVE·ELITE·BOSS 스텝은 스폰/게이트 직전에 맵 중앙에 `WARNING` �
 
 | 단계 | 동작 |
 |------|------|
-| 게이트 오픈 (`ELITE` 스텝, 또는 Director 미사용 시 60초 타이머) | 사격형 `threat_elite_single` / 돌격형 `threat_elite_awl` 교대로 1기 (`ThreatEliteController`). 스텝의 `elite_preset`이 있으면 그 preset |
+| 게이트 오픈 (`ELITE` 스텝, 또는 Director 미사용 시 60초 타이머) | 엘리트 로테이션으로 1기 (`ThreatEliteController`). 스텝의 `elite_preset`이 있으면 그 preset |
 | 엘리트 전투 중 | 일반 Encounter 스폰 **정지** (시퀀스도 대기) · 기존 일반 적 유지 |
 | 엘리트 처치 | 전투 정지 → 적탄을 XP로 변환 → 화면의 모든 XP 강제 회수 |
 | XP 회수 완료 | Threat **+1** → 적 증강 3지선다 |
 | 오퍼 완료 | 게이트 닫힘 → 시퀀스 다음 스텝 (타이머 모드면 일반 스폰·다음 Threat 타이머 재개) |
 | 전투·오퍼 중 | Threat 시간 **누적 안 함** (연속 엘리트 방지) |
 
-첫 엘리트: Threat **2** 사격형. Threat **3** 돌격형, 이후 짝수 Threat 사격형·홀수 Threat 돌격형으로 교대한다. 여기서 Threat는 처치 후 도달할 관문 목표값이다. 공통 HP 공식은 [엘리트](elites/index.md), 돌격 규칙은 [elite-awl](elites/elite-awl.md).
+첫 엘리트: Threat **2** 사격형(Fighter). Threat **3** 돌격형(Awl). Threat 4부터는 Fighter·Awl·Bomb·Caster 중 직전 엘리트를 제외하고 무작위로 고른다. 여기서 Threat는 처치 후 도달할 관문 목표값이다. 로테이션·공통 HP 공식은 [엘리트](elites/index.md) 정본.
 
 탄소거 보상 중에는 전투 전체와 플레이어 오그먼트 `C` 입력을 잠근다. 적탄 1발은 XP 1로 변환되며, 기존 XP와 엘리트 확정 드롭까지 실제로 수집된 뒤에만 적 오그먼트 오퍼가 열린다. BOSS 관문도 같은 처치 정산(탄소거·XP 회수·Threat 상승·적 오퍼)을 거친다.
 

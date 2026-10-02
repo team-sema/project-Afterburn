@@ -43,7 +43,7 @@ func run() -> void:
 	laser.show_hitbox = true
 	paused = true
 	renderer.refresh()
-	expect(renderer._debug_mesh.visible_instance_count == 37, "debug has one circle and all 36 real capsules")
+	expect(renderer._debug_mesh.visible_instance_count == 13, "debug has one circle and all 12 real capsules")
 	# The headless dummy renderer does not store instance transforms.
 	if DisplayServer.get_name() != "headless":
 		var transform: Transform2D = renderer._batches[renderer._commands[0]].get_instance_transform_2d(0)

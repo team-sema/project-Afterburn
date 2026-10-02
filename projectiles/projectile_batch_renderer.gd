@@ -210,23 +210,47 @@ func _flush_lasers(index: int) -> void:
 	_colors.clear()
 	_indices.clear()
 
+const LASER_WIDTHS: Array[float] = [2.6, 1.5, 1.0]
+const LASER_COLORS: Array[Color] = [Color(1, 0.4, 0.03, 0.12), Color(1, 0.75, 0.12, 0.55), Color(1, 0.98, 0.66)]
+## Triangle indices for consecutive ribbon layers. Every layer has the same
+## vertex count, so layer n uses slice n of this cache (grown on demand).
+var _ribbon_indices := PackedInt32Array()
+var _ribbon_points := 0
+
 func _append_laser(laser: CurvedLaser) -> void:
 	var pose := global_transform.affine_inverse()
-	var widths := [2.6, 1.5, 1.0]
-	var colors := [Color(1, 0.4, 0.03, 0.12), Color(1, 0.75, 0.12, 0.55), Color(1, 0.98, 0.66)]
+	var moved := pose != Transform2D.IDENTITY
+	var body := laser._body
+	var ribbon := laser._ribbon_offsets
+	var count := body.size()
+	var tint := laser.modulate * laser.self_modulate * laser.render_tint
+	var width := laser.core_width * laser.visual_scale
+	var layer_indices := (count - 1) * 6
+	if _ribbon_points != count:
+		_ribbon_points = count
+		_ribbon_indices.clear()
+	var colors := PackedColorArray()
+	colors.resize(count * 2)
 	for layer in 3:
 		var base := _vertices.size()
-		for i in laser._body.size():
-			var offset: Vector2 = laser._ribbon_offsets[i] * laser.core_width * laser.visual_scale * widths[layer]
-			_vertices.append(pose * (laser._body[i] + offset))
-			_vertices.append(pose * (laser._body[i] - offset))
-			var color: Color = colors[layer] * laser.modulate * laser.self_modulate * laser.render_tint
-			color.a *= laser.render_opacity
-			_colors.append(color)
-			_colors.append(color)
-		for i in laser.SEGMENTS:
-			var start := base + i * 2
-			_indices.append_array(PackedInt32Array([start, start + 1, start + 2, start + 1, start + 3, start + 2]))
+		var slot := base / (count * 2)
+		while _ribbon_indices.size() < (slot + 1) * layer_indices:
+			var first := (_ribbon_indices.size() / layer_indices) * count * 2
+			for i in count - 1:
+				var start := first + i * 2
+				_ribbon_indices.append_array(PackedInt32Array([start, start + 1, start + 2, start + 1, start + 3, start + 2]))
+		_indices.append_array(_ribbon_indices.slice(slot * layer_indices, (slot + 1) * layer_indices))
+		_vertices.resize(base + count * 2)
+		var layer_width := width * LASER_WIDTHS[layer]
+		for i in count:
+			var offset := ribbon[i] * layer_width
+			var point := body[i]
+			_vertices[base + i * 2] = pose * (point + offset) if moved else point + offset
+			_vertices[base + i * 2 + 1] = pose * (point - offset) if moved else point - offset
+		var color := LASER_COLORS[layer] * tint
+		color.a *= laser.render_opacity
+		colors.fill(color)
+		_colors.append_array(colors)
 
 func _make_bullet_mesh(appearance: BulletAppearance) -> ArrayMesh:
 	var vertices := PackedVector2Array()

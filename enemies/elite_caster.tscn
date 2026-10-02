@@ -1,18 +1,17 @@
 [gd_scene format=3]
 
 [ext_resource type="PackedScene" path="res://enemies/elite_fighter.tscn" id="1_elite"]
-[ext_resource type="Texture2D" path="res://assets/enemies/enemy_elite_awl.svg" id="2_visual"]
-[ext_resource type="Script" path="res://components/elite_charge_attack_component.gd" id="3_attack"]
-[ext_resource type="Script" path="res://components/elite_charge_visual.gd" id="4_visual"]
-[ext_resource type="Resource" path="res://resources/projectiles/elite_fountain_laser_shot.tres" id="6_shot"]
+[ext_resource type="Texture2D" path="res://assets/enemies/enemy_elite_caster.svg" id="2_visual"]
+[ext_resource type="Resource" path="res://resources/enemy_movement/sequences/elite_caster_hover.tres" id="3_movement"]
+[ext_resource type="Script" path="res://components/elite_caster_attack_component.gd" id="4_attack"]
 
 [sub_resource type="RectangleShape2D" id="HurtShape"]
-size = Vector2(20, 34)
+size = Vector2(22, 30)
 
 [sub_resource type="RectangleShape2D" id="HitShape"]
-size = Vector2(16, 30)
+size = Vector2(18, 26)
 
-[node name="EliteAwl" instance=ExtResource("1_elite")]
+[node name="EliteCaster" instance=ExtResource("1_elite")]
 
 [node name="WideGlow" parent="Anchor" index="1"]
 texture = ExtResource("2_visual")
@@ -23,6 +22,12 @@ texture = ExtResource("2_visual")
 [node name="Core" parent="Anchor" index="3"]
 texture = ExtResource("2_visual")
 
+[node name="MovementController" parent="." index="3"]
+sequence = ExtResource("3_movement")
+
+[node name="VisibleOnScreenNotifier2D" parent="." index="4"]
+rect = Rect2(-18, -22, 36, 44)
+
 [node name="CollisionShape2D" parent="HurtboxComponent" index="0"]
 shape = SubResource("HurtShape")
 
@@ -30,10 +35,4 @@ shape = SubResource("HurtShape")
 shape = SubResource("HitShape")
 
 [node name="EnemyShootComponent" parent="." index="15"]
-script = ExtResource("3_attack")
-projectile_speed = 100.0
-projectile_scene = null
-barrage_shot = ExtResource("6_shot")
-
-[node name="ChargeVisual" type="Node2D" parent="."]
-script = ExtResource("4_visual")
+script = ExtResource("4_attack")

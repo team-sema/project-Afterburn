@@ -93,6 +93,9 @@ func _apply_arming_rate_multiplier(enemy: Enemy, multiplier: float) -> void:
 	var bomb_fuse := enemy.get_node_or_null("BombProximityFuseComponent")
 	if bomb_fuse != null and bomb_fuse.has_method("apply_arming_rate_multiplier"):
 		bomb_fuse.call("apply_arming_rate_multiplier", multiplier)
+	var shoot := enemy.get_node_or_null("EnemyShootComponent")
+	if shoot != null and shoot.has_method("apply_arming_rate_multiplier"):
+		shoot.call("apply_arming_rate_multiplier", multiplier)
 
 
 func _attach_behavior_components(enemy: Enemy, behavior_components: Array[PackedScene]) -> void:

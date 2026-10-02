@@ -53,15 +53,12 @@ func _run() -> void:
 	_expect(elite.global_position.is_equal_approx(origin + direction * 64.0), "dash follows locked direction at authored speed")
 	await process_frame
 	var bullets := get_nodes_in_group("enemy_projectiles")
-	_expect(bullets.size() == 2, "dash emits one pair")
-	if bullets.size() == 2:
-		var a: Vector2 = bullets[0].get_travel_velocity()
-		var b: Vector2 = bullets[1].get_travel_velocity()
-		_expect(absf(a.normalized().dot(direction)) < 0.25 and absf(b.normalized().dot(direction)) < 0.25, "flames stay close to perpendicular")
-		_expect(a.dot(direction.orthogonal()) * b.dot(direction.orthogonal()) < 0.0, "flames spread to opposite sides")
-		_expect(a.length() >= 90.0 and a.length() <= 110.0, "flame speed stays bounded")
-		bullets[0]._physics_process(0.91)
-		_expect(bullets[0].is_queued_for_deletion(), "flame hazard expires instead of crossing the whole screen")
+	_expect(attack.use_spine and bullets.size() == 6, "first dash drops spine pairs along the path")
+	if bullets.size() == 6:
+		var a: Vector2 = bullets[0].behavior_state.velocity_at(0.0)
+		var b: Vector2 = bullets[1].behavior_state.velocity_at(0.0)
+		_expect(absf(a.normalized().dot(direction)) < 0.01 and absf(b.normalized().dot(direction)) < 0.01, "spines leave perpendicular to the dash")
+		_expect(a.dot(direction.orthogonal()) * b.dot(direction.orthogonal()) < 0.0, "spines go to opposite sides")
 	_expect(not elite.get_node("ChargeVisual")._embers.is_empty(), "dash leaves world-space embers")
 	for i in 100:
 		if attack.phase != attack.Phase.DASH:
@@ -85,9 +82,19 @@ func _run() -> void:
 	attack._process(2.0)
 	_expect(attack.phase == attack.Phase.RECOVERY, "reentry settles into a punish window")
 	_expect(attack.get_volleys_fired() == volleys, "reentry does not fire")
+	_expect(attack.dash_count == 1, "first dash completed")
 	elite.stats_component.health = 100
+	var hold := elite.global_position
 	attack._process(1.21)
-	attack._process(0.81)
+	_expect(attack.phase == attack.Phase.PULLBACK and not attack.use_spine, "second dash is the fountain dive")
+	_expect(attack.dash_direction == Vector2.DOWN, "fountain dive ignores the player")
+	_expect(elite.get_node("ChargeVisual").aiming and elite.get_node("ChargeVisual").locked, "fountain dive shows a fixed downward lane")
+	attack._process(0.5)
+	_expect(elite.global_position.is_equal_approx(hold + Vector2(0, -28)), "hull backs up 28px")
+	attack._process(0.29)
+	_expect(attack.phase == attack.Phase.PULLBACK, "wind-up lasts the full warning")
+	attack._process(0.02)
+	_expect(attack.phase == attack.Phase.DASH and attack.dash_direction == Vector2.DOWN, "fountain dive goes straight down")
 	elite.move_component.velocity_multiplier = 1.2
 	origin = elite.global_position
 	direction = attack.dash_direction
@@ -106,12 +113,66 @@ func _run() -> void:
 	attack.phase = attack.Phase.DASH
 	attack.dash_direction = Vector2.DOWN
 	attack._shot_elapsed = 0.0
+	attack.use_spine = false
 	attack.shot_count = 3
+	player.position = bounds.get_center() + Vector2(0, 120)
 	attack.spread_degrees = 18.0
 	attack.apply_action_rate_multiplier(10.0)
 	attack._process(0.11)
 	await process_frame
-	_expect(get_nodes_in_group("enemy_projectiles").size() == before_count + 6, "action-rate and volume augments apply to both sides")
+	_expect(get_nodes_in_group("enemy_projectiles").size() == before_count + 6, "action-rate and volume augments apply to both fountain sides")
+	before_count = get_nodes_in_group("enemy_projectiles").size()
+	elite.global_position = bounds.get_center()
+	attack.dash_direction = Vector2.DOWN
+	attack._shot_elapsed = 0.0
+	attack.use_spine = true
+	attack.shot_count = 1
+	attack.apply_action_rate_multiplier(1.0)
+	attack._process(0.06)
+	await process_frame
+	var spines := get_nodes_in_group("enemy_projectiles").slice(before_count)
+	_expect(spines.size() == 2, "spine dash drops one needle per side")
+	if spines.size() == 2:
+		var spine: FoundationBullet = spines[0]
+		var state: BulletBehaviorState = spine.behavior_state
+		_expect(absf(state.velocity_at(0.0).normalized().dot(Vector2.DOWN)) < 0.01, "spines point away from the path")
+		_expect(is_equal_approx(state.velocity_at(0.0).length(), 30.0), "spines leave slowly")
+		_expect(state.velocity_at(0.3).length() < 0.01 and state.velocity_at(1.1).length() < 0.01, "spines hold beside the path")
+		_expect(absf(state.velocity_at(1.8).length() - 150.0) < 0.5, "spines burst outward")
+		_expect(state.velocity_at(1.8).normalized().is_equal_approx(state.velocity_at(0.0).normalized()), "spines keep their side")
+		_expect(is_equal_approx(spine.lifetime, 4.0), "spine lifetime")
+		_expect(spine.appearance.collision_size == Vector2(6, 12), "spines use the 1.5x elite needle")
+	attack.apply_action_rate_multiplier(10.0)
+	attack._shot_elapsed = 0.0
+	attack._process(0.05)
+	await process_frame
+	_expect(get_nodes_in_group("enemy_projectiles").size() == before_count + 4, "action rate keeps the minimum spine interval")
+	before_count = get_nodes_in_group("enemy_projectiles").size()
+	elite.global_position = bounds.get_center()
+	attack.dash_direction = Vector2.DOWN
+	attack._shot_elapsed = 0.0
+	attack.use_spine = false
+	attack.shot_count = 1
+	attack.apply_action_rate_multiplier(1.0)
+	attack._process(0.15)
+	await process_frame
+	var lasers := get_nodes_in_group("enemy_projectiles").slice(before_count)
+	_expect(lasers.size() == 2, "fountain emits one laser per side")
+	if lasers.size() == 2:
+		var tail_y: float = lasers[0]._origin.y
+		_expect(tail_y < elite.global_position.y - 14.0 + 0.5, "lasers leave from the tail")
+		var sides := 0.0
+		for laser in lasers:
+			var start: Vector2 = laser.behavior_state.velocity_at(0.0)
+			var tilt := rad_to_deg(absf(Vector2.UP.angle_to(start)))
+			_expect(tilt >= 15.0 and tilt <= 45.0, "lasers spray up within 15-45 degrees")
+			sides += signf(start.x)
+			_expect(laser.behavior_state.velocity_at(0.25).normalized().is_equal_approx(start.normalized()), "lasers rise before homing")
+			_advance(laser, 1.6)
+			var to_player: Vector2 = (player.global_position - laser.global_position).normalized()
+			_expect(laser.get_travel_velocity().normalized().dot(to_player) > 0.8, "lasers curve toward the player")
+			_expect(absf(laser.get_travel_velocity().length() - 190.0) < 1.0, "lasers speed up while homing")
+		_expect(sides == 0.0, "fountain sprays to both sides")
 	player.remove_from_group("player")
 	attack.targeting_component.change_target(null)
 	attack._begin_aim()
@@ -125,6 +186,11 @@ func _run() -> void:
 		for failure in failures:
 			push_error(failure)
 		quit(1)
+
+
+func _advance(bullet: Node, age: float) -> void:
+	while bullet._active and bullet.age < age - 0.0001:
+		bullet._physics_process(minf(1.0 / 60.0, age - bullet.age))
 
 
 func _expect(condition: bool, message: String) -> void:

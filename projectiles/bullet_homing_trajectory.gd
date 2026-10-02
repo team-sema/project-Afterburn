@@ -41,6 +41,11 @@ var _direction: Vector2
 var _behavior: BulletBehavior
 var _frames: Array[Frame] = []
 var _committed := 0
+## Packed copies of frame times and final positions for fast body sampling.
+## Entries below _packed_valid match _frames; any resize lowers it.
+var _packed_times := PackedFloat64Array()
+var _packed_points := PackedVector2Array()
+var _packed_valid := 0
 
 func _init(runtime) -> void:
 	_runtime = weakref(runtime)
@@ -77,6 +82,7 @@ func _observe(frame: Frame) -> void:
 
 func invalidate_prediction() -> void:
 	_frames.resize(_committed + 1)
+	_packed_valid = mini(_packed_valid, _frames.size())
 
 func advance_to(time: float) -> void:
 	if time <= _frames[_committed].time: return
@@ -87,6 +93,7 @@ func advance_to(time: float) -> void:
 	var frame := _at(time)
 	var index := _floor_index(time)
 	_frames.resize(index + 1)
+	_packed_valid = mini(_packed_valid, _frames.size())
 	if _frames[-1].time < time - EPS: _frames.append(frame)
 	_committed = _frames.size() - 1
 	_runtime.get_ref().cached_until = time
@@ -97,6 +104,40 @@ func sample(time: float) -> Dictionary:
 func position_at(time: float) -> Vector2:
 	var frame := _at(time)
 	return frame.position + _direction.orthogonal() * float(frame.state.lateral)
+
+## Evenly spaced positions from start to end in one forward walk. Points on a
+## stored frame are exact; points between frames (at most STEP apart) are
+## interpolated, which is sub-pixel and avoids a full _step per point. Laser
+## bodies sample dozens of past times every tick.
+func positions_between(start: float, end: float, segments: int) -> PackedVector2Array:
+	var points := PackedVector2Array()
+	points.resize(segments + 1)
+	_at(end) # Integrates frames up to end so every point has a following frame.
+	_sync_packed()
+	var index := _floor_index(start)
+	var last := _packed_times.size() - 1
+	for point in segments + 1:
+		var time := lerpf(start, end, float(point) / segments)
+		while index < last and _packed_times[index + 1] <= time + EPS:
+			index += 1
+		var frame_time := _packed_times[index]
+		if time > frame_time + EPS and index < last:
+			var weight := (time - frame_time) / (_packed_times[index + 1] - frame_time)
+			points[point] = _packed_points[index].lerp(_packed_points[index + 1], weight)
+		else:
+			points[point] = _packed_points[index]
+	return points
+
+func _sync_packed() -> void:
+	var size := _frames.size()
+	_packed_times.resize(size)
+	_packed_points.resize(size)
+	var normal := _direction.orthogonal()
+	for index in range(_packed_valid, size):
+		var frame := _frames[index]
+		_packed_times[index] = frame.time
+		_packed_points[index] = frame.position + normal * float(frame.state.lateral)
+	_packed_valid = size
 
 func _floor_index(time: float) -> int:
 	var low := 0

@@ -378,6 +378,21 @@ func position_at(time: float) -> Vector2:
 	_position_queries[t] = position
 	return position
 
+## Evenly spaced positions from start to end (segments + 1 points) for drawing
+## and laser bodies. Homing paths without effects walk their stored frames once
+## and interpolate between them (sub-pixel); everything else calls position_at.
+func positions_between(start: float, end: float, segments: int) -> PackedVector2Array:
+	var from := clampf(start, 0, _limit)
+	var to := clampf(end, 0, _limit)
+	if _homing != null and _events.is_empty():
+		cached_until = maxf(cached_until, to)
+		return _homing.positions_between(from, to, segments)
+	var points := PackedVector2Array()
+	points.resize(segments + 1)
+	for index in segments + 1:
+		points[index] = position_at(lerpf(start, end, float(index) / segments))
+	return points
+
 func _position_at_uncached(t: float) -> Vector2:
 	if _constant_velocity:
 		return _direction * _speed * t + (_direction.orthogonal() * float(sample(t).lateral) if _has_lateral else Vector2.ZERO)

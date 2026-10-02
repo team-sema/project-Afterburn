@@ -9,6 +9,8 @@ signal elite_defeated(threat_level: int)
 @export var bullet_cancel_reward: BulletCancelRewardController
 @export var elite_preset: EncounterPreset
 @export var charge_elite_preset: EncounterPreset = preload("res://resources/encounters/presets/threat_elite_awl.tres")
+@export var bomb_elite_preset: EncounterPreset = preload("res://resources/encounters/presets/threat_elite_bomb.tres")
+@export var caster_elite_preset: EncounterPreset = preload("res://resources/encounters/presets/threat_elite_caster.tres")
 @export_range(1, 10000, 1) var base_elite_health := 420
 @export_range(0, 10000, 1) var health_per_threat := 140
 
@@ -16,6 +18,8 @@ var active_elite: Enemy
 var active_threat_level := 0
 var _next_gate_preset: EncounterPreset
 var _next_gate_is_boss := false
+var _last_elite_preset: EncounterPreset
+var rng := RandomNumberGenerator.new()
 
 
 func _ready() -> void:
@@ -24,13 +28,16 @@ func _ready() -> void:
 	assert(bullet_cancel_reward != null, "ThreatEliteController requires bullet cancel reward.")
 	assert(elite_preset != null and elite_preset.validate(true), "Elite preset is invalid.")
 	assert(charge_elite_preset != null and charge_elite_preset.validate(true), "Charge elite preset is invalid.")
+	assert(bomb_elite_preset != null and bomb_elite_preset.validate(true), "Bomb elite preset is invalid.")
+	assert(caster_elite_preset != null and caster_elite_preset.validate(true), "Caster elite preset is invalid.")
+	rng.randomize()
 	assert(enemy_generator.has_method("spawn_special_encounter"))
 	assert(enemy_generator.has_method("set_normal_spawns_paused"))
 	progression.elite_milestone_requested.connect(_on_elite_milestone_requested)
 	progression.elite_gate_changed.connect(_on_elite_gate_changed)
 
 
-## Overrides the alternation rule for the next gate only. A null preset keeps
+## Overrides the rotation rule for the next gate only. A null preset keeps
 ## the rule. Boss gates mark the enemy is_boss and keep the scene's HP.
 func set_next_gate(preset: EncounterPreset, is_boss := false) -> void:
 	_next_gate_preset = preset
@@ -40,7 +47,19 @@ func set_next_gate(preset: EncounterPreset, is_boss := false) -> void:
 func _resolve_gate_preset(threat_level: int) -> EncounterPreset:
 	if _next_gate_preset != null:
 		return _next_gate_preset
-	return charge_elite_preset if threat_level % 2 == 1 else elite_preset
+	if threat_level <= 2:
+		return elite_preset
+	if threat_level == 3:
+		return charge_elite_preset
+	var candidates: Array[EncounterPreset] = []
+	for preset in get_rotation_presets():
+		if preset != _last_elite_preset:
+			candidates.append(preset)
+	return candidates[rng.randi_range(0, candidates.size() - 1)]
+
+
+func get_rotation_presets() -> Array[EncounterPreset]:
+	return [elite_preset, charge_elite_preset, bomb_elite_preset, caster_elite_preset]
 
 
 func _on_elite_milestone_requested(threat_level: int) -> void:
@@ -50,6 +69,8 @@ func _on_elite_milestone_requested(threat_level: int) -> void:
 	var is_boss := _next_gate_is_boss
 	_next_gate_preset = null
 	_next_gate_is_boss = false
+	if not is_boss:
+		_last_elite_preset = preset
 	enemy_generator.call("set_normal_spawns_paused", true)
 	var controller := enemy_generator.call(
 		"spawn_special_encounter",
