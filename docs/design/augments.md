@@ -45,7 +45,7 @@ XP를 모은 뒤 플레이어가 선택 시점을 정하며, 무기·모듈·시
 | `enemy_fire_volume_boost` | 포화 사격 | ACTION_RATE ×1.25 + 탄 2 · 스프레드 18° | — |
 | `enemy_near_death_experience` | 임사 체험 | 치명 시 HP1 · 1초 무적 후 사망 · one-time | — |
 | `enemy_drone_formation_reinforcement` | 드론 증원 편대 | Drone 편대 +1 · one-time | ![드론](enemies/sprites/enemy_drone.svg) |
-| `enemy_bomb_fast_fuse` | 고속 기폭 장치 | Bomb 무장 ÷1.5 · one-time | ![폭탄](enemies/sprites/enemy_bomb.svg) |
+| `enemy_bomb_fast_fuse` | 고속 기폭 장치 | Bomb 무장·Elite Bomb 기뢰 점멸 ÷1.5 · one-time | ![폭탄](enemies/sprites/enemy_bomb.svg) |
 
 미등록: `enemy_counter_shot_on_hit` (`include_in_offer_pool = false`, 랩만).
 

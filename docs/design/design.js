@@ -68,8 +68,8 @@ const NAV = [
         children: [
           { id: "elites/elite-fighter", title: "Elite Fighter", file: "elites/elite-fighter.md" },
           { id: "elites/elite-awl", title: "Elite Awl", file: "elites/elite-awl.md" },
-          { id: "elites/elite-bomb", title: "Elite Bomb (시안)", file: "elites/elite-bomb.md" },
-          { id: "elites/elite-caster", title: "Elite Caster (시안)", file: "elites/elite-caster.md" },
+          { id: "elites/elite-bomb", title: "Elite Bomb", file: "elites/elite-bomb.md" },
+          { id: "elites/elite-caster", title: "Elite Caster", file: "elites/elite-caster.md" },
         ],
       },
       {

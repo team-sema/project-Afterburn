@@ -1,8 +1,8 @@
 extends Node2D
 ## Replay enemy attack phases against a shared automatic target path.
 
-const SCENES := ["res://enemies/elite_awl.tscn", "res://enemies/elite_fighter.tscn", "res://enemies/sniper_enemy.tscn"]
-const TITLES := ["Elite Awl", "Elite Fighter", "Sniper"]
+const SCENES := ["res://enemies/elite_awl.tscn", "res://enemies/elite_fighter.tscn", "res://enemies/elite_bomb.tscn", "res://enemies/elite_caster.tscn", "res://enemies/sniper_enemy.tscn"]
+const TITLES := ["Elite Awl", "Elite Fighter", "Elite Bomb", "Elite Caster", "Sniper"]
 
 var world: Node2D
 var target: Node2D
@@ -25,15 +25,15 @@ func _ready() -> void:
 	var row := HBoxContainer.new()
 	panel.add_child(row)
 	var buttons: Array[Button] = []
-	for entry in ["Elite Awl", "Elite Fighter", "Sniper", "다시 재생"]:
+	for entry in TITLES + ["다시 재생"]:
 		var button := Button.new()
 		button.add_theme_font_size_override("font_size", 10)
 		button.text = entry
 		row.add_child(button)
 		buttons.append(button)
 		button.mouse_entered.connect(button.grab_focus)
-	for i in 3: buttons[i].pressed.connect(restart.bind(i))
-	buttons[3].pressed.connect(func(): restart(mode))
+	for i in SCENES.size(): buttons[i].pressed.connect(restart.bind(i))
+	buttons[SCENES.size()].pressed.connect(func(): restart(mode))
 	for i in buttons.size():
 		buttons[i].focus_neighbor_left = buttons[i].get_path_to(buttons[posmod(i - 1, buttons.size())])
 		buttons[i].focus_neighbor_right = buttons[i].get_path_to(buttons[(i + 1) % buttons.size()])

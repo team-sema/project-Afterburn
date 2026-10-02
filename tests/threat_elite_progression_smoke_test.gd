@@ -79,7 +79,25 @@ func _run() -> void:
 		_expect(progression.get_threat_level() == 3, "charge elite defeat also advances Threat")
 		offer_controller.call("_complete_offer", AugmentOfferController.OfferType.ENEMY)
 		progression._process(60.0)
-		_expect(elite_controller.active_elite.spawn_id == &"threat_elite", "third gate returns to fighter")
+		var third_id := elite_controller.active_elite.spawn_id
+		_expect(third_id in [&"threat_elite", &"threat_elite_bomb", &"threat_elite_caster"], "third gate rotates away from the previous charge elite")
+		_expect(elite_controller.active_elite.stats_component.health == 840, "Threat 4 elite uses the shared HP formula")
+
+	var rotation := elite_controller.get_rotation_presets()
+	_expect(rotation.size() == 4, "rotation holds all four elites")
+	elite_controller.rng.seed = 7
+	for previous in rotation:
+		var seen := {}
+		elite_controller._last_elite_preset = previous
+		for i in 60:
+			var chosen_preset := elite_controller._resolve_gate_preset(4 + i)
+			_expect(chosen_preset != previous, "rotation never repeats the previous elite")
+			seen[chosen_preset] = true
+		_expect(seen.size() == 3, "rotation reaches every other elite")
+	for preset in rotation:
+		var scene := preset.members[0].enemy_scene.instantiate() as Enemy
+		_expect(scene.is_elite, "%s scene is marked elite" % preset.encounter_id)
+		scene.free()
 
 	gameplay.queue_free()
 	await process_frame

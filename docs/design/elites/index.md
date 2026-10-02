@@ -4,21 +4,24 @@
 
 ## 구현 상태
 
-- [Elite Fighter](elite-fighter.md): 구현·메인 ELITE 관문 연결.
-- [Elite Awl](elite-awl.md): 구현·메인 ELITE 관문 연결.
-- [Elite Bomb](elite-bomb.md): 외형 시안만 존재. 전투·스폰 미구현.
-- [Elite Caster](elite-caster.md): 외형 시안만 존재. 전투·스폰 미구현.
+- [Elite Fighter](elite-fighter.md): 구현·메인 ELITE 관문 연결. 유도 포화·레일 포격 / 가위 포격.
+- [Elite Awl](elite-awl.md): 구현·메인 ELITE 관문 연결. 가시 궤적 / 분수 강하.
+- [Elite Bomb](elite-bomb.md): 구현·메인 ELITE 관문 연결. 기뢰 살포 / 기뢰 지대.
+- [Elite Caster](elite-caster.md): 구현·메인 ELITE 관문 연결. 호흡 링 / 꽃잎 격자 / 정지 조준.
 
 ## 공통 규칙
 
 - 일반 MainEncounterPool에는 등록하지 않는다. ELITE 스텝에서 ThreatEliteController가 전용 Encounter를 생성한다. Director 미사용 시에만 60초 타이머 경로를 쓴다.
-- 관문이 요청하는 다음 Threat 기준으로 짝수는 Fighter, 홀수는 Awl이다. 현재 Threat는 처치 정산 완료 뒤 상승한다.
+- 관문이 요청하는 다음 Threat 기준으로 Threat 2는 Fighter, Threat 3은 Awl로 고정한다. Threat 4부터는 Fighter·Awl·Bomb·Caster 4종 중 **직전 엘리트를 제외한 3종**에서 균등 무작위로 고른다. 현재 Threat는 처치 정산 완료 뒤 상승한다.
+- 시퀀스 스텝의 `elite_preset`으로 지정한 엘리트도 직전 엘리트로 기록한다. BOSS 관문은 직전 엘리트 기록을 바꾸지 않는다.
 - 기본 HP = 420 + max(0, 관문 Threat - 2) × 140. 스폰 시 HEALTH 증강을 곱하고 반올림한다. 씬만 직접 실행했을 때의 HP와 구분한다.
-- is_elite와 is_boss는 별개다. 현재 두 엘리트는 보스 피해 배율 대상이 아니다.
+- 엘리트 바늘탄은 전용 외형 `resources/projectiles/elite_needle.tres`를 쓴다. 일반 바늘탄(`needle.tres`, 본체 6×8px·판정 4×8px)의 1.5배로 본체 9×12px, 판정 6×12px이다. 일반 적의 바늘탄 크기는 바꾸지 않는다.
+- 모든 엘리트는 서로 다른 공격 패턴을 **2개 이상** 정해진 순서로 순환한다. 패턴마다 빈 공간이 생기는 방식이나 피해야 할 방향이 달라야 한다. 체력에 따른 패턴 변화는 두지 않는다.
+- is_elite와 is_boss는 별개다. 엘리트는 보스 피해 배율 대상이 아니다.
 - 처치·탄소거·XP 정산·적 오퍼·일반 스폰 재개의 순서는 [런 페이싱](../run-pacing.md)을 따른다.
 - 베이스 Enemy 컴포넌트는 [일반 적](../enemies/index.md)의 공통 구현을 공유한다. 콘텐츠 문서의 분류와 코드 상속은 별개다.
 
 ## 관련 코드·검증
 
-- threat_elite_controller.gd, enemies/elite_fighter.tscn, enemies/elite_awl.tscn
-- tests/threat_elite_progression_smoke_test.gd, tests/elite_attack_smoke_test.gd, tests/elite_charge_smoke_test.gd
+- threat_elite_controller.gd, enemies/elite_fighter.tscn, enemies/elite_awl.tscn, enemies/elite_bomb.tscn, enemies/elite_caster.tscn
+- tests/threat_elite_progression_smoke_test.gd, tests/elite_attack_smoke_test.gd, tests/elite_charge_smoke_test.gd, tests/elite_mine_smoke_test.gd, tests/elite_caster_smoke_test.gd

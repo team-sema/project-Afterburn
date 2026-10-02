@@ -2,6 +2,8 @@ class_name CurvedLaser
 extends Node2D
 
 const SEGMENTS := 36
+## Each capsule spans this many drawn segments; 12 capsules cover the body.
+const COLLISION_STRIDE := 3
 const BATCH_RENDERER = preload("res://projectiles/projectile_batch_renderer.gd")
 @export var use_batched_rendering := true
 const LASER_HITBOX := preload("res://projectiles/curved_laser_hitbox.gd")
@@ -46,7 +48,7 @@ func _ready() -> void:
 	_hitbox.name = "HitboxComponent"
 	_hitbox.collision_layer = EnemyBullets.LAYER
 	_hitbox.collision_mask = 1
-	for index in SEGMENTS:
+	for index in SEGMENTS / COLLISION_STRIDE:
 		var collision := CollisionShape2D.new()
 		collision.shape = CapsuleShape2D.new()
 		collision.disabled = true
@@ -90,8 +92,8 @@ func launch(direction: Vector2, speed: float) -> void:
 	age = 0
 	_active = true
 	_seen = false
-	for index in SEGMENTS:
-		(_collisions[index].shape as CapsuleShape2D).radius = hit_width * 0.5 * width_factor(index)
+	for index in _collisions.size():
+		(_collisions[index].shape as CapsuleShape2D).radius = hit_width * 0.5 * _collision_width_factor(index)
 	_update_body()
 	set_physics_process(true)
 
@@ -101,16 +103,20 @@ func position_at(time: float) -> Vector2:
 
 
 func body_at(time: float) -> PackedVector2Array:
-	var points := PackedVector2Array()
-	var tail_time := maxf(0, time - trail_duration)
-	for index in range(SEGMENTS + 1):
-		points.append(position_at(lerpf(tail_time, time, float(index) / SEGMENTS)))
+	var points := behavior_state.positions_between(maxf(0, time - trail_duration), time, SEGMENTS)
+	for index in points.size():
+		points[index] += _origin
 	return points
 
 
 func width_factor(index: int) -> float:
 	# Rounded, tapered ends; collision follows the same profile as the core.
 	return maxf(0.08, pow(sin(PI * (float(index) + 0.5) / SEGMENTS), 0.55))
+
+
+## Width at the middle of a capsule spanning COLLISION_STRIDE drawn segments.
+func _collision_width_factor(index: int) -> float:
+	return maxf(0.08, pow(sin(PI * (float(index) + 0.5) * COLLISION_STRIDE / SEGMENTS), 0.55))
 
 
 func _physics_process(delta: float) -> void:
@@ -147,16 +153,16 @@ func _update_body() -> void:
 		var after := _body[mini(_body.size() - 1, index + 1)]
 		_ribbon_offsets[index] = (after - before).normalized().orthogonal() * _profile[index]
 	var inverse := global_transform.affine_inverse()
-	for index in SEGMENTS:
-		var start := inverse * _body[index]
-		var end := inverse * _body[index + 1]
+	for index in _collisions.size():
+		var start := inverse * _body[index * COLLISION_STRIDE]
+		var end := inverse * _body[(index + 1) * COLLISION_STRIDE]
 		var collision := _collisions[index]
 		if collision.disabled != (age <= 0.001):
 			collision.disabled = age <= 0.001
 		collision.position = (start + end) * 0.5
 		collision.rotation = (end - start).angle() - PI * 0.5
 		var capsule := collision.shape as CapsuleShape2D
-		var radius := hit_width * 0.5 * width_factor(index) * hitbox_scale
+		var radius := hit_width * 0.5 * _collision_width_factor(index) * hitbox_scale
 		if not is_equal_approx(capsule.radius, radius):
 			capsule.radius = radius
 		capsule.height = start.distance_to(end) + capsule.radius * 2
@@ -211,7 +217,7 @@ func _draw() -> void:
 	_draw_ribbon(core_width * 1.5, Color(1, 0.75, 0.12, 0.55))
 	_draw_ribbon(core_width, Color(1, 0.98, 0.66))
 	if show_hitbox:
-		for index in SEGMENTS:
+		for index in _collisions.size():
 			draw_set_transform(_collisions[index].position, _collisions[index].rotation)
 			_collisions[index].shape.draw(get_canvas_item(), Color(0.1, 1, 0.65, 0.65))
 		draw_set_transform(Vector2.ZERO)

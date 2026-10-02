@@ -25,29 +25,28 @@ func sample_scene(path: String) -> Array:
 	attack.apply_fire_volume_boost(2, 18)
 	attack.apply_action_rate_multiplier(2)
 	attack.phase = attack.Phase.DASH
+	attack.use_spine = false
 	attack.dash_direction = Vector2.DOWN
-	attack._process(0.21)
+	attack._process(0.17)
 	await process_frame
 	var bullets := get_nodes_in_group("enemy_projectiles")
-	expect(bullets.size() == 12, "two boosted pairs at action-rate minimum interval")
+	expect(bullets.size() == 12, "two boosted fountain bursts at action-rate minimum interval")
 	var result: Array = []
 	for bullet in bullets:
-		expect(bullet is FoundationBullet, "Awl always uses the adopted barrage body")
-		var velocity: Vector2
-		if bullet is FoundationBullet:
-			velocity = bullet.get_travel_velocity()
-			expect(is_equal_approx(bullet.lifetime, 0.9), "new flame lifetime")
-			expect(bullet.appearance.collision_size == Vector2(4, 8), "legacy collision size retained")
-			expect(bullet.trail_effect != null, "new flame has shared particles")
-			result.append([velocity, bullet._origin])
-		else:
+		expect(bullet is CurvedLaser, "fountain uses trail lasers")
+		if not bullet is CurvedLaser:
 			continue
-		expect(velocity.length() >= 90 and velocity.length() <= 110, "random speed bounded")
+		var velocity: Vector2 = bullet.behavior_state.velocity_at(0.0)
+		expect(is_equal_approx(bullet.lifetime, 5.0), "fountain laser lifetime")
+		expect(is_equal_approx(bullet.trail_duration, 0.5), "fountain laser keeps a short body")
+		expect(velocity.y < 0.0, "fountain lasers rise from the tail")
+		expect(velocity.length() >= 150 and velocity.length() <= 180, "random speed bounded")
+		result.append([velocity, bullet._origin])
 		bullet.set_process(false)
 		bullet.set_physics_process(false)
-	if not bullets.is_empty() and bullets[0] is FoundationBullet:
-		bullets[0]._physics_process(0.91)
-		expect(bullets[0].is_queued_for_deletion(), "new flame expires")
+	if not bullets.is_empty() and bullets[0] is CurvedLaser:
+		bullets[0]._physics_process(5.01)
+		expect(bullets[0].is_queued_for_deletion(), "fountain laser expires")
 	world.queue_free()
 	await process_frame
 	return result
@@ -67,10 +66,11 @@ func run() -> void:
 	await process_frame
 	await process_frame
 	expect(lab.mode == 1 and get_nodes_in_group("gameplay_world").size() == 1, "lab switches without stale worlds")
-	lab.restart(2)
-	await process_frame
-	await process_frame
-	expect(lab.mode == 2 and get_nodes_in_group("gameplay_world").size() == 1, "lab switches to Sniper")
+	for index in [2, 3, 4]:
+		lab.restart(index)
+		await process_frame
+		await process_frame
+		expect(lab.mode == index and get_nodes_in_group("gameplay_world").size() == 1, "lab switches to %s" % lab.TITLES[index])
 	lab.queue_free()
 	await process_frame
 	for failure in failures: push_error(failure)

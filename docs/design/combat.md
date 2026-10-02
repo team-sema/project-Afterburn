@@ -94,7 +94,7 @@ Hitbox.area_entered
 - 그림·판정·경로 예측은 같은 곡선 표본을 사용한다. 화면 밖으로 머리가 나가도 몸통이 남으면 유지한다. 소거/XP는 구간 수와 무관하게 레이저 한 줄당 1회다.
 - 시험 UI는 기존 이동·일시정지·초기화·판정 표시·소거를 재사용하며 단일 레이저와 꽃잎, 좌우 선회를 비교한다.
 - 실행: `tools/run-godot.cmd res://labs/bullet/presets/curved_laser_lab.tscn` 또는 해당 씬에서 F6. 일반 탄으로 돌아가려면 첫 선택에서 원탄 등을 고른다. 기체 WASD / 메뉴 방향키·Enter는 기존과 같다.
-- 구현은 `curved_laser.gd`의 시간별 머리 위치를 다시 표본화해 최근 경로를 구성한다. 36개 구간을 한 Hitbox에 모으고 연속 리본으로 그린다. 경로 예측(`get_predicted_path`)은 현재 꼬리부터 미래 머리까지를 보수적으로 포함한다. 구간별 판정 표시는 실제 캡슐 모양을 그린다.
+- 구현은 `curved_laser.gd`의 시간별 머리 위치를 다시 표본화해 최근 경로를 구성한다. 36개 구간의 연속 리본으로 그리고, 판정은 3구간마다 하나씩 12개 캡슐을 한 Hitbox에 모은다. 호밍 레이저의 몸통은 1/120초 간격으로 저장된 궤적 프레임을 한 번에 훑어 그 사이를 보간한다(1px 미만 오차, 머리 위치·`position_at`은 정확값). 리본 정점의 삼각형 인덱스는 렌더러가 캐시해 재사용한다. 경로 예측(`get_predicted_path`)은 현재 꼬리부터 미래 머리까지를 보수적으로 포함한다. 구간별 판정 표시는 실제 캡슐 모양을 그린다.
 - `curved_laser_smoke_test.gd`에서 머리와 떨어진 몸통 피격, 무적 종료 후 재피격, 화면 밖 머리/남은 몸통 유지, 완전 이탈 제거, 경로 예측, 일시정지·소거·메뉴 전환을 PASS로 확인했다. 기존 기본탄 시험과 탄소거 XP 회귀도 PASS. 실제 렌더링은 `artifacts/curved_laser_lab.png`에서 확인했다. 원작의 시간별 패턴 일치와 본 게임 밸런스는 확정하지 않았다.
 
 #### 탄환 렌더링 최적화 · 구현 완료
@@ -117,7 +117,7 @@ Hitbox.area_entered
 
 - 본 게임 Drone은 `patterns/drone_pattern.gd`, Striker·Interceptor는 `patterns/aimed_burst_pattern.gd`, Caster는 `patterns/caster_pattern.gd`를 사용한다. 모두 신규 바늘탄·직진 Behavior·공통 다이아몬드 꼬리·8초 수명을 사용한다. 기존 기본탄의 초기 확대/섬광과 시간당 파티클은 그대로 복제하지 않는다. 발사 수치·활성 조건은 각 적 기획서를 따른다. Radial 전용 컴포넌트는 제거했다. 패턴의 포화 사격 적용 범위는 [증강](augments.md)을 따른다.
 - pattern_script가 없는 레거시 모드에서는 `EnemyShootComponent.barrage_shot`을 선택해 새 탄만 연결할 수도 있다. 이때 방향 주입 없는 전용 씬 발사는 기존 projectile_scene 경로를 유지하고 새 탄 생성은 deferred 단계에서 수행한다.
-- Elite Awl은 이 단발 어댑터로 신규 불꽃탄을 사용한다. 이동 서브스텝·발사 난수·예고는 기존 공격 컴포넌트가 소유하며 Sequence 이식은 하지 않았다. 채택한 외형과 공격 재생 Lab은 [Elite Awl](elites/elite-awl.md#탄막-이식)을 따른다. 비교용 Legacy 구현은 제거했다.
+- Elite Awl은 공격 컴포넌트가 돌진 중 `BarrageShot.spawn`으로 가시 바늘과 분수 호밍 레이저를 직접 만든다. 이동 서브스텝·발사 난수·예고는 공격 컴포넌트가 소유하며 Sequence 이식은 하지 않았다. 패턴과 공격 재생 Lab은 [Elite Awl](elites/elite-awl.md#탄막-이식)을 따른다.
 - 안전 비율 격자 최적화는 레거시 탄에도 적용된다. 새 MultiMesh/레이저 메쉬·판정 표시 배칭은 FoundationBullet/CurvedLaser에 적용되며 `Kind.LEGACY`는 기존 Sprite/파티클 렌더링을 사용한다.
 
 ##### 발사 일정·Behavior 표현력 확장 · 구현 완료

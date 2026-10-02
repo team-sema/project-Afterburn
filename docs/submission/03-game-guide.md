@@ -129,7 +129,7 @@
 | 규칙 카드            | **4종**  | 제4 베이 · 시간 왜곡장 · 벼랑 끝 · 공명 사격 (프리즘)             |
 | 적 증강             | **6종**  | 체력·속도·화력 강화 + 임사 체험 · 드론 증원 · 고속 기폭             |
 | 적 유닛             | **8종**  | Drone · Striker · Awl · Bomb · Interceptor · Sniper · Tanker · Caster |
-| 엘리트 · 보스         | **2종 · 1종** | Elite Fighter · Elite Awl (관문에서 교대) · Boss Wall (거대 벽 + 출몰 포탑)           |
+| 엘리트 · 보스         | **4종 · 1종** | Elite Fighter · Elite Awl · Elite Bomb · Elite Caster (관문마다 직전과 다른 엘리트) · Boss Wall (거대 벽 + 출몰 포탑) |
 | 편대 조우(Encounter) | **13종** | 위협도에 따라 해금되는 편대 구성·진입 경로                        |
 
 

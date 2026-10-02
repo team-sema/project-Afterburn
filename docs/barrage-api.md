@@ -452,9 +452,9 @@ Drone은 `drone_pattern.gd`, Striker·Interceptor는 `aimed_burst_pattern.gd`를
 - 행동 속도 배율: 기존 `apply_action_rate_multiplier` 계약 유지. 패턴 모드는 Player.time_scale을 변경하며 원본 wait나 탄 이동 속도를 수정하지 않는다.
 - 수명: 적 아래의 Player는 적과 함께 제거되게 하고 탄은 독립된 월드 부모에 둔다. 전투 종료·화면 전환·일시정지·적 죽음 때 미래 발사가 멈추는지 확인한다.
 - 충돌·보상: `enemy_projectiles` 그룹, 적탄 판정 레이어 4, Hitbox/Hurtbox, 소거당 보상, 레이저 한 몸체당 보상, 무적 시간 중 접촉 규칙을 유지한다. 적탄 조회·소거는 [11절](#11-적탄-조회소거--enemybullets)의 `EnemyBullets`를 쓴다.
-- 특수 공격: Sniper의 전조/전용 configure, 화염탄, 반격탄은 각각의 계약을 검토한 뒤 별도로 옮긴다. 일반 탄 API로 일괄 대체하지 않는다.
+- 특수 공격: Sniper의 전조/전용 configure, 반격탄은 각각의 계약을 검토한 뒤 별도로 옮긴다. 일반 탄 API로 일괄 대체하지 않는다.
 
-이관한 일반 적의 Timer는 최초 활성화 지연에만 사용한다. Elite Awl은 `barrage_shot` 어댑터로 채택한 새 불꽃 몸체·꼬리를 연결하고 발사 타이밍·난수·이동은 기존 공격 제어자에 남겼다. 비교용 Legacy 구현은 제거했다.
+이관한 일반 적의 Timer는 최초 활성화 지연에만 사용한다. Elite Awl은 공격 제어자가 돌진 중 `BarrageShot.spawn`으로 가시 바늘과 분수 호밍 레이저(`barrage_shot`)를 직접 만들고, 발사 타이밍·난수·이동을 소유한다.
 
 Elite Fighter는 `elite_fighter_pattern.gd`의 유한 Sequence로 부채꼴/집중 사격을 재생한다. 제어자는 이동 정지·재개와 고정 조준 예고를 담당하고 마지막 발사의 `finished`로 다음 단계에 진입한다. ACTION_RATE는 단계별 최소 간격을 반영한 Player.time_scale로 적용한다.
 

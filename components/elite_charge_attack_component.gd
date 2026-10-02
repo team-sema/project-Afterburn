@@ -1,13 +1,15 @@
 extends "res://components/enemy_shoot_component.gd"
 
 const WARNING = preload("res://components/entry_warning_component.gd")
-enum Phase { ENTRY, RECOVERY, AIM, DASH, REENTRY_WARNING, REENTRY }
+enum Phase { ENTRY, RECOVERY, AIM, PULLBACK, DASH, REENTRY_WARNING, REENTRY }
 
 @export var dash_speed := 320.0
 @export var entry_speed := 110.0
 @export var aim_duration := 0.8
 @export var recovery_duration := 1.2
 @export var reentry_warning_duration := 0.7
+@export var pullback_distance := 28.0
+@export var pullback_duration := 0.5
 ## Nonzero seeds allow repeatable legacy/new comparisons without VFX RNG interference.
 @export var shot_random_seed := 0
 var _shot_rng := RandomNumberGenerator.new()
@@ -22,6 +24,10 @@ var _hold_position := Vector2.ZERO
 var _visual: Node2D
 var _aim_locked := false
 var _dash_intent := MovementIntent.new()
+## Dashes alternate: an aimed spine trail (A), then a straight-down fountain dive (B).
+var dash_count := 0
+var use_spine := true
+var spine_shot: BarrageShot
 
 
 func _ready() -> void:
@@ -29,6 +35,7 @@ func _ready() -> void:
 	else: _shot_rng.seed = shot_random_seed
 	super._ready()
 	fire_timer.stop()
+	spine_shot = _make_spine_shot()
 	_visual = enemy.get_node("ChargeVisual")
 	enemy.get_node("EliteAimCone").hide()
 	(enemy.get_node("VisibleOnScreenNotifier2D") as FreeOffscreenComponent).suspend_despawn()
@@ -54,7 +61,9 @@ func _process(delta: float) -> void:
 			enemy.global_position = _hold_position
 			_track_player(delta)
 			if _elapsed >= recovery_duration:
-				_begin_aim()
+				use_spine = dash_count % 2 == 0
+				if use_spine: _begin_aim()
+				else: _begin_pullback()
 		Phase.AIM:
 			enemy.global_position = _hold_position
 			if not _aim_locked:
@@ -63,10 +72,12 @@ func _process(delta: float) -> void:
 					_aim_locked = true
 					_visual.locked = true
 			if _elapsed >= aim_duration:
-				_visual.aiming = false
-				phase = Phase.DASH
-				_shot_elapsed = 0.0
-				_wake_elapsed = 0.0
+				_begin_dash()
+		Phase.PULLBACK:
+			var t := minf(_elapsed / pullback_duration, 1.0)
+			enemy.global_position = _hold_position + Vector2.UP * pullback_distance * (1.0 - (1.0 - t) * (1.0 - t))
+			if _elapsed >= aim_duration:
+				_begin_dash()
 		Phase.DASH:
 			# Substeps keep side shots along the path even on a slower frame.
 			var remaining := delta
@@ -101,6 +112,24 @@ func _begin_aim() -> void:
 	_visual.direction = dash_direction
 
 
+## No aim: the hull backs up, then dives straight down.
+func _begin_pullback() -> void:
+	phase = Phase.PULLBACK
+	_elapsed = 0.0
+	dash_direction = Vector2.DOWN
+	_face(Vector2.DOWN)
+	_visual.aiming = true
+	_visual.locked = true
+	_visual.direction = Vector2.DOWN
+
+
+func _begin_dash() -> void:
+	_visual.aiming = false
+	phase = Phase.DASH
+	_shot_elapsed = 0.0
+	_wake_elapsed = 0.0
+
+
 func _track_player(delta: float) -> void:
 	var target_direction := targeting_component.get_direction_from(enemy.global_position)
 	if target_direction.is_zero_approx():
@@ -125,18 +154,65 @@ func _advance_dash(delta: float) -> void:
 		if bounds.has_point(enemy.global_position):
 			_visual.emit_wake(enemy.global_position - dash_direction * 14.0, dash_direction)
 	_shot_elapsed += delta
-	var interval := maxf(0.1, 0.18 / _action_rate)
+	if use_spine:
+		var spine_interval := maxf(0.04, 0.06 / _action_rate)
+		if _shot_elapsed >= spine_interval:
+			_shot_elapsed -= spine_interval
+			if bounds.has_point(enemy.global_position):
+				_drop_spines()
+		return
+	var interval := maxf(0.08, 0.14 / _action_rate)
 	if _shot_elapsed >= interval:
 		_shot_elapsed -= interval
 		if bounds.has_point(enemy.global_position):
-			var perpendicular := Vector2(-dash_direction.y, dash_direction.x)
-			projectile_speed = _shot_rng.randf_range(90.0, 110.0)
-			_fire_projectiles(perpendicular.rotated(_shot_rng.randf_range(-0.24, 0.24)))
-			projectile_speed = _shot_rng.randf_range(90.0, 110.0)
-			_fire_projectiles((-perpendicular).rotated(_shot_rng.randf_range(-0.24, 0.24)))
+			_emit_fountain()
+
+
+## Two homing lasers spray up and outward from the tail, one to each side.
+func _emit_fountain() -> void:
+	var world := get_tree().get_first_node_in_group("gameplay_world") as Node2D
+	if world == null: world = get_tree().current_scene as Node2D
+	var tail := enemy.global_position - dash_direction * 14.0
+	var count := maxi(1, shot_count)
+	for side in [-1.0, 1.0]:
+		var direction := Vector2.UP.rotated(deg_to_rad(side * _shot_rng.randf_range(15.0, 45.0)))
+		var speed := _shot_rng.randf_range(150.0, 180.0)
+		for index in count:
+			var offset := lerpf(-spread_degrees * 0.5, spread_degrees * 0.5, float(index) / (count - 1)) if count > 1 else 0.0
+			barrage_shot.spawn(world, tail, direction.rotated(deg_to_rad(offset)), speed, false, _pattern_target(), _pattern_target)
+	_volleys_fired += 1
+
+
+## Needles brake beside the path, wait, turn red and burst outward in order.
+func _drop_spines() -> void:
+	var world := get_tree().get_first_node_in_group("gameplay_world") as Node2D
+	if world == null: world = get_tree().current_scene as Node2D
+	var perpendicular := Vector2(-dash_direction.y, dash_direction.x)
+	var count := maxi(1, shot_count)
+	for side in [perpendicular, -perpendicular]:
+		for index in count:
+			var offset := lerpf(-spread_degrees * 0.5, spread_degrees * 0.5, float(index) / (count - 1)) if count > 1 else 0.0
+			spine_shot.spawn(world, enemy.global_position, side.rotated(deg_to_rad(offset)), 30.0)
+	_volleys_fired += 1
+
+
+func _make_spine_shot() -> BarrageShot:
+	var shot := BarrageShot.new()
+	var look := preload("res://resources/projectiles/elite_needle.tres").duplicate() as BulletAppearance
+	look.tint = Color(0.95, 0.95, 1.0)
+	shot.appearance = look
+	var behavior := BulletBehavior.new()
+	behavior.speed_to(0.0, 0.25).eased(Tween.TRANS_QUAD, Tween.EASE_OUT)
+	behavior.wait(0.9)
+	behavior.tint_to(Color(1.0, 0.28, 0.3), 0.0)
+	behavior.speed_to(150.0, 0.6).eased(Tween.TRANS_QUAD, Tween.EASE_IN)
+	shot.behavior = behavior
+	shot.lifetime = 4.0
+	return shot
 
 
 func _begin_reentry_warning() -> void:
+	dash_count += 1
 	phase = Phase.REENTRY_WARNING
 	_elapsed = 0.0
 	var bounds := enemy.get_viewport_rect()
