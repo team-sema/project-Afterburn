@@ -44,6 +44,19 @@ static func trail_laser(behavior: BulletBehavior, trail := 1.6, lifetime := 8.0)
 	return shot
 
 
+## Telegraphed straight beam (BarrageShot.Kind.BEAM) in `tint`.
+static func beam(tint: Color, warn := 0.7, hold := 0.5, width := 6.0) -> BarrageShot:
+	var shot := BarrageShot.new()
+	shot.kind = BarrageShot.Kind.BEAM
+	shot.behavior = null
+	shot.beam_color = tint
+	shot.beam_warn_duration = warn
+	shot.beam_hold_duration = hold
+	shot.core_width = width
+	shot.hit_width = width * 0.6
+	return shot
+
+
 ## One straight bullet toward `direction` (API angles: down = 0°).
 static func single(shot: BarrageShot, direction: Vector2, speed: float) -> BarrageVolley:
 	var volley := BarrageVolley.new()

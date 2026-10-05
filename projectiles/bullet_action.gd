@@ -130,7 +130,7 @@ func spawn_error() -> String:
 	if payload.shot.behavior != null and payload.shot.behavior.has_spawn():
 		return "Spawned bullets cannot spawn again (depth 1)."
 	if payload.aim == BarrageVolley.Aim.LOCKED: return "Spawn volleys use Aim.NONE or EACH_SHOT."
-	if payload.shot.kind == BarrageShot.Kind.LEGACY: return "Spawn volleys need a BULLET or TRAIL_LASER shot."
+	if payload.shot.kind == BarrageShot.Kind.LEGACY: return "Spawn volleys need a BULLET, TRAIL_LASER or BEAM shot."
 	if not payload.is_valid(): return "Spawn payload volley is invalid."
 	if payload.layout != BarrageVolley.Layout.SINGLE and payload.count > SPAWN_MAX_COUNT:
 		return "Spawn volley exceeds %d bullets." % SPAWN_MAX_COUNT
