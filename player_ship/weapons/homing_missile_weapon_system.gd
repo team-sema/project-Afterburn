@@ -75,7 +75,14 @@ func _configure_projectile(projectile: Node) -> void:
 	var damage_mult := float(get_trait_param(&"missile_multi_rack", &"damage_mult", 1.0))
 	if has_trait(&"missile_proximity"):
 		damage_mult *= float(get_trait_param(&"missile_proximity", &"direct_mult", 0.95))
+	damage_mult *= float(get_trait_param(&"missile_mark_prism", &"damage_mult", 1.0))
 	var base := maxi(1, roundi(base_damage * damage_mult))
+	if has_trait(&"missile_mark_prism") and projectile.has_method("configure_target_mark"):
+		projectile.call(
+			"configure_target_mark",
+			float(get_trait_param(&"missile_mark_prism", &"mark_duration", 4.0)),
+			float(get_trait_param(&"missile_mark_prism", &"mark_damage_mult", 1.3)),
+		)
 
 	var aoe_radius := 0.0
 	var aoe_mult := 1.0

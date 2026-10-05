@@ -244,25 +244,35 @@ static func resolve_projectile_snapshot_damage(
 	snapshot: Dictionary,
 ) -> int:
 	var mult := float(snapshot.get("damage_multiplier", 1.0))
-	var boss_mult := float(snapshot.get("boss_damage_multiplier", 1.0))
-	if hurtbox != null and not is_equal_approx(boss_mult, 1.0):
-		var node: Node = hurtbox.get_parent()
-		while node != null and not (node is Enemy):
-			node = node.get_parent()
-		if node is Enemy and (node as Enemy).is_boss:
-			mult *= boss_mult
+	mult *= get_target_damage_multiplier(hurtbox, float(snapshot.get("boss_damage_multiplier", 1.0)))
 	return maxi(1, roundi(float(base_damage) * mult))
 
 
 func resolve_hit_damage(base_damage: int, hurtbox: HurtboxComponent = null) -> int:
 	var mult := get_effective_damage_multiplier()
-	if hurtbox != null and not is_equal_approx(_boss_damage_multiplier, 1.0):
-		var node: Node = hurtbox.get_parent()
-		while node != null and not (node is Enemy):
-			node = node.get_parent()
-		if node is Enemy and (node as Enemy).is_boss:
-			mult *= _boss_damage_multiplier
+	mult *= get_target_damage_multiplier(hurtbox, _boss_damage_multiplier)
 	return maxi(1, roundi(base_damage * mult))
+
+
+## Hit-time multiplier owned by the target: the boss facility bonus and the
+## homing missile target mark. Every player damage path applies it.
+static func get_target_damage_multiplier(hurtbox: HurtboxComponent, boss_mult: float) -> float:
+	var enemy := find_enemy(hurtbox)
+	if enemy == null:
+		return 1.0
+	var mult := TargetMarkComponent.get_multiplier(enemy)
+	if enemy.is_boss:
+		mult *= boss_mult
+	return mult
+
+
+static func find_enemy(hurtbox: HurtboxComponent) -> Enemy:
+	if hurtbox == null:
+		return null
+	var node: Node = hurtbox.get_parent()
+	while node != null and not (node is Enemy):
+		node = node.get_parent()
+	return node as Enemy
 
 
 ## One extra firing on top of the normal cadence (resonance fire rule).

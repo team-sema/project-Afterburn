@@ -2,8 +2,9 @@ extends SceneTree
 
 ## Prismatic weapon modules: laser spectrum prism (three beams, x0.45 each),
 ## plasma singularity (holds, pulls and swallows bullets, collapse bonus,
-## doubled fire interval) and barrier stasis orbit (slow field, unbreakable
-## segments, no contact damage).
+## doubled fire interval), barrier stasis orbit (slow field, unbreakable
+## segments, no contact damage), shotgun slug (one shot, overkill pierce),
+## autonomous drones (orbit and aim at enemies) and the missile target mark.
 
 
 class MockLoadout:
@@ -45,6 +46,9 @@ func _run() -> void:
 	await _test_laser_spectrum()
 	await _test_plasma_singularity()
 	await _test_barrier_stasis()
+	await _test_shotgun_slug()
+	await _test_aux_autonomous()
+	await _test_missile_mark()
 	_world.queue_free()
 	await process_frame
 	if failures.is_empty():
@@ -272,6 +276,187 @@ func _test_barrier_stasis() -> void:
 		if is_instance_valid(node):
 			node.queue_free()
 	await process_frame
+
+
+func _test_shotgun_slug() -> void:
+	var loadout := MockLoadout.new()
+	root.add_child(loadout)
+	var shotgun := (load("res://player_ship/weapons/shotgun_weapon_system.tscn") as PackedScene).instantiate() as ShotgunWeaponSystem
+	root.add_child(shotgun)
+	shotgun.global_position = Vector2(150.0, 300.0)
+	shotgun.setup_weapon(null, loadout, 0, &"main_shotgun")
+	shotgun.fire_rate_timer.stop()
+	await process_frame
+
+	var pellets := _fire_and_collect(shotgun, "_is_slug")
+	_expect(pellets.size() == shotgun.pellet_count, "a plain shotgun fires its pellet spread (%d)" % pellets.size())
+	_free_all(pellets)
+
+	loadout.set_trait(&"main_shotgun", &"shotgun_slug_prism", 1)
+	var slugs := _fire_and_collect(shotgun, "_is_slug")
+	_expect(slugs.size() == 1, "the slug prism fires a single shot (%d)" % slugs.size())
+	if slugs.is_empty():
+		_free_all([shotgun, loadout])
+		return
+	var slug := slugs[0] as Node2D
+	_expect(slug.call("is_slug"), "the single shot is a slug")
+	_expect(int(slug.get("_base_damage")) == shotgun.base_damage * shotgun.pellet_count, "the slug carries every pellet's damage")
+	var move := slug.get_node("MoveComponent") as MoveComponent
+	_expect(is_equal_approx(move.velocity.length(), shotgun.pellet_speed * 1.5), "the slug flies x1.5 faster")
+	_expect(absf(move.velocity.normalized().x) < 0.001, "the slug flies straight ahead")
+
+	slug.call("_process", shotgun.base_pellet_lifetime * 2.0)
+	_expect(not slug.is_queued_for_deletion(), "the slug outlives the pellet lifetime (unlimited range)")
+
+	var weak := _make_enemy(6)
+	var tough := _make_enemy(100)
+	var slug_hitbox := slug.get_node("HitboxComponent") as HitboxComponent
+	var core := slug.get_node("Sprite2D/Core") as Sprite2D
+	_expect(core.texture.resource_path.ends_with("player_slug.svg"), "the slug draws its own shell sprite")
+	var full_size := core.scale.y
+	slug_hitbox.call("_on_hurtbox_entered", weak.hurtbox_component)
+	_expect(not slug.is_queued_for_deletion(), "killing a weak enemy lets the slug pierce on")
+	_expect(core.scale.y < full_size, "spending damage on a kill shrinks the slug")
+	slug_hitbox.call("_on_hurtbox_entered", tough.hurtbox_component)
+	_expect(tough.stats_component.health == 100 - 14, "the next enemy takes the overkill share (hp %d)" % tough.stats_component.health)
+	_expect(slug.is_queued_for_deletion(), "a hit that does not kill stops the slug")
+
+	_free_all([weak, tough, shotgun, loadout])
+	await process_frame
+
+
+func _test_aux_autonomous() -> void:
+	var loadout := MockLoadout.new()
+	root.add_child(loadout)
+	var cannon := (load("res://player_ship/weapons/auxiliary_cannon_weapon_system.tscn") as PackedScene).instantiate() as AuxiliaryCannonWeaponSystem
+	root.add_child(cannon)
+	cannon.global_position = Vector2(150.0, 300.0)
+	cannon.setup_weapon(null, loadout, 0, &"aux_test_cannon")
+	cannon.fire_rate_timer.stop()
+	await process_frame
+	var plain_bolts := _fire_and_collect(cannon, "_pierce_hits")
+	var plain_damage := int(plain_bolts[0].get("_base_damage")) if not plain_bolts.is_empty() else -1
+	_free_all(plain_bolts)
+
+	var enemy := Node2D.new()
+	enemy.add_to_group("enemies")
+	_world.add_child(enemy)
+	enemy.global_position = Vector2(150.0, 120.0)
+	loadout.set_trait(&"aux_test_cannon", &"aux_autonomous_prism", 1)
+	await create_timer(2.0).timeout
+	_expect(cannon.get_drone_chased_enemy(0) == enemy, "a drone takes the on-screen enemy")
+	for position in cannon.get_support_drone_positions():
+		_expect(absf(position.distance_to(enemy.global_position) - 44.0) < 6.0, "drones circle the enemy at 44px (%s)" % str(position))
+
+	var bolts := _fire_and_collect(cannon, "_pierce_hits")
+	_expect(bolts.size() == cannon.get_support_drone_count(), "every drone fires")
+	for bolt in bolts:
+		var velocity := (bolt.get_node("MoveComponent") as MoveComponent).velocity
+		var to_enemy := (bolt as Node2D).global_position.direction_to(enemy.global_position)
+		_expect(velocity.normalized().dot(to_enemy) > 0.95, "drones aim at the chased enemy")
+	if not bolts.is_empty():
+		_expect(
+			int(bolts[0].get("_base_damage")) == roundi(float(plain_damage) * 0.75),
+			"autonomous drones deal x0.75 (plain %d)" % plain_damage,
+		)
+	_free_all(bolts)
+
+	enemy.free()
+	await process_frame
+	_expect(cannon.get_drone_chased_enemy(0) == null, "with no enemy the drones fall back to formation")
+	var fallback := _fire_and_collect(cannon, "_pierce_hits")
+	for bolt in fallback:
+		var velocity := (bolt.get_node("MoveComponent") as MoveComponent).velocity
+		_expect(velocity.normalized().dot(Vector2.UP) > 0.99, "drones without a target fire straight up")
+	_free_all(fallback)
+	cannon.shutdown_weapon()
+	_free_all([cannon, loadout])
+	await process_frame
+
+
+func _test_missile_mark() -> void:
+	var loadout := MockLoadout.new()
+	root.add_child(loadout)
+	var launcher := (load("res://player_ship/weapons/homing_missile_weapon_system.tscn") as PackedScene).instantiate() as HomingMissileWeaponSystem
+	root.add_child(launcher)
+	launcher.global_position = Vector2(150.0, 300.0)
+	launcher.setup_weapon(null, loadout, 0, &"aux_homing_missile")
+	launcher.fire_rate_timer.stop()
+	loadout.set_trait(&"aux_homing_missile", &"missile_mark_prism", 1)
+	await process_frame
+
+	var marked := _make_enemy(1000)
+	var other := _make_enemy(1000)
+	var missiles := _fire_and_collect(launcher, "_mark_duration")
+	_expect(missiles.size() == 1, "the launcher fires one missile")
+	if missiles.is_empty():
+		_free_all([marked, other, launcher, loadout])
+		return
+	var missile := missiles[0] as PlayerHomingMissile
+	_expect(int(missile.get("_base_damage")) == roundi(float(launcher.base_damage) * 0.5), "mark missiles deal x0.5")
+	(missile.get_node("HitboxComponent") as HitboxComponent).call("_on_hurtbox_entered", marked.hurtbox_component)
+	_expect(marked.stats_component.health == 1000 - 7, "the marking hit itself is not amplified")
+	var mark := TargetMarkComponent.get_mark(marked)
+	_expect(mark != null and is_equal_approx(mark.remaining, 4.0), "a missile hit marks the enemy for 4 seconds")
+
+	var probe := WeaponSystem.new()
+	root.add_child(probe)
+	_expect(probe.resolve_hit_damage(10, marked.hurtbox_component) == 13, "marked enemies take x1.3 from other weapons")
+	_expect(probe.resolve_hit_damage(10, other.hurtbox_component) == 10, "unmarked enemies take normal damage")
+	_expect(
+		WeaponSystem.resolve_projectile_snapshot_damage(10, marked.hurtbox_component, {}) == 13,
+		"projectile snapshots also apply the mark",
+	)
+
+	# Targeting prefers the unmarked enemy even when the marked one is closer.
+	marked.global_position = Vector2(150.0, 280.0)
+	other.global_position = Vector2(150.0, 60.0)
+	var seeker := (load("res://projectiles/player_homing_missile.tscn") as PackedScene).instantiate() as PlayerHomingMissile
+	seeker.configure_motion(150.0, 5.5, 0.15)
+	seeker.configure_target_mark(4.0, 1.3)
+	_world.add_child(seeker)
+	seeker.global_position = Vector2(150.0, 300.0)
+	seeker.set("_target", marked)
+	seeker.call("_acquire_target")
+	_expect(seeker.get("_target") == other, "mark missiles turn to an unmarked enemy")
+
+	mark.call("_process", 4.1)
+	_expect(not TargetMarkComponent.is_marked(marked), "the mark expires after 4 seconds")
+	_expect(probe.resolve_hit_damage(10, marked.hurtbox_component) == 10, "an expired mark no longer amplifies")
+	launcher.shutdown_weapon()
+	_free_all([seeker, probe, marked, other, launcher, loadout])
+	await process_frame
+
+
+## Calls fire() and returns the new projectiles in the world that expose `marker`.
+func _fire_and_collect(weapon: WeaponSystem, marker: String) -> Array[Node]:
+	var before := _world.get_children()
+	weapon.call("fire")
+	var spawned: Array[Node] = []
+	for child in _world.get_children():
+		if not before.has(child) and marker in child:
+			spawned.append(child)
+	return spawned
+
+
+func _make_enemy(health: int) -> Enemy:
+	var enemy := (load("res://enemies/normal_enemy.tscn") as PackedScene).instantiate() as Enemy
+	var registry := EnemyAugmentRegistry.new()
+	enemy.add_child(registry)
+	enemy.augment_registry = registry
+	_world.add_child(enemy)
+	enemy.global_position = Vector2(150.0, 150.0)
+	enemy.get_node("EnemyShootComponent").set_process(false)
+	enemy.get_node("EnemyShootComponent").fire_timer.stop()
+	enemy.movement_controller.stop()
+	enemy.stats_component.health = health
+	return enemy
+
+
+func _free_all(nodes: Array) -> void:
+	for node in nodes:
+		if node is Node and is_instance_valid(node) and not (node as Node).is_queued_for_deletion():
+			(node as Node).queue_free()
 
 
 func _spawn_bullet(origin: Vector2, direction: Vector2, speed: float) -> FoundationBullet:

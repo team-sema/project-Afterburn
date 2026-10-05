@@ -197,9 +197,7 @@ func _run() -> void:
 			"weapon control equips %s" % String(weapon_id),
 		)
 		_expect(
-			trait_buttons.get_child_count() == int(
-				{&"main_blaster": 6, &"main_laser": 7, &"plasma_bomb": 6, &"aux_orbital_barrier": 6}.get(weapon_id, 5)
-			),
+			trait_buttons.get_child_count() == (7 if weapon_id == &"main_laser" else 6),
 			"%s exposes its silver, gold and prismatic modules" % String(weapon_id),
 		)
 		for child in trait_buttons.get_children():
