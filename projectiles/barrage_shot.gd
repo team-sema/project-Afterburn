@@ -18,6 +18,9 @@ func is_valid() -> bool:
 	if trail_effect != null and (not trail_effect.is_valid() or kind == Kind.LEGACY): return false
 	if behavior != null and not behavior.validation_error().is_empty():
 		return false
+	# Spawning runs on the BULLET body only; a laser head never fires volleys.
+	if behavior != null and kind != Kind.BULLET and behavior.has_spawn():
+		return false
 	match kind:
 		Kind.BULLET:
 			return appearance != null and appearance.is_valid() and behavior != null and is_finite(lifetime) and lifetime > 0
@@ -31,8 +34,11 @@ func is_valid() -> bool:
 				and is_finite(lifetime) and lifetime > 0)
 	return false
 
-func spawn(parent: Node2D, origin: Vector2, direction: Vector2, speed: float, debug := false, target: Node2D = null, target_resolver := Callable()) -> Node2D:
-	if not is_valid() or not is_instance_valid(parent) or not parent.is_inside_tree() or parent.is_queued_for_deletion():
+## `shared_config` is for SPAWN children only: this shot is then part of the
+## parent's private, already validated Behavior copy, so bullets share it
+## instead of copying and re-validating per bullet.
+func spawn(parent: Node2D, origin: Vector2, direction: Vector2, speed: float, debug := false, target: Node2D = null, target_resolver := Callable(), shared_config := false) -> Node2D:
+	if not (shared_config or is_valid()) or not is_instance_valid(parent) or not parent.is_inside_tree() or parent.is_queued_for_deletion():
 		return null
 	if not origin.is_finite() or not direction.is_finite() or direction.is_zero_approx() or not is_finite(speed) or speed < 0 or (kind == Kind.TRAIL_LASER and speed == 0):
 		return null
@@ -45,6 +51,7 @@ func spawn(parent: Node2D, origin: Vector2, direction: Vector2, speed: float, de
 			bullet.trail_effect = trail_effect
 			bullet.lifetime = lifetime
 			bullet.show_hitbox = debug
+			bullet.shares_config = shared_config
 			projectile = bullet
 		Kind.TRAIL_LASER:
 			var laser := preload("res://projectiles/curved_laser.tscn").instantiate() as CurvedLaser
@@ -68,4 +75,6 @@ func spawn(parent: Node2D, origin: Vector2, direction: Vector2, speed: float, de
 	else:
 		projectile.launch(direction, speed)
 		projectile.behavior_state.configure_homing(projectile, origin, target, target_resolver)
+		if projectile is FoundationBullet:
+			(projectile as FoundationBullet).set_spawn_target(target, target_resolver)
 	return projectile if is_instance_valid(projectile) else null

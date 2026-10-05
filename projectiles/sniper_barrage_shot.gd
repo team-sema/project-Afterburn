@@ -13,7 +13,7 @@ func is_valid() -> bool:
 		and behavior == null and appearance == null and trail_effect == null)
 
 func spawn(parent: Node2D, origin: Vector2, direction: Vector2, speed: float,
-		_debug := false, _target: Node2D = null, _target_resolver := Callable()) -> Node2D:
+		_debug := false, _target: Node2D = null, _target_resolver := Callable(), _shared_config := false) -> Node2D:
 	if not is_valid() or not is_instance_valid(parent) or not parent.is_inside_tree() or parent.is_queued_for_deletion(): return null
 	if not origin.is_finite() or not direction.is_finite() or direction.is_zero_approx() or not is_finite(speed) or speed < 100: return null
 	var bullet := preload("res://projectiles/sniper_bullet.tscn").instantiate() as SniperBullet
