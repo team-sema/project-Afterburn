@@ -1,0 +1,62 @@
+[
+	{
+		"bullets_max": 452,
+		"bullets_median": 340,
+		"bullets_min": 253,
+		"draw_calls": 30,
+		"frame_max_ms": 97.29,
+		"frame_ms": 15.144,
+		"frame_p95_ms": 35.173,
+		"frames": 470,
+		"physics_max_ms": 20.948,
+		"physics_ms": 11.768,
+		"physics_p95_ms": 20.948,
+		"process_ms": 10.256,
+		"scenario": "heavy_mixed"
+	},
+	{
+		"bullets_max": 200,
+		"bullets_median": 144,
+		"bullets_min": 97,
+		"draw_calls": 11,
+		"frame_max_ms": 31.025,
+		"frame_ms": 12.539,
+		"frame_p95_ms": 17.055,
+		"frames": 803,
+		"physics_max_ms": 16.751,
+		"physics_ms": 8.793,
+		"physics_p95_ms": 16.751,
+		"process_ms": 8.657,
+		"scenario": "laser_mixed"
+	},
+	{
+		"bullets_max": 367,
+		"bullets_median": 334,
+		"bullets_min": 210,
+		"draw_calls": 16,
+		"frame_max_ms": 78.351,
+		"frame_ms": 16.486,
+		"frame_p95_ms": 32.649,
+		"frames": 469,
+		"physics_max_ms": 30.055,
+		"physics_ms": 16.426,
+		"physics_p95_ms": 30.055,
+		"process_ms": 8.426,
+		"scenario": "spawn_trails"
+	},
+	{
+		"bullets_max": 1247,
+		"bullets_median": 961,
+		"bullets_min": 785,
+		"draw_calls": 62,
+		"frame_max_ms": 296.197,
+		"frame_ms": 199.809,
+		"frame_p95_ms": 235.558,
+		"frames": 41,
+		"physics_max_ms": 93.55,
+		"physics_ms": 35.155,
+		"physics_p95_ms": 93.55,
+		"process_ms": 17.921,
+		"scenario": "extreme_mixed"
+	}
+]

@@ -546,7 +546,7 @@ Sniper는 `SniperBarrageShot`이 BarrageShot의 `is_valid()`와 `spawn()`을 재
 
 안전 비율 격자 계산 개선은 레거시 탄에도 적용된다. MultiMesh·레이저 메쉬·판정 표시 배칭과 Behavior 계산 최적화는 새 FoundationBullet/CurvedLaser 경로에 적용된다. `Kind.LEGACY`는 기존 Sprite·파티클·컴포넌트를 사용하므로 API로 발사해도 새 배치 렌더러로 전환되지 않는다. 반대로 기존 Timer에서 새 BarrageShot을 발사하면 새 렌더링 최적화가 적용된다.
 
-BarragePlayer가 발사한 탄은 `play()`가 복제·검증한 설정(외형·Behavior)을 SPAWN 자식과 같은 방식으로 공유하므로 발사 시 탄마다 복제·재검증하지 않는다(직접 `shot.spawn()` 호출은 기존대로 복제한다). 실행 중에는 시각 채널(색·투명도·배율) 액션이 없는 탄이 매 틱 상태 샘플을 건너뛰고, 방향·속도 변화가 없는 탄은 회전 갱신도 건너뛴다. 레이저 몸통은 외부 궤도 개입·호밍이 없는 동안 점별 분기 없이 같은 궤적 함수로 샘플링하고, 판정 캡슐은 폭 계수를 사전 계산하며 바뀐 값만 물리 서버에 쓴다. 외부 궤도 개입(`apply_effect`)·벽 반사·호밍은 해당 생략 경로를 쓰지 않으므로 동작이 달라지지 않는다. 측정 기준은 `tests/projectile_render_benchmark.gd`(결과: `artifacts/projectile_render_benchmark.json`)와 `tests/behavior_performance_benchmark.gd`다.
+BarragePlayer가 발사한 탄은 `play()`가 복제·검증한 설정(외형·Behavior)을 SPAWN 자식과 같은 방식으로 공유하므로 발사 시 탄마다 복제·재검증하지 않는다(직접 `shot.spawn()` 호출은 기존대로 복제한다). 실행 중에는 시각 채널(색·투명도·배율) 액션이 없는 탄이 매 틱 상태 샘플을 건너뛰고, 방향·속도 변화가 없는 탄은 회전 갱신도 건너뛴다. 레이저 몸통은 외부 궤도 개입·호밍이 없는 동안 점별 분기 없이 같은 궤적 함수로 샘플링하고, 판정 캡슐은 폭 계수를 사전 계산하며 바뀐 값만 물리 서버에 쓴다. 외부 궤도 개입(`apply_effect`)·벽 반사·호밍은 해당 생략 경로를 쓰지 않으므로 동작이 달라지지 않는다. 측정 기준은 `tests/projectile_render_benchmark.gd`(갱신 루프 단독, 결과: `artifacts/projectile_render_benchmark.json`)·`tests/behavior_performance_benchmark.gd`·`tests/barrage_stress_benchmark.gd`(실전형: BarragePlayer가 실제 패턴을 이동 표적에 라이브 발사, 물리·화면 이탈·렌더링 포함, 결과: `artifacts/barrage_stress_benchmark.json`)다. 실전형 기준 꼬리 입자를 포함한 ~340발 유지 부하는 물리 틱 ~12ms로 60fps 안에 있고, ~1000발 유지는 틱 비용이 프레임 예산을 넘어 물리 catch-up으로 프레임이 수백 ms까지 밀린다. 이 영역의 지배 비용은 9절의 한계(탄별 노드·물리 판정)와 꼬리 입자 관리기다.
 
 ## 11. 적탄 조회·소거 — EnemyBullets
 
