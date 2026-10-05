@@ -2,7 +2,8 @@ class_name BarrageShot
 extends Resource
 ## Serializable projectile recipe. No live projectile state belongs here.
 
-enum Kind { BULLET, TRAIL_LASER, LEGACY }
+## BEAM is appended last so saved Kind values keep their meaning.
+enum Kind { BULLET, TRAIL_LASER, LEGACY, BEAM }
 @export var kind: Kind = Kind.BULLET
 @export var appearance: BulletAppearance
 @export var behavior: BulletBehavior
@@ -13,6 +14,17 @@ enum Kind { BULLET, TRAIL_LASER, LEGACY }
 @export var core_width := 6.0
 @export var hit_width := 4.0
 @export var lifetime := 5.0
+## BEAM (TelegraphBeam): warning line without hitbox -> grow -> hold with
+## hitbox (`hit_width`, visual `core_width`) -> fade. 0 length = to view edge.
+@export var beam_warn_duration := 0.7
+@export var beam_grow_duration := 0.1
+@export var beam_hold_duration := 0.5
+@export var beam_fade_duration := 0.15
+@export var beam_warn_width := 1.5
+@export var beam_length := 0.0
+@export var beam_color := Color(1.0, 0.3, 0.5)
+## Glow and sparks where the held beam ends (visual only).
+@export var beam_impact := true
 
 func is_valid() -> bool:
 	if trail_effect != null and (not trail_effect.is_valid() or kind == Kind.LEGACY): return false
@@ -32,6 +44,17 @@ func is_valid() -> bool:
 				and is_finite(core_width) and core_width > 0
 				and is_finite(hit_width) and hit_width > 0 and hit_width <= core_width
 				and is_finite(lifetime) and lifetime > 0)
+		Kind.BEAM:
+			# A fixed straight beam has no Behavior runtime or particle trail.
+			return (behavior == null and trail_effect == null
+				and is_finite(beam_warn_duration) and beam_warn_duration >= 0
+				and is_finite(beam_grow_duration) and beam_grow_duration >= 0
+				and is_finite(beam_hold_duration) and beam_hold_duration > 0
+				and is_finite(beam_fade_duration) and beam_fade_duration >= 0
+				and is_finite(beam_warn_width) and beam_warn_width > 0
+				and is_finite(core_width) and core_width > 0
+				and is_finite(hit_width) and hit_width > 0 and hit_width <= core_width
+				and is_finite(beam_length) and beam_length >= 0)
 	return false
 
 ## `shared_config` is for SPAWN children only: this shot is then part of the
@@ -67,11 +90,28 @@ func spawn(parent: Node2D, origin: Vector2, direction: Vector2, speed: float, de
 			projectile = laser
 		Kind.LEGACY:
 			projectile = preload("res://projectiles/base_enemy_projectile.tscn").instantiate()
+		Kind.BEAM:
+			var beam := TelegraphBeam.new()
+			beam.add_to_group(EnemyBullets.GROUP)
+			beam.warn_duration = beam_warn_duration
+			beam.grow_duration = beam_grow_duration
+			beam.hold_duration = beam_hold_duration
+			beam.fade_duration = beam_fade_duration
+			beam.warn_width = beam_warn_width
+			beam.core_width = core_width
+			beam.hit_width = hit_width
+			beam.beam_length = beam_length
+			beam.color = beam_color
+			beam.show_impact = beam_impact
+			beam.show_hitbox = debug
+			projectile = beam
 	projectile.position = parent.to_local(origin)
 	parent.add_child(projectile)
 	if kind == Kind.LEGACY:
 		var velocity := parent.global_transform.basis_xform_inv(direction.normalized() * speed)
 		projectile.launch(velocity.normalized() if speed > 0 else direction, velocity.length())
+	elif kind == Kind.BEAM:
+		projectile.launch(direction, speed)
 	else:
 		projectile.launch(direction, speed)
 		projectile.behavior_state.configure_homing(projectile, origin, target, target_resolver)

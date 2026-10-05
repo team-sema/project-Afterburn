@@ -50,7 +50,7 @@ func build(params: Dictionary) -> void:
 - 조준 고정 연발 예제: [locked_burst_pattern.gd](../patterns/locked_burst_pattern.gd). `aim()` 뒤 `Aim.LOCKED` 바늘탄 3발(0.12초 간격) → 2초 휴식 → 반복. `build(params)`로 `shots`, `gap`, `rest`, `speed`를 씬에서 조정할 수 있다. 본 게임 적에는 배정하지 않았다.
 - 조준 부채꼴 연발 예제: [aimed_fan_burst_pattern.gd](../patterns/aimed_fan_burst_pattern.gd). 5방향 40° 부채꼴의 중앙 탄이 매 발사 표적을 향하는 `Aim.EACH_SHOT`, 0.15초 간격 5연발 → 1.6초 휴식 → 반복. `ways`, `spread`, `shots`, `gap`, `rest`, `speed`를 `build(params)`로 조정. 본 게임 적에는 배정하지 않았다.
 - 16방향 혼합 시험: [mixed_sixteen_pattern.gd](../patterns/mixed_sixteen_pattern.gd). 이 `.gd`가 현재 시험 씬의 실행 원본이다. 예전 `.tres`는 저장 형식 호환 예제로 남겨 둔다.
-- 쇼케이스 패턴: [`patterns/showcase/`](../patterns/showcase/) 9종(탄→탄 SPAWN 데모 `comet_trail` 포함). Lab 패턴 목록에 `showcase/…`로 나온다. 본 게임 적에는 배정하지 않았다. 색만 바꾼 탄은 [`labs/bullet/showcase_shots.gd`](../labs/bullet/showcase_shots.gd)로 만든다(외형 복제 후 `tint` 변경, 텍스처 공유).
+- 쇼케이스 패턴: [`patterns/showcase/`](../patterns/showcase/) 10종(탄→탄 SPAWN 데모 `comet_trail`, 예고형 빔 데모 `beam_lattice` 포함). Lab 패턴 목록에 `showcase/…`로 나온다. 본 게임 적에는 배정하지 않았다. 색만 바꾼 탄은 [`labs/bullet/showcase_shots.gd`](../labs/bullet/showcase_shots.gd)로 만든다(외형 복제 후 `tint` 변경, 텍스처 공유).
 
   | 파일 | 형태 | 쓰는 기능 |
   |------|------|-----------|
@@ -62,6 +62,7 @@ func build(params: Dictionary) -> void:
   | `wave_curtain_pattern.gd` | 반 주기 어긋난 두 줄이 좌우로 흔들리는 커튼 | `lateral_wave(…, phase).repeat()` |
   | `laser_whirl_pattern.gd` | 번갈아 반대로 말리는 궤적 레이저와 원탄 링 | `TRAIL_LASER` · `turn_at` |
   | `bloom_burst_pattern.gd` | 큰 탄이 멈춰 부풀고 하얗게 경고한 뒤 비틀며 폭발 가속 | `parallel`(색·시각 배율, 속도·선회) |
+  | `beam_lattice_pattern.gd` | 표적을 노린 분홍 빔 5줄 부채꼴 뒤에 천천히 도는 보라 빔 6줄 링 | `Kind.BEAM`(예고선 → 전개 → 유지 → 소멸) · `Aim.EACH_SHOT` · `speed = 0` |
   | `comet_trail_pattern.gd` | 큰 왕탄 3발이 뒤로 작은 불씨를 흘려 잔상 꼬리를 남김 | 탄→탄 `spawn`(SINGLE을 진행 반대 ±35°로 번갈아) · 유한 `repeat(64)` · 불씨의 `opacity`·`hitbox_scale` 동시 축소 |
 
   검증: `tests/showcase_patterns_smoke_test.gd` (Lab 로더로 모두 불러와 3초 재생 시 발사·반복 유지).
@@ -100,6 +101,7 @@ Sequence의 시간은 발사 일정, Behavior의 시간은 **각 탄이 발사�
 - `kind = Kind.BULLET`: 일반 탄. `appearance`와 `behavior`를 지정한다.
 - `Kind.TRAIL_LASER`: 머리의 과거 궤적을 몸통으로 남기는 레이저. 직선·선회·S자 이동 모두 같은 몸체다. `appearance`는 적용하지 않는다.
 - `Kind.LEGACY`: 기존 `base_enemy_projectile.tscn` 비교용 어댑터. Behavior를 지정할 수 없다.
+- `Kind.BEAM`: 예고형 직선 빔(`TelegraphBeam`). 아래 「예고형 빔 설정」. `behavior`·`trail_effect`는 비워 둔다(지정하면 무효). `appearance`·`lifetime`은 쓰지 않고, 수명은 네 단계 시간의 합이다.
 - `behavior: BulletBehavior`: 발사 후 행동. 빈 `BulletBehavior.new()`는 직진이다.
 - `lifetime = 5.0`: 수명. 유한한 양수. Behavior가 끝나도 탄은 마지막 상태로 수명까지 움직인다. 기존 화면 이탈 제거도 적용된다.
 
@@ -112,16 +114,45 @@ Sequence의 시간은 발사 일정, Behavior의 시간은 **각 탄이 발사�
 
 몸통은 양 끝이 가늘어지는 형태다. 시각 두께와 판정 두께는 독립이며, Behavior의 각 배율을 곱한다. `visual_scale_to(2, 1)`은 1초 동안 시각 **두께**를 2배로 만든다. 궤적 길이나 이동 속도를 2배로 만들지는 않는다. 레이저의 길이는 이동 궤적과 `trail_duration`으로 정해진다.
 
+### 예고형 빔 설정 (BEAM)
+
+```gdscript
+var shot := BarrageShot.new()
+shot.kind = BarrageShot.Kind.BEAM
+shot.behavior = null
+shot.beam_color = Color(1, 0.22, 0.52)
+shot.beam_warn_duration = 0.8   # 얇은 예고선, 판정 없음
+shot.beam_grow_duration = 0.1   # 굵어짐, 판정 없음
+shot.beam_hold_duration = 0.45  # 판정 있음, 끝에 충격 연출
+shot.beam_fade_duration = 0.15  # 가늘어지며 사라짐, 판정 없음
+shot.core_width = 6.0           # 유지 단계 시각 폭
+shot.hit_width = 3.6            # 판정 폭 (core_width 이하)
+shot.beam_impact = true         # 빔 끝 충격 연출 (false면 끔, 판정과 무관)
+var fan := BarrageVolley.new()
+fan.shot = shot
+fan.layout = BarrageVolley.Layout.FAN
+fan.count = 5
+fan.speed = 0.0                 # 빔은 속도를 쓰지 않는다
+fan.aim = BarrageVolley.Aim.EACH_SHOT
+```
+
+- 기본값: 예고 0.7초 · 전개 0.1초 · 유지 0.5초 · 소멸 0.15초 · 예고선 폭 `beam_warn_width` 1.5px · `beam_length` 0(발사 시점에 화면 경계까지 + 8px) · `beam_color` 분홍.
+- 빔은 발사한 순간의 위치·방향에 고정된다. 발사자가 움직이거나 사라져도 그대로 남는다. 시간은 탄 나이 기준이라 트리 일시정지 동안 멈춘다.
+- 유지 단계 동안 매 물리 프레임 겹친 Hurtbox를 검사하므로, 빔 안에 머문 플레이어는 무적이 끝나면 다시 맞는다. 맞혀도 빔은 사라지지 않는다.
+- `EnemyBullets` 조회·취소·탄소거 XP(1줄당 1)를 따르고, 궤도 개입(`apply_effect`)은 지원하지 않는다. `get_predicted_path`는 소멸 전까지 시작점→끝점 선분을 돌려준다.
+- 발사 중인 빔은 `get_phase()`(WARN·GROW·HOLD·FADE·DONE), `is_hitbox_active()`, `get_end_point()`, `current_width()`로 상태를 읽을 수 있다.
+- SPAWN payload로도 쓸 수 있다(멈춘 탄이 그 자리에서 빔을 쏘는 식). 게임 규칙 정본: [전투 — 예고형 빔](design/combat.md#예고형-빔-beam--구현-완료).
+
 ### 메서드
 
 ```gdscript
 is_valid() -> bool
 spawn(parent: Node2D, origin: Vector2, direction: Vector2,
       speed: float, debug := false, target: Node2D = null,
-      target_resolver := Callable()) -> Node2D
+      target_resolver := Callable(), shared_config := false) -> Node2D
 ```
 
-`spawn`은 월드 좌표에서 한 발을 생성·발사하고 노드를 반환한다. 실패하면 `null`. 부모는 트리 안에 있어야 한다. 방향은 유한한 0이 아닌 벡터, 속도는 유한한 0 이상이며 레이저의 초기 속도는 0보다 커야 한다. 통상 발사는 Sequence/Player를 사용하고 단발 연결에 이 메서드를 사용할 수 있다.
+`spawn`은 월드 좌표에서 한 발을 생성·발사하고 노드를 반환한다. 실패하면 `null`. 부모는 트리 안에 있어야 한다. 방향은 유한한 0이 아닌 벡터, 속도는 유한한 0 이상이며 `TRAIL_LASER`의 초기 속도는 0보다 커야 한다. `BEAM`은 속도를 쓰지 않는다(0 허용). `shared_config`는 SPAWN 내부 경로 전용이다. true면 이 Shot의 설정을 복제·재검증하지 않고 공유하므로, 직접 호출할 때는 쓰지 않는다. 이 메서드를 재정의하는 Shot(예: `SniperBarrageShot`)도 같은 인자 목록을 유지해야 한다. 통상 발사는 Sequence/Player를 사용하고 단발 연결에 이 메서드를 사용할 수 있다.
 
 ### 이전 설정 호환
 
@@ -137,7 +168,7 @@ Motion 호환 클래스·필드·프리셋은 제거했다. 일반 탄에는 beh
 shot.trail_effect = preload("res://resources/projectiles/diamond_trail.tres")
 ```
 
-BULLET과 TRAIL_LASER의 머리에 적용한다. 기본값 null은 효과 없음이며 LEGACY 몸체에 지정하면 유효성 검사에서 거부한다. 탄 부모는 Node2D 월드여야 한다. 발사 시 효과 설정을 복제한다.
+BULLET과 TRAIL_LASER의 머리에 적용한다. 기본값 null은 효과 없음이며 LEGACY·BEAM 몸체에 지정하면 유효성 검사에서 거부한다. 탄 부모는 Node2D 월드여야 한다. 발사 시 효과 설정을 복제한다.
 
 - `texture`: 입자 텍스처. 기본 프리셋은 기존 particle_diamond.svg.
 - `spacing = 2.0`: 이동 거리 2px마다 입자 하나. 최소 0.25px. 정지 중 방출 없음.
@@ -304,7 +335,7 @@ shot.behavior = BulletBehavior.new().speed_to(0, 0.4).wait(0.3).spawn(snipe, tru
 - `count = 1`: 1~2048. SINGLE은 항상 한 발.
 - `spread_degrees = 48.0`: FAN 전체 펼침각, 0~360. 1발이면 중심 방향.
 - `angle_degrees = 0.0`: 배치 중심의 추가 회전각.
-- `speed = 95.0`: 초기 속도.
+- `speed = 95.0`: 초기 속도. 0 이상이며 `TRAIL_LASER`는 0보다 커야 한다. `BEAM`은 속도를 쓰지 않는다.
 - `origin_offset = Vector2.ZERO`: 발사자 로컬 좌표의 발사 위치 보정.
 - `aim = Aim.NONE`: 조준 방식. `NONE`은 아래(0°) 기준. `EACH_SHOT`은 각 발사 시점의 표적 위치로 조준한다(발사 후 추적은 하지 않는다). `LOCKED`는 Sequence의 마지막 `aim()` 단계가 잠근 방향을 재사용한다. 발사점과 표적이 겹치면 아래 방향을 사용한다. 잠금이 없는 `LOCKED` Volley는 그 발사만 건너뛴다.
 - `aimed`: 호환 별칭. 읽으면 `aim != NONE`, `true`를 쓰면 `EACH_SHOT`(이미 `LOCKED`이면 유지), `false`를 쓰면 `NONE`.
@@ -444,7 +475,7 @@ fire_together(layers)
 ## 9. 현재 한계
 
 - 현재 런타임은 적 탄 전용 연결이다. Kind로 아군/적군을 선택하거나 피해량을 설정하는 API는 없다.
-- 레이저는 발사점에 계속 붙어 있는 빔이 아니라 이동하는 머리의 과거 궤적이다. 제어점으로 몸통을 직접 변형하는 API는 없다.
+- `TRAIL_LASER`는 이동하는 머리의 과거 궤적이고, `BEAM`은 발사 순간에 고정된 직선이다. 발사자를 따라 움직이거나 회전하는 빔, 휘는 빔, 제어점으로 몸통을 직접 변형하는 API는 없다. `BEAM`은 막히지 않고 화면 끝(또는 `beam_length`)까지 뻗는다.
 - 발사 시점 난수(각도·속도·대기 jitter)는 없다. 필요하면 시드 RNG를 Player가 소유하는 방식으로 추가한다.
 - 탄→탄 발사(`SPAWN`)는 재귀 깊이 1, Volley 32발, 부모 1발당 자식 128발로 제한한다. 레이저 머리는 SPAWN을 실행하지 않고, 경로 예측은 미래의 자식 탄을 포함하지 않는다.
 - 중첩 Behavior 그룹, 액션 단위 반복, 외부 이벤트 대기, 실행 중 Behavior 교체는 제공하지 않는다. 외부 궤도 효과는 속도 배율·방향 오프셋만 제공한다(11절).
@@ -507,7 +538,7 @@ Sniper는 `SniperBarrageShot`이 BarrageShot의 `is_valid()`와 `spawn()`을 재
 
 플레이어 효과와 증강은 날아가는 적탄을 이 정적 API로 찾고 지운다. 그룹을 직접 순회하거나 `queue_free`하지 않는다.
 
-- 모든 적탄 몸체는 `enemy_projectiles` 그룹에 속한다. `FoundationBullet`·`CurvedLaser`·레거시 기본탄의 판정은 물리 레이어 4(`enemy_projectile`, `EnemyBullets.LAYER`)에 올라간다. 이 레이어를 감지하는 영역은 기본적으로 없으므로 명시적인 쿼리만 적탄을 본다.
+- 모든 적탄 몸체는 `enemy_projectiles` 그룹에 속한다. `FoundationBullet`·`CurvedLaser`·`TelegraphBeam`·레거시 기본탄의 판정은 물리 레이어 4(`enemy_projectile`, `EnemyBullets.LAYER`)에 올라간다. 이 레이어를 감지하는 영역은 기본적으로 없으므로 명시적인 쿼리만 적탄을 본다.
 - `SniperBullet`은 판정을 감지 불가로 두므로 `query_shape`에 잡히지 않는다. 그룹 기반 조회·소거는 동일하게 적용된다.
 
 ```gdscript
@@ -520,7 +551,7 @@ EnemyBullets.get_hub(world) -> EnemyBulletHub
 ```
 
 - `world`는 적탄이 사는 게임플레이 월드다. 그 아래의 살아 있는(삭제 예약되지 않은) 적탄만 대상이다.
-- `query_circle`은 탄 중심(레이저는 머리)까지의 거리로 판단한다. `query_shape`는 물리 판정으로 판단하므로 레이저는 몸통 어느 마디가 겹쳐도 잡힌다. 방금 생성된 탄은 첫 물리 프레임 이후에 잡힌다.
+- `query_circle`은 탄 중심(레이저는 머리, 빔은 시작점)까지의 거리로 판단한다. `query_shape`는 물리 판정으로 판단하므로 레이저는 몸통 어느 마디가 겹쳐도 잡힌다. 빔은 판정이 켜진 유지 단계에서만 `query_shape`에 잡힌다(예고·전개·소멸 중에는 `get_all`·`query_circle`로만 찾는다). 방금 생성된 탄은 첫 물리 프레임 이후에 잡힌다.
 - `cancel`은 탄을 삭제 예약하고, 월드에 허브가 있으면 `bullet_cancelled(position, reason, bullet)`을 먼저 발행한다. 발행 중에는 탄이 아직 유효하다. 이미 지워졌거나 월드 밖인 탄은 false를 반환한다. 레이저는 몸체 하나가 한 번의 소거다.
 - 허브는 `get_hub(world)`로 처음 구독할 때 월드 아래에 생기고 월드와 함께 사라진다. 소거 보상·충전 같은 증강은 이 신호를 구독한다.
 - 게임이 쓰는 소거 이유: `augment_resume`(오퍼 재개 버스트) · `elite_reward`(엘리트 탄소거) · `boss`(보스 페이즈 정리) · `lab`(랩 정리).
@@ -537,7 +568,7 @@ EnemyBullets.get_effect(bullet, handle) -> Dictionary   # {speed_mult, heading_o
 - 탄의 현재 나이부터 적용한다. 핸들마다 하나이며 같은 핸들은 교체한다. 속도 배율은 핸들끼리 곱하고 방향 오프셋(도)은 더한다. `duration <= 0`은 해제할 때까지 유지한다.
 - 적용·교체·해제·만료 순간의 위치에서 새 구간이 시작되므로 탄이 튀지 않고, 지나온 위치와 레이저 몸통은 그대로다. 만료는 경로 예측에 미리 반영된다. 모두 해제하면 현재 위치에서 기본 속도로 이어 간다(원래 궤적으로 되돌아가지 않음).
 - 흡인처럼 위치에 따라 방향이 바뀌는 효과는 매 틱 같은 핸들을 새 오프셋으로 재등록한다. 현재 이동 방향은 탄의 `get_travel_velocity()`로 읽는다.
-- `FoundationBullet`·`CurvedLaser`만 지원한다. 호밍 탄은 효과가 없는 자기 궤적 위치 기준으로 표적 방향을 계산한다. 규칙 정본: [전투 — 외부 궤도 개입](design/combat.md#외부-궤도-개입--구현-완료).
+- `FoundationBullet`·`CurvedLaser`만 지원한다. `TelegraphBeam`·레거시 기본탄·SniperBullet은 false를 반환한다. 호밍 탄은 효과가 없는 자기 궤적 위치 기준으로 표적 방향을 계산한다. 규칙 정본: [전투 — 외부 궤도 개입](design/combat.md#외부-궤도-개입--구현-완료).
 - 원 안에 머무는 동안만 감속하는 장은 `BulletSlowField`([bullet_slow_field.gd](../projectiles/bullet_slow_field.gd))를 쓴다. 들어올 때 한 번 걸고 나갈 때 풀어, 머무는 탄에 구간이 쌓이지 않는다.
 
 ### 직접 시험
