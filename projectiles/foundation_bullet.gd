@@ -28,15 +28,23 @@ var _entered_view := false
 var _hitbox: HitboxComponent
 var _render_key := ""
 var _texture_fallback: MultiMesh
+## Target for SPAWN volleys with Aim.EACH_SHOT (the shot's launch target).
+var _spawn_target: WeakRef
+var _spawn_resolver := Callable()
+## Set by BarrageShot.spawn for SPAWN children: appearance/behavior are the
+## parent's private, already validated copy, so they are shared, not copied.
+var shares_config := false
+var _hitbox_scale_applied := -1.0
 
 
 func _ready() -> void:
-	if appearance == null or not appearance.is_valid() or behavior == null or not behavior.validation_error().is_empty() or not is_finite(lifetime) or lifetime <= 0:
+	if not shares_config and (appearance == null or not appearance.is_valid() or behavior == null or not behavior.validation_error().is_empty() or not is_finite(lifetime) or lifetime <= 0):
 		push_error("FoundationBullet requires valid appearance, behavior and lifetime.")
 		queue_free()
 		return
-	appearance = appearance.duplicate() as BulletAppearance
-	behavior = behavior.duplicate(true) as BulletBehavior
+	if not shares_config:
+		appearance = appearance.duplicate() as BulletAppearance
+		behavior = behavior.duplicate(true) as BulletBehavior
 	render_tint = appearance.tint
 	_render_key = appearance.render_key()
 	_hitbox = HitboxComponent.new()
@@ -85,7 +93,9 @@ func launch(direction: Vector2, speed: float) -> void:
 		_trail = BulletTrailEmitter.new(get_parent(), trail_effect, _origin)
 	_direction = direction.normalized()
 	_speed = speed
-	behavior_state = BulletBehaviorState.new(behavior, _direction, speed, appearance.tint, lifetime)
+	# The body already owns a private Behavior (copied in _ready or shared from a
+	# SPAWN parent's copy), so the state adopts it instead of copying again.
+	behavior_state = BulletBehaviorState.new(behavior, _direction, speed, appearance.tint, lifetime, false)
 	age = 0.0
 	_active = true
 	_entered_view = get_viewport_rect().has_point(global_position)
@@ -98,6 +108,8 @@ func _physics_process(delta: float) -> void:
 		return
 	age = minf(age + delta, lifetime)
 	_update_pose()
+	if _fire_due_spawns():
+		return
 	if _trail != null: _trail.advance(global_position, delta)
 	var bounds := get_viewport_rect().grow(appearance.visual_extent() * visual_scale)
 	if bounds.has_point(global_position):
@@ -119,13 +131,79 @@ func _update_pose() -> void:
 		_texture_fallback.set_instance_transform_2d(0, Transform2D.IDENTITY.scaled_local(Vector2.ONE * visual_scale))
 		_texture_fallback.set_instance_color(0, Color(1, 1, 1, render_opacity))
 		_texture_fallback.set_instance_custom_data(0, render_tint)
-	_hitbox.get_child(0).scale = Vector2.ONE * hitbox_scale
-	_hitbox.get_child(0).position = appearance.collision_offset * hitbox_scale
+	if hitbox_scale != _hitbox_scale_applied:
+		# Touch the physics shape only when the scale actually changes.
+		_hitbox_scale_applied = hitbox_scale
+		_hitbox.get_child(0).scale = Vector2.ONE * hitbox_scale
+		_hitbox.get_child(0).position = appearance.collision_offset * hitbox_scale
 	if not use_batched_rendering:
 		queue_redraw()
 	var velocity := get_travel_velocity()
 	if not velocity.is_zero_approx():
 		global_rotation = velocity.angle() + PI * 0.5
+
+
+func set_spawn_target(target: Node2D, resolver := Callable()) -> void:
+	_spawn_target = weakref(target) if is_instance_valid(target) else null
+	_spawn_resolver = resolver
+
+
+## Moves a just-launched bullet `seconds` along its path, so a child spawned
+## between frames starts where it would have been by now.
+func prewarm(seconds: float) -> void:
+	if not _active or not is_finite(seconds) or seconds <= 0.0:
+		return
+	age = minf(seconds, lifetime)
+	_update_pose()
+
+
+## Fires every SPAWN Action that came due this frame. Returns true when one of
+## them consumed this bullet.
+func _fire_due_spawns() -> bool:
+	if not behavior_state.has_pending_spawns():
+		return false
+	for entry in behavior_state.take_due_spawns(age):
+		var action := entry.action as BulletAction
+		var time := float(entry.time)
+		_fire_spawn(action.payload, _origin + behavior_state.position_at(time), behavior_state.heading_at(time), age - time)
+		if action.consume_parent:
+			_active = false
+			set_physics_process(false)
+			queue_free()
+			return true
+	return false
+
+
+func _fire_spawn(volley: BarrageVolley, origin: Vector2, heading: Vector2, overshoot: float) -> void:
+	var world := get_parent() as Node2D
+	if volley == null or world == null or not world.is_inside_tree():
+		return
+	var target := _resolve_spawn_target()
+	var directions: PackedVector2Array
+	if volley.aim == BarrageVolley.Aim.NONE:
+		# Volley angles are measured from the bullet heading instead of world-down.
+		directions = volley.directions(rad_to_deg(Vector2.DOWN.angle_to(heading)))
+	else:
+		if target == null or target.global_position.is_equal_approx(origin):
+			return
+		directions = volley.directions(0.0, target.global_position - origin)
+	var start := origin + volley.origin_offset.rotated(Vector2.DOWN.angle_to(heading))
+	for direction in directions:
+		var child := volley.shot.spawn(world, start, direction, volley.speed, show_hitbox, target, _spawn_resolver, true)
+		if child is FoundationBullet:
+			(child as FoundationBullet).prewarm(overshoot)
+
+
+func _resolve_spawn_target() -> Node2D:
+	var node: Variant = _spawn_target.get_ref() if _spawn_target != null else null
+	if not _is_spawn_target(node) and _spawn_resolver.is_valid():
+		node = _spawn_resolver.call()
+	return node as Node2D if _is_spawn_target(node) else null
+
+
+func _is_spawn_target(node: Variant) -> bool:
+	return (node is Node2D and is_instance_valid(node) and (node as Node2D).is_inside_tree()
+		and not (node as Node2D).is_queued_for_deletion() and (node as Node2D).get_viewport() == get_viewport())
 
 
 func _on_hit(_hurtbox: HurtboxComponent) -> void:

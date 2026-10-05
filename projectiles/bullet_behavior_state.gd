@@ -40,9 +40,23 @@ var _effects: Dictionary = {}
 ## {time, speed_mult, heading_offset, anchor, has_anchor, cache}. Each stretch
 ## integrates from its anchor, so positions before a change never move.
 var _events: Array[Dictionary] = []
+## SPAWN Actions with their offset inside one Behavior cycle, in order.
+var _spawn_offsets: Array[Dictionary] = []
+var _cycle_length := 0.0
+var _spawn_index := 0
+var _spawn_cycle := 0
+## Child bullets already fired; spawning stops once SPAWN_MAX_CHILDREN is spent.
+var _children_spent := 0
+## One-entry memo: a body update samples the same time for its pose and its
+## velocity. Cleared whenever playback commits (homing input may change).
+var _sample_time := NAN
+var _sample_cache: Dictionary
+var _spawn_budget_spent := false
 
-func _init(behavior: BulletBehavior, direction: Vector2, speed: float, tint: Color, lifetime: float) -> void:
-	_behavior = behavior.duplicate(true) as BulletBehavior
+## `copy = false` adopts `behavior` as-is; pass it only when the caller already
+## owns a private copy that nothing will edit.
+func _init(behavior: BulletBehavior, direction: Vector2, speed: float, tint: Color, lifetime: float, copy := true) -> void:
+	_behavior = behavior.duplicate(true) as BulletBehavior if copy else behavior
 	_direction = direction.normalized()
 	_speed = speed
 	_tint = tint
@@ -74,11 +88,26 @@ func _init(behavior: BulletBehavior, direction: Vector2, speed: float, tint: Col
 		_single_wave = _behavior.actions[0]
 	if has_homing:
 		_homing = preload("res://projectiles/bullet_homing_trajectory.gd").new(self)
+	for action in _behavior.actions:
+		if action.type == BulletAction.Type.SPAWN:
+			_spawn_offsets.append({"offset": _cycle_length, "action": action})
+		_cycle_length += action.length()
 
 func configure_homing(owner: Node2D, origin: Vector2, target: Node2D = null, resolver := Callable()) -> void:
 	if _homing != null: _homing.configure(owner, origin, target, resolver)
 
+## The returned state is the caller's own copy.
 func sample(time: float) -> Dictionary:
+	return _shared_sample(time).duplicate()
+
+## Memoized state for internal reads only; never hand it out or modify it.
+func _shared_sample(time: float) -> Dictionary:
+	if time != _sample_time:
+		_sample_cache = _sample_uncached(time)
+		_sample_time = time
+	return _sample_cache
+
+func _sample_uncached(time: float) -> Dictionary:
 	if _homing != null: return _homing.sample(clampf(time, 0, _limit))
 	var t := clampf(time, 0, _limit)
 	var index := _segment_at(t)
@@ -90,13 +119,60 @@ func sample(time: float) -> Dictionary:
 
 func advance_to(time: float) -> void:
 	# Only the actual body update commits time. Prediction queries never do.
+	_sample_time = NAN
 	if _homing != null and time > playback_time:
 		_homing.advance_to(clampf(time, 0, _limit))
 		# A new homing observation changes the base velocity ahead of it.
 		_trim_effect_caches(playback_time)
 	playback_time = maxf(playback_time, clampf(time, 0, _limit))
 
+## SPAWN Actions whose time is at or before `time`, oldest first, as
+## {time, action}. Each fires once: only the body's real update calls this, so
+## past/future queries and trajectory caches never re-run a spawn. Repeating
+## Behaviors keep spawning until the parent has fired SPAWN_MAX_CHILDREN
+## bullets; the first volley that would overrun the budget ends spawning.
+func take_due_spawns(time: float) -> Array[Dictionary]:
+	var due: Array[Dictionary] = []
+	var until := minf(time, _limit)
+	while not _spawn_offsets.is_empty() and not _spawn_budget_spent:
+		if _behavior.repeat_count > 0 and _spawn_cycle >= _behavior.repeat_count:
+			break
+		var entry := _spawn_offsets[_spawn_index]
+		var at := _spawn_cycle * _cycle_length + float(entry.offset)
+		if at > until + BOUNDARY_EPSILON:
+			break
+		var cost := (entry.action as BulletAction).spawn_count()
+		if _children_spent + cost > BulletAction.SPAWN_MAX_CHILDREN:
+			_spawn_budget_spent = true
+			break
+		due.append({"time": at, "action": entry.action})
+		_children_spent += cost
+		_spawn_index += 1
+		if _spawn_index == _spawn_offsets.size():
+			_spawn_index = 0
+			_spawn_cycle += 1
+	return due
+
+## False once no SPAWN can fire again (none in the Behavior, budget spent or
+## every repeat done), so bodies skip the per-frame schedule check.
+func has_pending_spawns() -> bool:
+	return (not _spawn_offsets.is_empty() and not _spawn_budget_spent
+		and not (_behavior.repeat_count > 0 and _spawn_cycle >= _behavior.repeat_count))
+
+## Unit heading at `time`, kept even while the bullet is stopped (speed 0).
+func heading_at(time: float) -> Vector2:
+	var velocity := velocity_at(time)
+	if not velocity.is_zero_approx():
+		return velocity.normalized()
+	var t := clampf(time, 0, _limit)
+	var heading := _direction.rotated(deg_to_rad(float(_shared_sample(t).heading)))
+	var index := _event_index(t)
+	if index >= 0:
+		heading = heading.rotated(deg_to_rad(float(_events[index].heading_offset)))
+	return heading
+
 func invalidate_prediction() -> void:
+	_sample_time = NAN
 	_trim_effect_caches(playback_time)
 	if _homing != null:
 		_homing.invalidate_prediction()
@@ -185,7 +261,7 @@ func velocity_at(time: float) -> Vector2:
 	return _effective_velocity(t, _events[index])
 
 func _base_velocity_at(time: float) -> Vector2:
-	var state := sample(time)
+	var state := _shared_sample(time)
 	return _direction.rotated(deg_to_rad(state.heading)) * float(state.speed) + _direction.orthogonal() * float(state.lateral_velocity)
 
 
@@ -395,7 +471,7 @@ func positions_between(start: float, end: float, segments: int) -> PackedVector2
 
 func _position_at_uncached(t: float) -> Vector2:
 	if _constant_velocity:
-		return _direction * _speed * t + (_direction.orthogonal() * float(sample(t).lateral) if _has_lateral else Vector2.ZERO)
+		return _direction * _speed * t + (_direction.orthogonal() * float(_shared_sample(t).lateral) if _has_lateral else Vector2.ZERO)
 	if _single_turn != null:
 		var turning := minf(t, _single_turn.duration)
 		var omega := deg_to_rad(_single_turn.value)
@@ -408,7 +484,7 @@ func _position_at_uncached(t: float) -> Vector2:
 		_positions.append(_positions[-1] + _integral(start, STEP))
 	var remainder := t - index * STEP
 	var position := _positions[index] + _integral(index * STEP, remainder) if remainder > 0 else _positions[index]
-	return position + (_direction.orthogonal() * float(sample(t).lateral) if _has_lateral else Vector2.ZERO)
+	return position + (_direction.orthogonal() * float(_shared_sample(t).lateral) if _has_lateral else Vector2.ZERO)
 
 func max_hitbox_scale(_until: float) -> float:
 	# Clamped interpolation stays between endpoints, even for nonmonotonic easing.

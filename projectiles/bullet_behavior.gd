@@ -55,6 +55,17 @@ func parallel(group: Array[BulletAction]) -> BulletBehavior:
 	action.children = group
 	return then(action)
 
+## Fires `volley` from the bullet's current position and heading; `consume`
+## removes the bullet afterwards (split). See BulletAction.SPAWN limits.
+func spawn(volley: BarrageVolley, consume := false) -> BulletBehavior:
+	return then(BulletAction.spawn(volley, consume))
+
+func has_spawn() -> bool:
+	for action in actions:
+		if action != null and action.type == BulletAction.Type.SPAWN:
+			return true
+	return false
+
 func repeat(times := 0) -> BulletBehavior:
 	repeat_count = times
 	return self
@@ -71,10 +82,14 @@ func eased(transition: Tween.TransitionType, easing: Tween.EaseType = Tween.EASE
 func validation_error() -> String:
 	if actions.size() > 128 or repeat_count < 0 or repeat_count > 10000: return "Behavior exceeds action/repeat limits."
 	var duration := 0.0
+	var spawns := 0
 	for action in actions:
 		if action == null: return "Null behavior action."
 		var error := action.validation_error()
 		if not error.is_empty(): return error
 		duration += action.length()
+		if action.type == BulletAction.Type.SPAWN: spawns += 1
+	if spawns > BulletAction.SPAWN_MAX_PER_BULLET:
+		return "Behavior exceeds %d spawn actions." % BulletAction.SPAWN_MAX_PER_BULLET
 	if repeat_count == 0 and duration < 0.1: return "Infinite behavior requires a cycle of at least 0.1s."
 	return ""
