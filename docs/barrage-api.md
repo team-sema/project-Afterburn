@@ -1,6 +1,6 @@
 # 탄막 API 레퍼런스와 본 게임 이식 안내
 
-코드 확인: 2026-09-17. 현재 구현된 API의 사용 설명이다. 게임 규칙의 정본은 [전투 기획서](design/combat.md)이다. 별도 API 문서를 요청한 데 따라 사용 계약을 모아 두었다. API 변경 시 이 문서도 함께 갱신한다.
+코드 확인: 2026-10-05. 현재 구현된 API의 사용 설명이다. 게임 규칙의 정본은 [전투 기획서](design/combat.md)이다. 별도 API 문서를 요청한 데 따라 사용 계약을 모아 두었다. API 변경 시 이 문서도 함께 갱신한다.
 
 ## 시작하기: 적에 .gd 패턴 지정하기 (2026-09-17)
 
@@ -165,7 +165,7 @@ spawn(parent: Node2D, origin: Vector2, direction: Vector2,
       target_resolver := Callable(), shared_config := false) -> Node2D
 ```
 
-`spawn`은 월드 좌표에서 한 발을 생성·발사하고 노드를 반환한다. 실패하면 `null`. 부모는 트리 안에 있어야 한다. 방향은 유한한 0이 아닌 벡터, 속도는 유한한 0 이상이며 `TRAIL_LASER`의 초기 속도는 0보다 커야 한다. `BEAM`은 속도를 쓰지 않는다(0 허용). `shared_config`는 SPAWN 내부 경로 전용이다. true면 이 Shot의 설정을 복제·재검증하지 않고 공유하므로, 직접 호출할 때는 쓰지 않는다. 이 메서드를 재정의하는 Shot(예: `SniperBarrageShot`)도 같은 인자 목록을 유지해야 한다. 통상 발사는 Sequence/Player를 사용하고 단발 연결에 이 메서드를 사용할 수 있다.
+`spawn`은 월드 좌표에서 한 발을 생성·발사하고 노드를 반환한다. 실패하면 `null`. 부모는 트리 안에 있어야 한다. 방향은 유한한 0이 아닌 벡터, 속도는 유한한 0 이상이며 `TRAIL_LASER`의 초기 속도는 0보다 커야 한다. `BEAM`은 속도를 쓰지 않는다(0 허용). `shared_config`는 내부 공유 경로(SPAWN, BarragePlayer의 발사) 전용이다. true면 이 Shot의 설정을 복제·재검증하지 않고 공유하므로, 직접 호출할 때는 쓰지 않는다. 이 메서드를 재정의하는 Shot(예: `SniperBarrageShot`)도 같은 인자 목록을 유지해야 한다. 통상 발사는 Sequence/Player를 사용하고 단발 연결에 이 메서드를 사용할 수 있다.
 
 ### 이전 설정 호환
 
@@ -545,6 +545,8 @@ Sniper는 `SniperBarrageShot`이 BarrageShot의 `is_valid()`와 `spawn()`을 재
 ### 최적화 적용 범위
 
 안전 비율 격자 계산 개선은 레거시 탄에도 적용된다. MultiMesh·레이저 메쉬·판정 표시 배칭과 Behavior 계산 최적화는 새 FoundationBullet/CurvedLaser 경로에 적용된다. `Kind.LEGACY`는 기존 Sprite·파티클·컴포넌트를 사용하므로 API로 발사해도 새 배치 렌더러로 전환되지 않는다. 반대로 기존 Timer에서 새 BarrageShot을 발사하면 새 렌더링 최적화가 적용된다.
+
+BarragePlayer가 발사한 탄은 `play()`가 복제·검증한 설정(외형·Behavior)을 SPAWN 자식과 같은 방식으로 공유하므로 발사 시 탄마다 복제·재검증하지 않는다(직접 `shot.spawn()` 호출은 기존대로 복제한다). 실행 중에는 시각 채널(색·투명도·배율) 액션이 없는 탄이 매 틱 상태 샘플을 건너뛰고, 방향·속도 변화가 없는 탄은 회전 갱신도 건너뛴다. 레이저 몸통은 외부 궤도 개입·호밍이 없는 동안 점별 분기 없이 같은 궤적 함수로 샘플링하고, 판정 캡슐은 폭 계수를 사전 계산하며 바뀐 값만 물리 서버에 쓴다. 외부 궤도 개입(`apply_effect`)·벽 반사·호밍은 해당 생략 경로를 쓰지 않으므로 동작이 달라지지 않는다. 측정 기준은 `tests/projectile_render_benchmark.gd`(결과: `artifacts/projectile_render_benchmark.json`)와 `tests/behavior_performance_benchmark.gd`다.
 
 ## 11. 적탄 조회·소거 — EnemyBullets
 

@@ -182,7 +182,9 @@ func advance(seconds: float) -> void:
 							if volley.relative_to_emitter:
 								rotation += rad_to_deg(_emitter.global_rotation)
 					for direction in volley.directions(rotation, aim):
-						var projectile := volley.shot.spawn(_projectile_parent, origin, direction, volley.speed, show_hitbox, target if is_instance_valid(target) else null, resolve_target)
+						# play() validated and deep-copied the whole sequence, so
+						# bullets share this private config instead of copying it.
+						var projectile := volley.shot.spawn(_projectile_parent, origin, direction, volley.speed, show_hitbox, target if is_instance_valid(target) else null, resolve_target, true)
 						# A homing resolver may stop/replace playback during spawn.
 						if generation != _generation or not running: return
 						if not _alive(_emitter) or not _alive(_projectile_parent):

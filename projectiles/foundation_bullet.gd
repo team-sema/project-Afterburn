@@ -28,6 +28,11 @@ var _entered_view := false
 var _hitbox: HitboxComponent
 var _render_key := ""
 var _texture_fallback: MultiMesh
+var _visual_extent := 0.0
+## Per-tick fast paths, set after the first full pose update in launch():
+## static visuals skip state sampling, constant travel skips rotation updates.
+var _static_visuals := false
+var _constant_travel := false
 ## Target for SPAWN volleys with Aim.EACH_SHOT (the shot's launch target).
 var _spawn_target: WeakRef
 var _spawn_resolver := Callable()
@@ -51,13 +56,14 @@ func _ready() -> void:
 		behavior = behavior.duplicate(true) as BulletBehavior
 	render_tint = appearance.tint
 	_render_key = appearance.render_key()
+	_visual_extent = appearance.visual_extent()
 	_hitbox = HitboxComponent.new()
 	_hitbox.name = "HitboxComponent"
 	_hitbox.collision_layer = EnemyBullets.LAYER
 	_hitbox.collision_mask = 1
 	var collision := CollisionShape2D.new()
 	collision.name = "CollisionShape2D"
-	collision.shape = appearance.make_shape()
+	collision.shape = appearance.shared_shape()
 	collision.position = appearance.collision_offset
 	_hitbox.add_child(collision)
 	_hitbox.hit_hurtbox.connect(_on_hit)
@@ -107,7 +113,13 @@ func launch(direction: Vector2, speed: float) -> void:
 	age = 0.0
 	_active = true
 	_entered_view = get_viewport_rect().has_point(global_position)
+	# The first update runs the full path (visuals, hitbox scale, rotation);
+	# later ticks skip whatever can never change again.
+	_static_visuals = false
+	_constant_travel = false
 	_update_pose()
+	_static_visuals = behavior_state.has_static_visuals()
+	_constant_travel = behavior_state.is_velocity_constant() and _bounce == null
 	set_physics_process(true)
 
 
@@ -115,40 +127,50 @@ func _physics_process(delta: float) -> void:
 	if not _active:
 		return
 	age = minf(age + delta, lifetime)
-	_update_pose()
+	var point := _update_pose()
 	if _fire_due_spawns():
 		return
-	if _trail != null: _trail.advance(global_position, delta)
-	var bounds := get_viewport_rect().grow(appearance.visual_extent() * visual_scale)
-	if bounds.has_point(global_position):
+	if _trail != null: _trail.advance(point, delta)
+	var inside := get_viewport_rect().grow(_visual_extent * visual_scale).has_point(point)
+	if inside:
 		_entered_view = true
-	if age >= lifetime or (_entered_view and not bounds.has_point(global_position)):
+	if age >= lifetime or (_entered_view and not inside):
 		_active = false
 		queue_free()
 
 
-func _update_pose() -> void:
+## Returns the new world position so the caller can reuse it without re-reading
+## the node transform.
+func _update_pose() -> Vector2:
 	behavior_state.advance_to(age)
-	global_position = world_position_at(age)
-	var state := behavior_state.sample(age)
-	visual_scale = state.visual_scale
-	hitbox_scale = state.hitbox_scale
-	render_tint = state.tint
-	render_opacity = state.opacity
-	if _texture_fallback != null:
-		_texture_fallback.set_instance_transform_2d(0, Transform2D.IDENTITY.scaled_local(Vector2.ONE * visual_scale))
-		_texture_fallback.set_instance_color(0, Color(1, 1, 1, render_opacity))
-		_texture_fallback.set_instance_custom_data(0, render_tint)
-	if hitbox_scale != _hitbox_scale_applied:
-		# Touch the physics shape only when the scale actually changes.
-		_hitbox_scale_applied = hitbox_scale
-		_hitbox.get_child(0).scale = Vector2.ONE * hitbox_scale
-		_hitbox.get_child(0).position = appearance.collision_offset * hitbox_scale
-	if not use_batched_rendering:
-		queue_redraw()
+	var point := world_position_at(age)
+	if not _static_visuals:
+		var state := behavior_state.sample_shared(age)
+		visual_scale = state.visual_scale
+		hitbox_scale = state.hitbox_scale
+		render_tint = state.tint
+		render_opacity = state.opacity
+		if _texture_fallback != null:
+			_texture_fallback.set_instance_transform_2d(0, Transform2D.IDENTITY.scaled_local(Vector2.ONE * visual_scale))
+			_texture_fallback.set_instance_color(0, Color(1, 1, 1, render_opacity))
+			_texture_fallback.set_instance_custom_data(0, render_tint)
+		if hitbox_scale != _hitbox_scale_applied:
+			# Touch the physics shape only when the scale actually changes.
+			_hitbox_scale_applied = hitbox_scale
+			_hitbox.get_child(0).scale = Vector2.ONE * hitbox_scale
+			_hitbox.get_child(0).position = appearance.collision_offset * hitbox_scale
+		if not use_batched_rendering:
+			queue_redraw()
+	if _constant_travel:
+		global_position = point
+		return point
 	var velocity := get_travel_velocity()
-	if not velocity.is_zero_approx():
-		global_rotation = velocity.angle() + PI * 0.5
+	if velocity.is_zero_approx():
+		global_position = point
+	else:
+		# One transform write moves and rotates together (half the engine calls).
+		global_transform = Transform2D(velocity.angle() + PI * 0.5, point)
+	return point
 
 
 func set_spawn_target(target: Node2D, resolver := Callable()) -> void:
@@ -232,6 +254,9 @@ func apply_trajectory_effect(handle: StringName, speed_mult: float, heading_offs
 		# A mirrored path turns the other way; later bounces are recomputed.
 		heading_offset *= _bounce.handedness(age)
 	var applied := behavior_state.apply_effect(handle, speed_mult, heading_offset, duration)
+	if applied:
+		# Effects change velocity, so the travel rotation must update again.
+		_constant_travel = false
 	if applied and _bounce != null:
 		_bounce.invalidate_after(age)
 	return applied
@@ -277,7 +302,7 @@ func get_predicted_path(seconds: float) -> PackedVector2Array:
 	# At least 24 samples per wave; cap the step at 50 ms.
 	var step := behavior_state.prediction_step
 	var count := maxi(1, ceili(duration / step))
-	var bounds := get_viewport_rect().grow(appearance.visual_extent() * visual_scale)
+	var bounds := get_viewport_rect().grow(_visual_extent * visual_scale)
 	for index in range(count + 1):
 		var time := age + duration * float(index) / count
 		var point := world_position_at(time)
