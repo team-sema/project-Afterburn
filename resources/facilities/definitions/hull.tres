@@ -8,6 +8,6 @@ script = ExtResource("1_facility")
 id = &"hull"
 display_name = "선체"
 effect = 3
-effect_summary = "최대 선체·피격 무적"
+effect_summary = "피격 무적 시간 증가"
 icon = ExtResource("2_icon")
 module_count_values = PackedFloat32Array(0, 1, 2, 3)

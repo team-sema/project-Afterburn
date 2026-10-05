@@ -19,13 +19,15 @@
 | 부위 | 아이콘 | 모듈 수 | 문서 |
 |------|--------|---------|------|
 | 무기실 | ![무기실](sprites/facility_weapon_room.svg) | 3 | [무기실](weapon-room.md) |
-| 동력로 | ![동력로](sprites/facility_hangar.svg) | 2 | [동력로](reactor.md) |
-| 엔진 | ![엔진](sprites/facility_engine.svg) | 2 | [엔진](engine.md) |
-| 선체 | ![선체](sprites/facility_hull.svg) | 2 | [선체](hull.md) |
+| 동력로 | ![동력로](sprites/facility_hangar.svg) | 1 | [동력로](reactor.md) |
+| 엔진 | ![엔진](sprites/facility_engine.svg) | 1 | [엔진](engine.md) |
+| 선체 | ![선체](sprites/facility_hull.svg) | 1 | [선체](hull.md) |
 | 레이더 | ![레이더](sprites/facility_radar.svg) | 2 | [레이더](radar.md) |
 | 실드 | ![실드](sprites/facility_shield.svg) | 2 | [실드](shield.md) |
 
-합계 **13종**. 아이콘은 흰 마스크 SVG를 시안 글로우로 칠해 쓴다. 상세의 **외형** 절에 미리보기가 있다.
+합계 **10종**. 아이콘은 흰 마스크 SVG를 시안 글로우로 칠해 쓴다. 상세의 **외형** 절에 미리보기가 있다.
+
+모든 시설 모듈은 설치하면 바로 효과가 난다. 효과 없는 카드, 별도 키 입력으로 발동하는 카드, 쿨다운이 있는 카드는 두지 않는다. 그래서 반응 장갑(빈 카드)·비상 부스터(Shift 발동, 쿨다운 7초)·비상 출력 장치(쿨다운 15초)를 풀에서 뺐다. `ENGINE_BOOST`·`HULL_HIT_DAMAGE_BUFF` Kind와 `EngineBoostComponent`는 코드에 남아 있지만 이 Kind를 쓰는 카드는 없다.
 
 ## 등급
 
@@ -33,10 +35,11 @@
 
 | 등급 | 모듈 |
 |------|------|
-| 실버 (8) | 집속 조준기 · 대형 표적 해석기 · 사격 통제 장치 · 추력 편향기 · 반응 장갑 · 광역 탐지기 · 전투 데이터 분석기 · 실드 축전기 |
-| 골드 (5) | 과충전 반응로 · 비상 출력 장치 · 비상 부스터 · 충격 분산 골격 · 급속 재충전기 |
+| 실버 (7) | 집속 조준기 · 대형 표적 해석기 · 사격 통제 장치 · 추력 편향기 · 광역 탐지기 · 전투 데이터 분석기 · 실드 축전기 |
+| 골드 (3) | 과충전 반응로 · 충격 분산 골격 · 급속 재충전기 |
 
 ## 완료 조건·검증
 
 - 시설 모듈만 범용 슬롯에 들어가고 무기 Kind는 들어가지 않는다.
+- 오퍼 풀의 시설 모듈은 10종이며, 효과 없는 카드·키 입력 발동 카드·쿨다운 카드가 없다 (`tests/weapon_augment_acquisition_test.gd`).
 - 부위별 문서의 ID·수치가 `resources/player_augments/` 카드와 일치한다.
