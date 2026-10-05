@@ -76,12 +76,7 @@ func _process(delta: float) -> void:
 
 func _resolve_hit_damage(damage: int, hurtbox: HurtboxComponent = null) -> int:
 	var multiplier := damage_multiplier
-	if hurtbox != null and not is_equal_approx(boss_damage_multiplier, 1.0):
-		var node: Node = hurtbox.get_parent()
-		while node != null and not (node is Enemy):
-			node = node.get_parent()
-		if node is Enemy and (node as Enemy).is_boss:
-			multiplier *= boss_damage_multiplier
+	multiplier *= WeaponSystem.get_target_damage_multiplier(hurtbox, boss_damage_multiplier)
 	return maxi(1, roundi(float(damage) * multiplier))
 
 

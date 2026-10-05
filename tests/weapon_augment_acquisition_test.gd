@@ -46,10 +46,10 @@ func _run() -> void:
 			PlayerAugmentKind.Kind.SHIP_RULE:
 				rule_count += 1
 	_expect(acquire_count == 7, "gameplay pool keeps seven weapon acquisition cards")
-	_expect(trait_count == 40, "gameplay pool keeps 40 weapon modules")
+	_expect(trait_count == 43, "gameplay pool keeps 43 weapon modules")
 	_expect(facility_count == 10, "gameplay pool includes 10 facility modules")
 	_expect(rule_count == 4, "gameplay pool includes the four prismatic rule cards")
-	_expect(offer.player_augment_pool.size() == 61, "legacy weapon level cards are removed")
+	_expect(offer.player_augment_pool.size() == 64, "legacy weapon level cards are removed")
 
 	_expect(loadout.is_weapon_equipped(&"main_blaster"), "starts with blaster")
 	var laser_acq := load("res://resources/player_augments/weapon/acquire_main_laser.tres") as PlayerAugment

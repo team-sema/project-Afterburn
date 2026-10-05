@@ -26,6 +26,9 @@ var _terminal_max := 0.0
 var _terminal_full_time := 2.5
 var _flight_time := 0.0
 var _pending_configure := false
+## Target mark prism: seconds of mark left on the enemy hit (0 = off).
+var _mark_duration := 0.0
+var _mark_damage_mult := 1.0
 
 
 func configure_motion(
@@ -57,6 +60,12 @@ func configure_missile_combat(
 	_pending_configure = true
 	if is_node_ready():
 		_apply_damage_resolver()
+
+
+## Hits mark the struck enemy, and targeting prefers enemies without a mark.
+func configure_target_mark(duration: float, damage_mult: float) -> void:
+	_mark_duration = maxf(0.0, duration)
+	_mark_damage_mult = maxf(1.0, damage_mult)
 
 
 func _ready() -> void:
@@ -121,6 +130,8 @@ func _on_hit_hurtbox(hurtbox: HurtboxComponent) -> void:
 	ImpactVfx.emit_from(self, global_position, impact_profile, -_velocity, 1.0, _aoe_radius)
 	if _aoe_radius > 0.0:
 		_deal_aoe(hurtbox)
+	if _mark_duration > 0.0:
+		TargetMarkComponent.apply_to(WeaponSystem.find_enemy(hurtbox), _mark_duration, _mark_damage_mult)
 	queue_free()
 
 
@@ -155,15 +166,21 @@ func _deal_aoe(exclude_hurtbox: HurtboxComponent) -> void:
 
 
 func _acquire_target() -> void:
+	var prefers_unmarked := _mark_duration > 0.0
 	if _target != null and is_instance_valid(_target):
-		return
+		if not prefers_unmarked or not TargetMarkComponent.is_marked(_target):
+			return
 	_target = null
 	var best_distance := INF
+	var best_marked := true
 	for node in get_tree().get_nodes_in_group(enemy_group):
 		var enemy := node as Node2D
 		if enemy == null or not is_instance_valid(enemy):
 			continue
+		var marked := prefers_unmarked and TargetMarkComponent.is_marked(enemy)
 		var distance := global_position.distance_squared_to(enemy.global_position)
-		if distance < best_distance:
+		# Unmarked enemies win over marked ones; distance breaks ties.
+		if (best_marked and not marked) or (marked == best_marked and distance < best_distance):
 			best_distance = distance
+			best_marked = marked
 			_target = enemy

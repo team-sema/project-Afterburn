@@ -422,12 +422,7 @@ func _deal_blast_damage(damage: int, radius := -1.0) -> int:
 
 func _resolve_hit_damage(damage: int, hurtbox: HurtboxComponent = null) -> int:
 	var multiplier := _damage_multiplier
-	if hurtbox != null and not is_equal_approx(_boss_damage_multiplier, 1.0):
-		var node: Node = hurtbox.get_parent()
-		while node != null and not (node is Enemy):
-			node = node.get_parent()
-		if node is Enemy and (node as Enemy).is_boss:
-			multiplier *= _boss_damage_multiplier
+	multiplier *= WeaponSystem.get_target_damage_multiplier(hurtbox, _boss_damage_multiplier)
 	return maxi(1, roundi(float(damage) * multiplier))
 
 

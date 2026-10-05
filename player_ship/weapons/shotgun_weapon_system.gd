@@ -54,13 +54,21 @@ func _fire_internal(count_as_real: bool) -> void:
 		return
 	sound_player.play_with_variance()
 	var count := maxi(1, pellet_count + int(get_trait_param(&"shotgun_expanded_shell", &"pellet_bonus", 0)))
-	for index in count:
-		var direction := _pellet_direction(index, count)
+	if has_trait(&"shotgun_slug_prism"):
+		# Slug prism: the whole volley's pellet damage in one straight shot.
 		spawner_component.spawn(
 			muzzle.global_position,
 			null,
-			func(projectile: Node) -> void: _configure_projectile(projectile, direction),
+			func(projectile: Node) -> void: _configure_projectile(projectile, Vector2.UP, count),
 		)
+	else:
+		for index in count:
+			var direction := _pellet_direction(index, count)
+			spawner_component.spawn(
+				muzzle.global_position,
+				null,
+				func(projectile: Node) -> void: _configure_projectile(projectile, direction),
+			)
 	fired.emit()
 	if count_as_real and has_trait(&"shotgun_burst_device"):
 		_real_shot_count += 1
@@ -96,7 +104,8 @@ func _on_weapon_shutdown() -> void:
 			fire_rate_timer.timeout.disconnect(fire)
 
 
-func _configure_projectile(projectile: Node, direction: Vector2) -> void:
+## `slug_pellets` > 0 turns the projectile into a slug carrying that many pellets' damage.
+func _configure_projectile(projectile: Node, direction: Vector2, slug_pellets: int = 0) -> void:
 	var hitbox := projectile.get_node_or_null("HitboxComponent") as HitboxComponent
 	if hitbox == null:
 		push_error("ShotgunWeaponSystem: projectile missing HitboxComponent.")
@@ -108,6 +117,8 @@ func _configure_projectile(projectile: Node, direction: Vector2) -> void:
 
 	var speed := pellet_speed
 	speed *= float(get_trait_param(&"shotgun_choke", &"speed_mult", 1.0))
+	if slug_pellets > 0:
+		speed *= float(get_trait_param(&"shotgun_slug_prism", &"speed_mult", 1.0))
 	var lifetime_mult := 1.0
 	lifetime_mult *= float(get_trait_param(&"shotgun_choke", &"lifetime_mult", 1.0))
 	lifetime_mult *= float(get_trait_param(&"shotgun_cut_barrel", &"lifetime_mult", 1.0))
@@ -118,6 +129,14 @@ func _configure_projectile(projectile: Node, direction: Vector2) -> void:
 	var damage_mult := float(get_trait_param(&"shotgun_expanded_shell", &"damage_mult", 1.0))
 	damage_mult *= _burst_damage_mult
 	var base := maxi(1, roundi(base_damage * damage_mult))
+	if slug_pellets > 0:
+		base *= slug_pellets
+		if projectile.has_method("configure_slug"):
+			projectile.call(
+				"configure_slug",
+				float(get_trait_param(&"shotgun_slug_prism", &"size_mult", 1.0)),
+				slug_pellets,
+			)
 	var close_mult := float(get_trait_param(&"shotgun_cut_barrel", &"close_damage_mult", 1.0))
 	var close_px := float(get_trait_param(&"shotgun_cut_barrel", &"close_range_px", close_range_px))
 	if not has_trait(&"shotgun_cut_barrel"):

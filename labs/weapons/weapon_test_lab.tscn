@@ -10,12 +10,12 @@
 [ext_resource type="LabelSettings" uid="uid://c0rnshv8jeh2e" path="res://fonts/title_label_settings.tres" id="7_title_label"]
 [ext_resource type="Script" uid="uid://r8a6m4303af1" path="res://menus/neon_corner_frame.gd" id="8_corner_frame"]
 [ext_resource type="Script" uid="uid://di3gte031mtvs" path="res://resources/facilities/ship_facility_definition.gd" id="9_facility_definition"]
-[ext_resource type="Resource" path="res://resources/facilities/definitions/weapon_room.tres" id="10_weapon_room"]
-[ext_resource type="Resource" path="res://resources/facilities/definitions/hangar.tres" id="11_hangar"]
-[ext_resource type="Resource" path="res://resources/facilities/definitions/engine.tres" id="12_engine"]
-[ext_resource type="Resource" path="res://resources/facilities/definitions/hull.tres" id="13_hull"]
-[ext_resource type="Resource" path="res://resources/facilities/definitions/radar.tres" id="14_radar"]
-[ext_resource type="Resource" path="res://resources/facilities/definitions/shield.tres" id="15_shield"]
+[ext_resource type="Resource" uid="uid://b8ql114d84svt" path="res://resources/facilities/definitions/weapon_room.tres" id="10_weapon_room"]
+[ext_resource type="Resource" uid="uid://chmnabos1sjmx" path="res://resources/facilities/definitions/hangar.tres" id="11_hangar"]
+[ext_resource type="Resource" uid="uid://cempkq3gkqdc" path="res://resources/facilities/definitions/engine.tres" id="12_engine"]
+[ext_resource type="Resource" uid="uid://crf6boso7pngw" path="res://resources/facilities/definitions/hull.tres" id="13_hull"]
+[ext_resource type="Resource" uid="uid://du3tglsg1ynoy" path="res://resources/facilities/definitions/radar.tres" id="14_radar"]
+[ext_resource type="Resource" uid="uid://d0222mempw42f" path="res://resources/facilities/definitions/shield.tres" id="15_shield"]
 [ext_resource type="Resource" uid="uid://st2okeo4r2qj" path="res://resources/weapons/definitions/main_blaster.tres" id="21_blaster"]
 [ext_resource type="Resource" uid="uid://cpn54ll1emgyw" path="res://resources/weapons/definitions/main_laser.tres" id="22_laser"]
 [ext_resource type="Resource" uid="uid://comw1xtg060l4" path="res://resources/weapons/definitions/main_shotgun.tres" id="23_shotgun"]
@@ -185,8 +185,8 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 24)
 layout_mode = 2
 text = "표적 / 적 탄환 정리"
-clip_text = true
 text_overrun_behavior = 3
+clip_text = true
 
 [node name="CornerFrame" type="Control" parent="Layout/LeftPanel" unique_id=1785209959]
 layout_mode = 2
@@ -357,8 +357,8 @@ custom_minimum_size = Vector2(0, 24)
 layout_mode = 2
 disabled = true
 text = "선택 무기 모듈 초기화"
-clip_text = true
 text_overrun_behavior = 3
+clip_text = true
 
 [node name="ActionRow" type="HBoxContainer" parent="Layout/RightPanel/Margin/VBox" unique_id=358552544]
 layout_mode = 2

@@ -81,6 +81,7 @@
 | `ShipCombatBuffController` | 과충전(주기) → temp 피해 배율 (선체 피격 버프 경로는 쓰는 카드 없음) |
 | `OverchargeVisualComponent` | 과충전 중 탄/지속 무기 시각을 붉은 틴트로 표시. 탄은 발사 시점 고정, 레이저·궤도 방벽은 실시간 |
 | `EngineBoostComponent` | `engine_boost`(Shift) 액티브 이속 버프 · 쿨다운 시그널 (현재 이 Kind를 쓰는 카드 없음) |
+| `TargetMarkComponent` | 유도탄 표적 지정 표식(적 자식 노드) · 남은 시간 동안 플레이어 무기 피해 배율 |
 | `EnemyModifierFactory` | 스폰 시 적 스탯·행동 컴포넌트 적용 |
 | `EnemyAugmentGrantComponent` | 수동으로 적 오그먼트 grant *(씬 미연결)* |
 | `TargetingComponent` | `"player"` 그룹 타깃 |
