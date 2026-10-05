@@ -25,6 +25,10 @@ enum Kind { BULLET, TRAIL_LASER, LEGACY, BEAM }
 @export var beam_color := Color(1.0, 0.3, 0.5)
 ## Glow and sparks where the held beam ends (visual only).
 @export var beam_impact := true
+## Playfield walls this shot reflects off (BULLET / TRAIL_LASER). 0 = none.
+@export_flags("Left", "Right", "Top", "Bottom") var bounce_walls := 0
+## Bounces per bullet before it passes through; 0 = unlimited.
+@export_range(0, 64) var bounce_count := 1
 
 func is_valid() -> bool:
 	if trail_effect != null and (not trail_effect.is_valid() or kind == Kind.LEGACY): return false
@@ -32,6 +36,11 @@ func is_valid() -> bool:
 		return false
 	# Spawning runs on the BULLET body only; a laser head never fires volleys.
 	if behavior != null and kind != Kind.BULLET and behavior.has_spawn():
+		return false
+	if bounce_walls < 0 or bounce_walls > BulletWallBounce.ALL or bounce_count < 0 or bounce_count > 64:
+		return false
+	# Homing steers by the unreflected path, so it cannot be mixed with bounces.
+	if bounce_walls != 0 and (kind not in [Kind.BULLET, Kind.TRAIL_LASER] or (behavior != null and behavior.has_homing())):
 		return false
 	match kind:
 		Kind.BULLET:
@@ -75,6 +84,8 @@ func spawn(parent: Node2D, origin: Vector2, direction: Vector2, speed: float, de
 			bullet.lifetime = lifetime
 			bullet.show_hitbox = debug
 			bullet.shares_config = shared_config
+			bullet.bounce_walls = bounce_walls
+			bullet.bounce_count = bounce_count
 			projectile = bullet
 		Kind.TRAIL_LASER:
 			var laser := preload("res://projectiles/curved_laser.tscn").instantiate() as CurvedLaser
@@ -87,6 +98,8 @@ func spawn(parent: Node2D, origin: Vector2, direction: Vector2, speed: float, de
 			laser.hit_width = hit_width
 			laser.lifetime = lifetime
 			laser.show_hitbox = debug
+			laser.bounce_walls = bounce_walls
+			laser.bounce_count = bounce_count
 			projectile = laser
 		Kind.LEGACY:
 			projectile = preload("res://projectiles/base_enemy_projectile.tscn").instantiate()

@@ -39,6 +39,10 @@ var _collisions: Array[CollisionShape2D] = []
 var _body := PackedVector2Array()
 var _ribbon_offsets := PackedVector2Array()
 var _profile := PackedFloat32Array()
+## Wall reflection (BarrageShot.bounce_walls / bounce_count); null = none.
+var bounce_walls := 0
+var bounce_count := 1
+var _bounce: BulletWallBounce
 
 
 func _ready() -> void:
@@ -89,6 +93,10 @@ func launch(direction: Vector2, speed: float) -> void:
 	_direction = direction.normalized()
 	_speed = speed
 	behavior_state = BulletBehaviorState.new(behavior, _direction, speed, Color.WHITE, lifetime)
+	if bounce_walls != 0:
+		_bounce = BulletWallBounce.new(
+			func(time: float) -> Vector2: return _origin + behavior_state.position_at(time),
+			get_viewport_rect(), hit_width * 0.5, bounce_walls, bounce_count, lifetime)
 	age = 0
 	_active = true
 	_seen = false
@@ -99,13 +107,18 @@ func launch(direction: Vector2, speed: float) -> void:
 
 
 func position_at(time: float) -> Vector2:
-	return _origin + behavior_state.position_at(time)
+	var point := _origin + behavior_state.position_at(time)
+	return _bounce.fold_point(point, time) if _bounce != null else point
 
 
 func body_at(time: float) -> PackedVector2Array:
-	var points := behavior_state.positions_between(maxf(0, time - trail_duration), time, SEGMENTS)
+	var start := maxf(0, time - trail_duration)
+	var points := behavior_state.positions_between(start, time, SEGMENTS)
 	for index in points.size():
 		points[index] += _origin
+		if _bounce != null:
+			# Each body point folds by the bounces that happened before its own time.
+			points[index] = _bounce.fold_point(points[index], lerpf(start, time, float(index) / SEGMENTS))
 	return points
 
 
@@ -175,11 +188,19 @@ func _update_body() -> void:
 func apply_trajectory_effect(handle: StringName, speed_mult: float, heading_offset: float, duration: float) -> bool:
 	if not _active or behavior_state == null:
 		return false
-	return behavior_state.apply_effect(handle, speed_mult, heading_offset, duration)
+	if _bounce != null:
+		heading_offset *= _bounce.handedness(age)
+	var applied := behavior_state.apply_effect(handle, speed_mult, heading_offset, duration)
+	if applied and _bounce != null:
+		_bounce.invalidate_after(age)
+	return applied
 
 
 func remove_trajectory_effect(handle: StringName) -> bool:
-	return _active and behavior_state != null and behavior_state.remove_effect(handle)
+	var removed := _active and behavior_state != null and behavior_state.remove_effect(handle)
+	if removed and _bounce != null:
+		_bounce.invalidate_after(age)
+	return removed
 
 
 func get_trajectory_effect(handle: StringName) -> Dictionary:
@@ -187,7 +208,12 @@ func get_trajectory_effect(handle: StringName) -> Dictionary:
 
 
 func get_travel_velocity() -> Vector2:
-	return behavior_state.velocity_at(age)
+	var velocity := behavior_state.velocity_at(age)
+	return _bounce.reflect_vector(age, velocity) if _bounce != null else velocity
+
+
+func get_bounce_count() -> int:
+	return _bounce.bounces_until(age) if _bounce != null else 0
 
 
 func get_hazard_radius() -> float:

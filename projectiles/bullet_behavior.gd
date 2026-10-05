@@ -66,6 +66,16 @@ func has_spawn() -> bool:
 			return true
 	return false
 
+func has_homing() -> bool:
+	for action in actions:
+		if action == null:
+			continue
+		var group: Array = action.children if action.type == BulletAction.Type.PARALLEL else [action]
+		for child in group:
+			if child != null and child.type == BulletAction.Type.HOMING:
+				return true
+	return false
+
 func repeat(times := 0) -> BulletBehavior:
 	repeat_count = times
 	return self
