@@ -35,6 +35,10 @@ var _spawn_resolver := Callable()
 ## parent's private, already validated copy, so they are shared, not copied.
 var shares_config := false
 var _hitbox_scale_applied := -1.0
+## Wall reflection (BarrageShot.bounce_walls / bounce_count); null = none.
+var bounce_walls := 0
+var bounce_count := 1
+var _bounce: BulletWallBounce
 
 
 func _ready() -> void:
@@ -96,6 +100,10 @@ func launch(direction: Vector2, speed: float) -> void:
 	# The body already owns a private Behavior (copied in _ready or shared from a
 	# SPAWN parent's copy), so the state adopts it instead of copying again.
 	behavior_state = BulletBehaviorState.new(behavior, _direction, speed, appearance.tint, lifetime, false)
+	if bounce_walls != 0:
+		_bounce = BulletWallBounce.new(
+			func(time: float) -> Vector2: return _origin + behavior_state.position_at(time),
+			get_viewport_rect(), appearance.bounding_radius(), bounce_walls, bounce_count, lifetime)
 	age = 0.0
 	_active = true
 	_entered_view = get_viewport_rect().has_point(global_position)
@@ -121,7 +129,7 @@ func _physics_process(delta: float) -> void:
 
 func _update_pose() -> void:
 	behavior_state.advance_to(age)
-	global_position = _origin + behavior_state.position_at(age)
+	global_position = world_position_at(age)
 	var state := behavior_state.sample(age)
 	visual_scale = state.visual_scale
 	hitbox_scale = state.hitbox_scale
@@ -165,7 +173,10 @@ func _fire_due_spawns() -> bool:
 	for entry in behavior_state.take_due_spawns(age):
 		var action := entry.action as BulletAction
 		var time := float(entry.time)
-		_fire_spawn(action.payload, _origin + behavior_state.position_at(time), behavior_state.heading_at(time), age - time)
+		var heading := behavior_state.heading_at(time)
+		if _bounce != null:
+			heading = _bounce.reflect_vector(time, heading)
+		_fire_spawn(action.payload, world_position_at(time), heading, age - time)
 		if action.consume_parent:
 			_active = false
 			set_physics_process(false)
@@ -217,11 +228,20 @@ func _on_hit(_hurtbox: HurtboxComponent) -> void:
 func apply_trajectory_effect(handle: StringName, speed_mult: float, heading_offset: float, duration: float) -> bool:
 	if not _active or behavior_state == null:
 		return false
-	return behavior_state.apply_effect(handle, speed_mult, heading_offset, duration)
+	if _bounce != null:
+		# A mirrored path turns the other way; later bounces are recomputed.
+		heading_offset *= _bounce.handedness(age)
+	var applied := behavior_state.apply_effect(handle, speed_mult, heading_offset, duration)
+	if applied and _bounce != null:
+		_bounce.invalidate_after(age)
+	return applied
 
 
 func remove_trajectory_effect(handle: StringName) -> bool:
-	return _active and behavior_state != null and behavior_state.remove_effect(handle)
+	var removed := _active and behavior_state != null and behavior_state.remove_effect(handle)
+	if removed and _bounce != null:
+		_bounce.invalidate_after(age)
+	return removed
 
 
 func get_trajectory_effect(handle: StringName) -> Dictionary:
@@ -229,7 +249,20 @@ func get_trajectory_effect(handle: StringName) -> Dictionary:
 
 
 func get_travel_velocity() -> Vector2:
-	return behavior_state.velocity_at(age) if _active else Vector2.ZERO
+	if not _active:
+		return Vector2.ZERO
+	var velocity := behavior_state.velocity_at(age)
+	return _bounce.reflect_vector(age, velocity) if _bounce != null else velocity
+
+
+## World position on the (wall-reflected) trajectory at bullet age `time`.
+func world_position_at(time: float) -> Vector2:
+	var point := _origin + behavior_state.position_at(time)
+	return _bounce.fold_point(point, time) if _bounce != null else point
+
+
+func get_bounce_count() -> int:
+	return _bounce.bounces_until(age) if _bounce != null else 0
 
 
 func get_hazard_radius() -> float:
@@ -247,7 +280,7 @@ func get_predicted_path(seconds: float) -> PackedVector2Array:
 	var bounds := get_viewport_rect().grow(appearance.visual_extent() * visual_scale)
 	for index in range(count + 1):
 		var time := age + duration * float(index) / count
-		var point := _origin + behavior_state.position_at(time)
+		var point := world_position_at(time)
 		points.append(point)
 		if _entered_view and not bounds.has_point(point):
 			break

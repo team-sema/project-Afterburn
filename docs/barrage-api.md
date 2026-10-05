@@ -50,7 +50,7 @@ func build(params: Dictionary) -> void:
 - 조준 고정 연발 예제: [locked_burst_pattern.gd](../patterns/locked_burst_pattern.gd). `aim()` 뒤 `Aim.LOCKED` 바늘탄 3발(0.12초 간격) → 2초 휴식 → 반복. `build(params)`로 `shots`, `gap`, `rest`, `speed`를 씬에서 조정할 수 있다. 본 게임 적에는 배정하지 않았다.
 - 조준 부채꼴 연발 예제: [aimed_fan_burst_pattern.gd](../patterns/aimed_fan_burst_pattern.gd). 5방향 40° 부채꼴의 중앙 탄이 매 발사 표적을 향하는 `Aim.EACH_SHOT`, 0.15초 간격 5연발 → 1.6초 휴식 → 반복. `ways`, `spread`, `shots`, `gap`, `rest`, `speed`를 `build(params)`로 조정. 본 게임 적에는 배정하지 않았다.
 - 16방향 혼합 시험: [mixed_sixteen_pattern.gd](../patterns/mixed_sixteen_pattern.gd). 이 `.gd`가 현재 시험 씬의 실행 원본이다. 예전 `.tres`는 저장 형식 호환 예제로 남겨 둔다.
-- 쇼케이스 패턴: [`patterns/showcase/`](../patterns/showcase/) 10종(탄→탄 SPAWN 데모 `comet_trail`, 예고형 빔 데모 `beam_lattice` 포함). Lab 패턴 목록에 `showcase/…`로 나온다. 본 게임 적에는 배정하지 않았다. 색만 바꾼 탄은 [`labs/bullet/showcase_shots.gd`](../labs/bullet/showcase_shots.gd)로 만든다(외형 복제 후 `tint` 변경, 텍스처 공유).
+- 쇼케이스 패턴: [`patterns/showcase/`](../patterns/showcase/) 11종(탄→탄 SPAWN 데모 `comet_trail`, 예고형 빔 데모 `beam_lattice`, 벽 반사 데모 `ricochet` 포함). Lab 패턴 목록에 `showcase/…`로 나온다. 본 게임 적에는 배정하지 않았다. 색만 바꾼 탄은 [`labs/bullet/showcase_shots.gd`](../labs/bullet/showcase_shots.gd)로 만든다(외형 복제 후 `tint` 변경, 텍스처 공유).
 
   | 파일 | 형태 | 쓰는 기능 |
   |------|------|-----------|
@@ -63,6 +63,7 @@ func build(params: Dictionary) -> void:
   | `laser_whirl_pattern.gd` | 번갈아 반대로 말리는 궤적 레이저와 원탄 링 | `TRAIL_LASER` · `turn_at` |
   | `bloom_burst_pattern.gd` | 큰 탄이 멈춰 부풀고 하얗게 경고한 뒤 비틀며 폭발 가속 | `parallel`(색·시각 배율, 속도·선회) |
   | `beam_lattice_pattern.gd` | 표적을 노린 분홍 빔 5줄 부채꼴 뒤에 천천히 도는 보라 빔 6줄 링 | `Kind.BEAM`(예고선 → 전개 → 유지 → 소멸) · `Aim.EACH_SHOT` · `speed = 0` |
+  | `ricochet_pattern.gd` | 좌우 벽에서 한 번 튕기는 쌀탄 부채꼴 2개와 벽에서 V자로 꺾이는 궤적 레이저 | `bounce_walls = SIDES` · `bounce_count` · `fire_together` |
   | `comet_trail_pattern.gd` | 큰 왕탄 3발이 뒤로 작은 불씨를 흘려 잔상 꼬리를 남김 | 탄→탄 `spawn`(SINGLE을 진행 반대 ±35°로 번갈아) · 유한 `repeat(64)` · 불씨의 `opacity`·`hitbox_scale` 동시 축소 |
 
   검증: `tests/showcase_patterns_smoke_test.gd` (Lab 로더로 모두 불러와 3초 재생 시 발사·반복 유지).
@@ -104,6 +105,18 @@ Sequence의 시간은 발사 일정, Behavior의 시간은 **각 탄이 발사�
 - `Kind.BEAM`: 예고형 직선 빔(`TelegraphBeam`). 아래 「예고형 빔 설정」. `behavior`·`trail_effect`는 비워 둔다(지정하면 무효). `appearance`·`lifetime`은 쓰지 않고, 수명은 네 단계 시간의 합이다.
 - `behavior: BulletBehavior`: 발사 후 행동. 빈 `BulletBehavior.new()`는 직진이다.
 - `lifetime = 5.0`: 수명. 유한한 양수. Behavior가 끝나도 탄은 마지막 상태로 수명까지 움직인다. 기존 화면 이탈 제거도 적용된다.
+- `bounce_walls = 0`: 반사할 플레이필드 벽 플래그(`BulletWallBounce.LEFT`·`RIGHT`·`TOP`·`BOTTOM`, 묶음 `SIDES`·`ALL`). 0은 반사 없음. `BULLET`·`TRAIL_LASER`만 쓸 수 있고 호밍 Behavior와는 함께 쓸 수 없다.
+- `bounce_count = 1`: 탄 하나의 최대 반사 횟수(0 = 무제한, 최대 64). 다 쓰면 다음 벽을 통과한다.
+
+```gdscript
+var rice := BarrageShot.new()
+rice.appearance = preload("res://resources/projectiles/rice.tres")
+rice.behavior = BulletBehavior.new()
+rice.bounce_walls = BulletWallBounce.SIDES  # 좌우 벽에서 튕김, 위·아래로는 나감
+rice.bounce_count = 1
+```
+
+벽은 발사 순간의 뷰포트 사각형에서 탄 반지름만큼 안쪽이다. 반사는 진행 방향과 Behavior를 거울처럼 뒤집고 속도는 유지한다. 이동·경로 예측·레이저 몸통이 같은 반사 경로를 쓰고, 발사 중인 탄의 반사 횟수는 `get_bounce_count()`로 읽는다. 자세한 규칙: [전투 — 벽 반사](design/combat.md#벽-반사--구현-완료).
 
 ### 레이저 설정
 
@@ -475,6 +488,7 @@ fire_together(layers)
 ## 9. 현재 한계
 
 - 현재 런타임은 적 탄 전용 연결이다. Kind로 아군/적군을 선택하거나 피해량을 설정하는 API는 없다.
+- 벽 반사는 거울 반사뿐이다. 반사 때 속도·색 변화, 반사 연출, 임의 모양의 벽(플레이필드 사각형 밖)은 없다. 호밍과 함께 쓸 수 없다.
 - `TRAIL_LASER`는 이동하는 머리의 과거 궤적이고, `BEAM`은 발사 순간에 고정된 직선이다. 발사자를 따라 움직이거나 회전하는 빔, 휘는 빔, 제어점으로 몸통을 직접 변형하는 API는 없다. `BEAM`은 막히지 않고 화면 끝(또는 `beam_length`)까지 뻗는다.
 - 발사 시점 난수(각도·속도·대기 jitter)는 없다. 필요하면 시드 RNG를 Player가 소유하는 방식으로 추가한다.
 - 탄→탄 발사(`SPAWN`)는 재귀 깊이 1, Volley 32발, 부모 1발당 자식 128발로 제한한다. 레이저 머리는 SPAWN을 실행하지 않고, 경로 예측은 미래의 자식 탄을 포함하지 않는다.
