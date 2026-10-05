@@ -91,6 +91,7 @@ func spawn(parent: Node2D, origin: Vector2, direction: Vector2, speed: float, de
 			var laser := preload("res://projectiles/curved_laser.tscn").instantiate() as CurvedLaser
 			laser.turn_degrees = turn_degrees
 			laser.behavior = behavior
+			laser.shares_config = shared_config
 			laser.trail_effect = trail_effect
 			laser.turn_duration = turn_duration
 			laser.trail_duration = trail_duration

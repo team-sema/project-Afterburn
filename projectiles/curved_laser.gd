@@ -28,14 +28,19 @@ var render_opacity := 1.0
 		show_hitbox = value
 		queue_redraw()
 
+## Set by BarrageShot.spawn when the behavior is the firing Player's private,
+## already validated copy: share it instead of copying and re-validating.
+var shares_config := false
 var age := 0.0
 var _origin := Vector2.ZERO
 var _direction := Vector2.DOWN
 var _speed := 90.0
 var _active := false
 var _seen := false
-var _hitbox: HitboxComponent
+var _static_visuals := false
+var _hitbox: LASER_HITBOX
 var _collisions: Array[CollisionShape2D] = []
+var _collision_factors := PackedFloat32Array()
 var _body := PackedVector2Array()
 var _ribbon_offsets := PackedVector2Array()
 var _profile := PackedFloat32Array()
@@ -57,6 +62,7 @@ func _ready() -> void:
 		collision.shape = CapsuleShape2D.new()
 		collision.disabled = true
 		_collisions.append(collision)
+		_collision_factors.append(_collision_width_factor(index))
 		_hitbox.add_child(collision)
 	add_child(_hitbox)
 	if use_batched_rendering:
@@ -79,7 +85,7 @@ func launch(direction: Vector2, speed: float) -> void:
 		return
 	if behavior == null:
 		behavior = BulletBehavior.new().turn_at(turn_degrees, turn_duration)
-	if not behavior.validation_error().is_empty():
+	if not shares_config and not behavior.validation_error().is_empty():
 		push_error(behavior.validation_error())
 		queue_free()
 		return
@@ -92,7 +98,8 @@ func launch(direction: Vector2, speed: float) -> void:
 		_trail = BulletTrailEmitter.new(get_parent(), trail_effect, _origin)
 	_direction = direction.normalized()
 	_speed = speed
-	behavior_state = BulletBehaviorState.new(behavior, _direction, speed, Color.WHITE, lifetime)
+	# A shared behavior is the Player's validated, read-only copy; adopt it.
+	behavior_state = BulletBehaviorState.new(behavior, _direction, speed, Color.WHITE, lifetime, not shares_config)
 	if bounce_walls != 0:
 		_bounce = BulletWallBounce.new(
 			func(time: float) -> Vector2: return _origin + behavior_state.position_at(time),
@@ -102,7 +109,10 @@ func launch(direction: Vector2, speed: float) -> void:
 	_seen = false
 	for index in _collisions.size():
 		(_collisions[index].shape as CapsuleShape2D).radius = hit_width * 0.5 * _collision_width_factor(index)
+	# The first update runs the full path; later ticks skip constant visuals.
+	_static_visuals = false
 	_update_body()
+	_static_visuals = behavior_state.has_static_visuals()
 	set_physics_process(true)
 
 
@@ -138,7 +148,7 @@ func _physics_process(delta: float) -> void:
 	age = minf(age + delta, lifetime)
 	_update_body()
 	if _trail != null: _trail.advance(global_position, delta)
-	_hitbox.call("apply_contacts")
+	_hitbox.apply_contacts()
 	var visible := false
 	var bounds := get_viewport_rect().grow(core_width * visual_scale * 2)
 	for point in _body:
@@ -153,21 +163,24 @@ func _physics_process(delta: float) -> void:
 
 func _update_body() -> void:
 	behavior_state.advance_to(age)
-	var state := behavior_state.sample(age)
-	visual_scale = state.visual_scale
-	hitbox_scale = state.hitbox_scale
-	render_tint = state.tint
-	render_opacity = state.opacity
+	if not _static_visuals:
+		var state := behavior_state.sample_shared(age)
+		visual_scale = state.visual_scale
+		hitbox_scale = state.hitbox_scale
+		render_tint = state.tint
+		render_opacity = state.opacity
 	global_position = position_at(age)
 	_body = body_at(age)
-	_ribbon_offsets.resize(_body.size())
-	for index in _body.size():
-		var before := _body[maxi(0, index - 1)]
-		var after := _body[mini(_body.size() - 1, index + 1)]
-		_ribbon_offsets[index] = (after - before).normalized().orthogonal() * _profile[index]
+	var count := _body.size()
+	_ribbon_offsets.resize(count)
+	_ribbon_offsets[0] = (_body[1] - _body[0]).normalized().orthogonal() * _profile[0]
+	for index in range(1, count - 1):
+		_ribbon_offsets[index] = (_body[index + 1] - _body[index - 1]).normalized().orthogonal() * _profile[index]
+	_ribbon_offsets[count - 1] = (_body[count - 1] - _body[count - 2]).normalized().orthogonal() * _profile[count - 1]
 	var inverse := global_transform.affine_inverse()
+	# Adjacent capsules share an endpoint, so each body point transforms once.
+	var start := inverse * _body[0]
 	for index in _collisions.size():
-		var start := inverse * _body[index * COLLISION_STRIDE]
 		var end := inverse * _body[(index + 1) * COLLISION_STRIDE]
 		var collision := _collisions[index]
 		if collision.disabled != (age <= 0.001):
@@ -175,10 +188,13 @@ func _update_body() -> void:
 		collision.position = (start + end) * 0.5
 		collision.rotation = (end - start).angle() - PI * 0.5
 		var capsule := collision.shape as CapsuleShape2D
-		var radius := hit_width * 0.5 * _collision_width_factor(index) * hitbox_scale
+		var radius := hit_width * 0.5 * _collision_factors[index] * hitbox_scale
 		if not is_equal_approx(capsule.radius, radius):
 			capsule.radius = radius
-		capsule.height = start.distance_to(end) + capsule.radius * 2
+		var height := start.distance_to(end) + capsule.radius * 2
+		if not is_equal_approx(capsule.height, height):
+			capsule.height = height
+		start = end
 	if not use_batched_rendering:
 		queue_redraw()
 

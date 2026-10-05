@@ -16,6 +16,7 @@ var prediction_step := 0.04
 var _single_turn: BulletAction
 var _single_wave: BulletAction
 var _has_lateral := false
+var _static_visuals := true
 const QUERY_CACHE_LIMIT := 2048
 const BOUNDARY_EPSILON := 1.0e-10
 var playback_time := 0.0
@@ -76,6 +77,8 @@ func _init(behavior: BulletBehavior, direction: Vector2, speed: float, tint: Col
 				_has_lateral = true
 			if child.channel() in ["heading", "speed"]:
 				_constant_velocity = false
+			if child.type in [BulletAction.Type.TINT, BulletAction.Type.OPACITY, BulletAction.Type.VISUAL_SCALE, BulletAction.Type.HITBOX_SCALE]:
+				_static_visuals = false
 			if child.type == BulletAction.Type.HITBOX_SCALE:
 				_max_hitbox_scale = maxf(_max_hitbox_scale, child.value)
 			if child.type in [BulletAction.Type.HEADING_WAVE, BulletAction.Type.LATERAL_WAVE]:
@@ -99,6 +102,22 @@ func configure_homing(owner: Node2D, origin: Vector2, target: Node2D = null, res
 ## The returned state is the caller's own copy.
 func sample(time: float) -> Dictionary:
 	return _shared_sample(time).duplicate()
+
+## Allocation-free sample for per-tick body updates: the returned Dictionary is
+## the internal memo. Read it immediately; never store or modify it.
+func sample_shared(time: float) -> Dictionary:
+	return _shared_sample(time)
+
+## True when no Action ever changes tint/opacity/visual/hitbox scale, so the
+## launch-time visual state holds for the bullet's whole life.
+func has_static_visuals() -> bool:
+	return _static_visuals
+
+## True while the velocity stays the launch direction*speed forever: no
+## heading/speed/lateral/homing Actions and no external trajectory effects.
+## Callers must re-check (or drop their fast path) after apply_effect().
+func is_velocity_constant() -> bool:
+	return _constant_velocity and not _has_lateral and _homing == null and _events.is_empty()
 
 ## Memoized state for internal reads only; never hand it out or modify it.
 func _shared_sample(time: float) -> Dictionary:
@@ -456,7 +475,10 @@ func position_at(time: float) -> Vector2:
 
 ## Evenly spaced positions from start to end (segments + 1 points) for drawing
 ## and laser bodies. Homing paths without effects walk their stored frames once
-## and interpolate between them (sub-pixel); everything else calls position_at.
+## and interpolate between them (sub-pixel). Plain paths evaluate the same
+## trajectory function per point but skip the per-point event/cache dispatch,
+## which laser bodies pay dozens of times every tick. Everything else calls
+## position_at.
 func positions_between(start: float, end: float, segments: int) -> PackedVector2Array:
 	var from := clampf(start, 0, _limit)
 	var to := clampf(end, 0, _limit)
@@ -465,6 +487,11 @@ func positions_between(start: float, end: float, segments: int) -> PackedVector2
 		return _homing.positions_between(from, to, segments)
 	var points := PackedVector2Array()
 	points.resize(segments + 1)
+	if _homing == null and _events.is_empty():
+		cached_until = maxf(cached_until, maxf(from, to))
+		for index in segments + 1:
+			points[index] = _position_at_uncached(clampf(lerpf(start, end, float(index) / segments), 0, _limit))
+		return points
 	for index in segments + 1:
 		points[index] = position_at(lerpf(start, end, float(index) / segments))
 	return points

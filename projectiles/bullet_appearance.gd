@@ -17,6 +17,9 @@ enum Form { ROUND, RICE, TEXTURED }
 @export var collision_size := Vector2(4, 8)
 @export var collision_offset := Vector2.ZERO
 
+var _shared_shape: Shape2D
+var _render_key := ""
+
 
 func is_valid() -> bool:
 	return (
@@ -44,14 +47,30 @@ func make_shape() -> Shape2D:
 	return circle
 
 
+## One collision Shape2D per appearance, shared by every bullet that uses this
+## instance (bullets scale their CollisionShape2D node, never the shape).
+## Launch-time copies are not edited afterwards, so the cache never goes stale.
+## File-backed presets stay uncached: they outlive play, and deep-duplicated
+## SPAWN payloads keep referencing them, so a cache would live until exit.
+func shared_shape() -> Shape2D:
+	if not resource_path.is_empty():
+		return make_shape()
+	if _shared_shape == null:
+		_shared_shape = make_shape()
+	return _shared_shape
+
+
 func bounding_radius() -> float:
 	if form == Form.TEXTURED: return collision_size.length() * 0.5 + collision_offset.length()
 	return (collision_height * 0.5 if form == Form.RICE else collision_radius) + collision_offset.length()
 
 func render_key() -> String:
-	if form == Form.TEXTURED:
-		return str(form, ":", texture.get_rid(), core_size, wide_size, tight_size, wide_color, tight_color, core_color)
-	return str(form, ":", core_size)
+	if _render_key.is_empty():
+		if form == Form.TEXTURED:
+			_render_key = str(form, ":", texture.get_rid(), core_size, wide_size, tight_size, wide_color, tight_color, core_color)
+		else:
+			_render_key = str(form, ":", core_size)
+	return _render_key
 
 func visual_extent() -> float:
 	var size := core_size

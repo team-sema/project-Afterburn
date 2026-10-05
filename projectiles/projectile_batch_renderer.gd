@@ -54,7 +54,13 @@ func _process(_delta: float) -> void:
 	refresh()
 
 func refresh() -> void:
-	projectiles = projectiles.filter(func(p): return is_instance_valid(p) and not p.is_queued_for_deletion())
+	var write := 0
+	for read in projectiles.size():
+		var candidate := projectiles[read]
+		if is_instance_valid(candidate) and not candidate.is_queued_for_deletion():
+			projectiles[write] = candidate
+			write += 1
+	projectiles.resize(write)
 	_vertices.clear()
 	_colors.clear()
 	_indices.clear()
@@ -69,8 +75,11 @@ func refresh() -> void:
 	for shape in extra_debug_shapes:
 		if is_instance_valid(shape) and shape.is_visible_in_tree() and not shape.disabled:
 			debug_shapes.append(shape)
+	# Every registered projectile is a direct child of this renderer's parent,
+	# so one ancestry check here covers them all; each adds only its own flag.
+	var tree_visible := is_visible_in_tree()
 	for projectile in projectiles:
-		if not projectile.is_visible_in_tree():
+		if not tree_visible or not projectile.visible:
 			continue
 		if projectile is FoundationBullet:
 			if not _vertices.is_empty():
@@ -121,11 +130,12 @@ func refresh() -> void:
 			batch.instance_count = maxi(members.size(), batch.instance_count * 2)
 		batch.visible_instance_count = members.size()
 		for i in members.size():
-			batch.set_instance_transform_2d(i, (inverse * members[i].global_transform).scaled_local(Vector2.ONE * members[i].visual_scale))
-			var modulation: Color = members[i].modulate * members[i].self_modulate
-			modulation.a *= members[i].render_opacity
+			var member: FoundationBullet = members[i]
+			batch.set_instance_transform_2d(i, (inverse * member.global_transform).scaled_local(Vector2.ONE * member.visual_scale))
+			var modulation: Color = member.modulate * member.self_modulate
+			modulation.a *= member.render_opacity
 			batch.set_instance_color(i, modulation)
-			batch.set_instance_custom_data(i, members[i].render_tint)
+			batch.set_instance_custom_data(i, member.render_tint)
 	if _debug_mesh.instance_count < debug_shapes.size():
 		_debug_mesh.instance_count = maxi(debug_shapes.size(), _debug_mesh.instance_count * 2)
 	_debug_mesh.visible_instance_count = debug_shapes.size()
