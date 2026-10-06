@@ -2,6 +2,7 @@ class_name EnemyAugmentRegistry
 extends Node
 
 signal augment_added(augment: EnemyAugment)
+signal augment_removed(augment: EnemyAugment)
 signal augments_cleared
 
 @export var active_augments: Array[EnemyAugment] = []
@@ -17,6 +18,18 @@ func add_augment(augment: EnemyAugment) -> void:
 		return
 	active_augments.append(augment)
 	augment_added.emit(augment)
+
+
+## Removes the most recently added stack of augment_id. Like adding, it only
+## changes enemies spawned afterwards; an evolution reverts to the original scene.
+func remove_augment(augment_id: StringName) -> bool:
+	for index in range(active_augments.size() - 1, -1, -1):
+		if active_augments[index].augment_id == augment_id:
+			var removed := active_augments[index]
+			active_augments.remove_at(index)
+			augment_removed.emit(removed)
+			return true
+	return false
 
 
 func get_active_augments() -> Array[EnemyAugment]:

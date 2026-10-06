@@ -79,6 +79,7 @@ var _augment_tabs: HBoxContainer
 var _augment_tab_buttons: Array[Button] = []
 var _augment_pages: Array[GridContainer] = []
 var _augment_tab_index := 0
+var _augment_reset_button: Button
 var _augment_title: Label
 var _augment_prompt: Label
 var _augment_result: Label
@@ -231,6 +232,14 @@ func _build_augment_overlay() -> void:
 	_augment_prompt.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	_augment_prompt.add_theme_color_override("font_color", DIM_TEXT_COLOR)
 	header.add_child(_augment_prompt)
+	_augment_reset_button = Button.new()
+	_augment_reset_button.name = "ResetAugmentsButton"
+	_augment_reset_button.tooltip_text = "이 모드에서 적용한 증강을 모두 뗍니다."
+	_augment_reset_button.pressed.connect(_reset_current_augments)
+	_style_button(_augment_reset_button, ENEMY_ACCENT)
+	_augment_reset_button.size_flags_horizontal = Control.SIZE_SHRINK_END
+	_augment_reset_button.custom_minimum_size.x = 84
+	header.add_child(_augment_reset_button)
 	var close_button := Button.new()
 	close_button.name = "CloseButton"
 	close_button.text = "닫기 [Esc]"
@@ -269,10 +278,10 @@ func _open_augment_picker(mode: AugmentTestMode) -> void:
 	var accent := PLAYER_ACCENT if mode == AugmentTestMode.PLAYER else ENEMY_ACCENT
 	if mode == AugmentTestMode.PLAYER:
 		_augment_title.text = "PLAYER Lv.%02d" % _simulated_player_level
-		_augment_prompt.text = "시설 증강을 골라 즉시 설치  ·  Q/E 탭 이동"
+		_augment_prompt.text = "시설 증강을 골라 즉시 설치  ·  떼기/우클릭으로 제거  ·  Q/E 탭"
 	else:
 		_augment_title.text = "THREAT %02d" % _simulated_enemy_tier
-		_augment_prompt.text = "적 증강을 골라 이후 스폰에 적용  ·  Q/E 탭 이동"
+		_augment_prompt.text = "적 증강을 골라 이후 스폰에 적용  ·  떼기/우클릭으로 제거  ·  Q/E 탭"
 	_augment_title.label_settings.font_color = accent
 	_rebuild_augment_list()
 	_augment_overlay.show()
@@ -305,7 +314,15 @@ func _rebuild_augment_list() -> void:
 				page.add_child(_create_enemy_augment_card(augment))
 	for index in _augment_pages.size():
 		var tab := _augment_tab_buttons[index]
+		var applied := 0
+		for card in _augment_pages[index].get_children():
+			applied += int(card.get_meta("applied_count", 0))
 		tab.text = "%s  %d" % [tab.text, _augment_pages[index].get_child_count()]
+		if applied > 0:
+			tab.text += "  · %d" % applied
+	var total_applied := _current_applied_count()
+	_augment_reset_button.text = "전부 떼기 (%d)" % total_applied
+	_augment_reset_button.disabled = total_applied <= 0
 	_select_augment_tab(clampi(_augment_tab_index, 0, maxi(0, _augment_pages.size() - 1)))
 
 
@@ -363,6 +380,8 @@ func _create_player_augment_card(augment: PlayerAugment) -> Button:
 		augment.get_offer_description(_loadout),
 		augment.icon,
 		PLAYER_ACCENT,
+		installed,
+		_remove_player_augment.bind(augment),
 	)
 	card.name = "Player_%s" % String(augment.augment_id)
 	card.pressed.connect(_on_player_augment_selected.bind(augment))
@@ -387,6 +406,8 @@ func _create_enemy_augment_card(augment: EnemyAugment) -> Button:
 		augment.description,
 		augment.icon,
 		ENEMY_ACCENT,
+		stack_count,
+		_remove_enemy_augment.bind(augment),
 	)
 	card.name = "Enemy_%s" % String(augment.augment_id)
 	card.disabled = not enemy_registry.can_add_augment(augment)
@@ -402,9 +423,12 @@ func _create_augment_card(
 	description: String,
 	icon: Texture2D,
 	accent: Color,
+	applied_count := 0,
+	on_remove := Callable(),
 ) -> Button:
 	var card := Button.new()
 	card.tooltip_text = description
+	card.set_meta("applied_count", applied_count)
 	_style_button(card, accent)
 	card.custom_minimum_size = Vector2(0, PICKER_CARD_HEIGHT)
 	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -451,6 +475,24 @@ func _create_augment_card(
 	description_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	description_label.custom_minimum_size.x = 1
 	text_box.add_child(description_label)
+	if applied_count > 0 and on_remove.is_valid():
+		var remove_button := Button.new()
+		remove_button.name = "Remove"
+		remove_button.text = "떼기"
+		remove_button.tooltip_text = "한 스택을 뗍니다."
+		_style_button(remove_button, ACTIVE_ACCENT, true)
+		remove_button.size_flags_horizontal = Control.SIZE_SHRINK_END
+		remove_button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		remove_button.custom_minimum_size = Vector2(30, COMPACT_BUTTON_HEIGHT)
+		remove_button.pressed.connect(on_remove)
+		row.add_child(remove_button)
+		# Right-click also removes; disabled (maxed) cards still receive it.
+		card.gui_input.connect(func(event: InputEvent) -> void:
+			var mouse := event as InputEventMouseButton
+			if mouse != null and mouse.pressed and mouse.button_index == MOUSE_BUTTON_RIGHT:
+				on_remove.call()
+				card.accept_event()
+		)
 	return card
 
 
@@ -479,6 +521,50 @@ func _on_enemy_augment_selected(augment: EnemyAugment) -> void:
 	enemy_registry.add_augment(augment)
 	_update_mode_badge("THREAT %d · %s" % [_simulated_enemy_tier, augment.display_name])
 	close_augment_picker()
+
+
+func _remove_enemy_augment(augment: EnemyAugment) -> void:
+	if not enemy_registry.remove_augment(augment.augment_id):
+		return
+	_augment_result.text = "뗌 · %s (이후 스폰부터)" % augment.display_name
+	_update_mode_badge("THREAT %d · 뗌 %s" % [_simulated_enemy_tier, augment.display_name])
+	_rebuild_augment_list.call_deferred()
+
+
+func _remove_player_augment(augment: PlayerAugment) -> void:
+	if not player_registry.uninstall_augment(augment.augment_id):
+		return
+	_augment_result.text = "뗌 · %s" % augment.display_name
+	_update_mode_badge("PLAYER · 뗌 %s" % augment.display_name)
+	_refresh_loadout_ui()
+	_rebuild_augment_list.call_deferred()
+
+
+func _reset_current_augments() -> void:
+	var count := _current_applied_count()
+	if count <= 0:
+		return
+	if _augment_mode == AugmentTestMode.PLAYER:
+		for augment in _player_augment_pool:
+			while player_registry.uninstall_augment(augment.augment_id):
+				pass
+		_refresh_loadout_ui()
+		_update_mode_badge("PLAYER · 시설 증강 %d개 모두 뗌" % count)
+	else:
+		while not enemy_registry.get_active_augments().is_empty():
+			enemy_registry.remove_augment(enemy_registry.get_active_augments().back().augment_id)
+		_update_mode_badge("THREAT · 적 증강 %d개 모두 뗌" % count)
+	_augment_result.text = "모두 뗌 · %d개" % count
+	_rebuild_augment_list.call_deferred()
+
+
+func _current_applied_count() -> int:
+	if _augment_mode == AugmentTestMode.PLAYER:
+		var count := 0
+		for augment in _player_augment_pool:
+			count += player_registry.get_stack_count(augment.augment_id)
+		return count
+	return enemy_registry.get_active_augments().size()
 
 
 func _apply_player_augment(augment: PlayerAugment) -> bool:
