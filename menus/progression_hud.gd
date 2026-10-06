@@ -76,7 +76,8 @@ func _refresh_experience() -> void:
 		if _bullet_cancel_reward_active:
 			experience_label.text = "LEVEL %02d   XP RECOVERY" % _level
 		else:
-			experience_label.text = "LEVEL %02d   AUGMENT READY [C]" % _level
+			# No level prefix: the full line must stay inside the 134px HUD column.
+			experience_label.text = "AUGMENT READY [C]"
 	else:
 		experience_label.text = "LEVEL %02d   %d / %d XP" % [
 			_level,
