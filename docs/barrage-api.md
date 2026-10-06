@@ -554,7 +554,7 @@ BarragePlayer가 발사한 탄은 `play()`가 복제·검증한 설정(외형·B
 
 플레이어 효과와 증강은 날아가는 적탄을 이 정적 API로 찾고 지운다. 그룹을 직접 순회하거나 `queue_free`하지 않는다.
 
-- 모든 적탄 몸체는 `enemy_projectiles` 그룹에 속한다. `FoundationBullet`·`CurvedLaser`·`TelegraphBeam`·레거시 기본탄의 판정은 물리 레이어 4(`enemy_projectile`, `EnemyBullets.LAYER`)에 올라간다. 이 레이어를 감지하는 영역은 기본적으로 없으므로 명시적인 쿼리만 적탄을 본다.
+- 모든 적탄 몸체는 `enemy_projectiles` 그룹에 속한다. `FoundationBullet`·`CurvedLaser`·`TelegraphBeam`·레거시 기본탄의 판정은 물리 레이어 4(`enemy_projectile`, `EnemyBullets.LAYER`)에 올라간다. `FoundationBullet`의 판정은 감지당하기만 하는(monitoring 없는) 수동 영역이고, 피격은 레이어 1 Hurtbox가 레이어 4를 감지해 전달한다(정본: [전투 — 데미지 파이프라인](design/combat.md#데미지-파이프라인)). 레이저·빔은 스스로 겹침을 검사하고 레거시 탄은 스스로 감시한다. 그 밖에 이 레이어를 감지하는 영역은 없으므로 적탄 조회·소거는 아래 명시적 쿼리를 쓴다.
 - `SniperBullet`은 판정을 감지 불가로 두므로 `query_shape`에 잡히지 않는다. 그룹 기반 조회·소거는 동일하게 적용된다.
 
 ```gdscript

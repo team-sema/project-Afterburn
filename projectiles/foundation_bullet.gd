@@ -34,6 +34,12 @@ var _visual_extent := 0.0
 var _static_visuals := false
 var _constant_travel := false
 var _needs_rotation := true
+var _has_spawns := false
+## The despawn bounds rect is identical for every bullet of a viewport within
+## one physics tick, so one engine query serves them all.
+static var _bounds_frame := -1
+static var _bounds_viewport := 0
+static var _bounds_rect: Rect2
 ## Target for SPAWN volleys with Aim.EACH_SHOT (the shot's launch target).
 var _spawn_target: WeakRef
 var _spawn_resolver := Callable()
@@ -62,6 +68,9 @@ func _ready() -> void:
 	_hitbox.name = "HitboxComponent"
 	_hitbox.collision_layer = EnemyBullets.LAYER
 	_hitbox.collision_mask = 1
+	# Passive body: the player-side hurtbox detects layer 4 and dispatches hits
+	# back (HurtboxComponent), so a thousand bullets skip overlap monitoring.
+	_hitbox.monitoring = false
 	var collision := CollisionShape2D.new()
 	collision.name = "CollisionShape2D"
 	collision.shape = appearance.shared_shape()
@@ -123,6 +132,7 @@ func launch(direction: Vector2, speed: float) -> void:
 	_constant_travel = behavior_state.is_velocity_constant() and _bounce == null
 	# A circle with centered collision looks and collides the same at any angle.
 	_needs_rotation = appearance.form != BulletAppearance.Form.ROUND or appearance.collision_offset != Vector2.ZERO
+	_has_spawns = behavior_state.has_pending_spawns()
 	set_physics_process(true)
 
 
@@ -131,15 +141,25 @@ func _physics_process(delta: float) -> void:
 		return
 	age = minf(age + delta, lifetime)
 	var point := _update_pose()
-	if _fire_due_spawns():
+	if _has_spawns and _fire_due_spawns():
 		return
 	if _trail != null: _trail.advance(point, delta)
-	var inside := get_viewport_rect().grow(_visual_extent * visual_scale).has_point(point)
+	var inside := _bounds().grow(_visual_extent * visual_scale).has_point(point)
 	if inside:
 		_entered_view = true
 	if age >= lifetime or (_entered_view and not inside):
 		_active = false
 		queue_free()
+
+
+func _bounds() -> Rect2:
+	var frame := int(Engine.get_physics_frames())
+	var viewport_id := int(get_viewport().get_instance_id())
+	if _bounds_frame != frame or _bounds_viewport != viewport_id:
+		_bounds_frame = frame
+		_bounds_viewport = viewport_id
+		_bounds_rect = get_viewport_rect()
+	return _bounds_rect
 
 
 ## Returns the new world position so the caller can reuse it without re-reading

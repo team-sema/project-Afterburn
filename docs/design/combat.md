@@ -15,24 +15,27 @@
 | 3 | `player_projectile` |
 | 4 | `enemy_projectile` |
 
-**레이어 3–4는 미사용.** 탄 Hitbox는 대개 layer 0 + hurtbox **mask**로 동작한다.
+**레이어 3은 미사용.** 적탄 판정은 레이어 4(`enemy_projectile`, [EnemyBullets](../barrage-api.md#11-적탄-조회소거--enemybullets))에 올라가고, 플레이어 탄 Hitbox는 layer 0 + hurtbox **mask**로 동작한다.
+
+적탄(FoundationBullet)의 Hitbox는 감지당하기만 하는(monitoring 없는) 수동 영역이다. 레이어 1 Hurtbox가 `_ready`에서 mask에 레이어 4를 더해 감지 주체가 되고, 겹친 수동 Hitbox의 기존 피격 처리를 호출한다. 수천 발이 각자 겹침을 감시하지 않게 하는 구조이며, 스스로 감시하는 Hitbox(접촉 몸·플레이어 탄·레거시 적탄)와 자체 폴링(레이저·빔)은 중복 피격 방지를 위해 이 경로에서 제외한다.
 
 ## 레이어/마스크 실사용
 
 | 액터 | Layer | Mask |
 |------|-------|------|
-| Player Hurtbox | 1 | default |
+| Player Hurtbox | 1 | 1+4 · 수동 적탄 감지 주체 |
 | Enemy Hurtbox | 2 | 0 |
 | Enemy Hitbox (몸) | 0 | 1 |
+| 적탄 (Foundation·Laser·Beam·레거시) | 4 | 1 · Foundation은 monitoring 없음 |
 | Player Blaster Hitbox | 0 | 2 · damage **10** |
 | Player Shotgun Pellet | 0 | 2 · damage **4** × 5발 |
-| Curve/Counter 탄 | 0 | 1 |
 | Laser RayCast | — | 2 (직접 `hurt.emit`) |
 
 ## 데미지 파이프라인
 
 ```text
-Hitbox.area_entered
+Hitbox.area_entered            (스스로 감시하는 Hitbox)
+Hurtbox.area_entered → Hitbox  (수동 적탄; 레이저·빔은 자체 폴링)
   → Hurtbox & not invincible
   → hit_hurtbox + hurtbox.hurt
   → HurtComponent
