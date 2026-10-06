@@ -82,6 +82,11 @@ func apply_action_rate_multiplier(multiplier: float) -> void:
 	cooldown_duration = _base_cooldown_duration / rate
 
 
+func apply_projectile_speed_multiplier(multiplier: float) -> void:
+	if is_finite(multiplier) and multiplier > 0.0:
+		projectile_speed *= multiplier
+
+
 func set_combat_timings(
 	aim: float,
 	shot_recovery: float,

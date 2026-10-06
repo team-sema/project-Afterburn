@@ -34,14 +34,14 @@
 | `StatsComponent` | HP + `health_changed` / `no_health` |
 | `HurtboxComponent` | 피격 Area2D · `hurt(hitbox)` · 무적 시 shape off |
 | `HitboxComponent` | 공격 Area2D · `damage` · `hit_hurtbox` |
-| `HurtComponent` | hurt → 피해 처리 · 공용 무적 타이머와 반투명 표시 · 플레이어 기본 0.6초 무적 |
+| `HurtComponent` | hurt → 피해 처리 · 공용 무적 타이머와 반투명 표시 · 플레이어 기본 0.6초 무적 · `armor_hits`만큼 피격을 피해 없이 흡수 |
 | `ShieldComponent` | 버퍼 HP · **시작 최대 1** · 피해는 실드 우선·초과분은 선체 · 미만 시 경과 초를 세고 필요 초(`regen_charge_duration` / 충전속도) 이상이면 `restore_shield(1)` · HUD 게이지는 경과/필요 초 · `notify_hit` 시 경과 리셋 |
 | `DestroyedComponent` | `no_health` 시 이펙트+free(기본). Enemy는 `auto_destroy_on_no_health=false`로 점수→이펙트→free를 직접 소유 |
 | `ScoreComponent` | `GameStats.score`에 가산 |
 | `ExperienceDropComponent` | 적 사망 시 경험치 오브 스폰 |
 | XP drop tuning | 일반 적 XP 오브 드롭 확률은 0.45, 엘리트는 1.0 |
 | `ExperienceCollectorComponent` | 플레이어 XP 수집 반경 제공 |
-| `ExperienceOrb` | 드롭 후 아래로 이동하며, 기본 낙하 속도는 플레이어 기본 이동 속도와 같은 140px/s. 강제 흡수 시 반경·넉백을 건너뛰고 일시정지 중에도 플레이어에게 이동 |
+| `ExperienceOrb` | 드롭 후 아래로 이동하며, 기본 낙하 속도는 플레이어 기본 이동 속도(140px/s)보다 조금 빠른 155px/s이며, 적 증강 `XP_DRIFT_SPEED` 배율을 드롭 시점에 곱한다. 강제 흡수 시 반경·넉백을 건너뛰고 일시정지 중에도 플레이어에게 이동 |
 | `BulletCancelRewardController` | 플레이필드 적탄을 1 XP 오브로 변환하고, 기존 오브와 함께 전부 실제 회수될 때까지 기다리는 엘리트 이상 공용 보상 연출. 수집기·월드가 free되면 진공을 중단 |
 | `EnemyHealthBarComponent` | 엘리트·보스급 적이 피해를 받으면 기체 위에 남은 HP를 표시하고, 마지막 피격 1.5초 후 페이드아웃 |
 
@@ -92,3 +92,5 @@
 | `HoldPositionMovementStep` | 위치 고정(무한) MovementStep |
 | `EnemyFireVolumeBoostComponent` | 위기: 탄수·스프레드 증가 (`augment_behaviors/`) |
 | `CounterShotComponent` | 피격/사망 반격 탄 *(풀에서 제외, 레거시)* |
+| `DeathBurstComponent` | 적 증강 유폭: 일반 적 사망 시 느린 탄 링 (`augment_behaviors/`) |
+| `ArmorPlateComponent` | 적 증강 장갑판: `HurtComponent.armor_hits` +1 · 장갑 표시 원 (`augment_behaviors/`) |

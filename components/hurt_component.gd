@@ -4,6 +4,7 @@ extends Node
 
 signal invincibility_started(duration: float)
 signal invincibility_ended
+signal armor_absorbed(remaining_hits: int)
 
 # Grab the stats so we can alter the health
 @export var stats_component: StatsComponent
@@ -31,6 +32,8 @@ var _iframe_timer: Timer
 ## (e.g. standing inside a plasma singularity). Iframes ending never clear a hold.
 var _invincibility_holds: Dictionary = {}
 var _base_visual_modulate := Color.WHITE
+## Whole hits ignored before hull damage (enemy armor plate augment).
+var armor_hits := 0
 
 
 func _ready() -> void:
@@ -64,6 +67,10 @@ func _ready() -> void:
 			remaining = shield_component.absorb_damage(remaining)
 		if remaining <= 0:
 			_try_apply_iframes(false)
+			return
+		if armor_hits > 0:
+			armor_hits -= 1
+			armor_absorbed.emit(armor_hits)
 			return
 		var scale := float(hurtbox_component.get_meta("incoming_damage_scale", 1.0))
 		if not is_equal_approx(scale, 1.0):

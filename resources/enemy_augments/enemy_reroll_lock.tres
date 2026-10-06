@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="EnemyAugment" format=3]
+
+[ext_resource type="Script" uid="uid://be4x07sn0gawv" path="res://resources/enemy_augments/enemy_augment.gd" id="1_augment"]
+
+[resource]
+script = ExtResource("1_augment")
+augment_id = &"enemy_reroll_lock"
+display_name = "리롤 봉쇄"
+description = "남은 리롤 횟수가 1 줄어듭니다."
+max_stacks = 1
+player_reroll_penalty = 1

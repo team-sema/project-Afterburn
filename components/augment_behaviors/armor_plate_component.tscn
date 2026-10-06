@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://components/augment_behaviors/armor_plate_component.gd" id="1_armor_plate"]
+
+[node name="ArmorPlateComponent" type="Node2D"]
+script = ExtResource("1_armor_plate")

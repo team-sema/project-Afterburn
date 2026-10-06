@@ -1,0 +1,8 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://components/augment_behaviors/death_burst_component.gd" id="1_death_burst"]
+[ext_resource type="Resource" uid="uid://calts8bej4ise" path="res://resources/projectiles/round_straight_shot.tres" id="2_projectile"]
+
+[node name="DeathBurstComponent" type="Node"]
+script = ExtResource("1_death_burst")
+barrage_shot = ExtResource("2_projectile")

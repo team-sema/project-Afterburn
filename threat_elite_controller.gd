@@ -82,7 +82,17 @@ func _on_elite_milestone_requested(threat_level: int) -> void:
 	assert(members.size() == 1, "Elite encounter must contain exactly one enemy.")
 	active_elite = members[0]
 	active_elite.stats_component.no_health.connect(_on_active_elite_defeated, CONNECT_ONE_SHOT)
+	if not is_boss:
+		_spawn_elite_escorts()
 	elite_spawned.emit(active_elite, threat_level)
+
+
+func _spawn_elite_escorts() -> void:
+	var registry := enemy_generator.get("augment_registry") as EnemyAugmentRegistry
+	if registry == null:
+		return
+	for preset in registry.get_elite_escort_presets():
+		enemy_generator.call("spawn_special_encounter", preset)
 
 
 func _configure_gate_enemy(enemy: Enemy, threat_level: int, is_boss: bool) -> void:

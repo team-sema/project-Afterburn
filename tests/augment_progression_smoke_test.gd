@@ -39,8 +39,9 @@ func _run() -> void:
 	var orb: ExperienceOrb = orb_scene.instantiate() as ExperienceOrb
 	gameplay.add_child(orb)
 	_expect(
-		is_equal_approx(orb.drift_speed, ship_move_input.move_stats.speed * ship_move.velocity_multiplier),
-		"experience orb drift matches the ship's default movement speed",
+		is_equal_approx(orb.drift_speed, 155.0)
+		and orb.drift_speed > ship_move_input.move_stats.speed * ship_move.velocity_multiplier,
+		"experience orb drifts at 155px/s, slightly faster than the ship's default movement",
 	)
 	orb.setup(7, collector.global_position + Vector2(60.0, 0.0))
 	for _index in 2:

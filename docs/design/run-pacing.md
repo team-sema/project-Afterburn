@@ -60,7 +60,7 @@ WAVE·ELITE·BOSS 스텝은 스폰/게이트 직전에 맵 중앙에 `WARNING` �
 
 | 단계 | 동작 |
 |------|------|
-| 게이트 오픈 (`ELITE` 스텝, 또는 Director 미사용 시 60초 타이머) | 엘리트 로테이션으로 1기 (`ThreatEliteController`). 스텝의 `elite_preset`이 있으면 그 preset |
+| 게이트 오픈 (`ELITE` 스텝, 또는 Director 미사용 시 60초 타이머) | 엘리트 로테이션으로 1기 (`ThreatEliteController`). 스텝의 `elite_preset`이 있으면 그 preset. 적 증강 「엘리트 호위대」가 있으면 호위 Encounter를 함께 스폰 |
 | 엘리트 전투 중 | 일반 Encounter 스폰 **정지** (시퀀스도 대기) · 기존 일반 적 유지 |
 | 엘리트 처치 | 전투 정지 → 적탄을 XP로 변환 → 화면의 모든 XP 강제 회수 |
 | XP 회수 완료 | Threat **+1** → 적 증강 3지선다 |

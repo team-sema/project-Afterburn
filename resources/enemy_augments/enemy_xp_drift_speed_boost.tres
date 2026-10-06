@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="EnemyAugment" format=3]
+
+[ext_resource type="Script" uid="uid://be4x07sn0gawv" path="res://resources/enemy_augments/enemy_augment.gd" id="1_augment"]
+[ext_resource type="Script" uid="uid://bd2vhj2tclcdr" path="res://resources/enemy_augments/enemy_stat_modifier.gd" id="2_modifier"]
+
+[sub_resource type="Resource" id="Resource_xp_drift_modifier"]
+script = ExtResource("2_modifier")
+stat = 4
+multiplier = 1.2
+
+[resource]
+script = ExtResource("1_augment")
+augment_id = &"enemy_xp_drift_speed_boost"
+display_name = "XP 드롭 속도 증가"
+description = "이후 등장하는 적이 떨어뜨린 XP가 20% 더 빠르게 떨어집니다."
+max_stacks = 2
+stat_modifiers = Array[ExtResource("2_modifier")]([SubResource("Resource_xp_drift_modifier")])
