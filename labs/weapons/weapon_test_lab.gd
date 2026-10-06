@@ -5,6 +5,17 @@ signal player_level_up_simulated(level: int)
 signal enemy_augment_event_simulated(tier: int)
 
 const ENCOUNTER_PRESET_DIRECTORY := "res://resources/encounters/presets"
+const MAIN_ENCOUNTER_POOL := preload("res://resources/encounters/pools/main_encounter_pool.tres")
+const SPECIAL_ENCOUNTER_IDS: Array[StringName] = [&"sniper_reinforcement", &"elite_escort_drone_pair"]
+const ENEMY_ACCENT := Color(1.0, 0.22, 0.48, 1.0)
+const PLAYER_ACCENT := Color(0.2, 0.82, 1.0, 1.0)
+const ACTIVE_ACCENT := Color(0.35, 1.0, 0.55, 1.0)
+const TRAIT_ACCENT := Color(0.72, 0.35, 1.0, 1.0)
+const TEXT_COLOR := Color(0.82, 0.93, 1.0)
+const DIM_TEXT_COLOR := Color(0.55, 0.66, 0.78)
+const BUTTON_HEIGHT := 16
+const COMPACT_BUTTON_HEIGHT := 14
+const PICKER_CARD_HEIGHT := 44
 const PLAYER_AUGMENT_KINDS: Array[PlayerAugmentKind.Kind] = [
 	PlayerAugmentKind.Kind.FACILITY_EFFECT,
 	PlayerAugmentKind.Kind.STAT_MULTIPLIER,
@@ -13,6 +24,20 @@ const PLAYER_AUGMENT_KINDS: Array[PlayerAugmentKind.Kind] = [
 enum AugmentTestMode {
 	PLAYER,
 	ENEMY,
+}
+
+enum EnemyAugmentCategory {
+	STAT,
+	BEHAVIOR,
+	SPAWN_RULE,
+	EVOLUTION,
+}
+
+enum EncounterGroup {
+	MAIN_POOL,
+	ELITE_BOSS,
+	SPECIAL,
+	OTHER,
 }
 
 @export var weapon_definitions: Array[WeaponDefinition] = []
@@ -50,6 +75,10 @@ var _player_augment_pool: Array[PlayerAugment] = []
 var _enemy_augment_pool: Array[EnemyAugment] = []
 var _augment_overlay: ColorRect
 var _augment_list: VBoxContainer
+var _augment_tabs: HBoxContainer
+var _augment_tab_buttons: Array[Button] = []
+var _augment_pages: Array[GridContainer] = []
+var _augment_tab_index := 0
 var _augment_title: Label
 var _augment_prompt: Label
 var _augment_result: Label
@@ -72,6 +101,12 @@ func _ready() -> void:
 	_build_weapon_buttons()
 	_load_augment_resources()
 	_build_augment_overlay()
+	_style_button(continuous_spawn_button, ACTIVE_ACCENT)
+	_style_button(%ClearTargetsButton, ENEMY_ACCENT)
+	_style_button(clear_traits_button, TRAIT_ACCENT)
+	_style_button(unequip_button, PLAYER_ACCENT)
+	%ClearTargetsButton.size_flags_horizontal = Control.SIZE_SHRINK_END
+	%ClearTargetsButton.custom_minimum_size.x = 64
 	%ClearTargetsButton.pressed.connect(_clear_targets)
 	continuous_spawn_button.toggled.connect(_set_continuous_spawn)
 	continuous_spawn_interval.value_changed.connect(_on_continuous_spawn_interval_changed)
@@ -100,6 +135,11 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		KEY_ESCAPE:
 			if is_augment_picker_open():
 				close_augment_picker()
+				get_viewport().set_input_as_handled()
+		KEY_Q, KEY_E:
+			if is_augment_picker_open() and not _augment_tab_buttons.is_empty():
+				var step := -1 if key == KEY_Q else 1
+				_select_augment_tab(posmod(_augment_tab_index + step, _augment_tab_buttons.size()))
 				get_viewport().set_input_as_handled()
 
 
@@ -148,7 +188,7 @@ func _build_augment_overlay() -> void:
 	_augment_overlay = ColorRect.new()
 	_augment_overlay.name = "AugmentTestOverlay"
 	_augment_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	_augment_overlay.color = Color(0.0, 0.01, 0.035, 0.92)
+	_augment_overlay.color = Color(0.0, 0.01, 0.035, 0.86)
 	_augment_overlay.mouse_filter = Control.MOUSE_FILTER_STOP
 	_augment_overlay.z_index = 100
 	_augment_overlay.hide()
@@ -156,9 +196,11 @@ func _build_augment_overlay() -> void:
 
 	var panel := PanelContainer.new()
 	panel.name = "PickerPanel"
-	panel.set_anchors_preset(Control.PRESET_CENTER)
-	panel.position = Vector2(-250, -166)
-	panel.size = Vector2(500, 332)
+	panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	panel.offset_left = 24
+	panel.offset_top = 18
+	panel.offset_right = -24
+	panel.offset_bottom = -18
 	panel.add_theme_stylebox_override(
 		"panel",
 		_button_style(Color(0.2, 0.9, 1.0, 1.0), 0.98, 0.9),
@@ -166,31 +208,42 @@ func _build_augment_overlay() -> void:
 	_augment_overlay.add_child(panel)
 
 	var margin := MarginContainer.new()
-	margin.add_theme_constant_override("margin_left", 12)
-	margin.add_theme_constant_override("margin_top", 10)
-	margin.add_theme_constant_override("margin_right", 12)
-	margin.add_theme_constant_override("margin_bottom", 10)
+	margin.add_theme_constant_override("margin_left", 10)
+	margin.add_theme_constant_override("margin_top", 8)
+	margin.add_theme_constant_override("margin_right", 10)
+	margin.add_theme_constant_override("margin_bottom", 8)
 	panel.add_child(margin)
 
 	var content := VBoxContainer.new()
-	content.add_theme_constant_override("separation", 6)
+	content.add_theme_constant_override("separation", 5)
 	margin.add_child(content)
 
 	var header := HBoxContainer.new()
+	header.add_theme_constant_override("separation", 8)
 	content.add_child(header)
 	_augment_title = Label.new()
-	_augment_title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_augment_title.label_settings = preload("res://fonts/title_label_settings.tres")
+	_augment_title.label_settings = preload("res://fonts/title_label_settings.tres").duplicate()
 	header.add_child(_augment_title)
+	_augment_prompt = Label.new()
+	_augment_prompt.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_augment_prompt.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_augment_prompt.clip_text = true
+	_augment_prompt.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	_augment_prompt.add_theme_color_override("font_color", DIM_TEXT_COLOR)
+	header.add_child(_augment_prompt)
 	var close_button := Button.new()
 	close_button.name = "CloseButton"
 	close_button.text = "닫기 [Esc]"
 	close_button.pressed.connect(close_augment_picker)
+	_style_button(close_button, PLAYER_ACCENT)
+	close_button.size_flags_horizontal = Control.SIZE_SHRINK_END
+	close_button.custom_minimum_size.x = 64
 	header.add_child(close_button)
 
-	_augment_prompt = Label.new()
-	_augment_prompt.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	content.add_child(_augment_prompt)
+	_augment_tabs = HBoxContainer.new()
+	_augment_tabs.name = "AugmentTabs"
+	_augment_tabs.add_theme_constant_override("separation", 3)
+	content.add_child(_augment_tabs)
 
 	var scroll := ScrollContainer.new()
 	scroll.name = "AugmentScroll"
@@ -200,7 +253,6 @@ func _build_augment_overlay() -> void:
 	_augment_list = VBoxContainer.new()
 	_augment_list.name = "AugmentList"
 	_augment_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_augment_list.add_theme_constant_override("separation", 4)
 	scroll.add_child(_augment_list)
 
 	_augment_result = Label.new()
@@ -210,91 +262,204 @@ func _build_augment_overlay() -> void:
 
 
 func _open_augment_picker(mode: AugmentTestMode) -> void:
+	if mode != _augment_mode:
+		_augment_tab_index = 0
 	_augment_mode = mode
 	_augment_result.text = ""
+	var accent := PLAYER_ACCENT if mode == AugmentTestMode.PLAYER else ENEMY_ACCENT
 	if mode == AugmentTestMode.PLAYER:
-		_augment_title.text = "PLAYER LEVEL UP  ·  %02d" % _simulated_player_level
-		_augment_prompt.text = "C · 시설 증강 중 하나를 선택해 즉시 적용"
+		_augment_title.text = "PLAYER Lv.%02d" % _simulated_player_level
+		_augment_prompt.text = "시설 증강을 골라 즉시 설치  ·  Q/E 탭 이동"
 	else:
-		_augment_title.text = "ENEMY AUGMENT  ·  THREAT %02d" % _simulated_enemy_tier
-		_augment_prompt.text = "V · 모든 적 증강 중 하나를 선택해 이후 스폰에 적용"
+		_augment_title.text = "THREAT %02d" % _simulated_enemy_tier
+		_augment_prompt.text = "적 증강을 골라 이후 스폰에 적용  ·  Q/E 탭 이동"
+	_augment_title.label_settings.font_color = accent
 	_rebuild_augment_list()
 	_augment_overlay.show()
 
 
 func _rebuild_augment_list() -> void:
-	for child in _augment_list.get_children():
-		_augment_list.remove_child(child)
+	for child in _augment_list.get_children() + _augment_tabs.get_children():
+		child.get_parent().remove_child(child)
 		child.queue_free()
+	_augment_tab_buttons.clear()
+	_augment_pages.clear()
 	if _augment_mode == AugmentTestMode.PLAYER:
 		for kind in PLAYER_AUGMENT_KINDS:
-			var kind_augments: Array[PlayerAugment] = []
+			var page: GridContainer = null
 			for augment in _player_augment_pool:
-				if augment.augment_type == kind:
-					kind_augments.append(augment)
-			if kind_augments.is_empty():
-				continue
-			_add_augment_section(_player_augment_kind_label(kind), Color(0.25, 0.85, 1.0))
-			for augment in kind_augments:
-				_add_player_augment_button(augment)
+				if augment.augment_type != kind:
+					continue
+				if page == null:
+					page = _add_augment_page(_player_augment_kind_label(kind), PLAYER_ACCENT)
+				page.add_child(_create_player_augment_card(augment))
 	else:
-		_add_augment_section("ENEMY AUGMENTS", Color(1.0, 0.28, 0.55))
-		for augment in _enemy_augment_pool:
-			_add_enemy_augment_button(augment)
+		var titles := ["스탯", "행동", "편성 · 규칙", "진화"]
+		for category in EnemyAugmentCategory.values():
+			var page: GridContainer = null
+			for augment in _enemy_augment_pool:
+				if _enemy_augment_category(augment) != category:
+					continue
+				if page == null:
+					page = _add_augment_page(titles[category], ENEMY_ACCENT)
+				page.add_child(_create_enemy_augment_card(augment))
+	for index in _augment_pages.size():
+		var tab := _augment_tab_buttons[index]
+		tab.text = "%s  %d" % [tab.text, _augment_pages[index].get_child_count()]
+	_select_augment_tab(clampi(_augment_tab_index, 0, maxi(0, _augment_pages.size() - 1)))
 
 
-func _add_augment_section(title: String, accent: Color) -> void:
-	var label := Label.new()
-	label.text = title
-	label.add_theme_color_override("font_color", accent)
-	_augment_list.add_child(label)
+func _add_augment_page(title: String, accent: Color) -> GridContainer:
+	var index := _augment_pages.size()
+	var tab := Button.new()
+	tab.name = "Tab%d" % index
+	tab.text = title
+	tab.toggle_mode = true
+	tab.pressed.connect(func() -> void: _select_augment_tab(index))
+	_style_button(tab, accent)
+	tab.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	tab.custom_minimum_size.x = 72
+	_augment_tabs.add_child(tab)
+	var page := GridContainer.new()
+	page.name = "Page%d" % index
+	page.columns = 2
+	page.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	page.add_theme_constant_override("h_separation", 4)
+	page.add_theme_constant_override("v_separation", 4)
+	_augment_list.add_child(page)
+	_augment_tab_buttons.append(tab)
+	_augment_pages.append(page)
+	return page
 
 
-func _add_player_augment_button(augment: PlayerAugment) -> void:
-	var button := _create_augment_button(
+func _select_augment_tab(index: int) -> void:
+	_augment_tab_index = index
+	for page_index in _augment_pages.size():
+		var selected := page_index == index
+		_augment_pages[page_index].visible = selected
+		_augment_tab_buttons[page_index].set_pressed_no_signal(selected)
+
+
+func _enemy_augment_category(augment: EnemyAugment) -> EnemyAugmentCategory:
+	if augment.is_evolution():
+		return EnemyAugmentCategory.EVOLUTION
+	if (
+		augment.target_spawn_id != &""
+		or augment.additional_spawn_count > 0
+		or augment.elite_escort_preset != null
+		or augment.player_reroll_penalty > 0
+	):
+		return EnemyAugmentCategory.SPAWN_RULE
+	if not augment.stat_modifiers.is_empty():
+		return EnemyAugmentCategory.STAT
+	return EnemyAugmentCategory.BEHAVIOR
+
+
+func _create_player_augment_card(augment: PlayerAugment) -> Button:
+	var installed := player_registry.get_stack_count(augment.augment_id)
+	var card := _create_augment_card(
 		augment.get_offer_title(_loadout).replace("\n", " · "),
-		String(augment.augment_id),
+		"설치 ×%d" % installed if installed > 0 else "",
 		augment.get_offer_description(_loadout),
-		Color(0.2, 0.82, 1.0),
+		augment.icon,
+		PLAYER_ACCENT,
 	)
-	button.name = "Player_%s" % String(augment.augment_id)
-	button.pressed.connect(_on_player_augment_selected.bind(augment))
-	_augment_list.add_child(button)
+	card.name = "Player_%s" % String(augment.augment_id)
+	card.pressed.connect(_on_player_augment_selected.bind(augment))
+	return card
 
 
-func _add_enemy_augment_button(augment: EnemyAugment) -> void:
+func _create_enemy_augment_card(augment: EnemyAugment) -> Button:
 	var stack_count := enemy_registry.get_stack_count(augment.augment_id)
-	var suffix := " · STACK %d" % stack_count if stack_count > 0 else ""
-	var button := _create_augment_button(
-		augment.display_name + suffix,
-		String(augment.augment_id),
+	var badges: PackedStringArray = []
+	if not augment.include_in_offer_pool:
+		badges.append("랩 전용")
+	if stack_count > 0:
+		if augment.max_stacks == 1:
+			badges.append("적용됨")
+		elif augment.max_stacks > 1:
+			badges.append("×%d/%d" % [stack_count, augment.max_stacks])
+		else:
+			badges.append("×%d" % stack_count)
+	var card := _create_augment_card(
+		augment.display_name,
+		" · ".join(badges),
 		augment.description,
-		Color(1.0, 0.28, 0.55),
+		augment.icon,
+		ENEMY_ACCENT,
 	)
-	button.name = "Enemy_%s" % String(augment.augment_id)
-	button.disabled = not enemy_registry.can_add_augment(augment)
-	if button.disabled:
-		button.tooltip_text = "%s\n\n최대 스택에 도달했습니다." % augment.description
-	button.pressed.connect(_on_enemy_augment_selected.bind(augment))
-	_augment_list.add_child(button)
+	card.name = "Enemy_%s" % String(augment.augment_id)
+	card.disabled = not enemy_registry.can_add_augment(augment)
+	if card.disabled:
+		card.tooltip_text = "%s\n\n최대 스택에 도달했습니다." % augment.description
+	card.pressed.connect(_on_enemy_augment_selected.bind(augment))
+	return card
 
 
-func _create_augment_button(
+func _create_augment_card(
 	title: String,
-	augment_id: String,
+	badge: String,
 	description: String,
+	icon: Texture2D,
 	accent: Color,
 ) -> Button:
-	var button := Button.new()
-	button.custom_minimum_size = Vector2(0, 50)
-	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	button.text = "%s  [%s]\n%s" % [title, augment_id, description.replace("\n", " ")]
-	button.tooltip_text = description
-	button.clip_text = true
-	button.alignment = HORIZONTAL_ALIGNMENT_LEFT
-	button.autowrap_mode = TextServer.AUTOWRAP_OFF
-	_style_button(button, accent)
-	return button
+	var card := Button.new()
+	card.tooltip_text = description
+	_style_button(card, accent)
+	card.custom_minimum_size = Vector2(0, PICKER_CARD_HEIGHT)
+	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var row := HBoxContainer.new()
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	row.offset_left = 5
+	row.offset_top = 2
+	row.offset_right = -5
+	row.offset_bottom = -2
+	row.add_theme_constant_override("separation", 5)
+	card.add_child(row)
+	if icon != null:
+		var icon_rect := TextureRect.new()
+		icon_rect.texture = icon
+		icon_rect.custom_minimum_size = Vector2(18, 18)
+		icon_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		icon_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		icon_rect.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		icon_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		row.add_child(icon_rect)
+	var text_box := VBoxContainer.new()
+	text_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	text_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	text_box.add_theme_constant_override("separation", 1)
+	row.add_child(text_box)
+	var title_row := HBoxContainer.new()
+	title_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	text_box.add_child(title_row)
+	var title_label := _card_label(title, Color.WHITE)
+	title_label.name = "Title"
+	title_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	title_label.clip_text = true
+	title_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	title_row.add_child(title_label)
+	if not badge.is_empty():
+		var badge_label := _card_label(badge, accent.lightened(0.35))
+		badge_label.name = "Badge"
+		title_row.add_child(badge_label)
+	var description_label := _card_label(description.replace("\n", " "), DIM_TEXT_COLOR)
+	description_label.name = "Description"
+	description_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	description_label.max_lines_visible = 2
+	description_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	description_label.custom_minimum_size.x = 1
+	text_box.add_child(description_label)
+	return card
+
+
+func _card_label(text: String, color: Color) -> Label:
+	var label := Label.new()
+	label.text = text
+	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	label.add_theme_color_override("font_color", color)
+	return label
 
 
 func _on_player_augment_selected(augment: PlayerAugment) -> void:
@@ -335,16 +500,16 @@ func _apply_player_augment(augment: PlayerAugment) -> bool:
 func _player_augment_kind_label(kind: PlayerAugmentKind.Kind) -> String:
 	match kind:
 		PlayerAugmentKind.Kind.FACILITY_EFFECT:
-			return "FACILITY MODULES"
+			return "시설 모듈"
 		PlayerAugmentKind.Kind.STAT_MULTIPLIER:
-			return "LEGACY STAT"
+			return "레거시 스탯"
 		_:
-			return "OTHER"
+			return "기타"
 
 
 func _update_mode_badge(status: String) -> void:
 	var badge := $Layout/Playfield/ModeBadge/Label as Label
-	badge.text = "AUGMENT TEST LAB  ·  %s" % status
+	badge.text = status
 
 
 func _load_encounter_presets() -> Array[EncounterPreset]:
@@ -361,30 +526,65 @@ func _load_encounter_presets() -> Array[EncounterPreset]:
 
 
 func _build_enemy_buttons() -> void:
+	var titles := ["본 게임 풀", "엘리트 · 보스", "특수 스폰", "기타 · 레거시"]
+	var grouped := {}
 	for preset in _enemy_encounters:
 		if preset == null:
 			continue
-		var row := HBoxContainer.new()
-		row.name = "Enemy_%s" % String(preset.encounter_id)
-		row.add_theme_constant_override("separation", 2)
-		var button := Button.new()
-		button.name = "Spawn_%s" % String(preset.encounter_id)
-		button.text = String(preset.encounter_id)
-		button.tooltip_text = "%s\n선택한 수만큼 이 스폰 패턴을 실행합니다." % String(preset.encounter_id)
-		_style_button(button, Color(1.0, 0.22, 0.48, 1.0), true)
-		button.pressed.connect(func() -> void: _spawn_batches(preset))
-		row.add_child(button)
-		var repeat_toggle := CheckButton.new()
-		repeat_toggle.name = "Repeat_%s" % String(preset.encounter_id)
-		repeat_toggle.custom_minimum_size = Vector2(36, 16)
-		repeat_toggle.add_theme_font_size_override("font_size", 10)
-		repeat_toggle.text = "R"
-		repeat_toggle.tooltip_text = "지속 스폰 모드에 이 프리셋을 포함합니다."
-		repeat_toggle.toggled.connect(
-			func(enabled: bool) -> void: _set_encounter_repeating(preset, enabled)
-		)
-		row.add_child(repeat_toggle)
-		enemy_buttons.add_child(row)
+		var group := _encounter_group(preset)
+		if not grouped.has(group):
+			grouped[group] = []
+		(grouped[group] as Array).append(preset)
+	for group in EncounterGroup.values():
+		if not grouped.has(group):
+			continue
+		var presets := grouped[group] as Array
+		var section := Label.new()
+		section.name = "Section_%d" % group
+		section.text = "%s  ·  %d" % [titles[group], presets.size()]
+		section.add_theme_color_override("font_color", ENEMY_ACCENT.lightened(0.3))
+		enemy_buttons.add_child(section)
+		for preset in presets:
+			enemy_buttons.add_child(_create_encounter_row(preset as EncounterPreset))
+
+
+func _create_encounter_row(preset: EncounterPreset) -> HBoxContainer:
+	var row := HBoxContainer.new()
+	row.name = "Enemy_%s" % String(preset.encounter_id)
+	row.add_theme_constant_override("separation", 2)
+	var button := Button.new()
+	button.name = "Spawn_%s" % String(preset.encounter_id)
+	button.text = String(preset.encounter_id)
+	button.tooltip_text = "%s\n선택한 수만큼 이 스폰 패턴을 실행합니다." % String(preset.encounter_id)
+	_style_button(button, ENEMY_ACCENT, true)
+	button.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	button.pressed.connect(func() -> void: _spawn_batches(preset))
+	row.add_child(button)
+	var repeat_toggle := Button.new()
+	repeat_toggle.name = "Repeat_%s" % String(preset.encounter_id)
+	repeat_toggle.toggle_mode = true
+	repeat_toggle.text = "반복"
+	repeat_toggle.tooltip_text = "지속 스폰에 이 프리셋을 포함합니다."
+	_style_button(repeat_toggle, ACTIVE_ACCENT, true)
+	repeat_toggle.size_flags_horizontal = Control.SIZE_SHRINK_END
+	repeat_toggle.custom_minimum_size.x = 28
+	repeat_toggle.toggled.connect(
+		func(enabled: bool) -> void: _set_encounter_repeating(preset, enabled)
+	)
+	row.add_child(repeat_toggle)
+	return row
+
+
+func _encounter_group(preset: EncounterPreset) -> EncounterGroup:
+	for entry in MAIN_ENCOUNTER_POOL.entries:
+		if entry != null and entry.preset != null and entry.preset.encounter_id == preset.encounter_id:
+			return EncounterGroup.MAIN_POOL
+	var encounter_id := String(preset.encounter_id)
+	if encounter_id.begins_with("threat_elite") or encounter_id.begins_with("boss_"):
+		return EncounterGroup.ELITE_BOSS
+	if SPECIAL_ENCOUNTER_IDS.has(preset.encounter_id):
+		return EncounterGroup.SPECIAL
+	return EncounterGroup.OTHER
 
 
 func _load_trait_definitions() -> void:
@@ -403,9 +603,10 @@ func _build_slot_buttons() -> void:
 	for slot_index in _loadout.get_max_equipped_weapon_count():
 		var button := Button.new()
 		button.name = "Slot%d" % (slot_index + 1)
-		button.custom_minimum_size = Vector2(0, 24)
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		button.toggle_mode = true
+		button.expand_icon = true
+		button.add_theme_constant_override("icon_max_width", 12)
 		button.pressed.connect(func() -> void: _select_slot(slot_index))
 		slot_buttons.add_child(button)
 		_slot_button_list.append(button)
@@ -420,29 +621,33 @@ func _build_weapon_buttons() -> void:
 		button.text = definition.display_name
 		button.icon = definition.icon
 		button.expand_icon = true
+		button.add_theme_constant_override("icon_max_width", 12)
 		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		button.tooltip_text = definition.description
-		_style_button(button, Color(0.16, 0.72, 1.0, 1.0))
+		_style_button(button, PLAYER_ACCENT)
 		button.pressed.connect(func() -> void: _equip_selected_slot(definition))
 		weapon_buttons.add_child(button)
 		_weapon_button_by_id[definition.id] = button
 
 
 func _style_button(button: Button, accent: Color, compact := false) -> void:
-	button.custom_minimum_size = Vector2(0, 16 if compact else 24)
+	button.custom_minimum_size = Vector2(0, COMPACT_BUTTON_HEIGHT if compact else BUTTON_HEIGHT)
 	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	# Side panels are 170px; long names trim instead of widening the panel.
 	button.clip_text = true
 	button.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-	if compact:
-		button.add_theme_font_size_override("font_size", 10)
-	button.add_theme_color_override("font_color", Color(0.82, 0.93, 1.0))
+	button.add_theme_color_override("font_color", TEXT_COLOR)
 	button.add_theme_color_override("font_hover_color", Color.WHITE)
 	button.add_theme_color_override("font_pressed_color", Color.WHITE)
+	button.add_theme_color_override("font_hover_pressed_color", Color.WHITE)
+	button.add_theme_color_override("font_focus_color", Color.WHITE)
+	button.add_theme_color_override("font_disabled_color", Color(TEXT_COLOR, 0.35))
 	button.add_theme_stylebox_override("normal", _button_style(accent, 0.12, 0.45, compact))
 	button.add_theme_stylebox_override("hover", _button_style(accent, 0.22, 0.85, compact))
 	button.add_theme_stylebox_override("pressed", _button_style(accent, 0.34, 1.0, compact))
-	button.add_theme_stylebox_override("focus", _button_style(accent, 0.2, 0.9, compact))
+	button.add_theme_stylebox_override("hover_pressed", _button_style(accent, 0.4, 1.0, compact))
+	button.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
+	button.add_theme_stylebox_override("disabled", _button_style(accent, 0.05, 0.15, compact))
 
 
 func _button_style(
@@ -456,11 +661,11 @@ func _button_style(
 	style.border_color = Color(accent.r, accent.g, accent.b, border_alpha)
 	style.set_border_width_all(1)
 	style.set_corner_radius_all(2 if compact else 3)
-	var margin := 4 if compact else 8
+	var margin := 3 if compact else 5
 	style.content_margin_left = margin
 	style.content_margin_right = margin
-	style.content_margin_top = 1 if compact else 0
-	style.content_margin_bottom = 1 if compact else 0
+	style.content_margin_top = 0
+	style.content_margin_bottom = 0
 	return style
 
 
@@ -583,15 +788,18 @@ func _refresh_loadout_ui() -> void:
 		var button := _slot_button_list[index]
 		var bay := _loadout.get_bay(index)
 		var weapon_name := "비어 있음"
+		button.icon = null
 		if bay != null and not bay.is_empty():
 			weapon_name = bay.equipped_weapon_display_name
+			button.icon = _definition_icon(bay.equipped_weapon_id)
 		button.text = str(index + 1)
-		button.tooltip_text = weapon_name
+		button.tooltip_text = "슬롯 %d · %s" % [index + 1, weapon_name]
 		button.button_pressed = index == _selected_slot
 		_style_button(
 			button,
 			Color(0.2, 0.9, 1.0, 1.0) if index == _selected_slot else Color(0.2, 0.5, 0.72, 1.0),
 		)
+		button.custom_minimum_size.y = 18
 
 	var selected_bay := _loadout.get_bay(_selected_slot)
 	var selected_weapon_id: StringName = &""
@@ -611,8 +819,9 @@ func _refresh_loadout_ui() -> void:
 		var equipped := _loadout.is_weapon_equipped(weapon_id)
 		weapon_button.text = "%s%s" % [
 			_loadout.get_weapon_display_name(weapon_id) if equipped else _definition_name(weapon_id),
-			"  [장착]" if equipped else "",
+			"  · 장착" if equipped else "",
 		]
+		_style_button(weapon_button, ACTIVE_ACCENT if equipped else PLAYER_ACCENT)
 	_refresh_trait_ui(selected_weapon_id)
 
 
@@ -628,11 +837,8 @@ func _refresh_trait_ui(weapon_id: StringName) -> void:
 		var active := rank > 0
 		has_active_trait = has_active_trait or active
 		button.button_pressed = active
-		button.text = "%s  %s" % ["[Lv.%d]" % rank if active else "[  ]", definition.display_name]
-		_style_button(
-			button,
-			Color(0.35, 1.0, 0.55, 1.0) if active else Color(0.72, 0.35, 1.0, 1.0),
-		)
+		button.text = "%s  · Lv.%d" % [definition.display_name, rank] if active else definition.display_name
+		_style_button(button, ACTIVE_ACCENT if active else TRAIT_ACCENT)
 	clear_traits_button.disabled = weapon_id == &"" or not has_active_trait
 
 
@@ -645,7 +851,8 @@ func _rebuild_trait_buttons(weapon_id: StringName) -> void:
 	if weapon_id == &"":
 		trait_weapon_label.text = "무기를 장착하면 모듈이 표시됩니다."
 		return
-	trait_weapon_label.text = "%s 전용 모듈 · 클릭 시 Lv.I→최대→해제" % _loadout.get_weapon_display_name(weapon_id)
+	trait_weapon_label.text = "%s 전용" % _loadout.get_weapon_display_name(weapon_id)
+	trait_weapon_label.tooltip_text = "모듈을 누를 때마다 Lv이 오르고, 최대 Lv에서 누르면 해제됩니다."
 	for definition in _trait_definitions:
 		if definition.target_weapon_id != weapon_id:
 			continue
@@ -654,12 +861,20 @@ func _rebuild_trait_buttons(weapon_id: StringName) -> void:
 		button.toggle_mode = true
 		button.icon = definition.icon
 		button.expand_icon = true
+		button.add_theme_constant_override("icon_max_width", 12)
 		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		button.tooltip_text = definition.format_description(1)
 		button.set_meta("definition", definition)
 		button.pressed.connect(func() -> void: _toggle_selected_weapon_trait(definition))
 		trait_buttons.add_child(button)
 		_trait_button_by_id[definition.trait_id] = button
+
+
+func _definition_icon(weapon_id: StringName) -> Texture2D:
+	for definition in weapon_definitions:
+		if definition != null and definition.id == weapon_id:
+			return definition.icon
+	return null
 
 
 func _definition_name(weapon_id: StringName) -> String:
@@ -674,7 +889,7 @@ func _refresh_target_count() -> void:
 	for enemy in get_tree().get_nodes_in_group("enemies"):
 		if gameplay.is_ancestor_of(enemy):
 			active_count += 1
-	target_count_label.text = "활성 표적  %02d" % active_count
+	target_count_label.text = "표적 %02d" % active_count
 
 
 func _make_ship_invincible() -> void:

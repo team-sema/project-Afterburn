@@ -1,9 +1,10 @@
-[gd_resource type="Resource" script_class="EnemyAugment" format=3]
+[gd_resource type="Resource" script_class="EnemyAugment" format=3 uid="uid://g6fvjy5bhxvf"]
 
-[ext_resource type="Script" path="res://resources/enemy_augments/enemy_augment.gd" id="1_augment"]
-[ext_resource type="Texture2D" path="res://assets/enemies/enemy_caster.svg" id="2_icon"]
-[ext_resource type="PackedScene" path="res://enemies/shooting_enemy.tscn" id="3_from"]
+[ext_resource type="Script" uid="uid://be4x07sn0gawv" path="res://resources/enemy_augments/enemy_augment.gd" id="1_augment"]
+[ext_resource type="Texture2D" uid="uid://cjhfuwqq2ffkl" path="res://assets/enemies/enemy_caster.svg" id="2_icon"]
+[ext_resource type="PackedScene" uid="uid://0th6okc5yjpd" path="res://enemies/shooting_enemy.tscn" id="3_from"]
 [ext_resource type="PackedScene" path="res://enemies/evolved/caster_evolved.tscn" id="4_to"]
+[ext_resource type="Script" uid="uid://bd2vhj2tclcdr" path="res://resources/enemy_augments/enemy_stat_modifier.gd" id="5_0qf53"]
 
 [resource]
 script = ExtResource("1_augment")
