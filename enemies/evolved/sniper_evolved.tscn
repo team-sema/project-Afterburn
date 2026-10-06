@@ -9,6 +9,4 @@
 script = ExtResource("2_mark")
 
 [node name="SniperAttackComponent" parent="."]
-follow_up_shots = 1
-follow_up_aim_duration = 0.7
-follow_up_lead = 1.0
+lock_on_duration = 0.25

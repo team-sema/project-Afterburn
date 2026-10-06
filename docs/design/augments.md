@@ -91,7 +91,7 @@ XP 드롭 속도 증가는 선택 뒤 스폰되는 적의 `ExperienceDropCompone
 | `enemy_evolve_interceptor` | 진화: 왕복 요격기 | Interceptor → `interceptor_evolved` | 화면을 지나간 뒤 경고 후 역방향으로 재돌파 |
 | `enemy_evolve_tanker` | 진화: 재생 실드 탱커 | Tanker → `tanker_evolved` | 실드가 2초 무피격 뒤 150/s 재생 |
 | `enemy_evolve_caster` | 진화: 역회전 캐스터 | Caster → `caster_evolved` | 서로 반대로 도는 12발 링 2겹 |
-| `enemy_evolve_sniper` | 진화: 연속 저격수 | Sniper → `sniper_evolved` | 저격 직후 이동 예측 지점에 고정 함정선 → 2발째 |
+| `enemy_evolve_sniper` | 진화: 속사 저격수 | Sniper → `sniper_evolved` | 조준선 락온 0.75초 → 0.25초 |
 
 ## 등급
 
