@@ -1,5 +1,7 @@
 extends SceneTree
 
+var failures: PackedStringArray = []
+
 
 func _initialize() -> void:
 	_run.call_deferred()
@@ -14,8 +16,8 @@ func _run() -> void:
 		root.add_child(first)
 		root.add_child(second)
 		await process_frame
-		assert(first.scene_file_path == scene.resource_path)
-		assert(first.surface != second.surface, "materials must be instance-local")
+		_expect(first.scene_file_path == scene.resource_path, "%s card instance keeps its scene path" % path)
+		_expect(first.surface != second.surface, "%s materials must be instance-local" % path)
 		var original_glow: Variant = second.surface.get_shader_parameter("glow_strength")
 		first.surface.set_shader_parameter("glow_strength", 2.0)
 		first.get_node("Title").position = Vector2(20, 80)
@@ -32,16 +34,26 @@ func _run() -> void:
 		augment.description = "씬의 설정을 유지합니다."
 		first.configure(augment, null)
 		first._process(0.1)
-		assert(first.get_node("Title").position == Vector2(20, 80))
-		assert(first.get_node("Title").get_theme_color("font_color") == Color.RED)
-		assert(first.surface.get_shader_parameter("glow_strength") == 2.0)
-		assert(second.surface.get_shader_parameter("glow_strength") == original_glow)
-		assert(first.surface.get_shader_parameter("orb_center") == Vector2(70, 45))
-		assert(first.surface.get_shader_parameter("halo_radius") == 31.0)
-		assert(first.rotating_orbits_enabled and first.particles_enabled)
-		assert(is_equal_approx(first.surface.get_shader_parameter("ray_strength"), 0.4))
+		_expect(first.get_node("Title").position == Vector2(20, 80), "%s configure keeps the edited title position" % path)
+		_expect(first.get_node("Title").get_theme_color("font_color") == Color.RED, "%s configure keeps the title color override" % path)
+		_expect(first.surface.get_shader_parameter("glow_strength") == 2.0, "%s keeps edited glow strength" % path)
+		_expect(second.surface.get_shader_parameter("glow_strength") == original_glow, "%s edits do not leak into another instance" % path)
+		_expect(first.surface.get_shader_parameter("orb_center") == Vector2(70, 45), "%s orb center follows the medallion anchor" % path)
+		_expect(first.surface.get_shader_parameter("halo_radius") == 31.0, "%s halo radius follows orbit_radius" % path)
+		_expect(first.rotating_orbits_enabled and first.particles_enabled, "%s tier does not override effect toggles" % path)
+		_expect(is_equal_approx(first.surface.get_shader_parameter("ray_strength"), 0.4), "%s keeps edited ray strength" % path)
 		first.queue_free()
 		second.queue_free()
 		await process_frame
-	print("augment card scene editing test: PASS")
-	quit(0)
+	if failures.is_empty():
+		print("augment card scene editing test: PASS")
+		quit()
+		return
+	for failure in failures:
+		push_error("augment card scene editing test: %s" % failure)
+	quit(1)
+
+
+func _expect(condition: bool, message: String) -> void:
+	if not condition:
+		failures.append(message)

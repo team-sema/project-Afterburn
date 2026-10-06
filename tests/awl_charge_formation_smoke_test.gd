@@ -141,12 +141,12 @@ func _finish(
 		registry.queue_free()
 	await process_frame
 	if failures.is_empty():
-		print("kamikaze_aim_charge_smoke_test: PASS")
+		print("awl_charge_formation_smoke_test: PASS")
 		quit(0)
 		return
 	for failure in failures:
 		push_error(failure)
-	print("kamikaze_aim_charge_smoke_test: FAIL")
+	print("awl_charge_formation_smoke_test: FAIL")
 	quit(1)
 
 

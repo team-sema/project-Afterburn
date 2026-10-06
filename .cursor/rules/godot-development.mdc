@@ -24,6 +24,7 @@ alwaysApply: false
 ```powershell
 .\tools\run-godot.cmd --headless --script res://tests/<name>.gd
 .\tools\run-godot.cmd --headless --editor --quit
+.\tools\run-tests.cmd            # 전체 회귀 (tests/*.gd), -Filter / -Suite labs|benchmarks|all
 ```
 
 - 실행 파일 경로는 래퍼 기본값 또는 환경 변수 `GODOT_EDITOR_PATH`로 정한다.

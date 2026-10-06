@@ -2,7 +2,7 @@ extends SceneTree
 ## Live-fire stress benchmark: BarragePlayers run real game patterns at a
 ## moving target with physics, off-screen despawn and rendering all active,
 ## unlike the pose-only render benchmark. Run with a rendered window:
-##   tools/run-godot.cmd --rendering-method gl_compatibility --script res://tests/barrage_stress_benchmark.gd
+##   tools/run-godot.cmd --rendering-method gl_compatibility --script res://tests/benchmarks/barrage_stress_benchmark.gd
 ## Frame intervals include presentation/waits; physics_ms is the 60 Hz tick
 ## cost that must stay well under 16.7 ms.
 
