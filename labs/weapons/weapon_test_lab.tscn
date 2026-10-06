@@ -24,6 +24,7 @@
 [ext_resource type="Resource" uid="uid://btckhxu7at2sl" path="res://resources/weapons/definitions/aux_homing_missile.tres" id="26_missile"]
 [ext_resource type="Resource" uid="uid://bfa38sv3dsbmk" path="res://resources/weapons/definitions/aux_orbital_barrier.tres" id="27_barrier"]
 [ext_resource type="Script" uid="uid://c8sivsbaqtrjs" path="res://enemies/enemy_spawner.gd" id="28_enemy_spawner"]
+[ext_resource type="Theme" uid="uid://oxyxst74vosk" path="res://labs/weapons/weapon_test_lab_theme.tres" id="29_lab_theme"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_left_panel"]
 bg_color = Color(0.018, 0.035, 0.075, 1)
@@ -68,6 +69,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = ExtResource("29_lab_theme")
 script = ExtResource("1_script")
 weapon_definitions = Array[ExtResource("2_wn358")]([ExtResource("21_blaster"), ExtResource("22_laser"), ExtResource("23_shotgun"), ExtResource("24_cannon"), ExtResource("25_plasma"), ExtResource("26_missile"), ExtResource("27_barrier")])
 
@@ -99,7 +101,7 @@ theme_override_constants/separation = 3
 [node name="Eyebrow" type="Label" parent="Layout/LeftPanel/Margin/VBox" unique_id=842581251]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.35, 0.58, 1)
-text = "TARGET CONTROL  ·  적 스폰"
+text = "TARGET  ·  적 스폰"
 label_settings = ExtResource("6_default_label")
 
 [node name="Title" type="Label" parent="Layout/LeftPanel/Margin/VBox" unique_id=936756450]
@@ -119,12 +121,12 @@ layout_mode = 2
 [node name="Label" type="Label" parent="Layout/LeftPanel/Margin/VBox/SpawnCountRow" unique_id=1274336127]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "스폰 횟수"
+text = "1회 스폰 수"
 label_settings = ExtResource("6_default_label")
 
 [node name="SpawnCount" type="SpinBox" parent="Layout/LeftPanel/Margin/VBox/SpawnCountRow" unique_id=1440882004]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(58, 24)
+custom_minimum_size = Vector2(46, 14)
 layout_mode = 2
 min_value = 1.0
 max_value = 10.0
@@ -141,18 +143,23 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 1
 
+[node name="SpawnRule" type="ColorRect" parent="Layout/LeftPanel/Margin/VBox" unique_id=1213426675]
+custom_minimum_size = Vector2(0, 1)
+layout_mode = 2
+color = Color(1, 0.18, 0.45, 0.45)
+
 [node name="ContinuousIntervalRow" type="HBoxContainer" parent="Layout/LeftPanel/Margin/VBox" unique_id=2138361646]
 layout_mode = 2
 
 [node name="Label" type="Label" parent="Layout/LeftPanel/Margin/VBox/ContinuousIntervalRow" unique_id=432852383]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "반복 간격"
+text = "반복 스폰 간격"
 label_settings = ExtResource("6_default_label")
 
 [node name="ContinuousSpawnInterval" type="SpinBox" parent="Layout/LeftPanel/Margin/VBox/ContinuousIntervalRow" unique_id=658159369]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(68, 24)
+custom_minimum_size = Vector2(52, 14)
 layout_mode = 2
 min_value = 0.5
 max_value = 30.0
@@ -162,7 +169,7 @@ suffix = " 초"
 
 [node name="ContinuousSpawnButton" type="Button" parent="Layout/LeftPanel/Margin/VBox" unique_id=1319724574]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 24)
+custom_minimum_size = Vector2(0, 16)
 layout_mode = 2
 disabled = true
 toggle_mode = true
@@ -173,18 +180,24 @@ visible = false
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="TargetCount" type="Label" parent="Layout/LeftPanel/Margin/VBox" unique_id=651435635]
+[node name="TargetRow" type="HBoxContainer" parent="Layout/LeftPanel/Margin/VBox" unique_id=907478292]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="TargetCount" type="Label" parent="Layout/LeftPanel/Margin/VBox/TargetRow" unique_id=651435635]
 unique_name_in_owner = true
 layout_mode = 2
+size_flags_horizontal = 3
 theme_override_colors/font_color = Color(1, 0.55, 0.7, 1)
 text = "활성 표적  00"
 label_settings = ExtResource("6_default_label")
 
-[node name="ClearTargetsButton" type="Button" parent="Layout/LeftPanel/Margin/VBox" unique_id=1678463888]
+[node name="ClearTargetsButton" type="Button" parent="Layout/LeftPanel/Margin/VBox/TargetRow" unique_id=1678463888]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 24)
+custom_minimum_size = Vector2(64, 16)
 layout_mode = 2
-text = "표적 / 적 탄환 정리"
+tooltip_text = "전장의 표적·적 탄환·XP 오브를 모두 지웁니다."
+text = "전장 정리"
 text_overrun_behavior = 3
 clip_text = true
 
@@ -238,10 +251,10 @@ augment_registry = NodePath("../PlayerAugmentRegistry")
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
-offset_left = 48.0
-offset_top = 8.0
-offset_right = -48.0
-offset_bottom = 34.0
+offset_left = 14.0
+offset_top = 9.0
+offset_right = -14.0
+offset_bottom = 23.0
 grow_horizontal = 2
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBox_control_box")
@@ -249,7 +262,7 @@ theme_override_styles/panel = SubResource("StyleBox_control_box")
 [node name="Label" type="Label" parent="Layout/Playfield/ModeBadge" unique_id=1095171759]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.5, 0.9, 1, 0.95)
-text = "AUGMENT TEST LAB  ·  C PLAYER / V ENEMY"
+text = "C 플레이어 증강  ·  V 적 증강"
 label_settings = ExtResource("6_default_label")
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -284,7 +297,7 @@ theme_override_constants/separation = 3
 [node name="Eyebrow" type="Label" parent="Layout/RightPanel/Margin/VBox" unique_id=109877203]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.35, 0.82, 1, 1)
-text = "LOADOUT  ·  장비 / 증강"
+text = "LOADOUT  ·  장비"
 label_settings = ExtResource("6_default_label")
 
 [node name="Title" type="Label" parent="Layout/RightPanel/Margin/VBox" unique_id=254436229]
@@ -319,7 +332,7 @@ horizontal_scroll_mode = 0
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/separation = 3
+theme_override_constants/separation = 2
 
 [node name="TraitRule" type="ColorRect" parent="Layout/RightPanel/Margin/VBox" unique_id=1179782728]
 custom_minimum_size = Vector2(0, 1)
@@ -329,14 +342,14 @@ color = Color(0.48, 0.22, 0.7, 0.8)
 [node name="TraitEyebrow" type="Label" parent="Layout/RightPanel/Margin/VBox" unique_id=563658139]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.72, 0.5, 1, 1)
-text = "WEAPON AUGMENTS"
+text = "WEAPON MODULES  ·  무기 모듈"
 label_settings = ExtResource("6_default_label")
 
 [node name="TraitWeaponLabel" type="Label" parent="Layout/RightPanel/Margin/VBox" unique_id=1935905326]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0.82, 0.7, 1, 1)
-text = "무기를 장착하면 특성이 표시됩니다."
+theme_override_colors/font_color = Color(0.62, 0.55, 0.8, 1)
+text = "무기를 장착하면 모듈이 표시됩니다."
 label_settings = ExtResource("6_default_label")
 autowrap_mode = 3
 
@@ -349,26 +362,27 @@ horizontal_scroll_mode = 0
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/separation = 3
-
-[node name="ClearTraitsButton" type="Button" parent="Layout/RightPanel/Margin/VBox" unique_id=2010255053]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 24)
-layout_mode = 2
-disabled = true
-text = "선택 무기 모듈 초기화"
-text_overrun_behavior = 3
-clip_text = true
+theme_override_constants/separation = 2
 
 [node name="ActionRow" type="HBoxContainer" parent="Layout/RightPanel/Margin/VBox" unique_id=358552544]
 layout_mode = 2
 theme_override_constants/separation = 4
 
-[node name="UnequipButton" type="Button" parent="Layout/RightPanel/Margin/VBox/ActionRow" unique_id=1392668733]
+[node name="ClearTraitsButton" type="Button" parent="Layout/RightPanel/Margin/VBox/ActionRow" unique_id=2010255053]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 24)
+custom_minimum_size = Vector2(0, 16)
 layout_mode = 2
 size_flags_horizontal = 3
+tooltip_text = "선택 무기의 모듈을 모두 해제합니다."
+disabled = true
+text = "모듈 초기화"
+
+[node name="UnequipButton" type="Button" parent="Layout/RightPanel/Margin/VBox/ActionRow" unique_id=1392668733]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 16)
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "선택 슬롯의 무기를 해제합니다."
 text = "슬롯 비우기"
 
 [node name="Hint" type="Label" parent="Layout/RightPanel/Margin/VBox" unique_id=62142708]

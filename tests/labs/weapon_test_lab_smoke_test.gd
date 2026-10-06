@@ -33,6 +33,12 @@ func _run() -> void:
 		and enemy_buttons.get_node_or_null("Enemy_striker_drone_diamond_5") != null,
 		"lab discovers core encounter spawn controls",
 	)
+	_expect(
+		enemy_buttons.get_node_or_null("Section_0") != null
+		and enemy_buttons.get_child(0).name == &"Section_0"
+		and enemy_buttons.get_child(1).name == &"Enemy_awl_formation",
+		"encounter list opens with the main-pool group",
+	)
 	_expect(weapon_buttons.get_child_count() == 7, "all seven weapon controls are present")
 	_expect(trait_buttons.get_child_count() == 6, "default blaster exposes 2 silver + 3 gold + 1 prismatic modules")
 	_expect(lab.get_player_augment_count() == 10, "all 10 facility augments are discovered")
@@ -86,6 +92,21 @@ func _run() -> void:
 	lab._unhandled_key_input(enemy_key)
 	_expect(enemy_events[0] == 1, "V simulates one enemy augment event")
 	_expect(lab.is_augment_picker_open(), "V opens the enemy augment picker")
+	var enemy_tabs := lab.find_child("AugmentTabs", true, false)
+	_expect(enemy_tabs != null and enemy_tabs.get_child_count() == 4, "enemy picker groups cards into four tabs")
+	var evolution_page := lab.find_child("Page3", true, false) as GridContainer
+	_expect(
+		evolution_page != null and evolution_page.get_child_count() == 8 and evolution_page.columns == 2,
+		"evolution tab lays out its eight cards in two columns",
+	)
+	var tab_key := InputEventKey.new()
+	tab_key.pressed = true
+	tab_key.physical_keycode = KEY_Q
+	lab._unhandled_key_input(tab_key)
+	_expect(evolution_page != null and evolution_page.visible, "Q wraps from the first tab to the evolution tab")
+	tab_key.physical_keycode = KEY_E
+	lab._unhandled_key_input(tab_key)
+	_expect(evolution_page != null and not evolution_page.visible, "E moves back to the first tab")
 	var counter_shot_button := (
 		lab.find_child("Enemy_enemy_counter_shot_on_hit", true, false) as Button
 	)
@@ -157,7 +178,7 @@ func _run() -> void:
 	)
 
 	var repeat_striker := (
-		enemy_buttons.get_node("Enemy_striker_drone_diamond_5/Repeat_striker_drone_diamond_5") as CheckButton
+		enemy_buttons.get_node("Enemy_striker_drone_diamond_5/Repeat_striker_drone_diamond_5") as Button
 	)
 	var continuous_button := lab.get_node("%ContinuousSpawnButton") as Button
 	var continuous_timer := lab.get_node("%ContinuousSpawnTimer") as Timer
