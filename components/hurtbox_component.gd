@@ -7,6 +7,22 @@ signal invincibility_changed(enabled: bool)
 ## When true, piercing player shots stop on this hurtbox (e.g. boss wall body).
 @export var blocks_pierce := false
 
+func _ready() -> void:
+	# Enemy bullets are passive (monitorable-only) areas: the few player-side
+	# hurtboxes they can hit watch the enemy_projectile layer instead of every
+	# bullet running its own overlap monitoring.
+	if collision_layer & 1: # layer 1 = player_hurtbox
+		monitoring = true
+		collision_mask |= EnemyBullets.LAYER
+		area_entered.connect(_on_passive_hitbox_entered)
+
+func _on_passive_hitbox_entered(area: Area2D) -> void:
+	# Hitboxes that monitor themselves (contact bodies, lasers, beams, legacy
+	# shots) keep their own detection; dispatching them here would double-hit.
+	var hitbox := area as HitboxComponent
+	if hitbox != null and not hitbox.monitoring:
+		hitbox._on_hurtbox_entered(self)
+
 # Create the is_invincible boolean
 var is_invincible = false :
 	# Here we create an inline setter so we can disable and enable collision shapes on
