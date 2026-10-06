@@ -45,6 +45,14 @@ func get_additional_spawn_count(spawn_id: StringName) -> int:
 	return additional_count
 
 
+func get_elite_escort_presets() -> Array[EncounterPreset]:
+	var presets: Array[EncounterPreset] = []
+	for augment in active_augments:
+		if augment.elite_escort_preset != null:
+			presets.append(augment.elite_escort_preset)
+	return presets
+
+
 func clear_augments() -> void:
 	if active_augments.is_empty():
 		return

@@ -56,6 +56,7 @@ var barrage_player: BarragePlayer
 var pattern_error := ""
 var _pattern: BarrageSequence
 var _pattern_action_rate := 1.0
+var _projectile_speed_multiplier := 1.0
 
 
 func apply_fire_volume_boost(extra_shots: int, min_spread: float) -> void:
@@ -81,6 +82,25 @@ func _boost_pattern_volume(sequence: BarrageSequence, extra_shots: int, min_spre
 			volley.layout = BarrageVolley.Layout.FAN
 			volley.count = maxi(1, count + extra_shots)
 			volley.spread_degrees = maxf(volley.spread_degrees, min_spread)
+
+
+## Spawn-time augment multiplier on launch speed. Behavior speed_to targets stay absolute.
+func apply_projectile_speed_multiplier(multiplier: float) -> void:
+	if not is_finite(multiplier) or multiplier <= 0.0:
+		return
+	_projectile_speed_multiplier *= multiplier
+	if _pattern != null:
+		_scale_pattern_speed(_pattern, multiplier)
+
+
+func _scale_pattern_speed(sequence: BarrageSequence, multiplier: float) -> void:
+	var scaled := {}
+	for step in sequence.steps:
+		if step.action != BarrageStep.Action.FIRE: continue
+		for volley in step.get_volleys():
+			if scaled.has(volley): continue
+			scaled[volley] = true
+			volley.speed *= multiplier
 
 
 func _ready() -> void:
@@ -230,7 +250,7 @@ func _fire_projectiles(target_direction: Variant = null) -> void:
 	if barrage_shot != null and target_direction != null:
 		if projectile_parent is Node2D:
 			_volleys_fired += 1
-			_spawn_barrage_volley.call_deferred(projectile_parent, enemy.global_position, target_direction, projectile_speed, maxi(1, shot_count), spread_degrees)
+			_spawn_barrage_volley.call_deferred(projectile_parent, enemy.global_position, target_direction, projectile_speed * _projectile_speed_multiplier, maxi(1, shot_count), spread_degrees)
 		return
 	_volleys_fired += 1
 
@@ -255,7 +275,7 @@ func _fire_projectiles(target_direction: Variant = null) -> void:
 					weight,
 				)
 				direction = direction.rotated(deg_to_rad(angle_offset))
-			projectile.call_deferred("launch", direction, projectile_speed)
+			projectile.call_deferred("launch", direction, projectile_speed * _projectile_speed_multiplier)
 
 
 func _spawn_barrage_volley(parent: Node2D, origin: Vector2, direction: Vector2, speed: float, count: int, spread: float) -> void:
@@ -325,6 +345,8 @@ func _prepare_pattern() -> void:
 		set_process(false)
 		return
 	_pattern = _pattern.snapshot()
+	if not is_equal_approx(_projectile_speed_multiplier, 1.0):
+		_scale_pattern_speed(_pattern, _projectile_speed_multiplier)
 	barrage_player = BarragePlayer.new()
 	barrage_player.name = "BarragePlayer"
 	barrage_player.may_fire = _pattern_can_fire

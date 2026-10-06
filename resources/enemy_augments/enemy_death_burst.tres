@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="EnemyAugment" format=3]
+
+[ext_resource type="Script" uid="uid://be4x07sn0gawv" path="res://resources/enemy_augments/enemy_augment.gd" id="1_augment"]
+[ext_resource type="PackedScene" path="res://components/augment_behaviors/death_burst_component.tscn" id="2_behavior"]
+
+[resource]
+script = ExtResource("1_augment")
+augment_id = &"enemy_death_burst"
+display_name = "유폭"
+description = "이후 등장하는 일반 적이 파괴될 때 느린 탄 4발을 대각선으로 흩뿌립니다."
+max_stacks = 1
+behavior_components = Array[PackedScene]([ExtResource("2_behavior")])

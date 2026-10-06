@@ -8,6 +8,7 @@ const HEALTH_BOOST := preload("res://resources/enemy_augments/enemy_health_boost
 const MOVE_BOOST := preload("res://resources/enemy_augments/enemy_move_speed_boost_1_2.tres")
 const FIRE_BOOST := preload("res://resources/enemy_augments/enemy_fire_volume_boost.tres")
 const BOMB_FAST_FUSE := preload("res://resources/enemy_augments/enemy_bomb_fast_fuse.tres")
+const XP_DRIFT_BOOST := preload("res://resources/enemy_augments/enemy_xp_drift_speed_boost.tres")
 
 var failures: PackedStringArray = []
 
@@ -27,6 +28,10 @@ func _run() -> void:
 	_expect(
 		gameplay_offer.enemy_augment_pool.has(BOMB_FAST_FUSE),
 		"bomb fast fuse is registered in the gameplay offer pool",
+	)
+	_expect(
+		gameplay_offer.enemy_augment_pool.has(XP_DRIFT_BOOST),
+		"XP drift speed boost is registered in the gameplay offer pool",
 	)
 	gameplay.free()
 
@@ -97,6 +102,47 @@ func _run() -> void:
 	action_only_bomb.queue_free()
 	await process_frame
 	action_only_registry.free()
+
+	_expect(XP_DRIFT_BOOST.max_stacks == 2, "XP drift speed boost stacks up to twice")
+	_expect(
+		XP_DRIFT_BOOST.stat_modifiers[0].stat == EnemyStatModifier.Stat.XP_DRIFT_SPEED
+		and is_equal_approx(XP_DRIFT_BOOST.stat_modifiers[0].multiplier, 1.2),
+		"XP drift speed boost multiplies orb fall speed by 1.2",
+	)
+	var drift_registry := EnemyAugmentRegistry.new()
+	drift_registry.add_augment(XP_DRIFT_BOOST)
+	drift_registry.add_augment(XP_DRIFT_BOOST)
+	drift_registry.add_augment(XP_DRIFT_BOOST)
+	_expect(drift_registry.get_stack_count(XP_DRIFT_BOOST.augment_id) == 2, "XP drift boost caps at two stacks")
+	var drift_world := Node2D.new()
+	drift_world.add_to_group("gameplay_world")
+	root.add_child(drift_world)
+	var drift_bomb := (
+		load("res://enemies/bomb_enemy.tscn") as PackedScene
+	).instantiate() as Enemy
+	drift_bomb.augment_registry = drift_registry
+	drift_bomb.spawn_id = &"tanker_bomb_vertical"
+	drift_world.add_child(drift_bomb)
+	await process_frame
+	var drift_drop := drift_bomb.get_node("ExperienceDropComponent") as ExperienceDropComponent
+	_expect(
+		is_equal_approx(drift_drop.drift_speed_multiplier, 1.44),
+		"two XP drift stacks multiply the spawned enemy's drop speed by 1.44",
+	)
+	drift_drop.drop_chance = 1.0
+	drift_drop._on_no_health()
+	await process_frame
+	var dropped_orb: ExperienceOrb = null
+	for node in get_nodes_in_group("experience_orbs"):
+		if drift_world.is_ancestor_of(node):
+			dropped_orb = node as ExperienceOrb
+	_expect(
+		dropped_orb != null and is_equal_approx(dropped_orb.drift_speed, 155.0 * 1.44),
+		"dropped XP orb falls at the augmented speed",
+	)
+	drift_world.queue_free()
+	await process_frame
+	drift_registry.free()
 
 	var overlay := (
 		load("res://menus/augment_selection_overlay.tscn") as PackedScene

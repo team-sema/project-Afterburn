@@ -12,8 +12,8 @@ enum CollectionState {
 
 const EXPERIENCE_COLLECTOR_LAYER := 1 << 4
 
-## Matches the ship's default movement: MoveStats 100 × velocity multiplier 1.4.
-@export var drift_speed := 140.0
+## Slightly faster than the ship's default movement (MoveStats 100 × velocity multiplier 1.4 = 140).
+@export var drift_speed := 155.0
 @export var lifetime := 20.0
 @export_range(0.0, 20.0, 0.5) var knockback_distance := 5.0
 @export_range(0.01, 1.0, 0.01) var knockback_duration := 0.09

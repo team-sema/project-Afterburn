@@ -201,7 +201,10 @@ func _pick_enemy_choices() -> Array[EnemyAugment]:
 
 
 func _is_enemy_augment_available(augment: EnemyAugment) -> bool:
-	return augment != null and enemy_registry.can_add_augment(augment)
+	if augment == null or not enemy_registry.can_add_augment(augment):
+		return false
+	# A reroll penalty with nothing left to remove would be a free pick.
+	return augment.player_reroll_penalty <= 0 or remaining_reroll_count > 0
 
 
 func _category_weight_multiplier(
@@ -311,7 +314,15 @@ func _on_choice_selected(choice: Resource) -> void:
 			var enemy_augment := choice as EnemyAugment
 			assert(enemy_augment != null, "Enemy offer requires an EnemyAugment choice.")
 			enemy_registry.add_augment(enemy_augment)
+			_apply_enemy_reroll_penalty(enemy_augment)
 			await _finish_offer(enemy_augment)
+
+
+func _apply_enemy_reroll_penalty(enemy_augment: EnemyAugment) -> void:
+	if enemy_augment.player_reroll_penalty <= 0 or remaining_reroll_count <= 0:
+		return
+	remaining_reroll_count = maxi(0, remaining_reroll_count - enemy_augment.player_reroll_penalty)
+	reroll_count_changed.emit(remaining_reroll_count)
 
 
 func _resolve_player_augment(player_augment: PlayerAugment) -> bool:
