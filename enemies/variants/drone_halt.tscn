@@ -1,0 +1,26 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://enemies/normal_enemy.tscn" id="1_base"]
+[ext_resource type="Script" path="res://patterns/drone_halt_pattern.gd" id="2_pattern"]
+
+[node name="DroneHalt" instance=ExtResource("1_base")]
+
+[node name="DiffuseGlow" parent="Anchor"]
+self_modulate = Color(1, 0.25, 0.3, 0.07)
+
+[node name="WideGlow" parent="Anchor"]
+self_modulate = Color(1, 0.22, 0.28, 0.1)
+
+[node name="TightGlow" parent="Anchor"]
+self_modulate = Color(1, 0.32, 0.36, 0.34)
+
+[node name="Core" parent="Anchor"]
+self_modulate = Color(1, 0.94, 0.94, 1)
+
+[node name="DestroyedComponent" parent="."]
+destroy_effect_color = Color(1, 0.5, 0.5, 1)
+
+[node name="EnemyShootComponent" parent="."]
+pattern_script = ExtResource("2_pattern")
+pattern_params = {"speed": 120.0, "hold": 0.4, "dash_speed": 190.0, "rest": 4.5}
+pattern_fire_volume_boost = false

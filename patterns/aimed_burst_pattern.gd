@@ -1,13 +1,14 @@
 extends BarrageSequence
 ## Scene-configured aimed bursts; activation belongs to EnemyShootComponent.
 ## `shape` picks the bullet vocabulary: "needle" (aimed single, default),
-## "round" (area pressure) or "rice" (fast aimed). `tint` recolours the shape
+## "round" (area pressure), "rice" (fast aimed) or "orb" (slow, lingering). `tint` recolours the shape
 ## (null keeps the preset colour) and `trail` adds the diamond particle trail.
 
 const SHAPES := {
 	"needle": preload("res://resources/projectiles/needle.tres"),
 	"round": preload("res://resources/projectiles/round.tres"),
 	"rice": preload("res://resources/projectiles/rice.tres"),
+	"orb": preload("res://resources/projectiles/orb.tres"),
 }
 const TRAIL := preload("res://resources/projectiles/diamond_trail.tres")
 

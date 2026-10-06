@@ -16,6 +16,9 @@ const PRESET_PATHS := [
 	"res://resources/encounters/presets/tanker_guard_sniper.tres",
 	"res://resources/encounters/presets/interceptor_pair.tres",
 	"res://resources/encounters/presets/interceptor_trio.tres",
+	"res://resources/encounters/presets/drone_spread_formation.tres",
+	"res://resources/encounters/presets/drone_slow_zigzag.tres",
+	"res://resources/encounters/presets/drone_halt_formation.tres",
 ]
 
 var failures := PackedStringArray()

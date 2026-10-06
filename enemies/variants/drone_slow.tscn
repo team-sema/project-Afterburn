@@ -1,0 +1,26 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://enemies/normal_enemy.tscn" id="1_base"]
+[ext_resource type="Script" path="res://patterns/aimed_burst_pattern.gd" id="2_pattern"]
+
+[node name="DroneSlow" instance=ExtResource("1_base")]
+
+[node name="DiffuseGlow" parent="Anchor"]
+self_modulate = Color(0.7, 0.4, 1, 0.07)
+
+[node name="WideGlow" parent="Anchor"]
+self_modulate = Color(0.68, 0.38, 1, 0.1)
+
+[node name="TightGlow" parent="Anchor"]
+self_modulate = Color(0.75, 0.48, 1, 0.34)
+
+[node name="Core" parent="Anchor"]
+self_modulate = Color(0.96, 0.92, 1, 1)
+
+[node name="DestroyedComponent" parent="."]
+destroy_effect_color = Color(0.78, 0.6, 1, 1)
+
+[node name="EnemyShootComponent" parent="."]
+pattern_script = ExtResource("2_pattern")
+pattern_params = {"ways": 1, "spread": 0.0, "shots": 1, "gap": 0.15, "rest": 4.5, "speed": 55.0, "shape": "orb", "tint": Color(0.72, 0.45, 1, 1), "trail": false}
+pattern_fire_volume_boost = true

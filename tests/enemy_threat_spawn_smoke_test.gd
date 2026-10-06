@@ -20,6 +20,9 @@ const EXPECTED_ROSTER := {
 	&"x9_caster_drone_orbit": {"difficulty": 15.0, "min_threat": 3},
 	&"v7_drone_down": {"difficulty": 7.0, "min_threat": 3},
 	&"interceptor_trio": {"difficulty": 18.0, "min_threat": 3},
+	&"drone_spread_formation": {"difficulty": 12.0, "min_threat": 1},
+	&"drone_slow_zigzag": {"difficulty": 10.0, "min_threat": 2},
+	&"drone_halt_formation": {"difficulty": 14.0, "min_threat": 2},
 }
 
 var failures := PackedStringArray()
@@ -76,7 +79,7 @@ func _test_generator_and_pool_shape() -> void:
 	_expect(is_equal_approx(generator.spawn_interval, 2.8), "normal encounters spawn every 2.8 seconds")
 	_expect(is_equal_approx(generator.spawn_interval_jitter, 0.3), "normal spawn jitter is 0.3 seconds")
 	_expect(pool != null and pool.validate(), "EnemyGenerator references one valid MainEncounterPool")
-	_expect(pool.entries.size() == 13, "MainEncounterPool contains all thirteen live encounters")
+	_expect(pool.entries.size() == 16, "MainEncounterPool contains all sixteen live encounters")
 	_expect(not _has_property(generator, &"spawn_sets"), "EnemyGenerator no longer exposes spawn_sets")
 	_expect(
 		not _has_property(generator.enemy_spawner, &"enemy_scene"),
@@ -124,6 +127,7 @@ func _test_threat_rosters_and_weights() -> void:
 			&"striker_drone_diamond_5",
 			&"awl_formation",
 			&"striker_drone_diamond_13",
+			&"drone_spread_formation",
 		],
 		"Threat 1",
 	)
@@ -138,6 +142,9 @@ func _test_threat_rosters_and_weights() -> void:
 			&"tanker_guard_sniper",
 			&"bomb_drone_diamond",
 			&"interceptor_pair",
+			&"drone_spread_formation",
+			&"drone_slow_zigzag",
+			&"drone_halt_formation",
 		],
 		"Threat 2",
 	)
@@ -157,6 +164,9 @@ func _test_threat_rosters_and_weights() -> void:
 			&"x9_caster_drone_orbit",
 			&"v7_drone_down",
 			&"interceptor_trio",
+			&"drone_spread_formation",
+			&"drone_slow_zigzag",
+			&"drone_halt_formation",
 		],
 		"Threat 3",
 	)
