@@ -134,6 +134,64 @@ func _run() -> void:
 	(lab.get_node("%ClearTargetsButton") as Button).pressed.emit()
 	await process_frame
 
+	lab.open_enemy_augment_picker()
+	var applied_card := lab.find_child("Enemy_enemy_drone_formation_reinforcement", true, false) as Button
+	var remove_button := applied_card.find_child("Remove", true, false) as Button if applied_card != null else null
+	_expect(remove_button != null, "an applied enemy augment card offers a remove control")
+	if remove_button != null:
+		remove_button.pressed.emit()
+	await process_frame
+	_expect(
+		enemy_registry.get_stack_count(&"enemy_drone_formation_reinforcement") == 0,
+		"remove control takes the enemy augment off",
+	)
+	_expect(lab.is_augment_picker_open(), "removing keeps the picker open")
+	var reinforcement_again := lab.find_child("Enemy_enemy_drone_formation_reinforcement", true, false) as Button
+	_expect(
+		reinforcement_again != null and not reinforcement_again.disabled
+		and reinforcement_again.find_child("Remove", true, false) == null,
+		"a removed one-time augment becomes pickable again",
+	)
+	lab.close_augment_picker()
+	(enemy_buttons.get_node("Enemy_drone_formation/Spawn_drone_formation") as Button).pressed.emit()
+	await process_frame
+	_expect(
+		_count_descendants_in_group(gameplay, &"enemies") == 5,
+		"later spawns lose the removed reinforcement",
+	)
+	(lab.get_node("%ClearTargetsButton") as Button).pressed.emit()
+	await process_frame
+
+	var evolve_drone := load("res://resources/enemy_augments/evolutions/enemy_evolve_drone.tres") as EnemyAugment
+	enemy_registry.add_augment(evolve_drone)
+	_expect(
+		enemy_registry.resolve_enemy_scene(evolve_drone.evolution_from) == evolve_drone.evolution_to,
+		"lab evolution applies",
+	)
+	lab.open_enemy_augment_picker()
+	var reset_button := lab.find_child("ResetAugmentsButton", true, false) as Button
+	_expect(reset_button != null and not reset_button.disabled, "reset control is enabled while augments are applied")
+	if reset_button != null:
+		reset_button.pressed.emit()
+	await process_frame
+	_expect(enemy_registry.get_active_augments().is_empty(), "reset control removes every enemy augment")
+	_expect(
+		enemy_registry.resolve_enemy_scene(evolve_drone.evolution_from) == evolve_drone.evolution_from,
+		"removing an evolution restores the original enemy scene",
+	)
+	_expect(reset_button != null and reset_button.disabled, "reset control disables once nothing is applied")
+	lab.close_augment_picker()
+
+	lab.open_player_augment_picker()
+	var engine_card := lab.find_child("Player_facility_engine", true, false) as Button
+	var engine_remove := engine_card.find_child("Remove", true, false) as Button if engine_card != null else null
+	_expect(engine_remove != null, "an installed facility card offers a remove control")
+	if engine_remove != null:
+		engine_remove.pressed.emit()
+	await process_frame
+	_expect(player_registry.get_stack_count(&"facility_engine") == 0, "remove control uninstalls the facility augment")
+	lab.close_augment_picker()
+
 	(enemy_buttons.get_node("Enemy_striker_drone_diamond_5/Spawn_striker_drone_diamond_5") as Button).pressed.emit()
 	await process_frame
 	_expect(_count_descendants_in_group(gameplay, &"enemies") == 5, "spawn control creates a diamond_5 escort")

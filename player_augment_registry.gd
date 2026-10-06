@@ -109,6 +109,18 @@ func install_augment(
 	return slot_index
 
 
+## Empties the last slot holding augment_id. The slot stays (capacity unchanged).
+func uninstall_augment(augment_id: StringName) -> bool:
+	for index in range(_module_slots.size() - 1, -1, -1):
+		var module := _module_slots[index] as PlayerAugmentModuleState
+		if module != null and module.augment.augment_id == augment_id:
+			_module_slots[index] = null
+			module_slots_changed.emit()
+			augments_changed.emit()
+			return true
+	return false
+
+
 func get_installed_modules() -> Array[PlayerAugmentModuleState]:
 	var modules: Array[PlayerAugmentModuleState] = []
 	for module in _module_slots:
