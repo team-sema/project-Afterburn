@@ -1,10 +1,14 @@
 extends BarrageSequence
+## Caster ring curtain: plain pink round bullets, no trail. Rounds mark area
+## pressure, so the ring never reads as the aimed needles Drones fire.
+
+const ROUND := preload("res://resources/projectiles/round.tres")
+
 
 func build(params: Dictionary) -> void:
 	var shot := BarrageShot.new()
-	shot.appearance = preload("res://resources/projectiles/needle.tres")
+	shot.appearance = ROUND
 	shot.behavior = BulletBehavior.new()
-	shot.trail_effect = preload("res://resources/projectiles/diamond_trail.tres")
 	shot.lifetime = 8.0
 	var rings := int(params.get("rings", 5))
 	for index in rings:

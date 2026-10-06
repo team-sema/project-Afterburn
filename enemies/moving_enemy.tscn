@@ -43,7 +43,7 @@ adjust_amount = 10
 [node name="EnemyShootComponent" parent="." index="16" unique_id=1768565056]
 pattern_script = ExtResource("5_pattern")
 pattern_fire_volume_boost = true
-pattern_params = {"ways": 5, "spread": 15.0, "shots": 2, "gap": 0.15, "rest": 4.5, "speed": 80.0}
+pattern_params = {"ways": 5, "spread": 15.0, "shots": 2, "gap": 0.15, "rest": 4.5, "speed": 80.0, "shape": "round", "trail": false}
 initial_delay = 1.5
 apply_shot_threshold = true
 

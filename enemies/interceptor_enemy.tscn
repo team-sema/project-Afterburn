@@ -51,9 +51,12 @@ pattern_script = ExtResource("5_pattern")
 pattern_params = {
 "gap": 0.1,
 "rest": 10.0,
+"shape": "rice",
 "shots": 5,
 "speed": 250.0,
 "spread": 0.0,
+"tint": Color(1, 0.55, 0.25, 1),
+"trail": false,
 "ways": 1
 }
 initial_delay = 0.04
