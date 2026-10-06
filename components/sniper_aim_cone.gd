@@ -10,8 +10,12 @@ extends Node2D
 @export_range(0.0, 1.0, 0.005) var start_alpha := 0.01
 @export_range(0.0, 1.0, 0.01) var focused_alpha := 0.36
 @export_range(0.25, 3.0, 0.25) var line_width := 0.5
+## Lock-on (line frozen before the shot) reads brighter and thicker than focus.
+@export_range(0.0, 1.0, 0.01) var locked_alpha := 0.62
+@export_range(0.25, 3.0, 0.25) var locked_line_width := 1.0
 
 var _focus_progress := 0.0
+var _locked := false
 
 
 func _ready() -> void:
@@ -35,7 +39,18 @@ func set_focus_progress(value: float) -> void:
 	queue_redraw()
 
 
+func set_locked(value: bool) -> void:
+	_locked = value
+	queue_redraw()
+
+
+func is_locked() -> bool:
+	return _locked
+
+
 func get_line_alpha() -> float:
+	if _locked:
+		return locked_alpha
 	return lerpf(start_alpha, focused_alpha, _focus_progress)
 
 
@@ -57,5 +72,6 @@ func _draw() -> void:
 	var current_color := line_color
 	current_color.a = get_line_alpha()
 
-	draw_line(Vector2.ZERO, left, current_color, line_width, true)
-	draw_line(Vector2.ZERO, right, current_color, line_width, true)
+	var width := locked_line_width if _locked else line_width
+	draw_line(Vector2.ZERO, left, current_color, width, true)
+	draw_line(Vector2.ZERO, right, current_color, width, true)

@@ -5,8 +5,8 @@
 [node name="SniperAttackComponent" type="Node" node_paths=PackedStringArray("aim_cone")]
 script = ExtResource("1_script")
 aim_cone = NodePath("../SniperAimCone")
-aim_duration = 4.0
-focus_hold_duration = 0.18
+aim_duration = 2.5
+lock_on_duration = 0.75
 shot_recovery_duration = 0.1
 cooldown_duration = 2.5
 telegraph_start_angle = 14.0

@@ -35,7 +35,7 @@ func _run() -> void:
 	# Fast cycle for headless verification (after deferred ACTION_RATE apply).
 	await process_frame
 	await process_frame
-	attack.set_combat_timings(0.35, 0.12, 0.2, 0.08)
+	attack.set_combat_timings(0.35, 0.12, 0.2, 0.3)
 	attack.telegraph_start_angle = 12.0
 	attack.telegraph_end_angle = 0.05
 
@@ -87,20 +87,26 @@ func _run() -> void:
 		"telegraph guide lines darken as focus closes",
 	)
 
-	# Fully focused lines linger briefly before the shot.
-	for _i in 30:
+	# Full focus locks on: the line freezes for lock_on_duration before the shot.
+	for _i in 60:
 		await process_frame
-		if is_equal_approx(
-			attack.aim_cone.half_angle_degrees,
-			attack.telegraph_end_angle,
-		):
+		if attack.get_combat_state() == SniperAttackComponent.CombatState.LOCKED:
 			break
 	_expect(
 		failures,
-		attack.get_combat_state() == SniperAttackComponent.CombatState.AIMING,
-		"sniper holds full focus before firing",
+		attack.get_combat_state() == SniperAttackComponent.CombatState.LOCKED,
+		"sniper locks on at full focus before firing",
 	)
-	_expect(failures, attack.get_shots_fired() == 0, "full focus does not fire immediately")
+	_expect(failures, attack.get_shots_fired() == 0, "lock-on does not fire immediately")
+	_expect(failures, attack.aim_cone.is_locked() and attack.is_telegraph_visible(), "lock-on shows the locked line")
+	var locked_direction := attack.get_aim_direction()
+	player.global_position = Vector2(20.0, 300.0) if locked_direction.x > 0.0 else Vector2(220.0, 300.0)
+	await create_timer(0.1).timeout
+	_expect(
+		failures,
+		attack.get_aim_direction().is_equal_approx(locked_direction),
+		"locked line stops tracking the moving player",
+	)
 
 	# Complete first shot cycle and capture bullet direction.
 	var first_bullet_dir := Vector2.ZERO

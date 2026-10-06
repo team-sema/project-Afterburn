@@ -277,41 +277,30 @@ func _check_caster() -> void:
 
 
 func _check_sniper() -> void:
-	var configure := func(enemy: Enemy) -> void:
-		var attack := enemy.get_node("SniperAttackComponent") as SniperAttackComponent
-		attack.follow_up_aim_duration = 0.2
 	var plain := await _spawn(SNIPER_SCENE, _registry([]), Vector2(200, 48))
-	var evolved := await _spawn(EVOLVE_SNIPER.evolution_to, _registry([]), Vector2(400, 48), configure)
-	for enemy in [plain, evolved]:
-		var attack := enemy.get_node("SniperAttackComponent") as SniperAttackComponent
-		attack.set_combat_timings(0.2, 0.05, 3.0, 0.0)
-	# A target moving right at 140px/s, smooth per frame so velocity reads cleanly.
-	var target := Node2D.new()
-	target.add_to_group("player")
-	target.position = Vector2(150, 300)
-	world.add_child(target)
-	target.create_tween().tween_property(target, "position:x", 500.0, 2.5)
+	var evolved := await _spawn(EVOLVE_SNIPER.evolution_to, _registry([]), Vector2(400, 48))
+	var plain_attack := plain.get_node("SniperAttackComponent") as SniperAttackComponent
 	var evolved_attack := evolved.get_node("SniperAttackComponent") as SniperAttackComponent
-	var locked_directions: Array[Vector2] = []
-	var target_x_at_lock := 0.0
+	_expect(is_equal_approx(plain_attack.aim_duration, 2.5), "snipers aim for 2.5s")
+	_expect(is_equal_approx(plain_attack.lock_on_duration, 0.75), "plain sniper locks on for 0.75s")
+	_expect(is_equal_approx(evolved_attack.lock_on_duration, 0.25), "evolved sniper locks on for 0.25s")
+	for attack in [plain_attack, evolved_attack]:
+		attack.set_combat_timings(0.3, 0.05, 3.0)
+	var plain_locked := false
+	var evolved_locked := false
+	var evolved_fired_first := false
 	for _tick in 30:
 		await _wait(0.05)
-		if evolved_attack.is_follow_up_aiming():
-			if locked_directions.is_empty():
-				target_x_at_lock = target.position.x
-			locked_directions.append(evolved_attack.get_follow_up_aim_direction())
-	var plain_attack := plain.get_node("SniperAttackComponent") as SniperAttackComponent
-	_expect(not locked_directions.is_empty(), "evolved sniper re-aims for a follow-up shot")
-	if not locked_directions.is_empty():
-		var locked := locked_directions[0]
-		var steady := true
-		for direction in locked_directions:
-			steady = steady and direction.is_equal_approx(locked)
-		_expect(steady, "the follow-up trap line stays locked while the target moves")
-		var line_x := evolved.global_position.x + locked.x / locked.y * (300.0 - evolved.global_position.y)
-		_expect(line_x > target_x_at_lock + 40.0, "the trap line lies ahead of the moving target")
-	_expect(evolved_attack.get_shots_fired() == 2, "evolved sniper fires two shots per cycle")
-	_expect(plain_attack.get_shots_fired() == 1, "plain sniper fires one shot per cycle")
+		plain_locked = plain_locked or plain_attack.get_combat_state() == SniperAttackComponent.CombatState.LOCKED
+		evolved_locked = evolved_locked or evolved_attack.get_combat_state() == SniperAttackComponent.CombatState.LOCKED
+		if evolved_attack.get_shots_fired() > 0 and plain_attack.get_shots_fired() == 0:
+			evolved_fired_first = true
+	_expect(plain_locked and evolved_locked, "both snipers freeze their line before firing")
+	_expect(evolved_fired_first, "evolved sniper fires before the plain one finishes its lock-on")
+	_expect(
+		plain_attack.get_shots_fired() == 1 and evolved_attack.get_shots_fired() == 1,
+		"both snipers fire one shot per cycle",
+	)
 	_clear_world()
 	await process_frame
 
