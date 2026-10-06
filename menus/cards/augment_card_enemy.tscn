@@ -1,0 +1,39 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" uid="uid://d0t6qpeevle3p" path="res://menus/cards/augment_card_base.tscn" id="1"]
+[ext_resource type="Shader" uid="uid://cf5l5svfu4h12" path="res://menus/augment_card_surface.gdshader" id="2"]
+
+[sub_resource type="ShaderMaterial" id="Surface"]
+resource_local_to_scene = true
+shader = ExtResource("2")
+shader_parameter/metal = Color(0.86, 0.2, 0.34, 1)
+shader_parameter/spectrum_amount = 0.0
+shader_parameter/ray_strength = 0.0
+shader_parameter/ray_speed = 0.5
+shader_parameter/focus_ring_strength = 0.0
+shader_parameter/base_glow = 0.2
+shader_parameter/base_reflection = 0.05
+shader_parameter/corner_cut = 10.0
+shader_parameter/glow_strength = 1.0
+shader_parameter/reflection_strength = 0.6
+shader_parameter/spectrum_speed = 0.055
+shader_parameter/halo_strength = 0.09
+shader_parameter/mist_strength = 0.4
+
+[node name="EnemyAugmentCard" instance=ExtResource("1")]
+static_arcs_enabled = true
+side_gems_enabled = true
+decoration_color = Color(1, 0.36, 0.5, 1)
+
+[node name="Surface" parent="." index="0"]
+material = SubResource("Surface")
+
+[node name="TierLabel" parent="." index="7"]
+theme_override_colors/font_color = Color(1, 0.72, 0.8, 1)
+text = "THREAT"
+
+[node name="TierAccent" parent="." index="8"]
+color = Color(1, 0.3, 0.48, 1)
+
+[node name="Title" parent="." index="9"]
+theme_override_colors/font_color = Color(1, 0.86, 0.9, 1)

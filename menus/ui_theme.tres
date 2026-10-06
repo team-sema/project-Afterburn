@@ -1,0 +1,214 @@
+[gd_resource type="Theme" format=3]
+
+[ext_resource type="FontFile" uid="uid://dhbb73hkpge3y" path="res://fonts/Mulmaru.ttf" id="1_font"]
+[ext_resource type="Texture2D" uid="uid://kee3t61ekvum" path="res://assets/ui/volume_grabber.svg" id="2_grabber"]
+
+[sub_resource type="FontVariation" id="FontVariation_spaced"]
+base_font = ExtResource("1_font")
+spacing_glyph = 2
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_panel"]
+content_margin_left = 14.0
+content_margin_top = 14.0
+content_margin_right = 14.0
+content_margin_bottom = 14.0
+bg_color = Color(0.018, 0.035, 0.075, 0.96)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.1, 0.65, 0.95, 0.85)
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_button_normal"]
+content_margin_left = 10.0
+content_margin_top = 3.0
+content_margin_right = 10.0
+content_margin_bottom = 3.0
+bg_color = Color(0.03, 0.06, 0.12, 0.65)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.12, 0.28, 0.42, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_button_focus"]
+content_margin_left = 10.0
+content_margin_top = 3.0
+content_margin_right = 10.0
+content_margin_bottom = 3.0
+bg_color = Color(0.35, 0.88, 1, 0.16)
+border_width_left = 3
+border_color = Color(0.35, 0.88, 1, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_button_pressed"]
+content_margin_left = 10.0
+content_margin_top = 3.0
+content_margin_right = 10.0
+content_margin_bottom = 3.0
+bg_color = Color(0.35, 0.88, 1, 0.38)
+border_width_left = 3
+border_color = Color(0.75, 0.97, 1, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_button_disabled"]
+content_margin_left = 10.0
+content_margin_top = 3.0
+content_margin_right = 10.0
+content_margin_bottom = 3.0
+bg_color = Color(0.03, 0.05, 0.09, 0.5)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.1, 0.16, 0.24, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_main_button_normal"]
+content_margin_left = 14.0
+content_margin_top = 4.0
+content_margin_right = 14.0
+content_margin_bottom = 4.0
+bg_color = Color(0, 0, 0, 0)
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_main_button_focus"]
+content_margin_left = 14.0
+content_margin_top = 4.0
+content_margin_right = 14.0
+content_margin_bottom = 4.0
+bg_color = Color(0.35, 0.88, 1, 0.16)
+border_width_left = 3
+border_color = Color(0.35, 0.88, 1, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_main_button_pressed"]
+content_margin_left = 14.0
+content_margin_top = 4.0
+content_margin_right = 14.0
+content_margin_bottom = 4.0
+bg_color = Color(0.35, 0.88, 1, 0.38)
+border_width_left = 3
+border_color = Color(0.75, 0.97, 1, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_slider_track"]
+content_margin_top = 1.0
+content_margin_bottom = 1.0
+bg_color = Color(0.02, 0.09, 0.16, 0.95)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.12, 0.28, 0.42, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_slider_fill"]
+content_margin_top = 1.0
+content_margin_bottom = 1.0
+bg_color = Color(0.15, 0.62, 0.9, 0.95)
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_slider_fill_highlight"]
+content_margin_top = 1.0
+content_margin_bottom = 1.0
+bg_color = Color(0.35, 0.88, 1, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_settings_row"]
+content_margin_left = 10.0
+content_margin_top = 4.0
+content_margin_right = 10.0
+content_margin_bottom = 4.0
+bg_color = Color(0.03, 0.06, 0.12, 0.55)
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_settings_row_focused"]
+content_margin_left = 10.0
+content_margin_top = 4.0
+content_margin_right = 10.0
+content_margin_bottom = 4.0
+bg_color = Color(0.35, 0.88, 1, 0.14)
+border_width_left = 3
+border_color = Color(0.35, 0.88, 1, 1)
+
+[sub_resource type="StyleBoxEmpty" id="StyleBox_empty"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_toggle_on"]
+content_margin_left = 10.0
+content_margin_top = 3.0
+content_margin_right = 10.0
+content_margin_bottom = 3.0
+bg_color = Color(0.35, 0.88, 1, 0.3)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.35, 0.88, 1, 1)
+
+[resource]
+default_font = ExtResource("1_font")
+default_font_size = 12
+AugmentCard/base_type = &"Button"
+AugmentCard/styles/disabled = SubResource("StyleBox_empty")
+AugmentCard/styles/focus = SubResource("StyleBox_empty")
+AugmentCard/styles/hover = SubResource("StyleBox_empty")
+AugmentCard/styles/hover_pressed = SubResource("StyleBox_empty")
+AugmentCard/styles/normal = SubResource("StyleBox_empty")
+AugmentCard/styles/pressed = SubResource("StyleBox_empty")
+Button/colors/font_color = Color(0.62, 0.76, 0.9, 1)
+Button/colors/font_disabled_color = Color(0.3, 0.38, 0.5, 1)
+Button/colors/font_focus_color = Color(0.86, 0.98, 1, 1)
+Button/colors/font_hover_color = Color(0.86, 0.98, 1, 1)
+Button/colors/font_hover_pressed_color = Color(1, 1, 1, 1)
+Button/colors/font_pressed_color = Color(1, 1, 1, 1)
+Button/styles/disabled = SubResource("StyleBox_button_disabled")
+Button/styles/focus = SubResource("StyleBox_button_focus")
+Button/styles/hover = SubResource("StyleBox_button_normal")
+Button/styles/hover_pressed = SubResource("StyleBox_button_pressed")
+Button/styles/normal = SubResource("StyleBox_button_normal")
+Button/styles/pressed = SubResource("StyleBox_button_pressed")
+HSlider/icons/grabber = ExtResource("2_grabber")
+HSlider/icons/grabber_disabled = ExtResource("2_grabber")
+HSlider/icons/grabber_highlight = ExtResource("2_grabber")
+HSlider/styles/grabber_area = SubResource("StyleBox_slider_fill")
+HSlider/styles/grabber_area_highlight = SubResource("StyleBox_slider_fill_highlight")
+HSlider/styles/slider = SubResource("StyleBox_slider_track")
+GameOverTitle/base_type = &"Label"
+GameOverTitle/colors/font_color = Color(2.4, 0.75, 0.95, 1)
+GameOverTitle/colors/font_shadow_color = Color(0.55, 0.05, 0.2, 0.9)
+GameOverTitle/constants/shadow_offset_x = 0
+GameOverTitle/constants/shadow_offset_y = 3
+GameOverTitle/font_sizes/font_size = 36
+HeaderLabel/base_type = &"Label"
+HeaderLabel/colors/font_color = Color(0.45, 0.78, 1, 1)
+HeaderLabel/font_sizes/font_size = 24
+HintLabel/base_type = &"Label"
+HintLabel/colors/font_color = Color(0.45, 0.62, 0.8, 1)
+HintLabel/font_sizes/font_size = 12
+Label/colors/font_color = Color(0.82, 0.92, 1, 1)
+RecordLabel/base_type = &"Label"
+RecordLabel/colors/font_color = Color(2, 1.65, 0.55, 1)
+RecordLabel/fonts/font = SubResource("FontVariation_spaced")
+RecordLabel/font_sizes/font_size = 12
+MainMenuButton/base_type = &"Button"
+MainMenuButton/colors/font_focus_color = Color(1.1, 1.45, 1.6, 1)
+MainMenuButton/colors/font_hover_color = Color(1.1, 1.45, 1.6, 1)
+MainMenuButton/font_sizes/font_size = 24
+MainMenuButton/styles/disabled = SubResource("StyleBox_main_button_normal")
+MainMenuButton/styles/focus = SubResource("StyleBox_main_button_focus")
+MainMenuButton/styles/hover = SubResource("StyleBox_main_button_normal")
+MainMenuButton/styles/hover_pressed = SubResource("StyleBox_main_button_pressed")
+MainMenuButton/styles/normal = SubResource("StyleBox_main_button_normal")
+MainMenuButton/styles/pressed = SubResource("StyleBox_main_button_pressed")
+PanelContainer/styles/panel = SubResource("StyleBox_panel")
+SettingsToggle/base_type = &"Button"
+SettingsToggle/colors/font_pressed_color = Color(0.86, 0.98, 1, 1)
+SettingsToggle/colors/font_hover_pressed_color = Color(0.86, 0.98, 1, 1)
+SettingsToggle/styles/focus = SubResource("StyleBox_empty")
+SettingsToggle/styles/hover_pressed = SubResource("StyleBox_toggle_on")
+SettingsToggle/styles/pressed = SubResource("StyleBox_toggle_on")
+SettingsRow/base_type = &"PanelContainer"
+SettingsRow/styles/panel = SubResource("StyleBox_settings_row")
+SettingsRowFocused/base_type = &"PanelContainer"
+SettingsRowFocused/styles/panel = SubResource("StyleBox_settings_row_focused")
+SubtitleLabel/base_type = &"Label"
+SubtitleLabel/colors/font_color = Color(0.45, 0.78, 1, 1)
+SubtitleLabel/fonts/font = SubResource("FontVariation_spaced")
+SubtitleLabel/font_sizes/font_size = 12
+TitleLabel/base_type = &"Label"
+TitleLabel/colors/font_color = Color(1.4, 2.1, 2.6, 1)
+TitleLabel/colors/font_shadow_color = Color(0.1, 0.45, 0.95, 0.85)
+TitleLabel/constants/shadow_offset_x = 0
+TitleLabel/constants/shadow_offset_y = 3
+TitleLabel/font_sizes/font_size = 36

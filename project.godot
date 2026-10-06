@@ -22,6 +22,7 @@ buses/default_bus_layout="uid://dhp5nmgmk01ss"
 [autoload]
 
 ResourceStash="*uid://c8ddbdwt5ti7k"
+UserSettings="*res://game_settings.gd"
 MusicPlayer="*uid://cgx0x2vh73geh"
 
 [display]

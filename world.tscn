@@ -14,6 +14,8 @@
 [ext_resource type="PackedScene" path="res://menus/weapon_core_cluster.tscn" id="13_bay_cluster"]
 [ext_resource type="PackedScene" path="res://menus/hex_module_frame.tscn" id="14_hex"]
 [ext_resource type="Script" uid="uid://b7a7qj3mj6nmc" path="res://menus/hex_honeycomb_container.gd" id="15_honeycomb"]
+[ext_resource type="PackedScene" path="res://menus/pause_menu.tscn" id="16_pause_menu"]
+[ext_resource type="PackedScene" path="res://menus/settings_menu.tscn" id="17_settings_menu"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_left_panel"]
 bg_color = Color(0.018, 0.035, 0.075, 1)
@@ -297,28 +299,10 @@ mouse_filter = 2
 script = ExtResource("11_corner_frame")
 inset = 5.0
 
-[node name="PauseOverlay" type="ColorRect" parent="Layout/Playfield" unique_id=603058799]
+[node name="PauseOverlay" parent="Layout/Playfield" unique_id=603058799 instance=ExtResource("16_pause_menu")]
 unique_name_in_owner = true
 visible = false
 layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(0.005, 0.01, 0.025, 0.72)
-
-[node name="PauseLabel" type="Label" parent="Layout/Playfield/PauseOverlay" unique_id=1312122063]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-text = "일시 정지"
-label_settings = ExtResource("4_title_label")
-horizontal_alignment = 1
-vertical_alignment = 1
 
 [node name="RightPanel" type="PanelContainer" parent="Layout" unique_id=162854702]
 texture_filter = 1
@@ -523,3 +507,7 @@ offset_bottom = 28.0
 layout_mode = 2
 mouse_filter = 2
 script = ExtResource("11_corner_frame")
+
+[node name="SettingsMenu" parent="." instance=ExtResource("17_settings_menu")]
+unique_name_in_owner = true
+layout_mode = 1

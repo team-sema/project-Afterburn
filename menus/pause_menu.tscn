@@ -1,0 +1,83 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://menus/pause_menu.gd" id="1_script"]
+[ext_resource type="Theme" path="res://menus/ui_theme.tres" id="2_theme"]
+
+[node name="PauseMenu" type="ColorRect"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2_theme")
+color = Color(0.005, 0.01, 0.025, 0.8)
+script = ExtResource("1_script")
+
+[node name="Center" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="VBox" type="VBoxContainer" parent="Center"]
+custom_minimum_size = Vector2(168, 0)
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="Tag" type="Label" parent="Center/VBox"]
+layout_mode = 2
+theme_type_variation = &"SubtitleLabel"
+text = "PAUSED"
+horizontal_alignment = 1
+
+[node name="Title" type="Label" parent="Center/VBox"]
+layout_mode = 2
+theme_type_variation = &"HeaderLabel"
+text = "일시 정지"
+horizontal_alignment = 1
+
+[node name="Rule" type="ColorRect" parent="Center/VBox"]
+custom_minimum_size = Vector2(0, 1)
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.1, 0.65, 0.95, 0.85)
+
+[node name="Gap" type="Control" parent="Center/VBox"]
+custom_minimum_size = Vector2(0, 12)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="ResumeButton" type="Button" parent="Center/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_default_cursor_shape = 2
+theme_type_variation = &"MainMenuButton"
+text = "계속하기"
+
+[node name="SettingsButton" type="Button" parent="Center/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_default_cursor_shape = 2
+theme_type_variation = &"MainMenuButton"
+text = "설정"
+
+[node name="MainMenuButton" type="Button" parent="Center/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_default_cursor_shape = 2
+theme_type_variation = &"MainMenuButton"
+text = "메인 메뉴"
+
+[node name="HintGap" type="Control" parent="Center/VBox"]
+custom_minimum_size = Vector2(0, 12)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Hint" type="Label" parent="Center/VBox"]
+layout_mode = 2
+theme_type_variation = &"HintLabel"
+text = "Esc 계속하기"
+horizontal_alignment = 1

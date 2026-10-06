@@ -1,74 +1,8 @@
 [gd_scene format=3 uid="uid://503oqsi4rpuh"]
 
 [ext_resource type="Script" uid="uid://cmey2cic1ef7d" path="res://menus/augment_selection_overlay.gd" id="1_overlay"]
-[ext_resource type="LabelSettings" path="res://fonts/overlay_title_label_settings.tres" id="2_title_settings"]
-[ext_resource type="LabelSettings" path="res://fonts/overlay_default_label_settings.tres" id="3_label_settings"]
-[ext_resource type="FontFile" uid="uid://dhbb73hkpge3y" path="res://fonts/Mulmaru.ttf" id="4_font"]
+[ext_resource type="Theme" path="res://menus/ui_theme.tres" id="2_theme"]
 [ext_resource type="PackedScene" uid="uid://c6x6veg03hm8w" path="res://menus/augment_breakpoint_intro.tscn" id="5_breakpoint_intro"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBox_panel"]
-bg_color = Color(0.025, 0.055, 0.11, 0.84)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.18, 0.78, 1, 0.8)
-corner_radius_top_left = 5
-corner_radius_top_right = 5
-corner_radius_bottom_right = 5
-corner_radius_bottom_left = 5
-
-[sub_resource type="StyleBoxFlat" id="StyleBox_card"]
-content_margin_left = 9.0
-content_margin_top = 8.0
-content_margin_right = 9.0
-content_margin_bottom = 8.0
-bg_color = Color(0.025, 0.075, 0.14, 0.98)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.2, 0.68, 0.9, 0.78)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
-shadow_color = Color(0.02, 0.55, 0.85, 0.2)
-shadow_size = 4
-
-[sub_resource type="StyleBoxFlat" id="StyleBox_card_pressed"]
-content_margin_left = 9.0
-content_margin_top = 8.0
-content_margin_right = 9.0
-content_margin_bottom = 8.0
-bg_color = Color(0.07, 0.18, 0.28, 1)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.65, 0.98, 1, 1)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
-
-[sub_resource type="StyleBoxFlat" id="StyleBox_card_hover"]
-content_margin_left = 9.0
-content_margin_top = 8.0
-content_margin_right = 9.0
-content_margin_bottom = 8.0
-bg_color = Color(0.04, 0.12, 0.21, 0.99)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.32, 0.88, 1, 0.95)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
-shadow_color = Color(0.05, 0.65, 0.95, 0.32)
-shadow_size = 6
 
 [node name="AugmentSelectionOverlay" type="CanvasLayer" unique_id=1658730483]
 process_mode = 3
@@ -77,223 +11,158 @@ script = ExtResource("1_overlay")
 player_accent_color = Color(0.18, 0.82, 1, 1)
 enemy_accent_color = Color(1, 0.2, 0.58, 1)
 
-[node name="Backdrop" type="ColorRect" parent="." unique_id=468227550]
+[node name="Stage" type="Control" parent="."]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.005, 0.01, 0.03, 0.16)
+mouse_filter = 2
+theme = ExtResource("2_theme")
 
-[node name="BreakpointIntro" parent="." unique_id=1570162321 instance=ExtResource("5_breakpoint_intro")]
-
-[node name="MarginContainer" type="MarginContainer" parent="." unique_id=1920810318]
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -118.0
-offset_top = -170.0
-offset_right = 118.0
-offset_bottom = 170.0
+[node name="Backdrop" type="ColorRect" parent="Stage"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_left = 8
-theme_override_constants/margin_top = 8
-theme_override_constants/margin_right = 8
-theme_override_constants/margin_bottom = 8
+color = Color(0.004, 0.008, 0.022, 0.92)
 
-[node name="PanelContainer" type="PanelContainer" parent="MarginContainer" unique_id=762158450]
-layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBox_panel")
+[node name="BreakpointIntro" parent="Stage" unique_id=1570162321 instance=ExtResource("5_breakpoint_intro")]
+layout_mode = 1
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/PanelContainer" unique_id=1371109450]
-layout_mode = 2
-theme_override_constants/separation = 5
+[node name="Content" type="Control" parent="Stage"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
 
-[node name="TitleLabel" type="Label" parent="MarginContainer/PanelContainer/VBoxContainer" unique_id=1887388987]
+[node name="Header" type="VBoxContainer" parent="Stage/Content"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 16.0
+offset_bottom = 70.0
+grow_horizontal = 2
+mouse_filter = 2
+theme_override_constants/separation = 2
+
+[node name="TagLabel" type="Label" parent="Stage/Content/Header"]
 unique_name_in_owner = true
 layout_mode = 2
-text = "강화"
-label_settings = ExtResource("2_title_settings")
+theme_type_variation = &"SubtitleLabel"
+text = "GOLD TIER"
 horizontal_alignment = 1
 
-[node name="PromptLabel" type="Label" parent="MarginContainer/PanelContainer/VBoxContainer" unique_id=1056033097]
+[node name="TitleLabel" type="Label" parent="Stage/Content/Header"]
 unique_name_in_owner = true
-visible = false
 layout_mode = 2
-label_settings = ExtResource("3_label_settings")
+theme_type_variation = &"HeaderLabel"
+text = "강화 선택"
 horizontal_alignment = 1
-autowrap_mode = 2
 
-[node name="AccentBar" type="ColorRect" parent="MarginContainer/PanelContainer/VBoxContainer" unique_id=2026540378]
-custom_minimum_size = Vector2(0, 3)
+[node name="AccentBar" type="ColorRect" parent="Stage/Content/Header"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(200, 2)
 layout_mode = 2
+size_flags_horizontal = 4
 mouse_filter = 2
 color = Color(0.18, 0.82, 1, 1)
 
-[node name="ChoiceCarousel" type="Control" parent="MarginContainer/PanelContainer/VBoxContainer" unique_id=1217082527]
+[node name="ChoiceRow" type="Control" parent="Stage/Content"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 202)
-layout_mode = 2
-size_flags_vertical = 3
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 76.0
+offset_bottom = 284.0
+grow_horizontal = 2
 mouse_filter = 2
 
-[node name="ChoiceButton1" type="Button" parent="MarginContainer/PanelContainer/VBoxContainer/ChoiceCarousel" unique_id=567130545]
+[node name="ChoiceButton1" type="Button" parent="Stage/Content/ChoiceRow"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(156, 188)
+custom_minimum_size = Vector2(140, 188)
 layout_mode = 0
-offset_top = 4.0
-offset_right = 156.0
-offset_bottom = 192.0
-theme_override_fonts/font = ExtResource("4_font")
-theme_override_font_sizes/font_size = 14
-theme_override_styles/normal = SubResource("StyleBox_card")
-theme_override_styles/disabled = SubResource("StyleBox_card")
-theme_override_styles/pressed = SubResource("StyleBox_card_pressed")
-theme_override_styles/hover = SubResource("StyleBox_card_hover")
-theme_override_styles/focus = SubResource("StyleBox_card_hover")
-text = "선택 1"
-autowrap_mode = 2
+offset_right = 140.0
+offset_bottom = 188.0
+mouse_default_cursor_shape = 2
+theme_type_variation = &"AugmentCard"
 
-[node name="TierLabel" type="Label" parent="MarginContainer/PanelContainer/VBoxContainer/ChoiceCarousel/ChoiceButton1"]
-unique_name_in_owner = false
-layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-offset_left = 9.0
-offset_top = 5.0
-offset_right = -9.0
-offset_bottom = 17.0
-grow_horizontal = 2
-mouse_filter = 2
-theme_override_fonts/font = ExtResource("4_font")
-theme_override_font_sizes/font_size = 9
-text = "SILVER"
-horizontal_alignment = 1
-
-[node name="TierAccent" type="ColorRect" parent="MarginContainer/PanelContainer/VBoxContainer/ChoiceCarousel/ChoiceButton1"]
-layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-offset_left = 12.0
-offset_top = 19.0
-offset_right = -12.0
-offset_bottom = 21.0
-grow_horizontal = 2
-mouse_filter = 2
-color = Color(0.62, 0.84, 0.98, 0.92)
-
-[node name="ChoiceButton2" type="Button" parent="MarginContainer/PanelContainer/VBoxContainer/ChoiceCarousel" unique_id=1842936470]
+[node name="ChoiceButton2" type="Button" parent="Stage/Content/ChoiceRow"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(156, 188)
+custom_minimum_size = Vector2(140, 188)
 layout_mode = 0
-offset_left = 32.0
-offset_top = 14.0
-offset_right = 188.0
-offset_bottom = 202.0
-theme_override_fonts/font = ExtResource("4_font")
-theme_override_font_sizes/font_size = 14
-theme_override_styles/normal = SubResource("StyleBox_card")
-theme_override_styles/disabled = SubResource("StyleBox_card")
-theme_override_styles/pressed = SubResource("StyleBox_card_pressed")
-theme_override_styles/hover = SubResource("StyleBox_card_hover")
-theme_override_styles/focus = SubResource("StyleBox_card_hover")
-text = "선택 2"
-autowrap_mode = 2
+offset_right = 140.0
+offset_bottom = 188.0
+mouse_default_cursor_shape = 2
+theme_type_variation = &"AugmentCard"
 
-[node name="TierLabel" type="Label" parent="MarginContainer/PanelContainer/VBoxContainer/ChoiceCarousel/ChoiceButton2"]
-unique_name_in_owner = false
-layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-offset_left = 9.0
-offset_top = 5.0
-offset_right = -9.0
-offset_bottom = 17.0
-grow_horizontal = 2
-mouse_filter = 2
-theme_override_fonts/font = ExtResource("4_font")
-theme_override_font_sizes/font_size = 9
-text = "SILVER"
-horizontal_alignment = 1
-
-[node name="TierAccent" type="ColorRect" parent="MarginContainer/PanelContainer/VBoxContainer/ChoiceCarousel/ChoiceButton2"]
-layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-offset_left = 12.0
-offset_top = 19.0
-offset_right = -12.0
-offset_bottom = 21.0
-grow_horizontal = 2
-mouse_filter = 2
-color = Color(0.62, 0.84, 0.98, 0.92)
-
-[node name="ChoiceButton3" type="Button" parent="MarginContainer/PanelContainer/VBoxContainer/ChoiceCarousel" unique_id=779700868]
+[node name="ChoiceButton3" type="Button" parent="Stage/Content/ChoiceRow"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(156, 188)
+custom_minimum_size = Vector2(140, 188)
 layout_mode = 0
-offset_left = 64.0
-offset_top = 14.0
-offset_right = 220.0
-offset_bottom = 202.0
-theme_override_fonts/font = ExtResource("4_font")
-theme_override_font_sizes/font_size = 14
-theme_override_styles/normal = SubResource("StyleBox_card")
-theme_override_styles/disabled = SubResource("StyleBox_card")
-theme_override_styles/pressed = SubResource("StyleBox_card_pressed")
-theme_override_styles/hover = SubResource("StyleBox_card_hover")
-theme_override_styles/focus = SubResource("StyleBox_card_hover")
-text = "선택 3"
-autowrap_mode = 2
+offset_right = 140.0
+offset_bottom = 188.0
+mouse_default_cursor_shape = 2
+theme_type_variation = &"AugmentCard"
 
-[node name="TierLabel" type="Label" parent="MarginContainer/PanelContainer/VBoxContainer/ChoiceCarousel/ChoiceButton3"]
-unique_name_in_owner = false
+[node name="PromptLabel" type="Label" parent="Stage/Content"]
+unique_name_in_owner = true
+visible = false
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
-offset_left = 9.0
-offset_top = 5.0
-offset_right = -9.0
-offset_bottom = 17.0
+offset_left = 16.0
+offset_top = 290.0
+offset_right = -16.0
+offset_bottom = 316.0
 grow_horizontal = 2
-mouse_filter = 2
-theme_override_fonts/font = ExtResource("4_font")
-theme_override_font_sizes/font_size = 9
-text = "SILVER"
+text = "결과"
 horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
 
-[node name="TierAccent" type="ColorRect" parent="MarginContainer/PanelContainer/VBoxContainer/ChoiceCarousel/ChoiceButton3"]
+[node name="ActionRow" type="HBoxContainer" parent="Stage/Content"]
+unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
-offset_left = 12.0
-offset_top = 19.0
-offset_right = -12.0
-offset_bottom = 21.0
+offset_top = 292.0
+offset_bottom = 316.0
 grow_horizontal = 2
 mouse_filter = 2
-color = Color(0.62, 0.84, 0.98, 0.92)
-
-[node name="RerollRow" type="HBoxContainer" parent="MarginContainer/PanelContainer/VBoxContainer" unique_id=519011975]
-layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 12
 alignment = 1
 
-[node name="RerollButton" type="Button" parent="MarginContainer/PanelContainer/VBoxContainer/RerollRow" unique_id=1296453980]
+[node name="RerollButton" type="Button" parent="Stage/Content/ActionRow"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(126, 28)
+custom_minimum_size = Vector2(108, 0)
 layout_mode = 2
-theme_override_fonts/font = ExtResource("4_font")
-theme_override_font_sizes/font_size = 13
+mouse_default_cursor_shape = 2
 text = "[R] 리롤 (2)"
 
-[node name="SlotActionLabel" type="Button" parent="MarginContainer/PanelContainer/VBoxContainer" unique_id=547211833]
+[node name="SlotActionLabel" type="Button" parent="Stage/Content/ActionRow"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 28)
+custom_minimum_size = Vector2(108, 0)
 layout_mode = 2
-theme_override_fonts/font = ExtResource("4_font")
-theme_override_font_sizes/font_size = 13
-text = "범용 슬롯 0/5 · [+1]"
+mouse_default_cursor_shape = 2
+text = "스킵 · 범용 슬롯 +1 (5→6)"
+
+[node name="HintLabel" type="Label" parent="Stage/Content"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -30.0
+offset_bottom = -14.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_type_variation = &"HintLabel"
+text = "←→ 선택 · Enter 결정 · R 리롤"
+horizontal_alignment = 1

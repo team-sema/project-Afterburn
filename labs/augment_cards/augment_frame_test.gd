@@ -21,6 +21,8 @@ func _ready() -> void:
 	for index in mode_buttons.get_child_count():
 		(mode_buttons.get_child(index) as Button).pressed.connect(show_mode.bind(index - 1))
 	%Reset.pressed.connect(show_mode.bind(-2))
+	# 게임의 우측 STATUS처럼 오른쪽 조작 패널은 덮지 않는다.
+	overlay.configure_stage_limit($LabControls/Panel)
 	overlay.reroll_requested.connect(_reroll)
 	overlay.choice_selected.connect(_select)
 	show_mode(-1)

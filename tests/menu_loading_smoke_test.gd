@@ -15,10 +15,18 @@ func _run() -> void:
 	current_scene = menu
 	menu.set_process(false)
 
+	var start_button := menu.get_node("%StartButton") as Button
+	var settings_button := menu.get_node("%SettingsButton") as Button
+	_expect(start_button.has_focus(), "start item is focused when the menu opens")
+
 	menu.call("_request_start")
 	menu.call("_enter_game_when_ready")
-	var start_label := menu.get_node("CenterContainer/VBoxContainer/StartLabel") as Label
-	_expect(start_label.text == "게임 준비 중...", "early start input shows loading feedback")
+	var status_label := menu.get_node("%StatusLabel") as Label
+	_expect(status_label.text == "게임 준비 중...", "early start input shows loading feedback")
+	_expect(
+		settings_button.disabled and settings_button.focus_mode == Control.FOCUS_NONE,
+		"other menu items are locked while the game is starting",
+	)
 
 	var deadline := Time.get_ticks_msec() + 10000
 	while menu.get("_game_scene") == null and Time.get_ticks_msec() < deadline:
@@ -28,8 +36,9 @@ func _run() -> void:
 
 	if menu.get("_game_scene") != null:
 		menu.call("_enter_game_when_ready")
-		await process_frame
-		await process_frame
+		deadline = Time.get_ticks_msec() + 3000
+		while (current_scene == null or current_scene.name != "World") and Time.get_ticks_msec() < deadline:
+			await process_frame
 		_expect(current_scene != null and current_scene.name == "World", "loaded game scene becomes current")
 	if current_scene != null:
 		current_scene.queue_free()

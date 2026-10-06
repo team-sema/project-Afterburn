@@ -34,9 +34,9 @@ result_hold_duration = 0.8
 layer = 101
 
 [node name="Panel" type="VBoxContainer" parent="LabControls" unique_id=1488941626]
-offset_left = 12.0
+offset_left = 452.0
 offset_top = 28.0
-offset_right = 190.0
+offset_right = 630.0
 offset_bottom = 326.0
 theme = SubResource("Theme_lab")
 theme_override_constants/separation = 8

@@ -6,11 +6,14 @@ extends Control
 @onready var title_label: Label = $CenterContainer/BreakpointCard/MarginContainer/VBoxContainer/TitleLabel
 @onready var accent_bar: ColorRect = $CenterContainer/BreakpointCard/MarginContainer/VBoxContainer/AccentBar
 @onready var animation_player: AnimationPlayer = $AnimationPlayer
+@onready var band: ColorRect = $Band
 
 
 func play_intro(accent_color: Color) -> void:
 	set_accent_color(accent_color)
 	visible = true
+	band.pivot_offset = band.size * 0.5
+	breakpoint_card.pivot_offset = breakpoint_card.size * 0.5
 	animation_player.play(&"reveal")
 	await animation_player.animation_finished
 	visible = false
@@ -38,3 +41,4 @@ func set_accent_color(accent_color: Color) -> void:
 	title_settings.outline_color = outline_color
 	title_label.label_settings = title_settings
 	accent_bar.color = accent_color
+	band.color = Color(accent_color.r, accent_color.g, accent_color.b, 0.12)

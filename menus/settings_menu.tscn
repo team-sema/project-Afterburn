@@ -1,0 +1,201 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://menus/settings_menu.gd" id="1_script"]
+[ext_resource type="Theme" path="res://menus/ui_theme.tres" id="2_theme"]
+[ext_resource type="Script" uid="uid://r8a6m4303af1" path="res://menus/neon_corner_frame.gd" id="3_frame"]
+
+[node name="SettingsMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2_theme")
+script = ExtResource("1_script")
+
+[node name="Backdrop" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0.008, 0.025, 0.86)
+
+[node name="Center" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Panel" type="PanelContainer" parent="Center"]
+custom_minimum_size = Vector2(320, 0)
+layout_mode = 2
+
+[node name="Frame" type="Control" parent="Center/Panel"]
+layout_mode = 2
+mouse_filter = 2
+script = ExtResource("3_frame")
+color = Color(0.35, 0.88, 1, 0.95)
+bracket_length = 14.0
+inset = -17.0
+
+[node name="VBox" type="VBoxContainer" parent="Center/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Header" type="HBoxContainer" parent="Center/Panel/VBox"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="Center/Panel/VBox/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"HeaderLabel"
+text = "설정"
+
+[node name="Tag" type="Label" parent="Center/Panel/VBox/Header"]
+layout_mode = 2
+size_flags_vertical = 8
+theme_type_variation = &"SubtitleLabel"
+text = "SETTINGS"
+
+[node name="Rule" type="ColorRect" parent="Center/Panel/VBox"]
+custom_minimum_size = Vector2(0, 1)
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.1, 0.65, 0.95, 0.85)
+
+[node name="Rows" type="VBoxContainer" parent="Center/Panel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 3
+
+[node name="MasterRow" type="PanelContainer" parent="Center/Panel/VBox/Rows"]
+layout_mode = 2
+theme_type_variation = &"SettingsRow"
+
+[node name="HBox" type="HBoxContainer" parent="Center/Panel/VBox/Rows/MasterRow"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Name" type="Label" parent="Center/Panel/VBox/Rows/MasterRow/HBox"]
+custom_minimum_size = Vector2(84, 0)
+layout_mode = 2
+text = "마스터 볼륨"
+
+[node name="Slider" type="HSlider" parent="Center/Panel/VBox/Rows/MasterRow/HBox"]
+custom_minimum_size = Vector2(0, 12)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+mouse_default_cursor_shape = 2
+max_value = 1.0
+step = 0.05
+value = 1.0
+scrollable = false
+
+[node name="Value" type="Label" parent="Center/Panel/VBox/Rows/MasterRow/HBox"]
+custom_minimum_size = Vector2(40, 0)
+layout_mode = 2
+text = "100%"
+horizontal_alignment = 2
+
+[node name="MusicRow" type="PanelContainer" parent="Center/Panel/VBox/Rows"]
+layout_mode = 2
+theme_type_variation = &"SettingsRow"
+
+[node name="HBox" type="HBoxContainer" parent="Center/Panel/VBox/Rows/MusicRow"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Name" type="Label" parent="Center/Panel/VBox/Rows/MusicRow/HBox"]
+custom_minimum_size = Vector2(84, 0)
+layout_mode = 2
+text = "음악"
+
+[node name="Slider" type="HSlider" parent="Center/Panel/VBox/Rows/MusicRow/HBox"]
+custom_minimum_size = Vector2(0, 12)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+mouse_default_cursor_shape = 2
+max_value = 1.0
+step = 0.05
+value = 1.0
+scrollable = false
+
+[node name="Value" type="Label" parent="Center/Panel/VBox/Rows/MusicRow/HBox"]
+custom_minimum_size = Vector2(40, 0)
+layout_mode = 2
+text = "100%"
+horizontal_alignment = 2
+
+[node name="SfxRow" type="PanelContainer" parent="Center/Panel/VBox/Rows"]
+layout_mode = 2
+theme_type_variation = &"SettingsRow"
+
+[node name="HBox" type="HBoxContainer" parent="Center/Panel/VBox/Rows/SfxRow"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Name" type="Label" parent="Center/Panel/VBox/Rows/SfxRow/HBox"]
+custom_minimum_size = Vector2(84, 0)
+layout_mode = 2
+text = "효과음"
+
+[node name="Slider" type="HSlider" parent="Center/Panel/VBox/Rows/SfxRow/HBox"]
+custom_minimum_size = Vector2(0, 12)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+mouse_default_cursor_shape = 2
+max_value = 1.0
+step = 0.05
+value = 1.0
+scrollable = false
+
+[node name="Value" type="Label" parent="Center/Panel/VBox/Rows/SfxRow/HBox"]
+custom_minimum_size = Vector2(40, 0)
+layout_mode = 2
+text = "100%"
+horizontal_alignment = 2
+
+[node name="FullscreenRow" type="PanelContainer" parent="Center/Panel/VBox/Rows"]
+layout_mode = 2
+theme_type_variation = &"SettingsRow"
+
+[node name="HBox" type="HBoxContainer" parent="Center/Panel/VBox/Rows/FullscreenRow"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Name" type="Label" parent="Center/Panel/VBox/Rows/FullscreenRow/HBox"]
+custom_minimum_size = Vector2(84, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "전체 화면"
+
+[node name="FullscreenButton" type="Button" parent="Center/Panel/VBox/Rows/FullscreenRow/HBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(56, 0)
+layout_mode = 2
+mouse_default_cursor_shape = 2
+theme_type_variation = &"SettingsToggle"
+toggle_mode = true
+text = "끔"
+
+[node name="BackButton" type="Button" parent="Center/Panel/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(120, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+mouse_default_cursor_shape = 2
+text = "돌아가기"
+
+[node name="Hint" type="Label" parent="Center/Panel/VBox"]
+layout_mode = 2
+theme_type_variation = &"HintLabel"
+text = "↑↓ 이동 · ←→ 조절 · Esc 돌아가기"
+horizontal_alignment = 1

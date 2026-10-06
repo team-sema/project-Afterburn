@@ -104,12 +104,8 @@ func _run() -> void:
 	root.add_child(overlay)
 	await process_frame
 	overlay._set_choices([DRONE_REINFORCEMENT])
-	var first_button := overlay.choice_buttons[0]
-	_expect(first_button.icon == DRONE_REINFORCEMENT.icon, "enemy SVG appears on its offer card")
-	_expect(
-		first_button.get_theme_constant("icon_max_width") == 48,
-		"enemy offer uses the temporary larger SVG preview size",
-	)
+	var card_icon := overlay.choice_buttons[0].get_node("CardArt/Icon") as TextureRect
+	_expect(card_icon.texture == DRONE_REINFORCEMENT.icon, "enemy SVG appears on its offer card")
 	overlay.queue_free()
 	await process_frame
 	registry.free()

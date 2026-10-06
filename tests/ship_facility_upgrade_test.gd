@@ -219,24 +219,14 @@ func _check_offer_layout(
 	playfield: Control,
 ) -> void:
 	selection_ui.configure_weapon_loadout(loadout)
-	var button_1 := selection_ui.get_node(
-		"MarginContainer/PanelContainer/VBoxContainer/ChoiceCarousel/ChoiceButton1"
-	) as Button
-	var button_2 := selection_ui.get_node(
-		"MarginContainer/PanelContainer/VBoxContainer/ChoiceCarousel/ChoiceButton2"
-	) as Button
-	var button_3 := selection_ui.get_node(
-		"MarginContainer/PanelContainer/VBoxContainer/ChoiceCarousel/ChoiceButton3"
-	) as Button
-	var expand_button := selection_ui.get_node(
-		"MarginContainer/PanelContainer/VBoxContainer/SlotActionLabel"
-	) as Button
+	selection_ui._apply_stage_rect()
+	var button_1 := selection_ui.choice_buttons[0]
+	var button_2 := selection_ui.choice_buttons[1]
+	var button_3 := selection_ui.choice_buttons[2]
+	var expand_button := selection_ui.slot_action_label
 	var reroll_button := selection_ui.get_node("%RerollButton") as Button
-	_expect(button_1.get_parent() == button_3.get_parent(), "three choices share the carousel host")
-	_expect(
-		button_1.get_parent().name == "ChoiceCarousel",
-		"augment choices use the cylinder carousel instead of a flat HBox row",
-	)
+	_expect(button_1.get_parent() == button_3.get_parent(), "three choices share one card row")
+	_expect(button_1.get_parent().name == "ChoiceRow", "augment choices sit in the wide card row")
 	_expect(
 		selection_ui.get_node_or_null("%OfferShipPanel") == null
 		and selection_ui.get_node_or_null("%OfferWeaponPreview") == null,
@@ -249,13 +239,15 @@ func _check_offer_layout(
 			button.get_theme_stylebox(&"disabled") == button.get_theme_stylebox(&"normal"),
 			"augment card keeps the same content margins when selection disables input",
 		)
-	var offer_rect := selection_ui.choice_container.get_global_rect()
+	var stage_rect := selection_ui.stage.get_global_rect()
 	var playfield_rect := playfield.get_global_rect()
 	_expect(
-		offer_rect.position.x >= playfield_rect.position.x - 0.5
-		and offer_rect.position.x + offer_rect.size.x
-		<= playfield_rect.position.x + playfield_rect.size.x + 0.5,
-		"the whole augment window stays inside the central playfield",
+		stage_rect.position.x <= 0.5 and stage_rect.end.x >= playfield_rect.end.x - 0.5,
+		"the offer stage covers the left HUD and the playfield",
+	)
+	_expect(
+		stage_rect.end.x <= status_ship_panel.get_global_rect().position.x + 0.5,
+		"the offer stage leaves the right STATUS panel uncovered",
 	)
 	selection_ui.set_reroll_state(2, true)
 	_expect(
@@ -282,7 +274,7 @@ func _check_offer_layout(
 	selection_ui.breakpoint_intro.visible = false
 	selection_ui._set_input_enabled(true)
 	selection_ui._highlight_choice(1)
-	await create_timer(selection_ui.carousel_transition_duration + 0.05, true).timeout
+	await create_timer(selection_ui.focus_transition_duration + 0.05, true).timeout
 	_expect(
 		status_ship_panel.get_selected_facility_id() == &"engine",
 		"facility focus highlights the existing right STATUS ship panel",
@@ -305,10 +297,21 @@ func _check_offer_layout(
 		not is_equal_approx(status_ship_panel.slot_rack.get_preview_alpha(), initial_module_alpha),
 		"facility icon preview keeps blinking while gameplay is paused",
 	)
-	_expect(selection_ui.get_focused_choice_index() == 1, "carousel tracks the focused card")
-	_expect(button_2.z_index > button_1.z_index, "focused carousel card renders in front")
-	_expect(button_2.modulate.a > button_1.modulate.a, "side cards are more transparent than focus")
-	_expect(button_2.scale.x > button_1.scale.x, "side cards are smaller than focus")
+	_expect(selection_ui.get_focused_choice_index() == 1, "the overlay tracks the focused card")
+	_expect(button_2.z_index > button_1.z_index, "focused card renders in front")
+	_expect(button_2.modulate.r > button_1.modulate.r, "unfocused cards are dimmer than focus")
+	_expect(button_2.scale.x > button_1.scale.x, "unfocused cards are smaller than focus")
+	_expect(button_2.position.y < button_1.position.y, "focused card lifts above the row")
+	for button in [button_1, button_2, button_3]:
+		_expect(
+			stage_rect.encloses(button.get_global_rect()),
+			"every card stays inside the offer stage",
+		)
+	_expect(
+		button_1.position.x + button_1.size.x <= button_2.position.x
+		and button_2.position.x + button_2.size.x <= button_3.position.x,
+		"all three cards are visible side by side without overlap",
+	)
 	var down_path: NodePath = button_1.focus_neighbor_bottom
 	_expect(not down_path.is_empty(), "augment card has a keyboard path to reroll")
 	_expect(
@@ -316,7 +319,7 @@ func _check_offer_layout(
 		"down from an augment card enters the reroll button",
 	)
 	button_1.grab_focus()
-	await create_timer(selection_ui.carousel_transition_duration + 0.05, true).timeout
+	await create_timer(selection_ui.focus_transition_duration + 0.05, true).timeout
 	var viewport_height := selection_ui.get_viewport().get_visible_rect().size.y
 	_expect(
 		selection_ui.choice_container.global_position.y >= -0.5,
@@ -329,42 +332,26 @@ func _check_offer_layout(
 	)
 	paused = true
 	await _press_action(&"ui_right")
-	_expect(root.gui_get_focus_owner() == button_2, "ui_right rotates focus to the next card")
-	_expect(selection_ui.get_focused_choice_index() == 1, "right rotation updates carousel focus")
-	var first_rotation := selection_ui._carousel_tween
+	_expect(root.gui_get_focus_owner() == button_2, "ui_right moves focus to the next card")
+	_expect(selection_ui.get_focused_choice_index() == 1, "right move updates the focused card")
 	await _press_action(&"ui_right")
-	_expect(
-		selection_ui._carousel_tween == first_rotation
-		and selection_ui.get_focused_choice_index() == 1,
-		"rapid repeat is ignored while the carousel is on cooldown",
-	)
-	await create_timer(selection_ui.carousel_min_rotation_interval + 0.05, true).timeout
-	_expect(
-		root.gui_get_focus_owner() == button_2
-		and selection_ui.get_focused_choice_index() == 1,
-		"ignored rapid press does not rotate after release or cooldown",
-	)
+	_expect(root.gui_get_focus_owner() == button_3, "a second ui_right reaches the last card")
 	await _press_action(&"ui_right")
-	_expect(
-		root.gui_get_focus_owner() == button_3
-		and selection_ui.get_focused_choice_index() == 2,
-		"a fresh press after the interval rotates once",
-	)
-	await create_timer(selection_ui.carousel_min_rotation_interval + 0.05, true).timeout
+	_expect(root.gui_get_focus_owner() == button_1, "ui_right from the last card wraps to the first")
 	await _press_action(&"ui_left")
-	await create_timer(selection_ui.carousel_min_rotation_interval + 0.05, true).timeout
+	_expect(root.gui_get_focus_owner() == button_3, "ui_left from the first card wraps to the last")
 	await _press_action(&"ui_left")
-	await create_timer(selection_ui.carousel_min_rotation_interval + 0.05, true).timeout
-	_expect(root.gui_get_focus_owner() == button_1, "left rotation returns to the first card")
+	await _press_action(&"ui_left")
+	_expect(root.gui_get_focus_owner() == button_1, "left moves return to the first card")
 	_expect(
-		button_1.focus_neighbor_left == button_1.get_path_to(button_1)
-		and button_1.focus_neighbor_right == button_1.get_path_to(button_1),
-		"carousel cards do not auto-navigate left/right via focus neighbors",
+		button_1.focus_neighbor_left == button_1.get_path_to(button_3)
+		and button_1.focus_neighbor_right == button_1.get_path_to(button_2),
+		"cards link left/right as a wrapping row",
 	)
 	await _press_action(&"ui_down")
 	_expect(root.gui_get_focus_owner() == reroll_button, "ui_down moves focus from card to reroll")
-	await _press_action(&"ui_down")
-	_expect(root.gui_get_focus_owner() == expand_button, "second ui_down enters universal expansion")
+	await _press_action(&"ui_right")
+	_expect(root.gui_get_focus_owner() == expand_button, "ui_right from reroll enters universal expansion")
 	_expect(status_ship_panel.slot_rack.has_expansion_preview(), "right STATUS reveals the next hex slot")
 	_expect(
 		not status_ship_panel.slot_rack.has_module_preview(),
@@ -386,13 +373,13 @@ func _check_offer_layout(
 		not is_equal_approx(status_ship_panel.slot_rack.get_preview_alpha(), initial_preview_alpha),
 		"next hex keeps blinking while gameplay is paused",
 	)
-	await _press_action(&"ui_up")
-	_expect(root.gui_get_focus_owner() == reroll_button, "ui_up returns from expansion to reroll")
+	await _press_action(&"ui_left")
+	_expect(root.gui_get_focus_owner() == reroll_button, "ui_left returns from expansion to reroll")
 	_expect(not status_ship_panel.slot_rack.has_expansion_preview(), "leaving expansion hides the preview hex")
 	_expect(status_ship_panel.slot_rack.has_module_preview(), "leaving expansion restores card preview")
 	await _press_action(&"ui_up")
 	paused = false
-	_expect(root.gui_get_focus_owner() == button_1, "second ui_up returns to the focused card")
+	_expect(root.gui_get_focus_owner() == button_1, "ui_up from the action row returns to the focused card")
 	_expect(
 		selection_ui.slot_action_label.text.contains("범용 슬롯"),
 		"facility preview identifies the shared slot pool",
@@ -411,7 +398,7 @@ func _check_offer_layout(
 		"weapon cards still navigate down to the reroll button",
 	)
 	_expect(
-		reroll_button.get_node(reroll_button.focus_neighbor_bottom) == expand_button,
+		reroll_button.get_node(reroll_button.focus_neighbor_right) == expand_button,
 		"weapon cards still navigate from reroll to universal expansion",
 	)
 	_expect(
@@ -483,10 +470,10 @@ func _check_offer_layout(
 		status_ship_panel.get_selected_facility_id() == &"engine",
 		"facility focus restores its own STATUS highlight",
 	)
-	selection_ui._on_choice_pressed(2)
+	selection_ui._on_control_hovered(button_3)
 	_expect(
-		selection_ui.get_focused_choice_index() == 2,
-		"clicking a side card rotates it into focus before selection",
+		selection_ui.get_focused_choice_index() == 2 and root.gui_get_focus_owner() == button_3,
+		"hovering a card focuses it like the keyboard",
 	)
 	selection_ui._set_input_enabled(false)
 	selection_ui._clear_status_preview()
@@ -504,12 +491,12 @@ func _check_offer_layout(
 	selection_ui._set_input_enabled(true)
 	selection_ui._highlight_choice(0)
 	_expect(
-		button_1.focus_neighbor_bottom.is_empty(),
-		"enemy offer keeps keyboard navigation within its carousel",
+		button_1.focus_neighbor_bottom == button_1.get_path_to(button_1),
+		"enemy offer keeps keyboard navigation within its card row",
 	)
 	_expect(
-		button_1.focus_neighbor_right == button_1.get_path_to(button_1),
-		"enemy carousel still owns left/right instead of cycling focus neighbors",
+		button_1.focus_neighbor_right == button_1.get_path_to(button_2),
+		"enemy cards move left/right along the row",
 	)
 	_expect(not weapon_hud.is_augment_preview_active(), "enemy offer leaves player STATUS preview clear")
 	selection_ui._set_input_enabled(false)

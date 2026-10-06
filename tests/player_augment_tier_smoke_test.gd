@@ -41,35 +41,26 @@ func _run() -> void:
 	root.add_child(overlay)
 	overlay.call("_set_choices", [silver, gold, prismatic])
 
-	var buttons: Array[Button] = [
-		overlay.get_node("MarginContainer/PanelContainer/VBoxContainer/ChoiceCarousel/ChoiceButton1") as Button,
-		overlay.get_node("MarginContainer/PanelContainer/VBoxContainer/ChoiceCarousel/ChoiceButton2") as Button,
-		overlay.get_node("MarginContainer/PanelContainer/VBoxContainer/ChoiceCarousel/ChoiceButton3") as Button,
-	]
+	var buttons: Array[Button] = overlay.choice_buttons
 	var expected_labels := ["SILVER", "GOLD", "PRISMATIC"]
-	var expected_border_widths := [1, 2, 3]
-	var border_colors: Array[Color] = []
+	var card_scenes: Array[String] = []
 	for index in buttons.size():
-		var tier_label := buttons[index].get_node("CardArt/TierLabel") as Label
-		var tier_accent := buttons[index].get_node("CardArt/TierAccent") as ColorRect
-		var normal_style := buttons[index].get_theme_stylebox("normal") as StyleBoxFlat
+		var art := buttons[index].get_node("CardArt") as Control
+		var tier_label := art.get_node("TierLabel") as Label
+		var tier_accent := art.get_node("TierAccent") as ColorRect
 		_expect(tier_label.visible, "player augment tier label %d is visible" % index)
 		_expect(tier_label.text == expected_labels[index], "player augment tier label %d is correct" % index)
 		_expect(tier_accent.visible, "player augment tier accent %d is visible" % index)
 		_expect(
-			normal_style.border_width_left == expected_border_widths[index],
-			"tier %d has a distinct frame weight" % index,
-		)
-		_expect(
-			buttons[index].get_theme_stylebox("disabled") == normal_style,
+			buttons[index].get_theme_stylebox("disabled") == buttons[index].get_theme_stylebox("normal"),
 			"tier %d keeps disabled and normal card geometry aligned" % index,
 		)
-		border_colors.append(normal_style.border_color)
+		card_scenes.append(art.scene_file_path)
 	_expect(
-		border_colors[0] != border_colors[1]
-		and border_colors[1] != border_colors[2]
-		and border_colors[0] != border_colors[2],
-		"Silver, Gold, and Prismatic frames use distinct colors",
+		card_scenes[0] != card_scenes[1]
+		and card_scenes[1] != card_scenes[2]
+		and card_scenes[0] != card_scenes[2],
+		"Silver, Gold, and Prismatic use distinct card scenes",
 	)
 
 	var prismatic_accent := buttons[2].get_node("CardArt/TierAccent") as ColorRect
@@ -85,12 +76,17 @@ func _run() -> void:
 	enemy_augment.display_name = "Enemy Test"
 	enemy_augment.description = "Existing enemy card presentation"
 	overlay.call("_set_choices", [enemy_augment])
-	var enemy_tier_label := buttons[0].get_node("TierLabel") as Label
-	var enemy_tier_accent := buttons[0].get_node("TierAccent") as ColorRect
-	var enemy_style := buttons[0].get_theme_stylebox("normal") as StyleBoxFlat
-	_expect(not enemy_tier_label.visible, "enemy augment cards do not show a player tier label")
-	_expect(not enemy_tier_accent.visible, "enemy augment cards do not show a player tier accent")
-	_expect(enemy_style.content_margin_top == 8.0, "enemy augment cards retain their original content spacing")
+	var enemy_art := buttons[0].get_node("CardArt") as Control
+	_expect(
+		enemy_art.scene_file_path == "res://menus/cards/augment_card_enemy.tscn",
+		"enemy augments use the red enemy card scene",
+	)
+	_expect((enemy_art.get_node("TierLabel") as Label).text == "THREAT", "enemy cards show THREAT instead of a tier")
+	_expect((enemy_art.get_node("Title") as Label).text == "Enemy Test", "enemy card shows the augment name")
+	_expect(
+		(enemy_art.get_node("Icon") as TextureRect).texture != null,
+		"enemy cards without an icon use the shared threat icon",
+	)
 
 	overlay.queue_free()
 	await process_frame

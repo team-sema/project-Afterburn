@@ -1,9 +1,11 @@
 extends Control
 
 const MASTER_VOLUME_CONTROL_SCENE := preload("res://menus/master_volume_control.tscn")
+const MENU_SCENE_PATH := "res://menus/menu.tscn"
 
 @onready var gameplay: Node = $Layout/Playfield/ViewportContainer/PlayfieldViewport/Gameplay
-@onready var pause_overlay: ColorRect = %PauseOverlay
+@onready var pause_overlay: PauseMenu = %PauseOverlay
+@onready var settings_menu: SettingsMenu = %SettingsMenu
 @onready var status_ship_panel: ShipPanel = $Layout/RightPanel/Margin/VBox/ShipPanel
 @onready var left_panel_content: VBoxContainer = $Layout/LeftPanel/Margin/VBox
 @onready var weapon_loadout_hud: WeaponLoadoutHud = (
@@ -16,6 +18,10 @@ var _is_manual_pause := false
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_add_master_volume_control()
+	pause_overlay.resume_requested.connect(_set_manual_pause.bind(false))
+	pause_overlay.settings_requested.connect(_open_settings)
+	pause_overlay.main_menu_requested.connect(_return_to_menu)
+	settings_menu.closed.connect(_on_settings_closed)
 	var overlays: Array[CanvasLayer] = []
 	for overlay_name in [
 		"AugmentSelectionOverlay",
@@ -30,6 +36,7 @@ func _ready() -> void:
 	var augment_selection := get_node("AugmentSelectionOverlay") as AugmentSelectionOverlay
 	assert(augment_selection != null, "World shell requires the augment selection overlay.")
 	augment_selection.configure_status_preview(status_ship_panel, weapon_loadout_hud)
+	augment_selection.configure_stage_limit($Layout/RightPanel)
 
 
 func _add_master_volume_control() -> void:
@@ -48,6 +55,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if get_tree().paused and not _is_manual_pause:
 		return
+	if settings_menu.visible:
+		return
 
 	_set_manual_pause(not _is_manual_pause)
 	get_viewport().set_input_as_handled()
@@ -55,8 +64,27 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _set_manual_pause(paused: bool) -> void:
 	_is_manual_pause = paused
-	pause_overlay.visible = paused
+	if paused:
+		pause_overlay.open()
+	else:
+		pause_overlay.close()
 	get_tree().paused = paused
+
+
+func _open_settings() -> void:
+	pause_overlay.set_suspended(true)
+	settings_menu.open()
+
+
+func _on_settings_closed() -> void:
+	pause_overlay.set_suspended(false)
+	pause_overlay.focus_settings_item()
+
+
+func _return_to_menu() -> void:
+	_is_manual_pause = false
+	get_tree().paused = false
+	get_tree().change_scene_to_file(MENU_SCENE_PATH)
 
 
 func _exit_tree() -> void:

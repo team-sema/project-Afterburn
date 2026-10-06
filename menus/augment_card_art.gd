@@ -50,25 +50,60 @@ func _ready() -> void:
 
 
 func configure(augment: PlayerAugment, loadout: PlayerWeaponLoadout) -> void:
-	title_label.text = augment.get_offer_title(loadout)
-	description_label.text = augment.get_offer_description(loadout)
-	icon.texture = augment.get_offer_icon()
-	_fit_copy(title_label, _title_font_size, _title_height)
-	_fit_copy(description_label, _description_font_size, _description_height)
+	configure_copy(
+		augment.get_offer_title(loadout),
+		augment.get_offer_description(loadout),
+		augment.get_offer_icon(),
+	)
+
+
+## 적 증강처럼 등급 정보가 없는 카드도 같은 배치로 채운다.
+func configure_copy(title: String, description: String, texture: Texture2D) -> void:
+	icon.texture = texture
+	_fit_copy(title_label, title, _title_font_size, _title_height)
+	_fit_copy(description_label, description, _description_font_size, _description_height)
 	queue_redraw()
 
 
-func _fit_copy(label: Label, preferred_size: int, height: float) -> void:
+func _fit_copy(label: Label, text: String, preferred_size: int, height: float) -> void:
 	var font := label.get_theme_font("font")
 	var font_size := preferred_size
-	while font_size > 9:
-		var measured := font.get_multiline_string_size(
-			label.text, HORIZONTAL_ALIGNMENT_CENTER, label.size.x, font_size
-		)
-		if measured.y <= height:
+	var wrapped := text
+	while true:
+		wrapped = wrap_words(text, font, font_size, label.size.x)
+		var measured := font.get_multiline_string_size(wrapped, HORIZONTAL_ALIGNMENT_CENTER, -1, font_size)
+		if measured.y <= height or font_size <= 9:
 			break
 		font_size -= 1
+	label.autowrap_mode = TextServer.AUTOWRAP_OFF
+	label.text = wrapped
 	label.add_theme_font_size_override("font_size", font_size)
+
+
+## 공백에서만 줄을 바꿔 한글 어절이 중간에서 끊기지 않게 한다. 폭보다 긴 어절만 글자 단위로 나눈다.
+static func wrap_words(text: String, font: Font, font_size: int, width: float) -> String:
+	var lines := PackedStringArray()
+	for paragraph in text.split("\n"):
+		var line := ""
+		for word in paragraph.split(" ", false):
+			var candidate := word if line.is_empty() else "%s %s" % [line, word]
+			if _text_width(candidate, font, font_size) <= width:
+				line = candidate
+				continue
+			if not line.is_empty():
+				lines.append(line)
+			line = ""
+			for character in word:
+				if _text_width(line + character, font, font_size) > width and not line.is_empty():
+					lines.append(line)
+					line = ""
+				line += character
+		lines.append(line)
+	return "\n".join(lines)
+
+
+static func _text_width(text: String, font: Font, font_size: int) -> float:
+	return font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
 
 
 func _process(delta: float) -> void:
