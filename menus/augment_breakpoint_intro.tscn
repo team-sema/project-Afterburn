@@ -10,10 +10,6 @@ border_width_top = 1
 border_width_right = 1
 border_width_bottom = 1
 border_color = Color(0.18, 0.82, 1, 0.9)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_right = 6
-corner_radius_bottom_left = 6
 shadow_color = Color(0.05, 0.55, 0.85, 0.28)
 shadow_size = 6
 
@@ -24,9 +20,9 @@ font_color = Color(0.35, 0.88, 1, 0.9)
 
 [sub_resource type="LabelSettings" id="LabelSettings_title"]
 font = ExtResource("2_font")
-font_size = 18
+font_size = 24
 font_color = Color(0.9, 0.98, 1, 1)
-outline_size = 3
+outline_size = 2
 outline_color = Color(0.04, 0.35, 0.55, 0.8)
 
 [sub_resource type="LabelSettings" id="LabelSettings_subtitle"]
@@ -73,6 +69,30 @@ tracks/2/keys = {
 "update": 0,
 "values": [Vector2(0, 1)]
 }
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("Band:scale")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(0, 1)]
+}
+tracks/4/type = "value"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath("Band:modulate")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
 
 [sub_resource type="Animation" id="Animation_reveal"]
 resource_name = "reveal"
@@ -113,6 +133,30 @@ tracks/2/keys = {
 "update": 0,
 "values": [Vector2(0, 1), Vector2(1, 1)]
 }
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("Band:scale")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0, 0.4),
+"transitions": PackedFloat32Array(0.5, 1),
+"update": 0,
+"values": [Vector2(0, 1), Vector2(1, 1)]
+}
+tracks/4/type = "value"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath("Band:modulate")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"times": PackedFloat32Array(0, 0.25, 1.2666667, 1.5),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 1), Color(1, 1, 1, 1), Color(1, 1, 1, 0)]
+}
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_intro"]
 _data = {
@@ -130,6 +174,21 @@ grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("1_intro")
 
+[node name="Band" type="ColorRect" parent="."]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = 14
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_top = -44.0
+offset_bottom = 44.0
+grow_horizontal = 2
+grow_vertical = 2
+scale = Vector2(0, 1)
+mouse_filter = 2
+color = Color(0.18, 0.82, 1, 0.12)
+
 [node name="CenterContainer" type="CenterContainer" parent="." unique_id=1989267585]
 layout_mode = 1
 anchors_preset = 15
@@ -141,7 +200,7 @@ mouse_filter = 2
 
 [node name="BreakpointCard" type="PanelContainer" parent="CenterContainer" unique_id=288702059]
 modulate = Color(1, 1, 1, 0)
-custom_minimum_size = Vector2(216, 126)
+custom_minimum_size = Vector2(232, 0)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBox_card")
 
@@ -164,8 +223,7 @@ horizontal_alignment = 1
 
 [node name="TitleLabel" type="Label" parent="CenterContainer/BreakpointCard/MarginContainer/VBoxContainer" unique_id=1050792614]
 layout_mode = 2
-text = "강화
-분기점"
+text = "강화 분기점"
 label_settings = SubResource("LabelSettings_title")
 horizontal_alignment = 1
 

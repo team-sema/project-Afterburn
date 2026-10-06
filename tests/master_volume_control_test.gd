@@ -16,6 +16,8 @@ func _initialize() -> void:
 
 
 func _run() -> void:
+	GameSettings.instance.save_enabled = false
+	var original_setting := GameSettings.instance.get_volume(&"Master")
 	var master_bus := AudioServer.get_bus_index(&"Master")
 	var original_db := AudioServer.get_bus_volume_db(master_bus)
 	var original_muted := AudioServer.is_bus_mute(master_bus)
@@ -29,8 +31,14 @@ func _run() -> void:
 		is_equal_approx(AudioServer.get_bus_volume_db(master_bus), linear_to_db(0.25)),
 		"slider value maps to Master bus decibels",
 	)
+	_expect(
+		is_equal_approx(GameSettings.instance.get_volume(&"Master"), 0.25),
+		"slider writes the Master volume through GameSettings",
+	)
 	slider.value = 0.0
 	_expect(AudioServer.is_bus_mute(master_bus), "zero volume mutes the Master bus")
+	GameSettings.instance.set_volume(&"Master", 0.6)
+	_expect(is_equal_approx(slider.value, 0.6), "slider follows volume changes made elsewhere")
 	_expect(control.process_mode == Node.PROCESS_MODE_ALWAYS, "control remains active while paused")
 	var menu := MENU_SCENE.instantiate()
 	var world := WORLD_SCENE.instantiate()
@@ -51,8 +59,8 @@ func _run() -> void:
 
 	menu.free()
 	world.queue_free()
-	control.set("_save_pending", false)
 	control.queue_free()
+	GameSettings.instance.set_volume(&"Master", original_setting)
 	await process_frame
 	AudioServer.set_bus_volume_db(master_bus, original_db)
 	AudioServer.set_bus_mute(master_bus, original_muted)

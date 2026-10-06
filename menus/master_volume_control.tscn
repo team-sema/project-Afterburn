@@ -54,7 +54,3 @@ step = 0.01
 value = 1.0
 scrollable = false
 
-[node name="SaveTimer" type="Timer" parent="."]
-unique_name_in_owner = true
-wait_time = 0.25
-one_shot = true

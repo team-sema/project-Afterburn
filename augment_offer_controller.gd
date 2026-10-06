@@ -102,7 +102,7 @@ func _start_offer() -> void:
 		selection_ui.configure_weapon_loadout(_get_loadout())
 		_current_player_choices = _pick_player_choices()
 		choices = _current_player_choices
-		title = "강화 선택 · %s" % PlayerAugment.tier_label(current_offer_tier)
+		title = "강화 선택"
 		accent_color = selection_ui.player_accent_color
 		show_ship_modules = true
 		_awaiting_final_choice = true

@@ -24,18 +24,66 @@ Lab 배치: 허브만 루트에 두고 각 Lab은 `labs/<주제>/` 아래에 둔
 ## 전이
 
 ```text
-Menu (ui_accept)
-  → World
-       → Ship.tree_exited → 1초 대기 → Game Over
-            → (ui_accept) → Menu
+Menu ─(게임 시작)→ World
+  │                 ├─ Ship.tree_exited → 1초 대기 → Game Over ─(메인 메뉴)→ Menu
+  │                 └─ Esc → 일시정지 ─(계속하기·Esc)→ World
+  │                                   ├─(설정)→ 설정 패널 ─(돌아가기·ui_cancel)→ 일시정지
+  │                                   └─(메인 메뉴)→ Menu
+  └─(설정)→ 설정 패널 (Menu 위 모달) ─(돌아가기·ui_cancel)→ Menu
 ```
 
-오그먼트 오버레이는 **씬 전환이 아니라** World 위 오버레이다. 오퍼 중 전투는 일시정지하지만 전장과 좌우 HUD는 계속 보이며, 중앙 카드 캐러셀과 우측 STATUS 미리보기를 함께 사용한다.
+오그먼트 오버레이는 **씬 전환이 아니라** World 위 오버레이다. 오퍼 중 전투는 일시정지하고, 왼쪽 HUD와 전장을 어둡게 덮은 무대에 카드 3장을 나란히 두며 우측 STATUS는 그대로 보여 미리보기에 쓴다. 상세는 [오그먼트](augments.md#ui-요약).
+
+## 공용 UI 테마 (`menus/ui_theme.tres`)
+
+메뉴 계열 화면(시작화면·설정·일시정지·게임 오버·증강 선택)은 World HUD와 같은 네온 SF 톤을 하나의 `Theme`로 공유한다. 각 화면 루트에 테마를 지정하고, 개별 노드의 `theme_override_*`는 테마로 표현할 수 없는 경우에만 쓴다. World 좌우 HUD는 기존 `LabelSettings`·패널 스타일을 유지한다(같은 팔레트).
+
+- 공용 배경 `menus/menu_backdrop.tscn`: 스크롤 `SpaceBackground` + 메뉴 전용 글로우(`glow_intensity` 1.6, HDR 글자에만 걸림) + 비네트 + 화면 모서리 `NeonCornerFrame`. 시작화면·게임 오버가 사용한다.
+- 공용 포커스 `menus/ui_focus.gd`(`UiFocus`): 세로 목록 위/아래 순환 연결, 포커스를 잃었을 때 복구 판정. 모든 메뉴 계열 화면이 사용한다.
+- 화면 전환은 0.4초 페이드인 / 0.2초 페이드아웃(시작화면·게임 오버).
+
+| 항목 | 값 |
+|---|---|
+| 기본 폰트 | Mulmaru 12px. 원본 픽셀 격자가 12px이므로 크기는 12의 배수(12·24·36)만 써서 2배(1280×720)·3배(1920×1080) 화면 모두 선명하게 유지한다 |
+| 패널 바탕 | 남색 `(0.018, 0.035, 0.075)`, 불투명도 0.96 · 테두리 1px 청색 `(0.1, 0.65, 0.95)` · 안쪽 여백 14px + 바깥쪽 `NeonCornerFrame` 브래킷 |
+| 본문 글자 | 연청백 `(0.82, 0.92, 1.0)` · 보조 글자 `(0.45, 0.62, 0.8)` |
+| 강조(포커스) | 시안 `(0.35, 0.88, 1.0)` — 왼쪽 3px 강조선 + 옅은 시안 바탕 |
+| 비활성 | 회청색 `(0.3, 0.38, 0.5)` |
+| 타입 변형 | `TitleLabel`(36px, HDR 시안 + 글로우) · `GameOverTitle`(36px, HDR 적분홍) · `SubtitleLabel`(12px 자간 2 청색) · `RecordLabel`(12px 자간 2 HDR 금색) · `HeaderLabel`(24px) · `HintLabel`(12px 보조색) · `MainMenuButton`(24px 메인 메뉴 항목) · `SettingsRow`/`SettingsRowFocused`(설정 행 바탕) · `SettingsToggle`(켬 상태는 시안 채움, 자체 포커스 표시 없음) |
+
+포커스와 마우스 호버는 같은 모습이다. 마우스가 항목 위에 올라가면 그 항목이 포커스를 가져간다.
 
 ## Menu (`menus/menu.tscn`)
 
-- 타이틀 표시: **갤럭시 메이헴**
-- 메뉴 진입 시 World를 비동기로 미리 로드한다. `ui_accept`로 시작을 요청하고 로딩이 끝나면 전환하며, 대기 중 준비 상태·진행률을 표시한다.
+- 타이틀 표시: **갤럭시 메이헴**(36px, 네온 글로우). 그 위에 보조 문구 `PROJECT AFTERBURN`, 아래에 1px 청색 구분선을 둔다. 타이틀 밝기는 ±8%로 천천히 맥동한다.
+- 배경: 공용 배경 `menu_backdrop.tscn`. 진입 시 0.4초 페이드인.
+- 메뉴 항목(세로): **게임 시작 · 설정 · 종료**. 진입 시 `게임 시작`에 포커스. 위/아래로 이동하고 끝에서 반대쪽으로 순환하며 `ui_accept`로 결정한다. 웹 빌드에서는 `종료`를 숨긴다.
+- 포커스를 잃은 상태에서 방향·확인 입력이 오면 기본 항목(`게임 시작`, 설정에서 돌아온 직후엔 `설정`)에 포커스를 복구한다.
+- 메뉴 진입 시 World를 비동기로 미리 로드한다. `게임 시작`을 결정하면 메뉴 입력을 잠그고, 로딩이 끝나면 0.2초 페이드아웃 후 전환한다. 대기 중에는 메뉴 아래에 `게임 준비 중... N%`를 표시한다. 로딩 실패 시 `게임 로딩 실패`를 표시하고 시작 항목을 비활성화한다.
+- 하단: 왼쪽 `최고 점수 000000`(현재 런 기록, 저장되지 않음), 오른쪽 조작 안내 `↑↓ 이동 · Enter 결정`.
+
+## 설정 (`menus/settings_menu.tscn`)
+
+Menu와 일시정지 위에 뜨는 모달 패널이다(씬 전환 아님). 같은 씬을 시작화면(`Menu`의 자식)과 World(루트 자식, 화면 전체)에서 쓴다. 열려 있는 동안 아래 화면의 타이틀·항목은 숨기고 배경만 어둡게 덮어 보이며, 마우스 입력을 막는다.
+
+| 행 | 조작 | 적용 |
+|---|---|---|
+| 마스터 볼륨 | 좌/우 5% 단위(슬라이더 `step` 0.05), 0–100% | `Master` 버스. 0%면 음소거 |
+| 음악 | 〃 | `Music` 버스 |
+| 효과음 | 〃 | `SFX` 버스 |
+| 전체 화면 | `ui_accept`·좌/우로 켬/끔 전환 | 창 모드 전환 (headless에서는 저장만) |
+| 돌아가기 | `ui_accept` | 패널 닫기 |
+
+- 열면 첫 행(마스터 볼륨)에 포커스. 위/아래로 행 이동(끝에서 순환), 포커스된 행은 `SettingsRowFocused` 바탕으로 강조한다. 볼륨 행은 오른쪽에 `N%`를 표시한다.
+- `ui_cancel`(Esc) 또는 `돌아가기`로 닫고, 닫으면 연 화면의 `설정` 항목으로 포커스를 돌려준다. 열려 있는 동안 아래 화면 항목은 포커스를 받지 않는다. 일시정지에서 연 경우 Esc는 설정만 닫고 일시정지는 유지한다.
+- 변경은 즉시 적용하고 마지막 변경 0.25초 뒤 저장한다.
+
+## 설정 저장 (`GameSettings`, `game_settings.gd`)
+
+- 오토로드 노드 `UserSettings`로 하나만 띄우고 코드에서는 `GameSettings.instance`로 접근한다. 오토로드 전역 이름은 `--script` 테스트에서 컴파일되지 않으므로 쓰지 않는다.
+- 파일: `user://settings.cfg`. 키: `audio/master_volume` · `audio/music_volume` · `audio/sfx_volume`(0.0–1.0, 값이 없으면 버스 레이아웃의 현재 볼륨) · `display/fullscreen`(기본 false).
+- 게임 시작 시 한 번 읽어 버스 볼륨·창 모드를 적용한다. 메뉴의 설정 패널과 World의 MasterVolumeControl은 모두 `GameSettings`를 통해 읽고 쓰며, 한쪽에서 바꾸면 다른 쪽 표시도 따라간다.
+- 저장 실패는 경고만 남기고 게임을 막지 않는다. 테스트·캡처 스크립트는 `GameSettings.instance.save_enabled = false`로 사용자 설정 파일을 건드리지 않는다.
 
 ## World (`world.tscn` / `world.gd`)
 
@@ -49,7 +97,7 @@ Menu (ui_accept)
 | **중앙** | 플레이필드 `300×360` — 함선·적·탄·배경이 여기서 움직임. 양옆 패널은 각 170px |
 | **오른쪽 STATUS** | 위: 함선 시설(5×3 범용 육각 슬롯, 호버 시 상세) · 아래: 장착 무기·모듈 벌집(클릭/호버로 포커스, 설명은 말줄임·패널 크기 고정) |
 
-전장 위에는 평소엔 안 보이지만, 오그먼트 선택 때 **중앙 카드 캐러셀**과(필요 시) **슬롯/베이 교체 모달**이 오버레이로 뜬다. ESC 일시정지 UI도 같은 World 위다.
+전장 위에는 평소엔 안 보이지만, 오그먼트 선택 때 **카드 선택 무대**(왼쪽 HUD+전장)와(필요 시) **슬롯/베이 교체 모달**이 오버레이로 뜬다. ESC 일시정지 UI도 같은 World 위다.
 
 ### 뒤에서 도는 것 (플레이어가 이름 몰라도 됨)
 
@@ -65,20 +113,26 @@ Menu (ui_accept)
 
 ### 마스터 볼륨
 
-World 왼쪽 패널에 MasterVolumeControl을 표시한다. 슬라이더는 Master 버스에 즉시 적용되고 0이면 음소거한다. user://settings.cfg에 저장하며 일시정지 중에도 조절할 수 있다.
+World 왼쪽 패널에 MasterVolumeControl을 표시한다. 슬라이더는 Master 버스에 즉시 적용되고 0이면 음소거한다. `GameSettings`를 통해 `user://settings.cfg`에 저장하며 일시정지 중에도 조절할 수 있다.
 
 ### 라이프사이클
 
 1. `_ready`: `game_stats.score = 0`, 점수 라벨 연결
 2. `Ship.tree_exited`: 1초 대기 후 Game Over 씬으로 이동
 3. 오그먼트 오퍼 중: `get_tree().paused = true` (오버레이 `PROCESS_MODE_ALWAYS`)
-4. **ESC** (`world_shell.gd`): 수동 일시정지 토글 · `PauseOverlay` 표시. 오그먼트 등 **다른 시스템이 건 pause** 중에는 ESC로 해제하지 않음
+4. **ESC** (`world_shell.gd`): 수동 일시정지 토글 · 일시정지 메뉴(`PauseOverlay`) 표시. 오그먼트 등 **다른 시스템이 건 pause** 중에는 ESC로 해제하지 않음
 
-## Game Over (`menus/game_over.gd`)
+### 일시정지 (`menus/pause_menu.tscn`, World `Layout/Playfield/PauseOverlay`)
 
-- `score > highscore`이면 highscore 갱신
-- 점수/하이스코어 표시
-- `ui_accept` → Menu
+- 중앙 전장(300×360)만 어둡게 덮고 좌우 HUD는 그대로 보인다. `PAUSED` 보조 문구 + `일시 정지`(24px) + 구분선 아래에 **계속하기 · 설정 · 메인 메뉴**(`MainMenuButton`), 하단에 `Esc 계속하기` 안내.
+- 열면 `계속하기`에 포커스. 위/아래 순환, `ui_accept` 결정. `Layout`이 일시정지 시 멈추므로 메뉴 자체는 `PROCESS_MODE_ALWAYS`로 입력을 받는다.
+- `계속하기`·Esc → 재개. `설정` → 설정 패널(일시정지 유지). `메인 메뉴` → 일시정지 해제 후 Menu로 전환하며 진행 중 점수는 최고 점수에 반영하지 않는다.
+
+## Game Over (`menus/game_over.tscn`)
+
+- 공용 배경 위에 `MISSION FAILED` 보조 문구 + **게임 오버**(`GameOverTitle`) + 점수 패널.
+- 점수 패널: `점수`(24px 6자리) · `최고 점수`(12px 보조색 6자리). `score > highscore`이면 highscore를 갱신하고 `NEW RECORD`(금색)를 표시한다.
+- 항목은 **메인 메뉴** 하나이며 진입 시 포커스. `ui_accept` → 0.2초 페이드아웃 후 Menu.
 
 ## 오그먼트 오버레이 플로우
 
@@ -102,5 +156,10 @@ World 왼쪽 패널에 MasterVolumeControl을 표시한다. 슬라이더는 Mast
 - 메뉴→플레이→게임 오버→메뉴 흐름이 완료된다.
 - 다른 시스템이 소유한 일시정지를 ESC로 해제할 수 없다.
 - 방향 입력과 확인만으로 선택·교체를 완료하고 모달 복귀 시 유효 포커스를 복원한다.
+- 시작화면·일시정지에서 방향키·Enter·Esc만으로 모든 항목과 설정 열기/닫기에 도달한다. 설정에서 돌아오면 `설정` 항목에 포커스가 있다.
+- 일시정지에서 설정을 열고 닫아도 게임은 멈춘 상태를 유지한다.
+- 게임 오버에서 최고 점수를 넘으면 `NEW RECORD`가 보이고, Enter로 메인 메뉴로 돌아간다.
+- 설정 패널의 볼륨 변경이 해당 버스에 즉시 반영되고, 재실행 후에도 유지된다. World 볼륨 슬라이더와 값이 일치한다.
+- 시작화면·설정·일시정지·게임 오버가 공용 테마를 사용하고 640×360에서 글자가 잘리거나 겹치지 않는다.
 
-검증 참고: `tests/pause_smoke_test.gd`. Godot 실행은 `tools/run-godot.cmd`를 사용한다.
+검증 참고: `tests/pause_smoke_test.gd` · `tests/menu_loading_smoke_test.gd` · `tests/settings_menu_smoke_test.gd` · `tests/game_over_smoke_test.gd` · `tests/master_volume_control_test.gd`. Godot 실행은 `tools/run-godot.cmd`를 사용한다.

@@ -1,6 +1,6 @@
 # 증강 카드 편집
 
-`augment_card_base.tscn`은 공통 배치, `augment_card_silver.tscn`, `augment_card_gold.tscn`, `augment_card_prismatic.tscn`은 등급별 상속 씬입니다. 게임도 이 세 씬을 인스턴스화하므로 저장한 수정이 실제 선택 UI에 적용됩니다.
+`augment_card_base.tscn`은 공통 배치, `augment_card_silver.tscn`, `augment_card_gold.tscn`, `augment_card_prismatic.tscn`은 등급별 상속 씬, `augment_card_enemy.tscn`은 적 증강용 적색 상속 씬입니다. 게임도 이 세 씬을 인스턴스화하므로 저장한 수정이 실제 선택 UI에 적용됩니다.
 
 ## 에디터에서 조정하기
 
@@ -28,9 +28,9 @@
 
 - 세 등급 모두의 배치를 바꾸려면 기본 씬을 수정합니다.
 - 특정 등급만 바꾸려면 해당 상속 씬에서 노드 속성을 덮어씁니다. Inspector의 되돌리기 화살표로 공통 씬 값을 다시 상속할 수 있습니다.
-- 현재 선택 화면은 156×188 카드에 맞춰져 있습니다. 카드 전체 크기 변경은 선택 화면의 카드 크기·회전 배치도 함께 수정해야 합니다. 내부 노드와 장식 조정은 바로 적용됩니다.
+- 현재 선택 화면은 140×188 카드 3장을 가로로 나란히 둡니다. 카드 전체 크기 변경은 선택 화면의 `CHOICE_CARD_SIZE`와 무대 폭도 함께 확인해야 합니다. 글자는 Mulmaru 격자에 맞춰 12px을 기본으로 하고, 긴 문구만 줄입니다(공백에서만 줄바꿈). 내부 노드와 장식 조정은 바로 적용됩니다.
 - `.gd`는 장식 도형의 구조와 동작, `.gdshader`는 빛 계산 자체를 바꿀 때만 수정하면 됩니다.
 
 ## 게임 동작 확인
 
-`res://labs/augment_cards/augment_frame_test.tscn`을 열고 F6으로 실행합니다. 1~4는 혼합/실버/골드/프리즘, 방향키는 회전, Enter는 선택, R은 리롤, F5는 다시 열기입니다. 등급별 `.tscn`의 F6 실행은 카드 단독 보기이며 선택 동작은 테스트 씬에서 확인합니다.
+`res://labs/augment_cards/augment_frame_test.tscn`을 열고 F6으로 실행합니다. 1~4는 혼합/실버/골드/프리즘, 좌우 방향키는 카드 이동, Enter는 선택, R은 리롤, F5는 다시 열기입니다. 등급별 `.tscn`의 F6 실행은 카드 단독 보기이며 선택 동작은 테스트 씬에서 확인합니다.

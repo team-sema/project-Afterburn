@@ -1,0 +1,68 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" uid="uid://da58jpbo01r7q" path="res://effects/space_background.tscn" id="1_space"]
+[ext_resource type="Script" uid="uid://r8a6m4303af1" path="res://menus/neon_corner_frame.gd" id="2_frame"]
+
+[sub_resource type="Environment" id="Environment_menu_glow"]
+background_mode = 3
+glow_enabled = true
+glow_levels/1 = 0.35
+glow_levels/2 = 0.2
+glow_levels/3 = 0.08
+glow_normalized = true
+glow_intensity = 1.6
+glow_strength = 0.65
+glow_bloom = 0.06
+glow_hdr_threshold = 1.05
+glow_hdr_scale = 1.4
+glow_hdr_luminance_cap = 2.0
+
+[sub_resource type="Gradient" id="Gradient_vignette"]
+offsets = PackedFloat32Array(0.35, 1)
+colors = PackedColorArray(0, 0.004, 0.02, 0, 0, 0.004, 0.02, 0.85)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_vignette"]
+gradient = SubResource("Gradient_vignette")
+width = 128
+height = 72
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 1)
+
+[node name="MenuBackdrop" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="SpaceBackground" parent="." instance=ExtResource("1_space")]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_menu_glow")
+
+[node name="Vignette" type="TextureRect" parent="."]
+texture_filter = 2
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = SubResource("GradientTexture2D_vignette")
+expand_mode = 1
+
+[node name="ScreenFrame" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("2_frame")
+bracket_length = 18.0
+inset = 8.0

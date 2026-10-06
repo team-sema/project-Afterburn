@@ -1,65 +1,65 @@
 class_name AugmentSelectionOverlay
 extends CanvasLayer
 
+## 증강 선택 무대. 카드 3장을 가로로 나란히 두고 우측 STATUS를 미리보기로 쓴다.
+## 규칙: docs/design/augments.md (UI 요약)
+
 signal choice_selected(choice: Resource)
 signal universal_slot_expansion_selected
 signal reroll_requested(choice_index: int)
 
-const CHOICE_ICON_MAX_WIDTH := 28
-const ENEMY_CHOICE_ICON_MAX_WIDTH := 48
-const CHOICE_CARD_SIZE := Vector2(156.0, 188.0)
-const CAROUSEL_SIDE_OFFSET := 32.0
-const CAROUSEL_SIDE_DROP := 10.0
-const CAROUSEL_SIDE_SCALE := Vector2(0.84, 0.84)
-const CAROUSEL_SIDE_MODULATE := Color(0.5, 0.58, 0.7, 0.5)
-const CAROUSEL_FOCUS_MODULATE := Color.WHITE
-## Initial hold delay before continuous rotation starts.
-const CAROUSEL_HOLD_DELAY := 0.35
-const PLAYER_CARD_CONTENT_TOP := 24.0
-const DEFAULT_CARD_CONTENT_TOP := 8.0
+const CHOICE_CARD_SIZE := Vector2(140.0, 188.0)
+const CARD_GAP := 12.0
+## 카드 행 안에서 포커스되지 않은 카드의 윗변 위치. 포커스 카드는 FOCUS_LIFT만큼 떠오른다.
+const CARD_TOP := 12.0
+const FOCUS_LIFT := 8.0
+const UNFOCUSED_SCALE := Vector2(0.94, 0.94)
+const UNFOCUSED_MODULATE := Color(0.68, 0.74, 0.84, 1.0)
+const FOCUSED_MODULATE := Color.WHITE
+const ENTRANCE_DROP := 16.0
+const RESULT_DROP := 14.0
 const CARD_SCENES := [
 	preload("res://menus/cards/augment_card_silver.tscn"),
 	preload("res://menus/cards/augment_card_gold.tscn"),
 	preload("res://menus/cards/augment_card_prismatic.tscn"),
 ]
+const ENEMY_CARD_SCENE := preload("res://menus/cards/augment_card_enemy.tscn")
+## 아이콘이 없는 적 증강 카드에 쓰는 공용 경고 아이콘.
+const ENEMY_FALLBACK_ICON := preload("res://assets/ui/threat.svg")
+const ENEMY_TITLE_COLOR := Color(1.0, 0.78, 0.84)
+const TIER_TAG_COLORS := {
+	PlayerAugment.Tier.SILVER: Color(0.75, 0.9, 1.0),
+	PlayerAugment.Tier.GOLD: Color(1.0, 0.79, 0.28),
+	PlayerAugment.Tier.PRISMATIC: Color(1.0, 0.58, 0.96),
+}
+const CARD_HINT := "←→ 선택 · Enter 결정"
 
 @export var player_accent_color: Color
 @export var enemy_accent_color: Color
 @export_range(0.01, 5.0, 0.01) var open_duration := 0.2
-@export_range(0.01, 1.0, 0.01) var carousel_transition_duration := 0.28
-## Minimum time between rotation starts. Hold-repeat never exceeds this rate.
-@export_range(0.1, 5.0, 0.01) var carousel_min_rotation_interval := 0.45
+@export_range(0.01, 1.0, 0.01) var focus_transition_duration := 0.15
 @export_range(0.01, 5.0, 0.01) var phase_transition_duration := 0.5
 @export_range(0.0, 5.0, 0.01) var result_hold_duration := 2.5
 @export_range(0.01, 5.0, 0.01) var close_duration := 0.22
 
-@onready var backdrop: ColorRect = $Backdrop
-@onready var breakpoint_intro: AugmentBreakpointIntro = $BreakpointIntro
-@onready var choice_container: MarginContainer = $MarginContainer
-@onready var panel_container: PanelContainer = $MarginContainer/PanelContainer
-@onready var content_container: VBoxContainer = $MarginContainer/PanelContainer/VBoxContainer
-@onready var accent_bar: ColorRect = $MarginContainer/PanelContainer/VBoxContainer/AccentBar
+@onready var stage: Control = $Stage
+@onready var backdrop: ColorRect = $Stage/Backdrop
+@onready var breakpoint_intro: AugmentBreakpointIntro = $Stage/BreakpointIntro
+@onready var choice_container: Control = $Stage/Content
+@onready var tag_label: Label = %TagLabel
 @onready var title_label: Label = %TitleLabel
+@onready var accent_bar: ColorRect = %AccentBar
+@onready var choice_row: Control = %ChoiceRow
 @onready var prompt_label: Label = %PromptLabel
+@onready var action_row: HBoxContainer = %ActionRow
+@onready var reroll_button: Button = %RerollButton
 @onready var slot_action_label: Button = %SlotActionLabel
-@onready var choice_carousel: Control = %ChoiceCarousel
+@onready var hint_label: Label = %HintLabel
 @onready var choice_buttons: Array[Button] = [
 	%ChoiceButton1,
 	%ChoiceButton2,
 	%ChoiceButton3,
 ]
-@onready var tier_labels: Array[Label] = [
-	%ChoiceButton1.get_node("TierLabel") as Label,
-	%ChoiceButton2.get_node("TierLabel") as Label,
-	%ChoiceButton3.get_node("TierLabel") as Label,
-]
-@onready var tier_accents: Array[ColorRect] = [
-	%ChoiceButton1.get_node("TierAccent") as ColorRect,
-	%ChoiceButton2.get_node("TierAccent") as ColorRect,
-	%ChoiceButton3.get_node("TierAccent") as ColorRect,
-]
-@onready var reroll_button: Button = get_node_or_null("%RerollButton") as Button
-@onready var reroll_label: Label = get_node_or_null("%RerollLabel") as Label
 
 var current_choices: Array = []
 var is_accepting_input := false
@@ -68,32 +68,35 @@ var _weapon_loadout: PlayerWeaponLoadout
 var _player_registry: PlayerAugmentRegistry
 var _status_ship_panel: ShipPanel
 var _status_weapon_hud: WeaponLoadoutHud
+## 무대 오른쪽 끝이 되는 Control(우측 STATUS 패널). 없으면 화면 전체가 무대다.
+var _stage_limit: Control
 var _reroll_enabled := false
 var _focused_choice_index := 0
-var _carousel_tween: Tween
-var _held_rotation_direction := 0
-var _hold_repeat_remaining := 0.0
-var _rotation_cooldown_remaining := 0.0
-var _carousel_rotating := false
+## 결정한 카드. 슬롯 확장처럼 카드를 고르지 않았으면 -1.
+var _selected_index := -1
+var _showing_result := false
+var _layout_tween: Tween
 
 
 func _ready() -> void:
 	for index in choice_buttons.size():
-		choice_buttons[index].custom_minimum_size = CHOICE_CARD_SIZE
-		choice_buttons[index].size = CHOICE_CARD_SIZE
-		choice_buttons[index].pivot_offset = CHOICE_CARD_SIZE * 0.5
-		choice_buttons[index].pressed.connect(_on_choice_pressed.bind(index))
-		choice_buttons[index].focus_entered.connect(_highlight_choice.bind(index))
-		choice_buttons[index].mouse_entered.connect(_highlight_choice.bind(index))
+		var button := choice_buttons[index]
+		button.custom_minimum_size = CHOICE_CARD_SIZE
+		button.size = CHOICE_CARD_SIZE
+		button.pivot_offset = CHOICE_CARD_SIZE * 0.5
+		button.pressed.connect(_on_choice_pressed.bind(index))
+		button.focus_entered.connect(_highlight_choice.bind(index))
+		button.mouse_entered.connect(_on_control_hovered.bind(button))
 	slot_action_label.pressed.connect(_on_expand_slot_pressed)
 	slot_action_label.focus_entered.connect(_refresh_expansion_preview)
 	slot_action_label.focus_exited.connect(_queue_expansion_preview_refresh)
-	slot_action_label.mouse_entered.connect(_refresh_expansion_preview)
+	slot_action_label.mouse_entered.connect(_on_control_hovered.bind(slot_action_label))
 	slot_action_label.mouse_exited.connect(_queue_expansion_preview_refresh)
-	if reroll_button != null:
-		reroll_button.pressed.connect(_on_reroll_pressed)
+	reroll_button.pressed.connect(_on_reroll_pressed)
+	reroll_button.mouse_entered.connect(_on_control_hovered.bind(reroll_button))
+	choice_row.resized.connect(_on_choice_row_resized)
 	visible = false
-	call_deferred("_layout_choice_cards", false)
+	_layout_choice_cards.call_deferred(false)
 
 
 func configure_player_registry(registry: PlayerAugmentRegistry) -> void:
@@ -110,18 +113,26 @@ func configure_status_preview(ship_panel: ShipPanel, weapon_hud: WeaponLoadoutHu
 	_clear_status_preview()
 
 
+## 무대를 이 Control의 왼쪽 끝까지로 제한한다(우측 STATUS를 덮지 않음).
+func configure_stage_limit(limit: Control) -> void:
+	_stage_limit = limit
+	_apply_stage_rect()
+
+
 func open_choices(
 	title: String,
 	choices: Array,
 	accent_color: Color,
 	show_ship_modules: bool = false,
 ) -> void:
+	_apply_stage_rect()
 	_set_input_enabled(false)
+	_reset_result_state()
 	_set_choices(choices)
 	_focused_choice_index = 0
 	_showing_ship_modules = show_ship_modules
 	_set_ship_section_visible(show_ship_modules)
-	accent_bar.color = accent_color
+	_apply_header(title)
 	_set_choice_buttons_visible(false)
 
 	visible = true
@@ -132,20 +143,13 @@ func open_choices(
 	await breakpoint_intro.play_intro(accent_color)
 
 	choice_container.visible = true
-	title_label.text = title
-	prompt_label.text = ""
-	prompt_label.visible = false
+	choice_container.modulate.a = 0.0
 	_set_choice_buttons_visible(true)
-	panel_container.modulate.a = 0.0
-	panel_container.scale = Vector2(0.96, 0.96)
-	panel_container.pivot_offset = panel_container.size * 0.5
-	content_container.modulate.a = 1.0
-
-	var open_tween := _create_pause_tween().set_parallel(true)
-	open_tween.tween_property(panel_container, "modulate:a", 1.0, open_duration)
-	open_tween.tween_property(panel_container, "scale", Vector2.ONE, open_duration).set_trans(
-		Tween.TRANS_QUAD
-	).set_ease(Tween.EASE_OUT)
+	for index in current_choices.size():
+		choice_buttons[index].position.y += ENTRANCE_DROP
+	var open_tween := _create_pause_tween()
+	open_tween.tween_property(choice_container, "modulate:a", 1.0, open_duration)
+	_layout_choice_cards(true, open_duration + 0.1)
 	await open_tween.finished
 	_set_input_enabled(true)
 	choice_buttons[0].grab_focus()
@@ -169,12 +173,10 @@ func suspend_choices() -> void:
 
 func resume_choices() -> void:
 	visible = true
+	_reset_result_state()
 	choice_container.visible = true
+	choice_container.modulate.a = 1.0
 	breakpoint_intro.visible = false
-	prompt_label.visible = false
-	panel_container.modulate.a = 1.0
-	panel_container.scale = Vector2.ONE
-	content_container.modulate.a = 1.0
 	_set_choice_buttons_visible(true)
 	_set_input_enabled(true)
 	var focus_index := clampi(_focused_choice_index, 0, current_choices.size() - 1)
@@ -197,44 +199,35 @@ func refresh_choice_at(index: int, choice: PlayerAugment) -> void:
 	current_choices[index] = choice
 	_populate_choice_button(index)
 	var button := choice_buttons[index]
-	var target_modulate := _get_choice_target_modulate(index)
+	var target_modulate := _get_card_target_modulate(index)
 	button.modulate = Color(target_modulate.r, target_modulate.g, target_modulate.b, 0.0)
 	var tween := _create_pause_tween()
-	tween.tween_property(button, "modulate", target_modulate, carousel_transition_duration).set_trans(
+	tween.tween_property(button, "modulate", target_modulate, phase_transition_duration * 0.5).set_trans(
 		Tween.TRANS_QUAD
 	).set_ease(Tween.EASE_OUT)
 	_refresh_status_preview()
 
 
 func set_reroll_state(remaining: int, enabled: bool) -> void:
-	## Pass remaining < 0 to hide the reroll row (enemy offers).
-	var show_row := remaining >= 0
-	_reroll_enabled = show_row and enabled and remaining > 0
-	if reroll_label != null:
-		reroll_label.visible = false
-	if reroll_button != null:
-		reroll_button.visible = show_row
-		reroll_button.disabled = not _reroll_enabled
-		if show_row:
-			reroll_button.text = "[R] 리롤 (%d)" % maxi(0, remaining)
+	## Pass remaining < 0 to hide the reroll button (enemy offers).
+	var show_reroll := remaining >= 0
+	_reroll_enabled = show_reroll and enabled and remaining > 0
+	reroll_button.visible = show_reroll
+	reroll_button.disabled = not _reroll_enabled or not is_accepting_input
+	if show_reroll:
+		reroll_button.text = "[R] 리롤 (%d)" % maxi(0, remaining)
+	_refresh_action_row()
 	if is_accepting_input:
 		_configure_focus_navigation()
-
-
-func _on_reroll_pressed() -> void:
-	if not is_accepting_input or not _reroll_enabled:
-		return
-	reroll_requested.emit(_focused_choice_index)
 
 
 func restore_for_result() -> void:
 	_clear_status_preview()
 	visible = true
 	choice_container.visible = true
+	choice_container.modulate.a = 1.0
 	breakpoint_intro.visible = false
-	panel_container.modulate.a = 1.0
-	panel_container.scale = Vector2.ONE
-	content_container.modulate.a = 1.0
+	_set_choice_buttons_visible(true)
 	_set_input_enabled(false)
 
 
@@ -243,31 +236,106 @@ func hide_choices() -> void:
 	current_choices.clear()
 
 
-func _close_with_summary(result_title: String, result_text: String, accent_color: Color) -> void:
+func get_focused_choice_index() -> int:
+	return _focused_choice_index
+
+
+func _on_reroll_pressed() -> void:
+	if not is_accepting_input or not _reroll_enabled:
+		return
+	reroll_requested.emit(_focused_choice_index)
+
+
+func _apply_stage_rect() -> void:
+	if stage == null:
+		return
+	if _stage_limit != null and is_instance_valid(_stage_limit) and _stage_limit.is_inside_tree():
+		stage.anchor_right = 0.0
+		stage.offset_right = _stage_limit.get_global_rect().position.x
+	else:
+		stage.anchor_right = 1.0
+		stage.offset_right = 0.0
+
+
+func _apply_header(title: String) -> void:
+	title_label.text = title
+	var tag_color := enemy_accent_color
+	var tag_text := "THREAT"
+	var first := current_choices[0] as PlayerAugment if not current_choices.is_empty() else null
+	if first != null:
+		tag_text = "%s TIER" % first.get_tier_label()
+		tag_color = TIER_TAG_COLORS.get(first.tier, player_accent_color)
+	tag_label.text = tag_text
+	tag_label.add_theme_color_override(&"font_color", tag_color)
+	if first != null:
+		title_label.remove_theme_color_override(&"font_color")
+	else:
+		title_label.add_theme_color_override(&"font_color", ENEMY_TITLE_COLOR)
+	accent_bar.color = tag_color
+
+
+func _close_with_summary(result_title: String, result_text: String, _accent_color: Color) -> void:
 	_set_input_enabled(false)
 	_clear_status_preview()
-	await _fade_content(0.0, phase_transition_duration * 0.75)
-	current_choices.clear()
-	_set_choice_buttons_visible(false)
-	_set_ship_section_visible(false)
+	_showing_result = true
+	var keep_index := _selected_index if _selected_index < current_choices.size() else -1
+	if _layout_tween != null:
+		_layout_tween.kill()
+
+	var gather := _create_pause_tween().set_parallel(true)
+	var duration := phase_transition_duration * 0.75
+	gather.tween_property(action_row, "modulate:a", 0.0, duration)
+	gather.tween_property(hint_label, "modulate:a", 0.0, duration)
+	gather.tween_property(title_label, "modulate:a", 0.0, duration * 0.5)
+	for index in current_choices.size():
+		var button := choice_buttons[index]
+		if index == keep_index:
+			button.z_index = 1
+			var center_x := (choice_row.size.x - CHOICE_CARD_SIZE.x) * 0.5
+			gather.tween_property(button, "position", Vector2(center_x, CARD_TOP - FOCUS_LIFT), duration).set_trans(
+				Tween.TRANS_CUBIC
+			).set_ease(Tween.EASE_OUT)
+			gather.tween_property(button, "scale", Vector2.ONE, duration)
+			gather.tween_property(button, "modulate", FOCUSED_MODULATE, duration)
+		else:
+			gather.tween_property(button, "position:y", button.position.y + RESULT_DROP, duration)
+			gather.tween_property(button, "modulate:a", 0.0, duration)
+	await gather.finished
+
 	title_label.text = result_title
 	prompt_label.text = result_text
-	prompt_label.visible = true
-	accent_bar.color = accent_color
-	await _fade_content(1.0, phase_transition_duration)
+	# 남은 카드가 결과를 보여 주므로 문구는 고른 카드가 없을 때만 쓴다.
+	prompt_label.visible = keep_index < 0
+	prompt_label.modulate.a = 0.0
+	if keep_index < 0:
+		# 고른 카드가 없으면 문구를 카드 자리 가운데에 둔다.
+		prompt_label.offset_top = choice_row.offset_top + choice_row.size.y * 0.5 - 13.0
+		prompt_label.offset_bottom = prompt_label.offset_top + 26.0
+	var reveal := _create_pause_tween().set_parallel(true)
+	reveal.tween_property(title_label, "modulate:a", 1.0, phase_transition_duration * 0.5)
+	reveal.tween_property(prompt_label, "modulate:a", 1.0, phase_transition_duration * 0.5)
+	await reveal.finished
 	await _wait(result_hold_duration)
 
-	var close_tween := _create_pause_tween().set_parallel(true)
-	close_tween.tween_property(backdrop, "modulate:a", 0.0, close_duration)
-	close_tween.tween_property(panel_container, "modulate:a", 0.0, close_duration)
-	close_tween.tween_property(panel_container, "scale", Vector2(0.97, 0.97), close_duration).set_trans(
-		Tween.TRANS_QUAD
-	).set_ease(Tween.EASE_IN)
+	var close_tween := _create_pause_tween()
+	close_tween.tween_property(stage, "modulate:a", 0.0, close_duration)
 	await close_tween.finished
 	visible = false
-	panel_container.scale = Vector2.ONE
-	panel_container.modulate.a = 1.0
-	content_container.modulate.a = 1.0
+	current_choices.clear()
+	_reset_result_state()
+
+
+func _reset_result_state() -> void:
+	_showing_result = false
+	_selected_index = -1
+	stage.modulate.a = 1.0
+	action_row.modulate.a = 1.0
+	hint_label.modulate.a = 1.0
+	title_label.modulate.a = 1.0
+	prompt_label.visible = false
+	prompt_label.modulate.a = 1.0
+	prompt_label.offset_top = 290.0
+	prompt_label.offset_bottom = 316.0
 
 
 func _set_choices(choices: Array) -> void:
@@ -291,226 +359,57 @@ func _populate_choice_button(index: int) -> void:
 	var button := choice_buttons[index]
 	var augment := current_choices[index] as Resource
 	var player_augment := augment as PlayerAugment
-	var icon_max_width := CHOICE_ICON_MAX_WIDTH
+	var scene: PackedScene = ENEMY_CARD_SCENE
 	if player_augment != null:
-		button.text = "%s\n\n%s" % [
-			player_augment.get_offer_title(_weapon_loadout),
-			player_augment.get_offer_description(_weapon_loadout),
-		]
-		button.icon = player_augment.get_offer_icon()
-		_apply_player_tier_style(index, player_augment)
-	else:
-		button.text = "%s\n\n%s" % [augment.get("display_name"), augment.get("description")]
-		button.icon = augment.get("icon") as Texture2D
-		icon_max_width = ENEMY_CHOICE_ICON_MAX_WIDTH
-		_apply_default_card_style(index)
-	button.add_theme_constant_override("icon_max_width", icon_max_width)
-
-
-func _apply_player_tier_style(index: int, augment: PlayerAugment) -> void:
-	var palette := _get_player_tier_palette(augment.tier)
-	var button := choice_buttons[index]
-	var normal_style := _make_card_style(
-		palette["background"],
-		palette["border"],
-		palette["shadow"],
-		int(palette["border_width"]),
-		int(palette["shadow_size"]),
-		PLAYER_CARD_CONTENT_TOP,
-	)
-	var hover_style := _make_card_style(
-		palette["hover_background"],
-		palette["hover_border"],
-		palette["hover_shadow"],
-		int(palette["border_width"]) + 1,
-		int(palette["shadow_size"]) + 2,
-		PLAYER_CARD_CONTENT_TOP,
-	)
-	var pressed_style := _make_card_style(
-		palette["pressed_background"],
-		palette["hover_border"],
-		palette["hover_shadow"],
-		int(palette["border_width"]) + 1,
-		int(palette["shadow_size"]),
-		PLAYER_CARD_CONTENT_TOP,
-	)
-	_set_card_styles(button, normal_style, hover_style, pressed_style)
-	_set_card_font_colors(button, palette["text"], palette["hover_text"])
+		scene = CARD_SCENES[int(player_augment.tier)]
 	var art := button.get_node_or_null("CardArt")
-	if art != null and art.scene_file_path != CARD_SCENES[int(augment.tier)].resource_path:
+	if art != null and art.scene_file_path != scene.resource_path:
 		button.remove_child(art)
 		art.queue_free()
 		art = null
 	if art == null:
-		art = CARD_SCENES[int(augment.tier)].instantiate()
+		art = scene.instantiate()
 		art.name = "CardArt"
 		button.add_child(art)
 		button.move_child(art, 0)
 	art.visible = true
-	art.configure(augment, _weapon_loadout)
+	if player_augment != null:
+		art.configure(player_augment, _weapon_loadout)
+		button.set_meta("player_augment_tier", player_augment.tier)
+	else:
+		var enemy_icon := augment.get("icon") as Texture2D
+		art.configure_copy(
+			str(augment.get("display_name")),
+			str(augment.get("description")),
+			enemy_icon if enemy_icon != null else ENEMY_FALLBACK_ICON,
+		)
+		button.set_meta("player_augment_tier", -1)
 	button.text = ""
 	button.icon = null
-	for style in [normal_style, hover_style, pressed_style]:
-		style.draw_center = false
-		style.border_color.a = 0.0
-		style.shadow_size = 0
-		style.corner_radius_top_left = 0
-		style.corner_radius_top_right = 0
-		style.corner_radius_bottom_left = 0
-		style.corner_radius_bottom_right = 0
-
-	# Tier presentation now belongs to the inherited card scene.
-	tier_labels[index].visible = false
-	tier_accents[index].visible = false
-	button.set_meta("player_augment_tier", augment.tier)
-
-
-func _apply_default_card_style(index: int) -> void:
-	var button := choice_buttons[index]
-	var art := button.get_node_or_null("CardArt")
-	if art != null:
-		art.visible = false
-	var normal_style := _make_card_style(
-		Color(0.025, 0.075, 0.14, 0.98),
-		Color(0.2, 0.68, 0.9, 0.78),
-		Color(0.02, 0.55, 0.85, 0.2),
-		1,
-		4,
-		DEFAULT_CARD_CONTENT_TOP,
-	)
-	var hover_style := _make_card_style(
-		Color(0.04, 0.12, 0.21, 0.99),
-		Color(0.32, 0.88, 1.0, 0.95),
-		Color(0.05, 0.65, 0.95, 0.32),
-		2,
-		6,
-		DEFAULT_CARD_CONTENT_TOP,
-	)
-	var pressed_style := _make_card_style(
-		Color(0.07, 0.18, 0.28, 1.0),
-		Color(0.65, 0.98, 1.0, 1.0),
-		Color(0.05, 0.65, 0.95, 0.24),
-		2,
-		4,
-		DEFAULT_CARD_CONTENT_TOP,
-	)
-	_set_card_styles(button, normal_style, hover_style, pressed_style)
-	_set_card_font_colors(button, Color.WHITE, Color(0.92, 1.0, 1.0))
-	tier_labels[index].visible = false
-	tier_accents[index].visible = false
-	button.set_meta("player_augment_tier", -1)
-
-
-func _set_card_styles(
-	button: Button,
-	normal_style: StyleBoxFlat,
-	hover_style: StyleBoxFlat,
-	pressed_style: StyleBoxFlat,
-) -> void:
-	button.add_theme_stylebox_override("normal", normal_style)
-	button.add_theme_stylebox_override("disabled", normal_style)
-	button.add_theme_stylebox_override("hover", hover_style)
-	button.add_theme_stylebox_override("focus", hover_style)
-	button.add_theme_stylebox_override("pressed", pressed_style)
-
-
-func _set_card_font_colors(button: Button, normal: Color, highlighted: Color) -> void:
-	button.add_theme_color_override("font_color", normal)
-	button.add_theme_color_override("font_disabled_color", normal.darkened(0.18))
-	button.add_theme_color_override("font_hover_color", highlighted)
-	button.add_theme_color_override("font_focus_color", highlighted)
-	button.add_theme_color_override("font_pressed_color", highlighted)
-
-
-func _make_card_style(
-	background: Color,
-	border: Color,
-	shadow: Color,
-	border_width: int,
-	shadow_size: int,
-	content_top: float,
-) -> StyleBoxFlat:
-	var style := StyleBoxFlat.new()
-	style.content_margin_left = 9.0
-	style.content_margin_top = content_top
-	style.content_margin_right = 9.0
-	style.content_margin_bottom = 8.0
-	style.bg_color = background
-	style.border_width_left = border_width
-	style.border_width_top = border_width
-	style.border_width_right = border_width
-	style.border_width_bottom = border_width
-	style.border_color = border
-	var corner_radius := 6 + border_width * 2
-	style.corner_radius_top_left = corner_radius
-	style.corner_radius_top_right = corner_radius
-	style.corner_radius_bottom_right = corner_radius
-	style.corner_radius_bottom_left = corner_radius
-	style.shadow_color = shadow
-	style.shadow_size = shadow_size
-	return style
-
-
-func _get_player_tier_palette(tier: PlayerAugment.Tier) -> Dictionary:
-	match tier:
-		PlayerAugment.Tier.GOLD:
-			return {
-				"background": Color(0.12, 0.075, 0.018, 0.99),
-				"border": Color(0.92, 0.62, 0.16, 0.96),
-				"shadow": Color(1.0, 0.56, 0.08, 0.28),
-				"hover_background": Color(0.19, 0.12, 0.025, 1.0),
-				"hover_border": Color(1.0, 0.88, 0.42, 1.0),
-				"hover_shadow": Color(1.0, 0.68, 0.12, 0.46),
-				"pressed_background": Color(0.24, 0.16, 0.04, 1.0),
-				"text": Color(1.0, 0.91, 0.69, 1.0),
-				"hover_text": Color(1.0, 0.98, 0.86, 1.0),
-				"label": Color(1.0, 0.79, 0.28, 1.0),
-				"accent": Color(1.0, 0.68, 0.14, 0.96),
-				"border_width": 2,
-				"shadow_size": 5,
-			}
-		PlayerAugment.Tier.PRISMATIC:
-			return {
-				"background": Color(0.075, 0.025, 0.13, 0.99),
-				"border": Color(0.72, 0.38, 1.0, 0.98),
-				"shadow": Color(0.25, 0.86, 1.0, 0.34),
-				"hover_background": Color(0.12, 0.045, 0.2, 1.0),
-				"hover_border": Color(0.42, 1.0, 0.94, 1.0),
-				"hover_shadow": Color(0.9, 0.28, 1.0, 0.52),
-				"pressed_background": Color(0.16, 0.065, 0.25, 1.0),
-				"text": Color(0.94, 0.84, 1.0, 1.0),
-				"hover_text": Color(0.86, 1.0, 0.98, 1.0),
-				"label": Color(1.0, 0.58, 0.96, 1.0),
-				"accent": Color(0.3, 1.0, 0.92, 1.0),
-				"border_width": 3,
-				"shadow_size": 7,
-			}
-		_:
-			return {
-				"background": Color(0.045, 0.075, 0.115, 0.99),
-				"border": Color(0.68, 0.82, 0.93, 0.9),
-				"shadow": Color(0.38, 0.72, 0.92, 0.2),
-				"hover_background": Color(0.07, 0.12, 0.17, 1.0),
-				"hover_border": Color(0.88, 0.97, 1.0, 1.0),
-				"hover_shadow": Color(0.52, 0.86, 1.0, 0.34),
-				"pressed_background": Color(0.09, 0.15, 0.21, 1.0),
-				"text": Color(0.86, 0.94, 1.0, 1.0),
-				"hover_text": Color(0.97, 1.0, 1.0, 1.0),
-				"label": Color(0.75, 0.9, 1.0, 1.0),
-				"accent": Color(0.62, 0.84, 0.98, 0.92),
-				"border_width": 1,
-				"shadow_size": 3,
-			}
 
 
 func _set_ship_section_visible(section_visible: bool) -> void:
 	if not section_visible:
 		_clear_status_preview()
 	slot_action_label.visible = section_visible
+	_refresh_action_row()
+
+
+## 하단 행은 리롤이나 슬롯 확장 중 하나라도 있을 때만 보이고, 안내 문구도 그에 맞춘다.
+func _refresh_action_row() -> void:
+	action_row.visible = reroll_button.visible or slot_action_label.visible
+	var actions := PackedStringArray()
+	if reroll_button.visible:
+		actions.append("리롤")
+	if slot_action_label.visible:
+		actions.append("슬롯")
+	hint_label.text = CARD_HINT
+	if not actions.is_empty():
+		hint_label.text += " · ↓ %s" % "/".join(actions)
 
 
 func _highlight_choice(index: int) -> void:
-	if index < 0 or index >= current_choices.size():
+	if index < 0 or index >= current_choices.size() or _showing_result:
 		return
 	var focus_changed := _focused_choice_index != index
 	_focused_choice_index = index
@@ -521,16 +420,16 @@ func _highlight_choice(index: int) -> void:
 func _refresh_status_preview() -> void:
 	if not _showing_ship_modules or _focused_choice_index < 0 or _focused_choice_index >= current_choices.size():
 		_clear_status_preview()
+		if is_accepting_input:
+			_configure_focus_navigation()
 		return
-	var index := _focused_choice_index
-	var augment := current_choices[index] as PlayerAugment
+	var augment := current_choices[_focused_choice_index] as PlayerAugment
 	if augment == null:
 		_clear_status_preview()
 		return
-	var is_weapon_offer := PlayerAugmentKind.is_weapon_offer(augment.augment_type)
 	slot_action_label.visible = true
 	_refresh_slot_expansion_action()
-	if is_weapon_offer:
+	if PlayerAugmentKind.is_weapon_offer(augment.augment_type):
 		if _status_ship_panel != null:
 			_status_ship_panel.set_highlighted_facility(&"")
 			_status_ship_panel.set_augment_preview(null)
@@ -558,17 +457,10 @@ func _refresh_slot_expansion_action() -> void:
 	var capacity := _player_registry.get_slot_capacity() if _player_registry != null else 0
 	var can_expand := _player_registry != null and _player_registry.can_expand_slots()
 	if can_expand:
-		slot_action_label.text = "스킵 후 범용 슬롯 확장 %d → %d" % [
-			capacity,
-			capacity + 1,
-		]
+		slot_action_label.text = "스킵 · 범용 슬롯 +1 (%d→%d)" % [capacity, capacity + 1]
 	else:
-		slot_action_label.text = "스킵 (범용 슬롯 MAX 도달)"
-	slot_action_label.disabled = (
-		not is_accepting_input
-		or _player_registry == null
-		or not can_expand
-	)
+		slot_action_label.text = "범용 슬롯 MAX"
+	slot_action_label.disabled = not is_accepting_input or not can_expand
 
 
 func _clear_status_preview() -> void:
@@ -587,9 +479,8 @@ func _on_choice_pressed(index: int) -> void:
 		return
 	if index != _focused_choice_index:
 		choice_buttons[index].grab_focus()
-		if _focused_choice_index != index:
-			_highlight_choice(index)
-		return
+		_highlight_choice(index)
+	_selected_index = index
 	_set_input_enabled(false)
 	choice_selected.emit(current_choices[index] as Resource)
 
@@ -599,8 +490,18 @@ func _on_expand_slot_pressed() -> void:
 		return
 	if _status_ship_panel != null:
 		_status_ship_panel.set_expansion_preview(false)
+	_selected_index = -1
 	_set_input_enabled(false)
 	universal_slot_expansion_selected.emit()
+
+
+func _on_control_hovered(control: Control) -> void:
+	if not is_accepting_input or not visible:
+		return
+	var button := control as BaseButton
+	if button != null and button.disabled:
+		return
+	control.grab_focus()
 
 
 func _set_choice_buttons_visible(buttons_visible: bool) -> void:
@@ -611,8 +512,6 @@ func _set_choice_buttons_visible(buttons_visible: bool) -> void:
 
 func _set_input_enabled(enabled: bool) -> void:
 	is_accepting_input = enabled
-	if not enabled:
-		_clear_carousel_hold_state()
 	for button in choice_buttons:
 		button.disabled = not enabled
 	if _showing_ship_modules:
@@ -620,8 +519,7 @@ func _set_input_enabled(enabled: bool) -> void:
 	else:
 		slot_action_label.disabled = true
 	_refresh_expansion_preview()
-	if reroll_button != null:
-		reroll_button.disabled = not enabled or not _reroll_enabled
+	reroll_button.disabled = not enabled or not _reroll_enabled
 	if enabled:
 		_configure_focus_navigation()
 
@@ -630,7 +528,7 @@ func _refresh_expansion_preview() -> void:
 	if _status_ship_panel == null:
 		return
 	var pointer_inside := (
-		slot_action_label.visible
+		slot_action_label.is_visible_in_tree()
 		and slot_action_label.get_global_rect().has_point(slot_action_label.get_viewport().get_mouse_position())
 	)
 	var expansion_enabled := (
@@ -647,91 +545,45 @@ func _refresh_expansion_preview() -> void:
 
 
 func _queue_expansion_preview_refresh() -> void:
-	call_deferred("_refresh_expansion_preview")
+	_refresh_expansion_preview.call_deferred()
 
 
+## 카드: 좌우 순환, 아래는 하단 행. 하단 행: 좌우 순환, 위는 포커스 카드.
+## 무대 밖(HUD)으로 포커스가 새지 않도록 빈 방향은 자기 자신을 가리킨다.
 func _configure_focus_navigation() -> void:
-	var visible_buttons: Array[Button] = []
+	var cards: Array[Control] = []
 	for button in choice_buttons:
 		if button.visible and not button.disabled:
-			visible_buttons.append(button)
+			cards.append(button)
+	var actions: Array[Control] = []
+	for button: Button in [reroll_button, slot_action_label]:
+		if button.is_visible_in_tree() and not button.disabled:
+			actions.append(button)
+	if cards.is_empty():
+		return
+	var focused_card: Control = choice_buttons[clampi(_focused_choice_index, 0, current_choices.size() - 1)]
+	if not cards.has(focused_card):
+		focused_card = cards[0]
 
-	var all_controls: Array[Control] = []
-	for button in visible_buttons:
-		all_controls.append(button)
-	var can_focus_reroll := reroll_button != null and reroll_button.visible and not reroll_button.disabled
-	if can_focus_reroll:
-		all_controls.append(reroll_button)
-	var can_focus_expansion := slot_action_label.visible and not slot_action_label.disabled
-	if can_focus_expansion:
-		all_controls.append(slot_action_label)
-	for control in all_controls:
-		_clear_focus_neighbors(control)
+	for index in cards.size():
+		var card := cards[index]
+		_set_focus_neighbor(card, "focus_neighbor_left", cards[(index - 1 + cards.size()) % cards.size()])
+		_set_focus_neighbor(card, "focus_neighbor_right", cards[(index + 1) % cards.size()])
+		_set_focus_neighbor(card, "focus_neighbor_top", card)
+		_set_focus_neighbor(card, "focus_neighbor_bottom", actions[0] if not actions.is_empty() else card)
+	for index in actions.size():
+		var action := actions[index]
+		_set_focus_neighbor(action, "focus_neighbor_left", actions[(index - 1 + actions.size()) % actions.size()])
+		_set_focus_neighbor(action, "focus_neighbor_right", actions[(index + 1) % actions.size()])
+		_set_focus_neighbor(action, "focus_neighbor_top", focused_card)
+		_set_focus_neighbor(action, "focus_neighbor_bottom", action)
 
-	# Horizontal focus neighbors stay empty so Godot never auto-jumps cards
-	# on ui_left/ui_right. Carousel owns left/right exclusively.
-	for button in visible_buttons:
-		_set_focus_neighbor(button, "focus_neighbor_left", button)
-		_set_focus_neighbor(button, "focus_neighbor_right", button)
-		var first_action: Control = null
-		if can_focus_reroll:
-			first_action = reroll_button
-		elif can_focus_expansion:
-			first_action = slot_action_label
-		if first_action != null:
-			_set_focus_neighbor(button, "focus_neighbor_bottom", first_action)
-		var last_action: Control = null
-		if can_focus_expansion:
-			last_action = slot_action_label
-		elif can_focus_reroll:
-			last_action = reroll_button
-		if last_action != null:
-			_set_focus_neighbor(button, "focus_neighbor_top", last_action)
-	var focused_card: Button = null
-	if not visible_buttons.is_empty():
-		focused_card = choice_buttons[clampi(_focused_choice_index, 0, current_choices.size() - 1)]
-	if can_focus_reroll and focused_card != null:
-		_set_focus_neighbor(
-			reroll_button,
-			"focus_neighbor_top",
-			focused_card,
-		)
-		_set_focus_neighbor(
-			reroll_button,
-			"focus_neighbor_bottom",
-			slot_action_label if can_focus_expansion else focused_card,
-		)
-	if can_focus_expansion and focused_card != null:
-		_set_focus_neighbor(
-			slot_action_label,
-			"focus_neighbor_top",
-			reroll_button if can_focus_reroll else focused_card,
-		)
-		_set_focus_neighbor(slot_action_label, "focus_neighbor_bottom", focused_card)
-
-	# Tab cycles only among the vertical action chain + focused card, never
-	# across the three carousel cards as a left/right ring.
-	var tab_controls: Array[Control] = []
-	if focused_card != null:
-		tab_controls.append(focused_card)
-	if can_focus_reroll:
-		tab_controls.append(reroll_button)
-	if can_focus_expansion:
-		tab_controls.append(slot_action_label)
-	for index in tab_controls.size():
-		var previous := tab_controls[(index - 1 + tab_controls.size()) % tab_controls.size()]
-		var next := tab_controls[(index + 1) % tab_controls.size()]
-		_set_focus_neighbor(tab_controls[index], "focus_previous", previous)
-		_set_focus_neighbor(tab_controls[index], "focus_next", next)
-
-
-func _clear_focus_neighbors(control: Control) -> void:
-	control.focus_neighbor_left = NodePath()
-	control.focus_neighbor_top = NodePath()
-	control.focus_neighbor_right = NodePath()
-	control.focus_neighbor_bottom = NodePath()
-	control.focus_next = NodePath()
-	control.focus_previous = NodePath()
+	var tab_ring: Array[Control] = []
+	tab_ring.append_array(cards)
+	tab_ring.append_array(actions)
+	for index in tab_ring.size():
+		_set_focus_neighbor(tab_ring[index], "focus_previous", tab_ring[(index - 1 + tab_ring.size()) % tab_ring.size()])
+		_set_focus_neighbor(tab_ring[index], "focus_next", tab_ring[(index + 1) % tab_ring.size()])
 
 
 func _set_focus_neighbor(control: Control, property_name: String, target: Control) -> void:
@@ -740,145 +592,58 @@ func _set_focus_neighbor(control: Control, property_name: String, target: Contro
 	control.set(property_name, control.get_path_to(target))
 
 
-func _layout_choice_cards(animated: bool = true) -> void:
-	if choice_carousel == null:
+func _on_choice_row_resized() -> void:
+	if not _showing_result:
+		_layout_choice_cards(false)
+
+
+## 카드를 무대 가운데에 가로로 정렬하고 포커스 카드를 띄운다.
+func _layout_choice_cards(animated: bool = true, duration: float = -1.0) -> void:
+	if choice_row == null or _showing_result:
 		return
-	if _carousel_tween != null:
-		_carousel_tween.kill()
-		_carousel_tween = null
-	if not animated:
-		_carousel_rotating = false
-	var center := Vector2(
-		maxf(0.0, (choice_carousel.size.x - CHOICE_CARD_SIZE.x) * 0.5),
-		4.0,
-	)
+	if _layout_tween != null:
+		_layout_tween.kill()
+		_layout_tween = null
+	var count := current_choices.size()
+	if count == 0:
+		return
+	var total_width := CHOICE_CARD_SIZE.x * count + CARD_GAP * (count - 1)
+	var start_x := floorf((choice_row.size.x - total_width) * 0.5)
 	if animated:
-		_carousel_rotating = true
-		_carousel_tween = _create_pause_tween().set_parallel(true)
-	for index in choice_buttons.size():
+		_layout_tween = _create_pause_tween().set_parallel(true)
+	var tween_duration := focus_transition_duration if duration < 0.0 else duration
+	for index in count:
 		var button := choice_buttons[index]
-		if index >= current_choices.size():
-			continue
-		var relative_slot := _get_relative_slot(index)
-		var target_position := center
-		var target_scale := Vector2.ONE
-		var target_modulate := CAROUSEL_FOCUS_MODULATE
-		var target_z := 20
-		if relative_slot < 0:
-			target_position += Vector2(-CAROUSEL_SIDE_OFFSET, CAROUSEL_SIDE_DROP)
-			target_scale = CAROUSEL_SIDE_SCALE
-			target_modulate = CAROUSEL_SIDE_MODULATE
-			target_z = 10
-		elif relative_slot > 0:
-			target_position += Vector2(CAROUSEL_SIDE_OFFSET, CAROUSEL_SIDE_DROP)
-			target_scale = CAROUSEL_SIDE_SCALE
-			target_modulate = CAROUSEL_SIDE_MODULATE
-			target_z = 10
-		button.z_index = target_z
+		var focused := index == _focused_choice_index
+		var target_position := Vector2(
+			start_x + index * (CHOICE_CARD_SIZE.x + CARD_GAP),
+			CARD_TOP - (FOCUS_LIFT if focused else 0.0),
+		)
+		var target_scale := Vector2.ONE if focused else UNFOCUSED_SCALE
+		var target_modulate := FOCUSED_MODULATE if focused else UNFOCUSED_MODULATE
+		button.z_index = 1 if focused else 0
 		if animated:
-			_carousel_tween.tween_property(
-				button,
-				"position",
-				target_position,
-				carousel_transition_duration,
-			).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
-			_carousel_tween.tween_property(
-				button,
-				"scale",
-				target_scale,
-				carousel_transition_duration,
-			).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
-			_carousel_tween.tween_property(
-				button,
-				"modulate",
-				target_modulate,
-				carousel_transition_duration,
-			).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+			_layout_tween.tween_property(button, "position", target_position, tween_duration).set_trans(
+				Tween.TRANS_QUAD
+			).set_ease(Tween.EASE_OUT)
+			_layout_tween.tween_property(button, "scale", target_scale, tween_duration).set_trans(
+				Tween.TRANS_QUAD
+			).set_ease(Tween.EASE_OUT)
+			_layout_tween.tween_property(button, "modulate", target_modulate, tween_duration)
 		else:
 			button.position = target_position
 			button.scale = target_scale
 			button.modulate = target_modulate
-	if animated and _carousel_tween != null:
-		_carousel_tween.finished.connect(_on_carousel_tween_finished)
 
 
-func _get_relative_slot(index: int) -> int:
-	var count := current_choices.size()
-	if count <= 1 or index == _focused_choice_index:
-		return 0
-	var clockwise := posmod(index - _focused_choice_index, count)
-	if count == 2:
-		return 1
-	return 1 if clockwise == 1 else -1
-
-
-func _get_choice_target_modulate(index: int) -> Color:
-	return CAROUSEL_FOCUS_MODULATE if index == _focused_choice_index else CAROUSEL_SIDE_MODULATE
-
-
-func _can_start_carousel_rotation() -> bool:
-	return (
-		is_accepting_input
-		and visible
-		and current_choices.size() >= 2
-		and not _carousel_rotating
-		and _rotation_cooldown_remaining <= 0.0
-		and _choice_card_has_keyboard_focus()
-	)
-
-
-func _try_start_carousel_rotation(direction: int) -> bool:
-	direction = signi(direction)
-	if direction == 0 or not _can_start_carousel_rotation():
-		return false
-	_rotate_carousel(direction)
-	return true
-
-
-func _rotate_carousel(direction: int) -> void:
-	_carousel_rotating = true
-	_rotation_cooldown_remaining = carousel_min_rotation_interval
-	var next_index := posmod(_focused_choice_index + direction, current_choices.size())
-	choice_buttons[next_index].grab_focus()
-	if _focused_choice_index != next_index:
-		_highlight_choice(next_index)
-	else:
-		_carousel_rotating = false
-
-
-func _on_carousel_tween_finished() -> void:
-	_carousel_tween = null
-	_carousel_rotating = false
-
-
-func _clear_carousel_hold_state() -> void:
-	_held_rotation_direction = 0
-	_hold_repeat_remaining = 0.0
-	_rotation_cooldown_remaining = 0.0
-
-
-func _choice_card_has_keyboard_focus() -> bool:
-	var focus_owner := get_viewport().gui_get_focus_owner()
-	for button in choice_buttons:
-		if focus_owner == button:
-			return true
-	return false
-
-
-func get_focused_choice_index() -> int:
-	return _focused_choice_index
+func _get_card_target_modulate(index: int) -> Color:
+	return FOCUSED_MODULATE if index == _focused_choice_index else UNFOCUSED_MODULATE
 
 
 func _get_focused_player_augment() -> PlayerAugment:
 	if _focused_choice_index < 0 or _focused_choice_index >= current_choices.size():
 		return null
 	return current_choices[_focused_choice_index] as PlayerAugment
-
-
-func _fade_content(target_alpha: float, duration: float) -> void:
-	var tween := _create_pause_tween()
-	tween.tween_property(content_container, "modulate:a", target_alpha, duration)
-	await tween.finished
 
 
 func _wait(duration: float) -> void:
@@ -891,49 +656,6 @@ func _wait(duration: float) -> void:
 
 func _create_pause_tween() -> Tween:
 	return create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
-
-
-func _process(delta: float) -> void:
-	if _rotation_cooldown_remaining > 0.0:
-		_rotation_cooldown_remaining = maxf(0.0, _rotation_cooldown_remaining - delta)
-	if _held_rotation_direction == 0 or not is_accepting_input or not visible:
-		return
-	_hold_repeat_remaining -= delta
-	if _hold_repeat_remaining > 0.0:
-		return
-	# Only rotate while the key is still held. Never queue a step for after release.
-	if _try_start_carousel_rotation(_held_rotation_direction):
-		_hold_repeat_remaining = carousel_min_rotation_interval
-	else:
-		# Keep polling until cooldown allows the next step, or the key is released.
-		_hold_repeat_remaining = 0.05
-
-
-func _input(event: InputEvent) -> void:
-	if not is_accepting_input or not visible:
-		return
-	var direction := 0
-	# allow_echo=false: OS key-repeat must not start extra rotations.
-	if event.is_action_pressed(&"ui_left", false):
-		direction = -1
-	elif event.is_action_pressed(&"ui_right", false):
-		direction = 1
-	if direction != 0:
-		# Swallow left/right completely so Button focus neighbors never steal them.
-		_held_rotation_direction = direction
-		_hold_repeat_remaining = CAROUSEL_HOLD_DELAY
-		_try_start_carousel_rotation(direction)
-		get_viewport().set_input_as_handled()
-		return
-	var released_left := event.is_action_released(&"ui_left")
-	var released_right := event.is_action_released(&"ui_right")
-	if (
-		(released_left and _held_rotation_direction < 0)
-		or (released_right and _held_rotation_direction > 0)
-	):
-		_held_rotation_direction = 0
-		_hold_repeat_remaining = 0.0
-		get_viewport().set_input_as_handled()
 
 
 func _unhandled_input(event: InputEvent) -> void:
