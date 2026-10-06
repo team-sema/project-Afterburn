@@ -13,6 +13,10 @@ func play_intro(accent_color: Color) -> void:
 	set_accent_color(accent_color)
 	visible = true
 	band.pivot_offset = band.size * 0.5
+	# The card overshoots 0.92 -> 1.03 -> 1.0 within 0.38 s, holds exactly 1.0
+	# while readable, and shrinks to 0.97 only during the final fade. The old
+	# slow 1.02 -> 1.0 glide kept the pixel font and 1px border off the pixel
+	# grid for the whole intro, which read as a constant tremble.
 	breakpoint_card.pivot_offset = breakpoint_card.size * 0.5
 	animation_player.play(&"reveal")
 	await animation_player.animation_finished
