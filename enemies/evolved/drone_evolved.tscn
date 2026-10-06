@@ -1,0 +1,17 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://enemies/normal_enemy.tscn" id="1_base"]
+[ext_resource type="Script" path="res://components/enemy_evolution_mark.gd" id="2_mark"]
+[ext_resource type="Script" path="res://patterns/aimed_burst_pattern.gd" id="3_pattern"]
+
+[node name="DroneEvolved" instance=ExtResource("1_base")]
+
+[node name="EvolutionMark" type="Sprite2D" parent="Anchor" index="0"]
+script = ExtResource("2_mark")
+
+[node name="StatsComponent" parent="."]
+health = 40
+
+[node name="EnemyShootComponent" parent="."]
+pattern_script = ExtResource("3_pattern")
+pattern_params = {"ways": 1, "spread": 0.0, "shots": 3, "gap": 0.12, "rest": 4.5, "speed": 105.0}

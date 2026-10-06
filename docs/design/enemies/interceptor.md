@@ -63,9 +63,18 @@
 
 → [Encounter 카탈로그](../encounters/catalog.md)
 
+## 진화형 (`enemies/evolved/interceptor_evolved.tscn`)
+
+적 증강 [진화: 왕복 요격기](../augments.md#진화-증강)를 고르면 이후 Interceptor가 이 씬으로 스폰된다. 첫 패스는 원본과 같고, `ReturnPassComponent`가 1회 왕복을 더한다.
+
+- 첫 사격 창(0.7초)이 끝난 뒤, 화면 가장자리를 **12px** 넘어가면 편대에서 분리되어 그 자리에 멈춘다.
+- **0.6초** 대기한다. 이 동안 복귀할 쪽 가장자리에 `EntryWarningComponent` 경고가 점멸한다.
+- 진행 방향을 정반대로 뒤집어 같은 경로를 210px/s로 되돌아온다. 화면에 다시 들어오면 사격 창(0.7초 · 5발 1회)이 한 번 더 열린다(`EnemyShootComponent.rearm_visible_entry`).
+- 복귀 패스 뒤에는 다시 돌아오지 않고 원본처럼 화면 밖으로 사라진다(보상 없음).
 
 ## 완료 조건·검증
 
 - 기획에 명시된 등장 조건, 공격 예고·실행·종료와 보상 처리를 확인한다.
 - 관련 씬의 수치와 위 규칙을 대조하고, 행동 변경 시 해당 적의 스모크 테스트를 실행한다.
 - `enemy_barrage_pattern_smoke_test.gd`에서 진입 활성화·발수·탄속·사격 창 종료를 검증하고, `interceptor_enemy_smoke_test.gd`에서 실제 편대의 경고·패스·발사·화면 이탈·보상을 검증한다.
+- 진화형은 첫 패스 뒤 화면 밖에서 0.6초 경고 후 역방향으로 돌아와 한 번 더 사격하고, 그 뒤에는 돌아오지 않는다.

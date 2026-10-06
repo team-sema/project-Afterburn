@@ -290,6 +290,19 @@ func _spawn_barrage_volley(parent: Node2D, origin: Vector2, direction: Vector2, 
 		barrage_shot.spawn(parent, origin, direction.rotated(deg_to_rad(offset)), speed)
 
 
+## Opens another visible-entry fire window, e.g. for a return pass.
+func rearm_visible_entry() -> void:
+	if not activate_on_visible_entry:
+		return
+	_visible_pass_started = false
+	_fire_window_active = false
+	_active_elapsed = 0.0
+	_burst_volleys_remaining = 0
+	if fire_timer != null: fire_timer.stop()
+	if barrage_player != null: barrage_player.stop()
+	set_process(true)
+
+
 func has_visible_pass_started() -> bool:
 	return _visible_pass_started
 

@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="EnemyAugment" format=3]
+
+[ext_resource type="Script" path="res://resources/enemy_augments/enemy_augment.gd" id="1_augment"]
+[ext_resource type="Texture2D" path="res://assets/enemies/enemy_awl.svg" id="2_icon"]
+[ext_resource type="PackedScene" path="res://enemies/kamikaze_enemy.tscn" id="3_from"]
+[ext_resource type="PackedScene" path="res://enemies/evolved/awl_evolved.tscn" id="4_to"]
+
+[resource]
+script = ExtResource("1_augment")
+augment_id = &"enemy_evolve_awl"
+display_name = "진화: 재돌격 송곳"
+description = "이후 등장하는 Awl이 진화합니다. 돌진 뒤 화면 안에 있으면 멈춰 다시 조준하고 한 번 더 돌진합니다."
+icon = ExtResource("2_icon")
+max_stacks = 1
+evolution_from = ExtResource("3_from")
+evolution_to = ExtResource("4_to")

@@ -12,6 +12,11 @@ enum BehaviorState {
 
 @export_range(0.0, 10.0, 0.05) var charge_duration := 2.0
 @export var dash_movement_sequence: MovementSequence
+## Evolved Awl: extra dashes. After dashing redash_delay seconds while still on
+## screen, it stops, re-aims for recharge_duration, and dashes again.
+@export_range(0, 5, 1) var redash_count := 0
+@export_range(0.05, 5.0, 0.05, "suffix:s") var redash_delay := 0.8
+@export_range(0.05, 10.0, 0.05, "suffix:s") var recharge_duration := 1.0
 
 var _behavior_state := BehaviorState.FORMATION
 var _charge_elapsed := 0.0
@@ -19,6 +24,9 @@ var _charging_position := Vector2.ZERO
 var _captured_target_position := Vector2.ZERO
 var _formation_movement_controller: MovementController
 var _aim_during_formation := false
+var _current_charge_duration := 0.0
+var _dash_elapsed := 0.0
+var _dashes_done := 0
 
 
 func _enter_tree() -> void:
@@ -37,14 +45,24 @@ func _process(delta: float) -> void:
 			global_position = _charging_position
 			_update_charge_aim()
 			_charge_elapsed += delta
-			if _charge_elapsed >= charge_duration:
+			if _charge_elapsed >= _current_charge_duration:
 				_begin_dash()
+		BehaviorState.DASHING:
+			_dash_elapsed += delta
+			# _dashes_done counts the first dash too, so redash_count extra dashes fit.
+			if (
+				_dashes_done <= redash_count
+				and _dash_elapsed >= redash_delay
+				and get_viewport_rect().has_point(global_position)
+			):
+				_begin_charging(recharge_duration)
 
 
 func enter_formation_mode(controller: Node, slot: FormationSlot) -> void:
 	super.enter_formation_mode(controller, slot)
 	_behavior_state = BehaviorState.FORMATION
 	_charge_elapsed = 0.0
+	_dashes_done = 0
 	_aim_during_formation = false
 	_face_visual_direction(Vector2.DOWN)
 	_formation_movement_controller = (
@@ -81,6 +99,10 @@ func is_charging() -> bool:
 
 func is_dashing() -> bool:
 	return _behavior_state == BehaviorState.DASHING
+
+
+func get_dash_count() -> int:
+	return _dashes_done
 
 
 func get_captured_target_position() -> Vector2:
@@ -121,10 +143,11 @@ func _on_formation_sequence_finished() -> void:
 	detach_from_formation()
 
 
-func _begin_charging() -> void:
+func _begin_charging(duration: float = charge_duration) -> void:
 	_behavior_state = BehaviorState.CHARGING
 	_aim_during_formation = false
 	_charge_elapsed = 0.0
+	_current_charge_duration = duration
 	_charging_position = global_position
 	movement_controller.clear_sequence()
 	move_component.stop_motion()
@@ -142,6 +165,8 @@ func _begin_dash() -> void:
 	if dash_direction.is_zero_approx():
 		dash_direction = Vector2.DOWN
 	_behavior_state = BehaviorState.DASHING
+	_dash_elapsed = 0.0
+	_dashes_done += 1
 	_face_visual_direction(dash_direction)
 	assert(dash_movement_sequence != null, "KamikazeEnemy requires a dash MovementSequence.")
 	set_movement_sequence(

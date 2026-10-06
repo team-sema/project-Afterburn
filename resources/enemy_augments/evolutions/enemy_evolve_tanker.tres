@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="EnemyAugment" format=3]
+
+[ext_resource type="Script" path="res://resources/enemy_augments/enemy_augment.gd" id="1_augment"]
+[ext_resource type="Texture2D" path="res://assets/enemies/enemy_tanker_body.svg" id="2_icon"]
+[ext_resource type="PackedScene" path="res://enemies/tanker_enemy.tscn" id="3_from"]
+[ext_resource type="PackedScene" path="res://enemies/evolved/tanker_evolved.tscn" id="4_to"]
+
+[resource]
+script = ExtResource("1_augment")
+augment_id = &"enemy_evolve_tanker"
+display_name = "진화: 재생 실드 탱커"
+description = "이후 등장하는 Tanker가 진화합니다. 실드가 2초간 피해를 받지 않으면 다시 차오릅니다."
+icon = ExtResource("2_icon")
+max_stacks = 1
+evolution_from = ExtResource("3_from")
+evolution_to = ExtResource("4_to")

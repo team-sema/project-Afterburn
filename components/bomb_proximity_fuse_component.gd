@@ -25,6 +25,11 @@ const ENEMY_HURTBOX_MASK := 1 << 1
 @export_range(1.0, 3.0, 0.05) var blast_size_multiplier := 1.5
 @export_range(1, 20, 1) var blast_damage := 2
 @export var blast_effect_color := Color(1.0, 0.2, 0.15, 1.0)
+@export_group("Detonation ring (evolved Bomb)")
+## Ring released only when the fuse detonates; a Bomb killed first stays silent.
+@export var detonation_ring_shot: BarrageShot
+@export_range(0, 64, 1) var detonation_ring_count := 0
+@export_range(1.0, 1000.0, 1.0, "suffix:px/s") var detonation_ring_speed := 75.0
 
 var _armed := false
 var _detonating := false
@@ -130,6 +135,7 @@ func _detonate() -> void:
 
 	_spawn_blast_vfx()
 	_deal_blast_damage()
+	_release_detonation_ring()
 
 	# Score / XP / queue_free via normal no_health hooks on Enemy.
 	stats_component.health = 0
@@ -147,6 +153,23 @@ func _spawn_blast_vfx() -> void:
 		effect.scale = Vector2.ONE * blast_size_multiplier
 	if effect.has_method("set_effect_color"):
 		effect.call("set_effect_color", blast_effect_color)
+
+
+func _release_detonation_ring() -> void:
+	if detonation_ring_count <= 0 or detonation_ring_shot == null:
+		return
+	var world := get_tree().get_first_node_in_group("gameplay_world") as Node2D
+	if world == null:
+		world = get_tree().current_scene as Node2D
+	if world == null:
+		return
+	var volley := BarrageVolley.new()
+	volley.shot = BarrageSequence.clone_settings(detonation_ring_shot) as BarrageShot
+	volley.layout = BarrageVolley.Layout.RING
+	volley.count = detonation_ring_count
+	volley.speed = detonation_ring_speed
+	for direction in volley.directions():
+		volley.shot.spawn(world, actor.global_position, direction, volley.speed)
 
 
 func _deal_blast_damage() -> void:

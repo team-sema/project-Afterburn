@@ -65,9 +65,17 @@
 
 → [Encounter 카탈로그](../encounters/catalog.md) · [Sniper](sniper.md)
 
+## 진화형 (`enemies/evolved/tanker_evolved.tscn`)
+
+적 증강 [진화: 재생 실드 탱커](../augments.md#진화-증강)를 고르면 이후 Tanker가 이 씬으로 스폰된다.
+
+- 실드가 **2초**(`shield_regen_delay`) 동안 피해를 받지 않으면 초당 **150**(`shield_regen_per_second`)씩 스폰 시 실드 HP까지 다시 찬다. 실드 HP가 줄어드는 모든 경로가 대기 시간을 처음부터 다시 센다.
+- 재생 상태는 기존 실드 잔량 표시(Core 알파 단계)로 드러난다.
+- 실드가 0이 되어 깨지면 다시 생기지 않는다. 화력을 끊지 않고 몰아 깨는 것이 정답이다.
 
 ## 완료 조건·검증
 
 - 실드 피격은 본체 HP를 깎지 않는다. 실드 파괴 후 전방 방어가 사라지며, 관통·우회로 본체 hurtbox를 직접 맞히는 공격은 실드가 남아 있어도 본체에 피해를 준다.
 - Tanker는 투사체를 발사하지 않는다.
 - 검증: `tests/tanker_enemy_smoke_test.gd`
+- 진화형 실드는 2초 무피격 뒤 초당 150씩 최대치까지 재생하고, 한 번 깨지면 돌아오지 않는다.

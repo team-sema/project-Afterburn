@@ -187,12 +187,43 @@ func _run() -> void:
 		"sniper never returns to POSITIONING after first hold",
 	)
 
+	await _check_released_aim_telegraph(failures, world)
 	# Encounter preset validates (sniper rides behind tanker).
 	var preset := load("res://resources/encounters/presets/tanker_guard_sniper.tres") as EncounterPreset
 	if preset == null or not preset.validate():
 		failures.append("tanker_guard_sniper EncounterPreset is invalid")
 
 	await _finish(failures, enemy, player)
+
+
+## sniper_reinforcement starts aiming as a formation member and is reparented on
+## release; the aim already in progress must keep its telegraph visible.
+func _check_released_aim_telegraph(failures: PackedStringArray, world: Node2D) -> void:
+	var registry := EnemyAugmentRegistry.new()
+	var spawner := EnemySpawner.new()
+	spawner.augment_registry = registry
+	spawner.spawn_parent = world
+	root.add_child(spawner)
+	var spawned: Array[Enemy] = []
+	spawner.enemy_spawned.connect(func(enemy: Enemy) -> void: spawned.append(enemy))
+	spawner.spawn_encounter(load("res://resources/encounters/presets/sniper_single.tres"), 0)
+	await create_timer(0.8).timeout
+	_expect(failures, spawned.size() == 1, "sniper_reinforcement spawns one sniper")
+	if spawned.size() == 1 and is_instance_valid(spawned[0]):
+		var sniper := spawned[0]
+		var attack := sniper.get_node("SniperAttackComponent") as SniperAttackComponent
+		var cone := sniper.get_node("SniperAimCone") as SniperAimCone
+		_expect(failures, not sniper.is_formation_member(), "sniper_reinforcement releases its sniper")
+		_expect(
+			failures,
+			attack.get_combat_state() == SniperAttackComponent.CombatState.AIMING,
+			"released sniper is still on its first aim",
+		)
+		_expect(failures, cone.visible, "first aim telegraph stays visible after formation release")
+		sniper.queue_free()
+	spawner.queue_free()
+	registry.free()
+	await process_frame
 
 
 func _find_bullet() -> SniperBullet:

@@ -37,8 +37,8 @@ func _run() -> void:
 	_expect(trait_buttons.get_child_count() == 6, "default blaster exposes 2 silver + 3 gold + 1 prismatic modules")
 	_expect(lab.get_player_augment_count() == 10, "all 10 facility augments are discovered")
 	_expect(
-		lab.get_enemy_augment_count() == 14,
-		"all fourteen enemy augments include the gameplay-unregistered resource",
+		lab.get_enemy_augment_count() == 22,
+		"all 22 enemy augments include the gameplay-unregistered resource",
 	)
 
 	var gameplay := lab.get_node("Layout/Playfield/ViewportContainer/PlayfieldViewport/WeaponTestGameplay")

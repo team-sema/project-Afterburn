@@ -135,7 +135,8 @@ func _spawn_encounter_member(
 ) -> void:
 	if not is_instance_valid(controller):
 		return
-	var instance := member.enemy_scene.instantiate()
+	augment_registry.note_enemy_scene_spawned(member.enemy_scene)
+	var instance := augment_registry.resolve_enemy_scene(member.enemy_scene).instantiate()
 	var enemy := instance as Enemy
 	if enemy == null:
 		instance.free()
