@@ -191,7 +191,7 @@ BULLET과 TRAIL_LASER의 머리에 적용한다. 기본값 null은 효과 없음
 - `spread_degrees = 6`: 반대 방향 기준 ±퍼짐각, 0~180°.
 - `color`, `end_color`: 시작/끝 색과 투명도. 선형 보간하며 기본은 분홍에서 어두운 투명색으로 감쇠한다. 탄 Behavior의 tint/opacity와 별개다.
 
-관리기는 월드당 하나이며 같은 텍스처·색·크기 설정끼리 한 MultiMesh로 묶는다. 입자 이동·색·크기 감쇠는 셰이더, 수명/방출 예산은 CPU가 관리한다. 트리 일시정지에서 정지하며 탄이 없어져도 기존 입자는 남는다. 장식 입자는 충돌·탄소거 보상·안전 비율에 포함하지 않는다.
+관리기는 월드당 하나이며 같은 텍스처·색·크기 설정끼리 한 MultiMesh로 묶는다. 입자 데이터는 방출 때 한 번 기록하고 이동·색·크기 감쇠·수명 종료 소멸은 셰이더가 나이로 처리하며, CPU는 수명·방출 예산과 슬롯 재사용만 관리한다. 트리 일시정지에서 정지하며 탄이 없어져도 기존 입자는 남는다. 장식 입자는 충돌·탄소거 보상·안전 비율에 포함하지 않는다.
 
 최대 4096입자/월드, 신규 256개/물리 틱, 탄당 64개/갱신. 초과 방출은 버리고 다음 틱에 보충하지 않는다. 한 번에 1024px 넘는 이동은 순간이동으로 취급한다. 굴곡은 물리 틱의 이전/현재 위치 사이 선분으로 근사한다. `ProjectileTrailManager.clear()`로 잔여 입자를 즉시 지울 수 있고 Lab 재시작은 이를 호출한다. 일반 탄 소거는 꼬리가 자연스럽게 사라지게 둔다.
 
@@ -546,7 +546,7 @@ Sniper는 `SniperBarrageShot`이 BarrageShot의 `is_valid()`와 `spawn()`을 재
 
 안전 비율 격자 계산 개선은 레거시 탄에도 적용된다. MultiMesh·레이저 메쉬·판정 표시 배칭과 Behavior 계산 최적화는 새 FoundationBullet/CurvedLaser 경로에 적용된다. `Kind.LEGACY`는 기존 Sprite·파티클·컴포넌트를 사용하므로 API로 발사해도 새 배치 렌더러로 전환되지 않는다. 반대로 기존 Timer에서 새 BarrageShot을 발사하면 새 렌더링 최적화가 적용된다.
 
-BarragePlayer가 발사한 탄은 `play()`가 복제·검증한 설정(외형·Behavior)을 SPAWN 자식과 같은 방식으로 공유하므로 발사 시 탄마다 복제·재검증하지 않는다(직접 `shot.spawn()` 호출은 기존대로 복제한다). 실행 중에는 시각 채널(색·투명도·배율) 액션이 없는 탄이 매 틱 상태 샘플을 건너뛰고, 방향·속도 변화가 없는 탄은 회전 갱신도 건너뛴다. 레이저 몸통은 외부 궤도 개입·호밍이 없는 동안 점별 분기 없이 같은 궤적 함수로 샘플링하고, 판정 캡슐은 폭 계수를 사전 계산하며 바뀐 값만 물리 서버에 쓴다. 외부 궤도 개입(`apply_effect`)·벽 반사·호밍은 해당 생략 경로를 쓰지 않으므로 동작이 달라지지 않는다. 측정 기준은 `tests/projectile_render_benchmark.gd`(갱신 루프 단독, 결과: `artifacts/projectile_render_benchmark.json`)·`tests/behavior_performance_benchmark.gd`·`tests/barrage_stress_benchmark.gd`(실전형: BarragePlayer가 실제 패턴을 이동 표적에 라이브 발사, 물리·화면 이탈·렌더링 포함, 결과: `artifacts/barrage_stress_benchmark.json`)다. 실전형 기준 꼬리 입자를 포함한 ~340발 유지 부하는 물리 틱 ~12ms로 60fps 안에 있고, ~1000발 유지는 틱 비용이 프레임 예산을 넘어 물리 catch-up으로 프레임이 수백 ms까지 밀린다. 이 영역의 지배 비용은 9절의 한계(탄별 노드·물리 판정)와 꼬리 입자 관리기다.
+BarragePlayer가 발사한 탄은 `play()`가 복제·검증한 설정(외형·Behavior)을 SPAWN 자식과 같은 방식으로 공유하므로 발사 시 탄마다 복제·재검증하지 않는다(직접 `shot.spawn()` 호출은 기존대로 복제한다). 실행 중에는 시각 채널(색·투명도·배율) 액션이 없는 탄이 매 틱 상태 샘플을 건너뛰고, 방향·속도 변화가 없는 탄은 회전 갱신도 건너뛴다. 레이저 몸통은 외부 궤도 개입·호밍이 없는 동안 점별 분기 없이 같은 궤적 함수로 샘플링하고, 판정 캡슐은 폭 계수를 사전 계산하며 바뀐 값만 물리 서버에 쓴다. 외부 궤도 개입(`apply_effect`)·벽 반사·호밍은 해당 생략 경로를 쓰지 않으므로 동작이 달라지지 않는다. 측정 기준은 `tests/projectile_render_benchmark.gd`(갱신 루프 단독, 결과: `artifacts/projectile_render_benchmark.json`)·`tests/behavior_performance_benchmark.gd`·`tests/barrage_stress_benchmark.gd`(실전형: BarragePlayer가 실제 패턴을 이동 표적에 라이브 발사, 물리·화면 이탈·렌더링 포함, 결과: `artifacts/barrage_stress_benchmark.json`)다. 실전형 기준 꼬리 입자를 포함한 ~350발 유지 부하는 프레임 중앙 ~10ms(p95 ~17ms)로 60fps 안에 있고, ~1000발 유지는 틱 비용이 프레임 예산을 넘어 물리 catch-up으로 프레임이 수백 ms까지 밀린다. 그 영역의 지배 비용은 9절의 한계(탄별 노드·물리 판정)다.
 
 ## 11. 적탄 조회·소거 — EnemyBullets
 
