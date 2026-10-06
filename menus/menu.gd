@@ -104,7 +104,20 @@ func _enter_game_when_ready() -> void:
 	var tween := create_tween()
 	tween.tween_property(fade, "color:a", 1.0, FADE_OUT_DURATION)
 	await tween.finished
-	get_tree().change_scene_to_packed(_game_scene)
+	_swap_to_game_scene()
+
+
+## Builds World behind the black fade and swaps scenes by hand. With
+## change_scene_to_packed the menu is freed first, so the viewport shows an
+## empty clear-colour (grey) frame for as long as world.tscn takes to
+## instantiate (~300 ms). Adding World before freeing the menu keeps the
+## screen black until the first World frame is ready.
+func _swap_to_game_scene() -> void:
+	var tree := get_tree()
+	var world := _game_scene.instantiate()
+	tree.root.add_child(world)
+	tree.current_scene = world
+	queue_free()
 
 
 func _set_load_failed() -> void:

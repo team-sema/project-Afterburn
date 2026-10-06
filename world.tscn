@@ -135,6 +135,8 @@ label_settings = ExtResource("3_default_label")
 layout_mode = 2
 text = "000000"
 label_settings = ExtResource("4_title_label")
+clip_text = true
+text_overrun_behavior = 3
 script = ExtResource("5_score_hud")
 game_stats = ExtResource("2_stats")
 
@@ -151,6 +153,8 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.35, 0.88, 1, 1)
 text = "LEVEL 01   0 / 5 XP"
 label_settings = ExtResource("3_default_label")
+clip_text = true
+text_overrun_behavior = 3
 
 [node name="ExperienceBar" type="ProgressBar" parent="Layout/LeftPanel/Margin/VBox/ProgressionHud" unique_id=1258553615]
 unique_name_in_owner = true
@@ -172,6 +176,8 @@ layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.35, 0.58, 1)
 text = "THREAT 01   01:00"
 label_settings = ExtResource("3_default_label")
+clip_text = true
+text_overrun_behavior = 3
 
 [node name="ThreatBar" type="ProgressBar" parent="Layout/LeftPanel/Margin/VBox/ProgressionHud" unique_id=1601726261]
 unique_name_in_owner = true
@@ -195,6 +201,8 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.72, 0.62, 1, 1)
 text = "SHIELD 0 / 0"
 label_settings = ExtResource("3_default_label")
+clip_text = true
+text_overrun_behavior = 3
 
 [node name="ShieldBar" type="ProgressBar" parent="Layout/LeftPanel/Margin/VBox/ShipStatusHud" unique_id=1389593045]
 unique_name_in_owner = true
