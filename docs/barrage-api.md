@@ -30,7 +30,7 @@ func _init() -> void:
 3. Activation의 initial_delay, activate_on_visible_entry, active_duration, apply_shot_threshold를 설정한다. 조준 Volley는 기존 targeting_component를 사용한다.
 4. 패턴 모드에서는 Legacy fire의 간격·버스트·발수·탄속·탄 설정과 legacy 방향 주입 옵션이 적용되지 않는다. 발사 내용은 `.gd`에서 정한다.
 
-수치를 적 씬에서 바꾸려면 `_init()` 대신(또는 함께) `build(params: Dictionary)`를 구현한다. 컴포넌트는 `_init()` 다음에 **Pattern → Pattern Params** Dictionary를 `build()`로 넘기고, 그 뒤에 검증·발사 요약·snapshot을 수행한다. Lab은 빈 Dictionary를 넘기므로 모든 키를 기본값과 함께 읽는다.
+수치를 적 씬에서 바꾸려면 `_init()` 대신(또는 함께) `build(params: Dictionary)`를 구현한다. 컴포넌트는 `_init()` 다음에 **Pattern → Pattern Params** Dictionary를 `build()`로 넘기고, 그 뒤에 검증을 수행한다. `build()` 결과는 그 적 전용 인스턴스라 그대로 쓰고, 패턴을 변이하는 증강(발수·탄속)이 처음 적용될 때만 독립 사본(snapshot)을 만들며, 재생 시작 시 `play()`가 실행용 사본을 별도로 뜬다. Lab은 빈 Dictionary를 넘기므로 모든 키를 기본값과 함께 읽는다.
 
 ```gdscript
 extends BarrageSequence
@@ -503,7 +503,7 @@ fire_together(layers)
 
 [EnemyShootComponent](../components/enemy_shoot_component.gd)는 기본 조준/부채꼴 사격과 버스트를 담당한다. 화면 진입 후 활성화, 초기 지연, 활성 기간, 발사 금지선, actor 전방 발사, 표적 없음 처리, 행동 속도 배율을 함께 관리한다.
 
-Caster도 공통 EnemyShootComponent를 사용하며 Radial 전용 컴포넌트는 제거했다. [EnemyModifierFactory](../components/enemy_modifier_factory.gd)는 공통 발사 컴포넌트에 속도 배율을 전달한다. `pattern_fire_volume_boost`는 스폰 시 발수 증강을 적용할 패턴의 명시적 opt-in이며 Drone·Striker·Interceptor만 켠다. 증강은 시작 전 컴포넌트의 독립 snapshot에 적용한다. 실행 중 snapshot 수정이나 자동 재시작은 지원하지 않는다.
+Caster도 공통 EnemyShootComponent를 사용하며 Radial 전용 컴포넌트는 제거했다. [EnemyModifierFactory](../components/enemy_modifier_factory.gd)는 공통 발사 컴포넌트에 속도 배율을 전달한다. `pattern_fire_volume_boost`는 스폰 시 발수 증강을 적용할 패턴의 명시적 opt-in이며 Drone·Striker·Interceptor만 켠다. 패턴을 변이하는 첫 증강이 시작 전에 컴포넌트 독립 사본(snapshot)을 만들어 거기에 적용하므로 공유 프리셋은 바뀌지 않는다. 실행 중 사본 수정이나 자동 재시작은 지원하지 않는다.
 
 ### 1단계: 탄 생성만 연결 — 호환 경로로 유지
 

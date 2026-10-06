@@ -161,8 +161,11 @@ func update_movement(delta: float) -> void:
 		stop()
 		return
 	move_component.apply_movement_intent(_intent, delta)
-	if step.is_finished(_build_context(), _current_step_state):
-		step.stop(_build_context(), _current_step_state)
+	# Steps treat the context as read-only, so the frame's context is reused
+	# with refreshed positions instead of being rebuilt per call.
+	_refresh_context_positions(context)
+	if step.is_finished(context, _current_step_state):
+		step.stop(context, _current_step_state)
 		_current_step_active = false
 		_advance_step()
 
@@ -270,6 +273,17 @@ func _build_context() -> Dictionary:
 	if player != null and is_instance_valid(player):
 		result["player_position"] = player.global_position
 	return result
+
+
+## Only positions change when the intent moves the actor; every other context
+## key is stable within the frame.
+func _refresh_context_positions(context: Dictionary) -> void:
+	if not _can_build_live_context():
+		return
+	var modifier_offset := move_component.get_modifier_offset()
+	context["global_position"] = actor.global_position
+	context["base_position"] = actor.global_position - modifier_offset
+	context["modifier_offset"] = modifier_offset
 
 
 func _can_build_live_context() -> bool:
