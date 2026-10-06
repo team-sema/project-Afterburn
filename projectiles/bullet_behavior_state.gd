@@ -65,39 +65,23 @@ func _init(behavior: BulletBehavior, direction: Vector2, speed: float, tint: Col
 	_limit = lifetime
 	_tail = {"heading": 0.0, "speed": _speed, "tint": _tint, "opacity": 1.0, "visual_scale": 1.0, "hitbox_scale": 1.0, "lateral": 0.0, "lateral_velocity": 0.0}
 	_finished = _behavior.actions.is_empty()
-	var has_homing := false
-	for action in _behavior.actions:
-		var heading_action: BulletAction
-		var speed_action: BulletAction
-		var group: Array = action.children if action.type == BulletAction.Type.PARALLEL else [action]
-		for child in group:
-			if child.type == BulletAction.Type.HOMING: has_homing = true
-			if child.channel() == "heading": heading_action = child
-			if child.channel() == "speed": speed_action = child
-			if child.type == BulletAction.Type.LATERAL_WAVE:
-				_has_lateral = true
-			if child.channel() in ["heading", "speed"]:
-				_constant_velocity = false
-			if child.type in [BulletAction.Type.TINT, BulletAction.Type.OPACITY, BulletAction.Type.VISUAL_SCALE, BulletAction.Type.HITBOX_SCALE]:
-				_static_visuals = false
-			if child.type == BulletAction.Type.HITBOX_SCALE:
-				_max_hitbox_scale = maxf(_max_hitbox_scale, child.value)
-			if child.type in [BulletAction.Type.HEADING_WAVE, BulletAction.Type.LATERAL_WAVE]:
-				prediction_step = minf(prediction_step, child.period / 24.0)
-		_heading_actions.append(heading_action)
-		_speed_actions.append(speed_action)
-	if _behavior.repeat_count == 1 and _behavior.actions.size() == 1 and _behavior.actions[0].type == BulletAction.Type.TURN_AT:
-		_single_turn = _behavior.actions[0]
-	if _behavior.actions.size() == 1 and _behavior.actions[0].type == BulletAction.Type.HEADING_WAVE and _behavior.actions[0].duration > 0:
-		_single_wave = _behavior.actions[0]
-	if _behavior.actions.size() == 1 and _behavior.actions[0].type == BulletAction.Type.LATERAL_WAVE and _behavior.actions[0].duration > 0:
-		_single_lateral = _behavior.actions[0]
-	if has_homing:
+	# Behavior-invariant analysis is cached on the Behavior and shared
+	# read-only by every bullet, so launch spikes skip re-walking the actions.
+	var analysis := _behavior.runtime_analysis()
+	_heading_actions = analysis.heading_actions
+	_speed_actions = analysis.speed_actions
+	_has_lateral = analysis.has_lateral
+	_constant_velocity = analysis.constant_velocity
+	_static_visuals = analysis.static_visuals
+	_max_hitbox_scale = analysis.max_hitbox_scale
+	prediction_step = analysis.prediction_step
+	_single_turn = analysis.single_turn
+	_single_wave = analysis.single_wave
+	_single_lateral = analysis.single_lateral
+	_spawn_offsets = analysis.spawn_offsets
+	_cycle_length = analysis.cycle_length
+	if analysis.has_homing:
 		_homing = preload("res://projectiles/bullet_homing_trajectory.gd").new(self)
-	for action in _behavior.actions:
-		if action.type == BulletAction.Type.SPAWN:
-			_spawn_offsets.append({"offset": _cycle_length, "action": action})
-		_cycle_length += action.length()
 
 func configure_homing(owner: Node2D, origin: Vector2, target: Node2D = null, resolver := Callable()) -> void:
 	if _homing != null: _homing.configure(owner, origin, target, resolver)
