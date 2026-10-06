@@ -203,6 +203,8 @@ func _pick_enemy_choices() -> Array[EnemyAugment]:
 func _is_enemy_augment_available(augment: EnemyAugment) -> bool:
 	if augment == null or not enemy_registry.can_add_augment(augment):
 		return false
+	if augment.is_evolution() and not enemy_registry.has_seen_enemy_scene(augment.evolution_from):
+		return false
 	# A reroll penalty with nothing left to remove would be a free pick.
 	return augment.player_reroll_penalty <= 0 or remaining_reroll_count > 0
 

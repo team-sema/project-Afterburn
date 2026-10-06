@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="EnemyAugment" format=3 uid="uid://da4ig0vhcrbta"]
+
+[ext_resource type="Script" uid="uid://be4x07sn0gawv" path="res://resources/enemy_augments/enemy_augment.gd" id="1_augment"]
+[ext_resource type="Texture2D" uid="uid://5kry8xerq4ll" path="res://assets/enemies/enemy_sniper.svg" id="2_icon"]
+[ext_resource type="PackedScene" path="res://enemies/sniper_enemy.tscn" id="3_from"]
+[ext_resource type="PackedScene" path="res://enemies/evolved/sniper_evolved.tscn" id="4_to"]
+[ext_resource type="Script" uid="uid://bd2vhj2tclcdr" path="res://resources/enemy_augments/enemy_stat_modifier.gd" id="5_5yoje"]
+
+[resource]
+script = ExtResource("1_augment")
+augment_id = &"enemy_evolve_sniper"
+display_name = "진화: 연속 저격수"
+description = "이후 등장하는 Sniper가 진화합니다. 저격 직후 이동 방향 앞에 조준선을 고정하고 두 번째 탄을 쏩니다."
+icon = ExtResource("2_icon")
+max_stacks = 1
+evolution_from = ExtResource("3_from")
+evolution_to = ExtResource("4_to")

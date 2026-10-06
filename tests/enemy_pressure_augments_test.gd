@@ -77,7 +77,7 @@ func _check_xp_drop_chance() -> void:
 	var registry := _registry([XP_DROP_CHANCE, XP_DROP_CHANCE])
 	var drone := await _spawn_drone(registry)
 	var drop := drone.get_node("ExperienceDropComponent") as ExperienceDropComponent
-	_expect(is_equal_approx(drop.drop_chance, 0.45 * 0.64), "two stacks lower a 45% drop to 28.8%")
+	_expect(is_equal_approx(drop.drop_chance, 0.45 * 0.81), "two stacks lower a 45% drop to 36.45%")
 	var guaranteed := await _spawn_drone(registry, func(enemy: Enemy) -> void:
 		(enemy.get_node("ExperienceDropComponent") as ExperienceDropComponent).drop_chance = 1.0
 	)
@@ -122,8 +122,17 @@ func _check_armor_plate() -> void:
 	_expect(armor != null and not armor.visible, "the outline disappears once the plate breaks")
 	drone.hurtbox_component.hurt.emit(hitbox)
 	_expect(drone.stats_component.health == health - 1, "the second hit deals damage")
+	var elite := await _spawn_drone(_registry([ARMOR_PLATE]), func(enemy: Enemy) -> void: enemy.is_elite = true)
+	var boss := await _spawn_drone(_registry([ARMOR_PLATE]), func(enemy: Enemy) -> void: enemy.is_boss = true)
+	await process_frame
+	for big in [elite, boss]:
+		var big_health: int = big.stats_component.health
+		_expect(big.get_node_or_null("ArmorPlateComponent") == null, "elites and bosses get no armor plate")
+		big.hurtbox_component.hurt.emit(hitbox)
+		_expect(big.stats_component.health == big_health - 1, "an elite or boss takes its first hit")
 	hitbox.free()
-	drone.queue_free()
+	for enemy in [drone, elite, boss]:
+		enemy.queue_free()
 	await process_frame
 	_free_registries()
 

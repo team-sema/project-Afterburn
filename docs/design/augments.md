@@ -21,7 +21,7 @@ XP를 모은 뒤 플레이어가 선택 시점을 정하며, 무기·모듈·시
 | `PlayerAugment` | `tier` · `augment_type` · `offer_weight` · 시설/무기/규칙(`rule_id`) 필드 |
 | `FacilityModuleEffect` | Kind + primary/secondary/tertiary |
 | `WeaponTraitDefinition` | `tier` · `max_rank`(실버 5 · 골드 3 · 프리즘 1) · `params` / `rank_overrides` |
-| `EnemyAugment` | `icon` · `max_stacks` · modifiers · spawn 보너스 · `elite_escort_preset` · `player_reroll_penalty` |
+| `EnemyAugment` | `icon` · `max_stacks` · modifiers · spawn 보너스 · `elite_escort_preset` · `player_reroll_penalty` · `evolution_from`/`evolution_to` |
 | `PlayerAugmentKind` | `FACILITY_EFFECT` · `WEAPON_ACQUIRE` · `WEAPON_TRAIT` · `SHIP_RULE` |
 
 ## 풀
@@ -31,7 +31,7 @@ XP를 모은 뒤 플레이어가 선택 시점을 정하며, 무기·모듈·시
 | 대상 | 경로 | 포함 |
 |------|------|------|
 | 플레이어 | `resources/player_augments/` | Kind 4종 · `offer_weight > 0` → **64종** (시설 10 + 획득 7 + 무기 모듈 43 + 규칙 4) |
-| 적 | `resources/enemy_augments/` | `include_in_offer_pool == true` → **13종** |
+| 적 | `resources/enemy_augments/` (하위 `evolutions/` 포함) | `include_in_offer_pool == true` → **21종** (일반 13 + 진화 8) |
 
 - 리롤: `max_reroll_count`(임시 2) · **포커스 카드 1장만** 교체 · 포커스 카드와 같은 등급(없으면 아래 등급)에서 같은 Kind 우선
 - 무기 Kind는 함선 범용 슬롯을 **쓰지 않음**
@@ -48,9 +48,9 @@ XP를 모은 뒤 플레이어가 선택 시점을 정하며, 무기·모듈·시
 | `enemy_bomb_fast_fuse` | 고속 기폭 장치 | Bomb 무장·Elite Bomb 기뢰 점멸 ÷1.5 · one-time | ![폭탄](enemies/sprites/enemy_bomb.svg) |
 | `enemy_xp_drift_speed_boost` | XP 드롭 속도 증가 | XP_DRIFT_SPEED ×1.2 · 최대 2스택(×1.44) | — |
 | `enemy_projectile_speed_boost` | 고속탄 | 일반 적 PROJECTILE_SPEED ×1.15 · 최대 2스택(×1.3225) | — |
-| `enemy_xp_drop_chance_down` | 빈약한 전리품 | XP_DROP_CHANCE ×0.8 · 최대 2스택(×0.64) | — |
+| `enemy_xp_drop_chance_down` | 빈약한 전리품 | XP_DROP_CHANCE ×0.9 · 최대 2스택(×0.81) | — |
 | `enemy_death_burst` | 유폭 | 일반 적 사망 시 느린 탄 4발 · one-time | — |
-| `enemy_armor_plate` | 장갑판 | 적마다 첫 피격 1회 무시 · one-time | — |
+| `enemy_armor_plate` | 장갑판 | 일반 적마다 첫 피격 1회 무시 · one-time | — |
 | `enemy_elite_escort` | 엘리트 호위대 | 엘리트 관문마다 Drone 2기 동반 · one-time | — |
 | `enemy_reroll_lock` | 리롤 봉쇄 | 남은 플레이어 리롤 −1 · one-time | — |
 
@@ -63,13 +63,35 @@ XP를 모은 뒤 플레이어가 선택 시점을 정하며, 무기·모듈·시
 XP 드롭 속도 증가는 선택 뒤 스폰되는 적의 `ExperienceDropComponent.drift_speed_multiplier`에 곱해지고, 그 적이 떨어뜨리는 XP 오브의 낙하 속도(기본 155px/s)를 올린다. 이미 화면에 있는 오브와 탄소거 XP는 바뀌지 않는다. 오브가 함선보다 빨리 지나가 놓치기 쉬워지므로 레벨업이 늦어지는 대가 카드다. 2스택이면 약 223px/s다. 배율·스택은 임시값이다.
 
 - **고속탄**: 선택 뒤 스폰되는 일반 적의 발사 속도에 곱한다. `EnemyShootComponent`는 레거시 사격의 `projectile_speed`와 패턴 FIRE 스텝의 모든 Volley `speed`를, `SniperAttackComponent`는 `projectile_speed`를 올린다. Behavior의 `speed_to` 같은 절대 속도 목표와 반격·유폭 탄은 그대로다. 엘리트·보스 패턴은 발사 속도와 절대 `speed_to`가 섞여 배율이 고르게 먹지 않으므로 제외한다.
-- **빈약한 전리품**: 선택 뒤 스폰되는 적의 `ExperienceDropComponent.drop_chance`에 곱한다(일반 45% → 36% → 28.8%). 확률 1.0인 확정 드롭(엘리트 보상)은 그대로다. 탄소거 XP는 바뀌지 않는다.
+- **빈약한 전리품**: 선택 뒤 스폰되는 적의 `ExperienceDropComponent.drop_chance`에 곱한다(일반 45% → 40.5% → 36.45%). 확률 1.0인 확정 드롭(엘리트 보상)은 그대로다. 탄소거 XP는 바뀌지 않는다.
 - **유폭** (`DeathBurstComponent`): 일반 적이 체력 0으로 파괴되면 그 자리에서 `round_straight_shot` 4발을 60px/s로 대각선(45°·135°·225°·315°) 링으로 뿌린다. 엘리트·보스는 처치 순간 탄소거가 시작되므로 터지지 않는다. 임사 체험과 겹치면 실제 사망 때 한 번만 터진다.
-- **장갑판** (`ArmorPlateComponent`): 선택 뒤 스폰되는 모든 적(엘리트·보스 포함)의 `HurtComponent.armor_hits`를 1 올린다. 피격 1회는 피해 없이 흡수하고, 피격 연출(번쩍임·흔들림)은 그대로 낸다. 장갑이 남은 동안 피격 판정 둘레에 옅은 청백색 원을 그린다. 연사형 무기는 손해가 작고 한 방이 큰 무기에 불리하다.
+- **장갑판** (`ArmorPlateComponent`): 선택 뒤 스폰되는 일반 적의 `HurtComponent.armor_hits`를 1 올린다. 엘리트·보스는 체력이 커서 1회 흡수가 체감되지 않고 외곽선만 어색하게 남으므로 제외한다. 피격 1회는 피해 없이 흡수하고, 피격 연출(번쩍임·흔들림)은 그대로 낸다. 장갑이 남은 동안 피격 판정 둘레에 옅은 청백색 원을 그린다. 연사형 무기는 손해가 작고 한 방이 큰 무기에 불리하다.
 - **엘리트 호위대**: 이후 엘리트 관문(보스 제외)이 열릴 때 `ThreatEliteController`가 엘리트와 함께 `elite_escort_drone_pair`(Drone 2기, 좌우 18px)를 특수 Encounter로 스폰한다. 호위기는 일반 적이라 엘리트 처치 후에도 남고, 드론 증원 편대 보너스는 받지 않는다.
 - **리롤 봉쇄**: 적 증강 중 유일하게 플레이어 자원을 깎는다. 선택 즉시 `AugmentOfferController.remaining_reroll_count`를 1 줄인다. 남은 리롤이 0이면 오퍼 후보에서 빠진다.
 
 `max_stacks` 0=무제한 · 1=one-time. `target_spawn_id` / `additional_spawn_count`는 Encounter 한정 보너스.
+
+### 진화 증강
+
+특정 일반 적 하나를 한 단계 위 진화형으로 바꾼다. 스탯 배율과 달리 그 적이 **하는 일**이 바뀐다.
+
+- **치환**: 고르면 이후 스폰되는 원본 씬(`evolution_from`)이 진화형 씬(`evolution_to`)으로 바뀐다. 모든 Encounter 멤버는 `EnemySpawner`에서 `EnemyAugmentRegistry.resolve_enemy_scene`을 거쳐 생성된다. 그래서 프리셋·진형·Encounter ID는 그대로이고, 엘리트 호위대처럼 다른 경로로 나오는 원본도 함께 진화한다. 이미 화면에 있는 적은 바뀌지 않는다. 씬이 정확히 같을 때만 치환하므로, Drone을 상속한 Interceptor와 엘리트는 Drone 진화의 영향을 받지 않는다.
+- **오퍼 조건**: 그 원본 적이 이번 런에 한 번이라도 스폰된 뒤부터 후보에 든다. 스폰 기록은 `EnemySpawner`가 원본 씬 기준으로 남기며, `clear_augments`가 함께 지운다. 진화는 모두 one-time이다.
+- **겹침**: 다른 적 증강(HP·이속·포화 사격·고속탄·장갑판 등)과 Encounter 한정 보너스는 진화형에도 그대로 적용된다.
+- **보상**: 점수·XP는 원본과 같다.
+- **외형**: 원본 실루엣·색을 유지하고, 뒤에 금색 외곽(`EnemyEvolutionMark`, Core의 1.5배, 1.2초 주기로 알파 0.3↔0.7 맥동)을 그린다. 카드 아이콘은 원본 스프라이트다.
+- 진화형 씬은 `enemies/evolved/`에 원본 상속 씬으로 둔다. 카드는 `resources/enemy_augments/evolutions/`에 둔다. 각 진화형의 동작·수치 정본은 원본 적 문서의 「진화형」 절이다.
+
+| ID | 표시명 | 원본 → 진화형 | 변화 |
+|----|--------|---------------|------|
+| `enemy_evolve_drone` | 진화: 연사 드론 | Drone → `drone_evolved` | 조준 단발 → 3연사 · HP 28→40 |
+| `enemy_evolve_striker` | 진화: 항적 스트라이커 | Striker → `striker_evolved` | 편대 해제 뒤 돌진하며 좌우로 느린 탄 |
+| `enemy_evolve_awl` | 진화: 재돌격 송곳 | Awl → `awl_evolved` | 돌진 뒤 재조준해 2차 돌진 |
+| `enemy_evolve_bomb` | 진화: 산탄 폭뢰 | Bomb → `bomb_evolved` | 자폭할 때 느린 탄 12발 링 |
+| `enemy_evolve_interceptor` | 진화: 왕복 요격기 | Interceptor → `interceptor_evolved` | 화면을 지나간 뒤 경고 후 역방향으로 재돌파 |
+| `enemy_evolve_tanker` | 진화: 재생 실드 탱커 | Tanker → `tanker_evolved` | 실드가 2초 무피격 뒤 150/s 재생 |
+| `enemy_evolve_caster` | 진화: 역회전 캐스터 | Caster → `caster_evolved` | 서로 반대로 도는 12발 링 2겹 |
+| `enemy_evolve_sniper` | 진화: 연속 저격수 | Sniper → `sniper_evolved` | 저격 직후 이동 예측 지점에 고정 함정선 → 2발째 |
 
 ## 등급
 
@@ -150,9 +172,10 @@ XP 드롭 속도 증가는 선택 뒤 스폰되는 적의 `ExperienceDropCompone
 - 벼랑 끝을 고르면 실드가 깨질 때 화면 적탄과 2초 안에 나온 적탄이 ×0.2로 느려졌다 풀리고, 실드 충전 시간이 2배가 된다.
 - 공명 사격을 고르면 처치마다 무기가 차례로 추가 발사하고(방벽 제외, 0.1초 간격), 무기 연사가 ×0.8이 된다.
 - 한 번 고른 규칙 카드는 다시 나오지 않는다.
-- 적 풀은 13종이다. 스탯 적 증강은 선택 뒤 스폰되는 적에만 적용되고, 스택 한도를 넘겨 나오지 않는다.
+- 적 풀은 21종(일반 13 + 진화 8)이다. 스탯 적 증강은 선택 뒤 스폰되는 적에만 적용되고, 스택 한도를 넘겨 나오지 않는다.
+- 진화 카드는 그 원본 적이 스폰되기 전에는 나오지 않는다. 고르면 이후 스폰되는 원본만 진화형으로 나오고, Encounter ID와 다른 적 증강은 유지된다. 한 번 고른 진화는 다시 나오지 않는다.
 - XP 드롭 속도 증가·빈약한 전리품은 그 적이 떨어뜨리는 오브의 낙하 속도·드롭 확률만 바꾸며, 확정 드롭과 탄소거 XP는 그대로다.
-- 고속탄·유폭은 일반 적에게만 적용되고 엘리트·보스는 그대로다. 장갑판은 적마다 첫 피격 1회만 흡수한다.
+- 고속탄·유폭·장갑판은 일반 적에게만 적용되고 엘리트·보스는 그대로다. 장갑판은 적마다 첫 피격 1회만 흡수한다.
 - 엘리트 호위대를 고르면 이후 엘리트 관문(보스 제외)마다 Drone 2기가 함께 나온다. 리롤 봉쇄는 남은 리롤을 1 줄이고, 남은 리롤이 0이면 후보에서 빠진다.
 
-검증 참고: `tests/augment_pool_data_driven_smoke_test.gd` · `tests/augment_offer_tier_test.gd` · `tests/fourth_weapon_bay_test.gd` · `tests/ship_rule_prism_test.gd` · `tests/enemy_augment_policy_smoke_test.gd` · `tests/enemy_pressure_augments_test.gd`.
+검증 참고: `tests/augment_pool_data_driven_smoke_test.gd` · `tests/augment_offer_tier_test.gd` · `tests/fourth_weapon_bay_test.gd` · `tests/ship_rule_prism_test.gd` · `tests/enemy_augment_policy_smoke_test.gd` · `tests/enemy_pressure_augments_test.gd` · `tests/enemy_evolution_augments_test.gd`.

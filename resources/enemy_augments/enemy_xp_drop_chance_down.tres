@@ -6,12 +6,12 @@
 [sub_resource type="Resource" id="Resource_xp_drop_chance"]
 script = ExtResource("2_modifier")
 stat = 6
-multiplier = 0.8
+multiplier = 0.9
 
 [resource]
 script = ExtResource("1_augment")
 augment_id = &"enemy_xp_drop_chance_down"
 display_name = "빈약한 전리품"
-description = "이후 등장하는 적이 XP를 떨어뜨릴 확률이 20% 감소합니다."
+description = "이후 등장하는 적이 XP를 떨어뜨릴 확률이 10% 감소합니다."
 max_stacks = 2
 stat_modifiers = Array[ExtResource("2_modifier")]([SubResource("Resource_xp_drop_chance")])

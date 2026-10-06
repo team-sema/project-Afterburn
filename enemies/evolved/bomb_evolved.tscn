@@ -1,0 +1,15 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://enemies/bomb_enemy.tscn" id="1_base"]
+[ext_resource type="Script" path="res://components/enemy_evolution_mark.gd" id="2_mark"]
+[ext_resource type="Resource" path="res://resources/projectiles/round_straight_shot.tres" id="3_shot"]
+
+[node name="BombEvolved" instance=ExtResource("1_base")]
+
+[node name="EvolutionMark" type="Sprite2D" parent="Anchor" index="0"]
+script = ExtResource("2_mark")
+
+[node name="BombProximityFuseComponent" parent="."]
+detonation_ring_shot = ExtResource("3_shot")
+detonation_ring_count = 12
+detonation_ring_speed = 75.0

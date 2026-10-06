@@ -17,6 +17,10 @@ var _radius := 10.0
 func _ready() -> void:
 	enemy = get_parent() as Enemy
 	assert(enemy != null, "ArmorPlateComponent must be attached directly to an Enemy.")
+	# One absorbed hit is noise on an elite or boss health pool; ordinary enemies only.
+	if enemy.is_elite or enemy.is_boss:
+		queue_free()
+		return
 	hurt_component = enemy.get_node("HurtComponent") as HurtComponent
 	assert(hurt_component != null, "ArmorPlateComponent requires HurtComponent.")
 	hurt_component.armor_hits += armor_hits

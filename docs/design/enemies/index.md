@@ -33,6 +33,10 @@
 
 HEALTH / MOVE_SPEED / ACTION_RATE (+ `EnemyShootComponent` / `SniperAttackComponent` 주기). Caster 링도 공통 `EnemyShootComponent`의 패턴으로 실행한다.
 
+## 진화형
+
+8종 모두 적 증강 [진화 카드](../augments.md#진화-증강)로 한 단계 위 진화형(`enemies/evolved/*_evolved.tscn`, 원본 상속 씬)을 갖는다. 진화형의 동작·수치는 각 상세 문서의 「진화형」 절에 둔다. 외형은 원본에 금색 맥동 외곽(`EnemyEvolutionMark`)을 더한 것이다.
+
 ## 보스 플래그 (`is_boss`)
 
 - `Enemy.is_boss == true`이면 `bosses` 그룹에 들어가며, 시설 **대형 표적 해석기**(`BOSS_DAMAGE_MULT`) 피해 배율 대상이 된다

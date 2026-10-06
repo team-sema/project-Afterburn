@@ -1,0 +1,14 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://enemies/shooting_enemy.tscn" id="1_base"]
+[ext_resource type="Script" path="res://components/enemy_evolution_mark.gd" id="2_mark"]
+[ext_resource type="Script" path="res://patterns/caster_evolved_pattern.gd" id="3_pattern"]
+
+[node name="CasterEvolved" instance=ExtResource("1_base")]
+
+[node name="EvolutionMark" type="Sprite2D" parent="Anchor" index="0"]
+script = ExtResource("2_mark")
+
+[node name="EnemyShootComponent" parent="."]
+pattern_script = ExtResource("3_pattern")
+pattern_params = {"count": 12, "gap": 0.1, "rest": 4.8, "rings": 5, "speed": 95.0, "spin": 9.0}

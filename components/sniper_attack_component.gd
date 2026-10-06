@@ -26,6 +26,16 @@ enum CombatState {
 @export_range(0.0, 16.0, 0.5) var recoil_distance := 5.0
 @export_range(0.01, 0.2, 0.01) var recoil_kick_duration := 0.05
 @export_range(0.05, 0.5, 0.01) var recoil_return_duration := 0.18
+@export_group("Follow-up (evolved Sniper)")
+## Extra shots after each main shot. Each locks a trap line once, where the
+## target would arrive at fire time if it kept its current velocity.
+@export_range(0, 3, 1) var follow_up_shots := 0
+@export_range(0.1, 5.0, 0.05) var follow_up_aim_duration := 0.7
+## Scales the lead; 1.0 meets a target that keeps moving until the shot lands.
+@export_range(0.0, 2.0, 0.05) var follow_up_lead := 1.0
+## The follow-up telegraph opens narrow and already visible, since its line is fixed.
+@export_range(0.0, 45.0, 0.5) var follow_up_start_angle := 3.0
+@export_range(0.0, 1.0, 0.01) var follow_up_start_focus := 0.5
 
 var enemy: Enemy
 var _state := CombatState.POSITIONING
@@ -34,6 +44,12 @@ var _aim_direction := Vector2.DOWN
 var _base_aim_duration := 4.0
 var _base_focus_hold_duration := 0.18
 var _base_cooldown_duration := 2.5
+var _base_follow_up_aim_duration := 0.7
+var _follow_ups_left := 0
+var _in_follow_up := false
+var _last_player_position := Vector2.ZERO
+var _has_last_player_position := false
+var _player_velocity := Vector2.ZERO
 var _active_bullet: SniperBullet
 var _shot_pending := false
 var _shots_fired := 0
@@ -52,6 +68,7 @@ func _ready() -> void:
 	_base_aim_duration = aim_duration
 	_base_focus_hold_duration = focus_hold_duration
 	_base_cooldown_duration = cooldown_duration
+	_base_follow_up_aim_duration = follow_up_aim_duration
 	if aim_cone == null:
 		aim_cone = enemy.get_node_or_null("SniperAimCone") as SniperAimCone
 	assert(aim_cone != null, "SniperAttackComponent requires a SniperAimCone sibling.")
@@ -80,6 +97,7 @@ func apply_action_rate_multiplier(multiplier: float) -> void:
 	aim_duration = _base_aim_duration / rate
 	focus_hold_duration = _base_focus_hold_duration / rate
 	cooldown_duration = _base_cooldown_duration / rate
+	follow_up_aim_duration = _base_follow_up_aim_duration / rate
 
 
 func apply_projectile_speed_multiplier(multiplier: float) -> void:
@@ -123,6 +141,10 @@ func has_active_bullet() -> bool:
 	return is_instance_valid(_active_bullet)
 
 
+func is_follow_up_aiming() -> bool:
+	return _in_follow_up and _state == CombatState.AIMING
+
+
 func _process(delta: float) -> void:
 	if enemy == null or not is_instance_valid(enemy):
 		return
@@ -130,6 +152,8 @@ func _process(delta: float) -> void:
 		_sync_positioning_from_movement()
 	if _hold_locked:
 		enemy.global_position = _hold_position
+	if follow_up_shots > 0:
+		_track_player_velocity(delta)
 
 	match _state:
 		CombatState.POSITIONING:
@@ -139,7 +163,11 @@ func _process(delta: float) -> void:
 		CombatState.FIRING:
 			_state_elapsed += delta
 			if _state_elapsed >= shot_recovery_duration:
-				_enter_cooldown()
+				if _follow_ups_left > 0:
+					_follow_ups_left -= 1
+					_enter_aiming(true)
+				else:
+					_enter_cooldown()
 		CombatState.COOLDOWN:
 			_state_elapsed += delta
 			if _state_elapsed >= cooldown_duration:
@@ -178,31 +206,38 @@ func _begin_hold_and_aim() -> void:
 	_enter_aiming()
 
 
-func _enter_aiming() -> void:
+func _enter_aiming(follow_up := false) -> void:
 	_state = CombatState.AIMING
 	_state_elapsed = 0.0
-	_refresh_aim_direction()
+	_in_follow_up = false
+	if follow_up:
+		_lock_follow_up_direction()
+	else:
+		_follow_ups_left = follow_up_shots
+		_refresh_aim_direction()
+	_in_follow_up = follow_up
 	_face_visual_direction(_aim_direction)
 	_apply_cone_transform()
 	if aim_cone != null:
 		aim_cone.set_cone_length(projectile_range)
-		aim_cone.set_half_angle_degrees(telegraph_start_angle)
-		aim_cone.set_focus_progress(0.0)
+		aim_cone.set_half_angle_degrees(_aim_start_angle())
+		aim_cone.set_focus_progress(_aim_start_focus())
 		aim_cone.show_telegraph()
 
 
 func _update_aiming(delta: float) -> void:
 	_state_elapsed += delta
 	_refresh_aim_direction()
-	var progress := clampf(_state_elapsed / maxf(0.05, aim_duration), 0.0, 1.0)
+	var current_aim_duration := follow_up_aim_duration if _in_follow_up else aim_duration
+	var progress := clampf(_state_elapsed / maxf(0.05, current_aim_duration), 0.0, 1.0)
 	# Cubic ease-out: a sharp initial lock-on that settles flat at full focus.
 	var focus_progress := 1.0 - pow(1.0 - progress, 3.0)
-	var half_angle := lerpf(telegraph_start_angle, telegraph_end_angle, focus_progress)
+	var half_angle := lerpf(_aim_start_angle(), telegraph_end_angle, focus_progress)
 	_apply_cone_transform()
 	if aim_cone != null:
 		aim_cone.set_half_angle_degrees(half_angle)
-		aim_cone.set_focus_progress(focus_progress)
-	if _state_elapsed >= aim_duration + focus_hold_duration:
+		aim_cone.set_focus_progress(lerpf(_aim_start_focus(), 1.0, focus_progress))
+	if _state_elapsed >= current_aim_duration + focus_hold_duration:
 		_enter_firing()
 
 
@@ -227,6 +262,10 @@ func _enter_cooldown() -> void:
 
 
 func _refresh_aim_direction() -> void:
+	if _in_follow_up:
+		# The trap line was locked when the follow-up began; it never tracks.
+		_face_visual_direction(_aim_direction)
+		return
 	var player := _get_player()
 	if player == null:
 		_aim_direction = Vector2.DOWN
@@ -236,6 +275,51 @@ func _refresh_aim_direction() -> void:
 			_aim_direction = Vector2.DOWN
 	if _state == CombatState.AIMING or _state == CombatState.FIRING:
 		_face_visual_direction(_aim_direction)
+
+
+func _aim_start_angle() -> float:
+	return follow_up_start_angle if _in_follow_up else telegraph_start_angle
+
+
+func _aim_start_focus() -> float:
+	return follow_up_start_focus if _in_follow_up else 0.0
+
+
+func _lock_follow_up_direction() -> void:
+	var player := _get_player()
+	if player == null:
+		_aim_direction = Vector2.DOWN
+		return
+	var travel_time := (
+		enemy.global_position.distance_to(player.global_position) / maxf(1.0, projectile_speed)
+	)
+	var lead_time := (follow_up_aim_duration + focus_hold_duration + travel_time) * follow_up_lead
+	var aim_point := player.global_position + _player_velocity * lead_time
+	# A trap line off the playfield would read as a miss, so keep it on screen.
+	var visible_rect := enemy.get_viewport_rect()
+	aim_point = aim_point.clamp(visible_rect.position, visible_rect.end)
+	_aim_direction = enemy.global_position.direction_to(aim_point)
+	if _aim_direction.length_squared() < 0.0001:
+		_aim_direction = Vector2.DOWN
+
+
+func get_follow_up_aim_direction() -> Vector2:
+	return _aim_direction if _in_follow_up else Vector2.ZERO
+
+
+func _track_player_velocity(delta: float) -> void:
+	var player := _get_player()
+	if player == null or delta <= 0.0:
+		_has_last_player_position = false
+		_player_velocity = Vector2.ZERO
+		return
+	var position := player.global_position
+	if _has_last_player_position:
+		var raw := (position - _last_player_position) / delta
+		# Frame-rate independent smoothing (~0.1s) so one jittery frame cannot swing the lock.
+		_player_velocity = _player_velocity.lerp(raw, 1.0 - exp(-delta / 0.1))
+	_last_player_position = position
+	_has_last_player_position = true
 
 
 func _face_visual_direction(direction: Vector2) -> void:
@@ -317,6 +401,15 @@ func _get_player() -> Node2D:
 			targeting.change_target(found)
 			return found
 	return get_tree().get_first_node_in_group("player") as Node2D
+
+
+func _enter_tree() -> void:
+	# Formation release reparents the sniper; _exit_tree hid the telegraph, so an
+	# aim already in progress shows it again instead of firing unannounced.
+	if not is_node_ready() or _state != CombatState.AIMING:
+		return
+	if aim_cone != null and is_instance_valid(aim_cone):
+		aim_cone.show_telegraph()
 
 
 func _exit_tree() -> void:
