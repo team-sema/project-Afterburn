@@ -20,6 +20,16 @@
   .\tools\run-godot.cmd --headless --editor --quit
   ```
 
+- Run the test suite with `tools/run-tests.cmd`. It runs each test in its own Godot process with a timeout, judges it by exit code, and lists tests that printed `SCRIPT ERROR` as warnings. Logs go to `.godot/test-logs/`.
+
+  ```powershell
+  .\tools\run-tests.cmd                    # core regressions: tests/*.gd
+  .\tools\run-tests.cmd -Filter laser      # name filter
+  .\tools\run-tests.cmd -Suite labs        # lab-tool regressions: tests/labs/
+  .\tools\run-tests.cmd -Suite benchmarks  # timing only, needs a window: tests/benchmarks/
+  ```
+
+- Put new game regressions in `tests/`, tests of lab tools in `tests/labs/`, and timing-only scripts in `tests/benchmarks/`. A test collects failures and calls `quit(1)` on failure; do not rely on bare `assert()`, which halts the script without exiting.
 - Do not request elevated execution solely for the `user://logs` error. The wrapper handles that error inside the writable workspace. Escalate only if a different sandbox restriction still blocks a required check.
 - Judge a smoke test by its exit code and explicit PASS/failure output. Report unrelated Godot editor/cache warnings separately from test failures.
 

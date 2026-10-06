@@ -3,6 +3,8 @@ extends SceneTree
 ## Facility module smoke: boss mult, hull-only emergency, boost action, iframes, radar, shield charge.
 
 var failures: PackedStringArray = []
+## Spawned enemies need a registry, as EnemySpawner injects one in the game.
+var enemy_registry := EnemyAugmentRegistry.new()
 
 
 func _initialize() -> void:
@@ -15,6 +17,7 @@ func _run() -> void:
 	_test_engine_boost_input_exists()
 	await _test_enemy_boss_flag()
 	await _test_world_modules()
+	enemy_registry.free()
 
 	if failures.is_empty():
 		print("facility weapon modules smoke: PASS")
@@ -45,6 +48,7 @@ func _test_boss_damage_resolver() -> void:
 		weapon.queue_free()
 		return
 	var boss := boss_scene.instantiate() as Enemy
+	boss.augment_registry = enemy_registry
 	boss.is_boss = true
 	root.add_child(boss)
 	await process_frame
@@ -80,6 +84,7 @@ func _test_engine_boost_input_exists() -> void:
 func _test_enemy_boss_flag() -> void:
 	var scene := load("res://enemies/normal_enemy.tscn") as PackedScene
 	var enemy := scene.instantiate() as Enemy
+	enemy.augment_registry = enemy_registry
 	root.add_child(enemy)
 	await process_frame
 	_expect(not enemy.is_boss, "default enemy is not boss")

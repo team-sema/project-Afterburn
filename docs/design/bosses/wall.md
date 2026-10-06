@@ -100,4 +100,4 @@
 - 포탑 파괴 시 코어 추가 노출
 - 본 게임에서 보스 체력바 없음
 - `tests/boss_wall_smoke_test.gd`
-- Lab: 허브에서 열고 돌아오기, 실제 함선 사격으로 보스 HP 감소, 포탑 단계 표시, 격파 시 시간 정지, 재시작·일시정지 — `tests/wall_boss_lab_smoke_test.gd`
+- Lab: 허브에서 열고 돌아오기, 실제 함선 사격으로 보스 HP 감소, 포탑 단계 표시, 격파 시 시간 정지, 재시작·일시정지 — `tests/labs/wall_boss_lab_smoke_test.gd`

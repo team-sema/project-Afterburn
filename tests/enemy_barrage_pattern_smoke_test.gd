@@ -140,5 +140,5 @@ func run() -> void:
 	registry.queue_free()
 	await process_frame
 	for failure in failures: push_error(failure)
-	print("enemy pattern migration smoke test: ", "PASS" if failures.is_empty() else "FAIL")
+	print("enemy barrage pattern smoke test: ", "PASS" if failures.is_empty() else "FAIL")
 	quit(0 if failures.is_empty() else 1)

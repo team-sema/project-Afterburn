@@ -27,9 +27,28 @@ func _run() -> void:
 	_expect(loadout.is_weapon_equipped(&"main_blaster"), "starts with blaster")
 	_expect(not weapon_hud.has_node("%RecordsScroll"), "STATUS records UI removed")
 	_expect(weapon_hud.has_node("%BayRow"), "STATUS bay row remains")
+	_expect(not weapon_hud.has_node("MainSwapHint"), "Z swap hint is removed")
+
+	# Weapons have no core level; growth lives in modules only.
+	_expect(not loadout.has_method("get_weapon_level"), "weapon core level API is removed")
+	for rank in [1, 2, 3]:
+		_expect(
+			loadout.add_or_upgrade_weapon_trait(&"main_blaster", &"blaster_accel_ap", 1) == rank,
+			"module reaches Lv.%d" % rank,
+		)
+	_expect(
+		not loadout.can_upgrade_weapon_trait(&"main_blaster", &"blaster_accel_ap"),
+		"maxed module cannot upgrade",
+	)
+	var blaster := loadout.get_bay(0).equipped_weapon_instance as WeaponSystem
+	_expect(
+		is_equal_approx(float(blaster.get_trait_param(&"blaster_accel_ap", &"pierce_bonus", 0)), 3.0),
+		"module Lv.III resolves its explicit combat params",
+	)
 
 	var laser := load("res://resources/weapons/definitions/main_laser.tres") as WeaponDefinition
 	_expect(loadout.offer_equip_weapon(laser), "laser equips")
+	_expect(loadout.get_equipped_weapon_ids().size() == 2, "two weapons fire together")
 	loadout.add_or_upgrade_weapon_trait(&"main_laser", &"laser_refract", 2)
 	_expect(int(loadout.get_weapon_traits(&"main_laser")[&"laser_refract"]) == 2, "laser module leveled")
 
@@ -37,6 +56,7 @@ func _run() -> void:
 	var cannon := load("res://resources/weapons/definitions/aux_test_cannon.tres") as WeaponDefinition
 	_expect(loadout.offer_equip_weapon(cannon), "third bay fills")
 	_expect(loadout.is_bays_full(), "bays full")
+	_expect(not loadout.offer_equip_weapon(shotgun), "full bays need replace")
 	var laser_slot := loadout.find_equipped_slot(&"main_laser")
 	_expect(laser_slot >= 0, "laser slot known")
 	_expect(loadout.request_replace_equipped(laser_slot, shotgun), "replace deletes old growth")

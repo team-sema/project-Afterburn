@@ -66,7 +66,7 @@ func build(params: Dictionary) -> void:
   | `ricochet_pattern.gd` | 좌우 벽에서 한 번 튕기는 쌀탄 부채꼴 2개와 벽에서 V자로 꺾이는 궤적 레이저 | `bounce_walls = SIDES` · `bounce_count` · `fire_together` |
   | `comet_trail_pattern.gd` | 큰 왕탄 3발이 뒤로 작은 불씨를 흘려 잔상 꼬리를 남김 | 탄→탄 `spawn`(SINGLE을 진행 반대 ±35°로 번갈아) · 유한 `repeat(64)` · 불씨의 `opacity`·`hitbox_scale` 동시 축소 |
 
-  검증: `tests/showcase_patterns_smoke_test.gd` (Lab 로더로 모두 불러와 3초 재생 시 발사·반복 유지).
+  검증: `tests/labs/showcase_patterns_smoke_test.gd` (Lab 로더로 모두 불러와 3초 재생 시 발사·반복 유지).
 - 발사 금지선에서는 FIRE를 건너뛰고 다음 일정으로 진행한다. 표적 부재 시 조준 Volley만 건너뛰며 다음 FIRE에서 재조회한다. 공격 기간 종료·적 제거는 미래 발사를 중단하고 기존 탄은 유지한다.
 - ACTION_RATE는 Player.time_scale에 적용한다. 초기 지연과 활성 기간은 게임 시간이며 이미 발사한 탄의 이동은 바뀌지 않는다.
 
@@ -546,7 +546,7 @@ Sniper는 `SniperBarrageShot`이 BarrageShot의 `is_valid()`와 `spawn()`을 재
 
 안전 비율 격자 계산 개선은 레거시 탄에도 적용된다. MultiMesh·레이저 메쉬·판정 표시 배칭과 Behavior 계산 최적화는 새 FoundationBullet/CurvedLaser 경로에 적용된다. `Kind.LEGACY`는 기존 Sprite·파티클·컴포넌트를 사용하므로 API로 발사해도 새 배치 렌더러로 전환되지 않는다. 반대로 기존 Timer에서 새 BarrageShot을 발사하면 새 렌더링 최적화가 적용된다.
 
-BarragePlayer가 발사한 탄은 `play()`가 복제·검증한 설정(외형·Behavior)을 SPAWN 자식과 같은 방식으로 공유하므로 발사 시 탄마다 복제·재검증하지 않는다(직접 `shot.spawn()` 호출은 기존대로 복제한다). 실행 중에는 시각 채널(색·투명도·배율) 액션이 없는 탄이 매 틱 상태 샘플을 건너뛰고, 방향·속도 변화가 없는 탄은 회전 갱신도 건너뛴다. 레이저 몸통은 외부 궤도 개입·호밍이 없는 동안 점별 분기 없이 같은 궤적 함수로 샘플링하고, 판정 캡슐은 폭 계수를 사전 계산하며 바뀐 값만 물리 서버에 쓴다. 외부 궤도 개입(`apply_effect`)·벽 반사·호밍은 해당 생략 경로를 쓰지 않으므로 동작이 달라지지 않는다. 측정 기준은 `tests/projectile_render_benchmark.gd`(갱신 루프 단독, 결과: `artifacts/projectile_render_benchmark.json`)·`tests/behavior_performance_benchmark.gd`·`tests/barrage_stress_benchmark.gd`(실전형: BarragePlayer가 실제 패턴을 이동 표적에 라이브 발사, 물리·화면 이탈·렌더링 포함, 결과: `artifacts/barrage_stress_benchmark.json`)다. 실전형 기준 꼬리 입자를 포함한 ~350발 유지 부하는 프레임 중앙 ~10ms(p95 ~17ms)로 60fps 안에 있고, ~1000발 유지는 틱 비용이 프레임 예산을 넘어 물리 catch-up으로 프레임이 수백 ms까지 밀린다. 그 영역의 지배 비용은 9절의 한계(탄별 노드·물리 판정)다.
+BarragePlayer가 발사한 탄은 `play()`가 복제·검증한 설정(외형·Behavior)을 SPAWN 자식과 같은 방식으로 공유하므로 발사 시 탄마다 복제·재검증하지 않는다(직접 `shot.spawn()` 호출은 기존대로 복제한다). 실행 중에는 시각 채널(색·투명도·배율) 액션이 없는 탄이 매 틱 상태 샘플을 건너뛰고, 방향·속도 변화가 없는 탄은 회전 갱신도 건너뛴다. 레이저 몸통은 외부 궤도 개입·호밍이 없는 동안 점별 분기 없이 같은 궤적 함수로 샘플링하고, 판정 캡슐은 폭 계수를 사전 계산하며 바뀐 값만 물리 서버에 쓴다. 외부 궤도 개입(`apply_effect`)·벽 반사·호밍은 해당 생략 경로를 쓰지 않으므로 동작이 달라지지 않는다. 측정 기준은 `tests/benchmarks/projectile_render_benchmark.gd`(갱신 루프 단독, 결과: `artifacts/projectile_render_benchmark.json`)·`tests/benchmarks/behavior_performance_benchmark.gd`·`tests/benchmarks/barrage_stress_benchmark.gd`(실전형: BarragePlayer가 실제 패턴을 이동 표적에 라이브 발사, 물리·화면 이탈·렌더링 포함, 결과: `artifacts/barrage_stress_benchmark.json`)다. 실전형 기준 꼬리 입자를 포함한 ~350발 유지 부하는 프레임 중앙 ~10ms(p95 ~17ms)로 60fps 안에 있고, ~1000발 유지는 틱 비용이 프레임 예산을 넘어 물리 catch-up으로 프레임이 수백 ms까지 밀린다. 그 영역의 지배 비용은 9절의 한계(탄별 노드·물리 판정)다.
 
 ## 11. 적탄 조회·소거 — EnemyBullets
 
@@ -598,4 +598,4 @@ Bullet Lab(`labs/bullet/bullet_lab.tscn`)에서 아무 패턴이나 재생한 �
 | R (누름) | 기체 반경 60px 감속장. 속도 ×0.35, 벗어나면 0.15초 뒤 해제 | `apply_effect` (짧은 지속시간 재등록) |
 | F | 기체 위치에 3초간 흡인점. 반경 90px 안의 탄을 초당 최대 240°씩 흡인점 쪽으로 틀고 속도 ×0.85 | `apply_effect` (방향 오프셋 누적) |
 
-소거 지점에는 허브 신호로 받은 ✕ 표시가 0.5초 뜨고, 하단 상태줄에 이유별 소거 누계와 감속·흡인 중인 탄 수가 나온다. 검증: `tests/bullet_lab_api_probe_test.gd` · `tests/enemy_bullets_api_test.gd` · `tests/bullet_intervention_test.gd`.
+소거 지점에는 허브 신호로 받은 ✕ 표시가 0.5초 뜨고, 하단 상태줄에 이유별 소거 누계와 감속·흡인 중인 탄 수가 나온다. 검증: `tests/labs/bullet_lab_api_probe_test.gd` · `tests/enemy_bullets_api_test.gd` · `tests/bullet_intervention_test.gd`.

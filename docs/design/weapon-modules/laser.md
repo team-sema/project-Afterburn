@@ -66,8 +66,8 @@
 - 일시정지 중 흐른 시간은 `laser_heat_stack` 스택 간격에 반영되지 않는다.
 - 빔 중심에서 비켜난 적도 판정 폭 안이면 맞고, 광각 렌즈를 장착하면 판정 폭이 넓어진다.
 - 빔 셰이더는 빔 길이와 게임플레이 시계를 받아 흐르고, 적을 맞힌 틱마다 피격 부위별로 섬광이 하나씩 생긴다.
-- 채찍 광선을 장착하고 함선이 움직이면 빔 끝이 이동 반대쪽으로 뒤처지고, 이탈은 한도를 넘지 않으며, 멈추면 직선으로 돌아온다. 휘어진 빔 위의 적도 맞는다 (`tests/laser_whip_smoke_test.gd`).
+- 채찍 광선을 장착하고 함선이 움직이면 빔 끝이 이동 반대쪽으로 뒤처지고, 이탈은 한도를 넘지 않으며, 멈추면 직선으로 돌아온다. 휘어진 빔 위의 적도 맞는다 (`tests/laser_damage_smoke_test.gd`).
 - 분광 프리즘을 장착하면 좌우 12° 빔이 보이고 그 위의 적이 맞으며, 정면 적은 ×0.45 피해를 받는다 (`tests/prism_weapon_modules_test.gd`).
-- `tests/laser_heat_stack_smoke_test.gd` · `tests/laser_beam_width_smoke_test.gd` · `tests/laser_heat_clock_smoke_test.gd` · `tests/laser_pulse_fade_smoke_test.gd` · `tests/laser_startup_visual_smoke_test.gd` · `tests/laser_beam_shader_smoke_test.gd`로 확인한다.
+- `tests/laser_damage_smoke_test.gd`(판정 폭·광각 렌즈·채찍·열 누적·일시정지 시계)와 `tests/laser_visual_smoke_test.gd`(빔 셰이더·시동 폭·펄스 감쇠·굴절 표시)로 확인한다.
 
 상위: [무기 모듈](index.md)

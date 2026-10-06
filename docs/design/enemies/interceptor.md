@@ -68,4 +68,4 @@
 
 - 기획에 명시된 등장 조건, 공격 예고·실행·종료와 보상 처리를 확인한다.
 - 관련 씬의 수치와 위 규칙을 대조하고, 행동 변경 시 해당 적의 스모크 테스트를 실행한다.
-- `enemy_pattern_migration_smoke_test.gd`에서 진입 활성화·발수·탄속·사격 창 종료를 검증하고, `interceptor_enemy_smoke_test.gd`에서 실제 편대의 경고·패스·발사·화면 이탈·보상을 검증한다.
+- `enemy_barrage_pattern_smoke_test.gd`에서 진입 활성화·발수·탄속·사격 창 종료를 검증하고, `interceptor_enemy_smoke_test.gd`에서 실제 편대의 경고·패스·발사·화면 이탈·보상을 검증한다.

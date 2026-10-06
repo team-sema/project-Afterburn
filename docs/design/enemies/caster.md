@@ -65,4 +65,4 @@
 
 - 기획에 명시된 등장 조건, 공격 예고·실행·종료와 보상 처리를 확인한다.
 - 관련 씬의 수치와 위 규칙을 대조하고, 행동 변경 시 해당 적의 스모크 테스트를 실행한다.
-- `enemy_pattern_migration_smoke_test.gd`에서 링 발수·주기·회전 초기화·ACTION_RATE·발수 증강 제외를 검증한다. `caster_top_orb_barrage_smoke_test.gd`에서 상단 진입·순찰과 공통 발사 연결을 검증한다.
+- `enemy_barrage_pattern_smoke_test.gd`에서 링 발수·주기·회전 초기화·ACTION_RATE·발수 증강 제외를 검증한다. `caster_top_orb_barrage_smoke_test.gd`에서 상단 진입·순찰과 공통 발사 연결을 검증한다.

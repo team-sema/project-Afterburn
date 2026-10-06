@@ -20,6 +20,9 @@ func _run() -> void:
 	var offer := gameplay.get_node("AugmentOfferController") as AugmentOfferController
 	for _i in 4:
 		await process_frame
+	# The mix checks draw offers statistically. Seed after World._ready, which
+	# calls randomize(), so the draws below are deterministic.
+	seed(20261006)
 
 	_expect(loadout.is_weapon_equipped(&"main_blaster"), "starts with blaster")
 	_expect(not loadout.is_bays_full(), "start has empty weapon bays")

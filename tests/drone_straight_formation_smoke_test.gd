@@ -128,12 +128,12 @@ func _finish(
 	root.remove_from_group("gameplay_world")
 	await process_frame
 	if failures.is_empty():
-		print("drone_diagonal_formation_smoke_test: PASS")
+		print("drone_straight_formation_smoke_test: PASS")
 		quit(0)
 		return
 	for failure in failures:
 		push_error(failure)
-	print("drone_diagonal_formation_smoke_test: FAIL")
+	print("drone_straight_formation_smoke_test: FAIL")
 	quit(1)
 
 

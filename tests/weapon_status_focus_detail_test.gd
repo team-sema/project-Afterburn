@@ -1,5 +1,15 @@
 extends SceneTree
 
+const DEFINITION_PATHS: PackedStringArray = [
+	"res://resources/weapons/definitions/main_blaster.tres",
+	"res://resources/weapons/definitions/main_laser.tres",
+	"res://resources/weapons/definitions/main_shotgun.tres",
+	"res://resources/weapons/definitions/aux_test_cannon.tres",
+	"res://resources/weapons/definitions/plasma_bomb.tres",
+	"res://resources/weapons/definitions/aux_homing_missile.tres",
+	"res://resources/weapons/definitions/aux_orbital_barrier.tres",
+]
+
 var failures: PackedStringArray = []
 
 
@@ -8,6 +18,12 @@ func _initialize() -> void:
 
 
 func _run() -> void:
+	for definition_path in DEFINITION_PATHS:
+		var definition := load(definition_path) as WeaponDefinition
+		_expect(definition != null, "%s loads as a WeaponDefinition" % definition_path)
+		if definition != null:
+			_expect(definition.icon != null, "%s declares an icon" % String(definition.id))
+
 	var world_scene: PackedScene = load("res://world.tscn")
 	var world: Control = world_scene.instantiate() as Control
 	root.add_child(world)
@@ -23,6 +39,11 @@ func _run() -> void:
 	weapon_hud.refresh()
 	await process_frame
 
+	var start_cluster := (weapon_hud.get_node("%BayRow") as HexHoneycombContainer).get_child(0) as WeaponCoreCluster
+	_expect(
+		start_cluster != null and start_cluster.weapon_id == &"main_blaster",
+		"first bay hosts the starting blaster core",
+	)
 	_expect(weapon_hud.get_node("%SelectedWeaponTitle") != null, "selected weapon title exists")
 	_expect(weapon_hud.get_node("%ModulesGrid") != null, "modules grid exists")
 	_expect(weapon_hud.get_node("%SelectedWeaponName") != null, "selected weapon name exists")
@@ -73,6 +94,12 @@ func _run() -> void:
 			laser_cluster = cluster
 			break
 	_expect(laser_cluster != null, "laser bay appears in equal row")
+	_expect(
+		laser_cluster != null
+		and (bay_row.get_child(0) as Control).get_combined_minimum_size().x
+		== laser_cluster.get_combined_minimum_size().x,
+		"all bay hexes use the same width",
+	)
 	_expect(
 		is_equal_approx(
 			laser_cluster.slot_size.x,
@@ -139,6 +166,19 @@ func _run() -> void:
 		and right_box.get_combined_minimum_size().y <= layout.size.y - margin_height + 0.5,
 		"long weapon descriptions stay inside the 640x360 shell",
 	)
+
+	loadout.unequip_weapon(&"main_laser")
+	await process_frame
+	weapon_hud.refresh()
+	await process_frame
+	var has_empty_bay := false
+	for child in bay_row.get_children():
+		var cluster := child as WeaponCoreCluster
+		if cluster != null and cluster.weapon_id == &"":
+			has_empty_bay = true
+			break
+	_expect(has_empty_bay, "unequip leaves an empty equal-size bay")
+	_expect(bay_row.get_child_count() == loadout.get_max_equipped_weapon_count(), "bay row keeps every slot after unequip")
 
 	if failures.is_empty():
 		print("weapon status focus detail test: PASS")
