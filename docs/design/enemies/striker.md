@@ -49,7 +49,7 @@ Diamond 호위 편대의 꼭짓점·후방. 예전 단독 프리셋은 풀 밖�
 
 전역 일반 적 사격 안전선을 사용하므로 중심점이 플레이필드 높이의 70% 아래로 내려가면 발사하지 않는다.
 
-`EnemyShootComponent.pattern_script`의 `aimed_burst_pattern.gd`로 위 일정을 실행한다. 매 볼리 재조준하며 신규 바늘탄을 사용한다. 포화 사격의 발수·펼침각과 ACTION_RATE를 보존한다.
+`EnemyShootComponent.pattern_script`의 `aimed_burst_pattern.gd`로 위 일정을 실행한다. 매 볼리 재조준한다. 탄은 **분홍 원탄**(`round.tres`, 반지름 3 원 판정, 꼬리 없음)이다. 부채꼴 면 압박은 원탄, Drone의 조준 단발은 바늘탄으로 모양을 나눈다([전투 — 탄 어휘](../combat.md#탄-어휘--구현-완료)). 씬 `pattern_params`의 `shape: "round"`, `trail: false`가 이를 정한다. 포화 사격의 발수·펼침각과 ACTION_RATE를 보존한다.
 
 ## 조합에서 쓰이는 곳
 
@@ -79,5 +79,5 @@ Diamond 호위 편대의 꼭짓점·후방. 예전 단독 프리셋은 풀 밖�
 
 - 기획에 명시된 등장 조건, 공격 예고·실행·종료와 보상 처리를 확인한다.
 - 관련 씬의 수치와 위 규칙을 대조하고, 행동 변경 시 해당 적의 스모크 테스트를 실행한다.
-- `enemy_barrage_pattern_smoke_test.gd`에서 재조준·연발/휴식 경계·발사 금지선·중첩 발수 증강을 검증한다.
+- `enemy_barrage_pattern_smoke_test.gd`에서 재조준·연발/휴식 경계·발사 금지선·중첩 발수 증강을 검증한다. `enemy_bullet_vocabulary_test.gd`에서 원탄·꼬리 없음을 검증한다.
 - 진화형은 편대 해제 뒤 이동하는 동안 0.45초마다 좌우로 탄 한 쌍을 흘리고, 편대 중이거나 안전선 아래에서는 흘리지 않는다.

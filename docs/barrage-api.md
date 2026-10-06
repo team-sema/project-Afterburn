@@ -47,6 +47,7 @@ func build(params: Dictionary) -> void:
 컴포넌트가 내부 BarragePlayer를 생성한다. 별도 실행 코드는 필요 없다. 잘못된 상속/필수 생성자 인자/잘못된 일정은 pattern_error와 오류 로그로 보고하며 레거시 사격으로 대체하지 않는다. pattern_script 선택은 씬 시작 시 적용하며 실행 중 필드 교체를 통한 자동 재시작은 지원하지 않는다.
 
 - 실제 Drone: [drone_pattern.gd](../patterns/drone_pattern.gd). Kind.BULLET과 needle.tres로 텍스처 바늘탄을 조준 단발로 발사한다. 105px/s, 4.5초 간격. 최초 1.5초 지연은 적 씬에 있다.
+- 조준 연발 공용: [aimed_burst_pattern.gd](../patterns/aimed_burst_pattern.gd). Striker(원탄 부채꼴)·Interceptor(주황 쌀탄 연발)·Drone 진화형(바늘탄 3연발)이 같은 스크립트를 쓰고, 씬 `pattern_params`의 `shape`·`tint`·`trail`로 탄 모양을 고른다. 모양 배정 규칙은 [전투 — 탄 어휘](design/combat.md#탄-어휘--구현-완료).
 - 조준 고정 연발 예제: [locked_burst_pattern.gd](../patterns/locked_burst_pattern.gd). `aim()` 뒤 `Aim.LOCKED` 바늘탄 3발(0.12초 간격) → 2초 휴식 → 반복. `build(params)`로 `shots`, `gap`, `rest`, `speed`를 씬에서 조정할 수 있다. 본 게임 적에는 배정하지 않았다.
 - 조준 부채꼴 연발 예제: [aimed_fan_burst_pattern.gd](../patterns/aimed_fan_burst_pattern.gd). 5방향 40° 부채꼴의 중앙 탄이 매 발사 표적을 향하는 `Aim.EACH_SHOT`, 0.15초 간격 5연발 → 1.6초 휴식 → 반복. `ways`, `spread`, `shots`, `gap`, `rest`, `speed`를 `build(params)`로 조정. 본 게임 적에는 배정하지 않았다.
 - 16방향 혼합 시험: [mixed_sixteen_pattern.gd](../patterns/mixed_sixteen_pattern.gd). 이 `.gd`가 현재 시험 씬의 실행 원본이다. 예전 `.tres`는 저장 형식 호환 예제로 남겨 둔다.
