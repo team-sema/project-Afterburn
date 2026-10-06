@@ -15,6 +15,7 @@ var _max_hitbox_scale := 1.0
 var prediction_step := 0.04
 var _single_turn: BulletAction
 var _single_wave: BulletAction
+var _single_lateral: BulletAction
 var _has_lateral := false
 var _static_visuals := true
 const QUERY_CACHE_LIMIT := 2048
@@ -89,6 +90,8 @@ func _init(behavior: BulletBehavior, direction: Vector2, speed: float, tint: Col
 		_single_turn = _behavior.actions[0]
 	if _behavior.actions.size() == 1 and _behavior.actions[0].type == BulletAction.Type.HEADING_WAVE and _behavior.actions[0].duration > 0:
 		_single_wave = _behavior.actions[0]
+	if _behavior.actions.size() == 1 and _behavior.actions[0].type == BulletAction.Type.LATERAL_WAVE and _behavior.actions[0].duration > 0:
+		_single_lateral = _behavior.actions[0]
 	if has_homing:
 		_homing = preload("res://projectiles/bullet_homing_trajectory.gd").new(self)
 	for action in _behavior.actions:
@@ -280,8 +283,34 @@ func velocity_at(time: float) -> Vector2:
 	return _effective_velocity(t, _events[index])
 
 func _base_velocity_at(time: float) -> Vector2:
+	if _single_lateral != null:
+		# One lateral wave never changes heading or speed, so the state
+		# Dictionary machinery is skipped (same formula as _apply).
+		return _direction * _speed + _direction.orthogonal() * _lateral_velocity_at(clampf(time, 0, _limit))
 	var state := _shared_sample(time)
 	return _direction.rotated(deg_to_rad(state.heading)) * float(state.speed) + _direction.orthogonal() * float(state.lateral_velocity)
+
+
+## Analytic lateral displacement for a Behavior that is one LATERAL_WAVE
+## (optionally repeating). A full builder wave ends where it started, but a
+## hand-made action may leave a per-cycle offset, so cycles accumulate it.
+func _lateral_at(t: float) -> float:
+	var action := _single_lateral
+	var end_value := action.value * (sin(TAU * action.duration / action.period + action.phase) - sin(action.phase))
+	var cycles := floori((t + BOUNDARY_EPSILON) / action.duration)
+	if _behavior.repeat_count > 0 and cycles >= _behavior.repeat_count:
+		return end_value * _behavior.repeat_count
+	var elapsed := minf(maxf(0.0, t - cycles * action.duration), action.duration)
+	return end_value * cycles + action.value * (sin(TAU * elapsed / action.period + action.phase) - sin(action.phase))
+
+
+func _lateral_velocity_at(t: float) -> float:
+	var action := _single_lateral
+	var cycles := floori((t + BOUNDARY_EPSILON) / action.duration)
+	if _behavior.repeat_count > 0 and cycles >= _behavior.repeat_count:
+		return 0.0
+	var elapsed := minf(maxf(0.0, t - cycles * action.duration), action.duration)
+	return action.value * TAU / action.period * cos(TAU * elapsed / action.period + action.phase)
 
 
 # --- External trajectory effects -------------------------------------------
@@ -498,7 +527,10 @@ func positions_between(start: float, end: float, segments: int) -> PackedVector2
 
 func _position_at_uncached(t: float) -> Vector2:
 	if _constant_velocity:
-		return _direction * _speed * t + (_direction.orthogonal() * float(_shared_sample(t).lateral) if _has_lateral else Vector2.ZERO)
+		if not _has_lateral:
+			return _direction * _speed * t
+		var lateral := _lateral_at(t) if _single_lateral != null else float(_shared_sample(t).lateral)
+		return _direction * _speed * t + _direction.orthogonal() * lateral
 	if _single_turn != null:
 		var turning := minf(t, _single_turn.duration)
 		var omega := deg_to_rad(_single_turn.value)

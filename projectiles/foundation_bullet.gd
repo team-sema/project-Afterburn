@@ -33,6 +33,7 @@ var _visual_extent := 0.0
 ## static visuals skip state sampling, constant travel skips rotation updates.
 var _static_visuals := false
 var _constant_travel := false
+var _needs_rotation := true
 ## Target for SPAWN volleys with Aim.EACH_SHOT (the shot's launch target).
 var _spawn_target: WeakRef
 var _spawn_resolver := Callable()
@@ -120,6 +121,8 @@ func launch(direction: Vector2, speed: float) -> void:
 	_update_pose()
 	_static_visuals = behavior_state.has_static_visuals()
 	_constant_travel = behavior_state.is_velocity_constant() and _bounce == null
+	# A circle with centered collision looks and collides the same at any angle.
+	_needs_rotation = appearance.form != BulletAppearance.Form.ROUND or appearance.collision_offset != Vector2.ZERO
 	set_physics_process(true)
 
 
@@ -161,7 +164,7 @@ func _update_pose() -> Vector2:
 			_hitbox.get_child(0).position = appearance.collision_offset * hitbox_scale
 		if not use_batched_rendering:
 			queue_redraw()
-	if _constant_travel:
+	if _constant_travel or not _needs_rotation:
 		global_position = point
 		return point
 	var velocity := get_travel_velocity()

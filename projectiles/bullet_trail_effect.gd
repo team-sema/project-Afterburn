@@ -12,6 +12,15 @@ extends Resource
 @export var color := Color(1, 0.18, 0.58, 0.65)
 @export var end_color := Color(0.65, 0.04, 0.3, 0)
 
+var _batch_key := ""
+
+## Groups particles with the same look into one MultiMesh (emitters snapshot
+## their effect at launch, so the cached key never goes stale).
+func batch_key() -> String:
+	if _batch_key.is_empty():
+		_batch_key = str(texture.get_rid(), size, end_size, color, end_color)
+	return _batch_key
+
 func is_valid() -> bool:
 	return texture != null and is_finite(spacing) and spacing >= 0.25 and is_finite(lifetime) and lifetime > 0 and lifetime <= 5 and is_finite(size) and size > 0 and size <= 128 and is_finite(end_size) and end_size >= 0 and end_size <= 128 and is_finite(speed_min) and is_finite(speed_max) and speed_min >= 0 and speed_max >= speed_min and speed_max <= 1000 and is_finite(spread_degrees) and spread_degrees >= 0 and spread_degrees <= 180 and _finite_color(color) and _finite_color(end_color)
 
