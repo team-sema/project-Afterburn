@@ -75,7 +75,7 @@ XP 드롭 속도 증가는 선택 뒤 스폰되는 적의 `ExperienceDropCompone
 
 특정 일반 적 하나를 한 단계 위 진화형으로 바꾼다. 스탯 배율과 달리 그 적이 **하는 일**이 바뀐다.
 
-- **치환**: 고르면 이후 스폰되는 원본 씬(`evolution_from`)이 진화형 씬(`evolution_to`)으로 바뀐다. 모든 Encounter 멤버는 `EnemySpawner`에서 `EnemyAugmentRegistry.resolve_enemy_scene`을 거쳐 생성된다. 그래서 프리셋·진형·Encounter ID는 그대로이고, 엘리트 호위대처럼 다른 경로로 나오는 원본도 함께 진화한다. 이미 화면에 있는 적은 바뀌지 않는다. 씬이 정확히 같을 때만 치환하므로, Drone을 상속한 Interceptor와 엘리트는 Drone 진화의 영향을 받지 않는다.
+- **치환**: 고르면 이후 스폰되는 원본 씬(`evolution_from`)이 진화형 씬(`evolution_to`)으로 바뀐다. 모든 Encounter 멤버는 `EnemySpawner`에서 `EnemyAugmentRegistry.resolve_enemy_scene`을 거쳐 생성된다. 그래서 프리셋·진형·Encounter ID는 그대로이고, 엘리트 호위대처럼 다른 경로로 나오는 원본도 함께 진화한다. 이미 화면에 있는 적은 바뀌지 않는다. 씬이 정확히 같을 때만 치환하므로, Drone을 상속한 Interceptor·Drone 변종(산탄·느린탄·정지탄)과 엘리트는 Drone 진화의 영향을 받지 않는다.
 - **오퍼 조건**: 그 원본 적이 이번 런에 한 번이라도 스폰된 뒤부터 후보에 든다. 스폰 기록은 `EnemySpawner`가 원본 씬 기준으로 남기며, `clear_augments`가 함께 지운다. 진화는 모두 one-time이다.
 - **겹침**: 다른 적 증강(HP·이속·포화 사격·고속탄·장갑판 등)과 Encounter 한정 보너스는 진화형에도 그대로 적용된다.
 - **보상**: 점수·XP는 원본과 같다.

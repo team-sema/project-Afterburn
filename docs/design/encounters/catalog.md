@@ -2,7 +2,7 @@
 
 `main_encounter_pool.tres` 등록분. weight = `60 / √difficulty` (min_threat 미만이면 0).
 
-Threat 1 후보 합 weight ≈98.1 · Threat 2 ≈154.4 · Threat 3 ≈249.4.
+Threat 1 후보 합 weight ≈115.4 · Threat 2 ≈206.7 · Threat 3 ≈301.7.
 
 ## 풀 등록
 
@@ -10,6 +10,9 @@ Threat 1 후보 합 weight ≈98.1 · Threat 2 ≈154.4 · Threat 3 ≈249.4.
 |-----------|----------:|-----------:|-------:|------|-----------|----------------|
 | `drone_formation` | 11 | 1 | ≈18.11 | [Horizontal](../formations/horizontal.md) | [Drone](../enemies/drone.md)×5 | 대각 유지 (`formation_drone_diagonal`) |
 | `drone_zigzag_mirrored` | 6 | 1 | ≈24.49 | [V5](../formations/v5.md) | Drone | zigzag · mirrored · MovementArea bounce |
+| `drone_spread_formation` | 12 | 1 | ≈17.32 | [Horizontal](../formations/horizontal.md) | [산탄 드론](../enemies/drone.md#변종-enemiesvariants)×5 | 대각 유지 (`formation_drone_diagonal`) |
+| `drone_slow_zigzag` | 10 | 2 | ≈18.97 | [V5](../formations/v5.md) | [느린탄 드론](../enemies/drone.md#변종-enemiesvariants)×5 | zigzag · mirrored |
+| `drone_halt_formation` | 14 | 2 | ≈16.04 | [Horizontal](../formations/horizontal.md) | [정지탄 드론](../enemies/drone.md#변종-enemiesvariants)×5 | 대각 유지 |
 | `striker_drone_diamond_5` | 7 | 1 | ≈22.68 | [Diamond5](../formations/diamond-5.md) | [Striker](../enemies/striker.md) Slot0 + Drone×4 | 1/3 하강 → 해제 → scatter / charge |
 | `awl_formation` | 12 | 1 | ≈17.32 | [V3](../formations/v3.md) | [Awl](../enemies/awl.md)×3 | 하강 유지 → 분리 차징 돌진 |
 | `striker_drone_diamond_13` | 15 | 1 | ≈15.49 | [Diamond13](../formations/diamond-13.md) | Striker + Drone×12 | 5기와 동일 진입·산개 |

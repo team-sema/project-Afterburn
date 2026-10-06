@@ -67,12 +67,13 @@ Hurtbox.area_entered → Hitbox  (수동 적탄; 레이저·빔은 자체 폴링
 | 모양 | 프리셋 | 판정 | 뜻 | 일반 적 사용 |
 |---|---|---|---|---|
 | 바늘탄 | `needle.tres` (+ `diamond_trail.tres`) | 4×8 사각 | 나를 노린 조준 단발·연발. 꼬리로 진행 방향이 읽힌다 | Drone · Drone 진화형 |
-| 원탄 | `round.tres` | 반지름 3 원 | 면 압박. 부채꼴·링 장판 | Striker 부채꼴 · Caster 링(분홍) · Caster 진화형(분홍/보라) · Striker 진화형 항적 |
+| 원탄 | `round.tres` | 반지름 3 원 | 면 압박. 부채꼴·링 장판 | Striker 부채꼴 · 산탄 드론(금색 3방향) · Caster 링(분홍) · Caster 진화형(분홍/보라) · Striker 진화형 항적 |
 | 쌀탄 | `rice.tres` | 6×12 캡슐 | 빠르게 나를 노리는 탄 | Interceptor(주황 `Color(1, 0.55, 0.25)`) |
-| 대형 구탄 | `orb.tres` | 반지름 8 원 | 느리고 오래 남는 큰 탄 | 일반 적 없음 (Elite Bomb 기뢰) |
+| 대형 구탄 | `orb.tres` | 반지름 8 원 | 느리고 오래 남는 큰 탄 | 느린탄 드론(보라 55px/s) · Elite Bomb 기뢰 |
 
+- 바늘탄은 정지탄 드론처럼 **멈췄다 재조준해 돌진하는 2단계 탄**에도 쓴다. 꼬리는 돌진 구간에서만 남고 붉은 tint가 예고다.
 - 바늘탄의 다이아몬드 꼬리는 조준 단발에만 붙인다. 링·부채꼴의 원탄에는 꼬리를 붙이지 않아 많은 발수에서 탄 자체의 가독성을 지킨다.
-- `aimed_burst_pattern.gd`는 씬 `pattern_params`의 `shape`(`"needle"`·`"round"`·`"rice"`, 기본 needle)·`tint`(Color, 생략 시 프리셋 색)·`trail`(bool, 기본은 needle일 때만 true)로 모양을 고른다. 모르는 `shape`는 needle로 대체한다. tint를 지정하면 프리셋을 복제하므로 공유 `.tres`는 바뀌지 않는다.
+- `aimed_burst_pattern.gd`는 씬 `pattern_params`의 `shape`(`"needle"`·`"round"`·`"rice"`·`"orb"`, 기본 needle)·`tint`(Color, 생략 시 프리셋 색)·`trail`(bool, 기본은 needle일 때만 true)로 모양을 고른다. 모르는 `shape`는 needle로 대체한다. tint를 지정하면 프리셋을 복제하므로 공유 `.tres`는 바뀌지 않는다.
 - 판정 모양이 바뀌었다. Striker·Caster는 4×8 사각에서 반지름 3 원으로, Interceptor는 6×12 캡슐로 바뀌어 길이 방향 판정이 짧아졌다. 탄속·발수·주기·휴식은 바꾸지 않았다.
 - 검증: `tests/enemy_bullet_vocabulary_test.gd`가 일반 적·진화형 씬의 `pattern_params`로 패턴을 빌드해 모양·색·꼬리·프리셋 비변형을 확인한다.
 

@@ -15,6 +15,9 @@
 [ext_resource type="Resource" uid="uid://epk72gmbe4fp" path="res://resources/encounters/presets/tanker_guard_sniper.tres" id="13_tanker"]
 [ext_resource type="Resource" uid="uid://ds28cw5vyu43o" path="res://resources/encounters/presets/interceptor_pair.tres" id="14_interceptor_pair"]
 [ext_resource type="Resource" uid="uid://slxdasisaely" path="res://resources/encounters/presets/interceptor_trio.tres" id="15_interceptor_trio"]
+[ext_resource type="Resource" uid="uid://cmcx8phjvugiy" path="res://resources/encounters/presets/drone_spread_formation.tres" id="16_drone_spread"]
+[ext_resource type="Resource" uid="uid://cnv5hhobmfb57" path="res://resources/encounters/presets/drone_slow_zigzag.tres" id="17_drone_slow"]
+[ext_resource type="Resource" uid="uid://dnjmmfljget1v" path="res://resources/encounters/presets/drone_halt_formation.tres" id="18_drone_halt"]
 
 [sub_resource type="Resource" id="Entry_drone"]
 script = ExtResource("2_entry")
@@ -76,6 +79,20 @@ script = ExtResource("2_entry")
 preset = ExtResource("15_interceptor_trio")
 min_threat = 3
 
+[sub_resource type="Resource" id="Entry_drone_spread"]
+script = ExtResource("2_entry")
+preset = ExtResource("16_drone_spread")
+
+[sub_resource type="Resource" id="Entry_drone_slow"]
+script = ExtResource("2_entry")
+preset = ExtResource("17_drone_slow")
+min_threat = 2
+
+[sub_resource type="Resource" id="Entry_drone_halt"]
+script = ExtResource("2_entry")
+preset = ExtResource("18_drone_halt")
+min_threat = 2
+
 [resource]
 script = ExtResource("1_pool")
-entries = Array[ExtResource("2_entry")]([SubResource("Entry_drone"), SubResource("Entry_zigzag"), SubResource("Entry_striker5"), SubResource("Entry_awl"), SubResource("Entry_striker13"), SubResource("Entry_tanker"), SubResource("Entry_bomb_diamond"), SubResource("Entry_interceptor_pair"), SubResource("Entry_caster"), SubResource("Entry_x9_drone"), SubResource("Entry_x9_orbit"), SubResource("Entry_v7"), SubResource("Entry_interceptor_trio")])
+entries = Array[ExtResource("2_entry")]([SubResource("Entry_drone"), SubResource("Entry_zigzag"), SubResource("Entry_striker5"), SubResource("Entry_awl"), SubResource("Entry_striker13"), SubResource("Entry_tanker"), SubResource("Entry_bomb_diamond"), SubResource("Entry_interceptor_pair"), SubResource("Entry_caster"), SubResource("Entry_x9_drone"), SubResource("Entry_x9_orbit"), SubResource("Entry_v7"), SubResource("Entry_interceptor_trio"), SubResource("Entry_drone_spread"), SubResource("Entry_drone_slow"), SubResource("Entry_drone_halt")])

@@ -70,6 +70,20 @@
 
 → [Encounter 카탈로그](../encounters/catalog.md) · [진형 배치 목록](../formations/index.md)
 
+## 변종 (`enemies/variants/`)
+
+같은 드론 실루엣에 색과 탄만 바꾼 세 변종이다. 각자 **회피 기술 하나**를 가르치며, 등장 작곡([런 페이싱](../run-pacing.md))에서 같은 교훈의 다른 교재로 쓴다. HP·점수·이동·사격 안전선·초기 지연 1.5초·휴식 4.5초는 원본과 같다. `normal_enemy.tscn`을 상속하므로 Drone 진화 카드의 치환 대상이 **아니다**(씬이 같을 때만 치환).
+
+| 변종 | 씬 | 글로우 | 탄 | 가르침 |
+|------|-----|--------|-----|--------|
+| 산탄 드론 | `drone_spread.tscn` | 금색 | 금색 원탄 **3방향 24°** 부채꼴 1회 · 80px/s | 한 발이 아니라 **부채꼴 폭만큼** 비킨다. Striker 부채꼴의 예습 |
+| 느린탄 드론 | `drone_slow.tscn` | 보라 | 보라 **대형 구탄** 1발 · 55px/s · 수명 8초 | 느린 탄은 오래 남아 **지금 안전한 자리가 곧 막힌다**. Caster 장판의 예습 |
+| 정지탄 드론 | `drone_halt.tscn` | 적색 | 바늘탄 1발 120px/s → 0.3초에 **정지** → 0.4초 대기 → **붉게 변하고** 0.15초 뒤 표적으로 재조준(1440°/s·0.12초) → 190px/s 돌진 | 발사 전에 움직여도 소용없고 **붉어진 뒤 돌진할 때** 비킨다. Sniper 락온의 예습 |
+
+- 산탄·느린탄은 `aimed_burst_pattern.gd`의 `shape`·`tint`·`trail` 파라미터로, 정지탄은 전용 [drone_halt_pattern.gd](../../../patterns/drone_halt_pattern.gd)로 쏜다. 정지탄은 포화 사격 발수 증강을 받지 않는다(`pattern_fire_volume_boost` 끔). 산탄·느린탄은 원본처럼 받는다.
+- Encounter: `drone_spread_formation`(가로 5기 대각, Threat 1) · `drone_slow_zigzag`(V5 지그재그, Threat 2) · `drone_halt_formation`(가로 5기 대각, Threat 2). 풀 가중치는 [카탈로그](../encounters/catalog.md).
+- 검증: `tests/drone_variants_test.gd`(탄 모양·속도·행동 순서·글로우 색·풀 Threat 관문), `tests/encounter_spawner_smoke_test.gd`(프리셋 스폰).
+
 ## 진화형 (`enemies/evolved/drone_evolved.tscn`)
 
 적 증강 [진화: 연사 드론](../augments.md#진화-증강)을 고르면 이후 Drone이 이 씬으로 스폰된다. 기본 규칙은 원본과 같고 아래만 다르다.
