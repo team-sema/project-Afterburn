@@ -55,8 +55,14 @@ var _volleys_fired := 0
 var barrage_player: BarragePlayer
 var pattern_error := ""
 var _pattern: BarrageSequence
+## False while _pattern is the build() instance, which may reference shared
+## .tres presets. The first augment that mutates the pattern snapshots it.
+var _pattern_private := false
 var _pattern_action_rate := 1.0
 var _projectile_speed_multiplier := 1.0
+## Script validity never changes per spawn, so each pattern Script is
+## reflected over once ("" = valid, otherwise the error).
+static var _pattern_script_errors := {}
 
 
 func apply_fire_volume_boost(extra_shots: int, min_spread: float) -> void:
@@ -69,8 +75,29 @@ func apply_fire_volume_boost(extra_shots: int, min_spread: float) -> void:
 	if barrage_player != null and barrage_player.running:
 		push_error("Pattern fire volume must be configured before playback starts.")
 		return
-	# Each step has its own snapshot, even when the builder reused a Volley.
+	_ensure_private_pattern()
 	_boost_pattern_volume(_pattern, extra_shots, min_spread)
+
+
+## Detaches _pattern from any shared presets before the first mutation.
+## snapshot() copies steps and settings into a plain BarrageSequence.
+func _ensure_private_pattern() -> void:
+	if _pattern_private or _pattern == null:
+		return
+	_pattern = _pattern.snapshot()
+	_pattern_private = true
+
+
+static func _validate_pattern_script(script: Script) -> String:
+	var base := script
+	while base != null and base != preload("res://projectiles/barrage_sequence.gd"):
+		base = base.get_base_script()
+	if base == null or not script.can_instantiate():
+		return "pattern_script must extend BarrageSequence."
+	for method in script.get_script_method_list():
+		if method.name == "_init" and method.args.size() > method.default_args.size():
+			return "Pattern _init must not require arguments."
+	return ""
 
 
 func _boost_pattern_volume(sequence: BarrageSequence, extra_shots: int, min_spread: float) -> void:
@@ -90,6 +117,7 @@ func apply_projectile_speed_multiplier(multiplier: float) -> void:
 		return
 	_projectile_speed_multiplier *= multiplier
 	if _pattern != null:
+		_ensure_private_pattern()
 		_scale_pattern_speed(_pattern, multiplier)
 
 
@@ -335,20 +363,13 @@ func _schedule_initial_burst() -> void:
 
 
 func _prepare_pattern() -> void:
-	var base := pattern_script
-	while base != null and base != preload("res://projectiles/barrage_sequence.gd"):
-		base = base.get_base_script()
-	if base == null or not pattern_script.can_instantiate():
-		pattern_error = "pattern_script must extend BarrageSequence."
+	if not _pattern_script_errors.has(pattern_script):
+		_pattern_script_errors[pattern_script] = _validate_pattern_script(pattern_script)
+	pattern_error = _pattern_script_errors[pattern_script]
+	if not pattern_error.is_empty():
 		push_error(pattern_error)
 		set_process(false)
 		return
-	for method in pattern_script.get_script_method_list():
-		if method.name == "_init" and method.args.size() > method.default_args.size():
-			pattern_error = "Pattern _init must not require arguments."
-			push_error(pattern_error)
-			set_process(false)
-			return
 	_pattern = pattern_script.new() as BarrageSequence
 	if _pattern != null:
 		_pattern.build(pattern_params)
@@ -357,8 +378,12 @@ func _prepare_pattern() -> void:
 		push_error(pattern_error)
 		set_process(false)
 		return
-	_pattern = _pattern.snapshot()
+	# The build() instance is this component's own; shared presets it references
+	# stay untouched until an augment mutates the pattern (copy-on-write), and
+	# play() snapshots its running copy either way.
+	_pattern_private = false
 	if not is_equal_approx(_projectile_speed_multiplier, 1.0):
+		_ensure_private_pattern()
 		_scale_pattern_speed(_pattern, _projectile_speed_multiplier)
 	barrage_player = BarragePlayer.new()
 	barrage_player.name = "BarragePlayer"
