@@ -47,7 +47,10 @@ func _run() -> void:
 		_expect(not offer_controller.is_offer_active, "enemy offer waits for the XP vacuum")
 		await elite_controller.elite_defeated
 	_expect(progression.get_threat_level() == 2, "elite defeat advances to Threat 2")
-	_expect(progression.current_experience == 1, "elite guaranteed XP is vacuumed before its offer")
+	_expect(
+		progression.current_experience == 11,
+		"elite drop (1) plus the 10 XP minimum (no bullets converted) is vacuumed before its offer (%d)" % progression.current_experience,
+	)
 	_expect(not progression.bullet_cancel_reward_active, "reward lock clears after the XP vacuum")
 	_expect(progression.elite_gate_active, "gate remains active through the reward offer")
 	_expect(offer_controller.is_offer_active, "elite defeat requests an augment offer")

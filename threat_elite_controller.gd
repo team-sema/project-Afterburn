@@ -13,6 +13,10 @@ signal elite_defeated(threat_level: int)
 @export var caster_elite_preset: EncounterPreset = preload("res://resources/encounters/presets/threat_elite_caster.tres")
 @export_range(1, 10000, 1) var base_elite_health := 420
 @export_range(0, 10000, 1) var health_per_threat := 140
+## Minimum bullet-cancel XP per kill. Converted bullets count toward it; the
+## shortfall pops out of the kill position as 1 XP orbs.
+@export_range(0, 1000, 1) var elite_minimum_cancel_experience := 10
+@export_range(0, 1000, 1) var boss_minimum_cancel_experience := 20
 
 var active_elite: Enemy
 var active_threat_level := 0
@@ -109,13 +113,19 @@ func _configure_gate_enemy(enemy: Enemy, threat_level: int, is_boss: bool) -> vo
 
 func _on_active_elite_defeated() -> void:
 	var completed_threat := active_threat_level
+	# no_health fires synchronously, so the enemy is still valid here.
+	var kill_position := active_elite.global_position
+	var minimum_experience := (
+		boss_minimum_cancel_experience if active_elite.is_boss
+		else elite_minimum_cancel_experience
+	)
 	active_elite = null
 	active_threat_level = 0
 	# The reward runs without pausing the tree: the ship, remaining enemies and
 	# their fire keep going while the converted XP flies in. Only player augment
 	# input stays locked until the enemy offer opens.
 	progression.set_bullet_cancel_reward_active(true)
-	await bullet_cancel_reward.collect_projectiles_and_vacuum()
+	await bullet_cancel_reward.collect_projectiles_and_vacuum(minimum_experience, kill_position)
 	if not bullet_cancel_reward.has_live_collector():
 		# The ship died during the vacuum; the run is ending, so no offer.
 		progression.set_bullet_cancel_reward_active(false)
