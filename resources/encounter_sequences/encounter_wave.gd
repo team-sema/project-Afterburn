@@ -2,11 +2,15 @@ class_name EncounterWave
 extends Resource
 
 ## WAVE 스텝이 참조하는 “연속 편대 묶음”.
-## 편대 목록은 Resource 배열이 아니라 **경로 문자열**로 적어 .tres에서 한 줄에 하나씩 읽히게 한다.
-## (Array[EncounterPreset]는 Godot이 ExtResource를 가로로 이어 붙여 20개면 한 줄이 수천 자가 된다.)
+## 편대 목록의 정본은 `encounter_presets`(Resource 참조)다. 열려 있는 에디터가
+## 외부에서 바뀐 .tres를 다시 저장할 때 `PackedStringArray` export를 비워 버리는
+## 일이 있어(2026-10-07, lesson_*.tres 16개), 경로 문자열 목록은 옛 데이터 호환용
+## 폴백으로만 남긴다. 둘 다 있으면 `encounter_presets`를 쓴다.
 
 @export var wave_id: StringName
-## 스폰 순서 고정. 예: res://resources/encounters/presets/drone_straight_formation.tres
+## 스폰 순서 고정. 정본.
+@export var encounter_presets: Array[EncounterPreset] = []
+## 호환용 폴백. `encounter_presets`가 비었을 때만 경로를 읽는다.
 @export var encounter_preset_paths: PackedStringArray = []
 ## 편대와 편대 사이 대기(초), [min, max] 랜덤.
 @export_range(0.0, 30.0, 0.05, "suffix:s") var interval_min := 1.0
@@ -15,6 +19,11 @@ extends Resource
 
 func get_encounter_presets() -> Array[EncounterPreset]:
 	var presets: Array[EncounterPreset] = []
+	if not encounter_presets.is_empty():
+		for preset in encounter_presets:
+			if preset != null:
+				presets.append(preset)
+		return presets
 	for path in encounter_preset_paths:
 		if path.is_empty():
 			continue
@@ -39,8 +48,14 @@ func get_validation_errors() -> PackedStringArray:
 	var errors := PackedStringArray()
 	if wave_id.is_empty():
 		errors.append("EncounterWave requires a non-empty wave_id.")
-	if encounter_preset_paths.is_empty():
-		errors.append("EncounterWave requires at least one encounter_preset_paths entry.")
+	if encounter_presets.is_empty() and encounter_preset_paths.is_empty():
+		errors.append("EncounterWave requires encounter_presets (or legacy encounter_preset_paths).")
+	for index in encounter_presets.size():
+		var preset := encounter_presets[index]
+		if preset == null:
+			errors.append("encounter_presets[%d] is null." % index)
+		elif not preset.validate():
+			errors.append("encounter_presets[%d] ('%s') is invalid." % [index, preset.encounter_id])
 	for index in encounter_preset_paths.size():
 		var path := encounter_preset_paths[index]
 		if path.is_empty():

@@ -1,11 +1,14 @@
-; 구절(교재) WAVE. 규칙: docs/design/run-pacing.md 「구절 작곡」.
-[gd_resource type="Resource" script_class="EncounterWave" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="EncounterWave" load_steps=5 format=3 uid="uid://dweeiia1acu12"]
 
-[ext_resource type="Script" path="res://resources/encounter_sequences/encounter_wave.gd" id="1_wave_script"]
+[ext_resource type="Script" uid="uid://l7bpelqan01w" path="res://resources/encounter_sequences/encounter_wave.gd" id="1_wave_script"]
+[ext_resource type="Resource" uid="uid://cmcx8phjvugiy" path="res://resources/encounters/presets/drone_spread_formation.tres" id="2_drone_spread_formation"]
+[ext_resource type="Resource" uid="uid://dualrcqcd1xic" path="res://resources/encounters/presets/drone_straight_formation.tres" id="3_drone_straight_formation"]
+
+[ext_resource type="Script" uid="uid://c6t14vfypdxop" path="res://resources/encounters/encounter_preset.gd" id="9_preset_script"]
 
 [resource]
 script = ExtResource("1_wave_script")
 wave_id = &"lesson_aim_b"
-encounter_preset_paths = PackedStringArray("res://resources/encounters/presets/drone_spread_formation.tres", "res://resources/encounters/presets/drone_straight_formation.tres", "res://resources/encounters/presets/drone_spread_formation.tres")
+encounter_presets = Array[ExtResource("9_preset_script")]([ExtResource("2_drone_spread_formation"), ExtResource("3_drone_straight_formation"), ExtResource("2_drone_spread_formation")])
 interval_min = 3.5
 interval_max = 4.0
