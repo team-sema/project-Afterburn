@@ -12,10 +12,10 @@
 | `MovementSequence` | 설정 전용 `MovementStep` 배열 Resource. 여러 적이 같은 Resource를 안전하게 공유 |
 | `Linear/Sine/MoveToPosition/Wait/HomingMovementStep` | 조합 가능한 범용 이동 단계 |
 | `HorizontalPatrolMovementStep` | Caster/Striker처럼 명시적 전투 위치가 필요한 경우 CombatArea 안에서 왕복하는 단계 |
-| `BoundedDiagonalMovementStep` | 명시적 bounded-arena 패턴 전용. VisibleRect가 아닌 확장 MovementArea에서 반사 |
+| `BoundedDiagonalMovementStep` | 편대 지그재그·대각 유지. 편대의 점유 폭(`formation_extent_left/right`)을 VisibleRect − `edge_margin` 안에서 반사, 밖이면 안쪽으로만 진행 ([진형 · 편대 이동 경계](formations/index.md#편대-이동-경계-벽-반사)) |
 | `ForwardAttackRunMovementStep` | 목표 방향으로 회전한 뒤 local forward 축으로만 고속 이동. clamp·bounce·strafe 없음 |
 | `FormationSlot` / `FormationLayout` | 에디터에서 배치하는 명시적 슬롯과 검증·미리보기 전용 편대 모양 Scene |
-| `FormationController` | Scene 기반 슬롯 매핑, 단일 편대 중앙 이동, 멤버 위치·이탈·해제 후 개별 Sequence 전환 |
+| `FormationController` | Scene 기반 슬롯 매핑, 단일 편대 중앙 이동, 멤버 위치·이탈·해제 후 개별 Sequence 전환. 매 프레임 살아 있는 멤버의 좌/우 점유 폭을 중앙 MovementController 컨텍스트에 발행 |
 | `EnemyShootComponent.pattern_script` | 일반 조준 연발·Caster 링을 BarragePlayer로 실행 |
 | `BombProximityFuseComponent` | 근접 신관 → 적색 점멸 → 자폭. 판정·VFX·반투명 프리뷰가 동일 radius 사용 |
 | `BombBlastPreview` | Bomb 신관 무장 중 자폭 판정 범위를 옅은 원과 외곽선으로 표시 |

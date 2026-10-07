@@ -19,7 +19,7 @@ func _run() -> void:
 	root.add_child(registry)
 
 	_test_space_relationships_and_resize()
-	await _test_diagonal_crosses_visible_edge_and_reenters()
+	await _test_diagonal_reflects_inside_visible_rect()
 	await _test_enemy_uses_despawn_area()
 	await _test_offscreen_formation_entry_maneuver_exit()
 
@@ -57,7 +57,7 @@ func _test_space_relationships_and_resize() -> void:
 	)
 
 
-func _test_diagonal_crosses_visible_edge_and_reenters() -> void:
+func _test_diagonal_reflects_inside_visible_rect() -> void:
 	var playfield := SubViewport.new()
 	playfield.size = Vector2i(240, 360)
 	root.add_child(playfield)
@@ -84,24 +84,18 @@ func _test_diagonal_crosses_visible_edge_and_reenters() -> void:
 	controller.start()
 	controller.set_process(false)
 	controller.update_movement(0.3)
-	var first_outside := actor.global_position
+	var after_turn := actor.global_position
+	var lane_right := visible.end.x - diagonal.edge_margin
+	_expect(
+		after_turn.x <= lane_right + 0.001,
+		"diagonal path reflects inside VisibleRect minus edge_margin, never crossing the camera",
+	)
+	_expect(after_turn.x < visible.end.x - 10.0, "the overshoot is mirrored back into the lane")
 	controller.update_movement(0.3)
-	var continued_outward := actor.global_position
-	_expect(first_outside.x > visible.end.x, "diagonal path crosses VisibleRect without clamping")
+	_expect(actor.global_position.x < after_turn.x, "after the turn the diagonal heads back inward")
 	_expect(
-		continued_outward.x > first_outside.x,
-		"constant diagonal continues after crossing the camera edge",
-	)
-	_expect(
-		CONFIG.get_despawn_area(visible).has_point(continued_outward),
-		"offscreen turn remains inside DespawnArea",
-	)
-	controller.update_movement(0.4)
-	_expect(actor.global_position.x > visible.end.x, "turn happens outside VisibleRect in MovementArea")
-	controller.update_movement(0.7)
-	_expect(
-		actor.global_position.x < visible.end.x,
-		"expanded-area diagonal naturally re-enters the camera",
+		CONFIG.get_movement_area(visible).has_point(Vector2(visible.end.x + 1.0, visible.get_center().y)),
+		"MovementArea still extends past the camera for other movement",
 	)
 
 	playfield.queue_free()
