@@ -289,13 +289,14 @@ if not player.play(sequence, emitter, world):
 비행 중인 탄이 그 자리에서 탄을 발사한다. 분열탄, 멈췄다가 플레이어를 노리는 탄, 날아가며 탄을 뿌리는 탄을 패턴 하나로 쓸 수 있다.
 
 - `BulletAction.Type.SPAWN`(빌더 `BulletBehavior.spawn(volley, consume = false)`)은 순간 Action(duration 0)이다. payload `BarrageVolley` 하나를 Action 시각의 탄 위치에서 발사한다. 여러 시점에 발사하려면 SPAWN을 여러 개 넣는다.
+- 다중 Volley(2026-10-07): `BulletBehavior.spawn_together(volleys, consume = false)`(`BulletAction.payloads`)는 Sequence의 `fire_together`처럼 Volley 여러 개를 같은 위치·진행 방향에서 한 번에 발사한다. Volley마다 속도·각도·조준이 따로이므로 원이 아닌 모양(타원·별)으로 터뜨릴 수 있다. `payloads`가 비어 있지 않으면 `payload`보다 우선한다. 탄 생성 비용은 탄당 동일하며 Volley 수와 무관하다(한 틱 32발 생성 ≈ 3ms, Volley 1개와 32개의 차이 0.1ms 미만). 같은 틱에 여러 부모가 함께 터지면 그만큼 한 프레임에 몰리므로 패턴 작성자가 터지는 시각을 어긋나게 둔다.
 - 방향: `Aim.NONE` Volley의 기준 방향은 월드 아래가 아니라 **그 순간 탄의 진행 방향**이다. `angle_degrees`·부채꼴·링도 진행 방향 기준이고, `origin_offset`도 진행 방향(+y)으로 회전한다. 속도 0으로 멈춘 탄은 마지막 진행 방향을 쓴다. `Aim.EACH_SHOT`은 탄 위치에서 표적으로 조준한다. 표적은 부모 탄을 발사할 때 넘긴 표적·공급자이며, 표적이 없거나 탄과 겹치면 그 SPAWN은 건너뛴다. `Aim.LOCKED`는 쓸 수 없다.
 - 부모 처리: `consume_parent = true`면 발사 직후 부모 탄을 지운다(분열). false면 부모는 그대로 날아간다.
 - 시점: 실제 몸체 갱신(`_physics_process`)에서만 한 번 실행한다. 경로 예측·과거 조회·궤적 캐시·레이저 꼬리 계산은 SPAWN을 실행하지 않는다. 자식 탄은 발사 위치·방향을 Action 시각 기준으로 계산하고, 그 시각부터 현재 프레임까지 지난 시간만큼 미리 진행시켜 프레임 간격과 무관한 자리에서 시작한다. 피격·소거·수명 종료로 먼저 사라진 탄은 SPAWN을 실행하지 않는다.
 - 자식 탄은 부모와 같은 월드 부모 아래 일반 적탄(`enemy_projectiles`)으로 생성된다. 피격, 엘리트 처치 탄소거와 그 보상(1발당 XP 1), 외부 궤도 개입, 정지 안전 비율 모두 일반 탄과 같다. 일반 적 사격 안전선은 발사하는 적에게만 적용되므로 SPAWN에는 적용하지 않는다. 바닥 근처 분열은 패턴 작성자가 피한다.
 - 상한(검증 단계에서 거부):
   - 재귀 깊이 1: 자식 Shot의 Behavior에는 SPAWN이 없어야 한다.
-  - SPAWN Volley는 최대 **32발**(`SPAWN_MAX_COUNT`)이다.
+  - SPAWN 하나가 내는 탄은 모든 Volley를 합쳐 최대 **32발**(`SPAWN_MAX_COUNT`)이다. Volley 개수 자체는 제한하지 않는다(SINGLE 32개 가능). 깊이·LOCKED·LEGACY 검사는 Volley마다 적용하며 null Volley나 빈 목록은 거부한다.
   - Behavior 하나에 SPAWN Action은 최대 **4개**(`SPAWN_MAX_PER_BULLET`)다.
   - 부모 1발이 낼 수 있는 자식은 최대 **128발**(`SPAWN_MAX_CHILDREN`)이다. Behavior를 반복하면 SPAWN도 반복되며, 128발 예산을 넘게 되는 첫 Volley부터 그 탄은 더 이상 SPAWN하지 않는다. 예를 들어 2발씩 뿌리는 꼬리는 64번까지 나온다.
   - 무한 반복 Behavior의 한 주기는 기존 규칙대로 최소 0.1초다. 더 촘촘한 간격은 유한 반복(`repeat(n)`)으로 쓴다.
@@ -303,7 +304,8 @@ if not player.play(sequence, emitter, world):
   - payload Shot은 `BULLET`·`TRAIL_LASER`·`BEAM` 중 하나여야 한다(`LEGACY` 불가).
 - 한계: 경로 예측(`get_predicted_path`)과 위험 반경은 아직 나오지 않은 자식 탄을 미리 보지 못한다.
 - 데모: Bullet Lab 패턴 `showcase/comet_trail`(`patterns/showcase/comet_trail_pattern.gd`). 큰 왕탄 3발이 표적 쪽으로 내려오며 0.06초마다 작은 불씨 1발을 좌우 번갈아(진행 반대 방향 ±35°) 흘린다. 불씨는 0.55초 동안 멈추며 흰색에서 청록으로 식은 뒤, 0.75초 동안 판정과 함께 작아지며 사라져 잔상처럼 보인다(수명 1.3초). 왕탄 하나에 살아 있는 불씨는 약 20발이다. 처음의 '0.07초마다 2발·수명 1.5초' 안은 화면에 250발까지 쌓여 무거웠다.
-- 완료 조건: 검증 상한(깊이·32발·4개·LOCKED·병렬·레이저·자기 참조 무한 재귀 없음), 미래 조회 뒤에도 1회만 실행, 반복 Behavior의 자식 128발 예산과 넘치는 Volley 미발사, 분열 위치·링 각도·부모 소멸, 진행 방향 기준 각도와 부모 유지, 정지 후 조준과 표적 없음 건너뛰기, 자식의 일반 적탄 그룹. 검증: `tests/bullet_spawn_action_test.gd`.
+- 데모(다중 Volley): Bullet Lab 패턴 `showcase/saturn_burst`(`patterns/showcase/saturn_burst_pattern.gd`). 보라 대형 구탄이 표적을 노려 130px/s로 날다 0.9초에 걸쳐 멈추고, 0.45초 동안 시각 0.35배·판정 0.4배로 줄며 하얗게 압축된 뒤, 노란 바깥 고리 32발(장축 170px/s)과 청록 안쪽 고리 32발(110px/s)의 기울어진 타원(단축/장축 0.42, 장축은 진행 방향에서 65°) 두 겹으로 터진다. 각 파편 속도가 그 방향의 타원 반지름에 비례해 모양을 유지하며 커진다. 구탄 3발을 조준·±28°로 0.9초 간격으로 쏴 터지는 시각이 겹치지 않는다.
+- 완료 조건: 검증 상한(깊이·32발·4개·LOCKED·병렬·레이저·자기 참조 무한 재귀 없음), 미래 조회 뒤에도 1회만 실행, 반복 Behavior의 자식 128발 예산과 넘치는 Volley 미발사, 분열 위치·링 각도·부모 소멸, 진행 방향 기준 각도와 부모 유지, 정지 후 조준과 표적 없음 건너뛰기, 자식의 일반 적탄 그룹, 다중 Volley의 합계 32발 상한·Volley별 검사·`payloads` 우선·Volley별 속도 유지와 같은 분열점. 검증: `tests/bullet_spawn_action_test.gd`.
 
 - 공통 꼬리 입자: BarrageShot.trail_effect는 선택적 시각 효과이며 BULLET/TRAIL_LASER에 적용한다. 월드별 관리기가 입자를 소유하고 같은 텍스처·색·크기 설정을 MultiMesh로 배치한다. 탄의 이전/현재 월드 위치 사이에서 이동 거리 간격으로 방출하며 정지 중에는 방출하지 않는다. 기존 입자는 탄 소멸 후에도 수명까지 남고 트리 일시정지를 따른다.
 - 관리기당 최대 4096입자, 물리 틱당 신규 256개, 탄별 갱신당 최대 64개로 제한한다. 초과 방출은 버리고 이후 몰아서 보충하지 않는다. 한 틱에 1024px 넘게 위치가 바뀌면 순간이동으로 취급해 연결 꼬리를 만들지 않는다. 입자는 장식이며 피격/소거 보상/안전 비율에 포함하지 않는다. 월드 제거 시 같이 정리한다.

@@ -16,7 +16,7 @@ func _initialize() -> void:
 
 func _run() -> void:
 	var paths := LOADER.list_patterns(DIRECTORY)
-	_expect(paths.size() >= 8, "showcase has at least eight patterns (got %d)" % paths.size())
+	_expect(paths.size() >= 17, "showcase has at least seventeen patterns (got %d)" % paths.size())
 	for path in paths:
 		await _check_pattern(path)
 	if failures.is_empty():

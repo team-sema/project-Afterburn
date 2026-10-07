@@ -221,7 +221,9 @@ func _fire_due_spawns() -> bool:
 		var heading := behavior_state.heading_at(time)
 		if _bounce != null:
 			heading = _bounce.reflect_vector(time, heading)
-		_fire_spawn(action.payload, world_position_at(time), heading, age - time)
+		var origin := world_position_at(time)
+		for volley in action.spawn_volleys():
+			_fire_spawn(volley, origin, heading, age - time)
 		if action.consume_parent:
 			_active = false
 			set_physics_process(false)
