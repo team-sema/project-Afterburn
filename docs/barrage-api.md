@@ -52,7 +52,7 @@ func build(params: Dictionary) -> void:
 - 조준 고정 연발 예제: [locked_burst_pattern.gd](../patterns/locked_burst_pattern.gd). `aim()` 뒤 `Aim.LOCKED` 바늘탄 3발(0.12초 간격) → 2초 휴식 → 반복. `build(params)`로 `shots`, `gap`, `rest`, `speed`를 씬에서 조정할 수 있다. 본 게임 적에는 배정하지 않았다.
 - 조준 부채꼴 연발 예제: [aimed_fan_burst_pattern.gd](../patterns/aimed_fan_burst_pattern.gd). 5방향 40° 부채꼴의 중앙 탄이 매 발사 표적을 향하는 `Aim.EACH_SHOT`, 0.15초 간격 5연발 → 1.6초 휴식 → 반복. `ways`, `spread`, `shots`, `gap`, `rest`, `speed`를 `build(params)`로 조정. 본 게임 적에는 배정하지 않았다.
 - 16방향 혼합 시험: [mixed_sixteen_pattern.gd](../patterns/mixed_sixteen_pattern.gd). 이 `.gd`가 현재 시험 씬의 실행 원본이다. 예전 `.tres`는 저장 형식 호환 예제로 남겨 둔다.
-- 쇼케이스 패턴: [`patterns/showcase/`](../patterns/showcase/) 11종(탄→탄 SPAWN 데모 `comet_trail`, 예고형 빔 데모 `beam_lattice`, 벽 반사 데모 `ricochet` 포함). Lab 패턴 목록에 `showcase/…`로 나온다. 본 게임 적에는 배정하지 않았다. 색만 바꾼 탄은 [`labs/bullet/showcase_shots.gd`](../labs/bullet/showcase_shots.gd)로 만든다(외형 복제 후 `tint` 변경, 텍스처 공유).
+- 쇼케이스 패턴: [`patterns/showcase/`](../patterns/showcase/) 17종(탄→탄 SPAWN 데모 `comet_trail`, 다중 Volley SPAWN 데모 `saturn_burst`, 예고형 빔 데모 `beam_lattice`, 벽 반사 데모 `ricochet`, 2026-10-07 탄막 교본 『弾幕 最強のシューティングゲームを作る！』 응용 5종 `washer_spiral`·`stepping_spiral`·`winder`·`overtaking_curtain`·`star_placed` 포함). Lab 패턴 목록에 `showcase/…`로 나온다. 본 게임 적에는 배정하지 않았다. 색만 바꾼 탄은 [`labs/bullet/showcase_shots.gd`](../labs/bullet/showcase_shots.gd)로 만든다(외형 복제 후 `tint` 변경, 텍스처 공유).
 
   | 파일 | 형태 | 쓰는 기능 |
   |------|------|-----------|
@@ -67,6 +67,12 @@ func build(params: Dictionary) -> void:
   | `beam_lattice_pattern.gd` | 표적을 노린 분홍 빔 5줄 부채꼴 뒤에 천천히 도는 보라 빔 6줄 링 | `Kind.BEAM`(예고선 → 전개 → 유지 → 소멸) · `Aim.EACH_SHOT` · `speed = 0` |
   | `ricochet_pattern.gd` | 좌우 벽에서 한 번 튕기는 쌀탄 부채꼴 2개와 벽에서 V자로 꺾이는 궤적 레이저 | `bounce_walls = SIDES` · `bounce_count` · `fire_together` |
   | `comet_trail_pattern.gd` | 큰 왕탄 3발이 뒤로 작은 불씨를 흘려 잔상 꼬리를 남김 | 탄→탄 `spawn`(SINGLE을 진행 반대 ±35°로 번갈아) · 유한 `repeat(64)` · 불씨의 `opacity`·`hitbox_scale` 동시 축소 |
+  | `washer_spiral_pattern.gd` | 휘는 10발 링 나선의 회전 방향과 탄 곡률이 10초 주기로 함께 뒤집히며(5링 동안 선형 블렌드) 되감기고, 노란 직선 팔 2개가 기준이 되는 세탁기 나선 | 링별 절대 각도를 build 루프에서 누적 · `parallel`(`SPEED` 30→140, `TURN_AT` ±60°/s) · 방향별 tint |
+  | `stepping_spiral_pattern.gd` | 1초 날고 1/3초 하얗게 멈추기를 반복해 계단식으로 전진하는 외팔 나선 | 매 물리 틱 1발 · `rotate(10.8)` 누적 · `wait` → `speed_to(0, 0)` → `wait` → `speed_to` `.repeat()` |
+  | `winder_pattern.gd` | 좌우 발사구의 쌀탄 6줄 광선이 반대 위상으로 ±30° 흔들리며 통로가 열렸다 닫히는 와이퍼 | `origin_offset` 발사구 2개 · 0.05초마다 링 `fire_together` · sin 기준각 5초 주기 |
+  | `overtaking_curtain_pattern.gd` | 발사구 3곳의 조준 부채꼴 8묶음이 0.08초마다 22px/s씩 빨라져 앞 묶음을 추월하며 두꺼운 벽으로 뭉쳤다 퍼짐 | `aim()` + `Aim.LOCKED` · `origin_offset` · 묶음별 속도·tint |
+  | `star_placed_pattern.gd` | 오각별 윤곽을 따라 탄을 한 발씩 놓고 다 그린 뒤 0.5초 멈춰 붉게 번쩍이며 동시 발사. 각 탄은 반지름 방향에서 144° 비틀려 중심을 지나 반대쪽으로 소용돌이치고, 36° 돌린 큰 별이 반대로 돈다 | `origin_offset`으로 배치 · `speed = 0` · 탄별 `wait`(공통 발사 시각까지 남은 시간) → `tint_to` → `speed_to` → 원래 색 복귀 |
+  | `saturn_burst_pattern.gd` | 조준한 보라 대형 구탄이 멈추며 하얗게 압축된 뒤 기울어진 타원 고리 두 겹(노랑 32발·청록 32발)으로 모양을 유지하며 터짐. 구탄 3발이 0.9초 간격 | `speed_to(0)` → `parallel`(시각·판정 축소, 색) → `spawn_together`(SINGLE 32개, 방향별 타원 반지름 속도) ×2, 둘째에 `consume` |
 
   검증: `tests/labs/showcase_patterns_smoke_test.gd` (Lab 로더로 모두 불러와 3초 재생 시 발사·반복 유지).
 - 발사 금지선에서는 FIRE를 건너뛰고 다음 일정으로 진행한다. 표적 부재 시 조준 Volley만 건너뛰며 다음 FIRE에서 재조회한다. 공격 기간 종료·적 제거는 미래 발사를 중단하고 기존 탄은 유지한다.
@@ -238,6 +244,7 @@ visual_scale_to(scale: float, seconds: float)
 hitbox_scale_to(scale: float, seconds: float)
 parallel(group: Array[BulletAction])
 spawn(volley: BarrageVolley, consume := false)
+spawn_together(volleys: Array[BarrageVolley], consume := false)
 repeat(times := 0)
 eased(transition: Tween.TransitionType, ease := Tween.EASE_IN_OUT)
 validation_error() -> String
@@ -256,6 +263,7 @@ validation_error() -> String
 - `opacity_to`: 전체 투명도 0~1. 투명해져도 판정과 수명은 유지된다.
 - `visual_scale_to` / `hitbox_scale_to`: 각각 시각·판정 배율. 0 초과 16 이하. 서로 자동 연동되지 않는다.
 - `spawn`: 그 순간 탄의 위치에서 `volley`를 발사한다(아래 「탄→탄 발사」). `consume = true`면 발사 후 탄을 지운다.
+- `spawn_together`: Volley 여러 개를 한 SPAWN으로 같은 위치·진행 방향에서 함께 발사한다. Volley마다 속도·각도·조준이 따로이며 합계 32발까지다.
 - `repeat(n)`: Behavior 전체를 총 n번 실행. 기본값 1, 0은 무한. 마지막 상태는 다음 반복으로 이어진다. 예: `turn_by(30, 1).repeat(3)`은 총 90° 선회한다.
 - `parallel`: 가장 긴 자식이 끝나면 다음 단계로 간다. 짧은 자식은 완료값을 유지한다. 같은 속성에 동시에 쓰는 액션과 중첩 병렬은 거부한다. 선회와 방향 파동은 모두 같은 방향 속성이다.
 
@@ -270,12 +278,13 @@ BulletAction.tint_to(color, seconds)
 BulletAction.visual_scale_to(scale, seconds)
 BulletAction.hitbox_scale_to(scale, seconds)
 BulletAction.spawn(volley, consume := false)
+BulletAction.spawn_together(volleys, consume := false)
 BulletAction.make(type, value, seconds)
 ```
 
 `Type`: `WAIT`, `TURN_BY`, `TURN_TO`, `TURN_AT`, `HEADING_WAVE`, `LATERAL_WAVE`, `SPEED`, `TINT`, `OPACITY`, `VISUAL_SCALE`, `HITBOX_SCALE`, `PARALLEL`, `HOMING`, `SPAWN`. 기존 저장 enum 번호는 유지한다(SPAWN은 끝에 추가).
 
-직접 편집할 수 있는 필드는 `type`, `duration`, `value`, `period`, `phase`, `color`, `children`, `transition_type`, `ease_type`, `payload`(SPAWN Volley), `consume_parent`(SPAWN 후 부모 제거)이다. `make`는 `period`를 자동 설정하지 않으므로 파동 액션을 직접 만들면 `period`도 지정한다. `BulletAction`의 나머지 메서드는 `eased(transition, ease)`(자기 자신 반환), `uses_easing()`, `progress(elapsed)`, `channel()`, `length()`, `validation_error()`, `spawn_error()`다.
+직접 편집할 수 있는 필드는 `type`, `duration`, `value`, `period`, `phase`, `color`, `children`, `transition_type`, `ease_type`, `payload`(SPAWN Volley), `payloads`(SPAWN Volley 목록, 비어 있지 않으면 `payload`보다 우선), `consume_parent`(SPAWN 후 부모 제거)이다. SPAWN 전용 조회는 `spawn_volleys()`(실제 발사 목록)와 `spawn_count()`(합계 발수)다. `make`는 `period`를 자동 설정하지 않으므로 파동 액션을 직접 만들면 `period`도 지정한다. `BulletAction`의 나머지 메서드는 `eased(transition, ease)`(자기 자신 반환), `uses_easing()`, `progress(elapsed)`, `channel()`, `length()`, `validation_error()`, `spawn_error()`다.
 
 ### 색·두께와 선회를 함께 변경
 
@@ -332,12 +341,23 @@ snipe.shot = shard
 snipe.aim = BarrageVolley.Aim.EACH_SHOT
 snipe.speed = 150
 shot.behavior = BulletBehavior.new().speed_to(0, 0.4).wait(0.3).spawn(snipe, true)
+
+# 멈춘 뒤 타원으로 터지는 탄: Volley마다 속도가 다르므로 spawn_together를 쓴다.
+var ellipse: Array[BarrageVolley] = []
+for index in 24:
+    var point := Vector2(cos(TAU * index / 24), sin(TAU * index / 24) * 0.4)
+    var piece := BarrageVolley.new()
+    piece.shot = shard
+    piece.angle_degrees = rad_to_deg(point.angle())   # 진행 방향 기준
+    piece.speed = 150 * point.length()                # 방향별 타원 반지름
+    ellipse.append(piece)
+shot.behavior = BulletBehavior.new().speed_to(0, 0.6).spawn_together(ellipse, true)
 ```
 
 - `Aim.NONE` Volley의 기준 방향은 **그 순간 탄의 진행 방향**이다(월드 아래가 아님). `angle_degrees = 90`이면 진행 방향에서 +90°로 나간다. `origin_offset`도 진행 방향(+y) 기준이다. 멈춘 탄은 마지막 진행 방향을 쓴다.
 - `Aim.EACH_SHOT`은 부모 탄을 발사할 때 넘긴 `target`/`target_resolver`(Player의 표적 포함)를 노린다. 표적이 없으면 그 SPAWN은 건너뛴다. `Aim.LOCKED`는 쓸 수 없다.
 - 실제 탄 갱신에서만 한 번 실행된다. 예측·과거 조회는 SPAWN을 실행하지 않고, `get_predicted_path`는 아직 나오지 않은 자식 탄을 보여 주지 않는다. 자식은 Action 시각 기준 위치에서 나와 그 뒤 지난 시간만큼 앞서 출발한다.
-- 상한: 자식 Behavior에 SPAWN 금지(깊이 1), SPAWN Volley 최대 32발, Behavior 하나에 SPAWN 최대 4개, 부모 1발당 자식 최대 128발이다. 반복 Behavior는 128발 예산을 다 쓸 때까지 계속 SPAWN하므로 `wait(0.06).spawn(left).wait(0.06).spawn(right).repeat(64)`처럼 꼬리를 흘릴 수 있다(무한 반복은 주기 0.1초 이상).
+- 상한: 자식 Behavior에 SPAWN 금지(깊이 1), SPAWN 하나의 탄은 모든 Volley를 합쳐 최대 32발(`spawn_together`의 Volley 개수는 제한 없음), Behavior 하나에 SPAWN 최대 4개, 부모 1발당 자식 최대 128발이다. 반복 Behavior는 128발 예산을 다 쓸 때까지 계속 SPAWN하므로 `wait(0.06).spawn(left).wait(0.06).spawn(right).repeat(64)`처럼 꼬리를 흘릴 수 있다(무한 반복은 주기 0.1초 이상).
 - 성능: 꼬리처럼 탄을 계속 흘리는 패턴은 살아 있는 자식 수가 비용을 정한다. 자식의 수명·발수를 줄이고, 시각 채널(색·투명도·배율)을 여러 개 바꾸는 자식은 꼭 필요한 만큼만 쓴다. SPAWN 자식은 부모의 설정 사본을 공유하므로 생성 시 복제·재검증 비용이 없다. SPAWN은 병렬 묶음 안에 넣을 수 없고 `BULLET` 몸체에서만 실행한다. 위반하면 `validation_error()`/`is_valid()`가 거부한다.
 - 자식 탄은 일반 적탄이다. 피격·탄소거·소거 XP·외부 궤도 개입이 똑같이 적용된다. 게임 규칙 정본: [전투 — 탄→탄 SPAWN](design/combat.md#탄탄-spawn--구현-완료).
 
@@ -493,7 +513,7 @@ fire_together(layers)
 - 벽 반사는 거울 반사뿐이다. 반사 때 속도·색 변화, 반사 연출, 임의 모양의 벽(플레이필드 사각형 밖)은 없다. 호밍과 함께 쓸 수 없다.
 - `TRAIL_LASER`는 이동하는 머리의 과거 궤적이고, `BEAM`은 발사 순간에 고정된 직선이다. 발사자를 따라 움직이거나 회전하는 빔, 휘는 빔, 제어점으로 몸통을 직접 변형하는 API는 없다. `BEAM`은 막히지 않고 화면 끝(또는 `beam_length`)까지 뻗는다.
 - 발사 시점 난수(각도·속도·대기 jitter)는 없다. 필요하면 시드 RNG를 Player가 소유하는 방식으로 추가한다.
-- 탄→탄 발사(`SPAWN`)는 재귀 깊이 1, Volley 32발, 부모 1발당 자식 128발로 제한한다. 레이저 머리는 SPAWN을 실행하지 않고, 경로 예측은 미래의 자식 탄을 포함하지 않는다.
+- 탄→탄 발사(`SPAWN`)는 재귀 깊이 1, 한 SPAWN의 Volley 합계 32발, 부모 1발당 자식 128발로 제한한다. 레이저 머리는 SPAWN을 실행하지 않고, 경로 예측은 미래의 자식 탄을 포함하지 않는다.
 - 중첩 Behavior 그룹, 액션 단위 반복, 외부 이벤트 대기, 실행 중 Behavior 교체는 제공하지 않는다. 외부 궤도 효과는 속도 배율·방향 오프셋만 제공한다(11절).
 - 탄 노드와 물리 판정은 탄마다 존재한다. 배치 렌더링은 노드/충돌 처리 비용까지 제거하지 않는다.
 - 위치·예측·레이저 과거 몸통은 같은 궤적 함수를 쓴다. 일반 이동 적분은 1/120초 중점 근사다. 직진·단일 일정 선회는 해석식, 단일 방향 파동은 직접 속도 평가를 사용한다.

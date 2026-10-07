@@ -3,8 +3,8 @@ extends Resource
 
 ## SPAWN is appended last so saved Action types keep their values.
 enum Type { WAIT, TURN_BY, TURN_TO, TURN_AT, HEADING_WAVE, LATERAL_WAVE, SPEED, TINT, OPACITY, VISUAL_SCALE, HITBOX_SCALE, PARALLEL, HOMING, SPAWN }
-## SPAWN limits: bullets per payload Volley, SPAWN Actions per Behavior, and
-## child bullets per parent bullet (repeats spend the same budget).
+## SPAWN limits: bullets per SPAWN (summed over its Volleys), SPAWN Actions per
+## Behavior, and child bullets per parent bullet (repeats spend the same budget).
 const SPAWN_MAX_COUNT := 32
 const SPAWN_MAX_PER_BULLET := 4
 const SPAWN_MAX_CHILDREN := 128
@@ -18,6 +18,10 @@ const SPAWN_MAX_CHILDREN := 128
 ## SPAWN: Volley fired from the bullet's position. Aim.NONE directions are
 ## relative to the bullet heading; EACH_SHOT aims at the bullet's target.
 @export var payload: BarrageVolley
+## SPAWN: several Volleys fired together from the same point and heading, like
+## a sequence fire_together. When non-empty it replaces `payload`; every Volley
+## keeps its own speed/angle/aim, so shapes such as ellipses are possible.
+@export var payloads: Array[BarrageVolley] = []
 ## SPAWN: removes the parent bullet once the payload is fired (split).
 @export var consume_parent := false
 ## Easing for interpolated actions (turn_by/turn_to/speed/tint/opacity/scales).
@@ -43,6 +47,23 @@ static func spawn(volley: BarrageVolley, consume := false) -> BulletAction:
 	action.payload = volley
 	action.consume_parent = consume
 	return action
+
+## One SPAWN that fires every Volley in `volleys` at once (SPAWN_MAX_COUNT
+## bullets in total).
+static func spawn_together(volleys: Array[BarrageVolley], consume := false) -> BulletAction:
+	var action := make(Type.SPAWN, 0, 0)
+	action.payloads = volleys
+	action.consume_parent = consume
+	return action
+
+## The Volleys this SPAWN fires: `payloads` when set, else the single `payload`.
+func spawn_volleys() -> Array[BarrageVolley]:
+	if not payloads.is_empty():
+		return payloads
+	var single: Array[BarrageVolley] = []
+	if payload != null:
+		single.append(payload)
+	return single
 
 static func tint_to(tint: Color, seconds: float) -> BulletAction:
 	var action := make(Type.TINT, 0, seconds)
@@ -125,18 +146,24 @@ func validation_error() -> String:
 
 func spawn_error() -> String:
 	if duration != 0: return "Spawn is instantaneous (duration 0)."
-	if payload == null or payload.shot == null: return "Spawn needs a payload volley with a shot."
-	# Checked before payload.is_valid() so a self-referencing payload cannot recurse.
-	if payload.shot.behavior != null and payload.shot.behavior.has_spawn():
-		return "Spawned bullets cannot spawn again (depth 1)."
-	if payload.aim == BarrageVolley.Aim.LOCKED: return "Spawn volleys use Aim.NONE or EACH_SHOT."
-	if payload.shot.kind == BarrageShot.Kind.LEGACY: return "Spawn volleys need a BULLET, TRAIL_LASER or BEAM shot."
-	if not payload.is_valid(): return "Spawn payload volley is invalid."
-	if payload.layout != BarrageVolley.Layout.SINGLE and payload.count > SPAWN_MAX_COUNT:
-		return "Spawn volley exceeds %d bullets." % SPAWN_MAX_COUNT
+	var volleys := spawn_volleys()
+	if volleys.is_empty(): return "Spawn needs a payload volley with a shot."
+	for volley in volleys:
+		if volley == null or volley.shot == null: return "Spawn needs a payload volley with a shot."
+		# Checked before volley.is_valid() so a self-referencing payload cannot recurse.
+		if volley.shot.behavior != null and volley.shot.behavior.has_spawn():
+			return "Spawned bullets cannot spawn again (depth 1)."
+		if volley.aim == BarrageVolley.Aim.LOCKED: return "Spawn volleys use Aim.NONE or EACH_SHOT."
+		if volley.shot.kind == BarrageShot.Kind.LEGACY: return "Spawn volleys need a BULLET, TRAIL_LASER or BEAM shot."
+		if not volley.is_valid(): return "Spawn payload volley is invalid."
+	if spawn_count() > SPAWN_MAX_COUNT:
+		return "Spawn volleys exceed %d bullets." % SPAWN_MAX_COUNT
 	return ""
 
-## Bullets one execution of this SPAWN fires.
+## Bullets one execution of this SPAWN fires, summed over its Volleys.
 func spawn_count() -> int:
-	if payload == null: return 0
-	return 1 if payload.layout == BarrageVolley.Layout.SINGLE else payload.count
+	var total := 0
+	for volley in spawn_volleys():
+		if volley == null: continue
+		total += 1 if volley.layout == BarrageVolley.Layout.SINGLE else volley.count
+	return total

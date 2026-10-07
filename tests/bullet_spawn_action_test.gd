@@ -21,6 +21,7 @@ func _run() -> void:
 	_test_validation()
 	_test_schedule()
 	await _test_split()
+	await _test_multi_volley_split()
 	await _test_heading_relative_keep()
 	await _test_stop_then_aim()
 	_world.queue_free()
@@ -91,6 +92,24 @@ func _test_validation() -> void:
 	_expect(not laser.is_valid(), "laser bodies cannot carry spawn actions")
 	_expect(not BulletBehavior.new().spawn(null).validation_error().is_empty(), "a spawn needs a payload")
 
+	# Multi-volley spawn: the 32-bullet limit is the sum over all volleys.
+	var sixteen: Array[BarrageVolley] = [_volley(BarrageVolley.Layout.RING, 16), _volley(BarrageVolley.Layout.RING, 16)]
+	_expect(BulletBehavior.new().spawn_together(sixteen).validation_error().is_empty(), "two 16-bullet volleys spawn together")
+	_expect(BulletAction.spawn_together(sixteen).spawn_count() == 32, "spawn_count sums the volleys")
+	var thirty_three: Array[BarrageVolley] = [_volley(BarrageVolley.Layout.RING, 16), _volley(BarrageVolley.Layout.FAN, 17)]
+	_expect(not BulletBehavior.new().spawn_together(thirty_three).validation_error().is_empty(), "volleys summing over 32 bullets are rejected")
+	var empty: Array[BarrageVolley] = []
+	_expect(not BulletBehavior.new().spawn_together(empty).validation_error().is_empty(), "an empty spawn_together is rejected")
+	var with_locked: Array[BarrageVolley] = [ring, locked]
+	_expect(not BulletBehavior.new().spawn_together(with_locked).validation_error().is_empty(), "LOCKED aim is rejected in any volley")
+	var with_nested: Array[BarrageVolley] = [ring, nested]
+	_expect(not BulletBehavior.new().spawn_together(with_nested).validation_error().is_empty(), "depth 1 applies to every volley")
+	var with_hole: Array[BarrageVolley] = [ring, null]
+	_expect(not BulletBehavior.new().spawn_together(with_hole).validation_error().is_empty(), "a null volley is rejected")
+	var overriding := BulletAction.spawn(huge)
+	overriding.payloads = sixteen
+	_expect(overriding.validation_error().is_empty() and overriding.spawn_volleys() == sixteen, "payloads replaces the single payload")
+
 
 func _test_schedule() -> void:
 	var ring := _volley(BarrageVolley.Layout.RING, 4)
@@ -135,6 +154,32 @@ func _test_split() -> void:
 		_expect(bullet.is_in_group(EnemyBullets.GROUP), "children are ordinary enemy bullets (clear XP applies)")
 	headings.sort()
 	_expect(headings.size() == 8 and absf(headings[1] - headings[0] - 45.0) < 1.0, "the ring spreads 45 degrees apart")
+	for child in children:
+		child.queue_free()
+	await process_frame
+
+
+## Three SINGLE volleys with their own speeds and angles fire together from one
+## SPAWN, so a burst can take any shape (ellipse, star) instead of a circle.
+func _test_multi_volley_split() -> void:
+	var volleys: Array[BarrageVolley] = []
+	for index in 3:
+		var single := _volley(BarrageVolley.Layout.SINGLE, 1, 40.0 + 30.0 * index)
+		single.angle_degrees = 90.0 * index
+		volleys.append(single)
+	var parent := _shot(BulletBehavior.new().wait(0.5).spawn_together(volleys, true)).spawn(_world, Vector2(150, 100), Vector2.DOWN, 100.0) as FoundationBullet
+	var before := _bullets()
+	await _physics_seconds(0.55)
+	_expect(not is_instance_valid(parent) or parent.is_queued_for_deletion(), "a consuming multi-volley spawn removes the parent")
+	var children := _bullets().filter(func(node: Node) -> bool: return not before.has(node))
+	_expect(children.size() == 3, "three single volleys spawn three children (%d)" % children.size())
+	var speeds: Array[float] = []
+	for child in children:
+		var bullet := child as FoundationBullet
+		_expect(bullet.global_position.distance_to(Vector2(150, 150)) < 6.0, "multi-volley children share the split point")
+		speeds.append(snappedf(bullet.get_travel_velocity().length(), 1.0))
+	speeds.sort()
+	_expect(speeds == [40.0, 70.0, 100.0], "each volley keeps its own speed (%s)" % str(speeds))
 	for child in children:
 		child.queue_free()
 	await process_frame

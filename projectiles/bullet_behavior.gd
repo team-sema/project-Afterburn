@@ -120,6 +120,11 @@ func parallel(group: Array[BulletAction]) -> BulletBehavior:
 func spawn(volley: BarrageVolley, consume := false) -> BulletBehavior:
 	return then(BulletAction.spawn(volley, consume))
 
+## Fires several Volleys at once from the bullet's current position and heading,
+## each with its own speed/angle/aim (SPAWN_MAX_COUNT bullets in total).
+func spawn_together(volleys: Array[BarrageVolley], consume := false) -> BulletBehavior:
+	return then(BulletAction.spawn_together(volleys, consume))
+
 func has_spawn() -> bool:
 	for action in actions:
 		if action != null and action.type == BulletAction.Type.SPAWN:
