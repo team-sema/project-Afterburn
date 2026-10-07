@@ -131,7 +131,7 @@ stats_component = NodePath("../StatsComponent")
 script = ExtResource("24_engine_boost")
 augment_applier = NodePath("../PlayerAugmentApplier")
 
-[node name="ShipFacilityApplier" type="Node" parent="." node_paths=PackedStringArray("augment_applier", "weapon_loadout", "stats_component", "shield_component", "experience_collector", "combat_buff_controller", "engine_boost_component")]
+[node name="ShipFacilityApplier" type="Node" parent="." node_paths=PackedStringArray("augment_applier", "weapon_loadout", "stats_component", "shield_component", "experience_collector", "combat_buff_controller", "engine_boost_component", "hit_point")]
 script = ExtResource("18_ship_facility_applier")
 augment_applier = NodePath("../PlayerAugmentApplier")
 weapon_loadout = NodePath("../PlayerWeaponLoadout")
@@ -140,6 +140,7 @@ shield_component = NodePath("../ShieldComponent")
 experience_collector = NodePath("../ExperienceCollector")
 combat_buff_controller = NodePath("../ShipCombatBuffController")
 engine_boost_component = NodePath("../EngineBoostComponent")
+hit_point = NodePath("../PlayerHitPoint")
 
 [node name="ScaleComponent" type="Node" parent="." unique_id=409266105 node_paths=PackedStringArray("sprite")]
 script = ExtResource("9_le0bn")
