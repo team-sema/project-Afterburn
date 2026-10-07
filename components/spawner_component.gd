@@ -17,9 +17,16 @@ func spawn(
 	assert(scene is PackedScene, "Error: The scene export was never set on this spawner component.")
 	var spawn_parent := parent
 	if spawn_parent == null:
-		spawn_parent = get_tree().get_first_node_in_group("gameplay_world")
-	if spawn_parent == null:
-		spawn_parent = get_tree().current_scene
+		# The owner may die while this spawner is still outside the tree: a
+		# formation break reparents the enemy, and the hurtbox re-entering the
+		# tree fires area_entered before later siblings (this node) have
+		# entered. The spawn parent is the world, not the owner, so resolve the
+		# tree through the main loop instead of dereferencing a null tree.
+		var tree := get_tree() if is_inside_tree() else Engine.get_main_loop() as SceneTree
+		assert(tree != null, "SpawnerComponent requires a SceneTree to resolve a spawn parent.")
+		spawn_parent = tree.get_first_node_in_group("gameplay_world")
+		if spawn_parent == null:
+			spawn_parent = tree.current_scene
 	assert(spawn_parent != null, "SpawnerComponent requires a spawn parent.")
 	# Instance the scene
 	var instance = scene.instantiate()
