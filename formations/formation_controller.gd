@@ -61,6 +61,7 @@ func _process(delta: float) -> void:
 	_prune_invalid_members()
 	if _formation_started:
 		_formation_elapsed += delta
+		_publish_extents()
 	_update_member_positions(delta)
 	if _formation_started:
 		if (
@@ -153,7 +154,10 @@ func start_formation(context: Dictionary = {}) -> void:
 	if _break_requested or _breaking or _cleanup_requested:
 		return
 	var movement_context := context.duplicate(true)
-	movement_context["formation_half_span"] = get_active_half_span()
+	var extents := get_active_extents()
+	movement_context["formation_extent_left"] = extents.x
+	movement_context["formation_extent_right"] = extents.y
+	movement_context["formation_half_span"] = maxf(extents.x, extents.y)
 	movement_context["lateral_sign"] = -1.0 if mirrored else 1.0
 	if not movement_context.has("formation_direction"):
 		var viewport_center_x := get_viewport_rect().get_center().x
@@ -253,22 +257,43 @@ func get_layout() -> FormationLayout:
 
 
 func get_active_half_span() -> float:
-	var half_span := 0.0
+	var extents := get_active_extents()
+	return maxf(extents.x, extents.y)
+
+
+## Occupied horizontal extent of the formation right now: x = distance from the
+## center to the leftmost live member, y = to the rightmost (both >= 0, in the
+## controller's local axes after behavior transform and mirroring). While
+## members are still pending, every authored slot counts so a late spawn never
+## lands outside the lane. Published to the center MovementController each
+## frame as `formation_extent_left` / `formation_extent_right`.
+func get_active_extents() -> Vector2:
+	var extent_left := 0.0
+	var extent_right := 0.0
+	var slots: Array[FormationSlot] = []
 	for binding_value in _bindings.values():
 		var binding := binding_value as Dictionary
 		var slot := binding.get("slot") as FormationSlot
 		if slot != null:
-			half_span = maxf(
-				half_span,
-				absf(_transform_slot_offset(_get_slot_layout_offset(slot), slot).x),
-			)
-	if _bindings.is_empty() and _layout != null:
+			slots.append(slot)
+	if (_pending_member_spawns > 0 or _bindings.is_empty()) and _layout != null:
 		for slot in _layout.get_slots_sorted():
-			half_span = maxf(
-				half_span,
-				absf(_transform_slot_offset(_get_slot_layout_offset(slot), slot).x),
-			)
-	return half_span
+			if not slots.has(slot):
+				slots.append(slot)
+	for slot in slots:
+		var x := _transform_slot_offset(_get_slot_layout_offset(slot), slot).x
+		extent_left = maxf(extent_left, -x)
+		extent_right = maxf(extent_right, x)
+	return Vector2(extent_left, extent_right)
+
+
+func _publish_extents() -> void:
+	if center_movement_controller == null:
+		return
+	var extents := get_active_extents()
+	center_movement_controller.set_context_value(&"formation_extent_left", extents.x)
+	center_movement_controller.set_context_value(&"formation_extent_right", extents.y)
+	center_movement_controller.set_context_value(&"formation_half_span", maxf(extents.x, extents.y))
 
 
 func get_used_local_bounds(slot_indices: Array[int]) -> Rect2:

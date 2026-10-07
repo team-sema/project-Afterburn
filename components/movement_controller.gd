@@ -186,6 +186,12 @@ func get_context() -> Dictionary:
 	return _context.duplicate(true)
 
 
+## Live context update while a sequence runs (e.g. a formation's occupied
+## extents that shrink as members die). Steps see it from the next frame.
+func set_context_value(key: StringName, value: Variant) -> void:
+	_context[key] = value
+
+
 func _begin_current_step() -> void:
 	var step := sequence.steps[_current_step_index]
 	_current_step_state = step.create_runtime_state()

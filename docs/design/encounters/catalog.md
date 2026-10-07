@@ -9,7 +9,7 @@ Threat 1 후보 합 weight ≈115.4 · Threat 2 ≈206.7 · Threat 3 ≈301.7.
 | Encounter | difficulty | min_threat | weight | 진형 | 멤버 요지 | 이동·해제 요지 |
 |-----------|----------:|-----------:|-------:|------|-----------|----------------|
 | `drone_formation` | 11 | 1 | ≈18.11 | [Horizontal](../formations/horizontal.md) | [Drone](../enemies/drone.md)×5 | 대각 유지 (`formation_drone_diagonal`) |
-| `drone_zigzag_mirrored` | 6 | 1 | ≈24.49 | [V5](../formations/v5.md) | Drone | zigzag · mirrored · MovementArea bounce |
+| `drone_zigzag_mirrored` | 6 | 1 | ≈24.49 | [V5](../formations/v5.md) | Drone | zigzag · mirrored · 점유 폭 기준 VisibleRect 반사 |
 | `drone_spread_formation` | 12 | 1 | ≈17.32 | [Horizontal](../formations/horizontal.md) | [산탄 드론](../enemies/drone.md#변종-enemiesvariants)×5 | 대각 유지 (`formation_drone_diagonal`) |
 | `drone_slow_zigzag` | 10 | 2 | ≈18.97 | [V5](../formations/v5.md) | [느린탄 드론](../enemies/drone.md#변종-enemiesvariants)×5 | zigzag · mirrored |
 | `drone_halt_formation` | 14 | 2 | ≈16.04 | [Horizontal](../formations/horizontal.md) | [정지탄 드론](../enemies/drone.md#변종-enemiesvariants)×5 | 대각 유지 |
