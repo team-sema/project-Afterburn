@@ -4,29 +4,130 @@
 [ext_resource type="Script" uid="uid://ccvva2lwj2nr3" path="res://resources/encounter_sequences/encounter_sequence_step.gd" id="2_step_script"]
 [ext_resource type="Script" uid="uid://d3271fkn4umf1" path="res://resources/encounter_sequences/encounter_sequence_phase.gd" id="3_phase_script"]
 [ext_resource type="Resource" uid="uid://bx6mvihopc5mq" path="res://resources/encounters/pools/main_encounter_pool.tres" id="4_main_pool"]
-[ext_resource type="Script" uid="uid://c6t14vfypdxop" path="res://resources/encounters/encounter_preset.gd" id="5_1p4mw"]
-[ext_resource type="Resource" path="res://resources/encounter_sequences/waves/drone_swarm_wave.tres" id="5_drone_swarm_wave"]
+[ext_resource type="Script" uid="uid://c6t14vfypdxop" path="res://resources/encounters/encounter_preset.gd" id="5_n4aof"]
+[ext_resource type="Script" uid="uid://l7bpelqan01w" path="res://resources/encounter_sequences/encounter_wave.gd" id="5_wave_script"]
 [ext_resource type="Resource" uid="uid://desaf2xju88rc" path="res://resources/encounters/presets/boss_wall.tres" id="6_boss_wall"]
+[ext_resource type="Resource" path="res://resources/encounter_sequences/waves/lesson_aim_a.tres" id="w_lesson_aim_a"]
+[ext_resource type="Resource" path="res://resources/encounter_sequences/waves/lesson_aim_b.tres" id="w_lesson_aim_b"]
+[ext_resource type="Resource" path="res://resources/encounter_sequences/waves/lesson_body_a.tres" id="w_lesson_body_a"]
+[ext_resource type="Resource" path="res://resources/encounter_sequences/waves/lesson_body_b.tres" id="w_lesson_body_b"]
+[ext_resource type="Resource" path="res://resources/encounter_sequences/waves/lesson_core_a.tres" id="w_lesson_core_a"]
+[ext_resource type="Resource" path="res://resources/encounter_sequences/waves/lesson_core_b.tres" id="w_lesson_core_b"]
+[ext_resource type="Resource" path="res://resources/encounter_sequences/waves/lesson_dive_a.tres" id="w_lesson_dive_a"]
+[ext_resource type="Resource" path="res://resources/encounter_sequences/waves/lesson_dive_b.tres" id="w_lesson_dive_b"]
+[ext_resource type="Resource" path="res://resources/encounter_sequences/waves/lesson_guard_a.tres" id="w_lesson_guard_a"]
+[ext_resource type="Resource" path="res://resources/encounter_sequences/waves/lesson_guard_b.tres" id="w_lesson_guard_b"]
+[ext_resource type="Resource" path="res://resources/encounter_sequences/waves/lesson_lane_a.tres" id="w_lesson_lane_a"]
+[ext_resource type="Resource" path="res://resources/encounter_sequences/waves/lesson_lane_b.tres" id="w_lesson_lane_b"]
+[ext_resource type="Resource" path="res://resources/encounter_sequences/waves/lesson_side_a.tres" id="w_lesson_side_a"]
+[ext_resource type="Resource" path="res://resources/encounter_sequences/waves/lesson_side_b.tres" id="w_lesson_side_b"]
+[ext_resource type="Resource" path="res://resources/encounter_sequences/waves/lesson_space_a.tres" id="w_lesson_space_a"]
+[ext_resource type="Resource" path="res://resources/encounter_sequences/waves/lesson_space_b.tres" id="w_lesson_space_b"]
 
-[sub_resource type="Resource" id="Resource_phase_main"]
+[sub_resource type="Resource" id="Resource_phase_lesson_1"]
 script = ExtResource("3_phase_script")
-phase_id = &"main"
-pattern = "a a a a b a a a b a a a c a a a a b a a a a d"
+phase_id = &"lesson_1"
+pattern = "L a H a W a c"
+
+[sub_resource type="Resource" id="Resource_phase_lesson_2"]
+script = ExtResource("3_phase_script")
+phase_id = &"lesson_2"
+pattern = "S a B a G a a c"
+
+[sub_resource type="Resource" id="Resource_phase_lesson_3"]
+script = ExtResource("3_phase_script")
+phase_id = &"lesson_3"
+pattern = "F a D a a a c d"
+
+[sub_resource type="Resource" id="Resource_phase_mix"]
+script = ExtResource("3_phase_script")
+phase_id = &"mix"
+pattern = "a a S a a F a a c a a B a a G a a D a a d"
 
 [sub_resource type="Resource" id="Resource_step_a"]
 script = ExtResource("2_step_script")
 token = &"a"
 encounter_pool = ExtResource("4_main_pool")
 
-[sub_resource type="Resource" id="Resource_step_b"]
+[sub_resource type="Resource" id="Resource_step_L"]
 script = ExtResource("2_step_script")
-token = &"b"
+token = &"L"
 kind = 1
-post_delay_min = 5.0
-post_delay_max = 5.5
-wave = ExtResource("5_drone_swarm_wave")
+post_delay_min = 3.0
+post_delay_max = 3.4
+waves = Array[ExtResource("5_wave_script")]([ExtResource("w_lesson_aim_a"), ExtResource("w_lesson_aim_b")])
+clear_timeout = 6.0
+clear_min_wait = 3.0
+
+[sub_resource type="Resource" id="Resource_step_H"]
+script = ExtResource("2_step_script")
+token = &"H"
+kind = 1
+post_delay_min = 3.0
+post_delay_max = 3.4
+waves = Array[ExtResource("5_wave_script")]([ExtResource("w_lesson_core_a"), ExtResource("w_lesson_core_b")])
+clear_timeout = 6.0
+clear_min_wait = 3.0
+
+[sub_resource type="Resource" id="Resource_step_W"]
+script = ExtResource("2_step_script")
+token = &"W"
+kind = 1
+post_delay_min = 3.0
+post_delay_max = 3.4
+waves = Array[ExtResource("5_wave_script")]([ExtResource("w_lesson_body_a"), ExtResource("w_lesson_body_b")])
+clear_timeout = 6.0
+clear_min_wait = 3.0
+
+[sub_resource type="Resource" id="Resource_step_S"]
+script = ExtResource("2_step_script")
+token = &"S"
+kind = 1
+post_delay_min = 3.0
+post_delay_max = 3.4
+waves = Array[ExtResource("5_wave_script")]([ExtResource("w_lesson_side_a"), ExtResource("w_lesson_side_b")])
 clear_timeout = 6.0
 clear_min_wait = 2.5
+
+[sub_resource type="Resource" id="Resource_step_B"]
+script = ExtResource("2_step_script")
+token = &"B"
+kind = 1
+post_delay_min = 3.0
+post_delay_max = 3.4
+waves = Array[ExtResource("5_wave_script")]([ExtResource("w_lesson_space_a"), ExtResource("w_lesson_space_b")])
+clear_timeout = 6.0
+clear_min_wait = 2.5
+
+[sub_resource type="Resource" id="Resource_step_G"]
+script = ExtResource("2_step_script")
+token = &"G"
+kind = 1
+post_delay_min = 3.0
+post_delay_max = 3.4
+waves = Array[ExtResource("5_wave_script")]([ExtResource("w_lesson_guard_a"), ExtResource("w_lesson_guard_b")])
+clear_timeout = 6.0
+clear_min_wait = 2.5
+
+[sub_resource type="Resource" id="Resource_step_F"]
+script = ExtResource("2_step_script")
+token = &"F"
+kind = 1
+post_delay_min = 3.0
+post_delay_max = 3.4
+waves = Array[ExtResource("5_wave_script")]([ExtResource("w_lesson_lane_a"), ExtResource("w_lesson_lane_b")])
+clear_timeout = 6.0
+clear_min_wait = 2.0
+
+[sub_resource type="Resource" id="Resource_step_D"]
+script = ExtResource("2_step_script")
+token = &"D"
+kind = 1
+post_delay_min = 3.0
+post_delay_max = 3.4
+waves = Array[ExtResource("5_wave_script")]([ExtResource("w_lesson_dive_a"), ExtResource("w_lesson_dive_b")])
+clear_timeout = 6.0
+clear_min_wait = 2.0
 
 [sub_resource type="Resource" id="Resource_step_c"]
 script = ExtResource("2_step_script")
@@ -42,5 +143,5 @@ boss_preset = ExtResource("6_boss_wall")
 [resource]
 script = ExtResource("1_sequence_script")
 sequence_id = &"main_encounter_sequence"
-shared_steps = Array[ExtResource("2_step_script")]([SubResource("Resource_step_a"), SubResource("Resource_step_b"), SubResource("Resource_step_c"), SubResource("Resource_step_d")])
-phases = Array[ExtResource("3_phase_script")]([SubResource("Resource_phase_main")])
+shared_steps = Array[ExtResource("2_step_script")]([SubResource("Resource_step_a"), SubResource("Resource_step_L"), SubResource("Resource_step_H"), SubResource("Resource_step_W"), SubResource("Resource_step_S"), SubResource("Resource_step_B"), SubResource("Resource_step_G"), SubResource("Resource_step_F"), SubResource("Resource_step_D"), SubResource("Resource_step_c"), SubResource("Resource_step_d")])
+phases = Array[ExtResource("3_phase_script")]([SubResource("Resource_phase_lesson_1"), SubResource("Resource_phase_lesson_2"), SubResource("Resource_phase_lesson_3"), SubResource("Resource_phase_mix")])

@@ -21,7 +21,7 @@ enemies/<type>     +  formations/<layout>  +  MovementSequence
 |--------|------|
 | Preset | `resources/encounters/presets/<id>.tres` |
 | Pool | `resources/encounters/pools/main_encounter_pool.tres` |
-| 시퀀스 | `resources/encounter_sequences/main_encounter_sequence.tres` · `waves/<id>.tres` |
+| 시퀀스 | `resources/encounter_sequences/main_encounter_sequence.tres` · 구절 `waves/lesson_*.tres` |
 | 스크립트 | `EncounterPreset` · `EncounterMember` · `EncounterPoolEntry` · `EncounterSequence` · `EncounterSequencePhase` · `EncounterSequenceStep` · `EncounterWave` |
 
 ## Preset이 담는 것

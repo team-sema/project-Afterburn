@@ -1,0 +1,11 @@
+; 구절(교재) WAVE. 규칙: docs/design/run-pacing.md 「구절 작곡」.
+[gd_resource type="Resource" script_class="EncounterWave" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/encounter_sequences/encounter_wave.gd" id="1_wave_script"]
+
+[resource]
+script = ExtResource("1_wave_script")
+wave_id = &"lesson_lane_a"
+encounter_preset_paths = PackedStringArray("res://resources/encounters/presets/caster_single.tres", "res://resources/encounters/presets/v7_drone_down.tres", "res://resources/encounters/presets/x9_caster_drone_orbit.tres")
+interval_min = 2.8
+interval_max = 3.0

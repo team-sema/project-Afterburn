@@ -33,6 +33,9 @@ enum Kind {
 
 @export_group("Wave")
 @export var wave: EncounterWave
+## 대안 구절. 비어 있지 않으면 `wave` 대신 이 중 하나를 균등 랜덤으로 고른다
+## (직전에 재생한 wave_id 회피). 같은 교훈을 다른 편대로 가르칠 때 쓴다.
+@export var waves: Array[EncounterWave] = []
 
 @export_group("Gate")
 ## ELITE: 비우면 ThreatEliteController의 사격/돌격 교대 규칙.
@@ -53,6 +56,43 @@ func roll_post_delay(random_number_generator: RandomNumberGenerator = null) -> f
 	if random_number_generator != null:
 		return random_number_generator.randf_range(post_delay_min, post_delay_max)
 	return randf_range(post_delay_min, post_delay_max)
+
+
+## WAVE 후보 전체 (`waves`가 있으면 그것, 없으면 `wave` 하나).
+func get_waves() -> Array[EncounterWave]:
+	var out: Array[EncounterWave] = []
+	if not waves.is_empty():
+		for candidate in waves:
+			if candidate != null:
+				out.append(candidate)
+	elif wave != null:
+		out.append(wave)
+	return out
+
+
+## 이번에 재생할 wave. 후보가 여럿이면 `avoid_wave_id`를 뺀 나머지에서 균등 랜덤.
+func pick_wave(
+	random_number_generator: RandomNumberGenerator = null,
+	avoid_wave_id: StringName = &"",
+) -> EncounterWave:
+	var candidates := get_waves()
+	if candidates.is_empty():
+		return null
+	if candidates.size() > 1 and avoid_wave_id != &"":
+		var filtered: Array[EncounterWave] = []
+		for candidate in candidates:
+			if candidate.wave_id != avoid_wave_id:
+				filtered.append(candidate)
+		if not filtered.is_empty():
+			candidates = filtered
+	if candidates.size() == 1:
+		return candidates[0]
+	var index := (
+		random_number_generator.randi_range(0, candidates.size() - 1)
+		if random_number_generator != null
+		else randi_range(0, candidates.size() - 1)
+	)
+	return candidates[index]
 
 
 func get_gate_preset() -> EncounterPreset:
@@ -86,10 +126,16 @@ func get_validation_errors() -> PackedStringArray:
 			if encounter_presets.is_empty() and encounter_pool != null and not encounter_pool.validate():
 				errors.append("NORMAL encounter_pool is invalid.")
 		Kind.WAVE:
-			if wave == null:
-				errors.append("WAVE step requires an EncounterWave.")
-			elif not wave.validate():
+			if wave == null and waves.is_empty():
+				errors.append("WAVE step requires an EncounterWave (wave or waves).")
+			if wave != null and not wave.validate():
 				errors.append("WAVE step EncounterWave is invalid.")
+			for index in waves.size():
+				var candidate := waves[index]
+				if candidate == null:
+					errors.append("WAVE waves[%d] is null." % index)
+				elif not candidate.validate():
+					errors.append("WAVE waves[%d] ('%s') is invalid." % [index, candidate.wave_id])
 		Kind.ELITE:
 			_append_gate_preset_errors(errors, elite_preset, "ELITE elite_preset")
 		Kind.BOSS:
