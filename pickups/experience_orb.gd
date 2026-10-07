@@ -21,6 +21,10 @@ const EXPERIENCE_COLLECTOR_LAYER := 1 << 4
 @export_range(1.0, 1000.0, 1.0) var attraction_acceleration := 480.0
 @export_range(1.0, 1000.0, 1.0) var maximum_attraction_speed := 190.0
 @export_range(0.5, 20.0, 0.5) var collection_distance := 3.0
+## Forced attraction (bullet-cancel reward) reaches the collector within this
+## budget whatever the distance, chasing a moving ship. Speed never drops below
+## maximum_attraction_speed, so nearby orbs arrive sooner.
+@export_range(0.05, 5.0, 0.05) var forced_arrival_time := 0.6
 
 var experience_amount := 1
 var _age := 0.0
@@ -28,6 +32,8 @@ var _state := CollectionState.DRIFTING
 var _collector: Area2D
 var _attraction_speed := 0.0
 var _knockback_tween: Tween
+var _is_forced := false
+var _forced_time_left := 0.0
 
 
 func _ready() -> void:
@@ -57,9 +63,20 @@ func start_forced_attraction(collector: Node) -> bool:
 		_knockback_tween.kill()
 	_collector = area
 	_attraction_speed = maximum_attraction_speed
+	_is_forced = true
+	_forced_time_left = forced_arrival_time
 	_state = CollectionState.ATTRACTING
-	process_mode = Node.PROCESS_MODE_ALWAYS
 	return true
+
+
+## Collects at once, skipping the flight. Used when the reward hits its cap.
+func collect_now() -> bool:
+	if _state == CollectionState.COLLECTED or not is_inside_tree():
+		return false
+	if _knockback_tween != null and _knockback_tween.is_valid():
+		_knockback_tween.kill()
+	_collect()
+	return _state == CollectionState.COLLECTED
 
 
 func _process(delta: float) -> void:
@@ -82,14 +99,24 @@ func _process_drift(delta: float) -> void:
 func _process_attraction(delta: float) -> void:
 	if not is_instance_valid(_collector):
 		_collector = null
+		_is_forced = false
 		_state = CollectionState.DRIFTING
-		process_mode = Node.PROCESS_MODE_PAUSABLE
 		return
-	_attraction_speed = move_toward(
-		_attraction_speed,
-		maximum_attraction_speed,
-		attraction_acceleration * delta,
-	)
+	if _is_forced:
+		# Constant speed over the remaining budget lands on a still collector
+		# exactly at the deadline; recomputing each frame follows a moving one.
+		_forced_time_left = maxf(_forced_time_left - delta, 0.0)
+		var distance := global_position.distance_to(_collector.global_position)
+		_attraction_speed = maxf(
+			maximum_attraction_speed,
+			distance / maxf(_forced_time_left, delta),
+		)
+	else:
+		_attraction_speed = move_toward(
+			_attraction_speed,
+			maximum_attraction_speed,
+			attraction_acceleration * delta,
+		)
 	global_position = global_position.move_toward(
 		_collector.global_position,
 		_attraction_speed * delta,

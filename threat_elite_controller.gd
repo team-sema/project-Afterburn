@@ -111,13 +111,17 @@ func _on_active_elite_defeated() -> void:
 	var completed_threat := active_threat_level
 	active_elite = null
 	active_threat_level = 0
+	# The reward runs without pausing the tree: the ship, remaining enemies and
+	# their fire keep going while the converted XP flies in. Only player augment
+	# input stays locked until the enemy offer opens.
 	progression.set_bullet_cancel_reward_active(true)
-	get_tree().paused = true
 	await bullet_cancel_reward.collect_projectiles_and_vacuum()
+	if not bullet_cancel_reward.has_live_collector():
+		# The ship died during the vacuum; the run is ending, so no offer.
+		progression.set_bullet_cancel_reward_active(false)
+		return
 	var milestone_completed := progression.complete_elite_milestone(completed_threat)
 	progression.set_bullet_cancel_reward_active(false)
-	if not milestone_completed:
-		get_tree().paused = false
 	assert(milestone_completed, "Elite defeat must complete the active Threat milestone.")
 	elite_defeated.emit(completed_threat)
 
