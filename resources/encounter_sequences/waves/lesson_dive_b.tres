@@ -1,15 +1,15 @@
-[gd_resource type="Resource" script_class="EncounterWave" load_steps=6 format=3 uid="uid://c1ip1i31ldiia"]
+[gd_resource type="Resource" script_class="EncounterWave" format=3 uid="uid://c1ip1i31ldiia"]
 
 [ext_resource type="Script" uid="uid://l7bpelqan01w" path="res://resources/encounter_sequences/encounter_wave.gd" id="1_wave_script"]
 [ext_resource type="Resource" uid="uid://c8yrdr6de8wry" path="res://resources/encounters/presets/v7_drone_down.tres" id="2_v7_drone_down"]
 [ext_resource type="Resource" uid="uid://dnjmmfljget1v" path="res://resources/encounters/presets/drone_halt_formation.tres" id="3_drone_halt_formation"]
 [ext_resource type="Resource" uid="uid://dhfkqigg4j6d0" path="res://resources/encounters/presets/x9_drone_down.tres" id="4_x9_drone_down"]
-
 [ext_resource type="Script" uid="uid://c6t14vfypdxop" path="res://resources/encounters/encounter_preset.gd" id="9_preset_script"]
 
 [resource]
 script = ExtResource("1_wave_script")
 wave_id = &"lesson_dive_b"
 encounter_presets = Array[ExtResource("9_preset_script")]([ExtResource("2_v7_drone_down"), ExtResource("3_drone_halt_formation"), ExtResource("4_x9_drone_down")])
-interval_min = 2.8
-interval_max = 3.0
+interval_min = 0.8
+interval_max = 2.4
+handoff_remaining = 2

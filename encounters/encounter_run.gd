@@ -26,6 +26,20 @@ func get_active_enemy_count() -> int:
 	return _active_enemy_ids.size()
 
 
+## True once every slot of the formation has spawned. Until then the active
+## count undercounts the formation and must not drive a handoff.
+func are_member_spawns_finished() -> bool:
+	return _member_spawns_finished
+
+
+## Handoff test for EncounterDirector: the formation is fully spawned and at most
+## `remaining` of its enemies are still in the tree.
+func is_handoff_ready(remaining: int) -> bool:
+	if _completed:
+		return true
+	return _member_spawns_finished and _active_enemy_ids.size() <= remaining
+
+
 func _attach(formation_controller: FormationController) -> void:
 	assert(formation_controller != null, "EncounterRun requires a FormationController.")
 	controller = formation_controller

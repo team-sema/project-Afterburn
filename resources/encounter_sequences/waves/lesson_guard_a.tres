@@ -1,14 +1,13 @@
-[gd_resource type="Resource" script_class="EncounterWave" load_steps=5 format=3 uid="uid://htgo7e2yxdh5"]
+[gd_resource type="Resource" script_class="EncounterWave" format=3 uid="uid://htgo7e2yxdh5"]
 
 [ext_resource type="Script" uid="uid://l7bpelqan01w" path="res://resources/encounter_sequences/encounter_wave.gd" id="1_wave_script"]
 [ext_resource type="Resource" uid="uid://epk72gmbe4fp" path="res://resources/encounters/presets/tanker_guard_sniper.tres" id="2_tanker_guard_sniper"]
 [ext_resource type="Resource" uid="uid://ds28cw5vyu43o" path="res://resources/encounters/presets/interceptor_pair.tres" id="3_interceptor_pair"]
-
 [ext_resource type="Script" uid="uid://c6t14vfypdxop" path="res://resources/encounters/encounter_preset.gd" id="9_preset_script"]
 
 [resource]
 script = ExtResource("1_wave_script")
 wave_id = &"lesson_guard_a"
 encounter_presets = Array[ExtResource("9_preset_script")]([ExtResource("2_tanker_guard_sniper"), ExtResource("3_interceptor_pair"), ExtResource("2_tanker_guard_sniper")])
-interval_min = 3.0
-interval_max = 3.3
+interval_max = 2.6
+handoff_remaining = 2

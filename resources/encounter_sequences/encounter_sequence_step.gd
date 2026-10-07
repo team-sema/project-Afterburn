@@ -20,16 +20,24 @@ enum Kind {
 @export var kind := Kind.NORMAL
 
 @export_group("Timing")
-## 다음 스텝까지 대기(초). 매번 [min, max] 균등 랜덤.
+## 다음 스텝까지 대기(초). `handoff_remaining` 0이면 매번 [min, max] 균등 랜덤.
+## 1 이상이면 min = 바닥 · max = 천장인 인계 규칙 (run-pacing.md 「등장 시퀀스」).
 ## 기준 시각: NORMAL/WAVE = (마지막) 스폰 직후 · ELITE/BOSS = 관문 종료 후.
 @export_range(0.0, 120.0, 0.05, "suffix:s") var post_delay_min := 2.8
 @export_range(0.0, 120.0, 0.05, "suffix:s") var post_delay_max := 3.1
+## 인계: 1 이상이면 이 스텝이 낸 편대들의 살아 있는 적 합계가 이 수 이하로
+## 줄면 post_delay_min만 채우고 바로 다음 스텝. WAVE/관문의 `wait_for_clear`
+## 판정에도 같은 값을 쓴다 (잔존 ≤ 이 수 = 클리어). 0이면 인계 없음 · 전원 클리어.
+@export_range(0, 32, 1) var handoff_remaining := 0
 
 @export_group("Normal")
 ## 고정 후보. 1개면 그것만, 여러 개면 균등 랜덤. Threat min 무시.
 @export var encounter_presets: Array[EncounterPreset] = []
 ## presets가 비었을 때만 사용. 예전 타이머 스폰과 같은 Threat 가중 풀.
 @export var encounter_pool: EncounterPool
+## 한 스텝에서 내는 편대 수. 2 이상이면 `encounter_gap` 간격으로 겹쳐 낸다.
+@export_range(1, 4, 1) var encounter_count := 1
+@export_range(0.0, 30.0, 0.05, "suffix:s") var encounter_gap := 1.2
 
 @export_group("Wave")
 @export var wave: EncounterWave
@@ -48,6 +56,10 @@ enum Kind {
 @export_range(0.0, 120.0, 0.05, "suffix:s") var clear_timeout := 0.0
 ## wait_for_clear 대기 시작부터 최소 이 초는 쉰 뒤 WARNING/관문으로 간다 (빨리 클리어해도 호흡 유지).
 @export_range(0.0, 120.0, 0.05, "suffix:s") var clear_min_wait := 0.0
+
+
+func uses_handoff() -> bool:
+	return handoff_remaining > 0
 
 
 func roll_post_delay(random_number_generator: RandomNumberGenerator = null) -> float:
@@ -113,10 +125,16 @@ func get_validation_errors() -> PackedStringArray:
 		errors.append("clear_timeout cannot be negative.")
 	if clear_min_wait < 0.0:
 		errors.append("clear_min_wait cannot be negative.")
+	if handoff_remaining < 0:
+		errors.append("handoff_remaining cannot be negative.")
 	match kind:
 		Kind.NORMAL:
 			if encounter_presets.is_empty() and encounter_pool == null:
 				errors.append("NORMAL step requires encounter_presets or an encounter_pool.")
+			if encounter_count < 1:
+				errors.append("NORMAL encounter_count must be at least 1.")
+			if encounter_gap < 0.0:
+				errors.append("NORMAL encounter_gap cannot be negative.")
 			for index in encounter_presets.size():
 				var preset := encounter_presets[index]
 				if preset == null:

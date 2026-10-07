@@ -12,9 +12,17 @@ extends Resource
 @export var encounter_presets: Array[EncounterPreset] = []
 ## 호환용 폴백. `encounter_presets`가 비었을 때만 경로를 읽는다.
 @export var encounter_preset_paths: PackedStringArray = []
-## 편대와 편대 사이 대기(초), [min, max] 랜덤.
+## 편대와 편대 사이 대기(초). `handoff_remaining` 0이면 [min, max] 랜덤,
+## 1 이상이면 min = 바닥 · max = 천장인 인계 규칙 (run-pacing.md 「등장 시퀀스」).
 @export_range(0.0, 30.0, 0.05, "suffix:s") var interval_min := 1.0
 @export_range(0.0, 30.0, 0.05, "suffix:s") var interval_max := 1.0
+## 1 이상이면 이 wave가 지금까지 낸 편대의 살아 있는 적 합계가 이 수 이하로
+## 줄어든 순간(단, interval_min 이후) 다음 편대를 낸다. 0이면 인계 없음.
+@export_range(0, 32, 1) var handoff_remaining := 0
+
+
+func uses_handoff() -> bool:
+	return handoff_remaining > 0
 
 
 func get_encounter_presets() -> Array[EncounterPreset]:
@@ -73,6 +81,8 @@ func get_validation_errors() -> PackedStringArray:
 		errors.append("interval_min cannot be negative.")
 	if interval_max < interval_min:
 		errors.append("interval_max must be >= interval_min.")
+	if handoff_remaining < 0:
+		errors.append("handoff_remaining cannot be negative.")
 	return errors
 
 
