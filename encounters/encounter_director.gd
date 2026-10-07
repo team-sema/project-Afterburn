@@ -37,8 +37,8 @@ signal sequence_completed(sequence_id: StringName)
 @export var autostart := true
 ## 0 randomizes; any other value makes delays and picks reproducible.
 @export var random_seed := 0
-## Center-screen blink before WAVE / ELITE / BOSS. 0 skips (tests).
-@export_range(0.0, 3.0, 0.05, "suffix:s") var step_warning_duration := 0.8
+## Center-screen gate warning before ELITE / BOSS (WAVE has none). 0 skips (tests).
+@export_range(0.0, 3.0, 0.05, "suffix:s") var step_warning_duration := 1.6
 
 var is_running := false
 var current_phase_id: StringName
@@ -50,6 +50,8 @@ var current_step_index := 0
 var current_step_count := 0
 var _random_number_generator := RandomNumberGenerator.new()
 var _active_runs: Array[EncounterRun] = []
+## Runs spawned by the step currently executing; drives its post-delay handoff.
+var _step_runs: Array[EncounterRun] = []
 var _last_normal_encounter_id: StringName
 var _last_wave_id: StringName
 var _stop_requested := false
@@ -160,15 +162,13 @@ func _await_process_frame() -> void:
 
 func _run_step(step: EncounterSequenceStep) -> void:
 	current_token = step.token
+	_step_runs = []
 	step_started.emit(step.token, step.kind)
 	match step.kind:
 		EncounterSequenceStep.Kind.NORMAL:
-			_spawn_normal(step)
+			await _spawn_normal(step)
 		EncounterSequenceStep.Kind.WAVE:
 			await _wait_for_clear_gated(step)
-			if not _can_continue():
-				return
-			await _play_step_warning(step.kind)
 			if not _can_continue():
 				return
 			await _spawn_wave(step)
@@ -178,7 +178,15 @@ func _run_step(step: EncounterSequenceStep) -> void:
 				return
 	if not _can_continue():
 		return
-	await _wait_seconds(step.roll_post_delay(_random_number_generator))
+	if step.uses_handoff():
+		await _wait_handoff(
+			step.post_delay_min,
+			step.post_delay_max,
+			_step_runs,
+			step.handoff_remaining,
+		)
+	else:
+		await _wait_seconds(step.roll_post_delay(_random_number_generator))
 
 
 func _play_step_warning(kind: EncounterSequenceStep.Kind) -> void:
@@ -192,11 +200,16 @@ func _play_step_warning(kind: EncounterSequenceStep.Kind) -> void:
 
 
 func _spawn_normal(step: EncounterSequenceStep) -> void:
-	var preset := _pick_normal_preset(step)
-	if preset == null:
-		push_warning("EncounterDirector: step '%s' found no eligible encounter." % step.token)
-		return
-	_spawn_preset(preset, step.token)
+	for index in maxi(1, step.encounter_count):
+		if index > 0:
+			await _wait_seconds(step.encounter_gap)
+			if not _can_continue():
+				return
+		var preset := _pick_normal_preset(step)
+		if preset == null:
+			push_warning("EncounterDirector: step '%s' found no eligible encounter." % step.token)
+			return
+		_spawn_preset(preset, step.token)
 
 
 func _pick_normal_preset(step: EncounterSequenceStep) -> EncounterPreset:
@@ -218,24 +231,37 @@ func _spawn_wave(step: EncounterSequenceStep) -> void:
 		return
 	_last_wave_id = wave.wave_id
 	var presets := wave.get_encounter_presets()
+	var wave_runs: Array[EncounterRun] = []
 	for index in presets.size():
 		if not _can_continue():
 			return
 		if index > 0:
-			await _wait_seconds(wave.roll_interval(_random_number_generator))
+			if wave.uses_handoff():
+				await _wait_handoff(
+					wave.interval_min,
+					wave.interval_max,
+					wave_runs,
+					wave.handoff_remaining,
+				)
+			else:
+				await _wait_seconds(wave.roll_interval(_random_number_generator))
 			if not _can_continue():
 				return
-		_spawn_preset(presets[index], step.token)
+		var run := _spawn_preset(presets[index], step.token)
+		if run != null:
+			wave_runs.append(run)
 
 
-func _spawn_preset(preset: EncounterPreset, token: StringName) -> void:
+func _spawn_preset(preset: EncounterPreset, token: StringName) -> EncounterRun:
 	var run := enemy_generator.call("spawn_preset_tracked", preset) as EncounterRun
 	if run == null:
 		push_warning("EncounterDirector: '%s' failed to spawn %s." % [token, preset.encounter_id])
-		return
+		return null
 	_last_normal_encounter_id = preset.encounter_id
 	_track_run(run)
+	_step_runs.append(run)
 	encounter_spawned.emit(run, token)
+	return run
 
 
 func _track_run(run: EncounterRun) -> void:
@@ -276,7 +302,7 @@ func _run_gate(step: EncounterSequenceStep) -> bool:
 func _wait_for_clear_gated(step: EncounterSequenceStep) -> void:
 	if not step.wait_for_clear:
 		return
-	var elapsed: float = await _wait_for_clear_or_timeout(step.clear_timeout)
+	var elapsed: float = await _wait_for_clear_or_timeout(step.clear_timeout, step.handoff_remaining)
 	if not _can_continue():
 		return
 	var remaining := step.clear_min_wait - elapsed
@@ -290,12 +316,14 @@ func _wait_for_clear() -> void:
 
 ## Returns gameplay seconds spent waiting. Frames where this node cannot process
 ## (tree paused for augment pick / bullet cancel) do not count, so clear_min_wait
-## keeps its full breathing room after a pause.
-func _wait_for_clear_or_timeout(timeout: float) -> float:
+## keeps its full breathing room after a pause. "Clear" means every tracked
+## formation has spawned and at most `remaining` enemies are left across them
+## (0 = everything gone).
+func _wait_for_clear_or_timeout(timeout: float, remaining := 0) -> float:
 	var elapsed := 0.0
 	if timeout > 0.0:
 		_wait_timer.start(timeout)
-	while _can_continue() and not _active_runs.is_empty():
+	while _can_continue() and not _runs_handed_off(_active_runs, remaining):
 		if timeout > 0.0 and _wait_timer.is_stopped():
 			return elapsed
 		await _await_process_frame()
@@ -311,3 +339,42 @@ func _wait_seconds(duration: float) -> void:
 		return
 	_wait_timer.start(duration)
 	await _wait_timer.timeout
+
+
+## Handoff wait (run-pacing.md 「등장 시퀀스」): always rest `floor_seconds`, then
+## continue as soon as `runs` are down to `remaining` enemies in total, or when
+## `ceiling_seconds` have elapsed since the start. Gameplay time, like the rest.
+func _wait_handoff(
+	floor_seconds: float,
+	ceiling_seconds: float,
+	runs: Array[EncounterRun],
+	remaining: int,
+) -> void:
+	await _wait_seconds(floor_seconds)
+	if not _can_continue():
+		return
+	var budget := ceiling_seconds - floor_seconds
+	if budget <= 0.0 or _runs_handed_off(runs, remaining):
+		return
+	_wait_timer.start(budget)
+	while _can_continue() and not _wait_timer.is_stopped():
+		await _await_process_frame()
+		if _runs_handed_off(runs, remaining):
+			if _wait_timer != null and is_instance_valid(_wait_timer):
+				_wait_timer.stop()
+			return
+
+
+## True when every run has finished spawning and the live enemies across all of
+## them number `remaining` or fewer. Completed runs count as zero.
+func _runs_handed_off(runs: Array[EncounterRun], remaining: int) -> bool:
+	var live := 0
+	for run in runs:
+		if run == null or run.is_completed():
+			continue
+		if not run.are_member_spawns_finished():
+			return false
+		live += run.get_active_enemy_count()
+		if live > remaining:
+			return false
+	return true

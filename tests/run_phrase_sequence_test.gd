@@ -44,14 +44,25 @@ func _run() -> void:
 			_expect(step != null, "%s: token %s resolves" % [phase.phase_id, token])
 			if step == null:
 				continue
+			if step.kind == EncounterSequenceStep.Kind.NORMAL:
+				_expect(step.handoff_remaining == 2, "%s: filler %s hands off at 2 remaining" % [phase.phase_id, token])
+				if token == "A":
+					_expect(step.encounter_count == 2, "%s: A overlaps two formations" % phase.phase_id)
+					_expect(phase_index >= 1, "overlapping pairs start in phase 2")
+				continue
 			if step.kind != EncounterSequenceStep.Kind.WAVE:
 				continue
 			lessons_in_order.append(token)
+			_expect(step.handoff_remaining == 2, "%s: lesson %s hands off at 2 remaining" % [phase.phase_id, token])
 			var waves := step.get_waves()
 			_expect(waves.size() == 2, "%s: lesson %s offers two alternative waves" % [phase.phase_id, token])
 			for wave in waves:
 				seen_waves[wave.wave_id] = true
 				_expect(wave.validate(), "wave %s validates" % wave.wave_id)
+				_expect(
+					wave.handoff_remaining == 2 and wave.interval_min < wave.interval_max,
+					"wave %s uses a floor~ceiling handoff interval" % wave.wave_id,
+				)
 				var presets := wave.get_encounter_presets()
 				_expect(presets.size() == 3, "wave %s is a three-formation phrase" % wave.wave_id)
 				for preset in presets:

@@ -18,20 +18,28 @@
 무엇이 언제 나오는지는 **데이터 시퀀스** `resources/encounter_sequences/main_encounter_sequence.tres` 가 정한다. `gameplay.tscn`의 `EncounterDirector`가 런 시작과 함께 재생하며, 그 순간 `EnemyGenerator` 타이머와 `AugmentProgressionController` 60초 엘리트 타이머를 **꺼서 대체**한다 (테스트처럼 Director가 시작하지 않으면 두 타이머는 예전 그대로 동작).
 
 - **Phase**: 공백으로 나눈 토큰 패턴 (`"a a a b a a c"`) + `repeat_count`. 순서대로 실행.
-- **Step(토큰)**: 종류 `NORMAL` / `WAVE` / `ELITE` / `BOSS` + `post_delay_min~max`. 시퀀스 공용(`shared_steps`) 또는 Phase 로컬(`steps`, 같은 토큰이면 우선).
-- **다음 스텝까지 간격**: 매 스텝 `[post_delay_min, post_delay_max]` 균등 랜덤. 기준 시점 — NORMAL: 스폰 순간 · WAVE: 마지막 편대 스폰 순간 · ELITE/BOSS: 게이트가 닫힌 순간. NORMAL끼리·WAVE 종료 후는 앞 스텝 적이 살아 있어도 기다리지 않는다.
+- **Step(토큰)**: 종류 `NORMAL` / `WAVE` / `ELITE` / `BOSS` + `post_delay_min~max` + `handoff_remaining`. 시퀀스 공용(`shared_steps`) 또는 Phase 로컬(`steps`, 같은 토큰이면 우선).
+- **다음 스텝까지 간격 (인계)**: 기준 시점 — NORMAL: 마지막 스폰 순간 · WAVE: 마지막 편대 스폰 순간 · ELITE/BOSS: 게이트가 닫힌 순간. `handoff_remaining` ≥ 1이면 **인계 규칙**: `post_delay_min`은 반드시 쉬고, 그 뒤로는 이 스텝이 낸 편대들의 살아 있는 적 합계가 `handoff_remaining` 이하로 줄어드는 순간 바로 다음 스텝으로 간다. 그래도 안 줄면 `post_delay_max`에 간다. 즉 min은 바닥, max는 천장이며 화면이 비기 전에 다음 편대가 들어온다. `handoff_remaining` 0이면 옛 방식대로 `[min, max]` 균등 랜덤이고 적 수를 보지 않는다 (게이트 토큰은 이쪽).
 - 마지막 Phase가 끝나면 `on_complete` — `REPEAT_LAST_PHASE`(기본) 또는 `STOP`.
 
 | 종류 | 무엇을 | 후보 선택 |
 |---|---|---|
-| `NORMAL` | 편대 1개 | `encounter_presets` 지정 시 균등 랜덤(직전 id 회피, **Threat 무시**) · 비었으면 `encounter_pool.choose(현재 Threat)` (weight·min_threat·직전 2 id 제외 그대로) |
-| `WAVE` | `EncounterWave` 의 `encounter_presets`(프리셋 참조 배열, 정본)를 **순서대로**, 편대 사이 `interval_min~max` 랜덤. 옛 `encounter_preset_paths` 경로 목록은 비어 있지 않은 쪽만 폴백으로 읽는다 | `waves`(대안 목록)가 있으면 그중 균등 랜덤(직전에 재생한 wave 회피), 없으면 `wave` 하나 |
+| `NORMAL` | 편대 `encounter_count`개 (기본 1). 2 이상이면 `encounter_gap`초 간격으로 연달아 내어 겹친다 | `encounter_presets` 지정 시 균등 랜덤(직전 id 회피, **Threat 무시**) · 비었으면 `encounter_pool.choose(현재 Threat)` (weight·min_threat·직전 2 id 제외 그대로) |
+| `WAVE` | `EncounterWave` 의 `encounter_presets`(프리셋 참조 배열, 정본)를 **순서대로**. 편대 사이는 wave의 `handoff_remaining`이 1 이상이면 인계 규칙(`interval_min` 바닥 · 이 wave가 지금까지 낸 편대의 잔존 합계 ≤ `handoff_remaining`이면 즉시 · `interval_max` 천장), 0이면 `interval_min~max` 랜덤. 옛 `encounter_preset_paths` 경로 목록은 비어 있지 않은 쪽만 폴백으로 읽는다 | `waves`(대안 목록)가 있으면 그중 균등 랜덤(직전에 재생한 wave 회피), 없으면 `wave` 하나 |
 | `ELITE` | 아래 엘리트 게이트를 연다 | `elite_preset` 지정 시 그 preset, 비우면 엘리트 로테이션 |
-| `BOSS` | 엘리트 게이트와 같은 흐름 + `is_boss` (엘리트 HP 공식 미적용) | `boss_preset` 비어 있으면 경고 후 **건너뜀** |
+| `BOSS` | 엘리트 게이트와 같은 흐름 + `is_boss` (엘리트 HP 공식 미적용) | `boss_preset` 비어 있으면 경고 없이 **건너뜀** |
 
-`WAVE`/`ELITE`/`BOSS`는 `wait_for_clear`(기본 true)면 WARNING·게이트 전에 Director가 추적 중인 편대가 비울 때까지 기다린다. `clear_timeout` > 0이면 **클리어 또는 타임아웃 중 먼저** 온 쪽으로 진행하고, `clear_min_wait`가 있으면 그 대기 시작부터 최소 그 초만큼은 쉰 뒤 진행한다 (빨리 클리어해도 WAVE 호흡을 남김). `clear_timeout` 0은 클리어만 본다(무한 대기). 대기 시간은 게임플레이 시간(프로세스 델타)으로 계산하므로 오그먼트 선택·탄소거 등 트리 일시정지 동안은 흐르지 않는다.
+`WAVE`/`ELITE`/`BOSS`는 `wait_for_clear`(기본 true)면 스폰·게이트 전에 Director가 추적 중인 편대의 잔존 합계가 스텝의 `handoff_remaining` 이하가 될 때까지 기다린다 (0이면 전원 클리어). `clear_timeout` > 0이면 **클리어 또는 타임아웃 중 먼저** 온 쪽으로 진행하고, `clear_min_wait`가 있으면 그 대기 시작부터 최소 그 초만큼은 쉰 뒤 진행한다 (빨리 클리어해도 WAVE 호흡을 남김). `clear_timeout` 0은 클리어만 본다(무한 대기). 대기 시간은 게임플레이 시간(프로세스 델타)으로 계산하므로 오그먼트 선택·탄소거 등 트리 일시정지 동안은 흐르지 않는다.
 
-WAVE·ELITE·BOSS 스텝은 스폰/게이트 직전에 맵 중앙에 `WARNING` 텍스트가 점멸한다 (NORMAL은 없음).
+### 관문 경고 (`EncounterStepWarning`)
+
+ELITE·BOSS 게이트 직전에만 `step_warning_duration`(기본 **1.6초**) 동안 맵 중앙에 관문 경고가 뜬다. WAVE는 경고 없이 바로 들어온다 (구절은 흐름의 일부이지 사건이 아니다). 경고의 목적은 "큰 것이 온다"를 한 번에 읽히게 하는 것이다.
+
+- 종류별 문구·색: ELITE `ELITE INBOUND` 주황빨강 · BOSS `BOSS INBOUND` 자홍. 아래 작은 글자 `CLEAR THE LANE`.
+- 화면 폭 전체의 반투명 검은 띠(높이 56px)가 중앙에서 좌우로 0.25초에 펼쳐지고, 띠 위아래로 사선 해저드 스트라이프가 흐른다. 화면 테두리도 같은 색으로 맥동한다.
+- 밝기는 초당 2.5회 맥동하고 마지막 0.3초에 사라진다.
+- `sounds/warning_sound.wav`(2음 클락슨, SFX 버스)를 경고 시작에 1회 재생한다.
+- Interceptor 가장자리 화살표(`EntryWarningComponent`)는 별개이며 그대로다.
 
 ## 구절 작곡 (현재 기본 시퀀스)
 
@@ -39,19 +47,21 @@ WAVE·ELITE·BOSS 스텝은 스폰/게이트 직전에 맵 중앙에 `WARNING` �
 
 1. **한 구절에 새 것 하나.** 구절마다 가르치는 회피 기술이 하나이고, 그 기술은 적 기획서의 「플레이어가 고민할 점」에서 온다.
 2. **같은 교훈, 다른 교재.** 구절마다 대안 wave를 둘 두고(`waves`) 런마다 하나를 뽑는다. 순서는 달라도 배우는 기술의 순서는 같다.
-3. **구절은 긴장 → 해소.** WAVE 뒤에 `clear_min_wait`로 숨을 주고, 구절 사이에는 풀 추첨 `a`를 하나 이상 둬 두 구절이 붙지 않게 한다.
+3. **구절은 긴장 → 해소.** WAVE 뒤에 `clear_min_wait`로 짧은 숨을 주고, 구절 사이에는 풀 추첨 `a`/`A`를 하나 이상 둬 두 구절이 붙지 않게 한다.
 4. **랜덤의 폭은 단계별로.** 교습 Phase는 "대안 둘 중 하나", 혼합 Phase는 풀 전체다. 후반은 카오스를 허용한다.
+5. **화면은 비지 않는다.** 편대 사이·스텝 사이 간격은 전부 인계 규칙(`handoff_remaining` 2)이다. 앞 편대가 2기 이하로 줄면 바닥 시간만 채우고 다음 편대가 들어온다. 잘 지울수록 빨라지고, 못 지우면 천장에서 들어온다. 간격 수치는 그래서 "바닥 ~ 천장"이다.
 
 **토큰**
 
-| 토큰 | 종류 | 내용 | post_delay · clear |
+| 토큰 | 종류 | 내용 | post_delay(바닥 ~ 천장) · clear |
 |---|---|---|---|
-| `a` | NORMAL | `MainEncounterPool` 랜덤 (Threat 가중) | 2.8 ~ 3.1초 |
-| `L` `H` `W` `S` `B` `G` `F` `D` | WAVE | 아래 구절. 각 토큰은 대안 wave A/B 중 하나 | 3.0 ~ 3.4초 · clear_timeout 6.0 · clear_min_wait Phase 1 3.0 / 2 2.5 / 3 2.0 |
-| `c` | ELITE | 엘리트 로테이션 · wait_for_clear (timeout 없음) | 2.8 ~ 3.1초 |
-| `d` | BOSS | `boss_wall` | 2.8 ~ 3.1초 |
+| `a` | NORMAL | `MainEncounterPool` 랜덤 (Threat 가중) 1편대 | 1.6 ~ 3.0초 · handoff 2 |
+| `A` | NORMAL | 같은 풀에서 **2편대**를 1.2초 간격으로 겹쳐 냄 (Phase 2+) | 1.6 ~ 3.0초 · handoff 2 |
+| `L` `H` `W` `S` `B` `G` `F` `D` | WAVE | 아래 구절. 각 토큰은 대안 wave A/B 중 하나 | 1.5 ~ 3.0초 · handoff 2 · clear_timeout 6.0 · clear_min_wait Phase 1 1.2 / 2 1.0 / 3 0.8 |
+| `c` | ELITE | 엘리트 로테이션 · wait_for_clear (timeout 없음, 전원 클리어) | 2.8 ~ 3.1초 랜덤 (handoff 0) |
+| `d` | BOSS | `boss_wall` | 2.8 ~ 3.1초 랜덤 (handoff 0) |
 
-**구절** (`resources/encounter_sequences/waves/lesson_*.tres`, 프리셋 참조 배열로 저장. 편대 간격은 Phase 1 3.5~4.0초 · 2 3.0~3.3초 · 3 2.8~3.0초)
+**구절** (`resources/encounter_sequences/waves/lesson_*.tres`, 프리셋 참조 배열로 저장. 편대 간격은 인계 규칙(handoff 2)으로 바닥 ~ 천장: Phase 1 1.2 ~ 3.0초 · 2 1.0 ~ 2.6초 · 3 0.8 ~ 2.4초)
 
 | 토큰 | 교훈 | 교재 A | 교재 B |
 |---|---|---|---|
@@ -71,9 +81,9 @@ WAVE·ELITE·BOSS 스텝은 스폰/게이트 직전에 맵 중앙에 `WARNING` �
 | Phase | 시작 Threat | 패턴 | 의도 |
 |---|---|---|---|
 | `lesson_1` 교습 | 1 | `L a H a W a c` | 모든 런이 같은 세 교훈으로 시작. 첫 엘리트(Fighter) |
-| `lesson_2` 압박 | 2 | `S a B a G a a c` | 측면·공간·가드. 복습 2개. 둘째 엘리트(Awl) |
-| `lesson_3` 장판 | 3 | `F a D a a a c d` | 통로·하강. 복습 3개. 엘리트 → 보스 |
-| `mix` 혼합 (반복) | 4+ | `a a S a a F a a c a a B a a G a a D a a d` | 배운 구절을 풀 추첨 사이에 섞음. `REPEAT_LAST_PHASE` |
+| `lesson_2` 압박 | 2 | `S A B A G A a c` | 측면·공간·가드. 풀 추첨은 2편대 겹침 `A`. 둘째 엘리트(Awl) |
+| `lesson_3` 장판 | 3 | `F A D A a A c d` | 통로·하강. 복습 3슬롯. 엘리트 → 보스 |
+| `mix` 혼합 (반복) | 4+ | `A a S A a F A a c A a B A a G A a D A a d` | 배운 구절을 풀 추첨(겹침 2 + 단독 1) 사이에 섞음. `REPEAT_LAST_PHASE` |
 
 Phase가 바뀔 때마다 HUD의 STAGE가 +1 된다. 개발자는 `.tres`의 패턴 문자열·토큰·wave 목록만 고쳐 시나리오를 바꾼다. 현행 규칙·완료 조건은 이 문서를 따른다.
 
@@ -122,8 +132,11 @@ Phase가 바뀔 때마다 HUD의 STAGE가 +1 된다. 개발자는 `.tres`의 패
 - 엘리트 전투 중 일반 Encounter 생성이 멈추고 기존 일반 적은 유지된다.
 - 처치 보상 정산 후 Threat 상승·적 오퍼·다음 구간 순서가 지켜진다.
 - 엘리트·오퍼 중 다음 관문 시간이 누적되지 않는다.
-- WAVE는 WARNING 전에 선행 편대 클리어(또는 `clear_timeout`)와 `clear_min_wait` 호흡을 거친다.
+- WAVE는 스폰 전에 선행 편대 클리어(잔존 ≤ `handoff_remaining`, 또는 `clear_timeout`)와 `clear_min_wait` 호흡을 거친다. WAVE에는 중앙 경고가 뜨지 않는다.
 - 클리어 대기 중 일시정지된 시간은 `clear_min_wait`에서 차감되지 않는다.
+- 인계 규칙: 스텝·편대 간격은 바닥 시간 전에는 절대 다음으로 가지 않고, 바닥 뒤 잔존 합계가 `handoff_remaining` 이하이면 즉시, 아니면 천장에서 간다. 멤버 스폰이 끝나지 않은 편대는 잔존을 세지 않고 인계 조건에서 제외한다. `handoff_remaining` 0은 옛 랜덤 대기와 같다.
+- `A` 토큰은 풀에서 2편대를 `encounter_gap` 간격으로 내고, 두 편대 모두를 인계 집계에 넣는다.
+- ELITE·BOSS 게이트만 `EncounterStepWarning`을 띄우며, 종류별 문구·색과 SFX가 붙고 `step_warning_duration` 뒤 스스로 사라진다.
 - 교습 Phase 1~3은 구절 → 풀 추첨 → 구절 순서를 지키고 두 구절이 붙지 않으며, 각 구절은 대안 wave 둘 중 하나를 재생한다. 구절 편대는 그 Phase의 Threat에서 쓸 수 있는 것만 쓴다.
 
 검증 참고: `tests/run_phrase_sequence_test.gd` · `tests/threat_elite_progression_smoke_test.gd` · `tests/encounter_sequence_smoke_test.gd`. Godot 실행은 `tools/run-godot.cmd`를 사용한다.

@@ -1,15 +1,15 @@
-[gd_resource type="Resource" script_class="EncounterWave" load_steps=6 format=3 uid="uid://cn5d4ohytqqac"]
+[gd_resource type="Resource" script_class="EncounterWave" format=3 uid="uid://cn5d4ohytqqac"]
 
 [ext_resource type="Script" uid="uid://l7bpelqan01w" path="res://resources/encounter_sequences/encounter_wave.gd" id="1_wave_script"]
 [ext_resource type="Resource" uid="uid://dyru17mhjp7x4" path="res://resources/encounters/presets/striker_drone_diamond_5.tres" id="2_striker_drone_diamond_5"]
 [ext_resource type="Resource" uid="uid://cdsjfx2pulnaa" path="res://resources/encounters/presets/drone_zigzag_mirrored.tres" id="3_drone_zigzag_mirrored"]
 [ext_resource type="Resource" uid="uid://c4axu4brwnlic" path="res://resources/encounters/presets/striker_drone_diamond_13.tres" id="4_striker_drone_diamond_13"]
-
 [ext_resource type="Script" uid="uid://c6t14vfypdxop" path="res://resources/encounters/encounter_preset.gd" id="9_preset_script"]
 
 [resource]
 script = ExtResource("1_wave_script")
 wave_id = &"lesson_core_a"
 encounter_presets = Array[ExtResource("9_preset_script")]([ExtResource("2_striker_drone_diamond_5"), ExtResource("3_drone_zigzag_mirrored"), ExtResource("4_striker_drone_diamond_13")])
-interval_min = 3.5
-interval_max = 4.0
+interval_min = 1.2
+interval_max = 3.0
+handoff_remaining = 2

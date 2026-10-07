@@ -35,7 +35,17 @@ class FakeGenerator:
 	func complete_all_runs() -> void:
 		for run in runs:
 			run.set("_member_spawns_finished", true)
+			run.set("_active_enemy_ids", {})
 			run.call("_try_complete")
+
+	## Pretend the run's formation has spawned `alive` enemies that are still in the tree.
+	func set_alive(run: EncounterRun, alive: int, spawns_finished := true) -> void:
+		var ids := {}
+		for index in alive:
+			ids[index + 1] = true
+		run.set("_active_enemy_ids", ids)
+		run.set("_member_spawns_finished", spawns_finished)
+		run.call("_try_complete")
 
 
 class FakeProgression:
@@ -79,6 +89,9 @@ func _run() -> void:
 	await _test_pause_keeps_clear_min_wait()
 	await _test_leaves_tree_during_wait()
 	await _test_delay_and_boss_skip()
+	await _test_normal_handoff()
+	await _test_normal_pair_and_wave_handoff()
+	await _test_gate_warning_only()
 	await _test_gameplay_wiring()
 
 	if failures.is_empty():
@@ -94,7 +107,7 @@ func _test_resources() -> void:
 	var main_sequence := load(MAIN_SEQUENCE_PATH) as EncounterSequence
 	_expect(main_sequence != null and main_sequence.validate(), "main_encounter_sequence.tres validates")
 	if main_sequence != null:
-		_expect(main_sequence.shared_steps.size() == 11, "main sequence defines a + 8 lesson tokens + c/d")
+		_expect(main_sequence.shared_steps.size() == 12, "main sequence defines a/A + 8 lesson tokens + c/d")
 		_expect(main_sequence.phases.size() == 4, "main sequence has three lesson phases and a mix phase")
 		var lesson_phase := main_sequence.phases[0]
 		_expect(lesson_phase.get_tokens() == PackedStringArray(["L", "a", "H", "a", "W", "a", "c"]), "phase 1 teaches aim, core and body before the first elite")
@@ -108,8 +121,26 @@ func _test_resources() -> void:
 		)
 		var step_a := main_sequence.resolve_step(lesson_phase, &"a")
 		_expect(
-			step_a != null and is_equal_approx(step_a.post_delay_min, 2.8) and is_equal_approx(step_a.post_delay_max, 3.1),
-			"token a keeps the 2.8~3.1s timer feel",
+			step_a != null
+			and is_equal_approx(step_a.post_delay_min, 1.6)
+			and is_equal_approx(step_a.post_delay_max, 3.0)
+			and step_a.handoff_remaining == 2
+			and step_a.encounter_count == 1,
+			"token a hands off at 2 remaining between a 1.6s floor and 3.0s ceiling",
+		)
+		var mix_phase_for_a := main_sequence.phases[1]
+		var step_big_a := main_sequence.resolve_step(mix_phase_for_a, &"A")
+		_expect(
+			step_big_a != null
+			and step_big_a.kind == EncounterSequenceStep.Kind.NORMAL
+			and step_big_a.encounter_count == 2
+			and is_equal_approx(step_big_a.encounter_gap, 1.2)
+			and step_big_a.handoff_remaining == 2,
+			"token A overlaps two pool formations 1.2s apart",
+		)
+		_expect(
+			not lesson_phase.get_tokens().has("A") and mix_phase_for_a.get_tokens().has("A"),
+			"phase 1 keeps single fillers, phase 2 starts overlapping pairs",
 		)
 		var step_l := main_sequence.resolve_step(lesson_phase, &"L")
 		_expect(
@@ -120,11 +151,21 @@ func _test_resources() -> void:
 			step_l != null
 			and step_l.wait_for_clear
 			and is_equal_approx(step_l.clear_timeout, 6.0)
-			and is_equal_approx(step_l.clear_min_wait, 3.0)
-			and is_equal_approx(step_l.post_delay_min, 3.0)
-			and is_equal_approx(step_l.post_delay_max, 3.4),
-			"lesson phrases wait for clear with a 3s breath in phase 1",
+			and is_equal_approx(step_l.clear_min_wait, 1.2)
+			and is_equal_approx(step_l.post_delay_min, 1.5)
+			and is_equal_approx(step_l.post_delay_max, 3.0)
+			and step_l.handoff_remaining == 2,
+			"lesson phrases wait for clear with a 1.2s breath in phase 1 and hand off at 2",
 		)
+		for wave in step_l.get_waves():
+			_expect(
+				wave.handoff_remaining == 2
+				and is_equal_approx(wave.interval_min, 1.2)
+				and is_equal_approx(wave.interval_max, 3.0),
+				"phase 1 lesson waves hand off between 1.2s and 3.0s",
+			)
+		var gate_step := main_sequence.resolve_step(lesson_phase, &"c")
+		_expect(gate_step != null and gate_step.handoff_remaining == 0, "gates keep the random post delay and full clear")
 		var swarm := load("res://resources/encounter_sequences/waves/drone_swarm_wave.tres") as EncounterWave
 		_expect(
 			swarm != null and swarm.encounter_preset_paths.size() == 3
@@ -187,13 +228,19 @@ func _test_resources() -> void:
 
 	var warning_host := Node2D.new()
 	root.add_child(warning_host)
-	var warning := EncounterStepWarning.present(warning_host, EncounterSequenceStep.Kind.WAVE, 0.05)
-	_expect(warning.get_parent() == warning_host, "step warning attaches under the gameplay host")
+	var warning := EncounterStepWarning.present(warning_host, EncounterSequenceStep.Kind.ELITE, 0.05)
+	_expect(warning.get_parent() == warning_host, "gate warning attaches under the gameplay host")
+	_expect(warning.get_headline() == "ELITE INBOUND", "elite gate warning names the elite")
+	_expect(warning.get_child_count() == 1 and warning.get_child(0) is AudioStreamPlayer, "gate warning plays its klaxon")
+	var boss_warning := EncounterStepWarning.present(warning_host, EncounterSequenceStep.Kind.BOSS, 0.05)
+	_expect(boss_warning.get_headline() == "BOSS INBOUND", "boss gate warning names the boss")
+	_expect(boss_warning.get_accent_color() != warning.get_accent_color(), "boss and elite warnings use different colors")
 	await warning.finished
 	await process_frame
-	_expect(not is_instance_valid(warning), "step warning frees itself after the blink")
+	_expect(not is_instance_valid(warning), "gate warning frees itself after the blink")
 	warning_host.queue_free()
 	await process_frame
+	_expect(ResourceLoader.exists("res://sounds/warning_sound.wav"), "warning klaxon wav is imported")
 
 
 func _make_director(
@@ -475,6 +522,178 @@ func _test_delay_and_boss_skip() -> void:
 	await create_timer(0.3).timeout
 	_expect(generator.spawned_ids.size() == 2, "second a spawns after the rolled post_delay")
 
+	host.queue_free()
+	await process_frame
+
+
+func _test_normal_handoff() -> void:
+	var drone := load(DRONE_PRESET_PATH) as EncounterPreset
+	var zigzag := load(ZIGZAG_PRESET_PATH) as EncounterPreset
+	var step_a := _normal_step(&"a", [drone, zigzag])
+	step_a.post_delay_min = 0.1
+	step_a.post_delay_max = 0.6
+	step_a.handoff_remaining = 2
+	var sequence := EncounterSequence.new()
+	sequence.sequence_id = &"handoff"
+	sequence.on_complete = EncounterSequence.OnComplete.STOP
+	sequence.shared_steps = [step_a]
+	var phase := EncounterSequencePhase.new()
+	phase.phase_id = &"handoff"
+	phase.pattern = "a a a"
+	sequence.phases = [phase]
+	_expect(sequence.validate(), "handoff test sequence validates")
+
+	var parts := _make_director(sequence)
+	var host: Node = parts[0]
+	var director: EncounterDirector = parts[1]
+	var generator: FakeGenerator = parts[2]
+	director.start_sequence()
+	await process_frame
+	_expect(generator.spawned_ids.size() == 1, "first a spawns at once")
+	# Formation still spawning: never hands off, even with zero tracked enemies.
+	generator.set_alive(generator.runs[0], 0, false)
+	await create_timer(0.2).timeout
+	_expect(generator.spawned_ids.size() == 1, "floor passed but an unfinished formation blocks the handoff")
+	generator.set_alive(generator.runs[0], 5)
+	await create_timer(0.1).timeout
+	_expect(generator.spawned_ids.size() == 1, "five live enemies keep the next step waiting")
+	generator.set_alive(generator.runs[0], 2)
+	await process_frame
+	await process_frame
+	_expect(generator.spawned_ids.size() == 2, "dropping to the handoff count spawns the next step before the ceiling")
+	# Second run: keep it crowded so the ceiling (0.6s) has to fire.
+	generator.set_alive(generator.runs[1], 5)
+	await create_timer(0.35).timeout
+	_expect(generator.spawned_ids.size() == 2, "crowded field holds until the ceiling")
+	await create_timer(0.4).timeout
+	_expect(generator.spawned_ids.size() == 3, "ceiling spawns the third step regardless of live enemies")
+
+	host.queue_free()
+	await process_frame
+
+
+func _test_normal_pair_and_wave_handoff() -> void:
+	var drone := load(DRONE_PRESET_PATH) as EncounterPreset
+	var zigzag := load(ZIGZAG_PRESET_PATH) as EncounterPreset
+	var pair_step := _normal_step(&"A", [drone, zigzag])
+	pair_step.encounter_count = 2
+	pair_step.encounter_gap = 0.05
+	var wave := EncounterWave.new()
+	wave.wave_id = &"handoff_wave"
+	wave.encounter_presets = [drone, zigzag, drone]
+	wave.interval_min = 0.05
+	wave.interval_max = 0.5
+	wave.handoff_remaining = 2
+	var step_b := EncounterSequenceStep.new()
+	step_b.token = &"b"
+	step_b.kind = EncounterSequenceStep.Kind.WAVE
+	step_b.wave = wave
+	step_b.post_delay_min = 0.0
+	step_b.post_delay_max = 0.0
+	step_b.wait_for_clear = true
+	step_b.clear_timeout = 2.0
+	step_b.clear_min_wait = 0.0
+	step_b.handoff_remaining = 2
+	var sequence := EncounterSequence.new()
+	sequence.sequence_id = &"pair_wave"
+	sequence.on_complete = EncounterSequence.OnComplete.STOP
+	sequence.shared_steps = [pair_step, step_b]
+	var phase := EncounterSequencePhase.new()
+	phase.phase_id = &"pair_wave"
+	phase.pattern = "A b"
+	sequence.phases = [phase]
+	_expect(sequence.validate(), "pair/wave handoff sequence validates")
+
+	var parts := _make_director(sequence)
+	var host: Node = parts[0]
+	var director: EncounterDirector = parts[1]
+	var generator: FakeGenerator = parts[2]
+	director.start_sequence()
+	await process_frame
+	_expect(generator.spawned_ids.size() == 1, "A spawns its first formation at once")
+	await create_timer(0.1).timeout
+	_expect(generator.spawned_ids.size() == 2, "A spawns its second formation after encounter_gap")
+	_expect(generator.spawned_ids[0] != generator.spawned_ids[1], "overlapping pair avoids repeating the formation")
+	_expect(director.get_active_encounter_count() == 2, "both pair formations are tracked")
+	# WAVE clear wait treats 'remaining <= handoff_remaining' as clear: 3 across two runs blocks, 2 passes.
+	generator.set_alive(generator.runs[0], 2)
+	generator.set_alive(generator.runs[1], 1)
+	await create_timer(0.1).timeout
+	_expect(generator.spawned_ids.size() == 2, "three stragglers across the pair still hold the WAVE")
+	generator.set_alive(generator.runs[1], 0)
+	await process_frame
+	await process_frame
+	_expect(generator.spawned_ids.size() == 3, "two stragglers count as clear for a handoff-2 WAVE")
+	# Inside the wave: the first formation is crowded, so the second waits past the floor...
+	generator.set_alive(generator.runs[2], 5)
+	await create_timer(0.15).timeout
+	_expect(generator.spawned_ids.size() == 3, "wave holds its next formation while five enemies live")
+	generator.set_alive(generator.runs[2], 2)
+	await process_frame
+	await process_frame
+	_expect(generator.spawned_ids.size() == 4, "wave hands off to its next formation at two remaining")
+	# ...and the ceiling still fires when nothing dies.
+	generator.set_alive(generator.runs[3], 6)
+	await create_timer(0.3).timeout
+	_expect(generator.spawned_ids.size() == 4, "wave ceiling not reached yet")
+	await create_timer(0.35).timeout
+	_expect(generator.spawned_ids.size() == 5, "wave ceiling spawns the last formation")
+
+	host.queue_free()
+	await process_frame
+
+
+func _test_gate_warning_only() -> void:
+	var drone := load(DRONE_PRESET_PATH) as EncounterPreset
+	var awl_elite := load(AWL_ELITE_PRESET_PATH) as EncounterPreset
+	var wave := EncounterWave.new()
+	wave.wave_id = &"solo"
+	wave.encounter_presets = [drone]
+	wave.interval_min = 0.0
+	wave.interval_max = 0.0
+	var step_b := EncounterSequenceStep.new()
+	step_b.token = &"b"
+	step_b.kind = EncounterSequenceStep.Kind.WAVE
+	step_b.wave = wave
+	step_b.post_delay_min = 0.0
+	step_b.post_delay_max = 0.0
+	step_b.wait_for_clear = false
+	var step_c := EncounterSequenceStep.new()
+	step_c.token = &"c"
+	step_c.kind = EncounterSequenceStep.Kind.ELITE
+	step_c.elite_preset = awl_elite
+	step_c.wait_for_clear = false
+	step_c.post_delay_min = 0.0
+	step_c.post_delay_max = 0.0
+	var sequence := EncounterSequence.new()
+	sequence.sequence_id = &"gate_warning"
+	sequence.on_complete = EncounterSequence.OnComplete.STOP
+	sequence.shared_steps = [step_b, step_c]
+	var phase := EncounterSequencePhase.new()
+	phase.phase_id = &"gate_warning"
+	phase.pattern = "b c"
+	sequence.phases = [phase]
+
+	var parts := _make_director(sequence)
+	var host: Node = parts[0]
+	var director: EncounterDirector = parts[1]
+	var generator: FakeGenerator = parts[2]
+	var progression: FakeProgression = parts[3]
+	director.step_warning_duration = 0.1
+	director.start_sequence()
+	await process_frame
+	_expect(generator.spawned_ids.size() == 1, "WAVE spawns immediately without a warning")
+	var warnings := 0
+	for child in host.get_children():
+		if child is EncounterStepWarning:
+			warnings += 1
+			_expect((child as EncounterStepWarning).kind == EncounterSequenceStep.Kind.ELITE, "the only warning belongs to the elite gate")
+	_expect(warnings == 1, "exactly one warning is showing for the gate")
+	_expect(progression.requests == 0, "gate opens only after the warning")
+	await create_timer(0.2).timeout
+	_expect(progression.requests == 1, "gate opens once the warning finishes")
+	progression.close_gate()
+	await process_frame
 	host.queue_free()
 	await process_frame
 
