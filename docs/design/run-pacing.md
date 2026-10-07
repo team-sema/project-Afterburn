@@ -25,7 +25,7 @@
 | 종류 | 무엇을 | 후보 선택 |
 |---|---|---|
 | `NORMAL` | 편대 1개 | `encounter_presets` 지정 시 균등 랜덤(직전 id 회피, **Threat 무시**) · 비었으면 `encounter_pool.choose(현재 Threat)` (weight·min_threat·직전 2 id 제외 그대로) |
-| `WAVE` | `EncounterWave` 의 `encounter_preset_paths`를 **순서대로**, 편대 사이 `interval_min~max` 랜덤 | 고정 순서 |
+| `WAVE` | `EncounterWave` 의 `encounter_preset_paths`를 **순서대로**, 편대 사이 `interval_min~max` 랜덤 | `waves`(대안 목록)가 있으면 그중 균등 랜덤(직전에 재생한 wave 회피), 없으면 `wave` 하나 |
 | `ELITE` | 아래 엘리트 게이트를 연다 | `elite_preset` 지정 시 그 preset, 비우면 엘리트 로테이션 |
 | `BOSS` | 엘리트 게이트와 같은 흐름 + `is_boss` (엘리트 HP 공식 미적용) | `boss_preset` 비어 있으면 경고 후 **건너뜀** |
 
@@ -33,19 +33,49 @@
 
 WAVE·ELITE·BOSS 스텝은 스폰/게이트 직전에 맵 중앙에 `WARNING` 텍스트가 점멸한다 (NORMAL은 없음).
 
-**현재 기본 시퀀스**
+## 구절 작곡 (현재 기본 시퀀스)
+
+등장은 **구절**(편대 3개짜리 WAVE) 단위로 쓴다. 원칙은 네 가지다.
+
+1. **한 구절에 새 것 하나.** 구절마다 가르치는 회피 기술이 하나이고, 그 기술은 적 기획서의 「플레이어가 고민할 점」에서 온다.
+2. **같은 교훈, 다른 교재.** 구절마다 대안 wave를 둘 두고(`waves`) 런마다 하나를 뽑는다. 순서는 달라도 배우는 기술의 순서는 같다.
+3. **구절은 긴장 → 해소.** WAVE 뒤에 `clear_min_wait`로 숨을 주고, 구절 사이에는 풀 추첨 `a`를 하나 이상 둬 두 구절이 붙지 않게 한다.
+4. **랜덤의 폭은 단계별로.** 교습 Phase는 "대안 둘 중 하나", 혼합 Phase는 풀 전체다. 후반은 카오스를 허용한다.
+
+**토큰**
 
 | 토큰 | 종류 | 내용 | post_delay · clear |
 |---|---|---|---|
-| `a` | NORMAL | `MainEncounterPool` 랜덤 | 2.8 ~ 3.1초 |
-| `b` | WAVE | `drone_swarm_wave`: 드론 편대 3연속 (straight → triangle → zigzag), 편대 간격 0.55~0.7초 | 5.0 ~ 5.5초 · clear_timeout 6.0 · clear_min_wait 2.5 |
+| `a` | NORMAL | `MainEncounterPool` 랜덤 (Threat 가중) | 2.8 ~ 3.1초 |
+| `L` `H` `W` `S` `B` `G` `F` `D` | WAVE | 아래 구절. 각 토큰은 대안 wave A/B 중 하나 | 3.0 ~ 3.4초 · clear_timeout 6.0 · clear_min_wait Phase 1 3.0 / 2 2.5 / 3 2.0 |
 | `c` | ELITE | 엘리트 로테이션 · wait_for_clear (timeout 없음) | 2.8 ~ 3.1초 |
-| `d` | BOSS | `boss_wall` (거대 벽 + 출몰 포탑) | 2.8 ~ 3.1초 |
+| `d` | BOSS | `boss_wall` | 2.8 ~ 3.1초 |
 
-- Phase `main`: `a a a a b a a a b a a a c a a a a b a a a a d`
-- 끝나면 같은 Phase를 반복 (`REPEAT_LAST_PHASE`). Phase는 패턴을 담는 단위일 뿐, opening/loop 고정 구조가 아니다.
+**구절** (`resources/encounter_sequences/waves/lesson_*.tres`, 편대 간격은 Phase 1 3.5~4.0초 · 2 3.0~3.3초 · 3 2.8~3.0초)
 
-개발자는 `.tres`의 패턴 문자열·토큰 정의만 고쳐 시나리오를 바꾼다. 현행 규칙·완료 조건은 이 문서를 따른다.
+| 토큰 | 교훈 | 교재 A | 교재 B |
+|---|---|---|---|
+| `L` 조준탄 | 쏘면 비킨다 | drone_formation → triangle → zigzag | 산탄 드론 → drone_formation → 산탄 드론 |
+| `H` 핵 | 호위 뚫고 핵부터 칠지 | Striker 5 → zigzag_mirrored → Striker 13 | Striker 5 → 산탄 드론 → Striker 13 |
+| `W` 몸 | 차징 읽기와 탄 피하기의 차이 | Awl → zigzag_mirrored → Awl | Awl → drone_formation → Awl |
+| `S` 측면 | 가장자리 경고에 시선 옮기기 | Interceptor pair → drone_formation → pair | Interceptor pair → 산탄 드론 → pair |
+| `B` 공간 | 거리 관리 | Bomb diamond → Awl → Bomb diamond | Bomb diamond → 느린탄 드론 → Bomb diamond |
+| `G` 가드 | 조준선 피하기 + 앞 막은 적 뒤 노리기 | Tanker+Sniper → Interceptor pair → Tanker+Sniper | 정지탄 드론 → Tanker+Sniper → 정지탄 드론 |
+| `F` 통로 | 빈 통로 찾기 | Caster → V7 하강 → X9 orbit | 느린탄 드론 → Caster → X9 orbit |
+| `D` 하강 | 산개 예측 | X9 하강 → Interceptor trio → V7 하강 | V7 하강 → 정지탄 드론 → X9 하강 |
+
+구절 안의 편대는 그 Phase 시작 시점의 Threat에서 쓸 수 있는 것만 넣는다(Phase 1은 Threat 1 콘텐츠만). `tests/run_phrase_sequence_test.gd`가 이를 검사한다.
+
+**Phase**
+
+| Phase | 시작 Threat | 패턴 | 의도 |
+|---|---|---|---|
+| `lesson_1` 교습 | 1 | `L a H a W a c` | 모든 런이 같은 세 교훈으로 시작. 첫 엘리트(Fighter) |
+| `lesson_2` 압박 | 2 | `S a B a G a a c` | 측면·공간·가드. 복습 2개. 둘째 엘리트(Awl) |
+| `lesson_3` 장판 | 3 | `F a D a a a c d` | 통로·하강. 복습 3개. 엘리트 → 보스 |
+| `mix` 혼합 (반복) | 4+ | `a a S a a F a a c a a B a a G a a D a a d` | 배운 구절을 풀 추첨 사이에 섞음. `REPEAT_LAST_PHASE` |
+
+Phase가 바뀔 때마다 HUD의 STAGE가 +1 된다. 개발자는 `.tres`의 패턴 문자열·토큰·wave 목록만 고쳐 시나리오를 바꾼다. 현행 규칙·완료 조건은 이 문서를 따른다.
 
 ## 일반 Encounter 스폰 (타이머 — Director 미사용 시)
 
@@ -94,5 +124,6 @@ WAVE·ELITE·BOSS 스텝은 스폰/게이트 직전에 맵 중앙에 `WARNING` �
 - 엘리트·오퍼 중 다음 관문 시간이 누적되지 않는다.
 - WAVE는 WARNING 전에 선행 편대 클리어(또는 `clear_timeout`)와 `clear_min_wait` 호흡을 거친다.
 - 클리어 대기 중 일시정지된 시간은 `clear_min_wait`에서 차감되지 않는다.
+- 교습 Phase 1~3은 구절 → 풀 추첨 → 구절 순서를 지키고 두 구절이 붙지 않으며, 각 구절은 대안 wave 둘 중 하나를 재생한다. 구절 편대는 그 Phase의 Threat에서 쓸 수 있는 것만 쓴다.
 
-검증 참고: `tests/threat_elite_progression_smoke_test.gd` · `tests/encounter_sequence_smoke_test.gd`. Godot 실행은 `tools/run-godot.cmd`를 사용한다.
+검증 참고: `tests/run_phrase_sequence_test.gd` · `tests/threat_elite_progression_smoke_test.gd` · `tests/encounter_sequence_smoke_test.gd`. Godot 실행은 `tools/run-godot.cmd`를 사용한다.

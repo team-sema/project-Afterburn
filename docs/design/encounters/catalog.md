@@ -30,7 +30,7 @@ Threat 1 후보 합 weight ≈115.4 · Threat 2 ≈206.7 · Threat 3 ≈301.7.
 | Encounter | 비고 |
 |-----------|------|
 | `threat_elite_single` / `threat_elite_awl` | 시퀀스 ELITE 관문 (일반 풀과 분리) — [elite-fighter](../elites/elite-fighter.md) · [run-pacing](../run-pacing.md) |
-| `drone_triangle_formation` / `drone_zigzag_formation` | 메인 WAVE에서 사용. 일반 풀 미등록이어도 실제 전투 콘텐츠다 |
+| `drone_triangle_formation` / `drone_zigzag_formation` | 구절 `L` 교재 A(`lesson_aim_a`)에서 사용. 일반 풀 미등록이어도 실제 전투 콘텐츠다 — [런 페이싱 · 구절 작곡](../run-pacing.md#구절-작곡-현재-기본-시퀀스) |
 | `sniper_reinforcement` | 탱커 생존 시 `tanker_guard_sniper` 대체 |
 | `elite_escort_drone_pair` | 적 증강 「엘리트 호위대」 선택 후 엘리트 관문마다 함께 스폰되는 Drone 2기 — [오그먼트](../augments.md#적-풀) |
 | `v3`/`v5`/`v9`/`inverted_*`/`x5_drone_down`, `striker_single`, `tanker_bomb_*` | 테스트·레거시 · **MainEncounterPool 미등록** |

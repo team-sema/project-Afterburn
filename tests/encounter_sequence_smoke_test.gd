@@ -94,42 +94,42 @@ func _test_resources() -> void:
 	var main_sequence := load(MAIN_SEQUENCE_PATH) as EncounterSequence
 	_expect(main_sequence != null and main_sequence.validate(), "main_encounter_sequence.tres validates")
 	if main_sequence != null:
-		_expect(main_sequence.shared_steps.size() == 4, "main sequence defines a/b/c/d")
-		_expect(main_sequence.phases.size() == 1, "main sequence has one repeating phase")
-		var main_phase := main_sequence.phases[0]
-		var tokens := main_phase.get_tokens()
-		_expect(tokens.size() == 23, "main pattern matches the authored a/b/c/d mix")
-		_expect(tokens.has("b") and tokens.has("c") and tokens.has("d"), "main pattern includes wave, elite, and boss tokens")
-		var step_c := main_sequence.resolve_step(main_phase, &"c")
+		_expect(main_sequence.shared_steps.size() == 11, "main sequence defines a + 8 lesson tokens + c/d")
+		_expect(main_sequence.phases.size() == 4, "main sequence has three lesson phases and a mix phase")
+		var lesson_phase := main_sequence.phases[0]
+		_expect(lesson_phase.get_tokens() == PackedStringArray(["L", "a", "H", "a", "W", "a", "c"]), "phase 1 teaches aim, core and body before the first elite")
+		var mix_phase := main_sequence.phases[3]
+		var mix_tokens := mix_phase.get_tokens()
+		_expect(mix_tokens.has("c") and mix_tokens.has("d") and mix_tokens.has("S") and mix_tokens.has("F"), "mix phase keeps elite, boss and lesson phrases")
+		var step_c := main_sequence.resolve_step(lesson_phase, &"c")
 		_expect(
 			step_c != null and step_c.kind == EncounterSequenceStep.Kind.ELITE and step_c.wait_for_clear,
 			"token c is an ELITE gate that waits for clear",
 		)
-		var step_a := main_sequence.resolve_step(main_phase, &"a")
+		var step_a := main_sequence.resolve_step(lesson_phase, &"a")
 		_expect(
 			step_a != null and is_equal_approx(step_a.post_delay_min, 2.8) and is_equal_approx(step_a.post_delay_max, 3.1),
 			"token a keeps the 2.8~3.1s timer feel",
 		)
-		var step_b := main_sequence.resolve_step(main_phase, &"b")
+		var step_l := main_sequence.resolve_step(lesson_phase, &"L")
 		_expect(
-			step_b != null and step_b.wave != null and step_b.wave.encounter_preset_paths.size() == 3,
-			"token b is a three-formation drone swarm wave",
+			step_l != null and step_l.kind == EncounterSequenceStep.Kind.WAVE and step_l.get_waves().size() == 2,
+			"token L is a WAVE with two alternative lesson waves",
 		)
 		_expect(
-			step_b != null
-			and step_b.wait_for_clear
-			and is_equal_approx(step_b.clear_timeout, 6.0)
-			and is_equal_approx(step_b.clear_min_wait, 2.5)
-			and is_equal_approx(step_b.post_delay_min, 5.0)
-			and is_equal_approx(step_b.post_delay_max, 5.5),
-			"token b waits for clear with timeout/min breath, then a longer post_delay before the next a",
+			step_l != null
+			and step_l.wait_for_clear
+			and is_equal_approx(step_l.clear_timeout, 6.0)
+			and is_equal_approx(step_l.clear_min_wait, 3.0)
+			and is_equal_approx(step_l.post_delay_min, 3.0)
+			and is_equal_approx(step_l.post_delay_max, 3.4),
+			"lesson phrases wait for clear with a 3s breath in phase 1",
 		)
+		var swarm := load("res://resources/encounter_sequences/waves/drone_swarm_wave.tres") as EncounterWave
 		_expect(
-			step_b != null
-			and step_b.wave != null
-			and is_equal_approx(step_b.wave.interval_min, 0.55)
-			and is_equal_approx(step_b.wave.interval_max, 0.7),
-			"drone swarm formations use the tighter 0.55~0.7s interval",
+			swarm != null and swarm.encounter_preset_paths.size() == 3
+			and is_equal_approx(swarm.interval_min, 0.55) and is_equal_approx(swarm.interval_max, 0.7),
+			"drone swarm wave resource keeps its tighter 0.55~0.7s interval",
 		)
 
 	var phase := EncounterSequencePhase.new()
@@ -147,6 +147,17 @@ func _test_resources() -> void:
 	wave_step.token = &"w"
 	wave_step.kind = EncounterSequenceStep.Kind.WAVE
 	_expect(not wave_step.validate(), "WAVE step without a wave is invalid")
+	var alt_a := load("res://resources/encounter_sequences/waves/lesson_aim_a.tres") as EncounterWave
+	var alt_b := load("res://resources/encounter_sequences/waves/lesson_aim_b.tres") as EncounterWave
+	wave_step.waves = [alt_a, alt_b]
+	_expect(wave_step.validate(), "WAVE step with alternative waves and no primary wave is valid")
+	var seeded := RandomNumberGenerator.new()
+	seeded.seed = 7
+	var picked_ids := {}
+	for _i in 40:
+		picked_ids[wave_step.pick_wave(seeded).wave_id] = true
+	_expect(picked_ids.size() == 2, "pick_wave draws from every alternative")
+	_expect(wave_step.pick_wave(seeded, &"lesson_aim_a").wave_id == &"lesson_aim_b", "pick_wave avoids the wave played last time")
 
 	var sequence := EncounterSequence.new()
 	sequence.sequence_id = &"undefined_token"

@@ -51,6 +51,7 @@ var current_step_count := 0
 var _random_number_generator := RandomNumberGenerator.new()
 var _active_runs: Array[EncounterRun] = []
 var _last_normal_encounter_id: StringName
+var _last_wave_id: StringName
 var _stop_requested := false
 var _wait_timer: Timer
 
@@ -211,7 +212,11 @@ func _pick_normal_preset(step: EncounterSequenceStep) -> EncounterPreset:
 
 
 func _spawn_wave(step: EncounterSequenceStep) -> void:
-	var wave := step.wave
+	var wave := step.pick_wave(_random_number_generator, _last_wave_id)
+	if wave == null:
+		push_warning("EncounterDirector: WAVE step '%s' has no wave to play." % step.token)
+		return
+	_last_wave_id = wave.wave_id
 	var presets := wave.get_encounter_presets()
 	for index in presets.size():
 		if not _can_continue():
