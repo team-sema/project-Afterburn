@@ -4,7 +4,7 @@ extends Node2D
 signal destroyed
 
 enum Kind { FIGHTER, STRIKER, RAIDER }
-const Neon = preload("res://labs/bosses/carrier/carrier_neon_visual.gd")
+const Neon = preload("res://enemies/carrier/carrier_neon_visual.gd")
 const Playfield := preload("res://menus/playfield_layout.gd")
 const RAIL_LOCK := 0.55
 const STRIKER_SPEED := 280.0
@@ -83,7 +83,7 @@ func take_damage(amount: int) -> void:
 	hit_flash = 0.1
 	if health == 0:
 		set_active(false)
-		preload("res://labs/bosses/carrier/carrier_destruction_effect.gd").spawn(world, global_position, 10.0)
+		preload("res://enemies/carrier/carrier_destruction_effect.gd").spawn(world, global_position, 10.0)
 		destroyed.emit()
 
 func _physics_process(delta: float) -> void:
@@ -132,7 +132,7 @@ func _fire(pattern_mode: int) -> void:
 	warning = false
 	var sequence := preload("res://patterns/carrier_lab_pattern.gd").new()
 	sequence.build({"mode": pattern_mode})
-	barrage.play(sequence, muzzle, world, target)
+	barrage.play(sequence, muzzle, world, target if is_instance_valid(target) else null)
 
 func _draw() -> void:
 	if not active: return

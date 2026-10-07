@@ -1,6 +1,6 @@
 extends Control
 const Playfield := preload("res://menus/playfield_layout.gd")
-const Boss = preload("res://labs/bosses/carrier/carrier_boss.gd")
+const Boss = preload("res://enemies/carrier/carrier_boss.gd")
 var viewport: SubViewport
 var world: Node2D
 var ship: Node2D
@@ -152,7 +152,7 @@ func restart() -> void:
 	boss.destruction_pulse.connect(func(strength: float): shake_strength = maxf(shake_strength,strength))
 	world.add_child(boss)
 	world.move_child(boss,0)
-	var dust := preload("res://labs/bosses/carrier/carrier_dust.gd").new()
+	var dust := preload("res://enemies/carrier/carrier_dust.gd").new()
 	dust.boss = boss
 	world.add_child(dust)
 	world.move_child(dust,1)

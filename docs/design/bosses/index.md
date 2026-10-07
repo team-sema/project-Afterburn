@@ -4,8 +4,8 @@
 
 ## 구현 상태
 
-- [Wall](wall.md): 프로토타입. 메인 시퀀스 `d` 토큰에 연결. 독립 시험은 `labs/bosses/wall/`.
-- [거대 항모 · Boss Lab](carrier.md): 독립 시험 장면. 본 게임 시퀀스·보상에 연결하지 않는다.
+- [거대 항모](carrier.md): 메인 시퀀스 `d` 토큰의 보스. 본 게임은 `enemies/boss_carrier.tscn`(게이트용 Enemy 껍데기) 안에서 항모 본체(`enemies/carrier/`)가 싸운다. 독립 시험은 `labs/bosses/carrier/`.
+- [Wall](wall.md): 프로토타입. 시퀀스에서 빠졌고 독립 시험(`labs/bosses/wall/`)과 `boss_wall` 프리셋으로만 남는다.
 
 ## 공통 규칙
 
@@ -16,4 +16,4 @@
 
 ## 관련 코드
 
-- `threat_elite_controller.gd`, `enemies/boss_wall.tscn`, `resources/encounters/presets/boss_wall.tres`
+- `threat_elite_controller.gd`, `enemies/boss_carrier.tscn` · `enemies/boss_carrier.gd`, `enemies/carrier/*.gd`, `resources/encounters/presets/boss_carrier.tres` (벽: `enemies/boss_wall.tscn`, `presets/boss_wall.tres`)

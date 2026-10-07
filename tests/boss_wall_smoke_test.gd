@@ -123,15 +123,6 @@ func _run() -> void:
 		await process_frame
 		_expect(boss.stats_component.health == hp_before - 25, "core hit applies full damage")
 
-	var sequence := load("res://resources/encounter_sequences/main_encounter_sequence.tres") as EncounterSequence
-	var boss_step: EncounterSequenceStep = null
-	for step in sequence.shared_steps:
-		if step.token == &"d":
-			boss_step = step
-			break
-	_expect(boss_step != null and boss_step.kind == EncounterSequenceStep.Kind.BOSS, "token d is BOSS")
-	_expect(boss_step.boss_preset != null and boss_step.boss_preset.encounter_id == &"boss_wall", "d uses boss_wall preset")
-
 	world.queue_free()
 	await process_frame
 	if failures.is_empty():

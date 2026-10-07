@@ -6,8 +6,8 @@ signal launch_requested(slot: int)
 signal stage_changed(stage: int)
 
 enum { TURRET = 0, HANGAR = 1, BRIDGE = 2, ESCORT = 4, ENGINE = 5 }
-const Neon = preload("res://labs/bosses/carrier/carrier_neon_visual.gd")
-const Beam = preload("res://labs/bosses/carrier/carrier_beam.gd")
+const Neon = preload("res://enemies/carrier/carrier_neon_visual.gd")
+const Beam = preload("res://enemies/carrier/carrier_beam.gd")
 const CRIMSON := Color(1.0, 0.08, 0.26)
 const EXHAUST := Color(1.0, 0.32, 0.1)
 const WARN_TIME := 0.95
@@ -265,7 +265,7 @@ func take_damage(amount: int) -> void:
 	if health == 0:
 		set_active(false)
 		_make_scorch()
-		preload("res://labs/bosses/carrier/carrier_destruction_effect.gd").spawn(world, global_position, destruction_radius(), mode in [HANGAR, BRIDGE])
+		preload("res://enemies/carrier/carrier_destruction_effect.gd").spawn(world, global_position, destruction_radius(), mode in [HANGAR, BRIDGE])
 		destroyed.emit()
 	elif mode == BRIDGE:
 		_check_bridge_stage()
@@ -396,7 +396,7 @@ func _process_weapon(delta: float) -> void:
 			return
 		var sequence := preload("res://patterns/carrier_lab_pattern.gd").new()
 		sequence.build({"mode": mode, "variant": current_variant})
-		barrage.play(sequence, muzzle, world, target)
+		barrage.play(sequence, muzzle, world, target if is_instance_valid(target) else null)
 
 func _update_visual() -> void:
 	if visual == null: return
