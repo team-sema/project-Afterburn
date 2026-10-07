@@ -15,12 +15,18 @@ signal max_hull_changed(max_hull: int)
 @export var progression_controller: AugmentProgressionController
 @export var combat_buff_controller: ShipCombatBuffController
 @export var engine_boost_component: EngineBoostComponent
+@export var hit_point: PlayerHitPoint
+
+## 시설로 줄여도 피격점 반경은 이 아래로 내려가지 않는다 (표시가 읽히는 최소 크기).
+const MIN_HIT_POINT_RADIUS := 2.0
 
 var facility_registry: PlayerAugmentRegistry
 ## 시설 적용 전 최대 선체. 선체 시설 보너스와 분리해 둔다.
 var base_max_hull := 1
 ## 시설 적용 전 수집 반경.
 var base_collection_radius := 0.0
+## 시설 적용 전 피격점 반경.
+var base_hit_point_radius := PlayerHitPoint.BASE_RADIUS
 
 var _applied_max_hull_bonus := 0
 
@@ -32,6 +38,8 @@ func initialize(registry: PlayerAugmentRegistry) -> void:
 		base_max_hull = maxi(1, stats_component.health)
 	if experience_collector != null:
 		base_collection_radius = experience_collector.collection_radius
+	if hit_point != null:
+		base_hit_point_radius = hit_point.radius
 	if not facility_registry.augments_changed.is_connected(refresh):
 		facility_registry.augments_changed.connect(refresh)
 	if combat_buff_controller != null:
@@ -56,6 +64,11 @@ func get_max_shield() -> int:
 
 func get_collection_radius() -> float:
 	return experience_collector.collection_radius if experience_collector != null else 0.0
+
+
+## 시설 가산을 적용한 현재 피격점 반경(px).
+func get_hit_point_radius() -> float:
+	return hit_point.radius if hit_point != null else base_hit_point_radius
 
 
 func refresh() -> void:
@@ -84,6 +97,13 @@ func refresh() -> void:
 		experience_collector.collection_radius = (
 			base_collection_radius
 			* facility_registry.get_module_effect_product(FacilityModuleEffect.Kind.PICKUP_RANGE_MULT)
+		)
+
+	if hit_point != null:
+		hit_point.radius = maxf(
+			base_hit_point_radius
+			+ facility_registry.get_module_effect_sum(FacilityModuleEffect.Kind.HIT_POINT_RADIUS_ADD),
+			MIN_HIT_POINT_RADIUS,
 		)
 
 	if progression_controller == null and is_inside_tree():

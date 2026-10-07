@@ -20,6 +20,7 @@ enum Kind {
 	SHIELD_CHARGE_SPEED_MULT,
 	## Appended to preserve serialized values of existing kinds.
 	WEAPON_FIRE_RATE_MULT,
+	HIT_POINT_RADIUS_ADD, ## primary=px added to the player hit point radius (negative shrinks)
 }
 
 @export var kind: Kind = Kind.WEAPON_DAMAGE_MULT
