@@ -185,9 +185,17 @@ func _on_turret_destroyed(slot: Node2D) -> void:
 		_phase = &"core_linger"
 		_timer = core_linger_after_turret
 		return
-	# Keep firing from remaining turrets for the rest of the window.
+	# Keep firing from remaining turrets for the rest of the window. This runs
+	# inside the player's hit callback (a physics flush), where spawning bullets
+	# is not allowed, so restart on the next frame.
 	if _phase == &"fire":
-		_start_barrage_from_firing()
+		_restart_barrage_after_turret_loss.call_deferred()
+
+
+func _restart_barrage_after_turret_loss() -> void:
+	if _phase != &"fire" or _firing.is_empty() or _barrage_player.running:
+		return
+	_start_barrage_from_firing()
 
 
 func _pick_slots() -> Array[Node2D]:

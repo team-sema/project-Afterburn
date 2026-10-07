@@ -21,6 +21,11 @@ func _on_hurtbox_entered(hurtbox: HurtboxComponent):
 	if not hurtbox is HurtboxComponent: return
 	# Make sure the hurtbox isn't invincible
 	if hurtbox.is_invincible: return
+	# A hurtbox that is momentarily outside the tree (its enemy is being
+	# reparented by a formation break) cannot resolve damage safely: death
+	# handlers reach for get_tree(). The overlap fires again once it is back
+	# in the tree, so skipping now loses nothing.
+	if not hurtbox.is_inside_tree() or not is_inside_tree(): return
 	if hit_filter.is_valid() and not hit_filter.call(hurtbox): return
 	if damage_resolver.is_valid():
 		damage = int(damage_resolver.call(hurtbox))

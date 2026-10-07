@@ -1,11 +1,15 @@
-; 구절(교재) WAVE. 규칙: docs/design/run-pacing.md 「구절 작곡」.
-[gd_resource type="Resource" script_class="EncounterWave" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="EncounterWave" load_steps=6 format=3 uid="uid://dx4mxm60a6vvq"]
 
-[ext_resource type="Script" path="res://resources/encounter_sequences/encounter_wave.gd" id="1_wave_script"]
+[ext_resource type="Script" uid="uid://l7bpelqan01w" path="res://resources/encounter_sequences/encounter_wave.gd" id="1_wave_script"]
+[ext_resource type="Resource" uid="uid://cnv5hhobmfb57" path="res://resources/encounters/presets/drone_slow_zigzag.tres" id="2_drone_slow_zigzag"]
+[ext_resource type="Resource" uid="uid://bm3y3hs8ty058" path="res://resources/encounters/presets/caster_single.tres" id="3_caster_single"]
+[ext_resource type="Resource" uid="uid://p7t6m8jhj1oh" path="res://resources/encounters/presets/x9_caster_drone_orbit.tres" id="4_x9_caster_drone_orbit"]
+
+[ext_resource type="Script" uid="uid://c6t14vfypdxop" path="res://resources/encounters/encounter_preset.gd" id="9_preset_script"]
 
 [resource]
 script = ExtResource("1_wave_script")
 wave_id = &"lesson_lane_b"
-encounter_preset_paths = PackedStringArray("res://resources/encounters/presets/drone_slow_zigzag.tres", "res://resources/encounters/presets/caster_single.tres", "res://resources/encounters/presets/x9_caster_drone_orbit.tres")
+encounter_presets = Array[ExtResource("9_preset_script")]([ExtResource("2_drone_slow_zigzag"), ExtResource("3_caster_single"), ExtResource("4_x9_caster_drone_orbit")])
 interval_min = 2.8
 interval_max = 3.0

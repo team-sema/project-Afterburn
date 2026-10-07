@@ -25,7 +25,7 @@
 | 종류 | 무엇을 | 후보 선택 |
 |---|---|---|
 | `NORMAL` | 편대 1개 | `encounter_presets` 지정 시 균등 랜덤(직전 id 회피, **Threat 무시**) · 비었으면 `encounter_pool.choose(현재 Threat)` (weight·min_threat·직전 2 id 제외 그대로) |
-| `WAVE` | `EncounterWave` 의 `encounter_preset_paths`를 **순서대로**, 편대 사이 `interval_min~max` 랜덤 | `waves`(대안 목록)가 있으면 그중 균등 랜덤(직전에 재생한 wave 회피), 없으면 `wave` 하나 |
+| `WAVE` | `EncounterWave` 의 `encounter_presets`(프리셋 참조 배열, 정본)를 **순서대로**, 편대 사이 `interval_min~max` 랜덤. 옛 `encounter_preset_paths` 경로 목록은 비어 있지 않은 쪽만 폴백으로 읽는다 | `waves`(대안 목록)가 있으면 그중 균등 랜덤(직전에 재생한 wave 회피), 없으면 `wave` 하나 |
 | `ELITE` | 아래 엘리트 게이트를 연다 | `elite_preset` 지정 시 그 preset, 비우면 엘리트 로테이션 |
 | `BOSS` | 엘리트 게이트와 같은 흐름 + `is_boss` (엘리트 HP 공식 미적용) | `boss_preset` 비어 있으면 경고 후 **건너뜀** |
 
@@ -51,7 +51,7 @@ WAVE·ELITE·BOSS 스텝은 스폰/게이트 직전에 맵 중앙에 `WARNING` �
 | `c` | ELITE | 엘리트 로테이션 · wait_for_clear (timeout 없음) | 2.8 ~ 3.1초 |
 | `d` | BOSS | `boss_wall` | 2.8 ~ 3.1초 |
 
-**구절** (`resources/encounter_sequences/waves/lesson_*.tres`, 편대 간격은 Phase 1 3.5~4.0초 · 2 3.0~3.3초 · 3 2.8~3.0초)
+**구절** (`resources/encounter_sequences/waves/lesson_*.tres`, 프리셋 참조 배열로 저장. 편대 간격은 Phase 1 3.5~4.0초 · 2 3.0~3.3초 · 3 2.8~3.0초)
 
 | 토큰 | 교훈 | 교재 A | 교재 B |
 |---|---|---|---|

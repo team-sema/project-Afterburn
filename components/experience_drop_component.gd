@@ -23,9 +23,14 @@ func _ready() -> void:
 func _on_no_health() -> void:
 	if drop_chance <= 0.0 or randf() > drop_chance:
 		return
-	var parent := get_tree().get_first_node_in_group("gameplay_world")
+	# The actor may die while outside the tree (mid-reparent); fall back to
+	# the main loop instead of dereferencing a null tree.
+	var tree := get_tree() if is_inside_tree() else Engine.get_main_loop() as SceneTree
+	if tree == null:
+		return
+	var parent := tree.get_first_node_in_group("gameplay_world")
 	if parent == null:
-		parent = get_tree().current_scene
+		parent = tree.current_scene
 	if parent == null:
 		return
 	var orb := orb_scene.instantiate()
