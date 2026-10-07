@@ -14,6 +14,9 @@ func _run() -> void:
 	await _test_offscreen_bullets_are_discarded()
 	await _test_distant_orb_arrives_within_budget()
 	await _test_cap_collects_stragglers()
+	await _test_minimum_tops_up_shortfall()
+	await _test_minimum_ignored_when_enough_converted()
+	_test_minimum_orbs_pop_at_kill_position()
 	await _test_freed_collector_during_vacuum()
 	await _test_ship_death_skips_elite_offer()
 	if failures.is_empty():
@@ -182,6 +185,63 @@ func _test_cap_collects_stragglers() -> void:
 	_expect(not is_instance_valid(slow_orb), "the cap collects the straggler")
 	_expect(progression.current_experience == 5, "the straggler's XP is still paid (%d)" % progression.current_experience)
 	await _free_gameplay(gameplay)
+
+
+func _test_minimum_tops_up_shortfall() -> void:
+	var gameplay := _make_gameplay()
+	var progression := gameplay.get_node("AugmentProgressionController") as AugmentProgressionController
+	var reward := gameplay.get_node("BulletCancelRewardController") as BulletCancelRewardController
+	var rect := reward.get_conversion_rect()
+	for i in 5:
+		_make_enemy_bullet(gameplay, rect.get_center() + Vector2(i * 12.0, -40.0))
+	# Off-screen bullets are cancelled without XP and never count toward the minimum.
+	for i in 4:
+		_make_enemy_bullet(gameplay, Vector2(rect.get_center().x, rect.position.y - 200.0 - i * 20.0))
+	var converted_count := await reward.collect_projectiles_and_vacuum(10, rect.get_center())
+	await process_frame
+
+	_expect(converted_count == 5, "five on-screen bullets convert (%d)" % converted_count)
+	_expect(reward.last_minimum_bonus_count == 5, "the 10 XP minimum adds the 5-orb shortfall (%d)" % reward.last_minimum_bonus_count)
+	_expect(progression.current_experience == 10, "converted plus minimum orbs pay exactly the minimum (%d)" % progression.current_experience)
+	await _free_gameplay(gameplay)
+
+
+func _test_minimum_ignored_when_enough_converted() -> void:
+	var gameplay := _make_gameplay()
+	var progression := gameplay.get_node("AugmentProgressionController") as AugmentProgressionController
+	var reward := gameplay.get_node("BulletCancelRewardController") as BulletCancelRewardController
+	var rect := reward.get_conversion_rect()
+	for i in 12:
+		_make_enemy_bullet(gameplay, rect.get_center() + Vector2(-60.0 + i * 10.0, -40.0))
+	var converted_count := await reward.collect_projectiles_and_vacuum(10, rect.get_center())
+	await process_frame
+
+	_expect(converted_count == 12, "twelve on-screen bullets convert (%d)" % converted_count)
+	_expect(reward.last_minimum_bonus_count == 0, "no minimum orbs once conversion reaches the minimum")
+	_expect(progression.current_experience == 12, "only converted bullets pay (%d)" % progression.current_experience)
+
+	# The default call (no minimum) never adds orbs either.
+	await reward.collect_projectiles_and_vacuum()
+	_expect(reward.last_minimum_bonus_count == 0, "a reward without a minimum adds no orbs")
+	await _free_gameplay(gameplay)
+
+
+func _test_minimum_orbs_pop_at_kill_position() -> void:
+	var gameplay := _make_gameplay()
+	var reward := gameplay.get_node("BulletCancelRewardController") as BulletCancelRewardController
+	var origin := Vector2(200, 80)
+	var before := get_nodes_in_group("experience_orbs").size()
+	_expect(reward._spawn_minimum_bonus(6, origin) == 6, "spawn reports every minimum orb")
+	var orbs := get_nodes_in_group("experience_orbs")
+	_expect(orbs.size() - before == 6, "six minimum orbs exist (%d)" % (orbs.size() - before))
+	for node in orbs:
+		var orb := node as ExperienceOrb
+		_expect(orb.experience_amount == 1, "each minimum orb is worth 1 XP")
+		_expect(
+			orb.global_position.distance_to(origin) <= reward.minimum_burst_radius + 0.01,
+			"minimum orbs pop out around the kill position (%s)" % orb.global_position,
+		)
+	gameplay.queue_free()
 
 
 func _test_freed_collector_during_vacuum() -> void:

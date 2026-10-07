@@ -94,7 +94,7 @@ func _run() -> void:
 	if not defeated[0]:
 		await elite_controller.elite_defeated
 	_expect(progression.get_threat_level() == 2, "boss defeat advances Threat")
-	_expect(progression.current_experience >= 3, "boss guaranteed XP is vacuumed before the offer (%d)" % progression.current_experience)
+	_expect(progression.current_experience >= 23, "boss drop (3) plus the 20 XP minimum is vacuumed before the offer (%d)" % progression.current_experience)
 	_expect(offer_controller.is_offer_active and offer_controller.active_offer_type == AugmentOfferController.OfferType.ENEMY, "boss defeat opens the enemy augment offer")
 	await process_frame
 	_expect(not is_instance_valid(shell) or shell.is_queued_for_deletion(), "shell frees itself after the settlement")

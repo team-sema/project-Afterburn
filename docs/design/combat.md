@@ -349,7 +349,7 @@ player.play(mixed, emitter, world)
 ### 엘리트 이상 처치 탄소거
 
 - Threat 엘리트 처치 시 게임을 멈추지 않고 플레이필드의 `enemy_projectiles`를 제거한다. 플레이어 탄환은 제거하지 않는다.
-- 화면(VisibleRect + 16px) 안 적탄 1발마다 XP 1짜리 `ExperienceOrb`를 탄 위치에 생성한다. 화면 밖 적탄은 XP 없이 지운다.
+- 화면(VisibleRect + 16px) 안 적탄 1발마다 XP 1짜리 `ExperienceOrb`를 탄 위치에 생성한다. 화면 밖 적탄은 XP 없이 지운다. 변환 수가 최소 탄소거 XP(엘리트 10 · 보스 20)에 못 미치면 모자란 만큼 처치 위치에서 XP 1 오브가 나온다.
 - 엘리트의 확정 드롭을 포함해 플레이필드에 있던 모든 XP 오브를 플레이어 수집기로 강제 흡수한다. 강제 흡수는 0.6초 안에 도착하고 1.0초 상한에서 남은 오브를 즉시 수집하며, 전부 실제 XP로 정산될 때까지 기다린다. 수치·예외 정본은 [런 페이싱](run-pacing.md).
 - 흡수 중에도 함선·남은 적은 계속 움직이며, 플레이어 오그먼트 `C` 입력과 HUD 힌트만 잠근다. 흡수가 끝난 뒤 Threat를 올리고 적 오그먼트 오퍼를 연다.
 - BOSS 스텝의 게이트·보상 경로는 구현되어 같은 `BulletCancelRewardController`를 호출한다. 기본 시퀀스 `d`는 [Boss Wall](bosses/wall.md)을 스폰한다.
