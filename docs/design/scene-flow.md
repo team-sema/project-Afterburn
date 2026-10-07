@@ -125,6 +125,23 @@ Menu와 일시정지 위에 뜨는 모달 패널이다(씬 전환 아님). 같�
 
 World 왼쪽 패널에 MasterVolumeControl을 표시한다. 슬라이더는 Master 버스에 즉시 적용되고 0이면 음소거한다. `GameSettings`를 통해 `user://settings.cfg`에 저장하며 일시정지 중에도 조절할 수 있다.
 
+### 런 시작 · 출격 시퀀스 (`effects/launch_sequence.gd`, `LaunchSequence`)
+
+런의 첫 2.6초는 플레이가 아니라 **출격**이다. 함선이 화면 아래에서 애프터버너를 켜고 치고 올라오며, 별이 가속해 선으로 늘어나고, 먹먹하던 음악이 열린다. 목적은 "빠르다"는 감각을 첫 화면에서 몸으로 주는 것이다. 동작은 게임플레이 시간으로 계산하며 입력 잠금 동안 Esc 일시정지는 그대로 된다.
+
+| 구간 | 시각 | 함선 | 배경 (`SpaceBackground.speed_scale`) | 소리 |
+|---|---|---|---|---|
+| 점화 | 0 ~ 0.5초 | 화면 아래 40px에 정지(`y = 전장 높이 + 40`), 이동 입력·클램프·무기 발사 잠금(무기 로드아웃 `PROCESS_MODE_DISABLED`), 엔진 화염이 커지기 시작 | 0 → 0.3 (별이 겨우 움직임) | 음악 먹먹함 유지(로우패스 500Hz) |
+| 연소 | 0.5 ~ 1.6초 | 0.3초부터 홈 위치(씬의 `Ship` 위치, `(100, 216)`)까지 ease-out cubic로 상승, 앵커 ±2px 진동, 엔진 화염 세로 3배·`speed_scale` 2.5 | 0.3 → 7.0 (가까운 별층 1120px/s), 스트릭 선 표시 | 0.3초에 `sounds/launch_burn.wav`(합성 엔진 굉음, SFX 버스) 1회. 0.6 ~ 1.4초에 로우패스가 500 → 20500Hz로 열림 |
+| 정착 | 1.6 ~ 2.6초 | 1.8초에 입력·클램프·무기 발사 해제, 화염·진동 원복 | 7.0 → 1.0 (순항) ease-in | — |
+| 종료 | 2.6초 | `launch_finished` → `EncounterDirector.start_sequence()` (씬의 Director는 `autostart = false`) | 순항 | — |
+
+- 시작 조건은 Director와 같다. `LaunchSequence`가 `_ready`에서 `current_scene`이 있을 때만 스스로 재생하므로 테스트에서 씬을 붙여도 돌지 않고, `play()`로 직접 재생한다. 재생 중이 아니면 함선·입력·Director는 지금까지와 같다.
+- 음악 먹먹함: `Music` 버스의 `AudioEffectLowPassFilter`(버스 레이아웃에 상주, 기본 열림). 시작화면이 열릴 때 닫고(`LaunchSequence.set_music_muffled(true)`), 출격의 연소 구간에서 연다. 일시정지·게임 오버에서 메뉴로 돌아가면 다시 닫힌다.
+- 건너뛰기는 없다(2.6초). 체감이 길어지면 이 표의 시각만 줄인다. 출격 중 왼쪽 HUD의 Threat 표시는 Director가 아직 시작 전이라 타이머 모드(`MM:SS`)로 보이다가 시작과 함께 `STAGE`로 바뀐다.
+
+완료 조건·검증: 재생 전 함선·입력·Director가 기존 상태, 재생 시작에 함선이 화면 밖·입력 잠금·음악 먹먹함, 연소 중 `speed_scale` 3 이상과 스트릭, 1.5초에 로우패스가 열리는 중, 1.8초 이후 입력 해제, 종료 시 홈 위치·순항 속도·Director 실행·`launch_finished` — `tests/launch_sequence_test.gd`.
+
 ### 라이프사이클
 
 1. `_ready`: `game_stats.score = 0`, 점수 라벨 연결

@@ -8,6 +8,7 @@
 |--------|------|
 | `MoveComponent` | 레거시 `velocity` 또는 `MovementIntent`를 받아 actor에 실제 이동·선택적 global rotation 적용 |
 | `MovementController` | `MovementSequence`의 현재 Step과 런타임 상태를 소유하고 Intent를 `MoveComponent`에 전달 |
+| `MoveInputComponent` / `PositionClampComponent` | 플레이어 입력 → 속도 · 화면 안 클램프. 둘 다 `enabled`로 잠글 수 있다(출격 시퀀스) |
 | `MovementSpaceConfig` | 실제 viewport에서 Visible/Movement/Combat/Despawn 영역을 비율 기반으로 계산하는 공통 설정 |
 | `MovementSequence` | 설정 전용 `MovementStep` 배열 Resource. 여러 적이 같은 Resource를 안전하게 공유 |
 | `Linear/Sine/MoveToPosition/Wait/HomingMovementStep` | 조합 가능한 범용 이동 단계 |
@@ -60,6 +61,7 @@
 | `EncounterPool` / `EncounterPoolEntry` | 라이브 Encounter 로스터. Entry는 `min_threat`만 두고, Preset `difficulty`로 `weight = 60 / sqrt(difficulty)` 산출(어려울수록 희귀·비율 완만). `EnemyGenerator`는 직전 2 id 제외 |
 | `EncounterSequence` / `EncounterSequencePhase` / `EncounterSequenceStep` / `EncounterWave` | 등장 시나리오 데이터. Phase = 토큰 패턴, Step = NORMAL/WAVE/ELITE/BOSS (+ `handoff_remaining` 인계, NORMAL `encounter_count` 겹침), Wave = `encounter_presets` 순서 고정 편대 묶음 (+ 인계 간격) |
 | `EncounterDirector` | 시퀀스 재생 노드. 시작 시 `EnemyGenerator` 타이머·60초 엘리트 타이머를 끄고 스텝 순서대로 스폰·게이트 요청. `sequence_progress_changed`로 HUD에 Phase 스텝 진행을 알림. 씬 트리에서 빠지면 `get_tree()` await 없이 중단 |
+| `LaunchSequence` | 런 시작 출격 연출(함선 상승·배경 가속·음악 로우패스 열기·엔진 SFX) 뒤 `EncounterDirector.start_sequence()`. `current_scene`이 있을 때만 자동 재생. `set_music_muffled()` 정적 함수로 Music 버스 로우패스 제어 ([씬 흐름](scene-flow.md#런-시작--출격-시퀀스-effectslaunch_sequencegd-launchsequence)) |
 | `EncounterRun` | 스폰된 편대 1개의 적을 편대 해제 후까지 추적, 전부 사라지면 `completed` (ELITE `wait_for_clear` 판정) |
 | `OnetimeAnimatedEffect` | 애니 종료 시 free |
 | `VariablePitchAudioStreamPlayer` | 피치 랜덤 SFX. 씬 트리 밖이면 `play_with_variance`는 no-op |

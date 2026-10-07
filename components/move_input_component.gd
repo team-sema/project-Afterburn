@@ -3,8 +3,12 @@ extends Node
 
 @export var move_stats: MoveStats
 @export var move_component: MoveComponent
+## false locks the ship (launch sequence): velocity stays whatever it was set to.
+@export var enabled := true
 
 func _process(_delta: float) -> void:
+	if not enabled:
+		return
 	var input_direction := Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
 
 	if Input.is_physical_key_pressed(KEY_A):

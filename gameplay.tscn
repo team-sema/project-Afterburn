@@ -26,6 +26,7 @@
 [ext_resource type="PackedScene" path="res://pickups/experience_orb.tscn" id="70_experience_orb"]
 [ext_resource type="Script" path="res://encounters/encounter_director.gd" id="71_encounter_director"]
 [ext_resource type="Resource" path="res://resources/encounter_sequences/main_encounter_sequence.tres" id="72_main_sequence"]
+[ext_resource type="Script" path="res://effects/launch_sequence.gd" id="73_launch_sequence"]
 
 [sub_resource type="Environment" id="Environment_neon"]
 background_mode = 3
@@ -112,3 +113,10 @@ enemy_generator = NodePath("../EnemyGenerator")
 progression = NodePath("../AugmentProgressionController")
 threat_elite_controller = NodePath("../ThreatEliteController")
 sequence = ExtResource("72_main_sequence")
+autostart = false
+
+[node name="LaunchSequence" type="Node" parent="." node_paths=PackedStringArray("ship", "space_background", "encounter_director")]
+script = ExtResource("73_launch_sequence")
+ship = NodePath("../Ship")
+space_background = NodePath("../SpaceBackground")
+encounter_director = NodePath("../EncounterDirector")
