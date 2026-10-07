@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="EncounterPreset" format=3 uid="uid://b8pdu63e8jlyy"]
+
+[ext_resource type="Script" uid="uid://c6t14vfypdxop" path="res://resources/encounters/encounter_preset.gd" id="1_preset"]
+[ext_resource type="Script" uid="uid://cbtt1l1ekmuxi" path="res://resources/encounters/encounter_member.gd" id="2_member"]
+[ext_resource type="PackedScene" path="res://formations/layouts/single_formation.tscn" id="3_layout"]
+[ext_resource type="Resource" uid="uid://ciw8jhdxct5qd" path="res://resources/enemy_movement/sequences/single_release.tres" id="4_release"]
+[ext_resource type="Resource" uid="uid://fo4vfckt7rd0" path="res://resources/enemy_movement/sequences/boss_hold.tres" id="5_individual"]
+[ext_resource type="PackedScene" path="res://enemies/boss_carrier.tscn" id="6_boss"]
+
+[sub_resource type="Resource" id="Member_boss"]
+script = ExtResource("2_member")
+enemy_scene = ExtResource("6_boss")
+
+[resource]
+script = ExtResource("1_preset")
+encounter_id = &"boss_carrier"
+difficulty = 60.0
+formation_layout_scene = ExtResource("3_layout")
+formation_movement_sequence = ExtResource("4_release")
+members = Array[ExtResource("2_member")]([SubResource("Member_boss")])
+formation_break_condition = 1
+individual_movement_sequence = ExtResource("5_individual")

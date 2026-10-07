@@ -4,6 +4,9 @@ extends Node2D
 @export var actor: Enemy
 @export var stats_component: StatsComponent
 @export var enabled := true
+## Boss mode: a fixed bar at the top centre of the viewport that stays visible
+## while the actor is eligible, instead of a fading bar above the actor.
+@export var pinned_to_top := false
 @export_range(0.1, 10.0, 0.1, "suffix:s") var visible_duration := 1.5
 @export_range(0.05, 2.0, 0.05, "suffix:s") var fade_duration := 0.25
 @export var screen_offset := Vector2(0.0, -22.0)
@@ -31,6 +34,23 @@ func _ready() -> void:
 	set_process(_is_eligible())
 	_sync_transform()
 	queue_redraw()
+	if pinned_to_top:
+		set_pinned_to_top(true)
+
+
+func set_pinned_to_top(value: bool) -> void:
+	pinned_to_top = value
+	if _fade_tween != null and _fade_tween.is_valid():
+		_fade_tween.kill()
+	if value:
+		visible = _is_eligible()
+		modulate.a = 1.0
+		set_process(_is_eligible())
+		_sync_transform()
+		queue_redraw()
+	else:
+		visible = false
+		modulate.a = 0.0
 
 
 func _process(_delta: float) -> void:
@@ -63,6 +83,8 @@ func _on_health_changed() -> void:
 
 	var took_damage := current_health < _last_health
 	_last_health = current_health
+	if pinned_to_top:
+		return
 	if not took_damage or not _is_eligible():
 		return
 	set_process(true)
@@ -90,5 +112,9 @@ func _is_eligible() -> bool:
 func _sync_transform() -> void:
 	if actor == null or not is_instance_valid(actor):
 		return
-	global_position = actor.global_position + screen_offset
+	if pinned_to_top:
+		var rect := get_viewport_rect()
+		global_position = Vector2(rect.get_center().x, rect.position.y) + screen_offset
+	else:
+		global_position = actor.global_position + screen_offset
 	global_rotation = 0.0

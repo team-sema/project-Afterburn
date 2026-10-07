@@ -59,7 +59,7 @@ ELITE·BOSS 게이트 직전에만 `step_warning_duration`(기본 **1.6초**) �
 | `A` | NORMAL | 같은 풀에서 **2편대**를 1.2초 간격으로 겹쳐 냄 (Phase 2+) | 1.6 ~ 3.0초 · handoff 2 |
 | `L` `H` `W` `S` `B` `G` `F` `D` | WAVE | 아래 구절. 각 토큰은 대안 wave A/B 중 하나 | 1.5 ~ 3.0초 · handoff 2 · clear_timeout 6.0 · clear_min_wait Phase 1 1.2 / 2 1.0 / 3 0.8 |
 | `c` | ELITE | 엘리트 로테이션 · wait_for_clear (timeout 없음, 전원 클리어) | 2.8 ~ 3.1초 랜덤 (handoff 0) |
-| `d` | BOSS | `boss_wall` | 2.8 ~ 3.1초 랜덤 (handoff 0) |
+| `d` | BOSS | `boss_carrier` ([거대 항모](bosses/carrier.md)) | 2.8 ~ 3.1초 랜덤 (handoff 0) |
 
 **구절** (`resources/encounter_sequences/waves/lesson_*.tres`, 프리셋 참조 배열로 저장. 편대 간격은 인계 규칙(handoff 2)으로 바닥 ~ 천장: Phase 1 1.2 ~ 3.0초 · 2 1.0 ~ 2.6초 · 3 0.8 ~ 2.4초)
 
@@ -109,7 +109,7 @@ Phase가 바뀔 때마다 HUD의 STAGE가 +1 된다. 개발자는 `.tres`의 패
 
 첫 엘리트: Threat **2** 사격형(Fighter). Threat **3** 돌격형(Awl). Threat 4부터는 Fighter·Awl·Bomb·Caster 중 직전 엘리트를 제외하고 무작위로 고른다. 여기서 Threat는 처치 후 도달할 관문 목표값이다. 로테이션·공통 HP 공식은 [엘리트](elites/index.md) 정본.
 
-탄소거 보상 중에는 전투 전체와 플레이어 오그먼트 `C` 입력을 잠근다. 적탄 1발은 XP 1로 변환되며, 기존 XP와 엘리트 확정 드롭까지 실제로 수집된 뒤에만 적 오그먼트 오퍼가 열린다. BOSS 관문도 같은 처치 정산(탄소거·XP 회수·Threat 상승·적 오퍼)을 거친다.
+탄소거 보상 중에는 전투 전체와 플레이어 오그먼트 `C` 입력을 잠근다. 적탄 1발은 XP 1로 변환되며, 기존 XP와 엘리트 확정 드롭까지 실제로 수집된 뒤에만 적 오그먼트 오퍼가 열린다. BOSS 관문도 같은 처치 정산(탄소거·XP 회수·Threat 상승·적 오퍼)을 거친다. 항모는 격침 연출(8.2초)이 끝난 뒤에 정산이 시작된다([거대 항모 · 본 게임 연결](bosses/carrier.md#본-게임-연결)).
 
 **확인 필요 (플레이 테스트 2026-10-07):** 탄소거는 화면 밖 멀리 있는 적탄까지 전부 XP 오브로 바꾸고(`EnemyBullets.get_all`), 회수는 오브가 190px/s로 함선까지 날아올 때까지 전투 잠금을 유지한다(`BulletCancelRewardController`·`ExperienceOrb.start_forced_attraction`). 화면 밖 수백 px의 오브 하나가 몇 초를 잡아먹어 게임이 멈춘 것처럼 느껴진다. 수정 후보: 변환은 VisibleRect(+여유) 안의 적탄만 오브로 만들고 밖의 탄은 오브 없이 소거하거나 XP를 바로 더한다 · 강제 회수 속도를 거리 비례로 정해 모든 오브가 일정 시간(예: 0.6초) 안에 도착하게 한다 · 상한 시간이 지나면 남은 오브를 즉시 수집한다. 별도 feature에서 수정하고 이 문단을 확정 규칙으로 바꾼다.
 

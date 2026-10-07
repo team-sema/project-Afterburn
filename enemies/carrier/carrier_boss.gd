@@ -5,8 +5,8 @@ signal section_changed(title: String)
 signal destruction_started
 signal destruction_finished
 signal destruction_pulse(strength: float)
-const Part = preload("res://labs/bosses/carrier/carrier_part.gd")
-const Craft = preload("res://labs/bosses/carrier/carrier_craft.gd")
+const Part = preload("res://enemies/carrier/carrier_part.gd")
+const Craft = preload("res://enemies/carrier/carrier_craft.gd")
 const TITLES := ["01 / AFT DEFENSE", "02 / FLIGHT DECK", "03 / COMMAND BRIDGE"]
 const FIGHTER_CAP := 6
 ## Side launch hatches (hull-local y per destination phase) that release the
@@ -43,13 +43,13 @@ var detail: Node2D
 
 func _ready() -> void:
 	position = Vector2(Playfield.CENTER.x, -170)
-	var hull_visual := preload("res://labs/bosses/carrier/carrier_neon_visual.gd").make(preload("res://assets/enemies/carrier_hull.svg"), 0.5, Color(1.0,0.08,0.26))
+	var hull_visual := preload("res://enemies/carrier/carrier_neon_visual.gd").make(preload("res://assets/enemies/carrier_hull.svg"), 0.5, Color(1.0,0.08,0.26))
 	hull_visual.position.y = -350
 	hull_visual.get_node("Core").self_modulate = Color(0.35,0.12,0.2,0.8)
 	hull_visual.get_node("WideGlow").self_modulate.a = 0.08
 	hull_visual.get_node("TightGlow").self_modulate.a = 0.18
 	add_child(hull_visual)
-	var edges := preload("res://labs/bosses/carrier/carrier_neon_visual.gd").make(preload("res://assets/enemies/carrier_hull_edges.svg"), 0.5, Color(1.0,0.1,0.28))
+	var edges := preload("res://enemies/carrier/carrier_neon_visual.gd").make(preload("res://assets/enemies/carrier_hull_edges.svg"), 0.5, Color(1.0,0.1,0.28))
 	edges.position.y = -350
 	edges.get_node("Core").self_modulate = Color(0.68,0.4,0.5,0.8)
 	edges.get_node("WideGlow").self_modulate.a = 0.12
@@ -231,7 +231,7 @@ func _launch_fighter(slot: int, hangar: Node2D) -> void:
 	fighters.append(craft)
 
 func _sink_burst(offset: Vector2, blast_radius: float) -> void:
-	preload("res://labs/bosses/carrier/carrier_destruction_effect.gd").spawn(world, to_global(offset), blast_radius, true)
+	preload("res://enemies/carrier/carrier_destruction_effect.gd").spawn(world, to_global(offset), blast_radius, true)
 	destruction_pulse.emit(0.6 if blast_radius < 100 else 2.2)
 
 func _process_destruction(delta: float) -> void:

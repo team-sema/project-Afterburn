@@ -6,7 +6,7 @@
 [ext_resource type="Resource" uid="uid://bx6mvihopc5mq" path="res://resources/encounters/pools/main_encounter_pool.tres" id="4_main_pool"]
 [ext_resource type="Script" uid="uid://c6t14vfypdxop" path="res://resources/encounters/encounter_preset.gd" id="5_n4aof"]
 [ext_resource type="Script" uid="uid://l7bpelqan01w" path="res://resources/encounter_sequences/encounter_wave.gd" id="5_wave_script"]
-[ext_resource type="Resource" uid="uid://desaf2xju88rc" path="res://resources/encounters/presets/boss_wall.tres" id="6_boss_wall"]
+[ext_resource type="Resource" path="res://resources/encounters/presets/boss_carrier.tres" id="6_boss_carrier"]
 [ext_resource type="Resource" uid="uid://deq2s1pesuj8t" path="res://resources/encounter_sequences/waves/lesson_aim_a.tres" id="w_lesson_aim_a"]
 [ext_resource type="Resource" uid="uid://dweeiia1acu12" path="res://resources/encounter_sequences/waves/lesson_aim_b.tres" id="w_lesson_aim_b"]
 [ext_resource type="Resource" uid="uid://ck10ypkcd7nqb" path="res://resources/encounter_sequences/waves/lesson_body_a.tres" id="w_lesson_body_a"]
@@ -158,7 +158,7 @@ kind = 2
 script = ExtResource("2_step_script")
 token = &"d"
 kind = 3
-boss_preset = ExtResource("6_boss_wall")
+boss_preset = ExtResource("6_boss_carrier")
 
 [resource]
 script = ExtResource("1_sequence_script")

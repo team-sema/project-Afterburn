@@ -1,8 +1,17 @@
-# 거대 항모 · Boss Lab
+# 거대 항모
 
 ## 구현 범위
 
-독립 시험 장면 `labs/bosses/carrier/carrier_boss_lab.tscn`에서 거대 항모의 함미 → 비행갑판 → 함교를 공략한다. 본 게임 BOSS 스텝·Threat·보상에는 연결하지 않는다. 기존 함선과 기본 자동 사격, BarrageSequence/BarragePlayer 탄막을 사용한다. 비주얼은 기존 네온 마스크·코어·글로우 계열을 따른다.
+거대 항모는 본 게임 BOSS 관문(시퀀스 `d` 토큰)의 보스다. 함미 → 비행갑판 → 함교 순서로 공략하며, 기존 함선과 자동 사격, BarrageSequence/BarragePlayer 탄막을 사용한다. 비주얼은 기존 네온 마스크·코어·글로우 계열을 따른다. 독립 시험 장면 `labs/bosses/carrier/carrier_boss_lab.tscn`은 같은 본체 코드를 쓰며 아래 「본 게임 연결」의 차이만 있다.
+
+## 본 게임 연결
+
+- **껍데기 Enemy:** 게이트 흐름(`ThreatEliteController`)은 StatsComponent를 가진 Enemy 하나를 요구한다. `enemies/boss_carrier.tscn`(`BossCarrierEnemy`)은 몸체·hurtbox·접촉 hitbox가 없는 껍데기이며, 스폰 시 항모 본체(`enemies/carrier/carrier_boss.gd`)를 **top-level 자식**으로 만들어 Lab과 같은 전장 좌표(중앙 x, y −170에서 진입)에서 싸우게 한다. 본체는 껍데기 아래에 있으므로 부위 피격에 보스 피해 시설 배율(`is_boss`)이 적용된다. 선체는 z −2로 함선·탄 아래, 배경 위에 그린다.
+- **HP 미러:** 껍데기 StatsComponent는 본체의 필수 부위 HP 합(1920)으로 시작하고, 부위 피해마다 같은 값으로 따라간다(격침 중에는 1 아래로 내리지 않음). 함교까지 파괴되어 본체 HP가 0이 되면 격침 연출 8.2초가 **일시정지 없이** 재생되고, 연출이 끝난 순간 껍데기 HP가 0이 되어 보스 처치 정산(점수 500 · XP 3 확정 드롭 · 탄소거 보상 일시정지 · Threat +1 · 적 오그먼트 오퍼)이 시작된다. 격침 시작 시 남은 적탄·함재기는 본체가 보상 없이 정리하므로 탄소거 XP는 보통 0이다. 껍데기는 격침 시작에 함교 위치(화면 안)로 옮겨 처치 폭발과 XP가 거기서 나온다.
+- **상단 HP바:** 껍데기의 `EnemyHealthBar`를 `pinned_to_top`으로 켜서 전장 상단 중앙(폭 276px, y 8)에 고정 표시한다. 피격 시 잠깐 뜨는 엘리트 바와 달리 관문 동안 계속 보인다. 구역 구분선·구역 제목은 본 게임에 없다.
+- **없는 것:** Lab의 카메라 줌아웃·전경 고정, 구역 제목 라벨, 생존 보장. 관문 경고는 공용 `BOSS INBOUND`([런 페이싱](../run-pacing.md#관문-경고-encounterstepwarning))가 대신한다.
+- 프리셋 `resources/encounters/presets/boss_carrier.tres`: Single 진형 · 즉시 해제 · `boss_hold` 개별 시퀀스(껍데기는 정지). 풀 미등록.
+- 완료 조건·검증: `d` 토큰이 `boss_carrier`, 게이트가 껍데기를 스폰하고 본체가 전장에 생성됨, HP 미러와 상단 바, 함교 파괴 시 일시정지 없는 격침, 격침 종료 후 Threat·XP·적 오퍼 정산, 껍데기 자동 정리 — `tests/boss_carrier_gate_test.gd`.
 
 ## 의도
 
@@ -163,6 +172,6 @@
 - 함교 OVERDRIVE 진입·장갑 개방·레이저 충전 → 발사 → 스윕
 - 격침 시 레이저·요격기 정리
 
-파괴 연출은 `labs/bosses/carrier/carrier_destruction_effect.gd`, 격침 진행·구역 전환·선체 디테일은 `labs/bosses/carrier/carrier_boss.gd`에서 관리한다. 부위 동작·손상·잔해는 `carrier_part.gd`, 함재기·돌격기·요격기는 `carrier_craft.gd`, 배기·레이저 판정은 `carrier_beam.gd`, 먼지 레이어는 `carrier_dust.gd`, 카메라·전경·HUD는 `carrier_boss_lab.gd`, 줌과 독립된 배경은 `carrier_background.gd`, 탄 패턴은 `patterns/carrier_lab_pattern.gd`에서 관리한다. 줌아웃·HP바 고정·폭발/카메라 동시 일시정지·침강 완료·효과 자동 정리·연출 중 재시작도 검증한다.
+본체 코드는 `enemies/carrier/`에 있다. 파괴 연출은 `carrier_destruction_effect.gd`, 격침 진행·구역 전환·선체 디테일은 `carrier_boss.gd`, 부위 동작·손상·잔해는 `carrier_part.gd`, 함재기·돌격기·요격기는 `carrier_craft.gd`, 배기·레이저 판정은 `carrier_beam.gd`, 먼지 레이어는 `carrier_dust.gd`, 탄 패턴은 `patterns/carrier_lab_pattern.gd`에서 관리한다. Lab 전용인 카메라·전경·HUD는 `labs/bosses/carrier/carrier_boss_lab.gd`, 줌과 독립된 배경은 `labs/bosses/carrier/carrier_background.gd`다. 줌아웃·HP바 고정·폭발/카메라 동시 일시정지·침강 완료·효과 자동 정리·연출 중 재시작도 검증한다.
 
-수치와 패턴은 Lab 검증용이다. 실제 보스 피해 시설·다중 무기 빌드·격침 보상·본 게임 밸런스 연결은 후속 범위다.
+수치와 패턴은 Lab에서 검증한 값을 본 게임에 그대로 쓴다. 다중 무기 빌드 기준 밸런스와 격침 보상의 크기는 플레이로 확인할 범위다.

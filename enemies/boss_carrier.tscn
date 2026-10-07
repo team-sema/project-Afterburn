@@ -1,0 +1,25 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" uid="uid://psmpwiapllcb" path="res://enemies/enemy.tscn" id="1_enemy"]
+[ext_resource type="Script" path="res://enemies/boss_carrier.gd" id="2_script"]
+[ext_resource type="Resource" path="res://resources/enemy_movement/sequences/boss_hold.tres" id="3_hold"]
+
+[node name="BossCarrier" instance=ExtResource("1_enemy")]
+script = ExtResource("2_script")
+
+[node name="StatsComponent" parent="." index="1"]
+health = 1920
+
+[node name="MovementController" parent="." index="3"]
+sequence = ExtResource("3_hold")
+
+[node name="ScoreComponent" parent="." index="13"]
+adjust_amount = 500
+
+[node name="ExperienceDropComponent" parent="." index="21"]
+experience_amount = 3
+drop_chance = 1.0
+
+[node name="EnemyHealthBar" parent="." index="23"]
+screen_offset = Vector2(0, 8)
+bar_size = Vector2(276, 5)
