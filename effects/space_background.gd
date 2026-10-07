@@ -1,7 +1,9 @@
 class_name SpaceBackground
 extends ParallaxBackground
 
-## Three-layer parallax star field (docs/design/effects.md 「World」).
+## Parallax star field (docs/design/effects.md 「World」).
+## Layer order: Space (black + dots) → Nebula (BackdropTheme colour field) →
+## Rocks (BackdropTheme silhouettes) → far stars → close stars → speed streaks.
 ## Cruise speeds are multiplied by `speed_scale`; above STREAK_THRESHOLD a
 ## layer of cyan-white streak lines fades in so a burst reads as speed.
 
@@ -11,8 +13,17 @@ const STREAK_THRESHOLD := 2.0
 const STREAK_COUNT := 24
 const STREAK_MAX_LENGTH := 80.0
 const STREAK_COLOR := Color(0.75, 0.95, 1.0)
+const ROCK_VERTEX_COUNT := 7
+const PLANET_RING_SEGMENTS := 40
+const PLANET_RING_TILT := -0.35
 
 @export_range(0.0, 20.0, 0.01) var speed_scale := 1.0
+## 성운·실루엣·행성 데이터. null이면 별밭만 그린다.
+@export var backdrop: BackdropTheme:
+	set(value):
+		backdrop = value
+		if is_node_ready():
+			_build_backdrop()
 
 @onready var space_layer: ParallaxLayer = %SpaceLayer
 @onready var far_stars_layer: ParallaxLayer = %FarStarsLayer
@@ -22,6 +33,8 @@ const STREAK_COLOR := Color(0.75, 0.95, 1.0)
 @onready var close_stars: TextureRect = $CloseStarsLayer/CloseStars
 
 var _streak_layer: StreakLayer
+var _nebula_layer: ParallaxLayer
+var _rock_layer: ParallaxLayer
 
 
 class StreakLayer:
@@ -53,6 +66,11 @@ func _process(delta: float) -> void:
 	space_layer.motion_offset.y += CRUISE_SPEEDS.x * speed_scale * delta
 	far_stars_layer.motion_offset.y += CRUISE_SPEEDS.y * speed_scale * delta
 	close_stars_layer.motion_offset.y += CRUISE_SPEEDS.z * speed_scale * delta
+	if backdrop != null:
+		if _nebula_layer != null:
+			_nebula_layer.motion_offset.y += backdrop.nebula_speed * speed_scale * delta
+		if _rock_layer != null:
+			_rock_layer.motion_offset.y += backdrop.rock_speed * speed_scale * delta
 	_update_streaks(delta)
 
 
@@ -63,6 +81,14 @@ func get_layer_speed(layer_index: int) -> float:
 
 func is_streaking() -> bool:
 	return _streak_layer != null and _streak_layer.alpha > 0.0
+
+
+func get_nebula_layer() -> ParallaxLayer:
+	return _nebula_layer
+
+
+func get_rock_layer() -> ParallaxLayer:
+	return _rock_layer
 
 
 func _seed_streaks() -> void:
@@ -106,3 +132,91 @@ func _resize_to_viewport() -> void:
 		texture_rect.size = viewport_size
 	for parallax_layer in [space_layer, far_stars_layer, close_stars_layer]:
 		parallax_layer.motion_mirroring.y = viewport_size.y
+	_build_backdrop()
+
+
+## Rebuilds the nebula and rock layers from `backdrop` for the current viewport.
+## Both tile vertically with the viewport height like the star layers.
+func _build_backdrop() -> void:
+	if _nebula_layer != null:
+		_nebula_layer.free()
+		_nebula_layer = null
+	if _rock_layer != null:
+		_rock_layer.free()
+		_rock_layer = null
+	if backdrop == null:
+		return
+	var viewport_size: Vector2 = get_viewport().get_visible_rect().size
+
+	_nebula_layer = ParallaxLayer.new()
+	_nebula_layer.name = "NebulaLayer"
+	_nebula_layer.motion_mirroring.y = viewport_size.y
+	var base := ColorRect.new()
+	base.name = "BaseTint"
+	base.color = backdrop.base_tint
+	base.size = viewport_size
+	_nebula_layer.add_child(base)
+	for index in backdrop.nebula_count():
+		var disc := _make_soft_disc(backdrop.nebula_colors[index], backdrop.nebula_radii[index])
+		disc.name = "Nebula%d" % index
+		disc.position = backdrop.nebula_positions[index] * viewport_size
+		_nebula_layer.add_child(disc)
+	add_child(_nebula_layer)
+	move_child(_nebula_layer, space_layer.get_index() + 1)
+
+	_rock_layer = ParallaxLayer.new()
+	_rock_layer.name = "RockLayer"
+	_rock_layer.motion_mirroring.y = viewport_size.y
+	for index in backdrop.rock_count():
+		var rock := _make_rock(backdrop.rock_sizes[index], index)
+		rock.name = "Rock%d" % index
+		rock.position = backdrop.rock_positions[index] * viewport_size
+		_rock_layer.add_child(rock)
+	if backdrop.planet_radius > 0.0:
+		var planet := _make_soft_disc(backdrop.planet_color, backdrop.planet_radius)
+		planet.name = "Planet"
+		planet.position = backdrop.planet_position * viewport_size
+		var ring := Line2D.new()
+		ring.name = "Ring"
+		ring.width = 1.2
+		ring.default_color = backdrop.planet_ring_color
+		for index in PLANET_RING_SEGMENTS + 1:
+			var angle := TAU * index / float(PLANET_RING_SEGMENTS)
+			var point := Vector2(cos(angle) * backdrop.planet_radius * 1.45, sin(angle) * backdrop.planet_radius * 0.35)
+			ring.add_point(point.rotated(PLANET_RING_TILT))
+		planet.add_child(ring)
+		_rock_layer.add_child(planet)
+	add_child(_rock_layer)
+	move_child(_rock_layer, _nebula_layer.get_index() + 1)
+
+
+## A sprite whose radial gradient fades from `color` to transparent at `radius`.
+static func _make_soft_disc(color: Color, radius: float) -> Sprite2D:
+	var gradient := Gradient.new()
+	gradient.set_color(0, color)
+	gradient.set_color(1, Color(color.r, color.g, color.b, 0.0))
+	var texture := GradientTexture2D.new()
+	texture.gradient = gradient
+	texture.fill = GradientTexture2D.FILL_RADIAL
+	texture.fill_from = Vector2(0.5, 0.5)
+	texture.fill_to = Vector2(1.0, 0.5)
+	texture.width = maxi(2, int(radius * 2.0))
+	texture.height = texture.width
+	var sprite := Sprite2D.new()
+	sprite.texture = texture
+	return sprite
+
+
+## An irregular dark polygon; `seed_index` keeps each rock's shape stable across rebuilds.
+func _make_rock(size: float, seed_index: int) -> Polygon2D:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = seed_index * 7919 + 17
+	var points := PackedVector2Array()
+	for index in ROCK_VERTEX_COUNT:
+		var angle := TAU * index / float(ROCK_VERTEX_COUNT) + rng.randf_range(-0.2, 0.2)
+		var radius := size * rng.randf_range(0.7, 1.0)
+		points.append(Vector2(cos(angle), sin(angle)) * radius)
+	var polygon := Polygon2D.new()
+	polygon.polygon = points
+	polygon.color = backdrop.rock_color
+	return polygon

@@ -8,6 +8,12 @@ Nova Drift 풍: **밝은 기하 코어 + 다중 글로우 레이어 + 어두운 
 
 - `WorldEnvironment` — HDR 글로우/블룸
 - `effects/space_background.tscn` (`SpaceBackground`) — 패럴랙스 스크롤. 순항 속도 12 / 40 / 160 px/s(우주·먼 별·가까운 별)에 `speed_scale`을 곱한다. `speed_scale`이 2를 넘으면 시안-흰색 스트릭 선 24개가 가까운 별층 속도로 흐르며 길이·밝기가 속도에 비례한다(최대 80px). 출격 시퀀스가 0 → 7 → 1로 몰아간다 ([씬 흐름 · 출격 시퀀스](scene-flow.md#런-시작--출격-시퀀스-effectslaunch_sequencegd-launchsequence)). 시작화면 배경도 같은 씬이라 순항 속도로 흐른다
+- **배경 디테일 (`BackdropTheme`, `effects/backdrop_theme.gd`)**: 순수 검정 별밭은 글로우 적이 뭉개져 보이므로, 우주층과 먼 별층 사이에 데이터로 만든 두 층을 더 둔다. `SpaceBackground.backdrop`에 꽂은 리소스(기본 `resources/backdrop/default_backdrop.tres`)를 읽어 뷰포트 크기에 맞춰 만들고, 뷰포트가 바뀌면 다시 만든다. null이면 별밭만 그린다.
+  - **성운층** `NebulaLayer`: 뷰포트 전체를 덮는 바탕색(`base_tint`, 기본 짙은 남보라 알파 0.55)으로 검정을 들어 올리고, 그 위에 방사형 그라데이션 색 면(`nebula_positions`(뷰포트 비율)·`nebula_radii`(px)·`nebula_colors`) 4장. 색은 적 분홍과 보색 범위(보라·남색·청록)로 제한한다. 6 px/s로 가장 느리게 흐른다.
+  - **실루엣층** `RockLayer`: 검은 소행성 다각형(`rock_positions`·`rock_sizes`, 7각 불규칙, 인덱스 시드라 모양이 고정) 5개와 고리 행성 1개(`planet_radius` 0이면 없음). 26 px/s.
+  - 두 층 모두 별층처럼 뷰포트 높이로 세로 타일링하며 `speed_scale`을 따른다. 별층 속도·스트릭·`get_layer_speed`는 그대로다.
+  - 스테이지 테마가 생기면 Phase별 `BackdropTheme`로 바꿔 끼우는 것이 의도이며, 지금은 기본 테마 하나다.
+  - 검증: `tests/space_backdrop_smoke_test.gd` (층 생성·순서·타일링·스크롤·테마 해제).
 
 ## 스프라이트 레이어 (함선·적·탄)
 
