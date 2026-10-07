@@ -32,7 +32,7 @@ size = Vector2(20, 14)
 is_elite = true
 
 [node name="Anchor" parent="." index="0"]
-scale = Vector2(1.35, 1.35)
+scale = Vector2(1.55, 1.55)
 
 [node name="DiffuseGlow" parent="Anchor" index="0"]
 self_modulate = Color(1, 0.08, 0.2, 0.16)
