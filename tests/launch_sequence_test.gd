@@ -3,7 +3,7 @@ extends SceneTree
 ## Launch sequence (docs/design/scene-flow.md 「런 시작 · 출격 시퀀스」):
 ## idle without a current scene, then play() + advance() drives ship rise,
 ## background burst/streaks, music low-pass opening, control unlock, and the
-## EncounterDirector start at the end.
+## EncounterDirector start at the end without pulling the player-flown ship back.
 
 const STEP := 0.05
 const HOME := Vector2(100.0, 216.0)
@@ -76,10 +76,15 @@ func _run() -> void:
 	_expect(weapon_loadout.process_mode == Node.PROCESS_MODE_INHERIT, "weapons resume with the controls")
 	_expect(launch.is_launching, "launch keeps settling after the unlock")
 	_expect(not director.is_running, "director waits until the settle ends")
+	_expect(ship.position.is_equal_approx(HOME), "ship reaches home by the unlock (%s)" % ship.position)
 
-	_step(launch, background, 0.8)
+	# The player flies the ship after the unlock; the settle must not pull it back.
+	var flown := HOME + Vector2(60.0, -40.0)
+	_step(launch, background, 0.3)
+	ship.position = flown
+	_step(launch, background, 0.5)
 	_expect(not launch.is_launching and finished[0], "launch finishes at 2.6s and emits launch_finished")
-	_expect(ship.position.is_equal_approx(HOME), "ship ends at home (%s)" % ship.position)
+	_expect(ship.position.is_equal_approx(flown), "ship keeps the player's position at the finish (%s)" % ship.position)
 	_expect(is_equal_approx(background.speed_scale, 1.0) and not background.is_streaking(), "background settles to cruise without streaks")
 	_expect(is_equal_approx(LaunchSequence.get_music_cutoff(), 20500.0), "music is fully open after launch")
 	_expect(director.is_running, "director starts when the launch finishes")

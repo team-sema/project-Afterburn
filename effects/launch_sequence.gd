@@ -209,7 +209,7 @@ func _finish() -> void:
 	if not _controls_unlocked:
 		_controls_unlocked = true
 		_set_controls(true)
-	ship.position = _home_position
+	# The ship is the player's since CONTROL_UNLOCK: keep where they flew it.
 	if _anchor != null:
 		_anchor.position = Vector2.ZERO
 	if _flame != null:
