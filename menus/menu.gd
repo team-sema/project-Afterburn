@@ -46,6 +46,8 @@ func _ready() -> void:
 	_default_focus = start_button
 	start_button.grab_focus()
 	_fade_in()
+	# The music stays muffled until the launch sequence opens it (scene-flow.md).
+	LaunchSequence.set_music_muffled(true)
 
 	var error := ResourceLoader.load_threaded_request(GAME_SCENE_PATH)
 	if error != OK:

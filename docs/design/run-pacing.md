@@ -15,7 +15,7 @@
 
 ## 등장 시퀀스 (`EncounterDirector`)
 
-무엇이 언제 나오는지는 **데이터 시퀀스** `resources/encounter_sequences/main_encounter_sequence.tres` 가 정한다. `gameplay.tscn`의 `EncounterDirector`가 런 시작과 함께 재생하며, 그 순간 `EnemyGenerator` 타이머와 `AugmentProgressionController` 60초 엘리트 타이머를 **꺼서 대체**한다 (테스트처럼 Director가 시작하지 않으면 두 타이머는 예전 그대로 동작).
+무엇이 언제 나오는지는 **데이터 시퀀스** `resources/encounter_sequences/main_encounter_sequence.tres` 가 정한다. `gameplay.tscn`의 `EncounterDirector`가 출격 시퀀스(2.6초, [씬 흐름](scene-flow.md#런-시작--출격-시퀀스-effectslaunch_sequencegd-launchsequence))가 끝나는 순간 재생을 시작하며, 그 순간 `EnemyGenerator` 타이머와 `AugmentProgressionController` 60초 엘리트 타이머를 **꺼서 대체**한다 (테스트처럼 Director가 시작하지 않으면 두 타이머는 예전 그대로 동작).
 
 - **Phase**: 공백으로 나눈 토큰 패턴 (`"a a a b a a c"`) + `repeat_count`. 순서대로 실행.
 - **Step(토큰)**: 종류 `NORMAL` / `WAVE` / `ELITE` / `BOSS` + `post_delay_min~max` + `handoff_remaining`. 시퀀스 공용(`shared_steps`) 또는 Phase 로컬(`steps`, 같은 토큰이면 우선).
@@ -110,6 +110,8 @@ Phase가 바뀔 때마다 HUD의 STAGE가 +1 된다. 개발자는 `.tres`의 패
 첫 엘리트: Threat **2** 사격형(Fighter). Threat **3** 돌격형(Awl). Threat 4부터는 Fighter·Awl·Bomb·Caster 중 직전 엘리트를 제외하고 무작위로 고른다. 여기서 Threat는 처치 후 도달할 관문 목표값이다. 로테이션·공통 HP 공식은 [엘리트](elites/index.md) 정본.
 
 탄소거 보상 중에는 전투 전체와 플레이어 오그먼트 `C` 입력을 잠근다. 적탄 1발은 XP 1로 변환되며, 기존 XP와 엘리트 확정 드롭까지 실제로 수집된 뒤에만 적 오그먼트 오퍼가 열린다. BOSS 관문도 같은 처치 정산(탄소거·XP 회수·Threat 상승·적 오퍼)을 거친다.
+
+**확인 필요 (플레이 테스트 2026-10-07):** 탄소거는 화면 밖 멀리 있는 적탄까지 전부 XP 오브로 바꾸고(`EnemyBullets.get_all`), 회수는 오브가 190px/s로 함선까지 날아올 때까지 전투 잠금을 유지한다(`BulletCancelRewardController`·`ExperienceOrb.start_forced_attraction`). 화면 밖 수백 px의 오브 하나가 몇 초를 잡아먹어 게임이 멈춘 것처럼 느껴진다. 수정 후보: 변환은 VisibleRect(+여유) 안의 적탄만 오브로 만들고 밖의 탄은 오브 없이 소거하거나 XP를 바로 더한다 · 강제 회수 속도를 거리 비례로 정해 모든 오브가 일정 시간(예: 0.6초) 안에 도착하게 한다 · 상한 시간이 지나면 남은 오브를 즉시 수집한다. 별도 feature에서 수정하고 이 문단을 확정 규칙으로 바꾼다.
 
 ## Threat HUD
 

@@ -7,7 +7,7 @@ Nova Drift 풍: **밝은 기하 코어 + 다중 글로우 레이어 + 어두운 
 ## World
 
 - `WorldEnvironment` — HDR 글로우/블룸
-- `effects/space_background.tscn` — 패럴랙스 스크롤 (약 2 / 5 / 20 px/s)
+- `effects/space_background.tscn` (`SpaceBackground`) — 패럴랙스 스크롤. 순항 속도 12 / 40 / 160 px/s(우주·먼 별·가까운 별)에 `speed_scale`을 곱한다. `speed_scale`이 2를 넘으면 시안-흰색 스트릭 선 24개가 가까운 별층 속도로 흐르며 길이·밝기가 속도에 비례한다(최대 80px). 출격 시퀀스가 0 → 7 → 1로 몰아간다 ([씬 흐름 · 출격 시퀀스](scene-flow.md#런-시작--출격-시퀀스-effectslaunch_sequencegd-launchsequence)). 시작화면 배경도 같은 씬이라 순항 속도로 흐른다
 
 ## 스프라이트 레이어 (함선·적·탄)
 
