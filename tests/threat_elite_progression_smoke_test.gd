@@ -41,7 +41,8 @@ func _run() -> void:
 	_expect(get_nodes_in_group("elites").size() == 1, "elite gate never duplicates the active elite")
 	if is_instance_valid(elite):
 		elite.stats_component.health = 0
-		_expect(paused, "elite defeat pauses combat for the bullet cancel reward")
+		_expect(not paused, "elite defeat keeps the game running during the bullet cancel reward")
+		_expect(gameplay.get_node("Ship").can_process(), "the ship can still move during the reward")
 		_expect(progression.bullet_cancel_reward_active, "elite reward locks player augment input")
 		_expect(not offer_controller.is_offer_active, "enemy offer waits for the XP vacuum")
 		await elite_controller.elite_defeated
@@ -56,7 +57,7 @@ func _run() -> void:
 	)
 	await process_frame
 	await process_frame
-	_expect(offer_controller.selection_ui.visible, "enemy offer UI opens while reward pause stays active")
+	_expect(offer_controller.selection_ui.visible, "enemy offer UI opens after the reward")
 	_expect(enemy_registry.get_active_augments().is_empty(), "enemy stays unchanged until a choice is applied")
 
 	var chosen := load("res://resources/enemy_augments/enemy_health_boost_1_2.tres") as EnemyAugment

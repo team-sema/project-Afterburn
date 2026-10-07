@@ -90,7 +90,7 @@ func _run() -> void:
 	elite_controller.elite_defeated.connect(func(_threat: int) -> void: defeated[0] = true)
 	carrier._physics_process(8.3)
 	await process_frame
-	_expect(paused or defeated[0], "finished sinking starts the bullet-cancel settlement")
+	_expect(progression.bullet_cancel_reward_active or defeated[0], "finished sinking starts the bullet-cancel settlement")
 	if not defeated[0]:
 		await elite_controller.elite_defeated
 	_expect(progression.get_threat_level() == 2, "boss defeat advances Threat")

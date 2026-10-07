@@ -166,8 +166,8 @@ World 왼쪽 패널에 MasterVolumeControl을 표시한다. 슬라이더는 Mast
 1. 적 사망 시 경험치 오브 드롭 → 플레이어 접촉 시 경험치 획득
 2. XP가 요구량을 채워도 **자동으로 열리지 않음**. `open_augment_offer`(**C**)로 PLAYER 오퍼 요청 · 오퍼 UI가 이미 열려 있으면 XP 미소모
 3. 시퀀스 ELITE 스텝 → 다음 Threat 엘리트 1기 소환. 현재 Threat는 유지하고 일반 Encounter와 시퀀스는 대기한다. Director 미사용 시에만 60초 타이머로 요청한다.
-4. 엘리트 처치 → 즉시 pause → 모든 `enemy_projectiles`를 탄 위치의 XP 1 오브로 변환. 기존 XP와 엘리트 확정 드롭도 함께 플레이어에게 강제 흡수하며 이 동안 `C` 플레이어 오퍼 입력을 잠금
-5. 모든 XP의 실제 정산 완료 → Threat 상승 → ENEMY 오퍼 요청. pause 소유권을 오퍼에 그대로 인계
+4. 엘리트 처치 → pause 없이 화면 안 `enemy_projectiles`를 탄 위치의 XP 1 오브로 변환(화면 밖은 XP 없이 소거). 기존 XP와 엘리트 확정 드롭도 함께 플레이어에게 강제 흡수하며 이 동안 `C` 플레이어 오퍼 입력을 잠금
+5. 모든 XP의 실제 정산 완료 → Threat 상승 → ENEMY 오퍼 요청. pause는 오퍼가 연다
 6. `AugmentOfferController.request_offer(type)` → `offer_started(type)` → pause. 강화 분기점 인트로는 PLAYER 청색 / ENEMY 적색 테마로 구분
 7. PLAYER 오퍼는 상단 3지선다와 하단 `범용 슬롯 +1`을 함께 표시. `FACILITY_EFFECT`는 우측 STATUS 범용 육각 슬롯의 같은 tag·빈 칸 미리보기, 무기 Kind는 병기 배치·모듈 레벨 미리보기를 표시하되 하단 슬롯 확장 버튼은 바꾸지 않음
 8. 시설 카드 → 범용 빈 슬롯 설치(가득 차면 전체 슬롯 교체 모달). 무기 Kind(획득·모듈 강화) → 로드아웃에 직접 적용(만석 획득은 베이 교체 UI). `범용 슬롯 +1`은 Kind와 무관하게 선택 가능(포커스/호버 → 다음 육각 칸 점멸, 선택 → 용량 +1; 시작 5, 최대 15면 비활성)
