@@ -1,6 +1,6 @@
 # 탄막 API 레퍼런스와 본 게임 이식 안내
 
-코드 확인: 2026-10-05. 현재 구현된 API의 사용 설명이다. 게임 규칙의 정본은 [전투 기획서](design/combat.md)이다. 별도 API 문서를 요청한 데 따라 사용 계약을 모아 두었다. API 변경 시 이 문서도 함께 갱신한다.
+코드 확인: 2026-10-08. 현재 구현된 API의 사용 설명이다. 게임 규칙의 정본은 [전투 기획서](design/combat.md)이다. 별도 API 문서를 요청한 데 따라 사용 계약을 모아 두었다. API 변경 시 이 문서도 함께 갱신한다.
 
 ## 시작하기: 적에 .gd 패턴 지정하기 (2026-09-17)
 
@@ -52,7 +52,7 @@ func build(params: Dictionary) -> void:
 - 조준 고정 연발 예제: [locked_burst_pattern.gd](../patterns/locked_burst_pattern.gd). `aim()` 뒤 `Aim.LOCKED` 바늘탄 3발(0.12초 간격) → 2초 휴식 → 반복. `build(params)`로 `shots`, `gap`, `rest`, `speed`를 씬에서 조정할 수 있다. 본 게임 적에는 배정하지 않았다.
 - 조준 부채꼴 연발 예제: [aimed_fan_burst_pattern.gd](../patterns/aimed_fan_burst_pattern.gd). 5방향 40° 부채꼴의 중앙 탄이 매 발사 표적을 향하는 `Aim.EACH_SHOT`, 0.15초 간격 5연발 → 1.6초 휴식 → 반복. `ways`, `spread`, `shots`, `gap`, `rest`, `speed`를 `build(params)`로 조정. 본 게임 적에는 배정하지 않았다.
 - 16방향 혼합 시험: [mixed_sixteen_pattern.gd](../patterns/mixed_sixteen_pattern.gd). 이 `.gd`가 현재 시험 씬의 실행 원본이다. 예전 `.tres`는 저장 형식 호환 예제로 남겨 둔다.
-- 쇼케이스 패턴: [`patterns/showcase/`](../patterns/showcase/) 17종(탄→탄 SPAWN 데모 `comet_trail`, 다중 Volley SPAWN 데모 `saturn_burst`, 예고형 빔 데모 `beam_lattice`, 벽 반사 데모 `ricochet`, 2026-10-07 탄막 교본 『弾幕 最強のシューティングゲームを作る！』 응용 5종 `washer_spiral`·`stepping_spiral`·`winder`·`overtaking_curtain`·`star_placed` 포함). Lab 패턴 목록에 `showcase/…`로 나온다. 본 게임 적에는 배정하지 않았다. 색만 바꾼 탄은 [`labs/bullet/showcase_shots.gd`](../labs/bullet/showcase_shots.gd)로 만든다(외형 복제 후 `tint` 변경, 텍스처 공유).
+- 쇼케이스 패턴: [`patterns/showcase/`](../patterns/showcase/) 19종(탄→탄 SPAWN 데모 `comet_trail`, 무판정 유령탄 데모 `phantom_drift`·`lattice_shift`, 다중 Volley SPAWN 데모 `saturn_burst`, 예고형 빔 데모 `beam_lattice`, 벽 반사 데모 `ricochet`, 2026-10-07 탄막 교본 『弾幕 最強のシューティングゲームを作る！』 응용 5종 `washer_spiral`·`stepping_spiral`·`winder`·`overtaking_curtain`·`star_placed` 포함). Lab 패턴 목록에 `showcase/…`로 나온다. 본 게임 적에는 배정하지 않았다. 색만 바꾼 탄은 [`labs/bullet/showcase_shots.gd`](../labs/bullet/showcase_shots.gd)로 만든다(외형 복제 후 `tint` 변경, 텍스처 공유).
 
   | 파일 | 형태 | 쓰는 기능 |
   |------|------|-----------|
@@ -72,6 +72,8 @@ func build(params: Dictionary) -> void:
   | `winder_pattern.gd` | 좌우 발사구의 쌀탄 6줄 광선이 반대 위상으로 ±30° 흔들리며 통로가 열렸다 닫히는 와이퍼 | `origin_offset` 발사구 2개 · 0.05초마다 링 `fire_together` · sin 기준각 5초 주기 |
   | `overtaking_curtain_pattern.gd` | 발사구 3곳의 조준 부채꼴 8묶음이 0.08초마다 22px/s씩 빨라져 앞 묶음을 추월하며 두꺼운 벽으로 뭉쳤다 퍼짐 | `aim()` + `Aim.LOCKED` · `origin_offset` · 묶음별 속도·tint |
   | `star_placed_pattern.gd` | 오각별 윤곽을 따라 탄을 한 발씩 놓고 다 그린 뒤 0.5초 멈춰 붉게 번쩍이며 동시 발사. 각 탄은 반지름 방향에서 144° 비틀려 중심을 지나 반대쪽으로 소용돌이치고, 36° 돌린 큰 별이 반대로 돈다 | `origin_offset`으로 배치 · `speed = 0` · 탄별 `wait`(공통 발사 시각까지 남은 시간) → `tint_to` → `speed_to` → 원래 색 복귀 |
+  | `phantom_drift_pattern.gd` | 청록 쌀탄 부채꼴이 내려오다 판정이 꺼져 반투명한 창백한 유령탄이 되고, 좌우로 갈라져 느리게 흘러간 뒤 분홍으로 불투명해지며 판정이 켜지고 표적으로 재조준해 돌진 | `intangible()` → `parallel`(투명도·색·`turn_to`·속도) → `parallel`(불투명·색·정지) → `tangible()` → `homing` → `speed_to` |
+  | `lattice_shift_pattern.gd` | 빨강 `\` 선·파랑 `/` 선(탄 간격 8.9px)으로 된 마름모 우리. 빨강은 왼쪽, 파랑은 오른쪽으로만 움직여 격자가 내려간다. 실체 상태로 1/4칸 내려간 뒤 유령이 되어 반 칸 더 벌어지며 새 교차점이 예전 칸 중심에 놓이고, 다시 실체화 | 반 주기 `LATERAL_WAVE` 수평 이동만 사용(속도 0) · `intangible()`/`tangible()` · 12 Action 무한 반복 · 틱별 지연을 유령 대기에서 흡수 · `build(params)`의 `field` |
   | `saturn_burst_pattern.gd` | 조준한 보라 대형 구탄이 멈추며 하얗게 압축된 뒤 기울어진 타원 고리 두 겹(노랑 32발·청록 32발)으로 모양을 유지하며 터짐. 구탄 3발이 0.9초 간격 | `speed_to(0)` → `parallel`(시각·판정 축소, 색) → `spawn_together`(SINGLE 32개, 방향별 타원 반지름 속도) ×2, 둘째에 `consume` |
 
   검증: `tests/labs/showcase_patterns_smoke_test.gd` (Lab 로더로 모두 불러와 3초 재생 시 발사·반복 유지).
@@ -242,6 +244,8 @@ tint_to(color: Color, seconds: float)
 opacity_to(alpha: float, seconds: float)
 visual_scale_to(scale: float, seconds: float)
 hitbox_scale_to(scale: float, seconds: float)
+intangible()
+tangible()
 parallel(group: Array[BulletAction])
 spawn(volley: BarrageVolley, consume := false)
 spawn_together(volleys: Array[BarrageVolley], consume := false)
@@ -262,6 +266,15 @@ validation_error() -> String
 - `tint_to`: 일반 탄은 기본색을 바꾼다. 레이저는 기존 금색 팔레트에 곱할 색을 바꾼다(초기 흰색). 따라서 레이저에 파란색을 지정한 결과는 순수한 파란색과 다를 수 있다.
 - `opacity_to`: 전체 투명도 0~1. 투명해져도 판정과 수명은 유지된다.
 - `visual_scale_to` / `hitbox_scale_to`: 각각 시각·판정 배율. 0 초과 16 이하. 서로 자동 연동되지 않는다.
+- `intangible` / `tangible`: 판정을 즉시 끄고 켠다(순간 Action). 꺼진 동안 플레이어와 겹쳐도 피격·소멸이 없고 이동·SPAWN은 계속된다. 켜는 순간 플레이어와 겹쳐 있으면 다음 물리 프레임에 피격된다. 외형은 바꾸지 않으므로 `opacity_to`·`tint_to`를 함께 쓰고, **판정을 켜기 전에 불투명도를 먼저 되돌린다**. `BULLET` 몸체 전용이다(레이저 Shot에 있으면 무효). 꺼진 탄도 `EnemyBullets` 조회·소거 대상이지만 물리 쿼리 `query_shape`에는 잡히지 않는다. 규칙 정본: [전투 — 무판정 구간](design/combat.md#무판정-구간-tangible--구현-완료).
+
+```gdscript
+# 내려오다 유령이 되어 옆으로 흐른 뒤 다시 실체화하는 탄
+shot.behavior = BulletBehavior.new().wait(0.9).intangible().parallel([
+    BulletAction.make(BulletAction.Type.OPACITY, 0.3, 0.15),
+    BulletAction.make(BulletAction.Type.TURN_TO, 70, 0.15),
+]).wait(1.1).opacity_to(1.0, 0.3).tangible()
+```
 - `spawn`: 그 순간 탄의 위치에서 `volley`를 발사한다(아래 「탄→탄 발사」). `consume = true`면 발사 후 탄을 지운다.
 - `spawn_together`: Volley 여러 개를 한 SPAWN으로 같은 위치·진행 방향에서 함께 발사한다. Volley마다 속도·각도·조준이 따로이며 합계 32발까지다.
 - `repeat(n)`: Behavior 전체를 총 n번 실행. 기본값 1, 0은 무한. 마지막 상태는 다음 반복으로 이어진다. 예: `turn_by(30, 1).repeat(3)`은 총 90° 선회한다.
@@ -279,10 +292,11 @@ BulletAction.visual_scale_to(scale, seconds)
 BulletAction.hitbox_scale_to(scale, seconds)
 BulletAction.spawn(volley, consume := false)
 BulletAction.spawn_together(volleys, consume := false)
+BulletAction.set_tangible(on: bool)
 BulletAction.make(type, value, seconds)
 ```
 
-`Type`: `WAIT`, `TURN_BY`, `TURN_TO`, `TURN_AT`, `HEADING_WAVE`, `LATERAL_WAVE`, `SPEED`, `TINT`, `OPACITY`, `VISUAL_SCALE`, `HITBOX_SCALE`, `PARALLEL`, `HOMING`, `SPAWN`. 기존 저장 enum 번호는 유지한다(SPAWN은 끝에 추가).
+`Type`: `WAIT`, `TURN_BY`, `TURN_TO`, `TURN_AT`, `HEADING_WAVE`, `LATERAL_WAVE`, `SPEED`, `TINT`, `OPACITY`, `VISUAL_SCALE`, `HITBOX_SCALE`, `PARALLEL`, `HOMING`, `SPAWN`, `TANGIBLE`. 기존 저장 enum 번호는 유지한다(SPAWN·TANGIBLE은 끝에 추가). `TANGIBLE`은 duration 0, `value` 0(끔)·1(켬)만 허용하며 병렬 묶음에 넣을 수 있다(채널 `tangible`).
 
 직접 편집할 수 있는 필드는 `type`, `duration`, `value`, `period`, `phase`, `color`, `children`, `transition_type`, `ease_type`, `payload`(SPAWN Volley), `payloads`(SPAWN Volley 목록, 비어 있지 않으면 `payload`보다 우선), `consume_parent`(SPAWN 후 부모 제거)이다. SPAWN 전용 조회는 `spawn_volleys()`(실제 발사 목록)와 `spawn_count()`(합계 발수)다. `make`는 `period`를 자동 설정하지 않으므로 파동 액션을 직접 만들면 `period`도 지정한다. `BulletAction`의 나머지 메서드는 `eased(transition, ease)`(자기 자신 반환), `uses_easing()`, `progress(elapsed)`, `channel()`, `length()`, `validation_error()`, `spawn_error()`다.
 
@@ -300,7 +314,7 @@ shot.behavior = BulletBehavior.new().wait(0.3).parallel([
 
 이 예제의 판정 두께는 유지된다. 발사 후 Behavior 자체를 교체하거나 임의 콜백을 실행하는 API는 없다. 탄 제거는 11절의 `EnemyBullets.cancel`을 쓴다.
 
-실행기는 Action 경계의 누적 상태와 탄별 궤적 표본을 재사용한다. 과거·미래 조회는 실제 탄 나이를 전진시키지 않으며, 몸체·판정·경로 예측은 같은 위치 계산을 사용한다. 경계의 1e-10초 이내 부동소수점 오차는 경계 시각으로 처리한다. 발사 후 외부에서 속도·방향을 바꾸는 효과는 11절의 `EnemyBullets.apply_effect`를 쓴다.
+실행기는 Action 경계의 누적 상태와 탄별 궤적 표본을 재사용한다. 같은 Behavior 인스턴스를 쓰는 탄(BarragePlayer가 쏜 같은 Shot의 탄, 같은 SPAWN의 자식)은 Behavior가 정하는 상태를 나이별로 공유하고, 적분이 필요한 경로는 발사 속도별 로컬 궤적 하나를 회전해 쓴다(호밍 제외, `turn_to`는 발사 방향별). 감속·방향 오프셋 같은 외부 개입은 탄 전용 기록이라 공유와 무관하다. 탄별 개입을 새로 만들 때는 공유 Behavior나 `sample_shared` 결과를 수정하지 말고 탄 전용 상태를 쓴다. 규칙 정본: [전투 — 실행 상태 캐시](design/combat.md#실행-상태-캐시--구현-완료). 과거·미래 조회는 실제 탄 나이를 전진시키지 않으며, 몸체·판정·경로 예측은 같은 위치 계산을 사용한다. 경계의 1e-10초 이내 부동소수점 오차는 경계 시각으로 처리한다. 발사 후 외부에서 속도·방향을 바꾸는 효과는 11절의 `EnemyBullets.apply_effect`를 쓴다.
 
 ### 비행 중 표적 추적
 
@@ -517,7 +531,7 @@ fire_together(layers)
 - 중첩 Behavior 그룹, 액션 단위 반복, 외부 이벤트 대기, 실행 중 Behavior 교체는 제공하지 않는다. 외부 궤도 효과는 속도 배율·방향 오프셋만 제공한다(11절).
 - 탄 노드와 물리 판정은 탄마다 존재한다. 배치 렌더링은 노드/충돌 처리 비용까지 제거하지 않는다.
 - 위치·예측·레이저 과거 몸통은 같은 궤적 함수를 쓴다. 일반 이동 적분은 1/120초 중점 근사다. 직진·단일 일정 선회는 해석식, 단일 방향 파동은 직접 속도 평가를 사용한다.
-- 예측 반경(`get_hazard_radius`)은 Behavior 전체의 최대 판정 배율을 사용하므로 실제 현재 판정보다 보수적일 수 있다. 성능 측정 결과와 환경은 작업 기록을 참고한다.
+- 예측 반경(`get_hazard_radius`)은 Behavior 전체의 최대 판정 배율을 사용하므로 실제 현재 판정보다 보수적일 수 있다. 경로 예측도 판정 꺼짐(`intangible`) 구간을 구분하지 않는다. 성능 측정 결과와 환경은 작업 기록을 참고한다.
 
 ## 10. 본 게임 이식 — Drone·Striker·Interceptor·Caster 적용 완료
 

@@ -1,8 +1,9 @@
 class_name BulletAction
 extends Resource
 
-## SPAWN is appended last so saved Action types keep their values.
-enum Type { WAIT, TURN_BY, TURN_TO, TURN_AT, HEADING_WAVE, LATERAL_WAVE, SPEED, TINT, OPACITY, VISUAL_SCALE, HITBOX_SCALE, PARALLEL, HOMING, SPAWN }
+## New types are appended last so saved Action types keep their values.
+## TANGIBLE is instantaneous: value 0 switches the hitbox off, 1 back on.
+enum Type { WAIT, TURN_BY, TURN_TO, TURN_AT, HEADING_WAVE, LATERAL_WAVE, SPEED, TINT, OPACITY, VISUAL_SCALE, HITBOX_SCALE, PARALLEL, HOMING, SPAWN, TANGIBLE }
 ## SPAWN limits: bullets per SPAWN (summed over its Volleys), SPAWN Actions per
 ## Behavior, and child bullets per parent bullet (repeats spend the same budget).
 const SPAWN_MAX_COUNT := 32
@@ -65,6 +66,11 @@ func spawn_volleys() -> Array[BarrageVolley]:
 		single.append(payload)
 	return single
 
+## Switches the bullet hitbox off (`on = false`) or back on, instantly. The
+## look is unchanged; pair it with opacity_to/tint_to.
+static func set_tangible(on: bool) -> BulletAction:
+	return make(Type.TANGIBLE, 1.0 if on else 0.0, 0)
+
 static func tint_to(tint: Color, seconds: float) -> BulletAction:
 	var action := make(Type.TINT, 0, seconds)
 	action.color = tint
@@ -103,6 +109,7 @@ func channel() -> String:
 		Type.OPACITY: return "opacity"
 		Type.VISUAL_SCALE: return "visual_scale"
 		Type.HITBOX_SCALE: return "hitbox_scale"
+		Type.TANGIBLE: return "tangible"
 	return ""
 
 func length() -> float:
@@ -115,7 +122,7 @@ func length() -> float:
 	return longest
 
 func validation_error() -> String:
-	if type < Type.WAIT or type > Type.SPAWN or not is_finite(duration) or duration < 0 or not is_finite(value):
+	if type < Type.WAIT or type > Type.TANGIBLE or not is_finite(duration) or duration < 0 or not is_finite(value):
 		return "Action needs a valid type, finite value and nonnegative duration."
 	if transition_type < Tween.TRANS_LINEAR or transition_type > Tween.TRANS_SPRING or ease_type < Tween.EASE_IN or ease_type > Tween.EASE_OUT_IN:
 		return "Action easing must use Tween transition and ease enums."
@@ -136,6 +143,8 @@ func validation_error() -> String:
 	if type == Type.SPAWN:
 		var error := spawn_error()
 		if not error.is_empty(): return error
+	if type == Type.TANGIBLE and (duration != 0 or (value != 0 and value != 1)):
+		return "Tangible is instantaneous with value 0 (off) or 1 (on)."
 	if type == Type.SPEED and value < 0: return "Speed must be nonnegative."
 	if type == Type.HOMING and (value <= 0 or duration <= 0): return "Homing needs a positive turn rate and duration."
 	if type in [Type.VISUAL_SCALE, Type.HITBOX_SCALE] and (value <= 0 or value > 16): return "Scale must be in (0, 16]."

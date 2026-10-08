@@ -36,7 +36,7 @@ var _heading_actions: Array[BulletAction] = []
 var _speed_actions: Array[BulletAction] = []
 var _homing: RefCounted
 ## External trajectory effects (augments), keyed by handle:
-## handle -> {speed_mult, heading_offset, until}. See combat.md 외부 궤도 개입.
+## handle -> {speed_mult, heading_offset, until}. See combat.md ?몃? 沅ㅻ룄 媛쒖엯.
 var _effects: Dictionary = {}
 ## Stretches of bullet age with one combined effect set, oldest first:
 ## {time, speed_mult, heading_offset, anchor, has_anchor, cache}. Each stretch
@@ -53,6 +53,33 @@ var _children_spent := 0
 ## velocity. Cleared whenever playback commits (homing input may change).
 var _sample_time := NAN
 var _sample_cache: Dictionary
+## Debug/benchmark switch for the shared sample tables below.
+static var share_samples := true
+## Samples shared with every state on the same Behavior instance and launch
+## key ({age: state}); null for homing, whose state is per bullet. Trajectory
+## effects never touch these: they act on velocity/position only.
+var _memo: Variant = null
+const MEMO_LIMIT := 512
+## Trajectory shared with every state on the same Behavior instance and launch
+## speed (and direction for world-heading Behaviors), integrated once in a
+## local frame where the launch direction is straight down. Each bullet rotates
+## it by `_frame_angle` and adds its own lateral offset; trajectory effects
+## branch off into per-bullet events as before. Null for analytic paths and
+## homing.
+var _path: SharedPath = null
+var _frame_angle := 0.0
+
+## Integrated local-frame path: fixed 1/120 s steps plus a memo of exact query
+## times, both shared read-mostly by every state that adopts it.
+class SharedPath extends RefCounted:
+	const QUERY_LIMIT := 2048
+	var positions := PackedVector2Array([Vector2.ZERO])
+	var queries := {}
+
+	func extend_to(index: int, integrator: BulletBehaviorState) -> void:
+		while positions.size() <= index:
+			var start := (positions.size() - 1) * BulletBehaviorState.STEP
+			positions.append(positions[-1] + integrator._local_integral(start, BulletBehaviorState.STEP))
 var _spawn_budget_spent := false
 
 ## `copy = false` adopts `behavior` as-is; pass it only when the caller already
@@ -63,7 +90,7 @@ func _init(behavior: BulletBehavior, direction: Vector2, speed: float, tint: Col
 	_speed = speed
 	_tint = tint
 	_limit = lifetime
-	_tail = {"heading": 0.0, "speed": _speed, "tint": _tint, "opacity": 1.0, "visual_scale": 1.0, "hitbox_scale": 1.0, "lateral": 0.0, "lateral_velocity": 0.0}
+	_tail = {"heading": 0.0, "speed": _speed, "tint": _tint, "opacity": 1.0, "visual_scale": 1.0, "hitbox_scale": 1.0, "tangible": true, "lateral": 0.0, "lateral_velocity": 0.0}
 	_finished = _behavior.actions.is_empty()
 	# Behavior-invariant analysis is cached on the Behavior and shared
 	# read-only by every bullet, so launch spikes skip re-walking the actions.
@@ -82,6 +109,12 @@ func _init(behavior: BulletBehavior, direction: Vector2, speed: float, tint: Col
 	_cycle_length = analysis.cycle_length
 	if analysis.has_homing:
 		_homing = preload("res://projectiles/bullet_homing_trajectory.gd").new(self)
+	elif share_samples:
+		# Array keys compare by exact value, so nearby speeds/tints never mix.
+		_memo = _behavior.sample_memo([_speed, _tint, _direction if analysis.uses_world_heading else Vector2.ZERO])
+		if not (_constant_velocity or _single_turn != null or _single_wave != null):
+			_path = _behavior.shared_path([_speed, _direction if analysis.uses_world_heading else Vector2.ZERO])
+			_frame_angle = Vector2.DOWN.angle_to(_direction)
 
 func configure_homing(owner: Node2D, origin: Vector2, target: Node2D = null, resolver := Callable()) -> void:
 	if _homing != null: _homing.configure(owner, origin, target, resolver)
@@ -109,9 +142,23 @@ func is_velocity_constant() -> bool:
 ## Memoized state for internal reads only; never hand it out or modify it.
 func _shared_sample(time: float) -> Dictionary:
 	if time != _sample_time:
-		_sample_cache = _sample_uncached(time)
+		_sample_cache = _sample_uncached(time) if _memo == null else _memo_sample(time)
 		_sample_time = time
 	return _sample_cache
+
+## The state at `time` from the shared table, evaluating it once per age for
+## every bullet on this Behavior and launch key. Read-only, like sample_shared.
+func _memo_sample(time: float) -> Dictionary:
+	var t := clampf(time, 0, _limit)
+	var memo: Dictionary = _memo
+	var hit: Variant = memo.get(t)
+	if hit != null:
+		return hit
+	var state := _sample_uncached(t)
+	if memo.size() >= MEMO_LIMIT:
+		memo.clear()
+	memo[t] = state
+	return state
 
 func _sample_uncached(time: float) -> Dictionary:
 	if _homing != null: return _homing.sample(clampf(time, 0, _limit))
@@ -186,6 +233,7 @@ func invalidate_prediction() -> void:
 		return
 	# Static Action checkpoints remain valid. Future dynamic input handling must
 	# split its timeline at playback_time before changing any movement inputs.
+	# A shared path depends on nothing but the Behavior, so it never trims.
 	var keep := floori(playback_time / STEP) + 1
 	if _positions.size() > keep: _positions.resize(keep)
 	for time in _position_queries.keys():
@@ -258,6 +306,8 @@ func _apply(action: BulletAction, elapsed: float, initial: Dictionary, state: Di
 			state.visual_scale = lerpf(initial.visual_scale, action.value, weight)
 		BulletAction.Type.HITBOX_SCALE:
 			state.hitbox_scale = lerpf(initial.hitbox_scale, action.value, weight)
+		BulletAction.Type.TANGIBLE:
+			state.tangible = action.value > 0.5
 
 func velocity_at(time: float) -> Vector2:
 	var t := clampf(time, 0, _limit)
@@ -430,6 +480,15 @@ func _trim_effect_caches(after: float) -> void:
 			event.cache = cache
 
 func _forward_velocity(time: float) -> Vector2:
+	return _velocity_along(_direction, time)
+
+## Midpoint step of the local-frame path (launch direction = straight down).
+func _local_integral(start: float, duration: float) -> Vector2:
+	return _velocity_along(Vector2.DOWN, start + duration * 0.5) * duration
+
+## Forward velocity with the launch direction replaced by `basis`. TURN_TO still
+## aims from the real launch direction; such Behaviors key shared paths on it.
+func _velocity_along(basis: Vector2, time: float) -> Vector2:
 	if _single_wave != null:
 		var t := clampf(time, 0, _limit)
 		var duration := _single_wave.duration
@@ -441,11 +500,11 @@ func _forward_velocity(time: float) -> Vector2:
 		else:
 			var elapsed := maxf(0.0, t - cycles * duration)
 			heading = end_heading * cycles + _single_wave.value * sin(TAU * elapsed / _single_wave.period + _single_wave.phase)
-		return _direction.rotated(deg_to_rad(heading)) * _speed
+		return basis.rotated(deg_to_rad(heading)) * _speed
 	var t := clampf(time, 0, _limit)
 	var index := _segment_at(t)
 	if index < 0:
-		return _direction.rotated(deg_to_rad(_tail.heading)) * float(_tail.speed)
+		return basis.rotated(deg_to_rad(_tail.heading)) * float(_tail.speed)
 	var initial := _initials[index]
 	var elapsed := maxf(0, t - _starts[index])
 	var heading := float(initial.heading)
@@ -464,7 +523,7 @@ func _forward_velocity(time: float) -> Vector2:
 	action = _speed_actions[_indices[index]]
 	if action != null:
 		speed = lerpf(speed, action.value, action.progress(elapsed))
-	return _direction.rotated(deg_to_rad(heading)) * speed
+	return basis.rotated(deg_to_rad(heading)) * speed
 
 func _integral(start: float, duration: float) -> Vector2:
 	# Midpoint quadrature avoids looking ahead across an instantaneous action.
@@ -521,6 +580,9 @@ func _position_at_uncached(t: float) -> Vector2:
 		if absf(omega) < 0.0001: return _direction * _speed * t
 		var normal := Vector2(-_direction.y, _direction.x)
 		return _speed / omega * (_direction * sin(omega * turning) + normal * (1 - cos(omega * turning))) + _direction.rotated(omega * turning) * _speed * (t - turning)
+	if _path != null:
+		var local := _shared_local_position(t).rotated(_frame_angle)
+		return local + (_direction.orthogonal() * float(_shared_sample(t).lateral) if _has_lateral else Vector2.ZERO)
 	var index := floori(t / STEP)
 	while _positions.size() <= index:
 		var start := (_positions.size() - 1) * STEP
@@ -528,6 +590,22 @@ func _position_at_uncached(t: float) -> Vector2:
 	var remainder := t - index * STEP
 	var position := _positions[index] + _integral(index * STEP, remainder) if remainder > 0 else _positions[index]
 	return position + (_direction.orthogonal() * float(_shared_sample(t).lateral) if _has_lateral else Vector2.ZERO)
+
+## Local-frame position at `t` from the shared path; the first bullet to ask
+## for a time integrates it, the rest read it.
+func _shared_local_position(t: float) -> Vector2:
+	var path := _path
+	var hit: Variant = path.queries.get(t)
+	if hit != null:
+		return hit
+	var index := floori(t / STEP)
+	path.extend_to(index, self)
+	var remainder := t - index * STEP
+	var local := path.positions[index] + _local_integral(index * STEP, remainder) if remainder > 0 else path.positions[index]
+	if path.queries.size() >= SharedPath.QUERY_LIMIT:
+		path.queries.clear()
+	path.queries[t] = local
+	return local
 
 func max_hitbox_scale(_until: float) -> float:
 	# Clamped interpolation stays between endpoints, even for nonmonotonic easing.

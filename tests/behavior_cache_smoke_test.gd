@@ -11,6 +11,25 @@ func expect(ok: bool, message: String) -> void:
 	if not ok and failures.size() < 20: failures.append(message)
 
 func compare_behavior(behavior: BulletBehavior, label: String) -> void:
+	# The integrator itself must match the reference exactly, so the strict
+	# pass runs with per-bullet paths. Shared paths integrate in a rotated local
+	# frame; their float32 rounding accumulates differently, so they are
+	# checked against the reference with a tolerance relative to the distance.
+	# share_samples is read when a state is created.
+	BulletBehaviorState.share_samples = false
+	_compare_behavior(behavior, label)
+	var exact := BulletBehaviorState.new(behavior, Vector2(0.6, 0.8), 90, Color.CYAN, 30)
+	BulletBehaviorState.share_samples = true
+	var shared := BulletBehaviorState.new(behavior, Vector2(0.6, 0.8), 90, Color.CYAN, 30)
+	shared.position_at(30)
+	for i in 301:
+		var time := i / 10.0
+		var expected := exact.position_at(time)
+		var allowed := maxf(0.001, expected.length() * 1.0e-4)
+		expect(shared.position_at(time).distance_to(expected) <= allowed, label + " shared path at " + str(time))
+		expect(shared.velocity_at(time).distance_to(exact.velocity_at(time)) < 0.001, label + " shared velocity at " + str(time))
+
+func _compare_behavior(behavior: BulletBehavior, label: String) -> void:
 	var cached := BulletBehaviorState.new(behavior, Vector2(0.6, 0.8), 90, Color.CYAN, 30)
 	var reference = Reference.new(behavior, Vector2(0.6, 0.8), 90, Color.CYAN, 31)
 	var times: Array[float] = [0, 0.1, 0.3, 0.5, 1, 1.2, 2.4, 3.9, 8, 29.999, 30]
