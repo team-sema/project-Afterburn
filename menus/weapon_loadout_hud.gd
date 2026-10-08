@@ -224,21 +224,26 @@ func get_preview_module_trait_id() -> StringName:
 
 
 func _rebuild_bays(loadout: PlayerWeaponLoadout) -> void:
-	_clear_runtime_children(bay_row)
-	_bay_clusters.clear()
-	_bay_index_by_cluster.clear()
-
+	# Clusters are reused across refreshes: a bay's cluster keeps its index and
+	# signals, only the bound weapon changes. Rebuilding every cluster cost ~18 ms
+	# per refresh and fired on every card focus change in the offer overlay.
 	var count := loadout.get_max_equipped_weapon_count()
 	if _focused_bay_index < 0 or _focused_bay_index >= count:
 		_ensure_valid_focus(loadout)
 
 	var side := _weapon_hex_side()
-	for index in count:
-		var cluster := _make_cluster(index)
+	while _bay_clusters.size() > count:
+		var surplus: WeaponCoreCluster = _bay_clusters.pop_back()
+		_bay_index_by_cluster.erase(surplus)
+		bay_row.remove_child(surplus)
+		surplus.free()
+	while _bay_clusters.size() < count:
+		var cluster := _make_cluster(_bay_clusters.size())
 		bay_row.add_child(cluster)
 		cluster.apply_slot_size(side, false)
 		_bay_clusters.append(cluster)
-		_bind_cluster(cluster, loadout, index, index == _focused_bay_index)
+	for index in count:
+		_bind_cluster(_bay_clusters[index], loadout, index, index == _focused_bay_index)
 
 
 func _make_cluster(bay_index: int) -> WeaponCoreCluster:
@@ -380,9 +385,12 @@ func _show_empty_detail() -> void:
 		selected_icon.visible = false
 	if selected_name != null:
 		selected_name.text = "무기를 선택하세요"
-	_clear_runtime_children(modules_grid)
+	_preview_module_hex = null
+	_preview_module_trait_id = &""
 	_set_module_side(_module_hex_side())
-	_add_empty_module_placeholders()
+	for index in MODULE_SLOT_COUNT:
+		_configure_module_hex(_module_hex_at(index), 0, null, &"", true)
+	_trim_module_hexes(MODULE_SLOT_COUNT)
 	_hover_trait_id = &""
 	_set_description("")
 
@@ -423,7 +431,6 @@ func _set_description(text: String) -> void:
 func _rebuild_module_cards(loadout: PlayerWeaponLoadout) -> void:
 	_preview_module_hex = null
 	_preview_module_trait_id = &""
-	_clear_runtime_children(modules_grid)
 	var traits := loadout.get_weapon_traits(_focused_weapon_id)
 	var preview_trait_id: StringName = &""
 	var preview_rank_increase := 0
@@ -454,39 +461,65 @@ func _rebuild_module_cards(loadout: PlayerWeaponLoadout) -> void:
 	if preview_trait_id != &"" and not ids.has(preview_trait_id):
 		module_count += 1
 	_set_module_side(_fit_module_hex_side(module_count))
+	# Hexes stay in the grid between refreshes; each slot is rebound in place.
+	var slot := 0
 	for trait_id in ids:
 		var is_preview := trait_id == preview_trait_id
 		var rank := int(traits[trait_id]) + (preview_rank_increase if is_preview else 0)
-		var hex := _make_module_hex(
-			loadout.get_trait_display_name(trait_id),
+		var hex := _configure_module_hex(
+			_module_hex_at(slot),
 			rank,
 			preview_icon if is_preview and preview_icon != null else loadout.get_trait_icon(trait_id),
 			trait_id,
 			false,
 			is_preview,
 		)
-		modules_grid.add_child(hex)
+		slot += 1
 		if is_preview:
 			_preview_module_hex = hex
 			_preview_module_trait_id = trait_id
 	if preview_trait_id != &"" and _preview_module_hex == null:
-		var preview_hex := _make_module_hex(
-			loadout.get_trait_display_name(preview_trait_id),
+		var preview_hex := _configure_module_hex(
+			_module_hex_at(slot),
 			maxi(1, preview_rank_increase),
 			preview_icon,
 			preview_trait_id,
 			false,
 			true,
 		)
-		modules_grid.add_child(preview_hex)
+		slot += 1
 		_preview_module_hex = preview_hex
 		_preview_module_trait_id = preview_trait_id
-	_add_empty_module_placeholders()
+	while slot < MODULE_SLOT_COUNT:
+		_configure_module_hex(_module_hex_at(slot), 0, null, &"", true)
+		slot += 1
+	_trim_module_hexes(slot)
 
 
-func _add_empty_module_placeholders() -> void:
-	while modules_grid != null and modules_grid.get_child_count() < MODULE_SLOT_COUNT:
-		modules_grid.add_child(_make_module_hex("", 0, null, &"", true))
+## The pooled hex at `index`, created on first use.
+func _module_hex_at(index: int) -> HexModuleFrame:
+	assert(module_hex_template != null, "WeaponLoadoutHud requires %ModuleHexTemplate placeholder.")
+	while modules_grid.get_child_count() <= index:
+		var hex := module_hex_template.duplicate() as HexModuleFrame
+		hex.visible = true
+		hex.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		hex.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		hex.set_meta("trait_id", &"")
+		hex.module_hovered.connect(_on_module_hex_hovered.bind(hex))
+		hex.module_clicked.connect(_on_module_hex_hovered.bind(hex))
+		hex.mouse_exited.connect(_on_module_hex_exited.bind(hex))
+		modules_grid.add_child(hex)
+	return modules_grid.get_child(index) as HexModuleFrame
+
+
+## Frees pooled hexes past `count` so the grid never shows stale slots.
+func _trim_module_hexes(count: int) -> void:
+	if modules_grid == null:
+		return
+	while modules_grid.get_child_count() > count:
+		var child := modules_grid.get_child(modules_grid.get_child_count() - 1)
+		modules_grid.remove_child(child)
+		child.free()
 
 
 ## Keeps a row of more than MODULE_SLOT_COUNT hexes inside the default row width.
@@ -515,28 +548,26 @@ func _get_trait_tier(loadout: PlayerWeaponLoadout, trait_id: StringName) -> int:
 	return int(definition.tier) if definition != null else int(PlayerAugment.Tier.GOLD)
 
 
-func _make_module_hex(
-	_label_text: String,
+func _configure_module_hex(
+	hex: HexModuleFrame,
 	_rank: int,
 	icon: Texture2D,
 	trait_id: StringName,
 	empty: bool,
 	preview: bool = false,
 ) -> HexModuleFrame:
-	assert(module_hex_template != null, "WeaponLoadoutHud requires %ModuleHexTemplate placeholder.")
-	var hex := module_hex_template.duplicate() as HexModuleFrame
-	hex.visible = true
+	hex.set_meta("trait_id", trait_id if not empty and not preview else &"")
 	hex.apply_fixed_size(get_module_hex_side())
 	hex.border_width = 1.0
 	hex.interactive = not empty
-	hex.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	hex.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	hex.modulate = Color.WHITE
 	if empty:
 		hex.set_module_text("", "")
 		hex.set_module_icon(null)
 		hex.border_color = Color(0.3, 0.55, 0.75, 0.5)
 		hex.fill_color = Color(0.02, 0.06, 0.12, 0.2)
 		hex.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		hex.queue_redraw()
 		return hex
 
 	hex.set_module_text("", "")
@@ -550,29 +581,35 @@ func _make_module_hex(
 		if _rank > 0:
 			hex.set_module_text("", _rank_roman(_rank))
 		hex.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		hex.queue_redraw()
 		return hex
 	hex.border_color = MODULE_TIER_BORDER_COLORS[_get_trait_tier(_get_loadout(), trait_id)]
 	hex.fill_color = Color(0.06, 0.18, 0.3, 0.95)
 	if _rank > 0:
 		hex.set_module_text("", _rank_roman(_rank))
-	var captured := trait_id
-	var on_hover := func() -> void:
-		_focused_trait_id = captured
-		_hover_trait_id = captured
-		var loadout := _get_loadout()
-		if loadout != null:
-			_show_trait_description(loadout, captured)
-	var on_exit := func() -> void:
-		if _hover_trait_id != captured:
-			return
-		_hover_trait_id = &""
-		var loadout := _get_loadout()
-		if loadout != null and _focused_weapon_id != &"":
-			_show_weapon_description(loadout)
-	hex.module_hovered.connect(on_hover)
-	hex.module_clicked.connect(on_hover)
-	hex.mouse_exited.connect(on_exit)
+	hex.queue_redraw()
 	return hex
+
+
+func _on_module_hex_hovered(hex: HexModuleFrame) -> void:
+	var trait_id: StringName = hex.get_meta("trait_id", &"")
+	if trait_id == &"":
+		return
+	_focused_trait_id = trait_id
+	_hover_trait_id = trait_id
+	var loadout := _get_loadout()
+	if loadout != null:
+		_show_trait_description(loadout, trait_id)
+
+
+func _on_module_hex_exited(hex: HexModuleFrame) -> void:
+	var trait_id: StringName = hex.get_meta("trait_id", &"")
+	if trait_id == &"" or _hover_trait_id != trait_id:
+		return
+	_hover_trait_id = &""
+	var loadout := _get_loadout()
+	if loadout != null and _focused_weapon_id != &"":
+		_show_weapon_description(loadout)
 
 
 func _rank_roman(rank: int) -> String:
