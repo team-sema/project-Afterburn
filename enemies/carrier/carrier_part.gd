@@ -685,8 +685,5 @@ func _draw() -> void:
 			draw_polyline(plate, Color("77354f"), 1.0, true)
 			for side in [-1,1]:
 				draw_line(Vector2(side*18,-8), Vector2(side*18,8), Color("bd566a"), 1.0)
-		if warning and cooldown <= LOCK_TIME and current_variant != 3:
-			var start := muzzle.position.rotated(pivot.rotation)
-			draw_line(start, start + Vector2.DOWN.rotated(pivot.rotation)*46, Color(1.0,0.3,0.35,0.4), 0.6, true)
 	elif mode == HANGAR:
 		_draw_hangar_bay()
