@@ -110,16 +110,7 @@ func run() -> void:
 	lab.ship.position = Vector2(boss.global_position.x - 82,320)
 	await create_timer(1.5).timeout
 	check(boss.transitioning and not hangars[0].active, "Hangars descend before their combat phase")
-	check(boss.raiders_sent, "Transit raiders cut in while the hull advances")
-	boss._spawn_raider(1.0)
-	var raider: Node2D = boss.raiders[-1]
-	check(raider.launch_speed > 0.0, "Raiders leave their hatch at the hull's speed")
-	raider._physics_process(0.5)
-	var raider_y: float = raider.position.y
-	raider._physics_process(0.1)
-	check(raider.position.y - raider_y >= 25.0, "Raiders dive faster than the hull transit")
-	var hatch_y: float = boss.to_global(Vector2(0, boss.RAID_HATCH_Y[1])).y
-	check(hatch_y > 0.0, "Raider hatches are on screen when the raiders launch")
+	check(not boss.raiders_sent and boss.raiders.is_empty(), "Flight-deck approach launches no transit raiders")
 	check(not engines[1].active and not engines[1].beam.firing, "Leaving the stern shuts down the surviving engine")
 	check(hangars[0].global_position.y > 0 and hangars[0].visual.modulate == Color.WHITE, "Hangar is already visible while moving into view")
 	check(boss.parts[0].visual.modulate.a < 1.0, "Destroyed turret remains dim wreckage")
@@ -185,7 +176,18 @@ func run() -> void:
 	for escort in escorts: escort.take_damage(9999)
 	# Bridge gap: between the left fuel tank and the bridge tower.
 	lab.ship.position = Vector2(boss.global_position.x - 80,320)
-	await create_timer(2.5).timeout
+	await create_timer(1.5).timeout
+	check(boss.transitioning and boss.raiders_sent, "Transit raiders cut in while the hull advances to the bridge")
+	boss._spawn_raider(1.0)
+	var raider: Node2D = boss.raiders[-1]
+	check(raider.launch_speed > 0.0, "Raiders leave their hatch at the hull's speed")
+	raider._physics_process(0.5)
+	var raider_y: float = raider.position.y
+	raider._physics_process(0.1)
+	check(raider.position.y - raider_y >= 25.0, "Raiders dive faster than the hull transit")
+	var hatch_y: float = boss.to_global(Vector2(0, boss.RAID_HATCH_Y[2])).y
+	check(hatch_y > 0.0, "Raider hatches are on screen when the raiders launch")
+	await create_timer(1.0).timeout
 	check(boss.phase == 2 and boss.health == 800, "Bridge section is reachable")
 	check(boss.fighters.is_empty(), "Transition removes surviving fighters")
 	bridge.take_damage(400)

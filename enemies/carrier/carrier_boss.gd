@@ -11,7 +11,9 @@ const TITLES := ["01 / AFT DEFENSE", "02 / FLIGHT DECK", "03 / COMMAND BRIDGE"]
 const FIGHTER_CAP := 6
 ## Side launch hatches (hull-local y per destination phase) that release the
 ## transit raiders, so they visibly leave the carrier instead of popping in.
-const RAID_HATCH_Y := {1: -100.0, 2: -460.0}
+## Only the run to the bridge launches them: on the way to the flight deck they
+## dived out of nowhere right before the hangars open.
+const RAID_HATCH_Y := {2: -460.0}
 const RAID_HATCH_X := 80.0
 const HATCH_OPEN := 0.25
 const HATCH_LAUNCH := 0.3
@@ -203,7 +205,7 @@ func _spawn_craft(kind: int, at: Vector2, side: float) -> Node2D:
 
 func _spawn_raider(side: float) -> void:
 	raiders = raiders.filter(func(item): return is_instance_valid(item) and not item.is_queued_for_deletion())
-	var hatch := Vector2(side * RAID_HATCH_X, RAID_HATCH_Y.get(phase, -100.0))
+	var hatch := Vector2(side * RAID_HATCH_X, RAID_HATCH_Y.get(phase, RAID_HATCH_Y[2]))
 	var raider := _spawn_craft(Craft.Kind.RAIDER, world.to_local(to_global(hatch)), side)
 	# Leave the hatch at the hull's own speed, then pull away.
 	raider.launch_speed = maxf(hull_speed, 0.0)
