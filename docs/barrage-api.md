@@ -80,7 +80,7 @@ func build(params: Dictionary) -> void:
 
 ### Player / Sequence 추가 API
 
-- `BarrageSequence.snapshot()`: 기본 BarrageSequence에 단계와 외부 프리셋(Shot·Appearance·Behavior·Action·Volley·TrailEffect)까지 복사한다. 텍스처 같은 자산 Resource는 복사하지 않고 공유한다. 배치 렌더러와 꼬리 관리기가 텍스처 RID로 묶음을 나누므로, 텍스처를 복제하면 발사자마다 별도 드로우콜로 갈라지고 재생마다 GPU 업로드가 생긴다. 상속 Sequence 생성자를 다시 실행하지 않는다. 유효한 Sequence에서 호출한다. `BarrageSequence.clone_settings(resource)`는 같은 규칙의 단일 Resource 복사다.
+- `BarrageSequence.snapshot()`: 기본 BarrageSequence에 단계와 외부 프리셋(Shot·Appearance·Behavior·Action·Volley·TrailEffect)까지 복사한다. 텍스처 같은 자산 Resource는 복사하지 않고 공유한다. 배치 렌더러와 꼬리 관리기가 텍스처 RID로 묶음을 나누므로, 텍스처를 복제하면 발사자마다 별도 드로우콜로 갈라지고 재생마다 GPU 업로드가 생긴다. 상속 Sequence 생성자를 다시 실행하지 않는다. 유효한 Sequence에서 호출한다. 한 사본 안에서 같은 원본 Resource는 한 번만 복제해 공유를 유지한다(`fire_together`로 여러 스텝이 같은 Volley·Shot을 쓰는 19스텝 엘리트 페이즈 기준 복제 비용 5~10ms → 1~3ms). 그래서 사본을 변이하는 코드(발수·탄속 증강)는 Volley를 한 번씩만 처리한다. `BarrageSequence.clone_settings(resource, copies)`는 같은 규칙의 단일 Resource 복사이며 `copies`가 원본→사본 사전이다.
 - `BarrageSequence.build(params)`: 기본 구현은 빈 훅. 파생 패턴이 재정의하면 컴포넌트/Lab이 `_init()` 다음에 호출한다.
 - `BarrageSequence.needs_target()`: `aim()` 단계 또는 `aim != NONE`인 Volley가 있으면 true. Player가 표적 요구 검증에 사용한다.
 - `BarragePlayer.time_scale = 1.0`: 양수 배속. 비유한/0 이하이면 진행하지 않는다.
