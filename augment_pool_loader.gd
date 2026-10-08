@@ -69,6 +69,80 @@ static func load_enemy_offer_pool(
 	return load_enemy_augments(directory_path, true)
 
 
+## Background preload of every card in the offer folders, one file at a time,
+## so the folder scan in AugmentOfferController._ready finds them cached.
+## The menu starts this once world.tscn has loaded (cards and the evolved
+## enemy scenes the enemy pool references are not world.tscn dependencies, and
+## loading them cold on the main thread held the World entry frame ~190 ms).
+## Loads run strictly one after another: parallel threaded requests that share
+## dependencies with the scene load produced parse errors.
+static var _preload_queue := PackedStringArray()
+static var _preload_current := ""
+static var _preloaded: Array[Resource] = []
+
+
+static func begin_background_preload(
+	directories: Array[String] = [DEFAULT_PLAYER_DIR, DEFAULT_ENEMY_DIR],
+) -> int:
+	for directory_path in directories:
+		for resource_path in _collect_resource_paths(directory_path):
+			if not ResourceLoader.has_cached(resource_path) and not _preload_queue.has(resource_path):
+				_preload_queue.append(resource_path)
+	_advance_background_preload()
+	return _preload_queue.size() + (1 if _preload_current != "" else 0)
+
+
+## Call every frame while a preload is pending; returns true while work remains.
+static func poll_background_preload() -> bool:
+	if _preload_current == "":
+		return false
+	match ResourceLoader.load_threaded_get_status(_preload_current):
+		ResourceLoader.THREAD_LOAD_IN_PROGRESS:
+			return true
+		ResourceLoader.THREAD_LOAD_LOADED:
+			var resource := ResourceLoader.load_threaded_get(_preload_current)
+			if resource != null:
+				_preloaded.append(resource)
+		_:
+			pass
+	_preload_current = ""
+	_advance_background_preload()
+	return _preload_current != ""
+
+
+static func is_background_preload_pending() -> bool:
+	return _preload_current != "" or not _preload_queue.is_empty()
+
+
+static func _advance_background_preload() -> void:
+	while _preload_current == "" and not _preload_queue.is_empty():
+		var resource_path := _preload_queue[0]
+		_preload_queue.remove_at(0)
+		if ResourceLoader.has_cached(resource_path):
+			continue
+		if ResourceLoader.load_threaded_request(resource_path) == OK:
+			_preload_current = resource_path
+
+
+static func _collect_resource_paths(directory_path: String) -> PackedStringArray:
+	var out := PackedStringArray()
+	var directory := DirAccess.open(directory_path)
+	if directory == null:
+		return out
+	directory.list_dir_begin()
+	var file_name := directory.get_next()
+	while file_name != "":
+		if not file_name.begins_with("."):
+			var resource_path := directory_path.path_join(file_name)
+			if directory.current_is_dir():
+				out.append_array(_collect_resource_paths(resource_path))
+			elif file_name.ends_with(".tres"):
+				out.append(resource_path)
+		file_name = directory.get_next()
+	directory.list_dir_end()
+	return out
+
+
 static func _collect_resources(directory_path: String) -> Array[Resource]:
 	var out: Array[Resource] = []
 	var directory := DirAccess.open(directory_path)

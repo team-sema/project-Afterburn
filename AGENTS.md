@@ -29,6 +29,7 @@
   .\tools\run-tests.cmd -Suite benchmarks  # timing only, needs a window: tests/benchmarks/
   ```
 
+- Frame-budget profiling of a real run: `tests/benchmarks/gameplay_frame_benchmark.gd` (windowed; `-- seconds=150 scenarios=default,late`) writes per-frame rows to `.godot/perf-logs/`; summarise with `python tools/analyze_frame_benchmark.py default late`. Windowed D3D12 stays capped at the display refresh rate even with vsync off, so judge cost by the process/physics/render columns and treat the interval only as a spike detector.
 - Put new game regressions in `tests/`, tests of lab tools in `tests/labs/`, and timing-only scripts in `tests/benchmarks/`. A test collects failures and calls `quit(1)` on failure; do not rely on bare `assert()`, which halts the script without exiting.
 - Do not request elevated execution solely for the `user://logs` error. The wrapper handles that error inside the writable workspace. Escalate only if a different sandbox restriction still blocks a required check.
 - Judge a smoke test by its exit code and explicit PASS/failure output. Report unrelated Godot editor/cache warnings separately from test failures.

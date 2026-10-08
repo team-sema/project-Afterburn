@@ -14,29 +14,38 @@ func snapshot() -> BarrageSequence:
 	# Never duplicate the derived sequence: its constructor may append steps.
 	var copy := BarrageSequence.new()
 	copy.repeat_count = repeat_count
+	# One copy per source Resource: fire_together() steps share their volleys
+	# and shots, so cloning per step cost 5-10 ms for a 19-step elite phase.
+	var copies := {}
 	for step in steps:
-		copy.steps.append(clone_settings(step) as BarrageStep)
+		copy.steps.append(clone_settings(step, copies) as BarrageStep)
 	return copy
 
 ## Copies every barrage setting Resource (including external presets) so a
 ## running pattern ignores later edits, but shares textures and other assets:
 ## the batch renderer and trail manager group projectiles by texture RID, so a
 ## duplicated texture would split every emitter into its own draw call.
-static func clone_settings(resource: Resource) -> Resource:
+## `copies` maps source instance ids to their copy so a Resource referenced
+## from several places is cloned once and stays shared inside the snapshot.
+static func clone_settings(resource: Resource, copies: Dictionary = {}) -> Resource:
 	if resource == null or not _is_setting(resource):
 		return resource
+	var source_id := resource.get_instance_id()
+	if copies.has(source_id):
+		return copies[source_id]
 	var copy := resource.duplicate()
+	copies[source_id] = copy
 	for property in copy.get_property_list():
 		if property.usage & PROPERTY_USAGE_STORAGE == 0 or property.name == "script":
 			continue
 		var value = copy.get(property.name)
 		if value is Resource:
-			copy.set(property.name, clone_settings(value))
+			copy.set(property.name, clone_settings(value, copies))
 		elif value is Array:
 			var items: Array = value.duplicate()
 			for index in items.size():
 				if items[index] is Resource:
-					items[index] = clone_settings(items[index])
+					items[index] = clone_settings(items[index], copies)
 			copy.set(property.name, items)
 	return copy
 

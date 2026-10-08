@@ -101,10 +101,13 @@ static func _validate_pattern_script(script: Script) -> String:
 
 
 func _boost_pattern_volume(sequence: BarrageSequence, extra_shots: int, min_spread: float) -> void:
+	# snapshot() keeps a volley reused by several steps as one Resource.
+	var boosted := {}
 	for step in sequence.steps:
 		if step.action != BarrageStep.Action.FIRE: continue
 		for volley in step.get_volleys():
-			if volley.layout == BarrageVolley.Layout.RING: continue
+			if volley.layout == BarrageVolley.Layout.RING or boosted.has(volley): continue
+			boosted[volley] = true
 			var count := 1 if volley.layout == BarrageVolley.Layout.SINGLE else volley.count
 			volley.layout = BarrageVolley.Layout.FAN
 			volley.count = maxi(1, count + extra_shots)

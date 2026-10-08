@@ -3,6 +3,8 @@ extends Control
 ## 시작화면. 규칙: docs/design/scene-flow.md (Menu)
 
 const GAME_SCENE_PATH := "res://world.tscn"
+## preload: a class_name is only visible after the editor rebuilds its class cache.
+const SHADER_WARMUP := preload("res://effects/shader_warmup.gd")
 const FADE_IN_DURATION := 0.4
 const FADE_OUT_DURATION := 0.2
 const TITLE_PULSE_SPEED := 1.6
@@ -60,6 +62,7 @@ func _process(delta: float) -> void:
 	var pulse := 1.0 + sin(_elapsed * TITLE_PULSE_SPEED) * TITLE_PULSE_AMOUNT
 	title_label.self_modulate = Color(pulse, pulse, pulse, 1.0)
 	_poll_game_scene_load()
+	AugmentPoolLoader.poll_background_preload()
 	if _start_requested:
 		_enter_game_when_ready()
 
@@ -93,6 +96,9 @@ func _poll_game_scene_load() -> void:
 				status_label.text = "게임 준비 중... %d%%" % roundi(progress[0] * 100.0)
 		ResourceLoader.THREAD_LOAD_LOADED:
 			_game_scene = ResourceLoader.load_threaded_get(GAME_SCENE_PATH) as PackedScene
+			# Offer cards are scanned from folders at World _ready, not pulled
+			# in by world.tscn; load them in the background once the scene is in.
+			AugmentPoolLoader.begin_background_preload()
 		ResourceLoader.THREAD_LOAD_FAILED, ResourceLoader.THREAD_LOAD_INVALID_RESOURCE:
 			push_error("Failed to load the game scene.")
 			_set_load_failed()
@@ -106,6 +112,14 @@ func _enter_game_when_ready() -> void:
 	var tween := create_tween()
 	tween.tween_property(fade, "color:a", 1.0, FADE_OUT_DURATION)
 	await tween.finished
+	# First start only: compile the playfield and overlay pipelines while the
+	# screen is black instead of on the World entry frame and the first
+	# bullet / elite / explosion / offer of the run.
+	if not SHADER_WARMUP.completed:
+		var warmup: Node = SHADER_WARMUP.new()
+		warmup.name = "ShaderWarmup"
+		add_child(warmup)
+		await warmup.finished
 	_swap_to_game_scene()
 
 
