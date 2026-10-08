@@ -8,6 +8,10 @@ extends Resource
 ## 순수 검정을 들어 올리는 바탕색. 알파가 덮는 정도다.
 @export var base_tint := Color(0.05, 0.045, 0.14, 0.55)
 
+@export_group("Orbital Ring")
+## 화면을 가로지르는 파손 궤도 구조물. 세로 타일링하지 않는 원경이다.
+@export var orbital_ring_enabled := false
+
 @export_group("Nebula")
 ## 성운 색 면의 중심(뷰포트 비율). radii·colors와 같은 길이여야 한다.
 @export var nebula_positions: PackedVector2Array = PackedVector2Array()

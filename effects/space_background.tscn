@@ -25,6 +25,7 @@ unique_name_in_owner = true
 motion_mirroring = Vector2(0, 240)
 
 [node name="FarStars" type="TextureRect" parent="FarStarsLayer" unique_id=129849381]
+self_modulate = Color(0.65, 0.65, 0.65, 1)
 offset_right = 160.0
 offset_bottom = 240.0
 texture = ExtResource("2_yrrok")
@@ -36,6 +37,7 @@ unique_name_in_owner = true
 motion_mirroring = Vector2(0, 240)
 
 [node name="CloseStars" type="TextureRect" parent="CloseStarsLayer" unique_id=2110448607]
+self_modulate = Color(0.4, 0.4, 0.4, 1)
 offset_right = 160.0
 offset_bottom = 240.0
 texture = ExtResource("3_0h1ho")

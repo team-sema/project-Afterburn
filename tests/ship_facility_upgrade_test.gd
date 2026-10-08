@@ -299,7 +299,12 @@ func _check_offer_layout(
 	)
 	_expect(selection_ui.get_focused_choice_index() == 1, "the overlay tracks the focused card")
 	_expect(button_2.z_index > button_1.z_index, "focused card renders in front")
-	_expect(button_2.modulate.r > button_1.modulate.r, "unfocused cards are dimmer than focus")
+	_expect(
+		button_1.modulate.is_equal_approx(Color.WHITE)
+		and button_2.modulate.is_equal_approx(Color.WHITE)
+		and button_3.modulate.is_equal_approx(Color.WHITE),
+		"all card copy stays at original brightness regardless of focus",
+	)
 	_expect(button_2.scale.x > button_1.scale.x, "unfocused cards are smaller than focus")
 	_expect(button_2.position.y < button_1.position.y, "focused card lifts above the row")
 	for button in [button_1, button_2, button_3]:

@@ -2,6 +2,8 @@
 extends Control
 ## Beveled metal and spectral glass, with a separate crisp text layer.
 
+const UNFOCUSED_DECORATION_TINT := Color(0.68, 0.74, 0.84, 1.0)
+
 @export_group("Decoration")
 @export var rotating_orbits_enabled := false
 @export var static_arcs_enabled := true
@@ -119,6 +121,9 @@ func _process(delta: float) -> void:
 		elapsed += delta * animation_speed
 	var button := get_parent() as Button
 	var active := preview_focused if Engine.is_editor_hint() or button == null else not button.disabled and (button.has_focus() or button.is_hovered())
+	# Dim only the drawn ornaments and surface, never child labels or the icon.
+	self_modulate = Color.WHITE if active else UNFOCUSED_DECORATION_TINT
+	$Surface.self_modulate = self_modulate
 	if active and not was_active:
 		activation = 1.0
 	else:
