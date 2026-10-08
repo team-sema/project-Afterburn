@@ -107,6 +107,13 @@ func _populate_playfield(stage: SubViewport) -> void:
 				child.stream = null
 		explosion.position = Vector2(60, 90)
 		stage.add_child(explosion)
+	# Shared hit-effect renderer: antialiased lines + gradient flares, additive.
+	var impact := ImpactVfx.new()
+	impact.material = load("res://effects/additive_unshaded_material.tres")
+	stage.add_child(impact)
+	var profile := load("res://effects/impact_profiles/blaster.tres") as ImpactProfile
+	if profile != null:
+		impact.emit_impact(Vector2(70, 70), profile, Vector2.DOWN, 1.0, false, 12.0)
 	var blaster := _instance("res://projectiles/player_blaster.tscn")
 	if blaster != null:
 		blaster.position = Vector2(100, 110)
@@ -117,6 +124,7 @@ func _populate_playfield(stage: SubViewport) -> void:
 	stage.add_child(bullets)
 	for path in [
 		"res://resources/projectiles/round_straight_shot.tres",
+		"res://resources/projectiles/rice_wave_shot.tres",
 		"res://resources/projectiles/needle_straight_shot.tres",
 		"res://resources/projectiles/elite_fountain_laser_shot.tres",
 	]:
