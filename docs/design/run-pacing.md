@@ -69,7 +69,7 @@ ELITE·BOSS 게이트 직전에만 `step_warning_duration`(기본 **1.6초**) �
 | `H` 핵 | 호위 뚫고 핵부터 칠지 | Striker 5 → zigzag_mirrored → Striker 13 | Striker 5 → 산탄 드론 → Striker 13 |
 | `W` 몸 | 차징 읽기와 탄 피하기의 차이 | Awl → zigzag_mirrored → Awl | Awl → drone_formation → Awl |
 | `S` 측면 | 가장자리 경고에 시선 옮기기 | Interceptor pair → drone_formation → pair | Interceptor pair → 산탄 드론 → pair |
-| `B` 공간 | 거리 관리 | Bomb diamond → Awl → Bomb diamond | Bomb diamond → 느린탄 드론 → Bomb diamond |
+| `B` 공간 | 거리 관리 | Bomb pair → Awl → Bomb pair | Bomb pair → 느린탄 드론 → Bomb pair |
 | `G` 가드 | 조준선 피하기 + 앞 막은 적 뒤 노리기 | Tanker+Sniper → Interceptor pair → Tanker+Sniper | 정지탄 드론 → Tanker+Sniper → 정지탄 드론 |
 | `F` 통로 | 빈 통로 찾기 | Caster → V7 하강 → X9 orbit | 느린탄 드론 → Caster → X9 orbit |
 | `D` 하강 | 산개 예측 | X9 하강 → Interceptor trio → V7 하강 | V7 하강 → 정지탄 드론 → X9 하강 |
@@ -119,8 +119,8 @@ Phase가 바뀔 때마다 HUD의 STAGE가 +1 된다. 개발자는 `.tres`의 패
 ## Threat별 로스터 요지
 
 - **Threat 1:** Drone·Striker 호위·Awl 등 (Bomb·Interceptor pair 제외)
-- **Threat 2+:** `tanker_guard_sniper` · `bomb_drone_diamond` · `interceptor_pair`
-- **Threat 3+:** Caster · V7/X9 하강 · X9 orbit · Interceptor trio
+- **Threat 2+:** `tanker_guard_sniper` · `bomb_pair` · `interceptor_pair`
+- **Threat 3+:** Caster · V7/X9 하강 · X9 orbit · Interceptor trio · Courier
 
 ## 관련
 

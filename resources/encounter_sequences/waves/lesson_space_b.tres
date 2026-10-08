@@ -1,13 +1,13 @@
 [gd_resource type="Resource" script_class="EncounterWave" format=3 uid="uid://8qb0attxpw6x"]
 
 [ext_resource type="Script" uid="uid://l7bpelqan01w" path="res://resources/encounter_sequences/encounter_wave.gd" id="1_wave_script"]
-[ext_resource type="Resource" uid="uid://dharoag8kx085" path="res://resources/encounters/presets/bomb_drone_diamond.tres" id="2_bomb_drone_diamond"]
+[ext_resource type="Resource" path="res://resources/encounters/presets/bomb_pair.tres" id="2_bomb_pair"]
 [ext_resource type="Resource" uid="uid://cnv5hhobmfb57" path="res://resources/encounters/presets/drone_slow_zigzag.tres" id="3_drone_slow_zigzag"]
 [ext_resource type="Script" uid="uid://c6t14vfypdxop" path="res://resources/encounters/encounter_preset.gd" id="9_preset_script"]
 
 [resource]
 script = ExtResource("1_wave_script")
 wave_id = &"lesson_space_b"
-encounter_presets = Array[ExtResource("9_preset_script")]([ExtResource("2_bomb_drone_diamond"), ExtResource("3_drone_slow_zigzag"), ExtResource("2_bomb_drone_diamond")])
+encounter_presets = Array[ExtResource("9_preset_script")]([ExtResource("2_bomb_pair"), ExtResource("3_drone_slow_zigzag"), ExtResource("2_bomb_pair")])
 interval_max = 2.6
 handoff_remaining = 2

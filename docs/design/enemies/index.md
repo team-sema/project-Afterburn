@@ -13,6 +13,7 @@
 | Yellow / Striker | 넓은 날개 다이아몬드 | 1 | `moving_enemy.tscn` | 60 | 10 | [striker](striker.md) |
 | Awl / Kamikaze | 세로로 긴 송곳 | 1 | `kamikaze_enemy.tscn` | 80 | 15 | [awl](awl.md) |
 | Bomb | 원형 본체 + 짧은 신관 | 1 | `bomb_enemy.tscn` | 160 | 20 | [bomb](bomb.md) |
+| Courier | 다트형 전투기 + 꼬리에 매단 Bomb | 3 | `courier_enemy.tscn` | 40 | 10 | [courier](courier.md) |
 | Interceptor | 주황 네온 화살촉 | 1 | `interceptor_enemy.tscn` | 50 | 5 | [interceptor](interceptor.md) |
 | Tanker | 청백 가드 + 횡 실드 | 2 | `tanker_enemy.tscn` | 본체 35 · 실드 1000 | 5 | [tanker](tanker.md) |
 | Pink / Caster | 육각·크리스탈형 | 3 | `shooting_enemy.tscn` | 110 | 25 | [caster](caster.md) |
@@ -37,7 +38,7 @@ HEALTH / MOVE_SPEED / ACTION_RATE (+ `EnemyShootComponent` / `SniperAttackCompon
 
 ## 진화형
 
-8종 모두 적 증강 [진화 카드](../augments.md#진화-증강)로 한 단계 위 진화형(`enemies/evolved/*_evolved.tscn`, 원본 상속 씬)을 갖는다. 진화형의 동작·수치는 각 상세 문서의 「진화형」 절에 둔다. 외형은 원본에 금색 맥동 외곽(`EnemyEvolutionMark`)을 더한 것이다.
+Courier를 뺀 8종 모두 적 증강 [진화 카드](../augments.md#진화-증강)로 한 단계 위 진화형(`enemies/evolved/*_evolved.tscn`, 원본 상속 씬)을 갖는다. 진화형의 동작·수치는 각 상세 문서의 「진화형」 절에 둔다. 외형은 원본에 금색 맥동 외곽(`EnemyEvolutionMark`)을 더한 것이다.
 
 ## 보스 플래그 (`is_boss`)
 
@@ -50,6 +51,7 @@ HEALTH / MOVE_SPEED / ACTION_RATE (+ `EnemyShootComponent` / `SniperAttackCompon
 - [Striker](striker.md)
 - [Awl](awl.md)
 - [Bomb](bomb.md)
+- [Courier](courier.md)
 - [Interceptor](interceptor.md)
 - [Tanker](tanker.md)
 - [Caster](caster.md)

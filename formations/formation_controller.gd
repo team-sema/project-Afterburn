@@ -14,6 +14,7 @@ signal formation_empty
 @export var mirrored := false
 @export var formation_break_condition := EncounterPreset.FormationBreakCondition.NEVER
 @export_range(0.0, 60.0, 0.05) var formation_break_delay := 0.0
+@export var formation_anchor_slot_index := -1
 @export var individual_movement_sequence: MovementSequence
 
 @onready var center_move_component: MoveComponent = $MoveComponent
@@ -31,6 +32,8 @@ var _break_requested := false
 var _breaking := false
 var _cleanup_requested := false
 var _formation_speed_multiplier := 1.0
+## Instance being reparented by _release_member; its tree_exiting is not a loss.
+var _reparenting_instance_id := 0
 
 
 func configure(preset: EncounterPreset) -> void:
@@ -41,6 +44,7 @@ func configure(preset: EncounterPreset) -> void:
 	mirrored = preset.mirrored
 	formation_break_condition = preset.formation_break_condition
 	formation_break_delay = preset.formation_break_delay
+	formation_anchor_slot_index = preset.formation_anchor_slot_index
 	individual_movement_sequence = preset.individual_movement_sequence
 
 
@@ -134,6 +138,12 @@ func add_member(
 		_on_member_tree_exiting.bind(enemy.get_instance_id(), slot_index),
 		CONNECT_ONE_SHOT,
 	)
+	if (
+		formation_break_condition == EncounterPreset.FormationBreakCondition.ANCHOR_LOST
+		and slot_index == formation_anchor_slot_index
+	):
+		# Not one-shot: a detach reparents the anchor, which also exits the tree.
+		enemy.tree_exiting.connect(_on_anchor_tree_exiting.bind(enemy.get_instance_id()))
 	_apply_member_position(enemy, slot, 0.0)
 	member_added.emit(enemy, slot_index)
 	if _pending_member_spawns == 0 and _break_requested:
@@ -446,6 +456,8 @@ func _release_member(
 	member_removed.emit(slot_index)
 	if enemy == null or not is_instance_valid(enemy) or slot == null:
 		return null
+	if enemy.is_queued_for_deletion():
+		return null
 	var preserved_position := enemy.global_position
 	var context := _build_individual_context(
 		enemy,
@@ -456,7 +468,9 @@ func _release_member(
 	var sequence := binding.get("individual_sequence") as MovementSequence
 	if sequence == null:
 		sequence = individual_movement_sequence
+	_reparenting_instance_id = enemy.get_instance_id()
 	enemy.reparent(release_parent, true)
+	_reparenting_instance_id = 0
 	enemy.global_position = preserved_position
 	enemy.exit_formation_mode(sequence, context)
 	return enemy
@@ -526,6 +540,14 @@ func _on_center_sequence_finished() -> void:
 		# MovementController emits from its own process callback. Let this
 		# controller apply the center's final position to members before release.
 		break_formation.call_deferred()
+
+
+## The anchor may already be detached (e.g. an arming Bomb), so it is tracked by
+## instance rather than by binding. Survivors break with their individual paths.
+func _on_anchor_tree_exiting(instance_id: int) -> void:
+	if _breaking or _cleanup_requested or instance_id == _reparenting_instance_id:
+		return
+	break_formation.call_deferred()
 
 
 func _on_member_tree_exiting(instance_id: int, slot_index: int) -> void:

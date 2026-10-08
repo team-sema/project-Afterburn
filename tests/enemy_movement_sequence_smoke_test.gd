@@ -63,8 +63,8 @@ func _test_bomb_sequence() -> void:
 	controller.update_movement(0.5)
 	_expect(controller.is_running(), "Bomb starts its scene MovementSequence")
 	_expect(
-		bomb.global_position.is_equal_approx(start + Vector2(0.0, 8.0)),
-		"Bomb preserves its 16 px/s straight descent",
+		bomb.global_position.is_equal_approx(start + Vector2(0.0, 20.0)),
+		"Bomb keeps its 40 px/s straight descent",
 	)
 	await _free_node(bomb)
 

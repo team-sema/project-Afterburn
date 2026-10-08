@@ -34,7 +34,19 @@ enemies/<type>     +  formations/<layout>  +  MovementSequence
 | `members[]` | 슬롯별 적 씬 | → enemies |
 | `formation_movement_sequence` | 편대 이동 | catalog / 상세 |
 | `formation_break_*` + `individual_*` | 해제 후 산개 | catalog |
+| `formation_anchor_slot_index` | `ANCHOR_LOST` 해제의 앵커 슬롯 | 아래 |
 | `spawn_*` / `start_delay` | 스폰 앵커·경고 | catalog |
+
+## 편대 해제 조건 (`formation_break_condition`)
+
+| 값 | 해제 시점 |
+|----|-----------|
+| `NEVER` | 해제하지 않는다. 편대 이동이 끝없는 호밍·패트롤이면 멤버가 화면에 남는다 |
+| `SEQUENCE_FINISHED` | 편대 이동 시퀀스 완료 |
+| `ELAPSED_TIME` | 편대 시작 후 `formation_break_delay`초 |
+| `ANCHOR_LOST` | `formation_anchor_slot_index` 멤버가 씬 트리에서 빠질 때(처치·자폭·화면 밖 해제). 앵커가 자기 행동으로 detach한 것만으로는 해제하지 않고, detach 뒤에 사라질 때 해제한다 |
+
+`NEVER`가 아니면 모든 멤버에 개별 이동(`individual_movement_sequence` 또는 멤버 override)이 있어야 한다. `ANCHOR_LOST`는 앵커 슬롯에 멤버가 있어야 한다(`EncounterPreset.validate`).
 
 ## 읽는 순서
 

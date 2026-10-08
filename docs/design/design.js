@@ -50,6 +50,7 @@ const NAV = [
           { id: "enemies/striker", title: "Striker", file: "enemies/striker.md" },
           { id: "enemies/awl", title: "Awl", file: "enemies/awl.md" },
           { id: "enemies/bomb", title: "Bomb", file: "enemies/bomb.md" },
+          { id: "enemies/courier", title: "Courier", file: "enemies/courier.md" },
           {
             id: "enemies/interceptor",
             title: "Interceptor",
@@ -133,6 +134,11 @@ const NAV = [
             id: "formations/interceptor-pair",
             title: "Interceptor pair",
             file: "formations/interceptor-pair.md",
+          },
+          {
+            id: "formations/bomb-pair",
+            title: "Bomb pair",
+            file: "formations/bomb-pair.md",
           },
           {
             id: "formations/single",

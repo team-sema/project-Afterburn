@@ -1,7 +1,7 @@
 # 진형 (Formation)
 
 진형 = **슬롯 기하만**. 어떤 적이 앉는지·어떻게 움직이는지는 [Encounter](../encounters/index.md)가 정한다.
-같은 레이아웃을 여러 Encounter가 재사용한다 (예: Diamond5 → Striker 호위 / Bomb 호위).
+같은 레이아웃을 여러 Encounter가 재사용한다 (예: Diamond5 → Striker 5 호위 / Single → Caster · Courier).
 
 코드: `formations/layouts/*.tscn` · `FormationLayout` / `FormationSlot`  
 배치 그림: `docs/design/formations/sprites/layout_*.svg` (슬롯 번호 = `slot_index`, 점선 교차 = 편대 원점 `(0,0)`, 화면 위 = Godot `-y`)
@@ -26,6 +26,7 @@
 | X9 | ![X9](sprites/layout_x9.svg) | 9 | [x9](x9.md) |
 | Triangle6 | ![Triangle6](sprites/layout_triangle6.svg) | 6 | [triangle6](triangle6.md) |
 | InterceptorPair | ![Pair](sprites/layout_interceptor_pair.svg) | 2 | [interceptor-pair](interceptor-pair.md) |
+| BombPair | ![BombPair](sprites/layout_bomb_pair.svg) | 2 | [bomb-pair](bomb-pair.md) |
 | Single | ![Single](sprites/layout_single.svg) | 1 | [single](single.md) |
 | Vertical | ![Vertical](sprites/layout_vertical.svg) | 5 | [vertical](vertical.md) |
 
@@ -40,7 +41,6 @@
 | `drone_triangle_formation` | [Triangle6](triangle6.md) | ![T6](sprites/layout_triangle6.svg) | WAVE · 풀 밖 |
 | `striker_drone_diamond_5` | [Diamond5](diamond-5.md) | ![D5](sprites/layout_diamond5.svg) | Slot0 Striker + Drone×4 |
 | `striker_drone_diamond_13` | [Diamond13](diamond-13.md) | ![D13](sprites/layout_diamond13.svg) | Slot0 Striker + Drone×12 |
-| `bomb_drone_diamond` | [Diamond5](diamond-5.md) | ![D5](sprites/layout_diamond5.svg) | Bomb center + Drone×4 |
 | `v7_drone_down` | [V7](v7.md) | ![V7](sprites/layout_v7.svg) | Threat 3+ |
 | `x9_drone_down` | [X9](x9.md) | ![X9](sprites/layout_x9.svg) | Threat 3+ |
 | `x9_caster_drone_orbit` | [X9](x9.md) | ![X9](sprites/layout_x9.svg) | Caster 중심 + Drone×8 |

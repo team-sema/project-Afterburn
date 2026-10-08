@@ -6,7 +6,6 @@
 
 [sub_resource type="Resource" id="Linear_bomb"]
 script = ExtResource("3_linear")
-speed = 16.0
 
 [resource]
 script = ExtResource("1_sequence")

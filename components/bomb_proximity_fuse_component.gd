@@ -20,6 +20,9 @@ const ENEMY_HURTBOX_MASK := 1 << 1
 @export_range(0.5, 5.0, 0.05) var arm_duration := 2.0
 @export_range(1, 8, 1) var flash_count := 3
 @export var flash_color := Color(1.0, 0.12, 0.12, 1.0)
+## Arms as soon as it enters the tree, regardless of the player's distance
+## (a Bomb dropped by a Courier is lit the moment it is released).
+@export var arm_on_ready := false
 ## Approx. normal enemy explosion reach (ring/glow feel).
 @export_range(8.0, 120.0, 1.0) var base_explosion_radius := 40.0
 @export_range(1.0, 3.0, 0.05) var blast_size_multiplier := 1.5
@@ -45,6 +48,8 @@ func _ready() -> void:
 	blast_preview.set_preview_radius(get_blast_radius())
 	blast_preview.visible = false
 	_cache_flash_targets()
+	if arm_on_ready:
+		_start_arming.call_deferred()
 
 
 func _process(_delta: float) -> void:
@@ -58,6 +63,8 @@ func _process(_delta: float) -> void:
 
 
 func _start_arming() -> void:
+	if _armed or _detonating or not is_inside_tree():
+		return
 	_armed = true
 	blast_preview.visible = true
 	_freeze_for_arming()

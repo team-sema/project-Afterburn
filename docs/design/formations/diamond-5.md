@@ -23,6 +23,6 @@
 | Encounter | Slot0 / center | 나머지 |
 |-----------|----------------|--------|
 | `striker_drone_diamond_5` | Striker (`top`) | Drone ×4 |
-| `bomb_drone_diamond` | Bomb (`center`) | Drone `top`/`left`/`right`/`bottom` |
+| `bomb_drone_diamond` (레거시, 풀 미등록) | Bomb (`top`) | Drone `left`/`center`/`right`/`bottom` |
 
 멤버·이동은 [catalog](../encounters/catalog.md) 참고.
