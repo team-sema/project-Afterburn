@@ -13,7 +13,7 @@ const EXPECTED_ROSTER := {
 	&"awl_formation": {"difficulty": 12.0, "min_threat": 1},
 	&"striker_drone_diamond_13": {"difficulty": 15.0, "min_threat": 1},
 	&"tanker_guard_sniper": {"difficulty": 10.0, "min_threat": 2},
-	&"bomb_drone_diamond": {"difficulty": 9.0, "min_threat": 2},
+	&"bomb_pair": {"difficulty": 9.0, "min_threat": 2},
 	&"interceptor_pair": {"difficulty": 12.0, "min_threat": 2},
 	&"caster_single": {"difficulty": 7.0, "min_threat": 3},
 	&"x9_drone_down": {"difficulty": 9.0, "min_threat": 3},
@@ -23,6 +23,7 @@ const EXPECTED_ROSTER := {
 	&"drone_spread_formation": {"difficulty": 12.0, "min_threat": 1},
 	&"drone_slow_zigzag": {"difficulty": 10.0, "min_threat": 2},
 	&"drone_halt_formation": {"difficulty": 14.0, "min_threat": 2},
+	&"courier_single": {"difficulty": 9.0, "min_threat": 3},
 }
 
 var failures := PackedStringArray()
@@ -79,7 +80,7 @@ func _test_generator_and_pool_shape() -> void:
 	_expect(is_equal_approx(generator.spawn_interval, 2.8), "normal encounters spawn every 2.8 seconds")
 	_expect(is_equal_approx(generator.spawn_interval_jitter, 0.3), "normal spawn jitter is 0.3 seconds")
 	_expect(pool != null and pool.validate(), "EnemyGenerator references one valid MainEncounterPool")
-	_expect(pool.entries.size() == 16, "MainEncounterPool contains all sixteen live encounters")
+	_expect(pool.entries.size() == 17, "MainEncounterPool contains all seventeen live encounters")
 	_expect(not _has_property(generator, &"spawn_sets"), "EnemyGenerator no longer exposes spawn_sets")
 	_expect(
 		not _has_property(generator.enemy_spawner, &"enemy_scene"),
@@ -102,6 +103,7 @@ func _test_early_enemy_health_baselines() -> void:
 		"res://enemies/kamikaze_enemy.tscn": 80,
 		"res://enemies/bomb_enemy.tscn": 160,
 		"res://enemies/interceptor_enemy.tscn": 50,
+		"res://enemies/courier_enemy.tscn": 40,
 	}
 	for scene_path in expected_health:
 		var enemy := (load(scene_path) as PackedScene).instantiate() as Enemy
@@ -140,7 +142,7 @@ func _test_threat_rosters_and_weights() -> void:
 			&"awl_formation",
 			&"striker_drone_diamond_13",
 			&"tanker_guard_sniper",
-			&"bomb_drone_diamond",
+			&"bomb_pair",
 			&"interceptor_pair",
 			&"drone_spread_formation",
 			&"drone_slow_zigzag",
@@ -157,7 +159,7 @@ func _test_threat_rosters_and_weights() -> void:
 			&"awl_formation",
 			&"striker_drone_diamond_13",
 			&"tanker_guard_sniper",
-			&"bomb_drone_diamond",
+			&"bomb_pair",
 			&"interceptor_pair",
 			&"caster_single",
 			&"x9_drone_down",
@@ -167,6 +169,7 @@ func _test_threat_rosters_and_weights() -> void:
 			&"drone_spread_formation",
 			&"drone_slow_zigzag",
 			&"drone_halt_formation",
+			&"courier_single",
 		],
 		"Threat 3",
 	)
@@ -370,7 +373,8 @@ func _test_formation_encounters() -> void:
 		&"x9_caster_drone_orbit": 9,
 		&"v7_drone_down": 7,
 		&"tanker_guard_sniper": 2,
-		&"bomb_drone_diamond": 5,
+		&"bomb_pair": 2,
+		&"courier_single": 1,
 		&"interceptor_pair": 2,
 		&"interceptor_trio": 3,
 	}
@@ -467,47 +471,32 @@ func _test_formation_encounters() -> void:
 		)
 		diamond13.queue_free()
 
-	var bomb_diamond := generator._spawn(_find_preset(&"bomb_drone_diamond")) as FormationController
-	_expect(bomb_diamond != null, "bomb_drone_diamond spawns")
-	if bomb_diamond != null:
-		var bd_by_slot: Dictionary = {}
-		for member in bomb_diamond.get_members():
-			var slot := member.get_formation_slot()
-			if slot != null:
-				bd_by_slot[slot.slot_index] = member
-		_expect(
-			bd_by_slot.has(0)
-			and (bd_by_slot[0] as Enemy).scene_file_path == "res://enemies/bomb_enemy.tscn",
-			"bomb_drone_diamond top slot is Bomb",
-		)
-		for slot_index in [1, 2, 3, 4]:
+	var bomb_pair_preset := _find_preset(&"bomb_pair")
+	_expect(
+		bomb_pair_preset.formation_break_condition
+		== EncounterPreset.FormationBreakCondition.SEQUENCE_FINISHED
+		and bomb_pair_preset.individual_movement_sequence.resource_path.ends_with(
+			"bomb_straight_down.tres"
+		),
+		"bomb_pair releases at once and each Bomb falls straight",
+	)
+	var bomb_pair := generator._spawn(bomb_pair_preset) as FormationController
+	_expect(bomb_pair != null, "bomb_pair spawns")
+	if bomb_pair != null:
+		for member in bomb_pair.get_members():
 			_expect(
-				bd_by_slot.has(slot_index)
-				and (bd_by_slot[slot_index] as Enemy).scene_file_path == "res://enemies/normal_enemy.tscn",
-				"bomb_drone_diamond slot %d is a Drone" % slot_index,
+				member.scene_file_path == "res://enemies/bomb_enemy.tscn",
+				"bomb_pair members are Bombs",
 			)
-		var bd_preset := _find_preset(&"bomb_drone_diamond")
-		_expect(
-			bd_preset.formation_movement_sequence.resource_path.ends_with(
-				"bomb_drone_approach.tres"
-			),
-			"bomb_drone_diamond slowly homes toward the player",
-		)
-		var bomb_homing := bd_preset.formation_movement_sequence.steps[0] as HomingMovementStep
-		_expect(
-			bomb_homing != null
-			and is_equal_approx(bomb_homing.speed, 130.0)
-			and is_zero_approx(bomb_homing.stop_distance),
-			"bomb_drone_diamond dashes faster than the player until the Bomb fuse stops it",
-		)
-		var bomb_fuse := bd_by_slot[0].get_node("BombProximityFuseComponent") as BombProximityFuseComponent
-		_expect(
-			bomb_fuse != null
-			and is_equal_approx(bomb_fuse.trigger_radius, 60.0)
-			and is_equal_approx(bomb_fuse.arm_duration, 3.0),
-			"top-slot Bomb stops the formation at 60 px and charges for three seconds",
-		)
-		bomb_diamond.queue_free()
+			var bomb_fuse := member.get_node("BombProximityFuseComponent") as BombProximityFuseComponent
+			_expect(
+				bomb_fuse != null
+				and is_equal_approx(bomb_fuse.trigger_radius, 60.0)
+				and is_equal_approx(bomb_fuse.arm_duration, 3.0)
+				and not bomb_fuse.arm_on_ready,
+				"base Bomb arms at 60 px for three seconds and is not pre-lit",
+			)
+		bomb_pair.queue_free()
 
 
 func _test_spawn_scoped_augments() -> void:
@@ -517,22 +506,28 @@ func _test_spawn_scoped_augments() -> void:
 	drone_controller.queue_free()
 
 	augment_registry.add_augment(BOMB_FAST_FUSE)
-	var bomb_controller := generator._spawn(_find_preset(&"bomb_drone_diamond")) as FormationController
+	var bomb_controller := generator._spawn(_find_preset(&"bomb_pair")) as FormationController
 	var bomb: Enemy = null
-	for member in bomb_controller.get_members():
+	var pair_members := bomb_controller.get_members()
+	for member in pair_members:
 		if member.scene_file_path == "res://enemies/bomb_enemy.tscn":
 			bomb = member
 			break
 	await process_frame
-	_expect(is_instance_valid(bomb), "bomb_drone_diamond Encounter includes a Bomb")
+	_expect(is_instance_valid(bomb), "bomb_pair Encounter includes a Bomb")
 	if is_instance_valid(bomb):
-		_expect(bomb.spawn_id == &"bomb_drone_diamond", "Bomb receives its EncounterPreset id")
+		_expect(bomb.spawn_id == &"bomb_pair", "Bomb receives its EncounterPreset id")
 		var bomb_fuse := bomb.get_node("BombProximityFuseComponent")
 		var actual_arm_duration := float(bomb_fuse.get("arm_duration"))
 		_expect(
 			is_equal_approx(actual_arm_duration, 3.0 / 1.5),
 			"Bomb fast fuse applies to formation Bombs without spawn-id gate",
 		)
+	# bomb_pair releases its Bombs right away, which also frees the controller.
+	for member in pair_members:
+		if is_instance_valid(member):
+			member.queue_free()
+	if is_instance_valid(bomb_controller):
 		bomb_controller.queue_free()
 	await process_frame
 

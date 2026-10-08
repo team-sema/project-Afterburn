@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="EncounterPreset" format=3 uid="uid://beuw64o4xh1h"]
+
+[ext_resource type="Script" uid="uid://c6t14vfypdxop" path="res://resources/encounters/encounter_preset.gd" id="1_preset"]
+[ext_resource type="Script" uid="uid://cbtt1l1ekmuxi" path="res://resources/encounters/encounter_member.gd" id="2_member"]
+[ext_resource type="PackedScene" path="res://formations/layouts/single_formation.tscn" id="3_layout"]
+[ext_resource type="Resource" uid="uid://ciw8jhdxct5qd" path="res://resources/enemy_movement/sequences/single_release.tres" id="4_release"]
+[ext_resource type="Resource" path="res://resources/enemy_movement/sequences/courier_arc_pass.tres" id="5_individual"]
+[ext_resource type="PackedScene" path="res://enemies/courier_enemy.tscn" id="6_courier"]
+
+[sub_resource type="Resource" id="Member_courier"]
+script = ExtResource("2_member")
+enemy_scene = ExtResource("6_courier")
+
+[resource]
+script = ExtResource("1_preset")
+encounter_id = &"courier_single"
+difficulty = 9.0
+formation_layout_scene = ExtResource("3_layout")
+formation_movement_sequence = ExtResource("4_release")
+members = Array[ExtResource("2_member")]([SubResource("Member_courier")])
+spawn_anchor = 5
+spawn_offset = Vector2(0, -20)
+spawn_edge_margin = 40.0
+formation_break_condition = 1
+individual_movement_sequence = ExtResource("5_individual")

@@ -7,6 +7,7 @@
 [ext_resource type="Resource" path="res://resources/formation_behaviors/maintain.tres" id="5_behavior"]
 [ext_resource type="PackedScene" uid="uid://bhw7lkvyjx43v" path="res://enemies/normal_enemy.tscn" id="6_drone"]
 [ext_resource type="PackedScene" uid="uid://dyoidordek441" path="res://enemies/bomb_enemy.tscn" id="7_bomb"]
+[ext_resource type="Resource" path="res://resources/enemy_movement/sequences/individual_scatter.tres" id="8_scatter"]
 
 [sub_resource type="Resource" id="Member_drone_center"]
 script = ExtResource("2_member")
@@ -43,3 +44,6 @@ members = Array[ExtResource("2_member")]([SubResource("Member_drone_center"), Su
 spawn_anchor = 0
 spawn_offset = Vector2(0, -20)
 spawn_edge_margin = 32.0
+formation_break_condition = 3
+formation_anchor_slot_index = 0
+individual_movement_sequence = ExtResource("8_scatter")

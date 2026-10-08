@@ -1,0 +1,30 @@
+[gd_resource type="Resource" script_class="EncounterPreset" format=3 uid="uid://dsglifoijmtoi"]
+
+[ext_resource type="Script" uid="uid://c6t14vfypdxop" path="res://resources/encounters/encounter_preset.gd" id="1_preset"]
+[ext_resource type="Script" uid="uid://cbtt1l1ekmuxi" path="res://resources/encounters/encounter_member.gd" id="2_member"]
+[ext_resource type="PackedScene" path="res://formations/layouts/bomb_pair_formation.tscn" id="3_layout"]
+[ext_resource type="Resource" uid="uid://ciw8jhdxct5qd" path="res://resources/enemy_movement/sequences/single_release.tres" id="4_release"]
+[ext_resource type="Resource" uid="uid://daaq4fq54thlw" path="res://resources/enemy_movement/sequences/bomb_straight_down.tres" id="5_individual"]
+[ext_resource type="PackedScene" uid="uid://dyoidordek441" path="res://enemies/bomb_enemy.tscn" id="6_bomb"]
+
+[sub_resource type="Resource" id="Member_left"]
+script = ExtResource("2_member")
+enemy_scene = ExtResource("6_bomb")
+
+[sub_resource type="Resource" id="Member_right"]
+script = ExtResource("2_member")
+enemy_scene = ExtResource("6_bomb")
+slot_index = 1
+
+[resource]
+script = ExtResource("1_preset")
+encounter_id = &"bomb_pair"
+difficulty = 9.0
+formation_layout_scene = ExtResource("3_layout")
+formation_movement_sequence = ExtResource("4_release")
+members = Array[ExtResource("2_member")]([SubResource("Member_left"), SubResource("Member_right")])
+spawn_anchor = 0
+spawn_offset = Vector2(0, -20)
+spawn_edge_margin = 24.0
+formation_break_condition = 1
+individual_movement_sequence = ExtResource("5_individual")

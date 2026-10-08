@@ -64,7 +64,6 @@
 | `drone_formation` | 5기 대각 편대 본체 |
 | `drone_zigzag_mirrored` | zigzag 편대 본체 |
 | `striker_drone_diamond_5` / `_13` | 호위 |
-| `bomb_drone_diamond` | 호위 |
 | `v7_drone_down` / `x9_drone_down` | 하강 후 산개 |
 | `x9_caster_drone_orbit` | 궤도 호위 |
 

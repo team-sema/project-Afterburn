@@ -206,6 +206,8 @@ func _resolve_encounter_position(
 			anchor.x = maximum_x
 		EncounterPreset.SpawnAnchor.CENTER:
 			anchor = viewport_rect.get_center()
+		EncounterPreset.SpawnAnchor.TOP_FAR_SIDE:
+			anchor.x = _far_side_x(minimum_x, maximum_x)
 		_:
 			anchor.x = viewport_rect.get_center().x
 	if effective_anchor != EncounterPreset.SpawnAnchor.CENTER:
@@ -215,6 +217,15 @@ func _resolve_encounter_position(
 	if preset.mirrored:
 		offset.x = -offset.x
 	return anchor + offset
+
+
+func _far_side_x(minimum_x: float, maximum_x: float) -> float:
+	var player := get_tree().get_first_node_in_group("player") as Node2D
+	if player == null or not is_instance_valid(player):
+		return minimum_x if randf() < 0.5 else maximum_x
+	var from_left := absf(player.global_position.x - minimum_x)
+	var from_right := absf(player.global_position.x - maximum_x)
+	return minimum_x if from_left >= from_right else maximum_x
 
 
 func _resolve_startup_context(

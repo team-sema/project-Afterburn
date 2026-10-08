@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="MovementSequence" format=3 uid="uid://fimq14k6ki0q"]
+
+[ext_resource type="Script" uid="uid://df54gp6payrqu" path="res://resources/enemy_movement/movement_sequence.gd" id="1_sequence"]
+[ext_resource type="Script" uid="uid://biufnl0ep3dyf" path="res://resources/enemy_movement/movement_step.gd" id="2_step"]
+[ext_resource type="Script" path="res://resources/enemy_movement/steps/hold_position_movement_step.gd" id="3_hold"]
+
+[sub_resource type="Resource" id="Hold_mine"]
+script = ExtResource("3_hold")
+
+[resource]
+script = ExtResource("1_sequence")
+steps = Array[ExtResource("2_step")]([SubResource("Hold_mine")])

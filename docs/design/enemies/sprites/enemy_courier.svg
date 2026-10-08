@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="88" viewBox="0 0 32 44">
+  <!-- Nose +Y (down). Slim dart fighter with swept delta wings and twin tail
+       fins; the tow hook at the tail holds the Bomb (a separate sprite). -->
+  <path fill="#fff" fill-rule="evenodd" d="
+    M16 43.5 L14.6 34 L14 14 L15 6 L17 6 L18 14 L17.4 34 Z
+    M16 36.5 L16.8 31.5 L16 27 L15.2 31.5 Z
+  "/>
+  <path fill="#fff" d="
+    M14.7 31 L2.5 19.5 L4.5 16 L14.5 21 Z
+    M17.3 31 L29.5 19.5 L27.5 16 L17.5 21 Z
+    M14.8 11 L8.5 3.5 L10.5 2.2 L15.4 7.5 Z
+    M17.2 11 L23.5 3.5 L21.5 2.2 L16.6 7.5 Z
+    M15.2 0.6 L16.8 0.6 L16.8 6.5 L15.2 6.5 Z
+  "/>
+</svg>

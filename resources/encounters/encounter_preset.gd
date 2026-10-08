@@ -7,12 +7,17 @@ enum SpawnAnchor {
 	TOP_LEFT = 2,
 	TOP_RIGHT = 3,
 	CENTER = 4,
+	## Top edge on the side farther from the player (random without a player).
+	TOP_FAR_SIDE = 5,
 }
 
 enum FormationBreakCondition {
 	NEVER = 0,
 	SEQUENCE_FINISHED = 1,
 	ELAPSED_TIME = 2,
+	## Break once the member authored at formation_anchor_slot_index leaves the
+	## tree (killed, detonated, freed offscreen). A detach alone does not count.
+	ANCHOR_LOST = 3,
 }
 
 @export var encounter_id: StringName
@@ -34,6 +39,8 @@ enum FormationBreakCondition {
 @export var mirrored := false
 @export var formation_break_condition := FormationBreakCondition.NEVER
 @export_range(0.0, 60.0, 0.05) var formation_break_delay := 0.0
+## Slot whose member anchors an ANCHOR_LOST formation.
+@export var formation_anchor_slot_index := -1
 @export var individual_movement_sequence: MovementSequence
 
 
@@ -59,6 +66,16 @@ func get_validation_errors() -> PackedStringArray:
 	if formation_break_condition == FormationBreakCondition.ELAPSED_TIME:
 		if formation_break_delay <= 0.0:
 			errors.append("ELAPSED_TIME break requires formation_break_delay > 0.")
+	if formation_break_condition == FormationBreakCondition.ANCHOR_LOST:
+		var has_anchor := false
+		for member in members:
+			if member != null and member.slot_index == formation_anchor_slot_index:
+				has_anchor = true
+		if not has_anchor:
+			errors.append(
+				"ANCHOR_LOST break requires a member at formation_anchor_slot_index %d."
+				% formation_anchor_slot_index
+			)
 
 	var layout: FormationLayout
 	var layout_instance: Node

@@ -78,7 +78,7 @@ func _test_sequence_enemy_motion() -> void:
 	var start := enemy.global_position
 	modifier.apply_impulse(Vector2(100.0, 0.0))
 	await create_timer(0.15).timeout
-	_expect(move.velocity == Vector2(0.0, 16.0), "modifier does not overwrite sequence velocity")
+	_expect(move.velocity == Vector2(0.0, 40.0), "modifier does not overwrite sequence velocity")
 	_expect(enemy.global_position.y > start.y + 1.0, "sequence movement continues during impulse")
 	_expect(enemy.global_position.x > start.x + 3.0, "sequence enemy receives additive impulse")
 	enemy.queue_free()

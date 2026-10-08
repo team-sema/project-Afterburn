@@ -1,0 +1,70 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" uid="uid://psmpwiapllcb" path="res://enemies/enemy.tscn" id="1_enemy"]
+[ext_resource type="Script" path="res://enemies/courier_enemy.gd" id="2_script"]
+[ext_resource type="Texture2D" path="res://assets/enemies/enemy_courier.svg" id="3_courier"]
+[ext_resource type="Texture2D" uid="uid://c8cmh0u40cjec" path="res://assets/enemies/enemy_bomb.svg" id="4_bomb"]
+[ext_resource type="Resource" path="res://resources/enemy_movement/sequences/courier_arc_pass.tres" id="5_movement"]
+[ext_resource type="Script" path="res://components/bomb_courier_component.gd" id="6_courier"]
+[ext_resource type="PackedScene" uid="uid://dyoidordek441" path="res://enemies/bomb_enemy.tscn" id="7_bomb_scene"]
+[ext_resource type="Resource" path="res://resources/enemy_movement/sequences/bomb_mine_hold.tres" id="8_mine_hold"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_hurt"]
+size = Vector2(14, 16)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_hit"]
+size = Vector2(8, 14)
+
+[node name="CourierEnemy" unique_id=1288405117 instance=ExtResource("1_enemy")]
+script = ExtResource("2_script")
+
+[node name="WideGlow" parent="Anchor" parent_id_path=PackedInt32Array(93118890) index="1" unique_id=1704439409]
+texture = ExtResource("3_courier")
+
+[node name="TightGlow" parent="Anchor" parent_id_path=PackedInt32Array(93118890) index="2" unique_id=1479335934]
+texture = ExtResource("3_courier")
+
+[node name="Core" parent="Anchor" parent_id_path=PackedInt32Array(93118890) index="3" unique_id=1004814504]
+texture = ExtResource("3_courier")
+
+[node name="CarriedBomb" type="Node2D" parent="Anchor" parent_id_path=PackedInt32Array(93118890) unique_id=727469390]
+position = Vector2(0, -15.5)
+
+[node name="Glow" type="Sprite2D" parent="Anchor/CarriedBomb" unique_id=197400152]
+self_modulate = Color(1, 0.22, 0.62, 0.34)
+scale = Vector2(0.22, 0.22)
+texture = ExtResource("4_bomb")
+
+[node name="Core" type="Sprite2D" parent="Anchor/CarriedBomb" unique_id=1041857850]
+self_modulate = Color(1, 0.94, 0.98, 1)
+scale = Vector2(0.2, 0.2)
+texture = ExtResource("4_bomb")
+
+[node name="StatsComponent" parent="." index="1" unique_id=1304120856]
+health = 40
+
+[node name="MovementController" parent="."]
+sequence = ExtResource("5_movement")
+
+[node name="VisibleOnScreenNotifier2D" parent="." index="3" unique_id=1344806211]
+rect = Rect2(-9, -28, 18, 40)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HurtboxComponent" parent_id_path=PackedInt32Array(863455394) index="0" unique_id=615617821]
+position = Vector2(0, 2)
+shape = SubResource("RectangleShape2D_hurt")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HitboxComponent" parent_id_path=PackedInt32Array(486674932) index="0" unique_id=429186180]
+position = Vector2(0, 2)
+shape = SubResource("RectangleShape2D_hit")
+
+[node name="ScoreComponent" parent="." index="12" unique_id=1849553207]
+adjust_amount = 10
+
+[node name="BombCourierComponent" type="Node" parent="." unique_id=700879767 node_paths=PackedStringArray("actor", "stats_component", "movement_controller", "carried_visual")]
+script = ExtResource("6_courier")
+actor = NodePath("..")
+stats_component = NodePath("../StatsComponent")
+movement_controller = NodePath("../MovementController")
+carried_visual = NodePath("../Anchor/CarriedBomb")
+bomb_scene = ExtResource("7_bomb_scene")
+mine_movement = ExtResource("8_mine_hold")
