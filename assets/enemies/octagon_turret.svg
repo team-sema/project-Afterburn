@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="144" height="176" viewBox="-36 -44 72 88">
+<!-- White mask. Paired separated armor blades and a hollow octagonal breech. -->
+<g fill="#fff">
+<path d="M-16-35H16L23-26 18-20H-18L-23-26Z"/>
+<path d="M-26-25-18-16-20 9-28 30-35 16-32-13Z M26-25 18-16 20 9 28 30 35 16 32-13Z"/>
+<path fill-rule="evenodd" d="M-8-19H8L18-9V8L8 18H-8L-18 8V-9Z M-5-12-11-6V5L-5 11H5L11 5V-6L5-12Z"/>
+<path d="M-16 19-9 20-11 36-18 42-21 33Z M16 19 9 20 11 36 18 42 21 33Z"/>
+<path d="M-4 19H4L5 39 0 44-5 39Z"/>
+</g></svg>
