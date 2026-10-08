@@ -14,7 +14,8 @@ const CARD_GAP := 12.0
 const CARD_TOP := 12.0
 const FOCUS_LIFT := 8.0
 const UNFOCUSED_SCALE := Vector2(0.94, 0.94)
-const UNFOCUSED_MODULATE := Color(0.68, 0.74, 0.84, 1.0)
+## Keep copy readable on every card; the surface shader, lift and scale mark focus.
+const UNFOCUSED_MODULATE := Color.WHITE
 const FOCUSED_MODULATE := Color.WHITE
 const ENTRANCE_DROP := 16.0
 const RESULT_DROP := 14.0

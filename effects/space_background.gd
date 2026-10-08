@@ -3,7 +3,7 @@ extends ParallaxBackground
 
 ## Parallax star field (docs/design/effects.md 「World」).
 ## Layer order: Space (black + dots) → Nebula (BackdropTheme colour field) →
-## Rocks (BackdropTheme silhouettes) → far stars → close stars → speed streaks.
+## Rocks (BackdropTheme silhouettes) → far stars → close stars → orbital ring → speed streaks.
 ## Cruise speeds are multiplied by `speed_scale`; above STREAK_THRESHOLD a
 ## layer of cyan-white streak lines fades in so a burst reads as speed.
 
@@ -16,9 +16,10 @@ const STREAK_COLOR := Color(0.75, 0.95, 1.0)
 const ROCK_VERTEX_COUNT := 7
 const PLANET_RING_SEGMENTS := 40
 const PLANET_RING_TILT := -0.35
+const ORBITAL_RING_SHADER := preload("res://effects/orbital_ring.gdshader")
 
 @export_range(0.0, 20.0, 0.01) var speed_scale := 1.0
-## 성운·실루엣·행성 데이터. null이면 별밭만 그린다.
+## 성운·실루엣·행성·궤도 링 데이터. null이면 별밭만 그린다.
 @export var backdrop: BackdropTheme:
 	set(value):
 		backdrop = value
@@ -35,6 +36,8 @@ const PLANET_RING_TILT := -0.35
 var _streak_layer: StreakLayer
 var _nebula_layer: ParallaxLayer
 var _rock_layer: ParallaxLayer
+var _orbital_ring: ColorRect
+var _orbital_elapsed := 0.0
 
 
 class StreakLayer:
@@ -71,6 +74,9 @@ func _process(delta: float) -> void:
 			_nebula_layer.motion_offset.y += backdrop.nebula_speed * speed_scale * delta
 		if _rock_layer != null:
 			_rock_layer.motion_offset.y += backdrop.rock_speed * speed_scale * delta
+		if _orbital_ring != null:
+			_orbital_elapsed += delta * speed_scale
+			(_orbital_ring.material as ShaderMaterial).set_shader_parameter("elapsed", _orbital_elapsed)
 	_update_streaks(delta)
 
 
@@ -89,6 +95,10 @@ func get_nebula_layer() -> ParallaxLayer:
 
 func get_rock_layer() -> ParallaxLayer:
 	return _rock_layer
+
+
+func get_orbital_ring() -> ColorRect:
+	return _orbital_ring
 
 
 func _seed_streaks() -> void:
@@ -135,9 +145,12 @@ func _resize_to_viewport() -> void:
 	_build_backdrop()
 
 
-## Rebuilds the nebula and rock layers from `backdrop` for the current viewport.
-## Both tile vertically with the viewport height like the star layers.
+## Rebuilds theme layers for the current viewport. Nebula and rocks tile vertically;
+## the orbital landmark spans the screen without repeating.
 func _build_backdrop() -> void:
+	if _orbital_ring != null:
+		_orbital_ring.free()
+		_orbital_ring = null
 	if _nebula_layer != null:
 		_nebula_layer.free()
 		_nebula_layer = null
@@ -188,6 +201,18 @@ func _build_backdrop() -> void:
 		_rock_layer.add_child(planet)
 	add_child(_rock_layer)
 	move_child(_rock_layer, _nebula_layer.get_index() + 1)
+	if backdrop.orbital_ring_enabled:
+		_orbital_ring = ColorRect.new()
+		_orbital_ring.name = "OrbitalRing"
+		_orbital_ring.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_orbital_ring.size = viewport_size
+		var ring_material := ShaderMaterial.new()
+		ring_material.shader = ORBITAL_RING_SHADER
+		ring_material.set_shader_parameter("viewport_size", viewport_size)
+		ring_material.set_shader_parameter("elapsed", _orbital_elapsed)
+		_orbital_ring.material = ring_material
+		add_child(_orbital_ring)
+		move_child(_orbital_ring, close_stars_layer.get_index() + 1)
 
 
 ## A sprite whose radial gradient fades from `color` to transparent at `radius`.
