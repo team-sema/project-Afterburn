@@ -21,8 +21,18 @@ class Analysis extends RefCounted:
 	var single_lateral: BulletAction
 	var spawn_offsets: Array[Dictionary] = []
 	var cycle_length := 0.0
+	## TURN_TO aims at a world angle, so its state depends on the launch
+	## direction; shared samples then key on it too.
+	var uses_world_heading := false
 
 var _runtime_analysis: Analysis
+## Shared state samples, one table per launch key (speed, tint and, for
+## world-heading Behaviors, direction): {key: {age: state}}. Bullets that share
+## this Behavior instance and key read one sample per age instead of each
+## evaluating it. Runtime only; never duplicated or saved.
+var _sample_memos := {}
+## Shared local-frame trajectories, {launch key: BulletBehaviorState.SharedPath}.
+var _path_tables := {}
 
 func runtime_analysis() -> Analysis:
 	if _runtime_analysis == null:
@@ -37,13 +47,14 @@ func _analyze() -> Analysis:
 		var group: Array = action.children if action.type == BulletAction.Type.PARALLEL else [action]
 		for child in group:
 			if child.type == BulletAction.Type.HOMING: analysis.has_homing = true
+			if child.type == BulletAction.Type.TURN_TO: analysis.uses_world_heading = true
 			if child.channel() == "heading": heading_action = child
 			if child.channel() == "speed": speed_action = child
 			if child.type == BulletAction.Type.LATERAL_WAVE:
 				analysis.has_lateral = true
 			if child.channel() in ["heading", "speed"]:
 				analysis.constant_velocity = false
-			if child.type in [BulletAction.Type.TINT, BulletAction.Type.OPACITY, BulletAction.Type.VISUAL_SCALE, BulletAction.Type.HITBOX_SCALE]:
+			if child.type in [BulletAction.Type.TINT, BulletAction.Type.OPACITY, BulletAction.Type.VISUAL_SCALE, BulletAction.Type.HITBOX_SCALE, BulletAction.Type.TANGIBLE]:
 				analysis.static_visuals = false
 			if child.type == BulletAction.Type.HITBOX_SCALE:
 				analysis.max_hitbox_scale = maxf(analysis.max_hitbox_scale, child.value)
@@ -66,7 +77,24 @@ func _analyze() -> Analysis:
 func then(action: BulletAction) -> BulletBehavior:
 	actions.append(action)
 	_runtime_analysis = null
+	_sample_memos.clear()
+	_path_tables.clear()
 	return self
+
+## The shared trajectory for one launch key (see _path_tables).
+func shared_path(key: Array) -> BulletBehaviorState.SharedPath:
+	var path: BulletBehaviorState.SharedPath = _path_tables.get(key)
+	if path == null:
+		path = BulletBehaviorState.SharedPath.new()
+		_path_tables[key] = path
+	return path
+
+## The shared {age: state} table for one launch key (see _sample_memos).
+func sample_memo(key: Array) -> Dictionary:
+	var memo: Dictionary = _sample_memos.get(key, {})
+	if memo.is_empty() and not _sample_memos.has(key):
+		_sample_memos[key] = memo
+	return memo
 
 func wait(seconds: float) -> BulletBehavior:
 	return then(BulletAction.make(BulletAction.Type.WAIT, 0, seconds))
@@ -109,6 +137,15 @@ func visual_scale_to(scale: float, seconds: float) -> BulletBehavior:
 func hitbox_scale_to(scale: float, seconds: float) -> BulletBehavior:
 	return then(BulletAction.hitbox_scale_to(scale, seconds))
 
+## Switches the hitbox off from this point (a ghost bullet): hits pass
+## through, the bullet keeps moving. Fade it with opacity_to yourself.
+func intangible() -> BulletBehavior:
+	return then(BulletAction.set_tangible(false))
+
+## Switches the hitbox back on. Restore opacity first so players can read it.
+func tangible() -> BulletBehavior:
+	return then(BulletAction.set_tangible(true))
+
 func parallel(group: Array[BulletAction]) -> BulletBehavior:
 	var action := BulletAction.new()
 	action.type = BulletAction.Type.PARALLEL
@@ -131,6 +168,17 @@ func has_spawn() -> bool:
 			return true
 	return false
 
+## True when any Action (parallel children included) toggles the hitbox.
+func has_tangible_toggle() -> bool:
+	for action in actions:
+		if action == null:
+			continue
+		var group: Array = action.children if action.type == BulletAction.Type.PARALLEL else [action]
+		for child in group:
+			if child != null and child.type == BulletAction.Type.TANGIBLE:
+				return true
+	return false
+
 func has_homing() -> bool:
 	for action in actions:
 		if action == null:
@@ -144,6 +192,8 @@ func has_homing() -> bool:
 func repeat(times := 0) -> BulletBehavior:
 	repeat_count = times
 	_runtime_analysis = null
+	_sample_memos.clear()
+	_path_tables.clear()
 	return self
 
 ## Eases the most recently added action. For parallel groups ease each child with
@@ -153,6 +203,8 @@ func eased(transition: Tween.TransitionType, easing: Tween.EaseType = Tween.EASE
 		push_warning("BulletBehavior.eased() needs a preceding non-parallel action.")
 		return self
 	actions[-1].eased(transition, easing)
+	_sample_memos.clear()
+	_path_tables.clear()
 	return self
 
 func validation_error() -> String:

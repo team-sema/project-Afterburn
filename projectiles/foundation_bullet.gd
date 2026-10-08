@@ -14,6 +14,8 @@ var visual_scale := 1.0
 var hitbox_scale := 1.0
 var render_tint := Color.WHITE
 var render_opacity := 1.0
+## False while a TANGIBLE Action has the hitbox switched off (ghost bullet).
+var tangible := true
 @export var show_hitbox := false:
 	set(value):
 		show_hitbox = value
@@ -182,6 +184,11 @@ func _update_pose() -> Vector2:
 			_hitbox_scale_applied = hitbox_scale
 			_hitbox.get_child(0).scale = Vector2.ONE * hitbox_scale
 			_hitbox.get_child(0).position = appearance.collision_offset * hitbox_scale
+		if state.tangible != tangible:
+			tangible = state.tangible
+			# Deferred: launch/SPAWN may run inside a physics callback. Re-enabling
+			# over the player registers a fresh overlap, so the hit still lands.
+			_hitbox.get_child(0).set_deferred(&"disabled", not tangible)
 		if not use_batched_rendering:
 			queue_redraw()
 	if _constant_travel or not _needs_rotation:
@@ -346,7 +353,7 @@ func _draw() -> void:
 		_draw_core(1.65 * visual_scale, Color(render_tint, 0.10 * render_opacity))
 		_draw_core(1.2 * visual_scale, Color(render_tint, 0.45 * render_opacity))
 		_draw_core(visual_scale, Color(render_tint.lightened(0.75), render_tint.a * render_opacity))
-	if show_hitbox:
+	if show_hitbox and tangible:
 		draw_set_transform(appearance.collision_offset * hitbox_scale, 0, Vector2.ONE * hitbox_scale)
 		var shape := appearance.make_shape()
 		shape.draw(get_canvas_item(), Color(0.2, 1.0, 0.75, 0.7))

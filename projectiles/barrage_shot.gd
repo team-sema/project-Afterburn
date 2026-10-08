@@ -37,6 +37,9 @@ func is_valid() -> bool:
 	# Spawning runs on the BULLET body only; a laser head never fires volleys.
 	if behavior != null and kind != Kind.BULLET and behavior.has_spawn():
 		return false
+	# Only the BULLET body owns a single toggleable hitbox shape.
+	if behavior != null and kind != Kind.BULLET and behavior.has_tangible_toggle():
+		return false
 	if bounce_walls < 0 or bounce_walls > BulletWallBounce.ALL or bounce_count < 0 or bounce_count > 64:
 		return false
 	# Homing steers by the unreflected path, so it cannot be mixed with bounces.
