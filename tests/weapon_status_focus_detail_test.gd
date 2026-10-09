@@ -64,8 +64,8 @@ func _run() -> void:
 	var second_hex := grid.get_child(1) as HexModuleFrame
 	_expect(first_hex != null, "equipped module is a bare HexModuleFrame")
 	_expect(
-		_hexes_share_edge(first_hex, second_hex),
-		"equipped module hexes share a honeycomb edge without gaps",
+		is_equal_approx(first_hex.position.y, second_hex.position.y) and second_hex.position.x > first_hex.position.x + first_hex.size.x,
+		"equipped module hexes occupy separate cells along the tilted display",
 	)
 	_expect(loadout.get_trait_icon(&"blaster_accel_ap") != null, "blaster accel AP has a visible icon for STATUS")
 	first_hex.module_hovered.emit()
@@ -80,12 +80,12 @@ func _run() -> void:
 	await process_frame
 	var bay_row: HexHoneycombContainer = weapon_hud.get_node("%BayRow") as HexHoneycombContainer
 	_expect(bay_row.get_child_count() == loadout.get_max_equipped_weapon_count(), "bay row lists every slot equally")
-	_expect(is_equal_approx(bay_row.hex_side, 32.0), "weapon bay hexes use the compact 32px size")
+	_expect(is_equal_approx(bay_row.hex_side, 28.0), "weapon bay hexes use the compact 28px size")
 	var first_bay := bay_row.get_child(0) as WeaponCoreCluster
 	var second_bay := bay_row.get_child(1) as WeaponCoreCluster
 	_expect(
-		_hexes_share_edge(first_bay.get_node("%Core") as HexModuleFrame, second_bay.get_node("%Core") as HexModuleFrame),
-		"weapon bay hexes share a honeycomb edge without gaps",
+		is_equal_approx(first_bay.position.y, second_bay.position.y) and second_bay.position.x > first_bay.position.x + first_bay.size.x,
+		"weapon bays are separate aligned cells",
 	)
 	var laser_cluster: WeaponCoreCluster = null
 	for child in bay_row.get_children():
@@ -131,7 +131,7 @@ func _run() -> void:
 	ship_panel.slot_rack.slot_hover_exited.emit()
 
 	var detail_cols := weapon_hud.get_node_or_null("%DetailColumns") as Control
-	_expect(detail_cols != null, "selected weapon and modules sit in side-by-side columns")
+	_expect(detail_cols != null, "selected weapon and modules belong to the lower display")
 	var footer_clip := weapon_hud.get_node_or_null("%WeaponDetailFooterClip") as Control
 	var layout := world.get_node("Layout") as Control
 	var right_panel := world.get_node("Layout/RightPanel") as Control
@@ -193,18 +193,3 @@ func _run() -> void:
 func _expect(condition: bool, message: String) -> void:
 	if not condition:
 		failures.append(message)
-
-
-func _hexes_share_edge(first: HexModuleFrame, second: HexModuleFrame) -> bool:
-	if first == null or second == null:
-		return false
-	var first_polygon := first.get_hex_polygon()
-	var second_polygon := second.get_hex_polygon()
-	if first_polygon.size() != 6 or second_polygon.size() != 6:
-		return false
-	var first_origin := first.get_global_transform_with_canvas().origin
-	var second_origin := second.get_global_transform_with_canvas().origin
-	return (
-		(first_origin + first_polygon[0]).is_equal_approx(second_origin + second_polygon[4])
-		and (first_origin + first_polygon[1]).is_equal_approx(second_origin + second_polygon[3])
-	)

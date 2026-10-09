@@ -30,6 +30,8 @@ func run() -> void:
 				var pixel: Vector2i = Vector2i(shell_point / Vector2(640, 360) * Vector2(image.get_size()))
 				pixel = pixel.clamp(Vector2i.ZERO, image.get_size()-Vector2i.ONE)
 				check(image.get_pixelv(pixel).a < 0.5, "ship clearance stays inside artwork at %s" % shell_point)
+	check(world.status_ship_panel.slot_rack.get_visible_slot_count() == 5, "new run starts with five facilities, not expanded capacity")
+	_check_instrument_fit(world)
 	ship.position = Vector2(170, 216)
 	launch.play()
 	launch.set_process(false)
@@ -38,6 +40,8 @@ func run() -> void:
 	for panel in cockpit.panels: check(panel.position.length() > 300, "panels start outside screen")
 	launch.advance(0.65)
 	check(cockpit.panels[0].position != cockpit.panels[2].position, "canopy and wing deploy separately")
+	for item in cockpit.instruments:
+		check(item.node.position.is_equal_approx(item.home + cockpit.panels[int(item.panel)].position), "instrument follows its own panel during deployment")
 	var before: float = launch.elapsed
 	world._set_manual_pause(true)
 	launch.set_process(true)
@@ -59,9 +63,9 @@ func run() -> void:
 	var hud = world.weapon_loadout_hud
 	check(hud.bay_row.get_child_count() == 4, "four weapon bays retained")
 	for bay in hud.bay_row.get_children():
-		check(bay.size.is_equal_approx(Vector2(32,32)), "occupied and empty bays have equal compact size")
+		check(bay.size.is_equal_approx(Vector2(24,24)), "occupied and empty bays have equal compact size")
 		check(hud.bay_row.get_global_rect().encloses(bay.get_global_rect()), "bay stays in its reserved screen")
-	check(Rect2(Vector2.ZERO, Vector2(640,360)).encloses(hud.detail_footer.get_global_rect()), "weapon explanation stays on screen")
+	_check_instrument_fit(world)
 	world.queue_free()
 	await process_frame
 	var next := load("res://world.tscn").instantiate() as Control
@@ -77,3 +81,46 @@ func run() -> void:
 	else:
 		for failure in failures: printerr("FAIL: ", failure)
 		quit(1)
+
+
+func _check_instrument_fit(world: Control) -> void:
+	var rack: UniversalModuleSlotRack = world.status_ship_panel.slot_rack
+	for i in rack.get_visible_slot_count():
+		var cell := rack.get_slot_rect(i)
+		check(Rect2(Vector2.ZERO, rack.size).encloses(cell), "every facility cell fits its reserved display")
+		check(rack._slot_at_position(cell.get_center()) == i, "each visible facility remains independently hoverable")
+	var hud: WeaponLoadoutHud = world.weapon_loadout_hud
+	var console := Rect2(514, 80, 112, 111)
+	for bay: Control in hud.bay_row.get_children():
+		check(console.encloses(bay.get_global_rect()), "weapon bay stays above lower metal seam")
+	var left := world.get_node("Layout/LeftPanel/Margin/VBox")
+	var shield := left.get_node("ShipStatusHud") as Control
+	var xp := left.get_node("ProgressionHud/ExperienceLabel") as Label
+	var bar := left.get_node("ProgressionHud/ExperienceBar") as Control
+	check(shield.rotation > 0.1 and is_equal_approx(shield.rotation, xp.rotation) and is_equal_approx(xp.rotation, bar.rotation), "shield and XP share the console tilt")
+	var xp_local: Vector2 = shield.get_global_transform().affine_inverse() * xp.global_position
+	var arc := shield.get_node("ShieldArc") as Control
+	var charge := shield.get_node("ShieldChargeBar") as Control
+	check(xp_local.y > arc.position.y + arc.size.y and xp_local.y > charge.position.y + charge.size.y, "XP has clearance below the shield arc and charging bar")
+	var selected := hud.get_node("%SelectedWeaponHex") as Control
+	var up_axis := hud.modules_grid.get_global_transform().y.normalized()
+	var modules_bottom := up_axis.dot(hud.modules_grid.global_position) + hud.modules_grid.size.y
+	var title_top := up_axis.dot(hud.detail_footer.global_position)
+	var title_bottom := title_top + hud.detail_footer.size.y
+	check(title_top > modules_bottom and up_axis.dot(selected.global_position) > title_bottom, "module row, weapon title and selected icon have distinct vertical space")
+	var safe_left := PackedVector2Array([Vector2(37,239), Vector2(121,260), Vector2(162,330), Vector2(134,339), Vector2(12,307)])
+	for control: Control in [shield.get_node("ShieldLabel"), shield.get_node("ShieldArc"), xp, bar]:
+		_check_corners(control, safe_left)
+	var safe_right := PackedVector2Array([Vector2(526,252), Vector2(610,232), Vector2(632,316), Vector2(610,328), Vector2(483,338)])
+	for control: Control in [hud.get_node("%SelectedWeaponHex"), hud.modules_grid, hud.detail_footer]:
+		_check_corners(control, safe_right)
+	var progress = left.get_node("ProgressionHud")
+	progress._on_experience_changed(999, 5, 1)
+	var font := xp.label_settings.font
+	check(font.get_string_size(xp.text, HORIZONTAL_ALIGNMENT_LEFT, -1, xp.label_settings.font_size).x <= xp.size.x, "full augment-ready prompt fits without clipping")
+	progress._on_experience_changed(0, 5, 1)
+
+func _check_corners(control: Control, polygon: PackedVector2Array) -> void:
+	for corner in [Vector2.ZERO, Vector2(control.size.x, 0), control.size, Vector2(0, control.size.y)]:
+		var point: Vector2 = control.get_global_transform() * corner
+		check(Geometry2D.is_point_in_polygon(point, polygon), "%s stays inside the slanted instrument glass at %s" % [control.name, point])
