@@ -88,169 +88,339 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("7_world_shell")
 
-[node name="Layout" type="HBoxContainer" parent="." unique_id=85169167]
+[node name="Layout" type="Control" parent="." unique_id=85169167]
 process_mode = 1
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 0
+layout_mode = 0
+anchors_preset = 0
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 640.0
+offset_bottom = 360.0
+custom_minimum_size = Vector2(0, 0)
+mouse_filter = 2
 
-[node name="LeftPanel" type="PanelContainer" parent="Layout" unique_id=1130177399]
+[node name="LeftPanel" type="Control" parent="Layout" unique_id=1130177399]
 texture_filter = 1
-custom_minimum_size = Vector2(170, 0)
-layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBox_left_panel")
+layout_mode = 0
+anchors_preset = 0
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 150.0
+offset_bottom = 360.0
+custom_minimum_size = Vector2(0, 0)
+mouse_filter = 2
 
-[node name="Margin" type="MarginContainer" parent="Layout/LeftPanel" unique_id=25973555]
-layout_mode = 2
+[node name="Margin" type="Control" parent="Layout/LeftPanel" unique_id=25973555]
 theme_override_constants/margin_left = 18
 theme_override_constants/margin_top = 18
 theme_override_constants/margin_right = 18
 theme_override_constants/margin_bottom = 18
+layout_mode = 0
+anchors_preset = 0
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 150.0
+offset_bottom = 360.0
+custom_minimum_size = Vector2(0, 0)
+mouse_filter = 2
 
-[node name="VBox" type="VBoxContainer" parent="Layout/LeftPanel/Margin" unique_id=730454617]
-layout_mode = 2
+[node name="VBox" type="Control" parent="Layout/LeftPanel/Margin" unique_id=730454617]
 theme_override_constants/separation = 6
+layout_mode = 0
+anchors_preset = 0
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 150.0
+offset_bottom = 360.0
+custom_minimum_size = Vector2(0, 0)
+mouse_filter = 2
 
 [node name="GameTitle" type="Label" parent="Layout/LeftPanel/Margin/VBox" unique_id=1072783613]
 layout_mode = 2
 text = "AFTERBURN"
 label_settings = ExtResource("4_title_label")
+visible = false
 
 [node name="TitleRule" type="ColorRect" parent="Layout/LeftPanel/Margin/VBox" unique_id=358723966]
 custom_minimum_size = Vector2(0, 2)
 layout_mode = 2
 color = Color(0.07, 0.455, 0.665, 0.85)
+visible = false
 
 [node name="ScoreTitle" type="Label" parent="Layout/LeftPanel/Margin/VBox" unique_id=1714873373]
-layout_mode = 2
 theme_override_colors/font_color = Color(0.45, 0.78, 1, 1)
 text = "SCORE"
 label_settings = ExtResource("3_default_label")
+layout_mode = 0
+anchors_preset = 0
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 27.0
+offset_top = 7.0
+offset_right = 117.0
+offset_bottom = 19.0
+custom_minimum_size = Vector2(0, 0)
+mouse_filter = 2
 
 [node name="ScoreValue" type="Label" parent="Layout/LeftPanel/Margin/VBox" unique_id=1895293755]
-layout_mode = 2
 text = "000000"
 label_settings = ExtResource("4_title_label")
 clip_text = true
 text_overrun_behavior = 3
 script = ExtResource("5_score_hud")
 game_stats = ExtResource("2_stats")
+layout_mode = 0
+anchors_preset = 0
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 27.0
+offset_right = 117.0
+offset_bottom = 43.0
+custom_minimum_size = Vector2(0, 0)
+mouse_filter = 2
+offset_top = 17.0
 
-[node name="ProgressionHud" type="VBoxContainer" parent="Layout/LeftPanel/Margin/VBox" unique_id=1125713299 node_paths=PackedStringArray("progression", "encounter_director")]
-layout_mode = 2
+[node name="ProgressionHud" type="Control" parent="Layout/LeftPanel/Margin/VBox" unique_id=1125713299 node_paths=PackedStringArray("progression", "encounter_director")]
 theme_override_constants/separation = 3
 script = ExtResource("8_progression_hud")
 progression = NodePath("../../../../Playfield/ViewportContainer/PlayfieldViewport/Gameplay/AugmentProgressionController")
 encounter_director = NodePath("../../../../Playfield/ViewportContainer/PlayfieldViewport/Gameplay/EncounterDirector")
+layout_mode = 0
+anchors_preset = 0
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 150.0
+offset_bottom = 360.0
+custom_minimum_size = Vector2(0, 0)
+mouse_filter = 2
 
 [node name="ExperienceLabel" type="Label" parent="Layout/LeftPanel/Margin/VBox/ProgressionHud" unique_id=1383963096]
 unique_name_in_owner = true
-layout_mode = 2
 theme_override_colors/font_color = Color(0.35, 0.88, 1, 1)
 text = "LEVEL 01   0 / 5 XP"
 label_settings = ExtResource("3_default_label")
 clip_text = true
 text_overrun_behavior = 3
+layout_mode = 0
+anchors_preset = 0
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 23.0
+offset_top = 297.0
+offset_right = 159.0
+offset_bottom = 311.0
+custom_minimum_size = Vector2(0, 0)
+mouse_filter = 2
 
 [node name="ExperienceBar" type="ProgressBar" parent="Layout/LeftPanel/Margin/VBox/ProgressionHud" unique_id=1258553615]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 10)
-layout_mode = 2
-mouse_filter = 2
 theme_override_styles/background = SubResource("StyleBox_progress_background")
 theme_override_styles/fill = SubResource("StyleBox_experience_fill")
 max_value = 5.0
 show_percentage = false
+layout_mode = 0
+anchors_preset = 0
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 23.0
+offset_top = 316.0
+offset_bottom = 323.0
+custom_minimum_size = Vector2(0, 0)
+mouse_filter = 2
+offset_right = 142.0
 
 [node name="ThreatSpacer" type="Control" parent="Layout/LeftPanel/Margin/VBox/ProgressionHud" unique_id=1544195094]
 custom_minimum_size = Vector2(0, 3)
 layout_mode = 2
+visible = false
 
 [node name="ThreatLabel" type="Label" parent="Layout/LeftPanel/Margin/VBox/ProgressionHud" unique_id=108393861]
 unique_name_in_owner = true
-layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.35, 0.58, 1)
 text = "THREAT 01   01:00"
 label_settings = ExtResource("3_default_label")
 clip_text = true
 text_overrun_behavior = 3
+layout_mode = 0
+anchors_preset = 0
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 35.0
+offset_top = 85.0
+offset_right = 134.0
+offset_bottom = 115.0
+custom_minimum_size = Vector2(0, 0)
+mouse_filter = 2
+autowrap_mode = 3
 
 [node name="ThreatBar" type="ProgressBar" parent="Layout/LeftPanel/Margin/VBox/ProgressionHud" unique_id=1601726261]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 10)
-layout_mode = 2
-mouse_filter = 2
 theme_override_styles/background = SubResource("StyleBox_progress_background")
 theme_override_styles/fill = SubResource("StyleBox_threat_fill")
 max_value = 60.0
 show_percentage = false
+layout_mode = 0
+anchors_preset = 0
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 35.0
+offset_top = 119.0
+offset_right = 127.0
+offset_bottom = 126.0
+custom_minimum_size = Vector2(0, 0)
+mouse_filter = 2
 
-[node name="ShipStatusHud" type="VBoxContainer" parent="Layout/LeftPanel/Margin/VBox" unique_id=1682139441 node_paths=PackedStringArray("ship")]
-layout_mode = 2
+[node name="ShipStatusHud" type="Control" parent="Layout/LeftPanel/Margin/VBox" unique_id=1682139441 node_paths=PackedStringArray("ship")]
 theme_override_constants/separation = 3
 script = ExtResource("12_ship_status_hud")
 ship = NodePath("../../../../Playfield/ViewportContainer/PlayfieldViewport/Gameplay/Ship")
+layout_mode = 0
+anchors_preset = 0
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 25.0
+offset_top = 250.0
+offset_bottom = 290.0
+custom_minimum_size = Vector2(0, 0)
+mouse_filter = 2
+offset_right = 137.0
 
 [node name="ShieldLabel" type="Label" parent="Layout/LeftPanel/Margin/VBox/ShipStatusHud" unique_id=1766376640]
 unique_name_in_owner = true
-layout_mode = 2
 theme_override_colors/font_color = Color(0.72, 0.62, 1, 1)
 text = "SHIELD 0 / 0"
 label_settings = ExtResource("3_default_label")
 clip_text = true
 text_overrun_behavior = 3
+layout_mode = 0
+anchors_preset = 0
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 124.0
+offset_bottom = 14.0
+custom_minimum_size = Vector2(0, 0)
+mouse_filter = 2
 
 [node name="ShieldBar" type="ProgressBar" parent="Layout/LeftPanel/Margin/VBox/ShipStatusHud" unique_id=1389593045]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 10)
-layout_mode = 2
-mouse_filter = 2
 theme_override_styles/background = SubResource("StyleBox_progress_background")
 theme_override_styles/fill = SubResource("StyleBox_shield_fill")
 max_value = 1.0
 show_percentage = false
+layout_mode = 0
+anchors_preset = 0
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 0.0
+offset_top = 20.0
+offset_bottom = 26.0
+custom_minimum_size = Vector2(0, 0)
+mouse_filter = 2
+offset_right = 96.0
+visible = false
 
 [node name="ShieldChargeBar" type="ProgressBar" parent="Layout/LeftPanel/Margin/VBox/ShipStatusHud" unique_id=830020752]
 unique_name_in_owner = true
 visible = false
-custom_minimum_size = Vector2(0, 4)
-layout_mode = 2
-mouse_filter = 2
 theme_override_styles/background = SubResource("StyleBox_progress_background")
 theme_override_styles/fill = SubResource("StyleBox_shield_charge_fill")
 max_value = 1.0
 show_percentage = false
+layout_mode = 0
+anchors_preset = 0
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 0.0
+custom_minimum_size = Vector2(0, 0)
+mouse_filter = 2
+offset_right = 96.0
+offset_top = 39.0
+offset_bottom = 42.0
 
 [node name="FlexibleSpace" type="Control" parent="Layout/LeftPanel/Margin/VBox" unique_id=794592989]
 layout_mode = 2
 size_flags_vertical = 3
+visible = false
 
 [node name="PlayfieldTitle" type="Label" parent="Layout/LeftPanel/Margin/VBox" unique_id=1685496757]
-visible = false
 layout_mode = 2
 theme_override_colors/font_color = Color(0.45, 0.78, 1, 1)
 text = "PLAYFIELD"
 label_settings = ExtResource("3_default_label")
+visible = false
 
 [node name="PlayfieldValue" type="Label" parent="Layout/LeftPanel/Margin/VBox" unique_id=1010545888]
-visible = false
 layout_mode = 2
-text = "300 × 360"
+text = "340 × 360"
 label_settings = ExtResource("3_default_label")
+visible = false
 
 [node name="CornerFrame" type="Control" parent="Layout/LeftPanel" unique_id=375089336]
 layout_mode = 2
 mouse_filter = 2
 script = ExtResource("11_corner_frame")
 color = Color(0.14, 0.504, 0.7, 0.9)
+visible = false
 
 [node name="Playfield" type="Control" parent="Layout" unique_id=2111030118]
-custom_minimum_size = Vector2(300, 360)
-layout_mode = 2
+layout_mode = 0
+anchors_preset = 0
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 150.0
+offset_top = 0.0
+offset_right = 490.0
+offset_bottom = 360.0
+custom_minimum_size = Vector2(0, 0)
+mouse_filter = 2
 
 [node name="ViewportContainer" type="SubViewportContainer" parent="Layout/Playfield" unique_id=1956774714]
 texture_filter = 1
@@ -265,8 +435,8 @@ stretch = true
 [node name="PlayfieldViewport" type="SubViewport" parent="Layout/Playfield/ViewportContainer" unique_id=1808854821]
 handle_input_locally = false
 use_hdr_2d = true
-size = Vector2i(300, 360)
 render_target_update_mode = 4
+size = Vector2i(340, 360)
 
 [node name="Gameplay" parent="Layout/Playfield/ViewportContainer/PlayfieldViewport" unique_id=941788113 instance=ExtResource("1_gameplay")]
 
@@ -281,6 +451,7 @@ offset_bottom = 180.0
 grow_vertical = 2
 mouse_filter = 2
 color = Color(0.07, 0.455, 0.665, 0.85)
+visible = false
 
 [node name="RightEdge" type="ColorRect" parent="Layout/Playfield" unique_id=117040119]
 layout_mode = 1
@@ -296,6 +467,7 @@ grow_horizontal = 0
 grow_vertical = 2
 mouse_filter = 2
 color = Color(0.07, 0.455, 0.665, 0.85)
+visible = false
 
 [node name="CornerFrame" type="Control" parent="Layout/Playfield" unique_id=1252016107]
 layout_mode = 1
@@ -308,68 +480,168 @@ mouse_filter = 2
 script = ExtResource("11_corner_frame")
 color = Color(0.14, 0.504, 0.7, 0.9)
 inset = 5.0
+visible = false
 
 [node name="PauseOverlay" parent="Layout/Playfield" unique_id=603058799 instance=ExtResource("16_pause_menu")]
 unique_name_in_owner = true
 visible = false
 layout_mode = 1
 
-[node name="RightPanel" type="PanelContainer" parent="Layout" unique_id=162854702]
+[node name="RightPanel" type="Control" parent="Layout" unique_id=162854702]
 texture_filter = 1
-custom_minimum_size = Vector2(170, 0)
-layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBox_right_panel")
+layout_mode = 0
+anchors_preset = 0
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 490.0
+offset_top = 0.0
+offset_right = 640.0
+offset_bottom = 360.0
+custom_minimum_size = Vector2(0, 0)
+mouse_filter = 2
 
-[node name="Margin" type="MarginContainer" parent="Layout/RightPanel" unique_id=210576496]
-layout_mode = 2
+[node name="Margin" type="Control" parent="Layout/RightPanel" unique_id=210576496]
 theme_override_constants/margin_left = 10
 theme_override_constants/margin_top = 7
 theme_override_constants/margin_right = 10
 theme_override_constants/margin_bottom = 7
+layout_mode = 0
+anchors_preset = 0
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 150.0
+offset_bottom = 360.0
+custom_minimum_size = Vector2(0, 0)
+mouse_filter = 2
 
-[node name="VBox" type="VBoxContainer" parent="Layout/RightPanel/Margin" unique_id=1328936483]
-layout_mode = 2
+[node name="VBox" type="Control" parent="Layout/RightPanel/Margin" unique_id=1328936483]
 theme_override_constants/separation = 6
+layout_mode = 0
+anchors_preset = 0
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 150.0
+offset_bottom = 360.0
+custom_minimum_size = Vector2(0, 0)
+mouse_filter = 2
 
 [node name="LoadoutTitle" type="Label" parent="Layout/RightPanel/Margin/VBox" unique_id=1979278927]
-layout_mode = 2
-text = "STATUS"
-label_settings = ExtResource("4_title_label")
+layout_mode = 0
+anchors_preset = 0
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 24.0
+offset_top = 81.0
+offset_right = 136.0
+offset_bottom = 95.0
+custom_minimum_size = Vector2(0, 0)
+mouse_filter = 2
+text = "FACILITIES"
+label_settings = ExtResource("3_default_label")
 
 [node name="TitleRule" type="ColorRect" parent="Layout/RightPanel/Margin/VBox" unique_id=403602896]
 custom_minimum_size = Vector2(0, 2)
 layout_mode = 2
 color = Color(0.07, 0.455, 0.665, 0.85)
+visible = false
 
 [node name="ShipPanel" parent="Layout/RightPanel/Margin/VBox" unique_id=650397774 node_paths=PackedStringArray("facility_registry") instance=ExtResource("10_ship_panel")]
-layout_mode = 2
 facility_registry = NodePath("../../../../Playfield/ViewportContainer/PlayfieldViewport/Gameplay/PlayerAugmentRegistry")
+layout_mode = 0
+anchors_preset = 0
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 17.0
+offset_top = 101.0
+offset_right = 136.0
+offset_bottom = 206.0
+custom_minimum_size = Vector2(0, 0)
+mouse_filter = 2
 
-[node name="WeaponBox" type="PanelContainer" parent="Layout/RightPanel/Margin/VBox" unique_id=1251279196]
-layout_mode = 2
+[node name="WeaponBox" type="Control" parent="Layout/RightPanel/Margin/VBox" unique_id=1251279196]
 size_flags_vertical = 3
 theme_override_styles/panel = SubResource("StyleBox_weapon_box")
+layout_mode = 0
+anchors_preset = 0
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+custom_minimum_size = Vector2(0, 0)
+mouse_filter = 2
+offset_left = -4.0
+offset_top = 247.0
+offset_right = 138.0
+offset_bottom = 348.0
 
-[node name="Margin" type="MarginContainer" parent="Layout/RightPanel/Margin/VBox/WeaponBox" unique_id=665550503]
-layout_mode = 2
+[node name="Margin" type="Control" parent="Layout/RightPanel/Margin/VBox/WeaponBox" unique_id=665550503]
 theme_override_constants/margin_left = 4
 theme_override_constants/margin_top = 4
 theme_override_constants/margin_right = 4
 theme_override_constants/margin_bottom = 4
+layout_mode = 0
+anchors_preset = 0
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 153.0
+offset_bottom = 110.0
+custom_minimum_size = Vector2(0, 0)
+mouse_filter = 2
 
-[node name="WeaponLoadoutHud" type="VBoxContainer" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin" unique_id=1257734690 node_paths=PackedStringArray("ship")]
-layout_mode = 2
+[node name="WeaponLoadoutHud" type="Control" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin" unique_id=1257734690 node_paths=PackedStringArray("ship")]
 size_flags_vertical = 3
 theme_override_constants/separation = 5
 script = ExtResource("6_weapon_hud")
 ship = NodePath("../../../../../../Playfield/ViewportContainer/PlayfieldViewport/Gameplay/Ship")
+layout_mode = 0
+anchors_preset = 0
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 153.0
+offset_bottom = 110.0
+custom_minimum_size = Vector2(0, 0)
+mouse_filter = 2
 
 [node name="BayTitle" type="Label" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud" unique_id=476054593]
 unique_name_in_owner = true
-layout_mode = 2
 theme_override_colors/font_color = Color(0.55, 0.85, 1, 0.9)
-text = "무기 모듈"
 label_settings = ExtResource("3_default_label")
+layout_mode = 0
+anchors_preset = 0
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_top = 0.0
+offset_right = 146.0
+offset_bottom = 14.0
+custom_minimum_size = Vector2(0, 0)
+mouse_filter = 2
+text = "WEAPONS"
+offset_left = 30.0
 
 [node name="BaySubtitle" type="Label" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud" unique_id=1715945432]
 unique_name_in_owner = true
@@ -381,26 +653,60 @@ label_settings = ExtResource("3_default_label")
 
 [node name="BayRow" type="Container" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud" unique_id=1303015167]
 unique_name_in_owner = true
-layout_mode = 2
 size_flags_horizontal = 3
 script = ExtResource("15_honeycomb")
-hex_side = 48.0
+layout_mode = 0
+anchors_preset = 0
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_top = 16.0
+custom_minimum_size = Vector2(0, 0)
+mouse_filter = 2
+hex_side = 32.0
+offset_left = 24.0
+offset_right = 135.0
+offset_bottom = 58.0
 
 [node name="BayDetailSpacer" type="Control" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud" unique_id=1888001001]
 unique_name_in_owner = true
 layout_mode = 2
 mouse_filter = 2
+visible = false
 
-[node name="DetailColumns" type="HBoxContainer" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud" unique_id=1093745424]
+[node name="DetailColumns" type="Control" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud" unique_id=1093745424]
 unique_name_in_owner = true
-layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 6
+layout_mode = 0
+anchors_preset = 0
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 0.0
+offset_right = 146.0
+custom_minimum_size = Vector2(0, 0)
+mouse_filter = 2
+offset_top = 61.0
+offset_bottom = 86.0
 
-[node name="SelectedCol" type="VBoxContainer" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud/DetailColumns" unique_id=1474408750]
-layout_mode = 2
+[node name="SelectedCol" type="Control" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud/DetailColumns" unique_id=1474408750]
 size_flags_horizontal = 3
 theme_override_constants/separation = 2
+layout_mode = 0
+anchors_preset = 0
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 46.0
+offset_bottom = 24.0
+custom_minimum_size = Vector2(0, 0)
+mouse_filter = 2
 
 [node name="SelectedWeaponTitle" type="Label" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud/DetailColumns/SelectedCol" unique_id=559563992]
 unique_name_in_owner = true
@@ -408,10 +714,22 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.55, 0.85, 1, 0.9)
 text = "선택된 무기"
 label_settings = ExtResource("3_default_label")
+visible = false
 
-[node name="SelectedWeaponRow" type="VBoxContainer" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud/DetailColumns/SelectedCol" unique_id=958650253]
-layout_mode = 2
+[node name="SelectedWeaponRow" type="Control" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud/DetailColumns/SelectedCol" unique_id=958650253]
 theme_override_constants/separation = 2
+layout_mode = 0
+anchors_preset = 0
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 46.0
+offset_bottom = 24.0
+custom_minimum_size = Vector2(0, 0)
+mouse_filter = 2
 
 [node name="SelectedWeaponIcon" type="TextureRect" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud/DetailColumns/SelectedCol/SelectedWeaponRow" unique_id=845517552]
 unique_name_in_owner = true
@@ -425,8 +743,8 @@ stretch_mode = 5
 
 [node name="SelectedWeaponHex" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud/DetailColumns/SelectedCol/SelectedWeaponRow" unique_id=617385867 instance=ExtResource("14_hex")]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(48, 48)
 size_flags_horizontal = 0
+custom_minimum_size = Vector2(24, 24)
 
 [node name="SelectedWeaponName" type="Label" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud/DetailColumns/SelectedCol/SelectedWeaponRow" unique_id=237567968]
 unique_name_in_owner = true
@@ -436,12 +754,24 @@ text = "무기를 선택하세요"
 label_settings = ExtResource("3_default_label")
 autowrap_mode = 3
 clip_text = true
+visible = false
 
-[node name="ModulesCol" type="VBoxContainer" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud/DetailColumns" unique_id=221993747]
-layout_mode = 2
+[node name="ModulesCol" type="Control" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud/DetailColumns" unique_id=221993747]
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 1.35
 theme_override_constants/separation = 2
+layout_mode = 0
+anchors_preset = 0
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 48.0
+offset_top = 0.0
+offset_right = 146.0
+offset_bottom = 24.0
+custom_minimum_size = Vector2(0, 0)
+mouse_filter = 2
 
 [node name="EquippedModulesTitle" type="Label" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud/DetailColumns/ModulesCol" unique_id=1549515079]
 unique_name_in_owner = true
@@ -449,6 +779,7 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.55, 0.85, 1, 0.9)
 text = "장착된 모듈"
 label_settings = ExtResource("3_default_label")
+visible = false
 
 [node name="ModulesGrid" type="Container" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud/DetailColumns/ModulesCol" unique_id=1886907067]
 unique_name_in_owner = true
@@ -461,6 +792,7 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 1)
 layout_mode = 2
 color = Color(0.1, 0.65, 0.95, 0.55)
+visible = false
 
 [node name="TraitDetail" type="Label" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud" unique_id=566296909]
 unique_name_in_owner = true
@@ -471,11 +803,20 @@ autowrap_mode = 3
 
 [node name="WeaponDetailFooterClip" type="Control" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud" unique_id=376555715]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 28)
 clip_contents = true
-layout_mode = 2
 size_flags_vertical = 0
+layout_mode = 0
+anchors_preset = 0
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 0.0
+offset_right = 146.0
+custom_minimum_size = Vector2(0, 0)
 mouse_filter = 2
+offset_top = 83.0
+offset_bottom = 97.0
 
 [node name="WeaponDetailFooter" type="Label" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud/WeaponDetailFooterClip" unique_id=77695922]
 unique_name_in_owner = true
@@ -490,7 +831,7 @@ label_settings = ExtResource("3_default_label")
 autowrap_mode = 3
 clip_text = true
 text_overrun_behavior = 3
-max_lines_visible = 2
+max_lines_visible = 1
 
 [node name="HudTemplates" type="Control" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud" unique_id=804636136]
 layout_mode = 2
@@ -503,21 +844,23 @@ layout_mode = 0
 anchors_preset = 0
 offset_right = 48.0
 offset_bottom = 48.0
+custom_minimum_size = Vector2(32, 32)
 
 [node name="ModuleHexTemplate" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud/HudTemplates" unique_id=694755618 instance=ExtResource("14_hex")]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(28, 28)
 layout_mode = 0
 anchors_preset = 0
 offset_left = 54.0
 offset_right = 82.0
 offset_bottom = 28.0
+custom_minimum_size = Vector2(18, 18)
 
 [node name="CornerFrame" type="Control" parent="Layout/RightPanel" unique_id=354929349]
 layout_mode = 2
 mouse_filter = 2
 script = ExtResource("11_corner_frame")
 color = Color(0.14, 0.504, 0.7, 0.9)
+visible = false
 
 [node name="SettingsMenu" parent="." instance=ExtResource("17_settings_menu")]
 unique_name_in_owner = true

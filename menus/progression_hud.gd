@@ -1,5 +1,5 @@
 class_name ProgressionHud
-extends VBoxContainer
+extends Control
 
 @export var progression: Node
 ## Optional. When set and running a sequence, Threat HUD shows phase progress

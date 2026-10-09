@@ -45,17 +45,8 @@ func _run() -> void:
 	_expect(not menu.has_node(^"MasterVolumeControl"), "main menu omits the in-game volume slider")
 	root.add_child(world)
 	await process_frame
-	var in_game_control := world.get_node(
-		^"Layout/LeftPanel/Margin/VBox/MasterVolumeControl"
-	) as Control
-	_expect(
-		in_game_control != null and in_game_control.visible,
-		"game HUD includes the volume slider",
-	)
-	_expect(
-		in_game_control != null and in_game_control.global_position.y > world.size.y * 0.5,
-		"volume slider is laid out in the lower half of the HUD",
-	)
+	_expect(not world.has_node(^"Layout/LeftPanel/Margin/VBox/MasterVolumeControl"),
+		"cockpit omits the volume slider; settings retains volume controls")
 
 	menu.free()
 	world.queue_free()

@@ -1,0 +1,101 @@
+extends Control
+## Six textured panels and live instruments share the launch's pause-aware time.
+const FRAME := preload("res://assets/ui/cockpit/pilot_visor_frame.png")
+const POWER := preload("res://menus/cockpit_power.gdshader")
+const Geometry := preload("res://menus/cockpit_geometry.gd")
+const DELAYS := [0.0, 0.08, 0.18, 0.25, 0.34, 0.41]
+var panels: Array[Control] = []
+var instruments: Array[Dictionary] = []
+var deployment_time := 2.6
+var _launch: LaunchSequence
+
+func configure(world: Control) -> void:
+	mouse_filter = MOUSE_FILTER_IGNORE
+	process_mode = Node.PROCESS_MODE_PAUSABLE
+	z_index = 0
+	# Draw the frame behind instruments, but above the rectangular battle texture.
+	var layout := get_parent()
+	layout.move_child(self, 2)
+	var partitions := [
+		PackedVector2Array([Vector2(0, 0), Vector2(320, 0), Vector2(320, 18), Vector2(142, 18), Vector2(22, 50), Vector2(0, 108)]),
+		PackedVector2Array([Vector2(0, 108), Vector2(22, 50), Vector2(142, 18), Vector2(320, 18), Vector2(320, 249), Vector2(128, 249), Vector2(0, 211)]),
+		PackedVector2Array([Vector2(0, 211), Vector2(128, 249), Vector2(320, 249), Vector2(320, 360), Vector2(0, 360)]),
+	]
+	for side in 2:
+		for row in 3:
+			var panel := Control.new()
+			panel.name = ["Left", "Right"][side] + ["Canopy", "Console", "Wing"][row]
+			panel.mouse_filter = MOUSE_FILTER_IGNORE
+			var mesh := Polygon2D.new()
+			var points := PackedVector2Array()
+			var uvs := PackedVector2Array()
+			for point: Vector2 in partitions[row]:
+				var vertex := Vector2(640.0 - point.x, point.y) if side == 1 else point
+				points.append(vertex)
+				uvs.append(vertex / Geometry.SHELL_SIZE * FRAME.get_size())
+			mesh.polygon = points
+			mesh.uv = uvs
+			mesh.texture = FRAME
+			mesh.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+			var material := ShaderMaterial.new()
+			material.shader = POWER
+			mesh.material = material
+			panel.add_child(mesh)
+			add_child(panel)
+			panels.append(panel)
+	var left := "Layout/LeftPanel/Margin/VBox/"
+	var right := "Layout/RightPanel/Margin/VBox/"
+	for item in [[left + "ScoreTitle", 0], [left + "ScoreValue", 0],
+		[left + "ProgressionHud/ThreatLabel", 1], [left + "ProgressionHud/ThreatBar", 1],
+		[left + "ShipStatusHud", 2], [left + "ProgressionHud/ExperienceLabel", 2],
+		[left + "ProgressionHud/ExperienceBar", 2], [right + "LoadoutTitle", 4],
+		[right + "ShipPanel", 4], [right + "WeaponBox", 5]]:
+		var node := world.get_node(item[0]) as Control
+		instruments.append({"node": node, "home": node.position, "panel": item[1]})
+	# Keep instruments after the frame without raising them over modal settings.
+	layout.move_child(world.get_node("Layout/LeftPanel"), layout.get_child_count() - 1)
+	var gauge := Control.new()
+	gauge.set_script(preload("res://menus/cockpit_shield_gauge.gd"))
+	world.get_node(left + "ShipStatusHud").add_child(gauge)
+	gauge.position = Vector2(0, 16)
+	gauge.size = Vector2(112, 24)
+	var ship := world.gameplay.get_node("Ship") as Node2D
+	ship.get_node("PositionClampComponent").cockpit_boundary = true
+	ship.position.x = Geometry.FIELD_WIDTH * 0.5
+	_launch = world.gameplay.get_node("LaunchSequence") as LaunchSequence
+	_launch.launch_started.connect(_on_launch_started)
+	_launch.launch_advanced.connect(set_deployment_time)
+	set_deployment_time(0.0 if _launch.is_launching else 2.6)
+
+func _on_launch_started() -> void:
+	set_deployment_time(0.0)
+
+func _offset(index: int, time: float) -> Vector2:
+	var side := -1.0 if index < 3 else 1.0
+	var row := index % 3
+	var t := clampf((time - float(DELAYS[index])) / 0.82, 0.0, 1.0)
+	var remaining := pow(1.0 - t, 4.0)
+	return Vector2(side * 350.0, [-70.0, 0.0, 105.0][row]) * remaining
+
+func _power(index: int, time: float) -> float:
+	var t := time - float(DELAYS[index]) - 0.48
+	if t < 0.0:
+		return 0.0
+	if t > 0.8:
+		return 1.0
+	# Deterministic, brief ignition pulses; no flicker after boot.
+	return 0.2 if (t < 0.08 or (t > 0.16 and t < 0.23) or (t > 0.34 and t < 0.38)) else 0.85
+
+func set_deployment_time(time: float) -> void:
+	deployment_time = time
+	for i in panels.size():
+		var panel := panels[i]
+		panel.position = _offset(i, time)
+		var material := panel.get_child(0).material as ShaderMaterial
+		material.set_shader_parameter("power", _power(i, time))
+		material.set_shader_parameter("scan", clampf((time - float(DELAYS[i]) - 0.5) / 0.8, 0.0, 1.0))
+	for item in instruments:
+		var node := item.node as Control
+		var index := int(item.panel)
+		node.position = item.home + _offset(index, time)
+		node.modulate.a = _power(index, time)

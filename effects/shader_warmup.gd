@@ -76,6 +76,16 @@ static func _find_environment(scene: PackedScene) -> Environment:
 
 
 func _populate_playfield(stage: SubViewport) -> void:
+	# The cockpit is drawn in the HDR shell, so warm its textured panel pipeline here.
+	var cockpit_panel := Polygon2D.new()
+	cockpit_panel.polygon = PackedVector2Array([Vector2(0, 0), Vector2(20, 0), Vector2(20, 20), Vector2(0, 20)])
+	cockpit_panel.uv = cockpit_panel.polygon
+	cockpit_panel.texture = load("res://assets/ui/cockpit/pilot_visor_frame.png")
+	cockpit_panel.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	var cockpit_material := ShaderMaterial.new()
+	cockpit_material.shader = load("res://menus/cockpit_power.gdshader")
+	cockpit_panel.material = cockpit_material
+	stage.add_child(cockpit_panel)
 	var background := _instance("res://effects/space_background.tscn")
 	if background != null:
 		background.set("backdrop", load("res://resources/backdrop/default_backdrop.tres"))

@@ -1,5 +1,5 @@
 class_name ShipStatusHud
-extends VBoxContainer
+extends Control
 
 ## 전투 중 실드 게이지. 함선의 상태를 읽어 표시만 하고 값을 바꾸지 않는다.
 ## 선체 HP는 항상 1이라 HUD에 두지 않는다. STATUS 패널의 모듈 슬롯과는 다른 정보다.

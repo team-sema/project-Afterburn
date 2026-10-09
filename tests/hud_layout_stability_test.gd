@@ -38,8 +38,8 @@ func _run() -> void:
 		await process_frame
 	var base := _rects(world)
 	_expect(is_equal_approx((base["Layout"] as Rect2).size.x, 640.0), "layout spans the 640px shell")
-	_expect(is_equal_approx((base["Layout/LeftPanel"] as Rect2).size.x, 170.0), "left panel is 170px wide")
-	_expect(is_equal_approx((base["Layout/Playfield"] as Rect2).position.x, 170.0), "playfield starts at x=170")
+	_expect(is_equal_approx((base["Layout/LeftPanel"] as Rect2).size.x, 150.0), "left panel is 150px wide")
+	_expect(is_equal_approx((base["Layout/Playfield"] as Rect2).position.x, 150.0), "playfield starts at x=150")
 
 	var progression := world.find_child("AugmentProgressionController", true, false)
 	var experience_label := world.get_node("Layout/LeftPanel/Margin/VBox/ProgressionHud/ExperienceLabel") as Label

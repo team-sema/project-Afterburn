@@ -22,8 +22,8 @@ func _run() -> void:
 	root.add_child(world)
 	for _index in 2:
 		await process_frame
-	var left_panel := world.get_node("Layout/LeftPanel") as PanelContainer
-	var right_panel := world.get_node("Layout/RightPanel") as PanelContainer
+	var left_panel := world.get_node("Layout/LeftPanel") as Control
+	var right_panel := world.get_node("Layout/RightPanel") as Control
 	_expect(
 		left_panel.texture_filter == CanvasItem.TEXTURE_FILTER_NEAREST,
 		"left HUD uses nearest texture filtering",

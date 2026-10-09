@@ -1,5 +1,5 @@
 class_name WeaponLoadoutHud
-extends VBoxContainer
+extends Control
 
 ## STATUS weapon panel.
 ## Runtime bay/module hexes are duplicated from editor Templates (see %HudTemplates).
@@ -59,7 +59,7 @@ func _ready() -> void:
 		return
 	add_theme_constant_override("separation", 4)
 	if bay_title != null:
-		bay_title.text = "무기 모듈"
+		bay_title.text = "WEAPONS"
 	if bay_subtitle != null:
 		bay_subtitle.visible = false
 	if bay_row != null:
@@ -78,7 +78,7 @@ func _ready() -> void:
 		modules_grid.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		modules_grid.hex_side = _module_hex_side()
 	if detail_rule != null:
-		detail_rule.visible = true
+		detail_rule.visible = false
 		detail_rule.custom_minimum_size = Vector2(0, 1)
 	if trait_detail != null:
 		trait_detail.visible = false
@@ -86,7 +86,7 @@ func _ready() -> void:
 	if detail_footer != null:
 		detail_footer.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		detail_footer.clip_text = true
-		detail_footer.max_lines_visible = 2
+		detail_footer.max_lines_visible = 1
 		detail_footer.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	_prepare_templates()
 	_ensure_selected_hex()
@@ -123,7 +123,7 @@ func _ensure_selected_hex() -> void:
 		return
 	_selected_hex.visible = true
 	_selected_hex.interactive = false
-	_selected_hex.apply_fixed_size(_weapon_hex_side())
+	_selected_hex.apply_fixed_size(24.0)
 	_selected_hex.border_width = 1.25
 	_selected_hex.border_color = Color(0.45, 0.9, 1.0, 0.95)
 	_selected_hex.fill_color = Color(0.05, 0.16, 0.28, 0.95)
@@ -356,9 +356,9 @@ func _refresh_detail(loadout: PlayerWeaponLoadout) -> void:
 		_show_empty_detail()
 		return
 	if selected_title != null:
-		selected_title.visible = true
+		selected_title.visible = false
 	if modules_title != null:
-		modules_title.visible = true
+		modules_title.visible = false
 	_ensure_selected_hex()
 	var icon := loadout.get_weapon_icon(_focused_weapon_id)
 	if _selected_hex != null:
@@ -419,10 +419,12 @@ func _show_trait_description(loadout: PlayerWeaponLoadout, trait_id: StringName)
 
 func _set_description(text: String) -> void:
 	if detail_rule != null:
-		detail_rule.visible = true
+		detail_rule.visible = false
 	if detail_footer != null:
 		detail_footer.visible = true
-		detail_footer.text = text
+		detail_footer.text = text.get_slice("\n", 0)
+		detail_footer.tooltip_text = text
+		detail_footer.mouse_filter = Control.MOUSE_FILTER_STOP
 	if trait_detail != null:
 		trait_detail.visible = false
 		trait_detail.text = ""
