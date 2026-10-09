@@ -9,9 +9,15 @@ extends Node2D
 @export var margin: = 8
 ## false lets the actor sit outside the viewport (launch sequence).
 @export var enabled := true
+## Enabled only by the main cockpit; labs retain viewport bounds.
+@export var cockpit_boundary := false
+const CockpitBounds := preload("res://menus/cockpit_geometry.gd")
 
 func _process(_delta: float) -> void:
 	if not enabled:
+		return
+	if cockpit_boundary:
+		actor.position = CockpitBounds.clamp_position(actor.position, float(margin))
 		return
 	var viewport_size := actor.get_viewport_rect().size
 	actor.global_position = actor.global_position.clamp(

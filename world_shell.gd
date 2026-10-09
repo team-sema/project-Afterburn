@@ -1,13 +1,13 @@
 extends Control
 
-const MASTER_VOLUME_CONTROL_SCENE := preload("res://menus/master_volume_control.tscn")
+const COCKPIT_SCENE := preload("res://menus/cockpit_hud.gd")
 const MENU_SCENE_PATH := "res://menus/menu.tscn"
 
 @onready var gameplay: Node = $Layout/Playfield/ViewportContainer/PlayfieldViewport/Gameplay
 @onready var pause_overlay: PauseMenu = %PauseOverlay
 @onready var settings_menu: SettingsMenu = %SettingsMenu
 @onready var status_ship_panel: ShipPanel = $Layout/RightPanel/Margin/VBox/ShipPanel
-@onready var left_panel_content: VBoxContainer = $Layout/LeftPanel/Margin/VBox
+@onready var left_panel_content: Control = $Layout/LeftPanel/Margin/VBox
 @onready var weapon_loadout_hud: WeaponLoadoutHud = (
 	$Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud
 )
@@ -17,7 +17,17 @@ var _is_manual_pause := false
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	_add_master_volume_control()
+	var backing := ColorRect.new()
+	backing.color = Color(0.002, 0.005, 0.012)
+	backing.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	backing.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	add_child(backing)
+	move_child(backing, 0)
+	var cockpit := Control.new()
+	cockpit.name = "CockpitHud"
+	cockpit.set_script(COCKPIT_SCENE)
+	$Layout.add_child(cockpit)
+	cockpit.configure(self)
 	pause_overlay.resume_requested.connect(_set_manual_pause.bind(false))
 	pause_overlay.settings_requested.connect(_open_settings)
 	pause_overlay.main_menu_requested.connect(_return_to_menu)
@@ -37,12 +47,6 @@ func _ready() -> void:
 	assert(augment_selection != null, "World shell requires the augment selection overlay.")
 	augment_selection.configure_status_preview(status_ship_panel, weapon_loadout_hud)
 	augment_selection.configure_stage_limit($Layout/RightPanel)
-
-
-func _add_master_volume_control() -> void:
-	if left_panel_content.has_node("MasterVolumeControl"):
-		return
-	left_panel_content.add_child(MASTER_VOLUME_CONTROL_SCENE.instantiate())
 
 
 func _unhandled_input(event: InputEvent) -> void:

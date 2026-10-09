@@ -569,35 +569,15 @@ func _check_capacity_limits(
 
 
 func _check_right_panel_fits(world: Control) -> void:
-	var layout := world.get_node("Layout") as Control
+	var shell := Rect2(Vector2.ZERO, Vector2(640, 360))
+	var panel := world.get_node("Layout/RightPanel/Margin/VBox/ShipPanel") as Control
+	var hud := world.weapon_loadout_hud as WeaponLoadoutHud
+	for control: Control in [panel, hud.bay_row, hud.modules_grid, hud.detail_footer]:
+		_expect(shell.encloses(control.get_global_rect()), "%s stays within cockpit screen" % control.name)
 	var left := world.get_node("Layout/LeftPanel") as Control
-	var play := world.get_node("Layout/Playfield") as Control
-	var right_panel := world.get_node("Layout/RightPanel") as Control
-	var margin := world.get_node("Layout/RightPanel/Margin") as MarginContainer
-	var box := world.get_node("Layout/RightPanel/Margin/VBox") as VBoxContainer
-	# Compare against the shell viewport, not the panel's inflated size after overflow.
-	var shell := layout.size
-	var margin_y := float(
-		margin.get_theme_constant("margin_top") + margin.get_theme_constant("margin_bottom")
-	)
-	var margin_x := float(
-		margin.get_theme_constant("margin_left") + margin.get_theme_constant("margin_right")
-	)
-	_expect(shell.y >= 360.0 - 0.5, "world shell keeps 360px height")
-	_expect(
-		box.get_combined_minimum_size().y <= shell.y - margin_y + 0.5,
-		"ship and weapon panels fit the right rail height",
-	)
-	_expect(
-		box.get_combined_minimum_size().x <= right_panel.custom_minimum_size.x - margin_x + 0.5
-		or box.get_combined_minimum_size().x <= 200.0 - margin_x + 0.5,
-		"weapon bay clusters fit the 200px right rail width",
-	)
-	_expect(
-		left.size.x + play.size.x + right_panel.size.x <= shell.x + 1.0,
-		"left + playfield + right fit 640px shell width",
-	)
-	_expect(right_panel.size.y <= shell.y + 0.5, "right rail does not overflow shell height")
+	var field := world.get_node("Layout/Playfield") as Control
+	var right := world.get_node("Layout/RightPanel") as Control
+	_expect(is_equal_approx(left.size.x + field.size.x + right.size.x, 640.0), "cockpit fills 640px shell")
 
 
 func _expect(condition: bool, message: String) -> void:
