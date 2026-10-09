@@ -177,10 +177,10 @@ anchor_left = 0.0
 anchor_top = 0.0
 anchor_right = 0.0
 anchor_bottom = 0.0
-offset_left = 27.0
-offset_top = 7.0
-offset_right = 117.0
-offset_bottom = 19.0
+offset_left = 28
+offset_top = 7
+offset_right = 93
+offset_bottom = 19
 custom_minimum_size = Vector2(0, 0)
 mouse_filter = 2
 
@@ -197,12 +197,12 @@ anchor_left = 0.0
 anchor_top = 0.0
 anchor_right = 0.0
 anchor_bottom = 0.0
-offset_left = 27.0
-offset_right = 117.0
-offset_bottom = 43.0
+offset_left = 28
+offset_right = 94
+offset_bottom = 38
 custom_minimum_size = Vector2(0, 0)
 mouse_filter = 2
-offset_top = 17.0
+offset_top = 18
 
 [node name="ProgressionHud" type="Control" parent="Layout/LeftPanel/Margin/VBox" unique_id=1125713299 node_paths=PackedStringArray("progression", "encounter_director")]
 theme_override_constants/separation = 3
@@ -235,12 +235,13 @@ anchor_left = 0.0
 anchor_top = 0.0
 anchor_right = 0.0
 anchor_bottom = 0.0
-offset_left = 23.0
-offset_top = 297.0
-offset_right = 159.0
-offset_bottom = 311.0
+offset_left = 34
+offset_top = 289.0
+offset_right = 146.0
+offset_bottom = 303.0
 custom_minimum_size = Vector2(0, 0)
 mouse_filter = 2
+rotation = 0.174533
 
 [node name="ExperienceBar" type="ProgressBar" parent="Layout/LeftPanel/Margin/VBox/ProgressionHud" unique_id=1258553615]
 unique_name_in_owner = true
@@ -254,12 +255,13 @@ anchor_left = 0.0
 anchor_top = 0.0
 anchor_right = 0.0
 anchor_bottom = 0.0
-offset_left = 23.0
-offset_top = 316.0
-offset_bottom = 323.0
+offset_left = 32
+offset_top = 304.0
+offset_bottom = 312.0
 custom_minimum_size = Vector2(0, 0)
 mouse_filter = 2
-offset_right = 142.0
+offset_right = 135
+rotation = 0.174533
 
 [node name="ThreatSpacer" type="Control" parent="Layout/LeftPanel/Margin/VBox/ProgressionHud" unique_id=1544195094]
 custom_minimum_size = Vector2(0, 3)
@@ -279,10 +281,10 @@ anchor_left = 0.0
 anchor_top = 0.0
 anchor_right = 0.0
 anchor_bottom = 0.0
-offset_left = 35.0
-offset_top = 85.0
-offset_right = 134.0
-offset_bottom = 115.0
+offset_left = 40
+offset_top = 84
+offset_right = 130
+offset_bottom = 112
 custom_minimum_size = Vector2(0, 0)
 mouse_filter = 2
 autowrap_mode = 3
@@ -299,10 +301,10 @@ anchor_left = 0.0
 anchor_top = 0.0
 anchor_right = 0.0
 anchor_bottom = 0.0
-offset_left = 35.0
-offset_top = 119.0
-offset_right = 127.0
-offset_bottom = 126.0
+offset_left = 40
+offset_top = 116
+offset_right = 128
+offset_bottom = 123
 custom_minimum_size = Vector2(0, 0)
 mouse_filter = 2
 
@@ -316,12 +318,13 @@ anchor_left = 0.0
 anchor_top = 0.0
 anchor_right = 0.0
 anchor_bottom = 0.0
-offset_left = 25.0
+offset_left = 38.0
 offset_top = 250.0
-offset_bottom = 290.0
+offset_bottom = 293.0
 custom_minimum_size = Vector2(0, 0)
 mouse_filter = 2
-offset_right = 137.0
+offset_right = 134.0
+rotation = 0.174533
 
 [node name="ShieldLabel" type="Label" parent="Layout/LeftPanel/Margin/VBox/ShipStatusHud" unique_id=1766376640]
 unique_name_in_owner = true
@@ -336,10 +339,10 @@ anchor_left = 0.0
 anchor_top = 0.0
 anchor_right = 0.0
 anchor_bottom = 0.0
-offset_left = 0.0
-offset_top = 0.0
-offset_right = 124.0
-offset_bottom = 14.0
+offset_left = 0
+offset_top = 0
+offset_right = 84.0
+offset_bottom = 14
 custom_minimum_size = Vector2(0, 0)
 mouse_filter = 2
 
@@ -376,12 +379,12 @@ anchor_left = 0.0
 anchor_top = 0.0
 anchor_right = 0.0
 anchor_bottom = 0.0
-offset_left = 0.0
+offset_left = 0
 custom_minimum_size = Vector2(0, 0)
 mouse_filter = 2
-offset_right = 96.0
-offset_top = 39.0
-offset_bottom = 42.0
+offset_right = 96
+offset_top = 34.0
+offset_bottom = 37.0
 
 [node name="FlexibleSpace" type="Control" parent="Layout/LeftPanel/Margin/VBox" unique_id=794592989]
 layout_mode = 2
@@ -439,6 +442,7 @@ render_target_update_mode = 4
 size = Vector2i(340, 360)
 
 [node name="Gameplay" parent="Layout/Playfield/ViewportContainer/PlayfieldViewport" unique_id=941788113 instance=ExtResource("1_gameplay")]
+
 
 [node name="LeftEdge" type="ColorRect" parent="Layout/Playfield" unique_id=1405380772]
 layout_mode = 1
@@ -543,10 +547,10 @@ anchor_left = 0.0
 anchor_top = 0.0
 anchor_right = 0.0
 anchor_bottom = 0.0
-offset_left = 24.0
-offset_top = 81.0
-offset_right = 136.0
-offset_bottom = 95.0
+offset_left = 26
+offset_top = 82
+offset_right = 136
+offset_bottom = 96
 custom_minimum_size = Vector2(0, 0)
 mouse_filter = 2
 text = "FACILITIES"
@@ -566,12 +570,13 @@ anchor_left = 0.0
 anchor_top = 0.0
 anchor_right = 0.0
 anchor_bottom = 0.0
-offset_left = 17.0
-offset_top = 101.0
-offset_right = 136.0
-offset_bottom = 206.0
+offset_left = 24
+offset_top = 98.0
+offset_right = 134
+offset_bottom = 144.0
 custom_minimum_size = Vector2(0, 0)
 mouse_filter = 2
+cockpit_layout = true
 
 [node name="WeaponBox" type="Control" parent="Layout/RightPanel/Margin/VBox" unique_id=1251279196]
 size_flags_vertical = 3
@@ -584,10 +589,10 @@ anchor_right = 0.0
 anchor_bottom = 0.0
 custom_minimum_size = Vector2(0, 0)
 mouse_filter = 2
-offset_left = -4.0
-offset_top = 247.0
-offset_right = 138.0
-offset_bottom = 348.0
+offset_left = 0
+offset_top = 0
+offset_right = 150
+offset_bottom = 360
 
 [node name="Margin" type="Control" parent="Layout/RightPanel/Margin/VBox/WeaponBox" unique_id=665550503]
 theme_override_constants/margin_left = 4
@@ -600,10 +605,10 @@ anchor_left = 0.0
 anchor_top = 0.0
 anchor_right = 0.0
 anchor_bottom = 0.0
-offset_left = 0.0
-offset_top = 0.0
-offset_right = 153.0
-offset_bottom = 110.0
+offset_left = 0
+offset_top = 0
+offset_right = 150
+offset_bottom = 360
 custom_minimum_size = Vector2(0, 0)
 mouse_filter = 2
 
@@ -618,10 +623,10 @@ anchor_left = 0.0
 anchor_top = 0.0
 anchor_right = 0.0
 anchor_bottom = 0.0
-offset_left = 0.0
-offset_top = 0.0
-offset_right = 153.0
-offset_bottom = 110.0
+offset_left = 0
+offset_top = 0
+offset_right = 150
+offset_bottom = 360
 custom_minimum_size = Vector2(0, 0)
 mouse_filter = 2
 
@@ -635,13 +640,13 @@ anchor_left = 0.0
 anchor_top = 0.0
 anchor_right = 0.0
 anchor_bottom = 0.0
-offset_top = 0.0
-offset_right = 146.0
-offset_bottom = 14.0
+offset_top = 146.0
+offset_right = 136
+offset_bottom = 160.0
 custom_minimum_size = Vector2(0, 0)
 mouse_filter = 2
 text = "WEAPONS"
-offset_left = 30.0
+offset_left = 26
 
 [node name="BaySubtitle" type="Label" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud" unique_id=1715945432]
 unique_name_in_owner = true
@@ -661,13 +666,14 @@ anchor_left = 0.0
 anchor_top = 0.0
 anchor_right = 0.0
 anchor_bottom = 0.0
-offset_top = 16.0
+offset_top = 162.0
 custom_minimum_size = Vector2(0, 0)
 mouse_filter = 2
 hex_side = 32.0
-offset_left = 24.0
-offset_right = 135.0
-offset_bottom = 58.0
+offset_left = 24
+offset_right = 134
+offset_bottom = 190.0
+aligned_row = true
 
 [node name="BayDetailSpacer" type="Control" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud" unique_id=1888001001]
 unique_name_in_owner = true
@@ -685,12 +691,12 @@ anchor_left = 0.0
 anchor_top = 0.0
 anchor_right = 0.0
 anchor_bottom = 0.0
-offset_left = 0.0
-offset_right = 146.0
+offset_left = 0
+offset_right = 150
 custom_minimum_size = Vector2(0, 0)
 mouse_filter = 2
-offset_top = 61.0
-offset_bottom = 86.0
+offset_top = 0
+offset_bottom = 360
 
 [node name="SelectedCol" type="Control" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud/DetailColumns" unique_id=1474408750]
 size_flags_horizontal = 3
@@ -701,12 +707,13 @@ anchor_left = 0.0
 anchor_top = 0.0
 anchor_right = 0.0
 anchor_bottom = 0.0
-offset_left = 0.0
-offset_top = 0.0
-offset_right = 46.0
-offset_bottom = 24.0
+offset_left = 21
+offset_top = 294.0
+offset_right = 63
+offset_bottom = 336.0
 custom_minimum_size = Vector2(0, 0)
 mouse_filter = 2
+rotation = -0.122173
 
 [node name="SelectedWeaponTitle" type="Label" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud/DetailColumns/SelectedCol" unique_id=559563992]
 unique_name_in_owner = true
@@ -724,10 +731,10 @@ anchor_left = 0.0
 anchor_top = 0.0
 anchor_right = 0.0
 anchor_bottom = 0.0
-offset_left = 0.0
-offset_top = 0.0
-offset_right = 46.0
-offset_bottom = 24.0
+offset_left = 0
+offset_top = 0
+offset_right = 42
+offset_bottom = 42
 custom_minimum_size = Vector2(0, 0)
 mouse_filter = 2
 
@@ -766,12 +773,13 @@ anchor_left = 0.0
 anchor_top = 0.0
 anchor_right = 0.0
 anchor_bottom = 0.0
-offset_left = 48.0
-offset_top = 0.0
-offset_right = 146.0
-offset_bottom = 24.0
+offset_left = 34.0
+offset_top = 258.0
+offset_right = 118.0
+offset_bottom = 276.0
 custom_minimum_size = Vector2(0, 0)
 mouse_filter = 2
+rotation = -0.122173
 
 [node name="EquippedModulesTitle" type="Label" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud/DetailColumns/ModulesCol" unique_id=1549515079]
 unique_name_in_owner = true
@@ -783,9 +791,18 @@ visible = false
 
 [node name="ModulesGrid" type="Container" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud/DetailColumns/ModulesCol" unique_id=1886907067]
 unique_name_in_owner = true
-layout_mode = 2
+layout_mode = 0
 size_flags_horizontal = 0
 script = ExtResource("15_honeycomb")
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 0
+offset_top = 0
+offset_right = 84.0
+offset_bottom = 18.0
+aligned_row = true
 
 [node name="DetailRule" type="ColorRect" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud" unique_id=1888001002]
 unique_name_in_owner = true
@@ -811,12 +828,13 @@ anchor_left = 0.0
 anchor_top = 0.0
 anchor_right = 0.0
 anchor_bottom = 0.0
-offset_left = 0.0
-offset_right = 146.0
+offset_left = 30
+offset_right = 122.0
 custom_minimum_size = Vector2(0, 0)
 mouse_filter = 2
-offset_top = 83.0
-offset_bottom = 97.0
+offset_top = 278.0
+offset_bottom = 292.0
+rotation = -0.122173
 
 [node name="WeaponDetailFooter" type="Label" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud/WeaponDetailFooterClip" unique_id=77695922]
 unique_name_in_owner = true
@@ -844,7 +862,7 @@ layout_mode = 0
 anchors_preset = 0
 offset_right = 48.0
 offset_bottom = 48.0
-custom_minimum_size = Vector2(32, 32)
+custom_minimum_size = Vector2(28, 28)
 
 [node name="ModuleHexTemplate" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud/HudTemplates" unique_id=694755618 instance=ExtResource("14_hex")]
 unique_name_in_owner = true

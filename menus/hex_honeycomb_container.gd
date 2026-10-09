@@ -4,6 +4,8 @@ extends Container
 const HEX_HALF_HEIGHT_RATIO := 0.866025
 const FRAME_INSET := 3.0
 
+@export var aligned_row := false
+
 @export_range(12.0, 96.0, 1.0) var hex_side := 28.0:
 	set(value):
 		hex_side = value
@@ -15,9 +17,8 @@ func _get_minimum_size() -> Vector2:
 	var count := _visible_child_count()
 	if count <= 0:
 		return Vector2.ZERO
-	var diameter := maxf(4.0, hex_side - FRAME_INSET * 2.0)
-	var horizontal_step := diameter * 0.75
-	var vertical_stagger := diameter * HEX_HALF_HEIGHT_RATIO * 0.5
+	var horizontal_step := get_horizontal_step()
+	var vertical_stagger := get_vertical_stagger()
 	return Vector2(
 		hex_side + horizontal_step * float(count - 1),
 		hex_side + (vertical_stagger if count > 1 else 0.0),
@@ -25,10 +26,14 @@ func _get_minimum_size() -> Vector2:
 
 
 func get_horizontal_step() -> float:
+	if aligned_row:
+		return hex_side + 3.0
 	return maxf(4.0, hex_side - FRAME_INSET * 2.0) * 0.75
 
 
 func get_vertical_stagger() -> float:
+	if aligned_row:
+		return 0.0
 	return maxf(4.0, hex_side - FRAME_INSET * 2.0) * HEX_HALF_HEIGHT_RATIO * 0.5
 
 

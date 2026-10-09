@@ -1,6 +1,7 @@
 class_name ShipPanel
 extends Control
 
+@export var cockpit_layout := false
 @export var facility_registry: PlayerAugmentRegistry
 
 @onready var detail_label: Label = %FacilityDetail
@@ -13,6 +14,11 @@ var _hovered_slot := -1
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	clip_contents = true
+	if cockpit_layout:
+		custom_minimum_size.y = 46.0
+		detail_label.visible = false
+		slot_rack.offset_bottom = 0.0
+		slot_rack.cockpit_rows = true
 	slot_rack.slot_hovered.connect(_on_slot_hovered)
 	slot_rack.slot_hover_exited.connect(_on_slot_hover_exited)
 	if facility_registry == null:
@@ -34,6 +40,7 @@ func refresh() -> void:
 		_refresh_slot_detail(_hovered_slot)
 	else:
 		_refresh_summary()
+	_sync_detail_tooltip()
 
 
 func set_registry(registry: PlayerAugmentRegistry) -> void:
@@ -114,9 +121,16 @@ func _bind_registry_signal() -> void:
 func _on_slot_hovered(slot_index: int) -> void:
 	_hovered_slot = slot_index
 	_refresh_slot_detail(slot_index)
+	_sync_detail_tooltip()
 
 
 func _on_slot_hover_exited() -> void:
 	_hovered_slot = -1
 	if facility_registry != null:
 		_refresh_summary()
+	_sync_detail_tooltip()
+
+
+func _sync_detail_tooltip() -> void:
+	if cockpit_layout:
+		slot_rack.tooltip_text = detail_label.text

@@ -49,16 +49,22 @@ func configure(world: Control) -> void:
 		[left + "ProgressionHud/ThreatLabel", 1], [left + "ProgressionHud/ThreatBar", 1],
 		[left + "ShipStatusHud", 2], [left + "ProgressionHud/ExperienceLabel", 2],
 		[left + "ProgressionHud/ExperienceBar", 2], [right + "LoadoutTitle", 4],
-		[right + "ShipPanel", 4], [right + "WeaponBox", 5]]:
+		[right + "ShipPanel", 4],
+		[right + "WeaponBox/Margin/WeaponLoadoutHud/BayTitle", 4],
+		[right + "WeaponBox/Margin/WeaponLoadoutHud/BayRow", 4],
+		[right + "WeaponBox/Margin/WeaponLoadoutHud/DetailColumns/SelectedCol", 5],
+		[right + "WeaponBox/Margin/WeaponLoadoutHud/DetailColumns/ModulesCol", 5],
+		[right + "WeaponBox/Margin/WeaponLoadoutHud/WeaponDetailFooterClip", 5]]:
 		var node := world.get_node(item[0]) as Control
 		instruments.append({"node": node, "home": node.position, "panel": item[1]})
 	# Keep instruments after the frame without raising them over modal settings.
 	layout.move_child(world.get_node("Layout/LeftPanel"), layout.get_child_count() - 1)
 	var gauge := Control.new()
+	gauge.name = "ShieldArc"
 	gauge.set_script(preload("res://menus/cockpit_shield_gauge.gd"))
 	world.get_node(left + "ShipStatusHud").add_child(gauge)
 	gauge.position = Vector2(0, 16)
-	gauge.size = Vector2(112, 24)
+	gauge.size = Vector2(96, 16)
 	var ship := world.gameplay.get_node("Ship") as Node2D
 	ship.get_node("PositionClampComponent").cockpit_boundary = true
 	ship.position.x = Geometry.FIELD_WIDTH * 0.5
