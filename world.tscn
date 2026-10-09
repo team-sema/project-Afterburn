@@ -107,7 +107,7 @@ custom_minimum_size = Vector2(0, 0)
 mouse_filter = 2
 
 [node name="LeftPanel" type="Control" parent="Layout" unique_id=1130177399]
-texture_filter = 1
+texture_filter = 2
 theme_override_styles/panel = SubResource("StyleBox_left_panel")
 layout_mode = 0
 anchors_preset = 0
@@ -492,7 +492,7 @@ visible = false
 layout_mode = 1
 
 [node name="RightPanel" type="Control" parent="Layout" unique_id=162854702]
-texture_filter = 1
+texture_filter = 2
 theme_override_styles/panel = SubResource("StyleBox_right_panel")
 layout_mode = 0
 anchors_preset = 0
