@@ -2,6 +2,8 @@ extends Control
 ## Transient, pause-aware cockpit reports. No backlog while disabled.
 ## Three rows in combat; the launch widens the window to five rows and
 ## streams the ship's boot log through it on the launch's own game clock.
+## Pinned lines report a standing state: they hold the top rows, dim once
+## read and leave only when dismissed.
 const FONT := preload("res://fonts/Mulmaru_hud.ttf")
 const PROJECTION := preload("res://menus/combat_event_log.gdshader")
 const OPACITY := 0.82
@@ -11,6 +13,8 @@ const LIFETIME := 2.8
 const LAUNCH_LIFETIME := 1.5
 const HIGHLIGHT_LIFETIME := 3.5
 const HIGHLIGHT := Color(0.93, 1.0, 1.0)
+const PINNED_OPACITY := 0.45
+const FADE := 0.6
 const SLIDE := 0.18
 const LINE_HEIGHT := 14.0
 const WIDTH := 180.0
@@ -43,6 +47,7 @@ var _box_rows := COMBAT_ROWS
 ## Rows requested by the launch; a shrink waits until entries fit.
 var _target_rows := COMBAT_ROWS
 var _launch_index := 0
+var _augment_ready := false
 var _projection: ShaderMaterial
 var _ink_viewport: SubViewport
 var _ink: Control
@@ -113,17 +118,32 @@ func _on_shield_changed(current: int, _maximum: int) -> void:
 	_last_shield = current
 
 func on_augment_ready(ready: bool) -> void:
+	_augment_ready = ready
 	if ready:
-		post_event(&"augment_ready", "AUGMENT READY [C]")
+		post_event(&"augment_ready", "AUGMENT READY [C]", false, INF)
+	else:
+		dismiss_event(&"augment_ready")
 
+## `lifetime` INF pins the line until dismiss_event(key).
 func post_event(key: StringName, message: String, urgent: bool = false, lifetime: float = LIFETIME, tone: Color = CYAN) -> void:
 	if not _enabled:
 		return
+	var pinned := is_inf(lifetime)
 	for entry in entries:
 		if entry.key == key:
+			# A pin still fading from a dismissal brightens back without a new scan.
+			if pinned and entry.pinned:
+				entry.lifetime = INF
+				_refresh()
 			return
-	while entries.size() >= _rows:
-		var oldest: Dictionary = entries.pop_front()
+	var pins := _pinned_count()
+	# Pins always leave at least one row for reports.
+	if pinned and pins + 1 >= _rows:
+		return
+	var report_rows := _rows - pins - (1 if pinned else 0)
+	var keep := report_rows if pinned else report_rows - 1
+	while entries.size() - pins > keep:
+		var oldest: Dictionary = entries.pop_at(pins)
 		_ink.remove_child(oldest.label)
 		oldest.label.queue_free()
 	var label := Label.new()
@@ -135,15 +155,22 @@ func post_event(key: StringName, message: String, urgent: bool = false, lifetime
 	label.add_theme_constant_override("shadow_offset_y", 1)
 	label.text = "> " + message
 	var below := float(_rows) * LINE_HEIGHT
-	label.position.y = maxf(below, entries[-1].label.position.y + LINE_HEIGHT) if not entries.is_empty() else below
+	# Pins fade in on their own top row; reports rise from below the stack.
+	if pinned:
+		label.position.y = float(pins) * LINE_HEIGHT
+	else:
+		label.position.y = maxf(below, entries[-1].label.position.y + LINE_HEIGHT) if entries.size() > pins else below
 	label.modulate.a = 0.0
 	_ink.add_child(label)
-	entries.append({"key": key, "label": label, "age": 0.0, "urgent": urgent, "lifetime": lifetime, "tone": tone, "start_y": label.position.y})
+	var line := {"key": key, "label": label, "age": 0.0, "urgent": urgent, "lifetime": lifetime, "tone": tone, "start_y": label.position.y, "pinned": pinned}
+	if pinned:
+		entries.insert(pins, line)
+	else:
+		entries.append(line)
 	_retarget()
 	_scan_age = 0.0
 	_projection.set_shader_parameter("scan_age", _scan_age)
-	_update_rendering()
-	set_process(true)
+	_refresh()
 
 func _on_enabled_changed(enabled: bool) -> void:
 	_enabled = enabled
@@ -154,17 +181,57 @@ func _on_enabled_changed(enabled: bool) -> void:
 			entry.label.queue_free()
 		entries.clear()
 		_settle_rows()
-	_update_rendering()
-	set_process(not entries.is_empty() or _box_rows != _rows)
+	elif _augment_ready:
+		# Standing states are current, not backlog: show them again.
+		post_event(&"augment_ready", "AUGMENT READY [C]", false, INF)
+	_refresh()
 
-func _update_rendering() -> void:
+## Fades a pinned line out over FADE; a re-post during the fade revives it.
+func dismiss_event(key: StringName) -> void:
+	for entry in entries:
+		if entry.key == key and entry.pinned and is_inf(entry.lifetime):
+			entry.lifetime = entry.age + FADE
+			_refresh()
+
+func _pinned_count() -> int:
+	var count := 0
+	while count < entries.size() and entries[count].pinned:
+		count += 1
+	return count
+
+## Runs _process and the offscreen render only while something still moves.
+func _refresh() -> void:
+	var settled := _is_settled()
+	_update_rendering(settled)
+	set_process(not settled)
+
+func _update_rendering(settled: bool) -> void:
 	_display.visible = _enabled and not entries.is_empty()
-	_ink_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS if _display.visible else SubViewport.UPDATE_DISABLED
+	if not _display.visible:
+		_ink_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
+	elif settled:
+		# Draw the final still frame once and keep showing it.
+		_ink_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
+	else:
+		_ink_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+
+## Nothing moves: only fully dimmed pins remain and slide, scan and resize ended.
+func _is_settled() -> bool:
+	if _box_rows != _rows:
+		return false
+	if entries.is_empty():
+		return true
+	if _slide_age < SLIDE or _scan_age < 1.0:
+		return false
+	for entry in entries:
+		if not is_inf(entry.lifetime) or entry.age < LIFETIME:
+			return false
+	return true
 
 func _request_rows(rows: int) -> void:
 	_target_rows = rows
 	_settle_rows()
-	set_process(not entries.is_empty() or _box_rows != _rows)
+	_refresh()
 
 ## Grows at once; shrinks only when the remaining rows fit the smaller window.
 func _settle_rows() -> void:
@@ -207,11 +274,14 @@ func _process(delta: float) -> void:
 	for i in entries.size():
 		var entry := entries[i]
 		var label: Label = entry.label
-		var target := float(_rows - entries.size() + i) * LINE_HEIGHT
+		# Pins hold the top rows; reports stack up from the bottom row.
+		var target := float(i if entry.pinned else _rows - entries.size() + i) * LINE_HEIGHT
 		label.position.y = lerpf(entry.start_y, target, 1.0 - pow(1.0 - _slide_age / SLIDE, 3.0))
-		label.modulate.a = minf(clampf(entry.age / SLIDE, 0, 1), clampf((entry.lifetime - entry.age) / 0.6, 0, 1)) * OPACITY
+		var level := OPACITY
+		if entry.pinned:
+			level = lerpf(OPACITY, PINNED_OPACITY, clampf((entry.age - LIFETIME + FADE) / FADE, 0, 1))
+		label.modulate.a = minf(clampf(entry.age / SLIDE, 0, 1), clampf((entry.lifetime - entry.age) / FADE, 0, 1)) * level
 		label.add_theme_color_override("font_color", ALERT if entry.urgent and entry.age < 0.35 else entry.tone)
 	if _box_rows != _rows and _slide_age >= SLIDE:
 		_resize_box(_rows)
-	_update_rendering()
-	set_process(not entries.is_empty() or _box_rows != _rows)
+	_refresh()
