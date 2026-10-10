@@ -84,6 +84,7 @@ func _populate_playfield(stage: SubViewport) -> void:
 	cockpit_panel.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	var cockpit_material := ShaderMaterial.new()
 	cockpit_material.shader = load("res://menus/cockpit_power.gdshader")
+	cockpit_material.set_shader_parameter("lamp_mask", load("res://assets/ui/cockpit/pilot_visor_lamps_mask.png"))
 	cockpit_panel.material = cockpit_material
 	stage.add_child(cockpit_panel)
 	var background := _instance("res://effects/space_background.tscn")

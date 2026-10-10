@@ -2,6 +2,8 @@ extends Control
 ## Six textured panels and live instruments share the launch's pause-aware time.
 const FRAME := preload("res://assets/ui/cockpit/pilot_visor_frame.png")
 const POWER := preload("res://menus/cockpit_power.gdshader")
+const LAMP_MASK := preload("res://assets/ui/cockpit/pilot_visor_lamps_mask.png")
+const WARNING_PERIOD := 0.8
 const Geometry := preload("res://menus/cockpit_geometry.gd")
 const DELAYS := [0.0, 0.08, 0.18, 0.25, 0.34, 0.41]
 ## Launch time by which every panel has slid home (last delay + 0.82s travel).
@@ -10,10 +12,41 @@ var panels: Array[Control] = []
 var instruments: Array[Dictionary] = []
 var deployment_time := 2.6
 var _launch: LaunchSequence
+var _shield_warning := false
+var _warning_elapsed := 0.0
+
+## Controls all nine lamps; blend=0 restores the original amber artwork.
+func set_indicator_style(color: Color, blend: float = 1.0, brightness: float = 1.0) -> void:
+	for panel in panels:
+		var material := panel.get_child(0).material as ShaderMaterial
+		material.set_shader_parameter("lamp_color", color)
+		material.set_shader_parameter("lamp_blend", clampf(blend, 0.0, 1.0))
+		material.set_shader_parameter("lamp_brightness", clampf(brightness, 0.0, 1.0))
+
+func _on_shield_changed(current: int, _maximum: int) -> void:
+	var warning := current <= 0
+	if warning == _shield_warning:
+		return
+	_shield_warning = warning
+	_warning_elapsed = 0.0
+	set_process(warning)
+	set_indicator_style(Color.RED, 1.0 if warning else 0.0)
+
+func _process(delta: float) -> void:
+	if not _shield_warning:
+		return
+	_warning_elapsed = fmod(_warning_elapsed + delta, WARNING_PERIOD)
+	var brightness := lerpf(0.18, 1.0, 0.5 + 0.5 * cos(TAU * _warning_elapsed / WARNING_PERIOD))
+	set_indicator_style(Color.RED, 1.0, brightness)
+
+func _on_ship_exiting() -> void:
+	set_process(false)
+
 
 func configure(world: Control) -> void:
 	mouse_filter = MOUSE_FILTER_IGNORE
 	process_mode = Node.PROCESS_MODE_PAUSABLE
+	set_process(false)
 	z_index = 0
 	# Draw the frame behind instruments, but above the rectangular battle texture.
 	var layout := get_parent()
@@ -41,6 +74,7 @@ func configure(world: Control) -> void:
 			mesh.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 			var material := ShaderMaterial.new()
 			material.shader = POWER
+			material.set_shader_parameter("lamp_mask", LAMP_MASK)
 			mesh.material = material
 			panel.add_child(mesh)
 			add_child(panel)
@@ -68,6 +102,10 @@ func configure(world: Control) -> void:
 	gauge.position = Vector2(0, 16)
 	gauge.size = Vector2(96, 16)
 	var ship := world.gameplay.get_node("Ship") as Node2D
+	var shield := ship.get_node("ShieldComponent") as ShieldComponent
+	shield.shield_changed.connect(_on_shield_changed)
+	ship.tree_exiting.connect(_on_ship_exiting)
+	_on_shield_changed(shield.get_current_shield(), shield.get_max_shield())
 	ship.get_node("PositionClampComponent").cockpit_boundary = true
 	ship.position.x = Geometry.FIELD_WIDTH * 0.5
 	_launch = world.gameplay.get_node("LaunchSequence") as LaunchSequence
