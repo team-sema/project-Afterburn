@@ -186,6 +186,29 @@ theme_type_variation = &"SettingsToggle"
 toggle_mode = true
 text = "끔"
 
+[node name="EventLogRow" type="PanelContainer" parent="Center/Panel/VBox/Rows"]
+layout_mode = 2
+theme_type_variation = &"SettingsRow"
+
+[node name="HBox" type="HBoxContainer" parent="Center/Panel/VBox/Rows/EventLogRow"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Name" type="Label" parent="Center/Panel/VBox/Rows/EventLogRow/HBox"]
+custom_minimum_size = Vector2(84, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "전투 이벤트 로그"
+
+[node name="EventLogButton" type="Button" parent="Center/Panel/VBox/Rows/EventLogRow/HBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(56, 0)
+layout_mode = 2
+mouse_default_cursor_shape = 2
+theme_type_variation = &"SettingsToggle"
+toggle_mode = true
+text = "켬"
+
 [node name="BackButton" type="Button" parent="Center/Panel/VBox"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(120, 0)

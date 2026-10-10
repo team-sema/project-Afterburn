@@ -4,6 +4,11 @@ const FRAME := preload("res://assets/ui/cockpit/pilot_visor_frame.png")
 const POWER := preload("res://menus/cockpit_power.gdshader")
 const LAMP_MASK := preload("res://assets/ui/cockpit/pilot_visor_lamps_mask.png")
 const WARNING_PERIOD := 0.8
+const BREAK_DURATION := 0.16
+const RECOVERY_DURATION := 0.55
+const RECOVERY_HOLD := 0.12
+const BREAK_COLOR := Color(1.0, 0.48, 0.38)
+const RECOVERY_COLOR := Color(0.15, 1.0, 0.38)
 const Geometry := preload("res://menus/cockpit_geometry.gd")
 const DELAYS := [0.0, 0.08, 0.18, 0.25, 0.34, 0.41]
 ## Launch time by which every panel has slid home (last delay + 0.82s travel).
@@ -14,6 +19,9 @@ var deployment_time := 2.6
 var _launch: LaunchSequence
 var _shield_warning := false
 var _warning_elapsed := 0.0
+var _shield_initialized := false
+var _transition := ""
+var _transition_elapsed := 0.0
 
 ## Controls all nine lamps; blend=0 restores the original amber artwork.
 func set_indicator_style(color: Color, blend: float = 1.0, brightness: float = 1.0) -> void:
@@ -21,19 +29,43 @@ func set_indicator_style(color: Color, blend: float = 1.0, brightness: float = 1
 		var material := panel.get_child(0).material as ShaderMaterial
 		material.set_shader_parameter("lamp_color", color)
 		material.set_shader_parameter("lamp_blend", clampf(blend, 0.0, 1.0))
-		material.set_shader_parameter("lamp_brightness", clampf(brightness, 0.0, 1.0))
+		material.set_shader_parameter("lamp_brightness", clampf(brightness, 0.0, 2.0))
 
 func _on_shield_changed(current: int, _maximum: int) -> void:
 	var warning := current <= 0
+	if not _shield_initialized:
+		_shield_initialized = true
+		_shield_warning = warning
+		set_indicator_style(Color.RED, 1.0 if warning else 0.0)
+		set_process(warning)
+		return
 	if warning == _shield_warning:
 		return
 	_shield_warning = warning
 	_warning_elapsed = 0.0
-	set_process(warning)
-	set_indicator_style(Color.RED, 1.0 if warning else 0.0)
+	_transition_elapsed = 0.0
+	_transition = "break" if warning else "recovery"
+	set_process(true)
+	_process(0.0)
 
 func _process(delta: float) -> void:
+	if not _transition.is_empty():
+		var duration := BREAK_DURATION if _transition == "break" else RECOVERY_DURATION
+		var remaining := maxf(0.0, duration - _transition_elapsed)
+		_transition_elapsed += delta
+		if _transition_elapsed < duration:
+			if _transition == "break":
+				var t := _transition_elapsed / BREAK_DURATION
+				set_indicator_style(BREAK_COLOR.lerp(Color.RED, t), 1.0, lerpf(1.65, 1.0, t))
+			else:
+				var t := smoothstep(RECOVERY_HOLD, RECOVERY_DURATION, _transition_elapsed)
+				set_indicator_style(RECOVERY_COLOR, 1.0 - t, lerpf(1.25, 1.0, t))
+			return
+		delta = maxf(0.0, delta - remaining)
+		_transition = ""
 	if not _shield_warning:
+		set_indicator_style(Color.RED, 0.0, 1.0)
+		set_process(false)
 		return
 	_warning_elapsed = fmod(_warning_elapsed + delta, WARNING_PERIOD)
 	var brightness := lerpf(0.18, 1.0, 0.5 + 0.5 * cos(TAU * _warning_elapsed / WARNING_PERIOD))

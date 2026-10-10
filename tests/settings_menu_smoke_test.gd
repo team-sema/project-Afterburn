@@ -74,6 +74,14 @@ func _run() -> void:
 	_expect(GameSettings.instance.is_fullscreen() == fullscreen_before, "toggling again restores fullscreen")
 
 	_press(&"ui_down")
+	var event_button := settings_menu.get_node("%EventLogButton") as Button
+	_expect(event_button.has_focus(), "event log toggle follows fullscreen")
+	var log_before := GameSettings.instance.is_combat_event_log_enabled()
+	_press(&"ui_right")
+	_expect(GameSettings.instance.is_combat_event_log_enabled() != log_before, "right toggles event log")
+	_press(&"ui_accept")
+	_expect(GameSettings.instance.is_combat_event_log_enabled() == log_before, "accept restores event log")
+	_press(&"ui_down")
 	_expect((settings_menu.get_node("%BackButton") as Button).has_focus(), "back item follows the toggle")
 	_press(&"ui_down")
 	_expect(master_slider.has_focus(), "down from the back item wraps to the first row")
@@ -87,6 +95,7 @@ func _run() -> void:
 	_press(&"ui_up")
 	_press(&"ui_accept")
 	_expect(settings_menu.visible, "settings can be reopened from the keyboard")
+	_press(&"ui_down")
 	_press(&"ui_down")
 	_press(&"ui_down")
 	_press(&"ui_down")
