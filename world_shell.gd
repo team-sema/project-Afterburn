@@ -40,6 +40,7 @@ func _ready() -> void:
 	event_log.configure(gameplay.get_node("Ship/ShieldComponent"))
 	$Layout/LeftPanel/Margin/VBox/ProgressionHud.augment_ready_changed.connect(event_log.on_augment_ready)
 	var launch := gameplay.get_node("LaunchSequence") as LaunchSequence
+	event_log.configure_launch(launch)
 	launch.launch_started.connect(_apply_field_bleed.bind(LAUNCH_BLEED))
 	launch.launch_advanced.connect(_on_launch_advanced)
 	_apply_field_bleed(LAUNCH_BLEED if launch.is_launching else CockpitGeometry.FIELD_BLEED)
