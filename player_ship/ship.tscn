@@ -28,6 +28,8 @@
 [ext_resource type="Script" path="res://components/shield_component.gd" id="22_shield"]
 [ext_resource type="Script" path="res://components/ship_combat_buff_controller.gd" id="23_combat_buff"]
 [ext_resource type="Script" path="res://components/engine_boost_component.gd" id="24_engine_boost"]
+[ext_resource type="Script" path="res://components/flash_component.gd" id="25_flash"]
+[ext_resource type="Script" path="res://components/player_hit_feedback.gd" id="26_hit_feedback"]
 
 [sub_resource type="Gradient" id="Gradient_engine"]
 offsets = PackedFloat32Array(0, 0.35, 1)
@@ -168,6 +170,19 @@ hurtbox_component = NodePath("../PlayerHitPoint/HurtboxComponent")
 base_iframe_duration = 0.6
 shield_component = NodePath("../ShieldComponent")
 combat_buff_controller = NodePath("../ShipCombatBuffController")
+
+[node name="HitFlashComponent" type="Node" parent="." node_paths=PackedStringArray("sprite", "flash_root")]
+script = ExtResource("25_flash")
+sprite = NodePath("../Anchor/ShipSprite")
+flash_root = NodePath("../Anchor/TightGlow")
+flash_duration = 0.12
+
+[node name="PlayerHitFeedback" type="Node" parent="." node_paths=PackedStringArray("hurt_component", "shield_component", "flash_component", "hit_point")]
+script = ExtResource("26_hit_feedback")
+hurt_component = NodePath("../HurtComponent")
+shield_component = NodePath("../ShieldComponent")
+flash_component = NodePath("../HitFlashComponent")
+hit_point = NodePath("../PlayerHitPoint")
 
 [node name="ExplosionSpawnerComponent" type="Node2D" parent="." unique_id=925069816]
 script = ExtResource("7_iekxl")

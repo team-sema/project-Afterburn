@@ -112,7 +112,7 @@ func _test_world_modules() -> void:
 	var collector := ship.get_node("ExperienceCollector") as ExperienceCollectorComponent
 	_expect(boost != null, "EngineBoostComponent on ship")
 	_expect(buffs != null, "ShipCombatBuffController on ship")
-	_expect(shield.get_max_shield() == 1, "start shield 1")
+	_expect(shield.get_max_shield() == 2, "start shield 2")
 
 	var radar := load("res://resources/player_augments/facilities/facility_radar.tres") as PlayerAugment
 	var base_radius := collector.collection_radius
