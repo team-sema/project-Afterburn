@@ -4,7 +4,7 @@
 [ext_resource type="Script" uid="uid://cbtt1l1ekmuxi" path="res://resources/encounters/encounter_member.gd" id="2_member"]
 [ext_resource type="PackedScene" path="res://formations/layouts/single_formation.tscn" id="3_layout"]
 [ext_resource type="Resource" uid="uid://ciw8jhdxct5qd" path="res://resources/enemy_movement/sequences/single_release.tres" id="4_release"]
-[ext_resource type="Resource" path="res://resources/enemy_movement/sequences/courier_arc_pass.tres" id="5_individual"]
+[ext_resource type="Resource" uid="uid://tt0rike2je4y" path="res://resources/enemy_movement/sequences/courier_arc_pass.tres" id="5_individual"]
 [ext_resource type="PackedScene" path="res://enemies/courier_enemy.tscn" id="6_courier"]
 
 [sub_resource type="Resource" id="Member_courier"]
