@@ -4,7 +4,7 @@ uniform float scan : hint_range(0.0, 1.0) = 1.0;
 uniform sampler2D lamp_mask : filter_linear, repeat_disable;
 uniform vec4 lamp_color : source_color = vec4(1.0, 0.0, 0.0, 1.0);
 uniform float lamp_blend : hint_range(0.0, 1.0) = 0.0;
-uniform float lamp_brightness : hint_range(0.0, 1.0) = 1.0;
+uniform float lamp_brightness : hint_range(0.0, 2.0) = 1.0;
 void fragment() {
 	vec4 tex = texture(TEXTURE, UV);
 	float mask = texture(lamp_mask, UV).r;

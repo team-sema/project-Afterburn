@@ -1,6 +1,8 @@
 class_name ProgressionHud
 extends Control
 
+signal augment_ready_changed(ready: bool)
+
 @export var progression: Node
 ## Optional. When set and running a sequence, Threat HUD shows phase progress
 ## instead of the 60s elite timer countdown.
@@ -90,6 +92,7 @@ func _set_augment_ready(is_ready: bool) -> void:
 	if _is_augment_ready == is_ready:
 		return
 	_is_augment_ready = is_ready
+	augment_ready_changed.emit(is_ready)
 	_highlight_time = 0.0
 	if is_ready:
 		return

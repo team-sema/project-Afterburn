@@ -33,6 +33,12 @@ func _ready() -> void:
 	cockpit.set_script(COCKPIT_SCENE)
 	$Layout.add_child(cockpit)
 	cockpit.configure(self)
+	var event_log := Control.new()
+	event_log.name = "CombatEventLog"
+	event_log.set_script(preload("res://menus/combat_event_log.gd"))
+	$Layout.add_child(event_log)
+	event_log.configure(gameplay.get_node("Ship/ShieldComponent"))
+	$Layout/LeftPanel/Margin/VBox/ProgressionHud.augment_ready_changed.connect(event_log.on_augment_ready)
 	var launch := gameplay.get_node("LaunchSequence") as LaunchSequence
 	launch.launch_started.connect(_apply_field_bleed.bind(LAUNCH_BLEED))
 	launch.launch_advanced.connect(_on_launch_advanced)
