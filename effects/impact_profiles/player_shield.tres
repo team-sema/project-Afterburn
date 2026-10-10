@@ -1,6 +1,6 @@
-[gd_resource type="Resource" script_class="ImpactProfile" format=3]
+[gd_resource type="Resource" script_class="ImpactProfile" format=3 uid="uid://cw56w4iahq7p6"]
 
-[ext_resource type="Script" path="res://effects/impact_profile.gd" id="1_profile"]
+[ext_resource type="Script" uid="uid://cik2saesmx7cm" path="res://effects/impact_profile.gd" id="1_profile"]
 
 [resource]
 script = ExtResource("1_profile")
@@ -11,8 +11,6 @@ flare_lifetime = 0.14
 spark_count = 6
 spark_speed_min = 120.0
 spark_speed_max = 220.0
-spark_spread_degrees = 70.0
 spark_length = 6.0
 spark_lifetime = 0.25
 ring_lifetime = 0.3
-ring_width = 1.5
