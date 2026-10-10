@@ -251,9 +251,12 @@ func _apply_stage_rect() -> void:
 	if stage == null:
 		return
 	if _stage_limit != null and is_instance_valid(_stage_limit) and _stage_limit.is_inside_tree():
+		stage.anchor_left = 0.0
+		stage.offset_left = (_stage_limit.get_parent() as Control).get_global_rect().position.x
 		stage.anchor_right = 0.0
 		stage.offset_right = _stage_limit.get_global_rect().position.x
 	else:
+		stage.offset_left = 0.0
 		stage.anchor_right = 1.0
 		stage.offset_right = 0.0
 

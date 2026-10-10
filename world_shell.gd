@@ -18,6 +18,22 @@ const MENU_SCENE_PATH := "res://menus/menu.tscn"
 
 var _is_manual_pause := false
 var _field_bleed := -1.0
+var _window: Window
+var _previous_aspect: Window.ContentScaleAspect
+var _previous_scale_size: Vector2i
+var _side_fill: Control
+
+
+func _enter_tree() -> void:
+	# Only the World expands; menus and standalone lab viewports keep their policy.
+	_window = get_viewport() as Window
+	if _window != null:
+		_previous_aspect = _window.content_scale_aspect
+		_previous_scale_size = _window.content_scale_size
+		# Cockpit geometry is authored in 640x360 logical coordinates, regardless
+		# of the project viewport setting or the physical window resolution.
+		_window.content_scale_size = Vector2i(CockpitGeometry.SHELL_SIZE)
+		_window.content_scale_aspect = Window.CONTENT_SCALE_ASPECT_KEEP_HEIGHT
 
 
 func _ready() -> void:
@@ -28,6 +44,12 @@ func _ready() -> void:
 	backing.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(backing)
 	move_child(backing, 0)
+	_side_fill = Control.new()
+	_side_fill.name = "WindowSideFill"
+	_side_fill.set_script(preload("res://effects/window_side_fill.gd"))
+	_side_fill.background = gameplay.get_node("SpaceBackground")
+	add_child(_side_fill)
+	move_child(_side_fill, 1)
 	var cockpit := Control.new()
 	cockpit.name = "CockpitHud"
 	cockpit.set_script(COCKPIT_SCENE)
@@ -63,6 +85,15 @@ func _ready() -> void:
 	assert(augment_selection != null, "World shell requires the augment selection overlay.")
 	augment_selection.configure_status_preview(status_ship_panel, weapon_loadout_hud)
 	augment_selection.configure_stage_limit($Layout/RightPanel)
+	resized.connect(_fit_window)
+	_fit_window()
+
+
+func _fit_window() -> void:
+	$Layout.position.x = maxf(0.0, (size.x - CockpitGeometry.SHELL_SIZE.x) * 0.5)
+	_side_fill.fit_to_window(size)
+	var overlay := get_node("AugmentSelectionOverlay") as AugmentSelectionOverlay
+	overlay.configure_stage_limit($Layout/RightPanel)
 
 
 ## The lane stays 340x360 for gameplay logic (visible rect), but the viewport
@@ -133,5 +164,8 @@ func _return_to_menu() -> void:
 
 
 func _exit_tree() -> void:
+	if is_instance_valid(_window):
+		_window.content_scale_size = _previous_scale_size
+		_window.content_scale_aspect = _previous_aspect
 	if _is_manual_pause and get_tree() != null:
 		get_tree().paused = false

@@ -10,6 +10,7 @@ func _initialize() -> void:
 
 
 func _run() -> void:
+	var original_scale_size := root.content_scale_size
 	var menu := MENU_SCENE.instantiate() as Control
 	root.add_child(menu)
 	current_scene = menu
@@ -40,11 +41,14 @@ func _run() -> void:
 		while (current_scene == null or current_scene.name != "World") and Time.get_ticks_msec() < deadline:
 			await process_frame
 		_expect(current_scene != null and current_scene.name == "World", "loaded game scene becomes current")
+	if current_scene != null and current_scene.name == "World":
+		_expect(root.content_scale_size == Vector2i(640, 360), "menu entry preserves the cockpit logical resolution")
 	if current_scene != null:
 		current_scene.queue_free()
 		current_scene = null
 		await process_frame
 
+	_expect(root.content_scale_size == original_scale_size, "World exit restores the configured menu resolution")
 	if failures.is_empty():
 		print("menu loading smoke test: PASS")
 		quit()
