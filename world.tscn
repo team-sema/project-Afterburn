@@ -551,9 +551,9 @@ anchor_top = 0.0
 anchor_right = 0.0
 anchor_bottom = 0.0
 offset_left = 26
-offset_top = 82
+offset_top = 74.0
 offset_right = 136
-offset_bottom = 96
+offset_bottom = 88.0
 custom_minimum_size = Vector2(0, 0)
 mouse_filter = 2
 text = "FACILITIES"
@@ -574,9 +574,9 @@ anchor_top = 0.0
 anchor_right = 0.0
 anchor_bottom = 0.0
 offset_left = 24
-offset_top = 98.0
+offset_top = 88.0
 offset_right = 134
-offset_bottom = 144.0
+offset_bottom = 151.0
 custom_minimum_size = Vector2(0, 0)
 mouse_filter = 2
 cockpit_layout = true
@@ -643,9 +643,9 @@ anchor_left = 0.0
 anchor_top = 0.0
 anchor_right = 0.0
 anchor_bottom = 0.0
-offset_top = 146.0
+offset_top = 151.0
 offset_right = 136
-offset_bottom = 160.0
+offset_bottom = 165.0
 custom_minimum_size = Vector2(0, 0)
 mouse_filter = 2
 text = "WEAPONS"
@@ -675,8 +675,9 @@ mouse_filter = 2
 hex_side = 32.0
 offset_left = 24
 offset_right = 134
-offset_bottom = 190.0
+offset_bottom = 194.0
 aligned_row = true
+row_gap = 1.0
 
 [node name="BayDetailSpacer" type="Control" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud" unique_id=1888001001]
 unique_name_in_owner = true
@@ -711,9 +712,9 @@ anchor_top = 0.0
 anchor_right = 0.0
 anchor_bottom = 0.0
 offset_left = 21
-offset_top = 294.0
+offset_top = 293.0
 offset_right = 63
-offset_bottom = 336.0
+offset_bottom = 337.0
 custom_minimum_size = Vector2(0, 0)
 mouse_filter = 2
 rotation = -0.122173
@@ -754,7 +755,7 @@ stretch_mode = 5
 [node name="SelectedWeaponHex" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud/DetailColumns/SelectedCol/SelectedWeaponRow" unique_id=617385867 instance=ExtResource("14_hex")]
 unique_name_in_owner = true
 size_flags_horizontal = 0
-custom_minimum_size = Vector2(24, 24)
+custom_minimum_size = Vector2(44, 44)
 
 [node name="SelectedWeaponName" type="Label" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud/DetailColumns/SelectedCol/SelectedWeaponRow" unique_id=237567968]
 unique_name_in_owner = true
@@ -777,9 +778,9 @@ anchor_top = 0.0
 anchor_right = 0.0
 anchor_bottom = 0.0
 offset_left = 34.0
-offset_top = 258.0
+offset_top = 250.0
 offset_right = 118.0
-offset_bottom = 276.0
+offset_bottom = 282.0
 custom_minimum_size = Vector2(0, 0)
 mouse_filter = 2
 rotation = -0.122173
@@ -804,8 +805,8 @@ anchor_bottom = 0.0
 offset_left = 0
 offset_top = 0
 offset_right = 84.0
-offset_bottom = 18.0
-aligned_row = true
+offset_bottom = 32.0
+aligned_row = false
 
 [node name="DetailRule" type="ColorRect" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud" unique_id=1888001002]
 unique_name_in_owner = true
@@ -835,8 +836,8 @@ offset_left = 30
 offset_right = 122.0
 custom_minimum_size = Vector2(0, 0)
 mouse_filter = 2
-offset_top = 278.0
-offset_bottom = 292.0
+offset_top = 281.0
+offset_bottom = 295.0
 rotation = -0.122173
 
 [node name="WeaponDetailFooter" type="Label" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud/WeaponDetailFooterClip" unique_id=77695922]
@@ -865,7 +866,7 @@ layout_mode = 0
 anchors_preset = 0
 offset_right = 48.0
 offset_bottom = 48.0
-custom_minimum_size = Vector2(28, 28)
+custom_minimum_size = Vector2(32, 32)
 
 [node name="ModuleHexTemplate" parent="Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud/HudTemplates" unique_id=694755618 instance=ExtResource("14_hex")]
 unique_name_in_owner = true
@@ -874,7 +875,7 @@ anchors_preset = 0
 offset_left = 54.0
 offset_right = 82.0
 offset_bottom = 28.0
-custom_minimum_size = Vector2(18, 18)
+custom_minimum_size = Vector2(24, 24)
 
 [node name="CornerFrame" type="Control" parent="Layout/RightPanel" unique_id=354929349]
 layout_mode = 2

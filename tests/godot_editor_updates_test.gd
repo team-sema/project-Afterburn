@@ -36,7 +36,7 @@ func _run() -> void:
 		"playfield viewport is 340x360 (got %s)" % playfield_viewport.size,
 	)
 	_expect(playfield_value.text == "340 × 360", "HUD matches the playfield viewport size")
-	_expect(ship_panel.size.y == 46.0, "world ShipPanel reserves three compact rows inside the facility display")
+	_expect(ship_panel.size.y == 63.0, "world ShipPanel reserves three compact rows inside the facility display")
 	_expect(ship_panel.clip_contents, "world ShipPanel inherits clipping")
 	world.queue_free()
 	await process_frame

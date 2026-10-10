@@ -59,13 +59,13 @@ func _run() -> void:
 	await process_frame
 	var grid: HexHoneycombContainer = weapon_hud.get_node("%ModulesGrid") as HexHoneycombContainer
 	_expect(grid.get_child_count() == 4, "module grid keeps four slots")
-	_expect(is_equal_approx(grid.hex_side, 18.0), "equipped module hexes use the compact 18px size")
+	_expect(is_equal_approx(grid.hex_side, 24.0), "equipped module hexes use the enlarged 24px size")
 	var first_hex := grid.get_child(0) as HexModuleFrame
 	var second_hex := grid.get_child(1) as HexModuleFrame
 	_expect(first_hex != null, "equipped module is a bare HexModuleFrame")
 	_expect(
-		is_equal_approx(first_hex.position.y, second_hex.position.y) and second_hex.position.x > first_hex.position.x + first_hex.size.x,
-		"equipped module hexes occupy separate cells along the tilted display",
+		_share_hex_edge(first_hex, second_hex),
+		"enlarged module hexes share an edge in the tilted display",
 	)
 	_expect(loadout.get_trait_icon(&"blaster_accel_ap") != null, "blaster accel AP has a visible icon for STATUS")
 	first_hex.module_hovered.emit()
@@ -80,7 +80,7 @@ func _run() -> void:
 	await process_frame
 	var bay_row: HexHoneycombContainer = weapon_hud.get_node("%BayRow") as HexHoneycombContainer
 	_expect(bay_row.get_child_count() == loadout.get_max_equipped_weapon_count(), "bay row lists every slot equally")
-	_expect(is_equal_approx(bay_row.hex_side, 28.0), "weapon bay hexes use the compact 28px size")
+	_expect(is_equal_approx(bay_row.hex_side, 32.0), "weapon bay hexes use the enlarged 32px size")
 	var first_bay := bay_row.get_child(0) as WeaponCoreCluster
 	var second_bay := bay_row.get_child(1) as WeaponCoreCluster
 	_expect(
@@ -193,3 +193,12 @@ func _run() -> void:
 func _expect(condition: bool, message: String) -> void:
 	if not condition:
 		failures.append(message)
+
+
+func _share_hex_edge(first: HexModuleFrame, second: HexModuleFrame) -> bool:
+	var shared := 0
+	for a in first.get_hex_polygon():
+		for b in second.get_hex_polygon():
+			if (first.get_global_transform() * a).is_equal_approx(second.get_global_transform() * b):
+				shared += 1
+	return shared == 2

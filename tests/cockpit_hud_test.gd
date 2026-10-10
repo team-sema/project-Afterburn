@@ -78,7 +78,7 @@ func run() -> void:
 	var hud = world.weapon_loadout_hud
 	check(hud.bay_row.get_child_count() == 4, "four weapon bays retained")
 	for bay in hud.bay_row.get_children():
-		check(bay.size.is_equal_approx(Vector2(24,24)), "occupied and empty bays have equal compact size")
+		check(bay.size.is_equal_approx(Vector2(26,26)), "occupied and empty bays have equal compact size")
 		check(hud.bay_row.get_global_rect().encloses(bay.get_global_rect()), "bay stays in its reserved screen")
 	_check_instrument_fit(world)
 	world.queue_free()
@@ -107,7 +107,8 @@ func _check_instrument_fit(world: Control) -> void:
 	var hud: WeaponLoadoutHud = world.weapon_loadout_hud
 	var console := Rect2(514, 80, 112, 111)
 	for bay: Control in hud.bay_row.get_children():
-		check(console.encloses(bay.get_global_rect()), "weapon bay stays above lower metal seam")
+		for point in _hex_points(bay.get_node("%Core")):
+			check(console.has_point(point), "weapon hex stays above lower metal seam")
 	var left := world.get_node("Layout/LeftPanel/Margin/VBox")
 	var shield := left.get_node("ShipStatusHud") as Control
 	var xp := left.get_node("ProgressionHud/ExperienceLabel") as Label
@@ -119,16 +120,24 @@ func _check_instrument_fit(world: Control) -> void:
 	check(xp_local.y > arc.position.y + arc.size.y and xp_local.y > charge.position.y + charge.size.y, "XP has clearance below the shield arc and charging bar")
 	var selected := hud.get_node("%SelectedWeaponHex") as Control
 	var up_axis := hud.modules_grid.get_global_transform().y.normalized()
-	var modules_bottom := up_axis.dot(hud.modules_grid.global_position) + hud.modules_grid.size.y
+	var modules_bottom := -INF
+	for module: HexModuleFrame in hud.modules_grid.get_children():
+		for point in _hex_points(module):
+			modules_bottom = maxf(modules_bottom, up_axis.dot(point))
 	var title_top := up_axis.dot(hud.detail_footer.global_position)
 	var title_bottom := title_top + hud.detail_footer.size.y
-	check(title_top > modules_bottom and up_axis.dot(selected.global_position) > title_bottom, "module row, weapon title and selected icon have distinct vertical space")
+	var selected_top := INF
+	for point in _hex_points(selected):
+		selected_top = minf(selected_top, up_axis.dot(point))
+	check(title_top > modules_bottom and selected_top > title_bottom, "module row, weapon title and selected icon have distinct vertical space")
 	var safe_left := PackedVector2Array([Vector2(37,239), Vector2(121,260), Vector2(162,330), Vector2(134,339), Vector2(12,307)])
 	for control: Control in [shield.get_node("ShieldLabel"), shield.get_node("ShieldArc"), xp, bar]:
 		_check_corners(control, safe_left)
 	var safe_right := PackedVector2Array([Vector2(526,252), Vector2(610,232), Vector2(632,316), Vector2(610,328), Vector2(483,338)])
-	for control: Control in [hud.get_node("%SelectedWeaponHex"), hud.modules_grid, hud.detail_footer]:
-		_check_corners(control, safe_right)
+	_check_corners(hud.detail_footer, safe_right)
+	for hex: HexModuleFrame in [selected] + hud.modules_grid.get_children():
+		for point in _hex_points(hex):
+			check(Geometry2D.is_point_in_polygon(point, safe_right), "enlarged hex stays within the instrument glass at %s" % point)
 	var progress = left.get_node("ProgressionHud")
 	progress._on_experience_changed(999, 5, 1)
 	var font := xp.label_settings.font
@@ -139,3 +148,7 @@ func _check_corners(control: Control, polygon: PackedVector2Array) -> void:
 	for corner in [Vector2.ZERO, Vector2(control.size.x, 0), control.size, Vector2(0, control.size.y)]:
 		var point: Vector2 = control.get_global_transform() * corner
 		check(Geometry2D.is_point_in_polygon(point, polygon), "%s stays inside the slanted instrument glass at %s" % [control.name, point])
+
+
+func _hex_points(hex: HexModuleFrame) -> PackedVector2Array:
+	return hex.get_global_transform() * hex.get_hex_polygon()

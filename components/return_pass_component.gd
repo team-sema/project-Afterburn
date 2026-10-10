@@ -10,6 +10,8 @@ const RETURN_RUN: MovementSequence = preload(
 )
 
 @export_range(0, 3, 1) var return_passes := 1
+@export var warning_color := Color("35ffe1")
+@export_range(0.25, 3.0, 0.05) var warning_scale := 0.6
 ## Offscreen hold before the return run; the edge warning lasts the same time.
 @export_range(0.1, 3.0, 0.05, "suffix:s") var turn_delay := 0.6
 ## How far past the visible edge the actor travels before it turns.
@@ -64,8 +66,10 @@ func _begin_hold() -> void:
 	var warning := EntryWarningComponent.new()
 	warning.actor = enemy
 	warning.entry_direction = Vector2.RIGHT if _return_direction.x >= 0.0 else Vector2.LEFT
-	warning.face_spawn_side = true
+	warning.trajectory_direction = _return_direction
 	warning.warning_duration = turn_delay
+	warning.warning_color = warning_color
+	warning.warning_scale = warning_scale
 	enemy.add_child(warning)
 
 

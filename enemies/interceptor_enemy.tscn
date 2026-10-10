@@ -67,4 +67,4 @@ active_duration = 0.7
 script = ExtResource("4_warning")
 actor = NodePath("..")
 warning_duration = 0.9
-face_spawn_side = true
+warning_scale = 0.6
