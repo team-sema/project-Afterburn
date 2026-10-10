@@ -176,8 +176,8 @@ func _check_facility_effect_modules(
 		is_equal_approx(applier.get_collection_radius(), base_radius * 1.5),
 		"radar module increases collection radius",
 	)
-	_expect(shield.get_max_shield() == 2, "shield module adds +1 on top of base max 1")
-	_expect(shield.get_current_shield() == 2, "max increase also raises current shield")
+	_expect(shield.get_max_shield() == 3, "shield module adds +1 on top of base max 2")
+	_expect(shield.get_current_shield() == 3, "max increase also raises current shield")
 
 
 func _check_replacement(registry: PlayerAugmentRegistry, loadout: PlayerWeaponLoadout) -> void:

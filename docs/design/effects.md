@@ -81,6 +81,7 @@ Nova Drift 풍: **밝은 기하 코어 + 다중 글로우 레이어 + 어두운 
 Flash / Scale / Shake — 피격·발사 시 펀치감
 
 - `FlashComponent`: 단일 `sprite` 또는 `flash_root`의 CanvasItem 자식들을 한꺼번에 화이트 플래시 (Tanker 실드 다중 레이어)
+- 플레이어 피격: 견딜만한 피격과 위험한 피격을 등급으로 나눠 함선 플래시·조종석 패널 흔들림·`ImpactVfx` 프로필 `player_shield`·전장 가장자리 경고(`effects/playfield_damage_warning.gd`)·피격점 맥동을 낸다. 등급·수치·완료 조건은 [플레이어 · 피격 연출](player.md#피격-연출)이 정본이다.
 - `EntryWarningComponent`: 고속 진입 전 VisibleRect 가장자리 화살표 점멸
 - `EncounterStepWarning`: ELITE/BOSS 관문 직전 맵 중앙 관문 경고 — 종류별 문구·색(ELITE 주황빨강 · BOSS 자홍), 펼쳐지는 검은 띠 + 해저드 스트라이프 + 테두리 맥동 + 클락슨 SFX. WAVE는 경고 없음 ([런 페이싱](run-pacing.md#관문-경고-encounterstepwarning))
 

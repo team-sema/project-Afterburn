@@ -13,6 +13,24 @@ const Geometry := preload("res://menus/cockpit_geometry.gd")
 const DELAYS := [0.0, 0.08, 0.18, 0.25, 0.34, 0.41]
 ## Launch time by which every panel has slid home (last delay + 0.82s travel).
 const DEPLOY_END := 1.25
+## Hit shake per row (canopy, console, wing): amplitude px, length s, frequency Hz,
+## start delay s and the axis the row rocks along. The console rocks along the
+## impact direction instead of a fixed axis. See docs/design/scene-flow.md.
+const SHAKE_AMPLITUDE := [1.0, 2.0, 3.0]
+const SHAKE_DURATION := [0.15, 0.25, 0.4]
+const SHAKE_FREQUENCY := [40.0, 24.0, 14.0]
+const SHAKE_DELAY := [0.0, 0.03, 0.06]
+## Unit axes: canopy ≈ (1, 0.35), wing ≈ (0.25, 1); the console entry is unused.
+const SHAKE_AXIS := [Vector2(0.9439, 0.3304), Vector2.ZERO, Vector2(0.2425, 0.9701)]
+## The side the shot came from shakes first and in full; the other side follows.
+const SHAKE_FAR_SIDE_SCALE := 0.7
+const SHAKE_FAR_SIDE_DELAY := 0.05
+const SHAKE_BROKEN_SCALE := 1.8
+const POWER_DIP_DURATION := 0.06
+const POWER_DIP := 0.2
+## Panels overlap their neighbours and the field by this much so shaking them
+## apart never opens a seam. The window edge is not padded.
+const SEAM_OVERLAP := 3.0
 var panels: Array[Control] = []
 var instruments: Array[Dictionary] = []
 var deployment_time := 2.6
@@ -22,6 +40,13 @@ var _warning_elapsed := 0.0
 var _shield_initialized := false
 var _transition := ""
 var _transition_elapsed := 0.0
+var _shake_elapsed := 0.0
+var _shake_active := false
+var _shake_scale := 1.0
+var _shake_axis := Vector2.UP
+## -1 left, 1 right, 0 both at once.
+var _shake_struck_side := 0
+var _power_dip_left := 0.0
 
 ## Controls all nine lamps; blend=0 restores the original amber artwork.
 func set_indicator_style(color: Color, blend: float = 1.0, brightness: float = 1.0) -> void:
@@ -48,7 +73,61 @@ func _on_shield_changed(current: int, _maximum: int) -> void:
 	set_process(true)
 	_process(0.0)
 
+## Player hit: shake the six panels with their own weight. Called from the
+## ship's HurtComponent.player_hit; severity is HurtComponent.HitSeverity.
+func notify_player_hit(severity: int, _hit_position: Vector2, impact_direction: Vector2) -> void:
+	if severity == HurtComponent.HitSeverity.LETHAL:
+		return
+	var broken := severity == HurtComponent.HitSeverity.SHIELD_BROKEN
+	_shake_active = true
+	_shake_elapsed = 0.0
+	_shake_scale = SHAKE_BROKEN_SCALE if broken else 1.0
+	_shake_axis = impact_direction.normalized() if impact_direction.length_squared() > 0.0001 else Vector2.UP
+	# The shot came from the side opposite to the push; a near-vertical hit rocks both at once.
+	_shake_struck_side = 0 if absf(impact_direction.x) < 0.2 else (1 if impact_direction.x < 0.0 else -1)
+	_power_dip_left = POWER_DIP_DURATION if broken else 0.0
+	set_process(true)
+	_apply_layout()
+
+func is_shaking() -> bool:
+	return _shake_active
+
+func _shake_offset(index: int) -> Vector2:
+	if not _shake_active:
+		return Vector2.ZERO
+	var side := -1 if index < 3 else 1
+	var row := index % 3
+	var t := _shake_elapsed - float(SHAKE_DELAY[row])
+	var scale := _shake_scale
+	if _shake_struck_side != 0 and side != _shake_struck_side:
+		t -= SHAKE_FAR_SIDE_DELAY
+		scale *= SHAKE_FAR_SIDE_SCALE
+	var duration := float(SHAKE_DURATION[row])
+	if t < 0.0 or t >= duration:
+		return Vector2.ZERO
+	var axis: Vector2 = SHAKE_AXIS[row] if row != 1 else _shake_axis
+	var envelope := pow(1.0 - t / duration, 2.0)
+	return axis * float(SHAKE_AMPLITUDE[row]) * scale * envelope * sin(TAU * float(SHAKE_FREQUENCY[row]) * t)
+
+func _shake_done() -> bool:
+	var longest := 0.0
+	for row in 3:
+		longest = maxf(longest, float(SHAKE_DELAY[row]) + float(SHAKE_DURATION[row]))
+	return _shake_elapsed >= longest + SHAKE_FAR_SIDE_DELAY
+
+func _advance_shake(delta: float) -> void:
+	if _power_dip_left > 0.0:
+		_power_dip_left = maxf(0.0, _power_dip_left - delta)
+	if _shake_active:
+		_shake_elapsed += delta
+		if _shake_done():
+			_shake_active = false
+	_apply_layout()
+
 func _process(delta: float) -> void:
+	var needs_shake := _shake_active or _power_dip_left > 0.0
+	if needs_shake:
+		_advance_shake(delta)
 	if not _transition.is_empty():
 		var duration := BREAK_DURATION if _transition == "break" else RECOVERY_DURATION
 		var remaining := maxf(0.0, duration - _transition_elapsed)
@@ -65,7 +144,8 @@ func _process(delta: float) -> void:
 		_transition = ""
 	if not _shield_warning:
 		set_indicator_style(Color.RED, 0.0, 1.0)
-		set_process(false)
+		if not (_shake_active or _power_dip_left > 0.0):
+			set_process(false)
 		return
 	_warning_elapsed = fmod(_warning_elapsed + delta, WARNING_PERIOD)
 	var brightness := lerpf(0.18, 1.0, 0.5 + 0.5 * cos(TAU * _warning_elapsed / WARNING_PERIOD))
@@ -83,10 +163,13 @@ func configure(world: Control) -> void:
 	# Draw the frame behind instruments, but above the rectangular battle texture.
 	var layout := get_parent()
 	layout.move_child(self, 2)
+	# Seam vertices are pushed SEAM_OVERLAP px into the neighbouring row and the
+	# field (x=320) so independently shaken panels keep covering each other.
+	var o := SEAM_OVERLAP
 	var partitions := [
-		PackedVector2Array([Vector2(0, 0), Vector2(320, 0), Vector2(320, 18), Vector2(142, 18), Vector2(22, 50), Vector2(0, 108)]),
-		PackedVector2Array([Vector2(0, 108), Vector2(22, 50), Vector2(142, 18), Vector2(320, 18), Vector2(320, 249), Vector2(128, 249), Vector2(0, 211)]),
-		PackedVector2Array([Vector2(0, 211), Vector2(128, 249), Vector2(320, 249), Vector2(320, 360), Vector2(0, 360)]),
+		PackedVector2Array([Vector2(0, 0), Vector2(320 + o, 0), Vector2(320 + o, 18 + o), Vector2(142, 18 + o), Vector2(22, 50 + o), Vector2(0, 108 + o)]),
+		PackedVector2Array([Vector2(0, 108 - o), Vector2(22, 50 - o), Vector2(142, 18 - o), Vector2(320 + o, 18 - o), Vector2(320 + o, 249 + o), Vector2(128, 249 + o), Vector2(0, 211 + o)]),
+		PackedVector2Array([Vector2(0, 211 - o), Vector2(128, 249 - o), Vector2(320 + o, 249 - o), Vector2(320 + o, 360), Vector2(0, 360)]),
 	]
 	for side in 2:
 		for row in 3:
@@ -136,6 +219,9 @@ func configure(world: Control) -> void:
 	var ship := world.gameplay.get_node("Ship") as Node2D
 	var shield := ship.get_node("ShieldComponent") as ShieldComponent
 	shield.shield_changed.connect(_on_shield_changed)
+	var hurt := ship.get_node_or_null("HurtComponent") as HurtComponent
+	if hurt != null:
+		hurt.player_hit.connect(notify_player_hit)
 	ship.tree_exiting.connect(_on_ship_exiting)
 	_on_shield_changed(shield.get_current_shield(), shield.get_max_shield())
 	ship.get_node("PositionClampComponent").cockpit_boundary = true
@@ -166,14 +252,20 @@ func _power(index: int, time: float) -> float:
 
 func set_deployment_time(time: float) -> void:
 	deployment_time = time
+	_apply_layout()
+
+## Deployment slide plus hit shake, for the frame pieces and their instruments.
+func _apply_layout() -> void:
+	var time := deployment_time
+	var dip := POWER_DIP if _power_dip_left > 0.0 else 1.0
 	for i in panels.size():
 		var panel := panels[i]
-		panel.position = _offset(i, time)
+		panel.position = _offset(i, time) + _shake_offset(i)
 		var material := panel.get_child(0).material as ShaderMaterial
-		material.set_shader_parameter("power", _power(i, time))
+		material.set_shader_parameter("power", _power(i, time) * dip)
 		material.set_shader_parameter("scan", clampf((time - float(DELAYS[i]) - 0.5) / 0.8, 0.0, 1.0))
 	for item in instruments:
 		var node := item.node as Control
 		var index := int(item.panel)
-		node.position = item.home + _offset(index, time)
-		node.modulate.a = _power(index, time)
+		node.position = item.home + _offset(index, time) + _shake_offset(index)
+		node.modulate.a = _power(index, time) * dip
