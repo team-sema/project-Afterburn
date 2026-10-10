@@ -431,6 +431,8 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = -16.0
+offset_right = 16.0
 grow_horizontal = 2
 grow_vertical = 2
 stretch = true
@@ -438,8 +440,9 @@ stretch = true
 [node name="PlayfieldViewport" type="SubViewport" parent="Layout/Playfield/ViewportContainer" unique_id=1808854821]
 handle_input_locally = false
 use_hdr_2d = true
+size = Vector2i(372, 360)
+size_2d_override = Vector2i(340, 360)
 render_target_update_mode = 4
-size = Vector2i(340, 360)
 
 [node name="Gameplay" parent="Layout/Playfield/ViewportContainer/PlayfieldViewport" unique_id=941788113 instance=ExtResource("1_gameplay")]
 

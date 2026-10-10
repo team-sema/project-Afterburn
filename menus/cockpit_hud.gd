@@ -4,6 +4,8 @@ const FRAME := preload("res://assets/ui/cockpit/pilot_visor_frame.png")
 const POWER := preload("res://menus/cockpit_power.gdshader")
 const Geometry := preload("res://menus/cockpit_geometry.gd")
 const DELAYS := [0.0, 0.08, 0.18, 0.25, 0.34, 0.41]
+## Launch time by which every panel has slid home (last delay + 0.82s travel).
+const DEPLOY_END := 1.25
 var panels: Array[Control] = []
 var instruments: Array[Dictionary] = []
 var deployment_time := 2.6

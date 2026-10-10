@@ -6,15 +6,21 @@ const FIELD_LEFT := 150.0
 const FIELD_WIDTH := 340.0
 const SHOULDER_Y := 226.0
 const LOWER_INSET := 76.0
+## Extra px rendered beyond each side of the lane so the artwork aperture,
+## which is wider than the lane around the console shoulders, shows background.
+const FIELD_BLEED := 16.0
 
 static func inset_at(y: float) -> float:
 	return LOWER_INSET * clampf((y - SHOULDER_Y) / (360.0 - SHOULDER_Y), 0.0, 1.0)
 
 static func clamp_position(point: Vector2, margin: float) -> Vector2:
 	var y := clampf(point.y, margin, 360.0 - margin)
-	# Offset the sloping boundary by the same perpendicular clearance as the sides.
+	# Below the shoulder, offset the sloping boundary by the same perpendicular
+	# clearance as the vertical sides; above it the clearance is exactly margin.
 	var slope := LOWER_INSET / (360.0 - SHOULDER_Y)
-	var inset := maxf(margin, inset_at(y) + margin * sqrt(1.0 + slope * slope))
+	var inset := margin
+	if y > SHOULDER_Y:
+		inset = maxf(margin, inset_at(y) + margin * sqrt(1.0 + slope * slope))
 	var top_slope := 24.0 / 22.0
 	var top_inset := 24.0 * clampf(1.0 - y / 22.0, 0.0, 1.0)
 	if y < 30.0:
