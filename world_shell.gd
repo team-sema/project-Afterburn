@@ -1,8 +1,12 @@
 extends Control
 
 const COCKPIT_SCENE := preload("res://menus/cockpit_hud.gd")
+## While the cockpit panels are still sliding in, the playfield renders the
+## whole shell width so the uncovered sides show space instead of black.
+const LAUNCH_BLEED := CockpitGeometry.FIELD_LEFT
 const MENU_SCENE_PATH := "res://menus/menu.tscn"
 
+@onready var playfield_viewport: SubViewport = $Layout/Playfield/ViewportContainer/PlayfieldViewport
 @onready var gameplay: Node = $Layout/Playfield/ViewportContainer/PlayfieldViewport/Gameplay
 @onready var pause_overlay: PauseMenu = %PauseOverlay
 @onready var settings_menu: SettingsMenu = %SettingsMenu
@@ -13,6 +17,7 @@ const MENU_SCENE_PATH := "res://menus/menu.tscn"
 )
 
 var _is_manual_pause := false
+var _field_bleed := -1.0
 
 
 func _ready() -> void:
@@ -28,6 +33,10 @@ func _ready() -> void:
 	cockpit.set_script(COCKPIT_SCENE)
 	$Layout.add_child(cockpit)
 	cockpit.configure(self)
+	var launch := gameplay.get_node("LaunchSequence") as LaunchSequence
+	launch.launch_started.connect(_apply_field_bleed.bind(LAUNCH_BLEED))
+	launch.launch_advanced.connect(_on_launch_advanced)
+	_apply_field_bleed(LAUNCH_BLEED if launch.is_launching else CockpitGeometry.FIELD_BLEED)
 	pause_overlay.resume_requested.connect(_set_manual_pause.bind(false))
 	pause_overlay.settings_requested.connect(_open_settings)
 	pause_overlay.main_menu_requested.connect(_return_to_menu)
@@ -47,6 +56,31 @@ func _ready() -> void:
 	assert(augment_selection != null, "World shell requires the augment selection overlay.")
 	augment_selection.configure_status_preview(status_ship_panel, weapon_loadout_hud)
 	augment_selection.configure_stage_limit($Layout/RightPanel)
+
+
+## The lane stays 340x360 for gameplay logic (visible rect), but the viewport
+## renders `bleed` px past each side: FIELD_BLEED once the cockpit is settled,
+## so the aperture, which is wider than the lane around the console shoulders,
+## never shows the lane edge; LAUNCH_BLEED while the panels deploy.
+func _apply_field_bleed(bleed: float) -> void:
+	if is_equal_approx(bleed, _field_bleed):
+		return
+	_field_bleed = bleed
+	var container := playfield_viewport.get_parent() as SubViewportContainer
+	container.offset_left = -bleed
+	container.offset_right = bleed
+	playfield_viewport.global_canvas_transform = Transform2D(0.0, Vector2(bleed, 0.0))
+	var background := gameplay.get_node("SpaceBackground") as SpaceBackground
+	background.bleed = bleed
+
+
+func get_field_bleed() -> float:
+	return _field_bleed
+
+
+func _on_launch_advanced(time: float) -> void:
+	if time >= COCKPIT_SCENE.DEPLOY_END:
+		_apply_field_bleed(CockpitGeometry.FIELD_BLEED)
 
 
 func _unhandled_input(event: InputEvent) -> void:

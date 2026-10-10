@@ -5,8 +5,10 @@ extends Node2D
 # Export the actor who's position will be clamped
 @export var actor: Node2D
 
-# Export a margin for left and right (margin.x) and top and bottom (margin.y)
-@export var margin: = 8
+## Clearance kept between the actor origin and the boundary. The ship's hit
+## point (radius 3) sits on its origin, so 4 keeps the hit point inside while
+## the hull artwork may overlap the frame (danmaku-style clamping).
+@export var margin: = 4
 ## false lets the actor sit outside the viewport (launch sequence).
 @export var enabled := true
 ## Enabled only by the main cockpit; labs retain viewport bounds.

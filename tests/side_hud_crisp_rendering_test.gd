@@ -63,7 +63,8 @@ func _run() -> void:
 		container.texture_filter == CanvasItem.TEXTURE_FILTER_NEAREST,
 		"playfield keeps nearest upscaling",
 	)
-	_expect(playfield.size == Vector2i(340, 360), "playfield renders at its 340x360 pixel size")
+	_expect(playfield.get_visible_rect().size == Vector2(340, 360), "playfield logic keeps its 340x360 lane")
+	_expect(playfield.size == Vector2i(372, 360), "playfield renders 16px of bleed past each lane edge")
 	_expect(playfield.msaa_2d == Viewport.MSAA_DISABLED, "playfield stays free of 2D MSAA")
 	for label_path in [
 		"Layout/LeftPanel/Margin/VBox/GameTitle",

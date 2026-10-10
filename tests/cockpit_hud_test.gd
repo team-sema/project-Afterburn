@@ -17,6 +17,17 @@ func run() -> void:
 	check(cockpit.panels.size() == 6, "six independently deployed panels")
 	check(cockpit.deployment_time == 2.6, "idle scene shows complete HUD")
 	check(clamp.cockpit_boundary, "main game enables cockpit boundary")
+	var hit_radius: float = ship.get_node("PlayerHitPoint/HurtboxComponent/CollisionShape2D").shape.radius
+	check(clamp.margin == int(hit_radius) + 1, "clamp clearance is the hit point radius plus 1px")
+	ship.position = Vector2(-100, 120)
+	clamp._process(0.0)
+	check(ship.position.x == float(clamp.margin), "hit point reaches the lane edge; hull may overlap the frame")
+	var bleed: float = Bounds.FIELD_BLEED
+	check(world.playfield_viewport.size == Vector2i(340 + int(bleed) * 2, 360) and ship.get_viewport_rect().size == Vector2(340, 360), "viewport renders bleed while the lane stays 340x360")
+	check(world.playfield_viewport.global_canvas_transform.origin == Vector2(bleed, 0), "lane origin is shifted by the bleed")
+	var background = world.gameplay.get_node("SpaceBackground")
+	check(background.bleed == bleed and background.space.position.x == -bleed and background.space.size.x == 340 + bleed * 2, "star field covers the bleed")
+	check(background.get_orbital_ring().position.x == -bleed and background.get_orbital_ring().size.x == 340 + bleed * 2, "orbital ring covers the bleed")
 	var image := load("res://assets/ui/cockpit/pilot_visor_frame.png").get_image() as Image
 	check(image.get_pixel(image.get_width()/2, image.get_height()/2).a < 0.01, "battle aperture is transparent")
 	check(image.get_pixel(int(image.get_width()*0.1), int(image.get_height()*0.4)).a > 0.98, "side console is opaque UI")
@@ -25,11 +36,11 @@ func run() -> void:
 			ship.position = Vector2(x, y)
 			clamp._process(0.0)
 			check(ship.position.y == y, "side clamp preserves vertical travel")
-			for offset in [Vector2(-8, 0), Vector2(8, 0), Vector2(0, -8), Vector2(0, 8)]:
+			for offset in [Vector2(-hit_radius, 0), Vector2(hit_radius, 0), Vector2(0, -hit_radius), Vector2(0, hit_radius)]:
 				var shell_point: Vector2 = ship.position + offset + Vector2(150, 0)
 				var pixel: Vector2i = Vector2i(shell_point / Vector2(640, 360) * Vector2(image.get_size()))
 				pixel = pixel.clamp(Vector2i.ZERO, image.get_size()-Vector2i.ONE)
-				check(image.get_pixelv(pixel).a < 0.5, "ship clearance stays inside artwork at %s" % shell_point)
+				check(image.get_pixelv(pixel).a < 0.5, "hit point stays inside artwork at %s" % shell_point)
 	check(world.status_ship_panel.slot_rack.get_visible_slot_count() == 5, "new run starts with five facilities, not expanded capacity")
 	_check_instrument_fit(world)
 	ship.position = Vector2(170, 216)
@@ -37,6 +48,7 @@ func run() -> void:
 	launch.set_process(false)
 	check(cockpit.deployment_time == 0.0, "launch resets all panels before first frame")
 	check(not clamp.enabled, "entry animation bypasses movement clamp")
+	check(world.get_field_bleed() == Bounds.FIELD_LEFT, "launch renders the full shell width behind the deploying panels")
 	for panel in cockpit.panels: check(panel.position.length() > 300, "panels start outside screen")
 	launch.advance(0.65)
 	check(cockpit.panels[0].position != cockpit.panels[2].position, "canopy and wing deploy separately")
@@ -47,6 +59,7 @@ func run() -> void:
 	launch.set_process(true)
 	for i in 4: await process_frame
 	check(launch.elapsed == before and cockpit.deployment_time == before, "pause freezes flight and deployment together")
+	check(world.playfield_viewport.size.x == 640 and world.playfield_viewport.global_canvas_transform.origin.x == Bounds.FIELD_LEFT and background.bleed == Bounds.FIELD_LEFT, "full-width playfield while panels are still out")
 	world._set_manual_pause(false)
 	launch.set_process(false)
 	launch.advance(1.16)
@@ -55,6 +68,8 @@ func run() -> void:
 	for item in cockpit.instruments: check(is_equal_approx(item.node.modulate.a, 1.0), "live instrument powered on")
 	launch.advance(1.0)
 	check(not launch.is_launching, "launch completes without extending original duration")
+	await process_frame
+	check(world.get_field_bleed() == bleed and world.playfield_viewport.size.x == 340 + int(bleed) * 2 and background.bleed == bleed, "bleed shrinks back once every panel has settled")
 	var registry = world.gameplay.get_node("PlayerAugmentRegistry")
 	for i in 10: registry.expand_slots()
 	ship.get_node("PlayerWeaponLoadout").add_weapon_bays(1)

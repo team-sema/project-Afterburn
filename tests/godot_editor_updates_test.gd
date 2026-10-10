@@ -31,7 +31,8 @@ func _run() -> void:
 	var playfield_value := world.get_node("Layout/LeftPanel/Margin/VBox/PlayfieldValue") as Label
 	var ship_panel := world.get_node("Layout/RightPanel/Margin/VBox/ShipPanel") as Control
 	_expect(
-		playfield_viewport.size == Vector2i(340, 360),
+		playfield_viewport.get_visible_rect().size == Vector2(340, 360)
+		and playfield_viewport.size == Vector2i(372, 360),
 		"playfield viewport is 340x360 (got %s)" % playfield_viewport.size,
 	)
 	_expect(playfield_value.text == "340 × 360", "HUD matches the playfield viewport size")
