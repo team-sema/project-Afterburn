@@ -95,3 +95,13 @@ Flash / Scale / Shake — 피격·발사 시 펀치감
 - `assets/backgrounds/` — 패럴랙스 배경 PNG
 - `assets/ui/` · `assets/pickups/` — UI·픽업 마스크
 
+
+## 공용 위험 표시
+
+`effects/danger_indicator.gd` (`DangerIndicator`)는 전투 로직에 의존하지 않는 Node2D 표시다. 기존 방위각 눈금·브래킷이 수렴하고 같은 중심의 화살표가 진입 방향으로 0.18초 동안 뻗은 뒤 맥동한다. 문구나 숫자는 없다.
+
+- 설정: `warning_color`(기본 청록 #35ffe1), `warning_scale`(기본 1), `warning_duration`(기본 0.9초), `inward_direction`(눈금이 열리는 방향), `trajectory_direction`(화살표 방향). 위치는 Node2D 위치로 지정한다. 방향은 표시 노드 로컬 좌표 기준이며 0벡터 궤도는 inward 방향으로 대체한다.
+- 기본 눈금 반지름은 28→20px, 화살표는 5→24px. 색의 알파와 크기 설정은 모든 선에 함께 적용한다. 시간 만료 시 숨기고 해제하며 일시정지 때 멈춘다.
+- `auto_advance=false`는 Lab처럼 외부 시간이 소유하는 경우 사용한다. `set_preview_time()`으로 동일 렌더러를 재생·되감기한다.
+- `EntryWarningComponent`는 이 표시를 상속하여 화면 가장자리 배치만 담당한다. 인터셉터 최초/왕복 진입은 실제 이동 벡터를 전달하며 각각 기존 0.9/0.6초를 유지한다. 엘리트 재진입은 기존 붉은색과 경고 시간을 유지한다.
+- 검증: 공용 표시의 시간 만료·되감기·방향·설정, 인터셉터와 진화형 및 엘리트 경고 회귀, Lab 렌더를 확인한다.

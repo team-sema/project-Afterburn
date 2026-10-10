@@ -15,7 +15,7 @@ func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	clip_contents = true
 	if cockpit_layout:
-		custom_minimum_size.y = 46.0
+		custom_minimum_size.y = 63.0
 		detail_label.visible = false
 		slot_rack.offset_bottom = 0.0
 		slot_rack.cockpit_rows = true

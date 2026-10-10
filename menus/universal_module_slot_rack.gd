@@ -150,12 +150,13 @@ func get_slot_polygon(index: int) -> PackedVector2Array:
 		return PackedVector2Array()
 	var row := floori(float(index) / float(COLUMN_COUNT))
 	var column := index % COLUMN_COUNT
-	var width := 16.0 if cockpit_rows else SLOT_WIDTH
+	var width := 20.0 if cockpit_rows else SLOT_WIDTH
 	var height := width * 0.866025
 	var origin: Vector2
 	if cockpit_rows:
-		# Five independent hexes per row; reserve all three rows as capacity grows.
-		origin = Vector2((size.x - 104.0) * 0.5 + column * 22.0, 1.0 + row * 15.0)
+		# Flat-top hexes share their diagonal and horizontal edges.
+		var grid_width := width * 4.0
+		origin = Vector2((size.x - grid_width) * 0.5 + column * width * 0.75, 1.0 + row * height + (height * 0.5 if column % 2 == 1 else 0.0))
 	else:
 		origin = Vector2(
 			(size.x - GRID_WIDTH) * 0.5 + column * COLUMN_STEP,
@@ -205,7 +206,7 @@ func _draw() -> void:
 			var icon_color := Color(ICON_COLOR, _preview_alpha) if is_module_preview else ICON_COLOR
 			draw_texture_rect(
 				icon,
-				Rect2(center - Vector2.ONE * (4.0 if cockpit_rows else 6.0), Vector2.ONE * (8.0 if cockpit_rows else 12.0)),
+				Rect2(center - Vector2(6, 6), Vector2(12, 12)),
 				false,
 				icon_color,
 			)

@@ -1,6 +1,7 @@
 extends Control
 
 const LABS := [
+	["HUD · 인터셉터 청색 경고 시안", "res://labs/hud/interceptor_warning_lab.tscn"],
 	["탄막 · 패턴 스크립트", "res://labs/bullet/bullet_lab.tscn"],
 	["보스 · 거대 항모", "res://labs/bosses/carrier/carrier_boss_lab.tscn"],
 	["보스 · 벽", "res://labs/bosses/wall/wall_boss_lab.tscn"],
@@ -33,7 +34,7 @@ func _ready() -> void:
 	for entry in LABS:
 		var button := Button.new()
 		button.text = entry[0]
-		button.custom_minimum_size.y = 32
+		button.custom_minimum_size.y = 28
 		button.add_theme_font_size_override("font_size", 16)
 		button.pressed.connect(open_lab.bind(entry[1]))
 		button.mouse_entered.connect(button.grab_focus)

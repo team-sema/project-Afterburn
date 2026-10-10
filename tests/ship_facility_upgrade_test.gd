@@ -66,16 +66,16 @@ func _check_initial_slots(registry: PlayerAugmentRegistry, panel: ShipPanel) -> 
 	_expect(panel.slot_rack.get_slot_icon(0) == null, "universal rack shows an empty starting slot")
 	var slot_size := panel.slot_rack.get_slot_rect(0).size
 	_expect(
-		is_equal_approx(slot_size.x, 16.0) and is_equal_approx(slot_size.y, 16.0 * 0.866025),
+		is_equal_approx(slot_size.x, 20.0) and is_equal_approx(slot_size.y, 20.0 * 0.866025),
 		"compact facility hexes fit three rows in the console",
 	)
 	_expect(panel.get_detail_text().contains("범용 슬롯 0/5"), "ship panel shows universal slot usage")
 	var slot_zero := panel.slot_rack.get_slot_polygon(0)
 	var slot_one := panel.slot_rack.get_slot_polygon(1)
 	_expect(
-		is_equal_approx(slot_zero[0].y, slot_one[0].y)
-		and slot_zero[2].x < slot_one[5].x,
-		"facility slots are separate cells on one row",
+		slot_zero[2].is_equal_approx(slot_one[0])
+		and slot_zero[3].is_equal_approx(slot_one[5]),
+		"facility hexes share diagonal edges in a tight honeycomb",
 	)
 
 
@@ -368,9 +368,9 @@ func _check_offer_layout(
 	_expect(
 		first_row_hex.size() >= 5
 		and second_row_hex.size() >= 2
-		and is_equal_approx(first_row_hex[0].x, second_row_hex[0].x)
-		and second_row_hex[0].y > first_row_hex[3].y,
-		"expanded facility row stays below the first row with clearance",
+		and first_row_hex[3].is_equal_approx(second_row_hex[1])
+		and first_row_hex[4].is_equal_approx(second_row_hex[0]),
+		"expanded honeycomb rows share horizontal edges",
 	)
 	var initial_preview_alpha := status_ship_panel.slot_rack.get_preview_alpha()
 	await create_timer(0.5, true).timeout

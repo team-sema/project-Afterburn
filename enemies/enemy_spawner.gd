@@ -296,9 +296,9 @@ func _apply_entry_warning_direction(enemy: Enemy, startup_context: Dictionary) -
 	if run_direction.is_zero_approx():
 		return
 	# Edge telegraph marks the side entry lane (spawn Y on L/R), not the dive path.
-	# Placement uses the inward axis; Interceptor arrows face the spawn side (L↔R swap).
+	# Placement uses the inward axis; the arrow shows the actual attack trajectory.
 	warning.entry_direction = Vector2.RIGHT if run_direction.x >= 0.0 else Vector2.LEFT
-	warning.face_spawn_side = true
+	warning.trajectory_direction = run_direction
 
 
 func _resolve_spawn_parent() -> Node:

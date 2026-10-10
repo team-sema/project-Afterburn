@@ -53,7 +53,7 @@
 | `ScaleComponent` | 펀치 스케일 트윈 |
 | `ShakeComponent` | 위치 셰이크 |
 | `FlashComponent` | 화이트 플래시 머티리얼 · 선택적 `flash_root`로 다중 CanvasItem 동시 플래시 |
-| `EntryWarningComponent` | 화면 밖 고속 진입 전 VisibleRect 가장자리 경고. Interceptor는 좌/우 등장 위치에서 스폰 쪽(왼↔오)을 가리킴 |
+| `EntryWarningComponent` | 화면 밖 고속 진입 전 VisibleRect 가장자리 경고. 공용 `DangerIndicator` 방위각·화살표 사용. Interceptor는 좌/우 등장 위치에서 실제 진입 궤도를 가리킴 |
 | `EncounterStepWarning` | ELITE/BOSS 관문 직전 맵 중앙 관문 경고 (종류별 문구·색, 띠·스트라이프·테두리 맥동, SFX). WAVE는 경고 없음 |
 | `SpawnerComponent` | PackedScene 인스턴스. 부모 미지정 시 `gameplay_world`, 자신이 트리 밖이면 메인 루프로 월드를 찾음 |
 | `EnemySpawner` | 선택된 `EncounterPreset`만 실제 생성하고 의존성·Encounter ID를 트리 진입 전에 주입. 단일 적도 동일한 `FormationController` 생명주기를 사용 |

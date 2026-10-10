@@ -5,6 +5,7 @@ const HEX_HALF_HEIGHT_RATIO := 0.866025
 const FRAME_INSET := 3.0
 
 @export var aligned_row := false
+@export_range(0.0, 8.0, 0.5) var row_gap := 3.0
 
 @export_range(12.0, 96.0, 1.0) var hex_side := 28.0:
 	set(value):
@@ -27,7 +28,7 @@ func _get_minimum_size() -> Vector2:
 
 func get_horizontal_step() -> float:
 	if aligned_row:
-		return hex_side + 3.0
+		return hex_side + row_gap
 	return maxf(4.0, hex_side - FRAME_INSET * 2.0) * 0.75
 
 

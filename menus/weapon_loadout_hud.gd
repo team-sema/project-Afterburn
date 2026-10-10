@@ -106,7 +106,7 @@ func _prepare_templates() -> void:
 func _weapon_hex_side() -> float:
 	var loadout := _get_loadout()
 	if bay_row != null and bay_row.aligned_row and loadout != null and loadout.get_max_equipped_weapon_count() > 3:
-		return 24.0
+		return 26.0
 	if bay_slot_template != null and bay_slot_template.custom_minimum_size.x > 0.0:
 		return bay_slot_template.custom_minimum_size.x
 	return 48.0
@@ -126,7 +126,7 @@ func _ensure_selected_hex() -> void:
 		return
 	_selected_hex.visible = true
 	_selected_hex.interactive = false
-	_selected_hex.apply_fixed_size(40.0)
+	_selected_hex.apply_fixed_size(44.0)
 	_selected_hex.border_width = 1.25
 	_selected_hex.border_color = Color(0.45, 0.9, 1.0, 0.95)
 	_selected_hex.fill_color = Color(0.05, 0.16, 0.28, 0.95)

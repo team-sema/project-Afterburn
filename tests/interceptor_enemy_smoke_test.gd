@@ -79,7 +79,7 @@ func _test_resources_and_roster() -> void:
 	_expect(shoot.pattern_params.rest == 10.0, "Interceptor does not schedule a second burst")
 	var warning := interceptor.get_node("EntryWarningComponent") as EntryWarningComponent
 	_expect(warning.warning_duration >= 0.85, "Interceptor warning lasts longer before entry")
-	_expect(warning.face_spawn_side, "Interceptor warning points at the spawn side")
+	_expect(warning is DangerIndicator, "Interceptor uses shared danger indicator")
 	drone.free()
 	interceptor.free()
 
@@ -148,12 +148,7 @@ func _test_pair_warning_attack_exit_and_reward() -> void:
 				warning.entry_direction.normalized().dot(Vector2.RIGHT) > 0.999,
 				"warning is placed from the left entry edge inward",
 			)
-			_expect(warning.face_spawn_side, "warning facing swaps to the spawn side")
-			var face_left := Vector2.LEFT.angle() - Vector2.DOWN.angle()
-			_expect(
-				absf(angle_difference(warning.global_rotation, face_left)) < 0.02,
-				"left-side entry warning points left",
-			)
+			_expect(warning.trajectory_direction.normalized().dot(run_direction) > 0.999, "warning arrow follows attack trajectory")
 			_expect(
 				absf(warning.global_position.y - member.global_position.y) < 1.0,
 				"warning marks the spawn entry Y, not a projected dive crossing",
