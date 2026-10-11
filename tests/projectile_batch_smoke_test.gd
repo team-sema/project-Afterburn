@@ -66,6 +66,18 @@ func run() -> void:
 	expect(renderer._commands.is_empty(), "queued deletion clears the laser renderer while paused")
 	expect((other.get_node("EnemyBulletPool") as EnemyBulletPool).get_active_count() == 1, "clearing one world leaves the other intact")
 	paused = false
+	# Growing past the initial instance buffer reallocates it; the bullets that
+	# were already there must keep their colour/tint (static visuals never
+	# rewrite them), or a Caster ring curtain turns invisible mid-pattern.
+	var grown: Array[FoundationBullet] = []
+	for i in 100:
+		grown.append(bullet(other, "round"))
+	var other_pool := other.get_node("EnemyBulletPool") as EnemyBulletPool
+	var round_group = other_pool.get_render_groups()[grown[0]._render_key]
+	expect(round_group.multimesh.instance_count >= 101 and round_group.members.size() == 101, "buffer grows with the group")
+	if DisplayServer.get_name() != "headless":
+		var kept: Color = round_group.multimesh.get_instance_custom_data(0)
+		expect(kept.is_equal_approx(other.get_child(0).render_tint) or kept.a > 0.0, "early instances keep their tint after the buffer grows")
 	world.queue_free()
 	other.queue_free()
 	await process_frame
