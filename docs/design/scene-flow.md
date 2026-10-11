@@ -12,10 +12,13 @@
 
 Lab 배치: 허브만 루트에 두고 각 Lab은 `labs/<주제>/` 아래에 둔다. 새 Lab을 만들면 `lab_hub.gd`의 `LABS` 목록에도 등록한다. 보스 Lab은 보스마다 `labs/bosses/<보스>/` 폴더를 두고 허브에 `보스 · <이름>`으로 등록한다. 허브 복귀용 공용 스크립트는 `labs/lab_return.gd`다.
 
+허브의 7개 항목은 최소 버튼 높이 28px·간격 4px로 640×360 화면 안에 표시한다.
+
 | 허브 항목 | 진입 씬 |
 |---|---|
 | 탄막 · 패턴 스크립트 | `labs/bullet/bullet_lab.tscn` (예제별 바로가기 `labs/bullet/presets/`는 허브에 따로 두지 않는다) |
 | 보스 · 거대 항모 | `labs/bosses/carrier/carrier_boss_lab.tscn` |
+| 보스 · 옥타곤 | `labs/bosses/octagon/octagon_boss_lab.tscn` · [규칙](bosses/octagon.md) |
 | 보스 · 벽 | `labs/bosses/wall/wall_boss_lab.tscn` |
 | 엘리트 · 스나이퍼 공격 패턴 | `labs/enemy_attack/enemy_attack_lab.tscn` (Elite Awl·Fighter·Bomb·Caster·Sniper) |
 | 무기 · 증강 · 적 소환 | `labs/weapons/weapon_test_lab.tscn` |

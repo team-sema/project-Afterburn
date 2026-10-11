@@ -4,6 +4,7 @@ const LABS := [
 	["HUD · 인터셉터 청색 경고 시안", "res://labs/hud/interceptor_warning_lab.tscn"],
 	["탄막 · 패턴 스크립트", "res://labs/bullet/bullet_lab.tscn"],
 	["보스 · 거대 항모", "res://labs/bosses/carrier/carrier_boss_lab.tscn"],
+	["보스 · 옥타곤", "res://labs/bosses/octagon/octagon_boss_lab.tscn"],
 	["보스 · 벽", "res://labs/bosses/wall/wall_boss_lab.tscn"],
 	["엘리트 · 스나이퍼 공격 패턴", "res://labs/enemy_attack/enemy_attack_lab.tscn"],
 	["무기 · 증강 · 적 소환", "res://labs/weapons/weapon_test_lab.tscn"],
@@ -20,7 +21,7 @@ func _ready() -> void:
 	var panel := VBoxContainer.new()
 	panel.position = Vector2(100, 28)
 	panel.size = Vector2(440, 304)
-	panel.add_theme_constant_override("separation", 6)
+	panel.add_theme_constant_override("separation", 4)
 	add_child(panel)
 	var title := Label.new()
 	title.text = "AFTERBURN  /  LAB"

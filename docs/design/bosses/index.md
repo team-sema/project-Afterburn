@@ -4,6 +4,8 @@
 
 ## 구현 상태
 
+- [옥타곤](octagon.md): 회전 고리·공통 포탑 8개를 검증하는 Boss Lab. 메인 런 미연결.
+
 - [거대 항모](carrier.md): 메인 시퀀스 `d` 토큰의 보스. 본 게임은 `enemies/boss_carrier.tscn`(게이트용 Enemy 껍데기) 안에서 항모 본체(`enemies/carrier/`)가 싸운다. 독립 시험은 `labs/bosses/carrier/`.
 - [Wall](wall.md): 프로토타입. 시퀀스에서 빠졌고 독립 시험(`labs/bosses/wall/`)과 `boss_wall` 프리셋으로만 남는다.
 
