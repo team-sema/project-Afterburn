@@ -90,22 +90,29 @@ func _run() -> void:
 			if bullet.get_travel_velocity().normalized().dot(to_player) > 0.95: aimed += 1
 		_expect(aimed == 16, "needles snap toward the player")
 
-	# Action rate, rest floor and volume augment
-	attack.apply_action_rate_multiplier(10.0)
-	attack.shot_count += 2
+	# Barrage pressure thickens each spell and shortens the rest
+	attack.pressure = 6
+	attack.spell = attack.Spell.BREATHING_RINGS
 	attack._remaining = 0.0
 	attack._process(0.01)
 	for i in 4:
-		attack._process(0.31)
+		attack._process(0.451)
 	await process_frame
-	_expect(_new_bullets().size() == 100, "volume augment leaves breathing rings unchanged")
-	_expect(attack.phase == attack.Phase.REST, "action rate is capped at 1.5x")
-	_expect(is_equal_approx(attack._remaining, 0.8), "action rate keeps the minimum rest")
+	_expect(_new_bullets().size() == 130, "pressure 6 puts 26 bullets in each breathing ring")
+	_expect(attack.phase == attack.Phase.REST, "breathing rings keep their 0.45s gap")
+	_expect(is_equal_approx(attack._remaining, BarragePressure.scale(1.4, 0.8, 6)), "pressure shortens the rest")
+	attack.spell = attack.Spell.PETAL_LATTICE
+	attack._remaining = 0.0
+	attack._process(0.01)
+	await process_frame
+	_expect(_new_bullets().size() == 28, "pressure 6 puts 14 bullets in each lattice ring")
+	attack.barrage_player.stop()
+	attack.phase = attack.Phase.REST
 	attack.spell = attack.Spell.HALT_AND_AIM
 	attack._remaining = 0.0
 	attack._process(0.01)
 	await process_frame
-	_expect(_new_bullets().size() == 18, "volume augment adds needles")
+	_expect(_new_bullets().size() == 22, "pressure 6 puts 22 needles in each halt ring")
 	elite.stats_component.health = 0
 	attack._process(0.1)
 	_expect(not attack.barrage_player.running, "death stops future fire")

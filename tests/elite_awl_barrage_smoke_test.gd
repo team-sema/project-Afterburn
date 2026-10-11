@@ -22,15 +22,14 @@ func sample_scene(path: String) -> Array:
 	world.add_child(enemy)
 	enemy.movement_controller.stop()
 	attack.set_process(false)
-	attack.apply_fire_volume_boost(2, 18)
-	attack.apply_action_rate_multiplier(2)
+	attack.pressure = 10
 	attack.phase = attack.Phase.DASH
 	attack.use_spine = false
 	attack.dash_direction = Vector2.DOWN
-	attack._process(0.17)
+	attack._process(0.21)
 	await process_frame
 	var bullets := get_nodes_in_group("enemy_projectiles")
-	expect(bullets.size() == 12, "two boosted fountain bursts at action-rate minimum interval")
+	expect(bullets.size() == 4, "two fountain bursts at the pressure 10 interval")
 	var result: Array = []
 	for bullet in bullets:
 		expect(bullet is CurvedLaser, "fountain uses trail lasers")

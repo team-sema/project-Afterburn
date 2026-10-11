@@ -127,31 +127,36 @@ func _run() -> void:
 	_expect(attack.mines_thrown == 3, "recovery after the field does not throw")
 	attack._process(0.02)
 	_expect(attack.mines_thrown == 4, "mine cycle resumes after 2.4s")
-	attack.apply_action_rate_multiplier(10.0)
+	attack.pressure = 6
 	attack._process(0.3)
 	_expect(attack.mines_thrown == 5, "base throw interval elapsed")
-	_expect(absf(attack._remaining - 0.15) < 0.05, "action rate keeps the minimum throw interval")
-	attack._process(0.15)
-	_expect(attack.mines_thrown == 6 and attack.phase == attack.Phase.RECOVERY, "action-rate cycle completes")
-	_expect(absf(attack._remaining - 1.2) < 0.05, "action rate keeps the minimum recovery")
+	_expect(absf(attack._remaining - 0.3) < 0.05, "pressure keeps the 0.3s throw interval")
+	attack._process(0.3)
+	_expect(attack.mines_thrown == 6 and attack.phase == attack.Phase.RECOVERY, "pressured cycle completes")
+	_expect(absf(attack._remaining - BarragePressure.scale(2.4, 1.5, 6)) < 0.05, "pressure shortens the recovery")
 	attack._process(attack._remaining + 0.01)
-	_expect(attack.phase == attack.Phase.FIELD_WARNING, "action-rate cycle still alternates")
+	_expect(attack.phase == attack.Phase.FIELD_WARNING, "pressured cycle still alternates")
 	attack._process(0.6)
-	_expect(attack.phase == attack.Phase.FIELD, "action rate keeps the full body warning")
-	attack._process(0.79)
-	_expect(attack.phase == attack.Phase.FIELD, "action rate keeps the minimum field gap")
+	_expect(attack.phase == attack.Phase.FIELD, "pressure keeps the full body warning")
+	attack._process(1.19)
+	_expect(attack.phase == attack.Phase.FIELD, "pressure keeps the 1.2s field gap")
 	attack._process(0.02)
-	_expect(attack.phase == attack.Phase.RECOVERY, "second burst fires after 0.8s")
+	_expect(attack.phase == attack.Phase.RECOVERY, "second burst fires after 1.2s")
 	attack.next_is_field = true
 	attack._process(attack._remaining + 0.61)
 	_expect(attack.barrage_player.running, "field is playing before the elite dies")
-	_expect(attack.get_ring_count() == 10, "base ring count is ten")
-	attack.shot_count += 2
-	_expect(attack.get_ring_count() == 12, "volume augment adds ring bullets")
-	attack.apply_arming_rate_multiplier(1.5)
-	_expect(is_equal_approx(attack.get_arm_duration(), 1.0), "fast fuse shortens mine arming")
-	attack.apply_arming_rate_multiplier(3.0)
-	_expect(is_equal_approx(attack.get_arm_duration(), 0.8), "mine arming keeps its minimum warning")
+	_expect(attack.get_ring_count() == 14, "pressure 6 grows the mine ring to fourteen")
+	_expect(is_equal_approx(attack.get_arm_duration(), BarragePressure.scale(1.5, 1.0, 6)), "pressure shortens mine arming")
+	var pressured_field := (preload("res://patterns/elite_bomb_pattern.gd") as Script).new() as BarrageSequence
+	pressured_field.build({"angle": 0.0, "pressure": 6})
+	var orbs := 0
+	for step in pressured_field.steps:
+		if step.action == BarrageStep.Action.FIRE:
+			for volley in step.get_volleys():
+				orbs += volley.count
+	_expect(orbs == 60, "pressure 6 puts ten orbs in each field layer")
+	attack.pressure = 0
+	_expect(attack.get_ring_count() == 10 and is_equal_approx(attack.get_arm_duration(), 1.5), "pressure 0 keeps the base mine")
 	var live: Array = attack.mines.duplicate()
 	var bullets := get_nodes_in_group("enemy_projectiles").size()
 	_expect(not live.is_empty(), "mines are pending before the elite dies")

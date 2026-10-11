@@ -12,7 +12,7 @@
 [sub_resource type="CircleShape2D" id="CircleShape2D_hit"]
 radius = 8.0
 
-[node name="BombEnemy" unique_id=654992947 instance=ExtResource("1_enemy")]
+[node name="BombEnemy" unique_id=654992947 groups=["bomb"] instance=ExtResource("1_enemy")]
 script = ExtResource("2_script")
 
 [node name="WideGlow" parent="Anchor" parent_id_path=PackedInt32Array(93118890) index="1" unique_id=1704439409]

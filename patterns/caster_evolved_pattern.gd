@@ -2,6 +2,7 @@ extends BarrageSequence
 ## Evolved Caster: two rings per beat that spin in opposite directions.
 ## Rounds, no trail; the forward ring stays pink and the backward ring is
 ## violet so the two lanes can be told apart while they cross.
+## Barrage pressure adds bullets to each ring (`count_limit`, kept even).
 
 const ROUND := preload("res://resources/projectiles/round.tres")
 const PINK := Color(1.0, 0.22, 0.52)
@@ -12,7 +13,8 @@ func build(params: Dictionary) -> void:
 	var forward_shot := _shot(PINK)
 	var backward_shot := _shot(VIOLET)
 	var rings := int(params.get("rings", 5))
-	var count := int(params.get("count", 12))
+	var count := BarragePressure.scale_even(int(params.get("count", 12)),
+		int(params.get("count_limit", 18)), int(params.get("pressure", 0)))
 	var speed := float(params.get("speed", 95.0))
 	var spin := float(params.get("spin", 9.0))
 	# The second ring starts half a gap over so the two rings never overlap.

@@ -18,6 +18,8 @@ const ENEMY_HURTBOX_MASK := 1 << 1
 
 @export_range(8.0, 200.0, 1.0) var trigger_radius := 72.0
 @export_range(0.5, 5.0, 0.05) var arm_duration := 2.0
+## Arm time the barrage pressure approaches: the burning fuse is the threat.
+@export_range(0.5, 5.0, 0.05) var pressure_arm_duration_limit := 2.0
 @export_range(1, 8, 1) var flash_count := 3
 @export var flash_color := Color(1.0, 0.12, 0.12, 1.0)
 ## Arms as soon as it enters the tree, regardless of the player's distance
@@ -32,6 +34,8 @@ const ENEMY_HURTBOX_MASK := 1 << 1
 ## Ring released only when the fuse detonates; a Bomb killed first stays silent.
 @export var detonation_ring_shot: BarrageShot
 @export_range(0, 64, 1) var detonation_ring_count := 0
+## Ring count the barrage pressure approaches (kept even). 0 leaves the ring as is.
+@export_range(0, 64, 1) var pressure_ring_count_limit := 0
 @export_range(1.0, 1000.0, 1.0, "suffix:px/s") var detonation_ring_speed := 75.0
 
 var _armed := false
@@ -45,6 +49,11 @@ func _ready() -> void:
 	assert(move_component != null, "BombProximityFuseComponent requires MoveComponent.")
 	assert(stats_component != null, "BombProximityFuseComponent requires StatsComponent.")
 	assert(blast_preview != null, "BombProximityFuseComponent requires BombBlastPreview.")
+	var enemy := actor as Enemy
+	var pressure := enemy.get_barrage_pressure() if enemy != null else 0
+	arm_duration = BarragePressure.scale(arm_duration, pressure_arm_duration_limit, pressure)
+	if detonation_ring_count > 0 and pressure_ring_count_limit > 0:
+		detonation_ring_count = BarragePressure.scale_even(detonation_ring_count, pressure_ring_count_limit, pressure)
 	blast_preview.set_preview_radius(get_blast_radius())
 	blast_preview.visible = false
 	_cache_flash_targets()

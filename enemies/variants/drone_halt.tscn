@@ -23,4 +23,3 @@ destroy_effect_color = Color(1, 0.5, 0.5, 1)
 [node name="EnemyShootComponent" parent="."]
 pattern_script = ExtResource("2_pattern")
 pattern_params = {"speed": 120.0, "hold": 0.4, "dash_speed": 190.0, "rest": 4.5}
-pattern_fire_volume_boost = false

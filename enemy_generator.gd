@@ -32,6 +32,7 @@ func _ready() -> void:
 	enemy_spawner.augment_registry = augment_registry
 
 	current_threat_level = progression.get_threat_level()
+	augment_registry.threat_level = current_threat_level
 	assert(
 		encounter_pool.get_total_weight(current_threat_level) > 0.0,
 		"EnemyGenerator requires an encounter available at the initial Threat level.",
@@ -55,6 +56,7 @@ func pick_encounter(
 
 func _on_threat_level_changed(new_threat_level: int) -> void:
 	current_threat_level = new_threat_level
+	augment_registry.threat_level = new_threat_level
 
 
 func _on_spawn_timer_timeout() -> void:

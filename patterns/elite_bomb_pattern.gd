@@ -2,6 +2,8 @@ extends BarrageSequence
 ## Elite Bomb minefield: three orb rings brake into floating layers, swell white
 ## as the warning, then twist outward. The actor owns the body warning and rest;
 ## without params (Bullet Lab) the field repeats with a rest. `angle`: down = 0.
+## Barrage pressure (`pressure`) adds orbs to each layer; layers, bursts,
+## halts and the swell warning stay.
 
 const ORB := preload("res://resources/projectiles/orb.tres")
 const ORB_TINT := Color(1.0, 0.3, 0.4)
@@ -11,7 +13,8 @@ const LAYERS := [[70.0, 0.0], [105.0, 15.0], [140.0, 7.5]]
 
 func build(params: Dictionary) -> void:
 	var angle := float(params.get("angle", 0.0))
-	var gap := 1.2 / clampf(float(params.get("rate", 1.0)), 0.01, 1.5)
+	var gap := 1.2
+	var count := BarragePressure.scale_even(8, 12, int(params.get("pressure", 0)))
 	for burst in 2:
 		var layers: Array[BarrageVolley] = []
 		var shot := _orb(1.0 if burst == 0 else -1.0)
@@ -19,9 +22,10 @@ func build(params: Dictionary) -> void:
 			var volley := BarrageVolley.new()
 			volley.shot = shot
 			volley.layout = BarrageVolley.Layout.RING
-			volley.count = 8
+			volley.count = count
 			volley.speed = layer[0]
-			volley.angle_degrees = angle + layer[1] + burst * 22.5
+			# Offsets are set for 8-orb rings; scale them so denser rings keep the weave.
+			volley.angle_degrees = angle + (layer[1] + burst * 22.5) * 8.0 / count
 			layers.append(volley)
 		fire_together(layers)
 		if burst == 0: wait(gap)

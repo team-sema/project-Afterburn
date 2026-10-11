@@ -53,6 +53,10 @@ func _run() -> void:
 	var player_registry := gameplay.get_node("PlayerAugmentRegistry") as PlayerAugmentRegistry
 	var enemy_registry := gameplay.get_node("EnemyAugmentRegistry") as EnemyAugmentRegistry
 	_expect(loadout.get_equipped_weapon_ids() == [&"main_blaster"], "test ship starts with the default blaster")
+	_expect(lab.pressure_level != null and lab.get_barrage_pressure() == 0, "lab starts at barrage pressure 0")
+	lab.pressure_level.value = 6
+	_expect(enemy_registry.threat_level == 7 and lab.get_barrage_pressure() == 6, "pressure control sets P for the next spawns")
+	lab.set_barrage_pressure(0)
 
 	var player_level_events := [0]
 	lab.player_level_up_simulated.connect(func(_level: int) -> void: player_level_events[0] += 1)

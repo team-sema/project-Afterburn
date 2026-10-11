@@ -76,9 +76,36 @@ func _run() -> void:
 	)
 	_expect(BOMB_FAST_FUSE.icon != null, "bomb fast fuse references the Bomb SVG icon")
 	_expect(
-		BOMB_FAST_FUSE.stat_modifiers[0].stat == EnemyStatModifier.Stat.ARMING_RATE,
-		"bomb fast fuse uses the isolated arming-rate stat",
+		BOMB_FAST_FUSE.stat_modifiers.is_empty()
+		and BOMB_FAST_FUSE.pressure_bonus == 4
+		and BOMB_FAST_FUSE.pressure_group == &"bomb",
+		"bomb fast fuse adds four barrage pressure levels to the bomb group only",
 	)
+	_expect(
+		FIRE_BOOST.stat_modifiers.is_empty()
+		and FIRE_BOOST.behavior_components.is_empty()
+		and FIRE_BOOST.pressure_bonus == 2
+		and FIRE_BOOST.pressure_group == &"",
+		"fire volume boost adds two barrage pressure levels to every enemy",
+	)
+	var fuse_registry := EnemyAugmentRegistry.new()
+	fuse_registry.add_augment(BOMB_FAST_FUSE)
+	var fast_bomb := (load("res://enemies/bomb_enemy.tscn") as PackedScene).instantiate() as Enemy
+	fast_bomb.augment_registry = fuse_registry
+	root.add_child(fast_bomb)
+	var fast_drone := (load("res://enemies/normal_enemy.tscn") as PackedScene).instantiate() as Enemy
+	fast_drone.augment_registry = fuse_registry
+	root.add_child(fast_drone)
+	await process_frame
+	_expect(
+		is_equal_approx(float(fast_bomb.get_node("BombProximityFuseComponent").get("arm_duration")), 2.5),
+		"fast fuse shortens a Threat 1 Bomb fuse to 2.5 seconds",
+	)
+	_expect(fast_drone.get_barrage_pressure() == 0, "fast fuse leaves non-bomb enemies at pressure 0")
+	fast_bomb.queue_free()
+	fast_drone.queue_free()
+	await process_frame
+	fuse_registry.free()
 	var action_rate_modifier := EnemyStatModifier.new()
 	action_rate_modifier.stat = EnemyStatModifier.Stat.ACTION_RATE
 	action_rate_modifier.multiplier = 1.25

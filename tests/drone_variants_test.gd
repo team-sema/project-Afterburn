@@ -33,7 +33,6 @@ func _build(scene_path: String) -> Dictionary:
 	sequence.build(component.pattern_params)
 	var glow := (enemy.get_node("Anchor/TightGlow") as CanvasItem).self_modulate
 	var health: int = enemy.get_node("StatsComponent").health
-	var boost: bool = component.pattern_fire_volume_boost
 	enemy.free()
 	_expect(sequence.validation_error().is_empty(), "%s pattern valid: %s" % [scene_path, sequence.validation_error()])
 	var volley: BarrageVolley = null
@@ -41,7 +40,7 @@ func _build(scene_path: String) -> Dictionary:
 		if step.action == BarrageStep.Action.FIRE:
 			volley = step.get_volleys()[0]
 			break
-	return {"volley": volley, "glow": glow, "health": health, "boost": boost}
+	return {"volley": volley, "glow": glow, "health": health}
 
 
 func _run() -> void:
@@ -77,7 +76,6 @@ func _run() -> void:
 		types.append(action.type)
 	_expect(types.has(BulletAction.Type.SPEED) and types.has(BulletAction.Type.TINT) and types.has(BulletAction.Type.HOMING), "halt needle brakes, tints and homes")
 	_expect(types.find(BulletAction.Type.TINT) < types.find(BulletAction.Type.HOMING), "red warning comes before the dash")
-	_expect(not halt["boost"], "halt drone opts out of fire-volume boost")
 
 	# Presets validate and point at the variant scenes; pool gates them by Threat.
 	for id in PRESETS:

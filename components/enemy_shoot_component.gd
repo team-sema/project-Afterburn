@@ -8,8 +8,6 @@ extends Node
 @export var pattern_script: Script
 ## Passed to the pattern's build(params) after _init(); patterns read keys with defaults.
 @export var pattern_params: Dictionary = {}
-## Opt in only for ordinary aimed patterns. Applied by spawn-time augments.
-@export var pattern_fire_volume_boost := false
 @export_group("Legacy fire (ignored when Pattern is set)")
 @export var projectile_scene: PackedScene
 ## Optional new projectile recipe for directional fire; timers and gates stay here.
@@ -65,20 +63,6 @@ var _projectile_speed_multiplier := 1.0
 static var _pattern_script_errors := {}
 
 
-func apply_fire_volume_boost(extra_shots: int, min_spread: float) -> void:
-	if pattern_script == null:
-		shot_count = maxi(shot_count + extra_shots, 1)
-		spread_degrees = maxf(spread_degrees, min_spread)
-		return
-	if not pattern_fire_volume_boost or _pattern == null:
-		return
-	if barrage_player != null and barrage_player.running:
-		push_error("Pattern fire volume must be configured before playback starts.")
-		return
-	_ensure_private_pattern()
-	_boost_pattern_volume(_pattern, extra_shots, min_spread)
-
-
 ## Detaches _pattern from any shared presets before the first mutation.
 ## snapshot() copies steps and settings into a plain BarrageSequence.
 func _ensure_private_pattern() -> void:
@@ -98,20 +82,6 @@ static func _validate_pattern_script(script: Script) -> String:
 		if method.name == "_init" and method.args.size() > method.default_args.size():
 			return "Pattern _init must not require arguments."
 	return ""
-
-
-func _boost_pattern_volume(sequence: BarrageSequence, extra_shots: int, min_spread: float) -> void:
-	# snapshot() keeps a volley reused by several steps as one Resource.
-	var boosted := {}
-	for step in sequence.steps:
-		if step.action != BarrageStep.Action.FIRE: continue
-		for volley in step.get_volleys():
-			if volley.layout == BarrageVolley.Layout.RING or boosted.has(volley): continue
-			boosted[volley] = true
-			var count := 1 if volley.layout == BarrageVolley.Layout.SINGLE else volley.count
-			volley.layout = BarrageVolley.Layout.FAN
-			volley.count = maxi(1, count + extra_shots)
-			volley.spread_degrees = maxf(volley.spread_degrees, min_spread)
 
 
 ## Spawn-time augment multiplier on launch speed. Behavior speed_to targets stay absolute.
@@ -375,7 +345,10 @@ func _prepare_pattern() -> void:
 		return
 	_pattern = pattern_script.new() as BarrageSequence
 	if _pattern != null:
-		_pattern.build(pattern_params)
+		# Patterns read `pressure` (barrage pressure P) and interpret it themselves.
+		var params := pattern_params.duplicate()
+		params["pressure"] = enemy.get_barrage_pressure()
+		_pattern.build(params)
 	pattern_error = "Pattern construction failed." if _pattern == null else _pattern.validation_error()
 	if not pattern_error.is_empty():
 		push_error(pattern_error)
