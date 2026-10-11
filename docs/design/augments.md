@@ -49,7 +49,7 @@ XP를 모은 뒤 플레이어가 선택 시점을 정하며, 무기·모듈·시
 | `enemy_xp_drift_speed_boost` | XP 드롭 속도 증가 | XP_DRIFT_SPEED ×1.2 · 최대 2스택(×1.44) | — |
 | `enemy_projectile_speed_boost` | 고속탄 | 일반 적 PROJECTILE_SPEED ×1.15 · 최대 2스택(×1.3225) | — |
 | `enemy_xp_drop_chance_down` | 빈약한 전리품 | XP_DROP_CHANCE ×0.9 · 최대 2스택(×0.81) | — |
-| `enemy_death_burst` | 유폭 | 일반 적 사망 시 느린 탄 4발 · one-time | — |
+| `enemy_death_burst` | 유폭 | 일반 적 사망 시 곧 사라지는 탄 4발 · one-time | — |
 | `enemy_armor_plate` | 장갑판 | 일반 적마다 첫 피격 1회 무시 · one-time | — |
 | `enemy_elite_escort` | 엘리트 호위대 | 엘리트 관문마다 Drone 2기 동반 · one-time | — |
 | `enemy_reroll_lock` | 리롤 봉쇄 | 남은 플레이어 리롤 −1 · one-time | — |
@@ -64,7 +64,7 @@ XP 드롭 속도 증가는 선택 뒤 스폰되는 적의 `ExperienceDropCompone
 
 - **고속탄**: 선택 뒤 스폰되는 일반 적의 발사 속도에 곱한다. `EnemyShootComponent`는 레거시 사격의 `projectile_speed`와 패턴 FIRE 스텝의 모든 Volley `speed`를, `SniperAttackComponent`는 `projectile_speed`를 올린다. Behavior의 `speed_to` 같은 절대 속도 목표와 반격·유폭 탄은 그대로다. 엘리트·보스 패턴은 발사 속도와 절대 `speed_to`가 섞여 배율이 고르게 먹지 않으므로 제외한다.
 - **빈약한 전리품**: 선택 뒤 스폰되는 적의 `ExperienceDropComponent.drop_chance`에 곱한다(일반 45% → 40.5% → 36.45%). 확률 1.0인 확정 드롭(엘리트 보상)은 그대로다. 탄소거 XP는 바뀌지 않는다.
-- **유폭** (`DeathBurstComponent`): 일반 적이 체력 0으로 파괴되면 그 자리에서 `round_straight_shot` 4발을 60px/s로 대각선(45°·135°·225°·315°) 링으로 뿌린다. 엘리트·보스는 처치 순간 탄소거가 시작되므로 터지지 않는다. 임사 체험과 겹치면 실제 사망 때 한 번만 터진다.
+- **유폭** (`DeathBurstComponent`): 근접 처치에 리스크를 붙이는 카드다. 일반 적이 체력 0으로 파괴되면 그 자리에서 `death_burst_shot` 4발을 90px/s로 대각선(45°·135°·225°·315°) 링으로 뿌린다. 탄은 큰 `orb` 외형(지름 20px · 판정 반경 8px)으로 시작해 0.7초 동안 외형과 판정이 함께 0.15배까지 줄어든 뒤 수명이 끝나 사라진다. 축소는 cubic ease-in이라 처음엔 크게 버티다 끝에서 급히 사그라든다: 약 30px까지는 거의 원래 크기이고, 약 50px에서 판정이 절반 남짓이며, 약 63px에서 사라진다. 멀리서 잡으면 닿지 않고 화면에 남는 탄도 없다. 엘리트·보스는 처치 순간 탄소거가 시작되므로 터지지 않는다. 임사 체험과 겹치면 실제 사망 때 한 번만 터진다.
 - **장갑판** (`ArmorPlateComponent`): 선택 뒤 스폰되는 일반 적의 `HurtComponent.armor_hits`를 1 올린다. 엘리트·보스는 체력이 커서 1회 흡수가 체감되지 않고 외곽선만 어색하게 남으므로 제외한다. 피격 1회는 피해 없이 흡수하고, 피격 연출(번쩍임·흔들림)은 그대로 낸다. 장갑이 남은 동안 피격 판정 둘레에 옅은 청백색 원을 그린다. 연사형 무기는 손해가 작고 한 방이 큰 무기에 불리하다.
 - **엘리트 호위대**: 이후 엘리트 관문(보스 제외)이 열릴 때 `ThreatEliteController`가 엘리트와 함께 `elite_escort_drone_pair`(Drone 2기, 좌우 18px)를 특수 Encounter로 스폰한다. 호위기는 일반 적이라 엘리트 처치 후에도 남고, 드론 증원 편대 보너스는 받지 않는다.
 - **리롤 봉쇄**: 적 증강 중 유일하게 플레이어 자원을 깎는다. 선택 즉시 `AugmentOfferController.remaining_reroll_count`를 1 줄인다. 남은 리롤이 0이면 오퍼 후보에서 빠진다.
@@ -177,6 +177,7 @@ XP 드롭 속도 증가는 선택 뒤 스폰되는 적의 `ExperienceDropCompone
 - 진화 카드는 그 원본 적이 스폰되기 전에는 나오지 않는다. 고르면 이후 스폰되는 원본만 진화형으로 나오고, Encounter ID와 다른 적 증강은 유지된다. 한 번 고른 진화는 다시 나오지 않는다.
 - XP 드롭 속도 증가·빈약한 전리품은 그 적이 떨어뜨리는 오브의 낙하 속도·드롭 확률만 바꾸며, 확정 드롭과 탄소거 XP는 그대로다.
 - 고속탄·유폭·장갑판은 일반 적에게만 적용되고 엘리트·보스는 그대로다. 장갑판은 적마다 첫 피격 1회만 흡수한다.
+- 유폭 탄은 일반 탄보다 크게 시작해 날아가며 외형과 판정이 함께 줄어들고, 0.7초 안에 모두 사라진다.
 - 엘리트 호위대를 고르면 이후 엘리트 관문(보스 제외)마다 Drone 2기가 함께 나온다. 리롤 봉쇄는 남은 리롤을 1 줄이고, 남은 리롤이 0이면 후보에서 빠진다.
 
 검증 참고: `tests/augment_pool_data_driven_smoke_test.gd` · `tests/augment_offer_tier_test.gd` · `tests/fourth_weapon_bay_test.gd` · `tests/ship_rule_prism_test.gd` · `tests/enemy_augment_policy_smoke_test.gd` · `tests/enemy_pressure_augments_test.gd` · `tests/enemy_evolution_augments_test.gd`.

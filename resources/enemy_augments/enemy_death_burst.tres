@@ -7,6 +7,6 @@
 script = ExtResource("1_augment")
 augment_id = &"enemy_death_burst"
 display_name = "유폭"
-description = "이후 등장하는 일반 적이 파괴될 때 느린 탄 4발을 대각선으로 흩뿌립니다."
+description = "이후 등장하는 일반 적이 파괴될 때 곧 사라지는 탄 4발을 대각선으로 흩뿌립니다. 가까이서 처치하면 위험합니다."
 max_stacks = 1
 behavior_components = Array[PackedScene]([ExtResource("2_behavior")])

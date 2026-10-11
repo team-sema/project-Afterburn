@@ -11,7 +11,7 @@ const RETURN_RUN: MovementSequence = preload(
 
 @export_range(0, 3, 1) var return_passes := 1
 @export var warning_color := Color("35ffe1")
-@export_range(0.25, 3.0, 0.05) var warning_scale := 0.6
+@export_range(0.25, 3.0, 0.05) var warning_scale := 1.0
 ## Offscreen hold before the return run; the edge warning lasts the same time.
 @export_range(0.1, 3.0, 0.05, "suffix:s") var turn_delay := 0.6
 ## How far past the visible edge the actor travels before it turns.

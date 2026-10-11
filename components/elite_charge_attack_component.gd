@@ -8,6 +8,7 @@ enum Phase { ENTRY, RECOVERY, AIM, PULLBACK, DASH, REENTRY_WARNING, REENTRY }
 @export var aim_duration := 0.8
 @export var recovery_duration := 1.2
 @export var reentry_warning_duration := 0.7
+@export_range(0.25, 3.0, 0.05) var reentry_warning_scale := 1.4
 @export var pullback_distance := 28.0
 @export var pullback_duration := 0.5
 ## Nonzero seeds allow repeatable legacy/new comparisons without VFX RNG interference.
@@ -223,6 +224,7 @@ func _begin_reentry_warning() -> void:
 	warning.actor = enemy
 	warning.warning_duration = reentry_warning_duration
 	warning.warning_color = Color(1.0, 0.25, 0.42, 0.95)
+	warning.warning_scale = reentry_warning_scale
 	enemy.add_child(warning)
 
 

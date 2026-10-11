@@ -94,10 +94,26 @@ func _check_death_burst() -> void:
 	var drone := await _spawn_drone(registry)
 	_expect(drone.get_node_or_null("DeathBurstComponent") != null, "death burst attaches to spawned enemies")
 	var before := _bullet_count()
+	var existing := get_nodes_in_group(EnemyBullets.GROUP)
+	# Off the view corner, or three shots leave the screen and free early.
+	drone.global_position = root.get_visible_rect().get_center()
 	drone.stats_component.health = 0
 	await process_frame
 	await process_frame
 	_expect(_bullet_count() - before == 4, "an ordinary enemy releases four burst shots on death")
+	var burst: Array[FoundationBullet] = []
+	for node in get_nodes_in_group(EnemyBullets.GROUP):
+		if node is FoundationBullet and not existing.has(node):
+			burst.append(node)
+	_expect(burst.size() == 4, "burst shots are foundation bullets")
+	await create_timer(0.5).timeout
+	for bullet in burst:
+		_expect(
+			is_instance_valid(bullet) and bullet.visual_scale < 0.8 and bullet.hitbox_scale < 0.8,
+			"burst shots shrink their look and hitbox together",
+		)
+	await create_timer(0.4).timeout
+	_expect(burst.all(func(bullet) -> bool: return not is_instance_valid(bullet)), "burst shots vanish within 0.7s")
 	var elite := await _spawn_drone(registry, func(enemy: Enemy) -> void: enemy.is_elite = true)
 	before = _bullet_count()
 	elite.stats_component.health = 0
