@@ -33,7 +33,7 @@
 | 클래스 | 역할 |
 |--------|------|
 | `StatsComponent` | HP + `health_changed` / `no_health` |
-| `HurtboxComponent` | 피격 Area2D · `hurt(hitbox)` · 무적 시 shape off |
+| `HurtboxComponent` | 피격 Area2D · `hurt(hitbox)` · 무적 시 shape off · 레이어 1이면 `enemy_bullet_targets` 그룹에 들어가 풀 탄·레이저의 CPU 판정 표적이 됨 |
 | `HitboxComponent` | 공격 Area2D · `damage` · `hit_hurtbox` |
 | `HurtComponent` | hurt → 피해 처리 · 공용 무적 타이머와 반투명 표시 · 플레이어 기본 0.6초 무적 · `armor_hits`만큼 피격을 피해 없이 흡수 |
 | `ShieldComponent` | 버퍼 HP · **시작 최대 2** ([플레이어 · 생존](player.md#생존)) · 피해는 실드 우선·초과분은 선체 · 미만 시 경과 초를 세고 필요 초(`regen_charge_duration` / 충전속도) 이상이면 `restore_shield(1)` · HUD 게이지는 경과/필요 초 · `notify_hit` 시 경과 리셋 |

@@ -41,7 +41,7 @@ var _aim_direction := Vector2.DOWN
 var _base_aim_duration := 2.5
 var _base_lock_on_duration := 0.75
 var _base_cooldown_duration := 2.5
-var _active_bullet: SniperBullet
+var _active_bullet: Node
 var _shot_pending := false
 var _shots_fired := 0
 var _hold_position := Vector2.ZERO
@@ -325,9 +325,10 @@ func _spawn_shot(shot: SniperBarrageShot, parent: Node2D, origin: Vector2, direc
 	_shot_pending = false
 	if not is_instance_valid(enemy) or enemy.is_queued_for_deletion() or not enemy.is_inside_tree(): return
 	if not is_instance_valid(parent) or parent.get_viewport() != enemy.get_viewport(): return
-	_active_bullet = shot.spawn(parent, origin, direction, speed) as SniperBullet
+	_active_bullet = shot.spawn(parent, origin, direction, speed)
 	if _active_bullet != null:
-		_active_bullet.finished.connect(_on_bullet_finished, CONNECT_ONE_SHOT)
+		# A pooled bullet frees itself at range, on a hit or when cancelled.
+		_active_bullet.tree_exiting.connect(_on_bullet_finished, CONNECT_ONE_SHOT)
 
 
 func _on_bullet_finished() -> void:

@@ -82,7 +82,7 @@ func run() -> void:
 	lab.ship.position.x = 230
 	gun._process_weapon(0.1)
 	check(is_equal_approx(gun.pivot.rotation, locked_angle), "Final warning locks the barrel despite target movement")
-	var fired: Array[Node2D] = []
+	var fired: Array[Node] = []
 	gun.barrage.volley_fired.connect(func(projectiles): fired.append_array(projectiles), CONNECT_ONE_SHOT)
 	gun.cooldown = 0
 	var muzzle_origin: Vector2 = gun.muzzle.global_position

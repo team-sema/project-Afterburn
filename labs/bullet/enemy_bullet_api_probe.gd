@@ -105,7 +105,7 @@ func pull_step(delta: float) -> int:
 		if not bullet.has_method("get_travel_velocity"):
 			continue
 		var velocity: Vector2 = bullet.call("get_travel_velocity")
-		var toward := _well_position - bullet.global_position
+		var toward: Vector2 = _well_position - bullet.global_position
 		if velocity.is_zero_approx() or toward.is_zero_approx():
 			continue
 		var turn := clampf(velocity.angle_to(toward), -max_turn, max_turn)
@@ -152,7 +152,7 @@ func _physics_process(delta: float) -> void:
 	queue_redraw()
 
 
-func _on_bullet_cancelled(position: Vector2, reason: StringName, _bullet: Node2D) -> void:
+func _on_bullet_cancelled(position: Vector2, reason: StringName, _bullet: Node) -> void:
 	counts[reason] = int(counts.get(reason, 0)) + 1
 	if _marks.size() < MAX_MARKS:
 		_marks.append({"position": to_local(position), "age": 0.0})

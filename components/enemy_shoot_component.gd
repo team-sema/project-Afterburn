@@ -399,5 +399,5 @@ func _pattern_target() -> Node2D:
 	return target if is_instance_valid(target) and target.is_inside_tree() and not target.is_queued_for_deletion() else null
 
 
-func _pattern_fired(projectiles: Array[Node2D]) -> void:
+func _pattern_fired(projectiles: Array[Node]) -> void:
 	if not projectiles.is_empty(): _volleys_fired += 1

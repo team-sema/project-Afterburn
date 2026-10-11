@@ -15,9 +15,9 @@
 | 3 | `player_projectile` |
 | 4 | `enemy_projectile` |
 
-**레이어 3은 미사용.** 적탄 판정은 레이어 4(`enemy_projectile`, [EnemyBullets](../barrage-api.md#11-적탄-조회소거--enemybullets))에 올라가고, 플레이어 탄 Hitbox는 layer 0 + hurtbox **mask**로 동작한다.
+**레이어 3은 미사용.** 레이어 4(`enemy_projectile`, [EnemyBullets](../barrage-api.md#11-적탄-조회소거--enemybullets))에는 레거시 기본탄의 판정만 올라가고, 플레이어 탄 Hitbox는 layer 0 + hurtbox **mask**로 동작한다.
 
-적탄(FoundationBullet)의 Hitbox는 감지당하기만 하는(monitoring 없는) 수동 영역이다. 레이어 1 Hurtbox가 `_ready`에서 mask에 레이어 4를 더해 감지 주체가 되고, 겹친 수동 Hitbox의 기존 피격 처리를 호출한다. 수천 발이 각자 겹침을 감시하지 않게 하는 구조이며, 스스로 감시하는 Hitbox(접촉 몸·플레이어 탄·레거시 적탄)와 자체 폴링(레이저·빔)은 중복 피격 방지를 위해 이 경로에서 제외한다.
+새 적탄(FoundationBullet)·곡선 레이저·예고형 빔은 물리 판정을 갖지 않는다. 레이어 1 Hurtbox는 `_ready`에서 `enemy_bullet_targets` 그룹에 들어가고, 탄 부모마다 하나인 `EnemyBulletPool`이 매 물리 틱 그 Hurtbox들의 활성 CollisionShape2D(원·캡슐, 그 밖은 `Shape2D.collide`)를 모아 모든 탄과 CPU로 판정한다. 레이저·빔도 같은 표적 목록에 몸통 선분을 댄다. 피격은 셰이프 없는 대리 HitboxComponent(피해 1, 위치는 맞은 지점)를 Hurtbox에 넘겨 기존 파이프라인을 그대로 탄다. 레이어 1 Hurtbox는 레거시 탄을 위해 mask에 레이어 4도 유지한다.
 
 ## 레이어/마스크 실사용
 
@@ -26,7 +26,8 @@
 | Player Hurtbox | 1 | 1+4 · 수동 적탄 감지 주체 |
 | Enemy Hurtbox | 2 | 0 |
 | Enemy Hitbox (몸) | 0 | 1 |
-| 적탄 (Foundation·Laser·Beam·레거시) | 4 | 1 · Foundation은 monitoring 없음 |
+| 적탄 (레거시) | 4 | 1 |
+| 적탄 (Foundation·Laser·Beam) | — | — · 물리 없음, `EnemyBulletPool`/레이저가 `enemy_bullet_targets` Hurtbox와 CPU 판정 |
 | Player Blaster Hitbox | 0 | 2 · damage **10** |
 | Player Shotgun Pellet | 0 | 2 · damage **4** × 5발 |
 | Laser RayCast | — | 2 (직접 `hurt.emit`) |
@@ -34,8 +35,8 @@
 ## 데미지 파이프라인
 
 ```text
-Hitbox.area_entered            (스스로 감시하는 Hitbox)
-Hurtbox.area_entered → Hitbox  (수동 적탄; 레이저·빔은 자체 폴링)
+Hitbox.area_entered            (스스로 감시하는 Hitbox · 레거시 적탄)
+EnemyBulletPool / 레이저 CPU 판정 → 대리 Hitbox._on_hurtbox_entered  (Foundation·Laser·Beam)
   → Hurtbox & not invincible
   → hit_hurtbox + hurtbox.hurt
   → HurtComponent
@@ -114,11 +115,11 @@ Hitbox와 Hurtbox 중 하나라도 **트리 밖**이면 그 겹침은 무시한�
 - 사용자 참조 이미지의 노란 초승달형 몸통과 방사형 꽃잎 배치를 재현하는 실험이다. 원작의 정확한 시간별 움직임 재현을 주장하지 않는다.
 - `curved_laser_lab.tscn`에서 바로 곡선 레이저 꽃잎 패턴으로 시작한다. 기존 비교 장면에서도 곡선 레이저를 선택할 수 있다.
 - 머리는 90px/s로 진행하며 처음 1.5초 동안 ±70°/s로 선회한 뒤 마지막 방향으로 직진한다. 최근 1.4초의 경로가 몸통이고 양끝을 가늘게 만든다. 시각 폭 6px, 충돌 폭 최대 4px, 수명 5초다. 12줄을 30° 간격으로 발사하고 다음 묶음은 4초 뒤 15° 회전해 발사한다.
-- 몸통 전체에 구간별 캡슐 판정을 둔다. 겹친 구간은 같은 물리 프레임에 같은 Hurtbox를 한 번만 때리며, 레이저는 피격으로 사라지지 않는다. 기존 Hurtbox 무적을 따른다.
+- 몸통 전체에 구간별 캡슐 판정을 둔다(36구간, 물리 서버 없이 CPU 점-선분 거리). 겹친 구간은 같은 물리 프레임에 같은 Hurtbox를 한 번만 때리며, 레이저는 피격으로 사라지지 않는다. 기존 Hurtbox 무적을 따른다.
 - 그림·판정·경로 예측은 같은 곡선 표본을 사용한다. 화면 밖으로 머리가 나가도 몸통이 남으면 유지한다. 소거/XP는 구간 수와 무관하게 레이저 한 줄당 1회다.
 - 시험 UI는 기존 이동·일시정지·초기화·판정 표시·소거를 재사용하며 단일 레이저와 꽃잎, 좌우 선회를 비교한다.
 - 실행: `tools/run-godot.cmd res://labs/bullet/presets/curved_laser_lab.tscn` 또는 해당 씬에서 F6. 일반 탄으로 돌아가려면 첫 선택에서 원탄 등을 고른다. 기체 WASD / 메뉴 방향키·Enter는 기존과 같다.
-- 구현은 `curved_laser.gd`의 시간별 머리 위치를 다시 표본화해 최근 경로를 구성한다. 36개 구간의 연속 리본으로 그리고, 판정은 3구간마다 하나씩 12개 캡슐을 한 Hitbox에 모은다. 호밍 레이저의 몸통은 1/120초 간격으로 저장된 궤적 프레임을 한 번에 훑어 그 사이를 보간한다(1px 미만 오차, 머리 위치·`position_at`은 정확값). 리본 정점의 삼각형 인덱스는 렌더러가 캐시해 재사용한다. 경로 예측(`get_predicted_path`)은 현재 꼬리부터 미래 머리까지를 보수적으로 포함한다. 구간별 판정 표시는 실제 캡슐 모양을 그린다.
+- 구현은 `curved_laser.gd`의 시간별 머리 위치를 다시 표본화해 최근 경로를 구성한다. 36개 구간의 연속 리본으로 그리고, 판정은 36구간 각각을 폭 프로파일 그대로 캡슐로 보아 `enemy_bullet_targets` Hurtbox와 CPU로 검사한다(AABB 조기 탈락 뒤 점-선분·선분-선분 거리). `query_shape`도 같은 캡슐로 답한다. 호밍 레이저의 몸통은 1/120초 간격으로 저장된 궤적 프레임을 한 번에 훑어 그 사이를 보간한다(1px 미만 오차, 머리 위치·`position_at`은 정확값). 리본 정점의 삼각형 인덱스는 렌더러가 캐시해 재사용한다. 경로 예측(`get_predicted_path`)은 현재 꼬리부터 미래 머리까지를 보수적으로 포함한다. 구간별 판정 표시는 실제 캡슐 모양을 그린다.
 - `curved_laser_smoke_test.gd`에서 머리와 떨어진 몸통 피격, 무적 종료 후 재피격, 화면 밖 머리/남은 몸통 유지, 완전 이탈 제거, 경로 예측, 일시정지·소거·메뉴 전환을 PASS로 확인했다. 기존 기본탄 시험과 탄소거 XP 회귀도 PASS. 실제 렌더링은 `artifacts/curved_laser_lab.png`에서 확인했다. 원작의 시간별 패턴 일치와 본 게임 밸런스는 확정하지 않았다.
 
 #### 예고형 빔 (BEAM) · 구현 완료
@@ -132,7 +133,7 @@ Hitbox와 Hurtbox 중 하나라도 **트리 밖**이면 그 겹침은 무시한�
   - **전개** `beam_grow_duration`: 예고 폭에서 `core_width`까지 굵어진다(ease-out). 아직 판정이 없다.
   - **유지** `beam_hold_duration`: 폭 `core_width`의 빔이다. 판정 폭은 `hit_width`이고 빔 전체 길이에 걸친다. 빔 끝에 충격 연출(맥동하는 섬광과 사방으로 튀는 불꽃)이, 시작점에 발사 섬광이 보인다. 충격 연출은 `beam_impact = false`로 끌 수 있다(시각 전용, 판정과 무관).
   - **소멸** `beam_fade_duration`: 가늘어지며 투명해지고, 판정은 없다. 끝나면 사라진다.
-- 피격: 유지 단계 동안 매 물리 프레임 겹친 Hurtbox를 검사한다. 플레이어가 빔 안에 머물면 무적 시간이 끝날 때 다시 맞는다. 빔은 맞혀도 사라지지 않는다.
+- 피격: 유지 단계 동안 매 물리 프레임 빔 선분(폭 `hit_width`)을 `enemy_bullet_targets` Hurtbox와 CPU로 검사한다. 플레이어가 빔 안에 머물면 무적 시간이 끝날 때 다시 맞는다. 빔은 맞혀도 사라지지 않는다.
 - 색은 `beam_color`다. 예고선은 같은 색을 옅게 쓰고, 유지 단계는 흰 코어에 그 색의 발광을 겹친다.
 - 적탄 계약:
   - `enemy_projectiles` 그룹이라 탄소거·소거 XP(1줄당 1)·`EnemyBullets` 조회·취소를 그대로 따른다. `query_circle`은 시작점을 기준으로 잰다.
@@ -149,10 +150,10 @@ Hitbox와 Hurtbox 중 하나라도 **트리 밖**이면 그 겹침은 무시한�
 - 판정 표시는 엔진 전역 디버그와 중복되지 않게 한다. 캡슐/원 판정의 표시도 묶어서 그리며, 실제 충돌 판정과 표시용 데이터는 같은 모양/위치를 사용한다.
 - 충돌 캡슐 수를 먼저 줄이지 않고 변하지 않는 반지름·프로필 계산과 중복 갱신을 제거한다. 실제 피해 규칙을 바꾸는 충돌 시스템 교체는 성능 결과를 보고 별도 판단한다.
 - 검증은 같은 개수/궤적에서 표시 OFF/ON의 그리기 호출, 몸통 갱신 시간과 렌더링 갱신 시간을 비교한다. 프레임 간격은 대기 시간을 포함할 수 있으므로 GPU 실행 시간으로 표기하지 않는다. 실제 화면 비교와 기존 피격/소거 회귀를 함께 통과해야 한다.
-- `projectile_batch_renderer.gd`는 탄의 부모별로 하나를 공유한다. 같은 외형이 연속된 구간만 MultiMesh로 묶고, 그 사이의 레이저도 순서대로 그려 탄종이 섞일 때 투명도 중첩 순서를 보존한다. 개별 이동 노드와 Area2D 판정은 유지하며 풀링/충돌 시스템 전체 교체는 이번 범위가 아니다.
+- `enemy_bullet_pool.gd`(`EnemyBulletPool`)는 탄의 부모별로 하나다. FoundationBullet은 Node2D·Area2D·자체 `_physics_process`가 없는 가벼운 Node 핸들이고(트리·그룹·`queue_free`·일시정지·인스턴스 id 계약은 그대로), 풀이 한 루프에서 모든 탄을 진행하고 외형별 MultiMesh 인스턴스를 물리 틱에서 바로 쓴다. 빈 Behavior·반사 없음인 직진탄은 BulletBehaviorState 없이 `origin + direction × speed × age`로 움직이고, 외부 궤도 개입이나 예측 질의가 오는 순간 같은 궤적의 상태를 만들어 이어 간다(직진탄의 위치는 두 방식이 같다). `projectile_batch_renderer.gd`는 곡선 레이저 리본과 랩 디버그 모양만 그린다. 탄과 레이저의 그리기 순서는 풀·렌더러 노드의 형제 순서다. 측정은 [탄막 API 10절](../barrage-api.md#10-본-게임-이식--drone·striker·interceptor·caster-적용-완료)의 `bullet_pool_benchmark`를 따른다.
 - 지원 범위는 현재 시험 탄의 공통 Z/기본 재질이다. 별도 Z, 개별 ShaderMaterial, Y 정렬, 다른 오브젝트와 탄마다 교차하는 그리기 순서가 필요하면 `use_batched_rendering = false`를 트리 추가 전에 설정하거나 별도 탄 컨테이너로 나눈다. 실행 중 외형 Resource 변경은 지원하지 않으며 새 설정으로 재발사한다.
 - 원탄의 가장자리 평활화는 64분할 원과 투명 외곽 메시로 구현한다. 쌀탄의 24분할 외곽, 레이저 표본과 폭/색은 유지한다. 원탄 가장자리의 픽셀 단위 일치까지 보장하지 않는다. 판정 표시는 실제 원/캡슐을 인스턴스 셰이더로 그린다.
-- 재현 가능한 렌더링 비교는 `tests/benchmarks/projectile_render_benchmark.gd`, 배치 수명·격리·혼합 순서 회귀는 `tests/projectile_batch_smoke_test.gd`다. 측정 결과를 비교할 때 실행 환경을 함께 확인한다.
+- 재현 가능한 비용 측정은 `tests/benchmarks/bullet_pool_benchmark.gd`, 풀 묶음 수명·격리·레이저 공존 회귀는 `tests/projectile_batch_smoke_test.gd`다. 측정 결과를 비교할 때 실행 환경을 함께 확인한다.
 
 #### 탄막 작성 API · 1차 구현 완료
 
@@ -260,7 +261,7 @@ if not player.play(sequence, emitter, world):
 
 - 한 틱의 적용 순서는 Behavior/호밍의 기본 heading·speed 평가 → 외부 효과 합성 → 위치 적분 → 몸체·판정 갱신이다. 외부 효과는 탄별 핸들로 등록/해제하고 활성 시간 동안 방향 오프셋 합과 비음수 속도 배율 곱을 적용한다. 서로 다른 효과는 등록 순서에 영향받지 않는다. 같은 핸들 재등록은 교체한다. 순간 반사·소유권 전환·Behavior 교체는 이 설계 범위 밖이다.
 - 동적 입력은 실제 시각의 경계에 기록하고 이미 지나온 위치/레이저 꼬리를 다시 계산하지 않는다. 표적 관측이나 효과 변경 시 경계 이후 예측만 폐기한다. 호밍 예측에서는 마지막 관측 위치를 고정하며 미래의 표적 이동·재획득·새 외부 효과 발생을 가정하지 않는다. 알려진 효과 만료는 예측에 반영한다. 이 예측은 보장된 미래 경로가 아닌 현재 입력 기준 근사다.
-- API: `EnemyBullets.apply_effect(bullet, handle, speed_mult = 1, heading_offset_degrees = 0, duration = 0)` · `remove_effect(bullet, handle)` · `get_effect(bullet, handle)`. 탄 몸체 `FoundationBullet`·`CurvedLaser`만 지원하며 레거시 기본탄·SniperBullet은 false를 반환한다. `duration <= 0`은 해제할 때까지 유지한다. 속도 배율은 0 이상이며 0이면 그 자리에 멈춘다.
+- API: `EnemyBullets.apply_effect(bullet, handle, speed_mult = 1, heading_offset_degrees = 0, duration = 0)` · `remove_effect(bullet, handle)` · `get_effect(bullet, handle)`. 탄 몸체 `FoundationBullet`(저격탄 포함)·`CurvedLaser`만 지원하며 레거시 기본탄은 false를 반환한다. `duration <= 0`은 해제할 때까지 유지한다. 속도 배율은 0 이상이며 0이면 그 자리에 멈춘다.
 - 구현: 적용 시점은 탄의 현재 나이(마지막 `advance_to`)다. 첫 효과에서 그 순간의 위치를 기준점으로 고정하고, 이후 기본 이동 속도(선회·속도·파동·호밍이 반영된 속도)를 방향 오프셋 합만큼 회전하고 속도 배율 곱을 곱해 1/120초 간격으로 적분한다. 등록·교체·해제·만료마다 새 구간을 그 순간의 위치에서 시작하므로 이전 구간의 위치와 이미 그려진 레이저 몸통은 바뀌지 않는다. 알려진 만료 시각은 미리 구간으로 넣어 경로 예측에 포함한다. 효과를 모두 해제해도 탄은 원래 궤적으로 돌아가지 않고 현재 위치에서 기본 속도로 이어 간다.
 - 시간은 탄의 나이 기준이라 트리 일시정지 동안 효과 지속 시간도 줄지 않는다. 흡인처럼 위치에 따라 방향을 바꾸는 효과는 증강이 매 틱 같은 핸들을 새 오프셋으로 재등록해 누적한다.
 - 한계: 호밍 탄은 표적 방향을 효과가 적용되지 않은 자기 궤적 위치 기준으로 계산한다. 순간 반사·소유권 전환·Behavior 교체는 범위 밖이다.
@@ -319,10 +320,10 @@ if not player.play(sequence, emitter, world):
 잘 내려오던 탄이 갑자기 '비활성'으로 바뀌어 반투명한 채 다른 방향으로 흘러가다가, 다시 불투명해지며 판정이 살아나는 패턴(동방 프로젝트식 '유령탄')을 쓴다. 플레이어는 흐린 탄 사이를 지나갈 수 있지만, 그 탄이 어디에서 되살아날지 읽어야 한다.
 
 - `BulletAction.Type.TANGIBLE`(빌더 `BulletBehavior.intangible()` / `tangible()`)은 순간 Action(duration 0)이다. `value` 0이면 판정을 끄고 1이면 다시 켠다. 그 밖의 값은 거부한다. 상태는 다음 Action과 Behavior 반복으로 이어지며, 발사 직후의 기본값은 판정 있음이다.
-- 판정 꺼짐 동안 탄의 CollisionShape2D를 비활성화한다. 플레이어에 닿아도 피격되지 않고 탄도 사라지지 않는다. 판정 표시(`show_hitbox`)도 숨긴다. 판정이 다시 켜지는 순간 플레이어와 겹쳐 있으면 다음 물리 프레임에 피격된다. 겹친 채로 켜지는 것도 피격으로 친다.
+- 판정 꺼짐 동안 풀이 그 탄의 충돌 검사를 건너뛴다. 플레이어에 닿아도 피격되지 않고 탄도 사라지지 않는다. 판정 표시(`show_hitbox`)도 숨긴다. 판정이 다시 켜지는 순간 플레이어와 겹쳐 있으면 그 물리 프레임에 피격된다. 겹친 채로 켜지는 것도 피격으로 친다.
 - 외형은 바꾸지 않는다. 반투명·색 변화는 패턴이 `opacity_to`·`tint_to`로 함께 지정한다. **판정을 다시 켜기 전에 불투명도를 먼저 되돌려(권장: 0.2초 이상에 걸쳐 0.9 이상)** 플레이어가 재활성을 미리 읽을 수 있게 한다. API는 이 순서를 강제하지 않는다.
 - 이동·SPAWN·외부 궤도 개입·꼬리 입자는 판정 상태와 무관하게 그대로 동작한다. 판정이 꺼진 탄도 SPAWN을 실행하며, 자식 탄은 자기 Behavior를 따른다(기본 판정 있음).
-- 판정이 꺼진 탄도 적탄 그룹(`enemy_projectiles`)에 남는다. `EnemyBullets.get_all`·`query_circle`·`cancel`·엘리트 처치 탄소거와 그 XP·오그먼트 선택 직후 소거·궤도 개입 대상이 된다. 물리 쿼리인 `query_shape`는 꺼진 충돌 모양을 보지 못하므로 판정 꺼짐 탄을 돌려주지 않는다.
+- 판정이 꺼진 탄도 적탄 그룹(`enemy_projectiles`)에 남는다. `EnemyBullets.get_all`·`query_circle`·`cancel`·엘리트 처치 탄소거와 그 XP·오그먼트 선택 직후 소거·궤도 개입 대상이 된다. `query_shape`는 판정 꺼짐 탄을 돌려주지 않는다.
 - 적용 몸체: `BULLET`만 실행한다. `TRAIL_LASER`·`BEAM` Shot의 Behavior에 TANGIBLE이 있으면 Shot이 무효다. 병렬 묶음 안에도 넣을 수 있다(채널 `tangible`).
 - 한계: 경로 예측(`get_predicted_path`)과 위험 반경은 판정 꺼짐 구간을 구분하지 않아 정지 안전 비율이 보수적으로 나온다.
 - 데모: Bullet Lab 패턴 `showcase/phantom_drift`(`patterns/showcase/phantom_drift_pattern.gd`). 청록 쌀탄 부채꼴이 내려오다 0.9초에 판정이 꺼지고 0.15초 만에 투명도 0.3·창백한 색으로 바뀐다. 이어 좌우로 갈라져(부채꼴 왼쪽 절반은 왼쪽, 오른쪽 절반은 오른쪽 아래로 70°) 느리게 1.1초 흘러간다. 그 뒤 0.3초 동안 분홍으로 불투명해지고 판정이 켜진 다음, 표적 쪽으로 다시 가속한다. 0.8초 간격으로 부채꼴 각도를 바꿔 반복한다.

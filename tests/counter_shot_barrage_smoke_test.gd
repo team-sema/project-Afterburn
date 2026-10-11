@@ -57,7 +57,7 @@ func run() -> void:
 		var bullet := bullets[index] as FoundationBullet
 		expect(bullet != null, "new body")
 		if bullet == null: continue
-		bullet.set_physics_process(false)
+		bullet.simulating = false
 		expect(bullet._origin.is_equal_approx(origin), "world origin snapshot")
 		expect(bullet._direction.is_equal_approx(aimed.rotated(deg_to_rad(-10 + 10 * index))), "aim and spread snapshot")
 		expect(bullet._speed == 200, "speed captured before deferral")

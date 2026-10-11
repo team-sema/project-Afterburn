@@ -114,7 +114,7 @@ func _test_live_bullets() -> void:
 
 	_expect(not EnemyBullets.apply_effect(legacy, &"slow", 0.5), "the legacy body does not support effects")
 	_expect(EnemyBullets.apply_effect(bullet, &"slow", 0.25, 0.0, 1.0), "EnemyBullets applies an effect to a bullet")
-	var start := bullet.global_position
+	var start: Vector2 = bullet.global_position
 	var predicted := (bullet as FoundationBullet).get_predicted_path(0.5)
 	for _i in 30:
 		await physics_frame
@@ -122,12 +122,12 @@ func _test_live_bullets() -> void:
 		predicted.size() > 1 and bullet.global_position.distance_to(predicted[-1]) < 0.5,
 		"path prediction made after the intervention matches the real movement",
 	)
-	var moved := bullet.global_position.y - start.y
+	var moved: float = bullet.global_position.y - start.y
 	_expect(absf(moved - 12.5) < 1.5, "the live bullet moves at 25 px/s under x0.25 (moved %.2f)" % moved)
 	_expect(absf((bullet as FoundationBullet).get_travel_velocity().length() - 25.0) < 0.5, "travel velocity reports the slowed speed")
 
 	paused = true
-	var paused_at := bullet.global_position
+	var paused_at: Vector2 = bullet.global_position
 	await create_timer(0.6).timeout
 	paused = false
 	_expect(bullet.global_position.is_equal_approx(paused_at), "pause freezes the slowed bullet")

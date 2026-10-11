@@ -193,7 +193,7 @@ func _test_pair_warning_attack_exit_and_reward() -> void:
 	_expect(projectile != null, "aimed burst spawns the shared enemy projectile")
 	if projectile != null:
 		var projectile_velocity: Vector2 = projectile.get_travel_velocity()
-		var aim := projectile.global_position.direction_to(player.global_position)
+		var aim: Vector2 = projectile.global_position.direction_to(player.global_position)
 		_expect(
 			projectile_velocity.normalized().dot(aim) > 0.98,
 			"projectile launches toward the player",
@@ -323,10 +323,10 @@ func _test_forward_turning_contract() -> void:
 	await process_frame
 
 
-func _find_first_enemy_projectile() -> Node2D:
+func _find_first_enemy_projectile() -> Node:
 	for node in get_nodes_in_group("enemy_projectiles"):
-		if node is Node2D and node.get_viewport() == world.get_viewport():
-			return node as Node2D
+		if node.get_viewport() == world.get_viewport():
+			return node
 	return null
 
 

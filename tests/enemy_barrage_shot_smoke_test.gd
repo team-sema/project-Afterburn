@@ -38,7 +38,7 @@ func run() -> void:
 		var bullet := bullets[0] as FoundationBullet
 		expect(bullet._origin.is_equal_approx(origin) and bullet._direction.is_equal_approx(direction), "world origin and aim preserved under translated parent")
 		expect(bullet.get_travel_velocity().is_equal_approx(direction * 105), "speed preserved")
-		expect(bullet.use_batched_rendering, "new body uses batched renderer")
+		expect(bullet._pool != null and bullet._slot >= 0, "new body is registered with the enemy bullet pool")
 	shoot.apply_action_rate_multiplier(2)
 	expect(shoot.fire_interval == 2.25 and shoot.projectile_speed == 105, "modifier changes cadence only")
 	enemy.global_position.y = enemy.get_viewport_rect().size.y * 0.9

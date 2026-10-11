@@ -30,9 +30,11 @@ func run() -> void:
 	await process_frame
 	var bullets := get_nodes_in_group("enemy_projectiles")
 	for bullet in bullets:
-		bullet.set_physics_process(false)
-	var renderer = bullets[0].get_parent().get_node("ProjectileBatchRenderer")
-	renderer.set_process(false)
+		if bullet is FoundationBullet: bullet.simulating = false
+		else: bullet.set_physics_process(false)
+	var renderer = bullets[0].get_parent().get_node_or_null("ProjectileBatchRenderer")
+	if renderer != null: renderer.set_process(false)
+	var pool := EnemyBulletPool.for_parent(bullets[0].get_parent())
 	var meters := [lab.safety_meter]
 	var result := {}
 	for debug in [false, true]:
@@ -45,7 +47,9 @@ func run() -> void:
 			for bullet in bullets:
 				bullet.age = 2.0 + frame / 120.0
 				if bullet is CurvedLaser: bullet._update_body()
-				else: bullet._update_pose()
+				else:
+					bullet._update_pose()
+					pool._write_instance(bullet)
 			var updated := Time.get_ticks_usec()
 			renderer.refresh()
 			var rendered := Time.get_ticks_usec()

@@ -116,7 +116,7 @@ func _init(behavior: BulletBehavior, direction: Vector2, speed: float, tint: Col
 			_path = _behavior.shared_path([_speed, _direction if analysis.uses_world_heading else Vector2.ZERO])
 			_frame_angle = Vector2.DOWN.angle_to(_direction)
 
-func configure_homing(owner: Node2D, origin: Vector2, target: Node2D = null, resolver := Callable()) -> void:
+func configure_homing(owner: Node, origin: Vector2, target: Node2D = null, resolver := Callable()) -> void:
 	if _homing != null: _homing.configure(owner, origin, target, resolver)
 
 ## The returned state is the caller's own copy.

@@ -133,7 +133,7 @@ func _run() -> void:
 				await create_timer(0.05).timeout
 				_expect(
 					failures,
-					is_equal_approx(bullet.rotation, first_bullet_dir.angle() - PI * 0.5),
+					is_equal_approx(bullet.global_rotation, first_bullet_dir.angle() + PI * 0.5),
 					"fired bullet stays on the telegraphed path while player moves",
 				)
 				_expect(
@@ -232,24 +232,24 @@ func _check_released_aim_telegraph(failures: PackedStringArray, world: Node2D) -
 	await process_frame
 
 
-func _find_bullet() -> SniperBullet:
+func _find_bullet() -> FoundationBullet:
 	for node in root.get_children():
-		if node is SniperBullet:
-			return node as SniperBullet
+		if node is FoundationBullet:
+			return node as FoundationBullet
 	for node in root.get_children():
 		for child in node.get_children():
-			if child is SniperBullet:
-				return child as SniperBullet
+			if child is FoundationBullet:
+				return child as FoundationBullet
 	return null
 
 
 func _count_bullets() -> int:
 	var count := 0
 	for node in root.get_children():
-		if node is SniperBullet:
+		if node is FoundationBullet:
 			count += 1
 		for child in node.get_children():
-			if child is SniperBullet:
+			if child is FoundationBullet:
 				count += 1
 	return count
 

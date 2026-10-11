@@ -43,4 +43,4 @@ func get_count() -> int:
 
 func _remove(bullet: Variant) -> void:
 	if is_instance_valid(bullet):
-		EnemyBullets.remove_effect(bullet as Node2D, handle)
+		EnemyBullets.remove_effect(bullet as Node, handle)

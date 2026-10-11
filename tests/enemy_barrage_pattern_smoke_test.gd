@@ -28,7 +28,7 @@ func actor(path: String, pressure := 0) -> EnemyShootComponent:
 	return shoot
 
 func start(shoot: EnemyShootComponent, batches: Array) -> void:
-	shoot.barrage_player.volley_fired.connect(func(bullets: Array[Node2D]): batches.append(bullets))
+	shoot.barrage_player.volley_fired.connect(func(bullets: Array[Node]): batches.append(bullets))
 	shoot._start_pattern()
 	shoot.barrage_player.set_physics_process(false)
 
@@ -115,7 +115,7 @@ func run() -> void:
 
 	var interceptor := actor("res://enemies/interceptor_enemy.tscn")
 	var shots: Array = []
-	interceptor.barrage_player.volley_fired.connect(func(bullets: Array[Node2D]): shots.append(bullets))
+	interceptor.barrage_player.volley_fired.connect(func(bullets: Array[Node]): shots.append(bullets))
 	interceptor.enemy.position.x = -30
 	interceptor._process(0.1)
 	expect(not interceptor.has_visible_pass_started(), "Interceptor waits outside viewport")
@@ -134,7 +134,7 @@ func run() -> void:
 
 	var dense := actor("res://enemies/interceptor_enemy.tscn", 6)
 	var dense_shots: Array = []
-	dense.barrage_player.volley_fired.connect(func(bullets: Array[Node2D]): dense_shots.append(bullets))
+	dense.barrage_player.volley_fired.connect(func(bullets: Array[Node]): dense_shots.append(bullets))
 	dense._process(0)
 	dense.fire_timer.stop()
 	dense._start_pattern()
@@ -146,7 +146,7 @@ func run() -> void:
 	# A dead emitter cancels future fire but leaves existing world bullets alive.
 	drone._start_pattern()
 	drone.barrage_player.set_physics_process(false)
-	var survivor: Node2D = drone_batches[0][0]
+	var survivor: Node = drone_batches[0][0]
 	var shot_total := drone_batches.size()
 	# Detach the runner to verify its emitter lifetime binding independently.
 	var runner := drone.barrage_player

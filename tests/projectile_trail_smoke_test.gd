@@ -68,7 +68,7 @@ func run() -> void:
 	short_tail.lifetime = 0.22
 	shot.trail_effect = short_tail
 	var bullet := shot.spawn(world, Vector2(100, 80), Vector2.DOWN, 100) as FoundationBullet
-	bullet.set_physics_process(false)
+	bullet.simulating = false
 	bullet._physics_process(0.1)
 	expect(manager.particles.size() == 5, "body submits swept positions")
 	bullet.queue_free()

@@ -24,12 +24,13 @@ func shot(behavior: BulletBehavior, kind := BarrageShot.Kind.BULLET) -> BarrageS
 	result.lifetime = 8
 	return result
 
-func spawn(recipe: BarrageShot, speed := 20.0, tracked: Node2D = target) -> Node2D:
+func spawn(recipe: BarrageShot, speed := 20.0, tracked: Node2D = target) -> Node:
 	var bullet := recipe.spawn(world, Vector2(200, 100), Vector2.DOWN, speed, false, tracked, resolver)
-	bullet.set_physics_process(false)
+	if bullet is FoundationBullet: bullet.simulating = false
+	else: bullet.set_physics_process(false)
 	return bullet
 
-func update(bullet: Node2D, time: float) -> void:
+func update(bullet: Node, time: float) -> void:
 	bullet.age = time
 	if bullet is CurvedLaser: bullet._update_body()
 	else: bullet._update_pose()
@@ -84,7 +85,7 @@ func run() -> void:
 	viewport.add_child(foreign)
 	foreign.position = Vector2(500, 100)
 	var isolated := shot(BulletBehavior.new().homing(90, 1)).spawn(world, Vector2(200, 100), Vector2.DOWN, 20, false, foreign, func(): return "invalid")
-	isolated.set_physics_process(false)
+	isolated.simulating = false
 	update(isolated, 0.2)
 	expect(isolated.behavior_state.sample(0.2).heading == 0, "foreign viewport and malformed provider cannot steer")
 	viewport.queue_free()
@@ -122,7 +123,7 @@ func run() -> void:
 	expect(laser.position_at(0.2) == tail, "laser keeps old tail after target changes")
 	expect(laser._body[-1].distance_to(laser.global_position) < 0.001, "laser visible head matches physical position")
 	# Pause uses the same engine clock as existing projectiles.
-	seeker.set_physics_process(true)
+	seeker.simulating = true
 	var frozen: Vector2 = seeker.global_position
 	paused = true
 	await create_timer(0.05, true).timeout
@@ -159,7 +160,7 @@ func test_player_and_collision() -> void:
 	emitter.position = Vector2(200, 100)
 	var player := BarragePlayer.new()
 	world.add_child(player)
-	var projectiles: Array[Node2D] = []
+	var projectiles: Array[Node] = []
 	player.volley_fired.connect(func(nodes): projectiles.assign(nodes))
 	var sequence := BarrageSequence.new().fire_fan(shot(BulletBehavior.new().homing(180, 2)), 1, 0, 90)
 	target.position = Vector2(500, 100)
@@ -195,14 +196,17 @@ func test_lab() -> void:
 	lab.pattern_player.stop()
 	expect(lab.get_pattern_id() == &"homing_round" and root.gui_get_focus_owner() == lab.pattern_choice, "homing Lab starts with keyboard focus and homing selected")
 	for node in get_nodes_in_group("enemy_projectiles"):
-		node.set_physics_process(false)
+		if node is FoundationBullet: node.simulating = false
+		else: node.set_physics_process(false)
 	for selection in [&"homing_round", &"homing_laser"]:
 		lab.select_pattern(selection)
 		lab.pattern_player.stop()
 		await process_frame
 		var bullets := get_nodes_in_group("enemy_projectiles")
 		expect(bullets.size() == 3, "homing Lab emits three projectiles")
-		for node in bullets: node.set_physics_process(false)
+		for node in bullets:
+			if node is FoundationBullet: node.simulating = false
+			else: node.set_physics_process(false)
 		for tick in 90:
 			lab.target.position = Vector2(208 + 100 * sin(tick / 60.0 * 2), 230)
 			for node in bullets: update(node, (tick + 1) / 60.0)
