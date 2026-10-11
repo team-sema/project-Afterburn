@@ -94,7 +94,7 @@
 | `HoldPositionMovementStep` | 위치 고정(무한) MovementStep |
 | `EnemyFireVolumeBoostComponent` | 위기: 탄수·스프레드 증가 (`augment_behaviors/`) |
 | `CounterShotComponent` | 피격/사망 반격 탄 *(풀에서 제외, 레거시)* |
-| `DeathBurstComponent` | 적 증강 유폭: 일반 적 사망 시 느린 탄 링 (`augment_behaviors/`) |
+| `DeathBurstComponent` | 적 증강 유폭: 일반 적 사망 시 곧 사라지는 근거리 탄 링 (`augment_behaviors/`) |
 | `ArmorPlateComponent` | 적 증강 장갑판: 일반 적의 `HurtComponent.armor_hits` +1 · 장갑 표시 원 · 엘리트·보스는 붙자마자 제거 (`augment_behaviors/`) |
 | `EnemyEvolutionMark` | 진화형 적의 금색 맥동 외곽 — `Anchor/Core` 텍스처를 1.5배로 복사해 뒤에 그림 |
 | `WakeShotComponent` | 진화 Striker: 편대 해제 뒤 이동 방향 좌우로 느린 탄 한 쌍을 일정 간격으로 흘림 |

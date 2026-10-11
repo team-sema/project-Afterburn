@@ -45,7 +45,7 @@
 
 - `EnemySpawner`가 `ForwardAttackRun`을 좌→우 / 우→좌 랜덤 + dive 각도(약 15~29°)로 배치
 - 스폰 Y: VisibleRect 높이의 약 16~38% 상단 밴드
-- 기체별 경고는 공용 기본 크기의 0.6배를 사용해 편대의 인접 눈금 겹침을 줄인다. 왕복 경고도 같은 크기이며 색·크기를 설정할 수 있다.
+- 기체별 경고는 공용 기본 크기(1.0배)를 사용해 등장 방향을 멀리서도 읽히게 한다. 왕복 경고도 같은 크기이며 색·크기를 설정할 수 있다(`ReturnPassComponent.warning_scale`).
 - `start_delay=0.9` 동안 `EntryWarningComponent`가 좌/우 등장 가장자리에 경고 (청록색 공용 방위각 표시, 화살표는 실제 진입 궤도 방향)
 - `ForwardAttackRunMovementStep`: 편대 루트를 진행 방향으로 회전 후 local forward 210px/s. clamp·bounce·재추적 없음
 - 화면 진입 후 **0.7초** 사격 창 · **5발 burst 1회만** (`gap` 0.1, `rest` 10으로 재공격 차단)
