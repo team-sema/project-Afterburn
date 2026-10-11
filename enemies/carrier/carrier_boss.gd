@@ -322,8 +322,23 @@ func _draw_hull_detail() -> void:
 
 func _draw() -> void:
 	# Keep the deck dark so the weapon cores and projectiles stay in front.
-	var hull := PackedVector2Array([Vector2(0,-860),Vector2(165,-680),Vector2(198,-560),Vector2(180,75),Vector2(145,145),Vector2(-145,145),Vector2(-180,75),Vector2(-198,-560),Vector2(-165,-680)])
+	# Follow the SVG's separate stern armor blades instead of closing the deck
+	# with a broad horizontal slab. Engine roots keep a central mounting spine.
+	var stern_right := PackedVector2Array([
+		Vector2(183,-51),Vector2(171,65),Vector2(154,103),
+		Vector2(148,157),Vector2(133,126),Vector2(122,65),
+		Vector2(99,32),Vector2(85,101),Vector2(70,120),
+		Vector2(62,158),Vector2(48,124),Vector2(37,112),
+		Vector2(35,136),Vector2(9,136),Vector2(0,113),
+	])
+	var stern := stern_right.duplicate()
+	for i in range(stern_right.size()-2,-1,-1):
+		stern.append(Vector2(-stern_right[i].x,stern_right[i].y))
+	var hull := PackedVector2Array([Vector2(0,-860),Vector2(165,-680),Vector2(198,-560)])
+	hull.append_array(stern)
+	hull.append_array(PackedVector2Array([Vector2(-198,-560),Vector2(-165,-680)]))
 	draw_colored_polygon(hull, Color("0d0915"))
+	draw_polyline(stern,Color("382034"),1.0,true)
 	# Inset flight deck and launch rails belong to the moving hull, not the HUD.
 	var flight_deck := PackedVector2Array([Vector2(-78,-359),Vector2(78,-359),Vector2(80,-188),Vector2(59,-156),Vector2(-59,-156),Vector2(-80,-188)])
 	draw_colored_polygon(flight_deck, Color("170e20"))

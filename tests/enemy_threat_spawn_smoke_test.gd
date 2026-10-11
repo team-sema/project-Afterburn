@@ -77,6 +77,7 @@ func _run() -> void:
 func _test_generator_and_pool_shape() -> void:
 	_expect(progression.get_threat_level() == 1, "run starts at Threat 1")
 	_expect(generator.current_threat_level == 1, "generator reads the initial Threat level")
+	_expect(augment_registry.threat_level == 1, "generator syncs Threat into the augment registry")
 	_expect(is_equal_approx(generator.spawn_interval, 2.8), "normal encounters spawn every 2.8 seconds")
 	_expect(is_equal_approx(generator.spawn_interval_jitter, 0.3), "normal spawn jitter is 0.3 seconds")
 	_expect(pool != null and pool.validate(), "EnemyGenerator references one valid MainEncounterPool")
@@ -520,7 +521,11 @@ func _test_spawn_scoped_augments() -> void:
 		var bomb_fuse := bomb.get_node("BombProximityFuseComponent")
 		var actual_arm_duration := float(bomb_fuse.get("arm_duration"))
 		_expect(
-			is_equal_approx(actual_arm_duration, 3.0 / 1.5),
+			bomb.get_barrage_pressure() == generator.current_threat_level - 1 + 4,
+			"Bomb pressure is Threat - 1 plus the fast fuse bonus",
+		)
+		_expect(
+			is_equal_approx(actual_arm_duration, BarragePressure.scale(3.0, 2.0, bomb.get_barrage_pressure())),
 			"Bomb fast fuse applies to formation Bombs without spawn-id gate",
 		)
 	# bomb_pair releases its Bombs right away, which also frees the controller.

@@ -6,6 +6,8 @@ extends Node
 ## Plays itself only when a current scene exists (same gate as the director),
 ## so tests that attach gameplay.tscn drive it with play() + advance().
 
+signal launch_started
+signal launch_advanced(time: float)
 signal launch_finished
 
 const MUSIC_BUS := &"Music"
@@ -93,6 +95,7 @@ func play() -> void:
 		return
 	is_launching = true
 	elapsed = 0.0
+	launch_started.emit()
 	_sfx_played = false
 	_controls_unlocked = false
 	_home_position = ship.position
@@ -115,6 +118,7 @@ func advance(delta: float) -> void:
 	if not is_launching:
 		return
 	elapsed += delta
+	launch_advanced.emit(elapsed)
 	_update_ship()
 	_update_background()
 	_update_audio()

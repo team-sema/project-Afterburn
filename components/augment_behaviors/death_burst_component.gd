@@ -1,13 +1,14 @@
 class_name DeathBurstComponent
 extends Node
 
-## Releases a slow ring of shots when an ordinary enemy is destroyed.
+## Releases a short-lived ring of shots when an ordinary enemy is destroyed.
+## The shot shrinks away within its lifetime, so only close-range kills risk it.
 
 @export var barrage_shot: BarrageShot
 @export_range(1, 32, 1) var shot_count := 4
 ## Ring start angle from world-down. 45 keeps every shot off the straight-down lane.
 @export_range(0.0, 360.0, 1.0) var angle_degrees := 45.0
-@export_range(1.0, 1000.0, 1.0) var projectile_speed := 60.0
+@export_range(1.0, 1000.0, 1.0) var projectile_speed := 90.0
 
 var enemy: Enemy
 

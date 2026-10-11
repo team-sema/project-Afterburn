@@ -12,7 +12,7 @@ signal shield_absorbed(damage: int)
 signal charge_changed(progress: float)
 
 ## 시설 보너스를 뺀 기본 최대 실드. 런 시작 시 현재=최대.
-@export var base_max_shield := 1
+@export var base_max_shield := 2
 ## 실드 1칸을 채우는 데 걸리는 초 (현재 < 최대일 때).
 @export_range(0.5, 120.0, 0.1) var regen_charge_duration := 30.0
 

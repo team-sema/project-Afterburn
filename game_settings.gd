@@ -7,6 +7,7 @@ extends Node
 
 signal volume_changed(bus: StringName, value: float)
 signal fullscreen_changed(enabled: bool)
+signal combat_event_log_changed(enabled: bool)
 
 const SETTINGS_PATH := "user://settings.cfg"
 const AUDIO_SECTION := "audio"
@@ -26,6 +27,7 @@ var save_enabled := true
 
 var _volumes := {}
 var _fullscreen := false
+var _combat_event_log := true
 var _save_timer: Timer
 var _save_pending := false
 
@@ -83,6 +85,16 @@ func set_fullscreen(enabled: bool) -> void:
 	fullscreen_changed.emit(enabled)
 
 
+func is_combat_event_log_enabled() -> bool:
+	return _combat_event_log
+
+func set_combat_event_log_enabled(enabled: bool) -> void:
+	if _combat_event_log == enabled:
+		return
+	_combat_event_log = enabled
+	_queue_save()
+	combat_event_log_changed.emit(enabled)
+
 ## 대기 중인 변경을 즉시 저장한다.
 func flush() -> void:
 	if not _save_pending:
@@ -97,6 +109,7 @@ func flush() -> void:
 	for bus in VOLUME_KEYS:
 		config.set_value(AUDIO_SECTION, VOLUME_KEYS[bus], get_volume(bus))
 	config.set_value(DISPLAY_SECTION, FULLSCREEN_KEY, _fullscreen)
+	config.set_value(DISPLAY_SECTION, "combat_event_log", _combat_event_log)
 	var error := config.save(SETTINGS_PATH)
 	if error != OK:
 		push_warning("Failed to save settings: %s" % error_string(error))
@@ -112,6 +125,7 @@ func _load() -> void:
 			value = config.get_value(AUDIO_SECTION, VOLUME_KEYS[bus], fallback)
 		_volumes[bus] = clampf(float(value), 0.0, 1.0)
 	_fullscreen = loaded and bool(config.get_value(DISPLAY_SECTION, FULLSCREEN_KEY, false))
+	_combat_event_log = bool(config.get_value(DISPLAY_SECTION, "combat_event_log", true))
 
 
 func _current_bus_volume(bus: StringName) -> float:

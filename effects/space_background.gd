@@ -19,6 +19,13 @@ const PLANET_RING_TILT := -0.35
 const ORBITAL_RING_SHADER := preload("res://effects/orbital_ring.gdshader")
 
 @export_range(0.0, 20.0, 0.01) var speed_scale := 1.0
+## Horizontal px drawn beyond each side of the visible rect (lane). Layers keep
+## their lane-relative placement; only their rects extend into the bleed.
+@export_range(0.0, 320.0, 1.0) var bleed := 0.0:
+	set(value):
+		bleed = value
+		if is_node_ready():
+			_apply_bleed()
 ## 성운·실루엣·행성·궤도 링 데이터. null이면 별밭만 그린다.
 @export var backdrop: BackdropTheme:
 	set(value):
@@ -37,7 +44,9 @@ var _streak_layer: StreakLayer
 var _nebula_layer: ParallaxLayer
 var _rock_layer: ParallaxLayer
 var _orbital_ring: ColorRect
+var _base_tint: ColorRect
 var _orbital_elapsed := 0.0
+var _built_size := Vector2.ZERO
 
 
 class StreakLayer:
@@ -137,12 +146,32 @@ func _update_streaks(delta: float) -> void:
 
 func _resize_to_viewport() -> void:
 	var viewport_size: Vector2 = get_viewport().get_visible_rect().size
-	for texture_rect in [space, far_stars, close_stars]:
-		texture_rect.position = Vector2.ZERO
-		texture_rect.size = viewport_size
 	for parallax_layer in [space_layer, far_stars_layer, close_stars_layer]:
 		parallax_layer.motion_mirroring.y = viewport_size.y
+	# The render target may grow or shrink (bleed) without changing the lane;
+	# only a lane change rebuilds the theme layers, so scroll offsets survive.
+	if viewport_size == _built_size:
+		_apply_bleed()
+		return
+	_built_size = viewport_size
+	_apply_bleed()
 	_build_backdrop()
+
+
+## Stretches the full-width rects sideways by `bleed` without rebuilding.
+func _apply_bleed() -> void:
+	var viewport_size: Vector2 = get_viewport().get_visible_rect().size
+	var rect_position := Vector2(-bleed, 0.0)
+	var rect_size := viewport_size + Vector2(bleed * 2.0, 0.0)
+	for rect in [space, far_stars, close_stars, _base_tint, _orbital_ring]:
+		if rect == null:
+			continue
+		rect.position = rect_position
+		rect.size = rect_size
+	if _orbital_ring != null:
+		var ring_material := _orbital_ring.material as ShaderMaterial
+		ring_material.set_shader_parameter("rect_size", rect_size)
+		ring_material.set_shader_parameter("rect_offset", rect_position)
 
 
 ## Rebuilds theme layers for the current viewport. Nebula and rocks tile vertically;
@@ -154,6 +183,7 @@ func _build_backdrop() -> void:
 	if _nebula_layer != null:
 		_nebula_layer.free()
 		_nebula_layer = null
+		_base_tint = null
 	if _rock_layer != null:
 		_rock_layer.free()
 		_rock_layer = null
@@ -167,8 +197,10 @@ func _build_backdrop() -> void:
 	var base := ColorRect.new()
 	base.name = "BaseTint"
 	base.color = backdrop.base_tint
-	base.size = viewport_size
+	base.position = Vector2(-bleed, 0.0)
+	base.size = viewport_size + Vector2(bleed * 2.0, 0.0)
 	_nebula_layer.add_child(base)
+	_base_tint = base
 	for index in backdrop.nebula_count():
 		var disc := _make_soft_disc(backdrop.nebula_colors[index], backdrop.nebula_radii[index])
 		disc.name = "Nebula%d" % index
@@ -205,10 +237,13 @@ func _build_backdrop() -> void:
 		_orbital_ring = ColorRect.new()
 		_orbital_ring.name = "OrbitalRing"
 		_orbital_ring.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		_orbital_ring.size = viewport_size
+		_orbital_ring.position = Vector2(-bleed, 0.0)
+		_orbital_ring.size = viewport_size + Vector2(bleed * 2.0, 0.0)
 		var ring_material := ShaderMaterial.new()
 		ring_material.shader = ORBITAL_RING_SHADER
 		ring_material.set_shader_parameter("viewport_size", viewport_size)
+		ring_material.set_shader_parameter("rect_size", _orbital_ring.size)
+		ring_material.set_shader_parameter("rect_offset", _orbital_ring.position)
 		ring_material.set_shader_parameter("elapsed", _orbital_elapsed)
 		_orbital_ring.material = ring_material
 		add_child(_orbital_ring)

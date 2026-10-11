@@ -1,7 +1,8 @@
 extends BarrageSequence
 ## Textured needle body with batched glow; schedule remains API-driven.
+## Barrage pressure shortens only the rest (`rest_limit`), never the single shot.
 
-func _init() -> void:
+func build(params: Dictionary) -> void:
 	var volley := BarrageVolley.new()
 	volley.shot = BarrageShot.new()
 	volley.shot.appearance = preload("res://resources/projectiles/needle.tres")
@@ -11,5 +12,6 @@ func _init() -> void:
 	volley.aim = BarrageVolley.Aim.EACH_SHOT
 	volley.speed = 105.0
 	fire(volley)
-	wait(4.5)
+	var pressure := int(params.get("pressure", 0))
+	wait(BarragePressure.scale(4.5, float(params.get("rest_limit", 2.5)), pressure))
 	repeat()

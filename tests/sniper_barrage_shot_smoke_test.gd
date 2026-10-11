@@ -1,4 +1,7 @@
 extends SceneTree
+## SniperBarrageShot spawns a pooled FoundationBullet: range becomes lifetime,
+## width sizes the streak and its collision rectangle, damage rides on the body,
+## and the round obeys the enemy bullet contract (group, effects, cancel).
 
 var failures: Array[String] = []
 
@@ -24,20 +27,30 @@ func run() -> void:
 	var copied := copy.steps[0].volley.shot as SniperBarrageShot
 	expect(copied != null and copied.damage == 3, "snapshot preserves specialized settings independently")
 	var origin := Vector2(80, 60)
-	var bullet := copied.spawn(world, origin, Vector2.RIGHT, 900) as SniperBullet
-	expect(bullet != null, "adapter spawns specialized body")
+	var bullet := copied.spawn(world, origin, Vector2.RIGHT, 900) as FoundationBullet
+	expect(bullet != null, "adapter spawns a pooled bullet")
 	if bullet != null:
-		bullet.set_physics_process(false)
+		bullet.simulating = false
 		expect(bullet.is_in_group("enemy_projectiles"), "cancel/reward group retained")
-		expect(bullet.global_position.is_equal_approx(origin) and is_equal_approx(bullet.global_rotation, -PI / 2), "world position and rotation under transformed parent")
-		expect(bullet._shape.size == Vector2(4, 30) and bullet._hitbox.damage == 3, "high-speed hitbox and damage retained")
-		var finished_count := [0]
-		bullet.finished.connect(func(): finished_count[0] += 1)
+		expect(bullet.global_position.is_equal_approx(origin) and is_equal_approx(bullet.global_rotation, PI * 0.5), "world position and travel rotation (sprite up = travel, so right is +90°)")
+		expect(bullet.collision_shape() is RectangleShape2D and bullet.collision_shape().size == Vector2(4, 30) and bullet.damage == 3, "high-speed hitbox and damage retained")
+		expect(is_equal_approx(bullet.lifetime, 240.0 / 900.0), "range becomes lifetime")
+		expect(bullet.appearance.form == BulletAppearance.Form.TEXTURED and is_equal_approx(bullet.appearance.core_size.x, 4.0), "width scales the streak sprite")
+		expect(bullet._straight, "sniper round takes the straight fast path")
+		var gone := [0]
+		bullet.tree_exiting.connect(func(): gone[0] += 1)
 		bullet._physics_process(1.0)
 		expect(bullet.global_position.is_equal_approx(origin + Vector2(240, 0)), "range clamps long frame travel")
-		expect(finished_count[0] == 1 and bullet.is_queued_for_deletion(), "range ends body once")
-		bullet._finish()
-		expect(finished_count[0] == 1, "finish is idempotent")
+		expect(bullet.is_queued_for_deletion(), "range ends body")
+		await process_frame
+		expect(gone[0] == 1 and not is_instance_valid(bullet), "body frees itself once at range")
+	# Trajectory effects apply like any other enemy bullet (time warp, brink, singularity).
+	var slowed := copied.spawn(world, origin, Vector2.RIGHT, 900) as FoundationBullet
+	if slowed != null:
+		slowed.simulating = false
+		expect(EnemyBullets.apply_effect(slowed, &"test", 0.5), "sniper round accepts trajectory effects")
+		expect(slowed.get_travel_velocity().is_equal_approx(Vector2.RIGHT * 450), "slow field halves the round's speed")
+		expect(EnemyBullets.cancel(world, slowed, &"lab"), "sniper round can be cancelled")
 	shot.bullet_width = NAN
 	expect(not shot.is_valid() and shot.spawn(world, origin, Vector2.DOWN, 900) == null, "invalid settings rejected")
 	world.queue_free()

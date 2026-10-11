@@ -30,7 +30,8 @@ func run() -> void:
 	player.volley_fired.connect(func(nodes):
 		volleys.append(nodes)
 		for node in nodes:
-			node.set_physics_process(false))
+			if node is FoundationBullet: node.simulating = false
+			else: node.set_physics_process(false))
 	player.finished.connect(func(): completions += 1)
 	var volley := recipe()
 	volley.layout = BarrageVolley.Layout.FAN

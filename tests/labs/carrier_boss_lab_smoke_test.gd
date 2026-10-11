@@ -82,7 +82,7 @@ func run() -> void:
 	lab.ship.position.x = 230
 	gun._process_weapon(0.1)
 	check(is_equal_approx(gun.pivot.rotation, locked_angle), "Final warning locks the barrel despite target movement")
-	var fired: Array[Node2D] = []
+	var fired: Array[Node] = []
 	gun.barrage.volley_fired.connect(func(projectiles): fired.append_array(projectiles), CONNECT_ONE_SHOT)
 	gun.cooldown = 0
 	var muzzle_origin: Vector2 = gun.muzzle.global_position
@@ -230,7 +230,15 @@ func run() -> void:
 	check(boss.destruction_complete and not boss.visible and boss.position.y > 750, "Carrier finishes its sinking sequence and fades out")
 	check(lab.camera.zoom.is_equal_approx(Vector2.ONE*0.28), "Pullback reveals the full hull")
 	var backgrounds: Array = lab.world.get_children().filter(func(child): return child.get_script() == preload("res://labs/bosses/carrier/carrier_background.gd"))
-	check(backgrounds.size() == 1 and backgrounds[0].tiles[0].get_global_transform_with_canvas().get_scale().is_equal_approx(Vector2.ONE), "Starfield keeps screen coverage at the smallest camera zoom")
+	check(backgrounds.size() == 1 and backgrounds[0].background_viewport.size == Vector2i(300,360), "Game background keeps screen coverage at the smallest camera zoom")
+	if backgrounds.size() == 1:
+		var background: SpaceBackground = backgrounds[0].background
+		check(background.backdrop == preload("res://resources/backdrop/default_backdrop.tres") and background._orbital_ring != null, "Lab uses the actual game theme and orbital ring")
+		var background_age := background._orbital_elapsed
+		lab.toggle_pause()
+		await create_timer(0.1,true).timeout
+		check(background._orbital_elapsed == background_age, "Pause freezes the game background too")
+		lab.toggle_pause()
 	check(get_nodes_in_group("carrier_destruction_effects").is_empty(), "All explosion and debris effects clean themselves up")
 	lab.toggle_pause()
 	lab.restart()

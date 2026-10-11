@@ -1,0 +1,37 @@
+[gd_resource type="Resource" script_class="BarrageShot" format=3 uid="uid://mly0rxvsopkj"]
+
+[ext_resource type="Script" uid="uid://cllhljtf4jfsc" path="res://projectiles/barrage_shot.gd" id="1"]
+[ext_resource type="Script" uid="uid://decidrufsjx8w" path="res://projectiles/bullet_behavior.gd" id="2"]
+[ext_resource type="Script" uid="uid://chw3u3xfqd8f4" path="res://projectiles/bullet_action.gd" id="3"]
+[ext_resource type="Resource" uid="uid://bl7s3e10gxigx" path="res://resources/projectiles/orb.tres" id="4"]
+
+[sub_resource type="Resource" id="VisualShrink"]
+script = ExtResource("3")
+type = 9
+duration = 0.7
+value = 0.15
+transition_type = 7
+ease_type = 0
+
+[sub_resource type="Resource" id="HitboxShrink"]
+script = ExtResource("3")
+type = 10
+duration = 0.7
+value = 0.15
+transition_type = 7
+ease_type = 0
+
+[sub_resource type="Resource" id="Shrink"]
+script = ExtResource("3")
+type = 11
+children = Array[ExtResource("3")]([SubResource("VisualShrink"), SubResource("HitboxShrink")])
+
+[sub_resource type="Resource" id="Behavior"]
+script = ExtResource("2")
+actions = Array[ExtResource("3")]([SubResource("Shrink")])
+
+[resource]
+script = ExtResource("1")
+appearance = ExtResource("4")
+behavior = SubResource("Behavior")
+lifetime = 0.7

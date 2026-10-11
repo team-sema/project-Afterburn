@@ -2,11 +2,9 @@ class_name CurvedLaser
 extends Node2D
 
 const SEGMENTS := 36
-## Each capsule spans this many drawn segments; 12 capsules cover the body.
-const COLLISION_STRIDE := 3
 const BATCH_RENDERER = preload("res://projectiles/projectile_batch_renderer.gd")
 @export var use_batched_rendering := true
-const LASER_HITBOX := preload("res://projectiles/curved_laser_hitbox.gd")
+const DEBUG_COLOR := Color(0.1, 1, 0.65, 0.65)
 
 @export var behavior: BulletBehavior
 @export var trail_effect: BulletTrailEffect
@@ -38,9 +36,10 @@ var _speed := 90.0
 var _active := false
 var _seen := false
 var _static_visuals := false
-var _hitbox: LASER_HITBOX
-var _collisions: Array[CollisionShape2D] = []
-var _collision_factors := PackedFloat32Array()
+## Shape-less HitboxComponent handed to hurtboxes as the damage source; the
+## body is tested on the CPU against EnemyBullets.TARGET_GROUP every tick.
+var _hitbox: HitboxComponent
+var _targets: Array[EnemyBulletPool.Target] = []
 var _body := PackedVector2Array()
 var _ribbon_offsets := PackedVector2Array()
 var _profile := PackedFloat32Array()
@@ -53,17 +52,12 @@ var _bounce: BulletWallBounce
 func _ready() -> void:
 	for index in range(SEGMENTS + 1):
 		_profile.append(maxf(0.08, pow(sin(PI * float(index) / SEGMENTS), 0.55)) * 0.5)
-	_hitbox = LASER_HITBOX.new()
+	_hitbox = HitboxComponent.new()
 	_hitbox.name = "HitboxComponent"
-	_hitbox.collision_layer = EnemyBullets.LAYER
-	_hitbox.collision_mask = 1
-	for index in SEGMENTS / COLLISION_STRIDE:
-		var collision := CollisionShape2D.new()
-		collision.shape = CapsuleShape2D.new()
-		collision.disabled = true
-		_collisions.append(collision)
-		_collision_factors.append(_collision_width_factor(index))
-		_hitbox.add_child(collision)
+	_hitbox.collision_layer = 0
+	_hitbox.collision_mask = 0
+	_hitbox.monitoring = false
+	_hitbox.monitorable = false
 	add_child(_hitbox)
 	if use_batched_rendering:
 		BATCH_RENDERER.register(self)
@@ -107,8 +101,6 @@ func launch(direction: Vector2, speed: float) -> void:
 	age = 0
 	_active = true
 	_seen = false
-	for index in _collisions.size():
-		(_collisions[index].shape as CapsuleShape2D).radius = hit_width * 0.5 * _collision_width_factor(index)
 	# The first update runs the full path; later ticks skip constant visuals.
 	_static_visuals = false
 	_update_body()
@@ -137,18 +129,13 @@ func width_factor(index: int) -> float:
 	return maxf(0.08, pow(sin(PI * (float(index) + 0.5) / SEGMENTS), 0.55))
 
 
-## Width at the middle of a capsule spanning COLLISION_STRIDE drawn segments.
-func _collision_width_factor(index: int) -> float:
-	return maxf(0.08, pow(sin(PI * (float(index) + 0.5) * COLLISION_STRIDE / SEGMENTS), 0.55))
-
-
 func _physics_process(delta: float) -> void:
 	if not _active:
 		return
 	age = minf(age + delta, lifetime)
 	_update_body()
 	if _trail != null: _trail.advance(global_position, delta)
-	_hitbox.apply_contacts()
+	apply_contacts()
 	var visible := false
 	var bounds := get_viewport_rect().grow(core_width * visual_scale * 2)
 	for point in _body:
@@ -177,26 +164,59 @@ func _update_body() -> void:
 	for index in range(1, count - 1):
 		_ribbon_offsets[index] = (_body[index + 1] - _body[index - 1]).normalized().orthogonal() * _profile[index]
 	_ribbon_offsets[count - 1] = (_body[count - 1] - _body[count - 2]).normalized().orthogonal() * _profile[count - 1]
-	var inverse := global_transform.affine_inverse()
-	# Adjacent capsules share an endpoint, so each body point transforms once.
-	var start := inverse * _body[0]
-	for index in _collisions.size():
-		var end := inverse * _body[(index + 1) * COLLISION_STRIDE]
-		var collision := _collisions[index]
-		if collision.disabled != (age <= 0.001):
-			collision.disabled = age <= 0.001
-		collision.position = (start + end) * 0.5
-		collision.rotation = (end - start).angle() - PI * 0.5
-		var capsule := collision.shape as CapsuleShape2D
-		var radius := hit_width * 0.5 * _collision_factors[index] * hitbox_scale
-		if not is_equal_approx(capsule.radius, radius):
-			capsule.radius = radius
-		var height := start.distance_to(end) + capsule.radius * 2
-		if not is_equal_approx(capsule.height, height):
-			capsule.height = height
-		start = end
-	if not use_batched_rendering:
+	if not use_batched_rendering or show_hitbox:
 		queue_redraw()
+
+
+## Half hit width at drawn segment `index` (same taper as the core).
+func segment_hit_radius(index: int) -> float:
+	return hit_width * 0.5 * width_factor(index) * hitbox_scale
+
+
+## CPU collision: every body segment against every player-side hurtbox shape.
+## Polling each tick means a player sitting inside a persistent laser is hit
+## again once immunity ends, like the old overlap polling.
+func apply_contacts() -> void:
+	if age <= 0.001 or _body.size() < 2 or not is_inside_tree():
+		return
+	EnemyBulletPool.collect_targets(get_tree(), _targets)
+	if _targets.is_empty():
+		return
+	var low := _body[0]
+	var high := _body[0]
+	for point in _body:
+		low = low.min(point)
+		high = high.max(point)
+	var margin := hit_width * 0.5 * hitbox_scale
+	for target in _targets:
+		var reach := margin + target.radius
+		if target.center.x < low.x - reach or target.center.x > high.x + reach or target.center.y < low.y - reach or target.center.y > high.y + reach:
+			continue
+		if target.hurtbox.is_invincible:
+			continue
+		for index in _body.size() - 1:
+			var hit: Variant = EnemyBulletPool.segment_hits(_body[index], _body[index + 1], segment_hit_radius(index), target)
+			if hit != null:
+				_hitbox.global_position = hit
+				_hitbox._on_hurtbox_entered(target.hurtbox)
+				break
+
+
+## True when `shape` at `shape_transform` overlaps any body segment
+## (EnemyBullets.query_shape).
+func overlaps_shape(shape: Shape2D, shape_transform: Transform2D) -> bool:
+	if not _active or age <= 0.001 or _body.size() < 2:
+		return false
+	var capsule := CapsuleShape2D.new()
+	for index in _body.size() - 1:
+		var a := _body[index]
+		var b := _body[index + 1]
+		capsule.radius = segment_hit_radius(index)
+		capsule.height = a.distance_to(b) + capsule.radius * 2.0
+		var xform := Transform2D((b - a).angle() - PI * 0.5, (a + b) * 0.5)
+		if shape.collide(shape_transform, capsule, xform):
+			return true
+	return false
 
 
 ## External trajectory effect on the laser head (see EnemyBullets.apply_effect).
@@ -251,18 +271,16 @@ func get_predicted_path(seconds: float) -> PackedVector2Array:
 
 
 func _draw() -> void:
-	if use_batched_rendering:
-		return
 	if age <= 0.001 or _body.size() < 2:
 		return
-	_draw_ribbon(core_width * 2.6, Color(1, 0.4, 0.03, 0.12))
-	_draw_ribbon(core_width * 1.5, Color(1, 0.75, 0.12, 0.55))
-	_draw_ribbon(core_width, Color(1, 0.98, 0.66))
+	if not use_batched_rendering:
+		_draw_ribbon(core_width * 2.6, Color(1, 0.4, 0.03, 0.12))
+		_draw_ribbon(core_width * 1.5, Color(1, 0.75, 0.12, 0.55))
+		_draw_ribbon(core_width, Color(1, 0.98, 0.66))
 	if show_hitbox:
-		for index in _collisions.size():
-			draw_set_transform(_collisions[index].position, _collisions[index].rotation)
-			_collisions[index].shape.draw(get_canvas_item(), Color(0.1, 1, 0.65, 0.65))
-		draw_set_transform(Vector2.ZERO)
+		# One capsule per segment: the exact CPU collision volume.
+		for index in _body.size() - 1:
+			draw_line(to_local(_body[index]), to_local(_body[index + 1]), DEBUG_COLOR, segment_hit_radius(index) * 2.0, true)
 
 
 func _draw_ribbon(width: float, color: Color) -> void:

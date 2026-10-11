@@ -1,5 +1,5 @@
 class_name WeaponLoadoutHud
-extends VBoxContainer
+extends Control
 
 ## STATUS weapon panel.
 ## Runtime bay/module hexes are duplicated from editor Templates (see %HudTemplates).
@@ -59,7 +59,7 @@ func _ready() -> void:
 		return
 	add_theme_constant_override("separation", 4)
 	if bay_title != null:
-		bay_title.text = "무기 모듈"
+		bay_title.text = "WEAPON MODULES"
 	if bay_subtitle != null:
 		bay_subtitle.visible = false
 	if bay_row != null:
@@ -78,7 +78,7 @@ func _ready() -> void:
 		modules_grid.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		modules_grid.hex_side = _module_hex_side()
 	if detail_rule != null:
-		detail_rule.visible = true
+		detail_rule.visible = false
 		detail_rule.custom_minimum_size = Vector2(0, 1)
 	if trait_detail != null:
 		trait_detail.visible = false
@@ -86,7 +86,7 @@ func _ready() -> void:
 	if detail_footer != null:
 		detail_footer.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		detail_footer.clip_text = true
-		detail_footer.max_lines_visible = 2
+		detail_footer.max_lines_visible = 1
 		detail_footer.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	_prepare_templates()
 	_ensure_selected_hex()
@@ -104,6 +104,9 @@ func _prepare_templates() -> void:
 
 
 func _weapon_hex_side() -> float:
+	var loadout := _get_loadout()
+	if bay_row != null and bay_row.aligned_row and loadout != null and loadout.get_max_equipped_weapon_count() > 3:
+		return 26.0
 	if bay_slot_template != null and bay_slot_template.custom_minimum_size.x > 0.0:
 		return bay_slot_template.custom_minimum_size.x
 	return 48.0
@@ -123,7 +126,7 @@ func _ensure_selected_hex() -> void:
 		return
 	_selected_hex.visible = true
 	_selected_hex.interactive = false
-	_selected_hex.apply_fixed_size(_weapon_hex_side())
+	_selected_hex.apply_fixed_size(44.0)
 	_selected_hex.border_width = 1.25
 	_selected_hex.border_color = Color(0.45, 0.9, 1.0, 0.95)
 	_selected_hex.fill_color = Color(0.05, 0.16, 0.28, 0.95)
@@ -232,6 +235,7 @@ func _rebuild_bays(loadout: PlayerWeaponLoadout) -> void:
 		_ensure_valid_focus(loadout)
 
 	var side := _weapon_hex_side()
+	bay_row.hex_side = side
 	while _bay_clusters.size() > count:
 		var surplus: WeaponCoreCluster = _bay_clusters.pop_back()
 		_bay_index_by_cluster.erase(surplus)
@@ -243,6 +247,8 @@ func _rebuild_bays(loadout: PlayerWeaponLoadout) -> void:
 		cluster.apply_slot_size(side, false)
 		_bay_clusters.append(cluster)
 	for index in count:
+		if not is_equal_approx(_bay_clusters[index].slot_size.x, side):
+			_bay_clusters[index].apply_slot_size(side, false)
 		_bind_cluster(_bay_clusters[index], loadout, index, index == _focused_bay_index)
 
 
@@ -356,9 +362,9 @@ func _refresh_detail(loadout: PlayerWeaponLoadout) -> void:
 		_show_empty_detail()
 		return
 	if selected_title != null:
-		selected_title.visible = true
+		selected_title.visible = false
 	if modules_title != null:
-		modules_title.visible = true
+		modules_title.visible = false
 	_ensure_selected_hex()
 	var icon := loadout.get_weapon_icon(_focused_weapon_id)
 	if _selected_hex != null:
@@ -419,10 +425,12 @@ func _show_trait_description(loadout: PlayerWeaponLoadout, trait_id: StringName)
 
 func _set_description(text: String) -> void:
 	if detail_rule != null:
-		detail_rule.visible = true
+		detail_rule.visible = false
 	if detail_footer != null:
 		detail_footer.visible = true
-		detail_footer.text = text
+		detail_footer.text = text.get_slice("\n", 0)
+		detail_footer.tooltip_text = text
+		detail_footer.mouse_filter = Control.MOUSE_FILTER_STOP
 	if trait_detail != null:
 		trait_detail.visible = false
 		trait_detail.text = ""
@@ -527,6 +535,8 @@ func _fit_module_hex_side(module_count: int) -> float:
 	var base := _module_hex_side()
 	if module_count <= MODULE_SLOT_COUNT:
 		return base
+	if modules_grid.aligned_row:
+		return (base * MODULE_SLOT_COUNT + 3.0 * (MODULE_SLOT_COUNT - module_count)) / float(module_count)
 	var inset := HexHoneycombContainer.FRAME_INSET * 2.0
 	var row_width := base + (base - inset) * 0.75 * float(MODULE_SLOT_COUNT - 1)
 	var steps := float(module_count - 1)

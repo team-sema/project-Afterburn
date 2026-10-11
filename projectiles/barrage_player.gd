@@ -2,7 +2,7 @@ class_name BarragePlayer
 extends Node
 ## Attach to the world; pass an independent emitter and projectile parent to play().
 
-signal volley_fired(projectiles: Array[Node2D])
+signal volley_fired(projectiles: Array[Node])
 signal finished
 
 var show_hitbox := false
@@ -157,7 +157,7 @@ func advance(seconds: float) -> void:
 					_index -= 1
 					return
 				emitted += count
-				var spawned: Array[Node2D] = []
+				var spawned: Array[Node] = []
 				var target := _target
 				if _needs_target and resolve_target.is_valid():
 					target = resolve_target.call() as Node2D

@@ -68,6 +68,10 @@
 - **즉시 점화**(`arm_on_ready`): 플레이어와의 거리와 관계없이 스폰되는 순간 무장해 3초 점멸 뒤 자폭한다(격추로 떨어진 폭탄도 같다). 폭발 60px · 다른 적 즉사 규칙은 일반 Bomb와 같다.
 - 점멸 중에 처치하면 터지지 않는다. 처치 시 점수·XP는 일반 Bomb와 같다(20).
 
+### 탄막 압력 해석
+
+[탄막 압력](../combat.md#탄막-압력) Courier 자신은 단계 `P`로 바뀌지 않는다. 호의 모양, 속도, 투하 시점은 그대로다. 투하한 정지형 Bomb는 투하 순간의 `P`로 스폰되어 [Bomb](bomb.md)의 해석표(무장 시간 단축)를 따른다.
+
 ## 관련 코드
 
 - `enemies/courier_enemy.tscn`, `enemies/courier_enemy.gd`, `components/bomb_courier_component.gd`

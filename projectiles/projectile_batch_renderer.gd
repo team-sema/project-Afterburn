@@ -1,5 +1,7 @@
 extends Node2D
-## One renderer per projectile parent. Simulation and physics remain on projectiles.
+## One renderer per projectile parent: merges CurvedLaser ribbons into ArrayMesh
+## commands and draws debug hitbox shapes. Pooled bullets are drawn by
+## EnemyBulletPool; this renderer only builds their meshes/materials.
 
 const DEBUG_SHADER = preload("res://projectiles/projectile_hitbox.gdshader")
 var projectiles: Array[Node2D] = []
@@ -81,23 +83,10 @@ func refresh() -> void:
 	for projectile in projectiles:
 		if not tree_visible or not projectile.visible:
 			continue
-		if projectile is FoundationBullet:
-			if not _vertices.is_empty():
-				_flush_lasers(laser_run)
-				laser_run += 1
-			var appearance_key: String = projectile._render_key
-			if appearance_key != previous_key:
-				run += 1
-				members_in_run = []
-				var key := str(run, ":", appearance_key)
-				groups[key] = members_in_run
-				_commands.append(key)
-			previous_key = appearance_key
-			members_in_run.append(projectile)
-		elif projectile is CurvedLaser and projectile.age > 0.001:
+		if projectile is CurvedLaser and projectile.age > 0.001:
 			previous_key = ""
 			_append_laser(projectile)
-		if projectile.show_hitbox:
+		if projectile.show_hitbox and "_hitbox" in projectile and projectile._hitbox != null:
 			for child in projectile._hitbox.get_children():
 				if child is CollisionShape2D and not child.disabled:
 					debug_shapes.append(child)
@@ -262,7 +251,7 @@ func _append_laser(laser: CurvedLaser) -> void:
 		colors.fill(color)
 		_colors.append_array(colors)
 
-func _make_bullet_mesh(appearance: BulletAppearance) -> ArrayMesh:
+static func _make_bullet_mesh(appearance: BulletAppearance) -> ArrayMesh:
 	var vertices := PackedVector2Array()
 	var colors := PackedColorArray()
 	var indices := PackedInt32Array()

@@ -1,23 +1,71 @@
 extends Control
 
-const MASTER_VOLUME_CONTROL_SCENE := preload("res://menus/master_volume_control.tscn")
+const COCKPIT_SCENE := preload("res://menus/cockpit_hud.gd")
+## While the cockpit panels are still sliding in, the playfield renders the
+## whole shell width so the uncovered sides show space instead of black.
+const LAUNCH_BLEED := CockpitGeometry.FIELD_LEFT
 const MENU_SCENE_PATH := "res://menus/menu.tscn"
 
+@onready var playfield_viewport: SubViewport = $Layout/Playfield/ViewportContainer/PlayfieldViewport
 @onready var gameplay: Node = $Layout/Playfield/ViewportContainer/PlayfieldViewport/Gameplay
 @onready var pause_overlay: PauseMenu = %PauseOverlay
 @onready var settings_menu: SettingsMenu = %SettingsMenu
 @onready var status_ship_panel: ShipPanel = $Layout/RightPanel/Margin/VBox/ShipPanel
-@onready var left_panel_content: VBoxContainer = $Layout/LeftPanel/Margin/VBox
+@onready var left_panel_content: Control = $Layout/LeftPanel/Margin/VBox
 @onready var weapon_loadout_hud: WeaponLoadoutHud = (
 	$Layout/RightPanel/Margin/VBox/WeaponBox/Margin/WeaponLoadoutHud
 )
 
 var _is_manual_pause := false
+var _field_bleed := -1.0
+var _window: Window
+var _previous_aspect: Window.ContentScaleAspect
+var _previous_scale_size: Vector2i
+var _side_fill: Control
+
+
+func _enter_tree() -> void:
+	# Only the World expands; menus and standalone lab viewports keep their policy.
+	_window = get_viewport() as Window
+	if _window != null:
+		_previous_aspect = _window.content_scale_aspect
+		_previous_scale_size = _window.content_scale_size
+		# Cockpit geometry is authored in 640x360 logical coordinates, regardless
+		# of the project viewport setting or the physical window resolution.
+		_window.content_scale_size = Vector2i(CockpitGeometry.SHELL_SIZE)
+		_window.content_scale_aspect = Window.CONTENT_SCALE_ASPECT_KEEP_HEIGHT
 
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	_add_master_volume_control()
+	var backing := ColorRect.new()
+	backing.color = Color(0.002, 0.005, 0.012)
+	backing.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	backing.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	add_child(backing)
+	move_child(backing, 0)
+	_side_fill = Control.new()
+	_side_fill.name = "WindowSideFill"
+	_side_fill.set_script(preload("res://effects/window_side_fill.gd"))
+	_side_fill.background = gameplay.get_node("SpaceBackground")
+	add_child(_side_fill)
+	move_child(_side_fill, 1)
+	var cockpit := Control.new()
+	cockpit.name = "CockpitHud"
+	cockpit.set_script(COCKPIT_SCENE)
+	$Layout.add_child(cockpit)
+	cockpit.configure(self)
+	var event_log := Control.new()
+	event_log.name = "CombatEventLog"
+	event_log.set_script(preload("res://menus/combat_event_log.gd"))
+	$Layout.add_child(event_log)
+	event_log.configure(gameplay.get_node("Ship/ShieldComponent"))
+	$Layout/LeftPanel/Margin/VBox/ProgressionHud.augment_ready_changed.connect(event_log.on_augment_ready)
+	var launch := gameplay.get_node("LaunchSequence") as LaunchSequence
+	event_log.configure_launch(launch)
+	launch.launch_started.connect(_apply_field_bleed.bind(LAUNCH_BLEED))
+	launch.launch_advanced.connect(_on_launch_advanced)
+	_apply_field_bleed(LAUNCH_BLEED if launch.is_launching else CockpitGeometry.FIELD_BLEED)
 	pause_overlay.resume_requested.connect(_set_manual_pause.bind(false))
 	pause_overlay.settings_requested.connect(_open_settings)
 	pause_overlay.main_menu_requested.connect(_return_to_menu)
@@ -37,12 +85,40 @@ func _ready() -> void:
 	assert(augment_selection != null, "World shell requires the augment selection overlay.")
 	augment_selection.configure_status_preview(status_ship_panel, weapon_loadout_hud)
 	augment_selection.configure_stage_limit($Layout/RightPanel)
+	resized.connect(_fit_window)
+	_fit_window()
 
 
-func _add_master_volume_control() -> void:
-	if left_panel_content.has_node("MasterVolumeControl"):
+func _fit_window() -> void:
+	$Layout.position.x = maxf(0.0, (size.x - CockpitGeometry.SHELL_SIZE.x) * 0.5)
+	_side_fill.fit_to_window(size)
+	var overlay := get_node("AugmentSelectionOverlay") as AugmentSelectionOverlay
+	overlay.configure_stage_limit($Layout/RightPanel)
+
+
+## The lane stays 340x360 for gameplay logic (visible rect), but the viewport
+## renders `bleed` px past each side: FIELD_BLEED once the cockpit is settled,
+## so the aperture, which is wider than the lane around the console shoulders,
+## never shows the lane edge; LAUNCH_BLEED while the panels deploy.
+func _apply_field_bleed(bleed: float) -> void:
+	if is_equal_approx(bleed, _field_bleed):
 		return
-	left_panel_content.add_child(MASTER_VOLUME_CONTROL_SCENE.instantiate())
+	_field_bleed = bleed
+	var container := playfield_viewport.get_parent() as SubViewportContainer
+	container.offset_left = -bleed
+	container.offset_right = bleed
+	playfield_viewport.global_canvas_transform = Transform2D(0.0, Vector2(bleed, 0.0))
+	var background := gameplay.get_node("SpaceBackground") as SpaceBackground
+	background.bleed = bleed
+
+
+func get_field_bleed() -> float:
+	return _field_bleed
+
+
+func _on_launch_advanced(time: float) -> void:
+	if time >= COCKPIT_SCENE.DEPLOY_END:
+		_apply_field_bleed(CockpitGeometry.FIELD_BLEED)
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -88,5 +164,8 @@ func _return_to_menu() -> void:
 
 
 func _exit_tree() -> void:
+	if is_instance_valid(_window):
+		_window.content_scale_size = _previous_scale_size
+		_window.content_scale_aspect = _previous_aspect
 	if _is_manual_pause and get_tree() != null:
 		get_tree().paused = false

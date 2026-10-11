@@ -4,6 +4,10 @@ render_mode unshaded;
 // A distant broken orbital megastructure. No TIME: the world owns its clock.
 uniform vec2 viewport_size = vec2(300.0, 360.0);
 uniform float elapsed = 0.0;
+// When the rect is larger than the lane (bleed), rect_size is its size and
+// rect_offset its position relative to the lane origin; zero keeps UV == lane.
+uniform vec2 rect_size = vec2(0.0);
+uniform vec2 rect_offset = vec2(0.0);
 
 float hash(vec2 p) {
 	return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
@@ -29,7 +33,8 @@ vec4 over(vec4 back, vec4 front) {
 void fragment() {
 	float unit = min(viewport_size.x, viewport_size.y);
 	float aa = 1.1 / unit;
-	vec2 screen = UV * viewport_size / unit;
+	vec2 lane_px = rect_size.x > 0.0 ? UV * rect_size + rect_offset : UV * viewport_size;
+	vec2 screen = lane_px / unit;
 	// In wide menus, lift the landmark clear of the central action list.
 	float wide_layout = smoothstep(1.1, 1.6, viewport_size.x / viewport_size.y);
 	vec2 center = vec2(0.64, 0.045 - wide_layout * 0.19) * viewport_size / unit;

@@ -59,13 +59,13 @@ func _run() -> void:
 	await process_frame
 	var grid: HexHoneycombContainer = weapon_hud.get_node("%ModulesGrid") as HexHoneycombContainer
 	_expect(grid.get_child_count() == 4, "module grid keeps four slots")
-	_expect(is_equal_approx(grid.hex_side, 28.0), "equipped module hexes use the enlarged 28px size")
+	_expect(is_equal_approx(grid.hex_side, 24.0), "equipped module hexes use the enlarged 24px size")
 	var first_hex := grid.get_child(0) as HexModuleFrame
 	var second_hex := grid.get_child(1) as HexModuleFrame
 	_expect(first_hex != null, "equipped module is a bare HexModuleFrame")
 	_expect(
-		_hexes_share_edge(first_hex, second_hex),
-		"equipped module hexes share a honeycomb edge without gaps",
+		_share_hex_edge(first_hex, second_hex),
+		"enlarged module hexes share an edge in the tilted display",
 	)
 	_expect(loadout.get_trait_icon(&"blaster_accel_ap") != null, "blaster accel AP has a visible icon for STATUS")
 	first_hex.module_hovered.emit()
@@ -80,12 +80,12 @@ func _run() -> void:
 	await process_frame
 	var bay_row: HexHoneycombContainer = weapon_hud.get_node("%BayRow") as HexHoneycombContainer
 	_expect(bay_row.get_child_count() == loadout.get_max_equipped_weapon_count(), "bay row lists every slot equally")
-	_expect(is_equal_approx(bay_row.hex_side, 48.0), "weapon bay hexes use the enlarged 48px size")
+	_expect(is_equal_approx(bay_row.hex_side, 32.0), "weapon bay hexes use the enlarged 32px size")
 	var first_bay := bay_row.get_child(0) as WeaponCoreCluster
 	var second_bay := bay_row.get_child(1) as WeaponCoreCluster
 	_expect(
-		_hexes_share_edge(first_bay.get_node("%Core") as HexModuleFrame, second_bay.get_node("%Core") as HexModuleFrame),
-		"weapon bay hexes share a honeycomb edge without gaps",
+		is_equal_approx(first_bay.position.y, second_bay.position.y) and second_bay.position.x > first_bay.position.x + first_bay.size.x,
+		"weapon bays are separate aligned cells",
 	)
 	var laser_cluster: WeaponCoreCluster = null
 	for child in bay_row.get_children():
@@ -130,13 +130,13 @@ func _run() -> void:
 	)
 	ship_panel.slot_rack.slot_hover_exited.emit()
 
-	var detail_cols := weapon_hud.get_node_or_null("%DetailColumns") as HBoxContainer
-	_expect(detail_cols != null, "selected weapon and modules sit in side-by-side columns")
+	var detail_cols := weapon_hud.get_node_or_null("%DetailColumns") as Control
+	_expect(detail_cols != null, "selected weapon and modules belong to the lower display")
 	var footer_clip := weapon_hud.get_node_or_null("%WeaponDetailFooterClip") as Control
 	var layout := world.get_node("Layout") as Control
 	var right_panel := world.get_node("Layout/RightPanel") as Control
-	var right_box := world.get_node("Layout/RightPanel/Margin/VBox") as VBoxContainer
-	var right_margin := world.get_node("Layout/RightPanel/Margin") as MarginContainer
+	var right_box := world.get_node("Layout/RightPanel/Margin/VBox") as Control
+	var right_margin := world.get_node("Layout/RightPanel/Margin") as Control
 	_expect(footer_clip != null, "weapon description uses a fixed clipping region")
 	var layout_size_before := layout.size
 	var right_minimum_before := right_box.get_combined_minimum_size()
@@ -150,11 +150,12 @@ func _run() -> void:
 		right_margin.get_theme_constant("margin_top")
 		+ right_margin.get_theme_constant("margin_bottom")
 	)
-	_expect(footer.max_lines_visible == 2, "weapon description is limited to two visible lines")
+	_expect(footer.max_lines_visible == 1, "weapon description is shows one concise title, with full description in its tooltip")
+	_expect(footer.tooltip_text.contains("세 번째 줄"), "tooltip retains the complete explanation")
 	_expect(footer.clip_text, "weapon description clips overflow text")
 	_expect(
-		is_equal_approx(footer_clip.size.y, 28.0),
-		"weapon description region keeps its fixed two-line height",
+		is_equal_approx(footer_clip.size.y, 14.0),
+		"weapon description region keeps its fixed one-line height",
 	)
 	_expect(layout.size == layout_size_before, "long weapon descriptions do not resize the world layout")
 	_expect(
@@ -194,16 +195,10 @@ func _expect(condition: bool, message: String) -> void:
 		failures.append(message)
 
 
-func _hexes_share_edge(first: HexModuleFrame, second: HexModuleFrame) -> bool:
-	if first == null or second == null:
-		return false
-	var first_polygon := first.get_hex_polygon()
-	var second_polygon := second.get_hex_polygon()
-	if first_polygon.size() != 6 or second_polygon.size() != 6:
-		return false
-	var first_origin := first.get_global_transform_with_canvas().origin
-	var second_origin := second.get_global_transform_with_canvas().origin
-	return (
-		(first_origin + first_polygon[0]).is_equal_approx(second_origin + second_polygon[4])
-		and (first_origin + first_polygon[1]).is_equal_approx(second_origin + second_polygon[3])
-	)
+func _share_hex_edge(first: HexModuleFrame, second: HexModuleFrame) -> bool:
+	var shared := 0
+	for a in first.get_hex_polygon():
+		for b in second.get_hex_polygon():
+			if (first.get_global_transform() * a).is_equal_approx(second.get_global_transform() * b):
+				shared += 1
+	return shared == 2

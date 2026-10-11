@@ -2,16 +2,21 @@ class_name EnemyBullets
 extends RefCounted
 
 ## Shared access to live enemy bullets for player effects and augments.
-## Every enemy bullet body joins GROUP. FoundationBullet, CurvedLaser and the
-## legacy projectile also put their hitbox on physics LAYER; SniperBullet keeps a
-## non-monitorable hitbox, so query_shape skips it (query_circle/cancel still work).
-## Query and cancel through here instead of walking the group directly, so every
-## removal reports a reason on the world's EnemyBulletHub.
+## Every enemy bullet body joins GROUP. Pooled bullets (FoundationBullet) and
+## laser bodies have no physics shape: EnemyBulletPool / the laser nodes test
+## them against TARGET_GROUP hurtboxes on the CPU, and query_shape asks them
+## through overlaps_shape(). The legacy projectile keeps its hitbox on physics
+## LAYER and answers query_shape through physics. Query and cancel through here instead of
+## walking the group directly, so every removal reports a reason on the world's
+## EnemyBulletHub.
 
 const GROUP := &"enemy_projectiles"
 ## Physics layer 4 (`enemy_projectile`). Bullet hitboxes are monitorable on it;
 ## nothing masks it by default, so only explicit queries see bullets.
 const LAYER := 1 << 3
+## Player-side hurtboxes (layer 1) join this group in HurtboxComponent._ready;
+## pooled bullets and laser bodies test against its members every tick.
+const TARGET_GROUP := &"enemy_bullet_targets"
 const HUB_NAME := &"EnemyBulletHub"
 const QUERY_BATCH := 64
 
@@ -24,20 +29,20 @@ const REASON_SINGULARITY := &"augment_singularity"
 
 
 ## Live bullets under `world`, excluding ones already queued for deletion.
-static func get_all(world: Node) -> Array[Node2D]:
-	var bullets: Array[Node2D] = []
+static func get_all(world: Node) -> Array[Node]:
+	var bullets: Array[Node] = []
 	if world == null or not world.is_inside_tree():
 		return bullets
 	for node in world.get_tree().get_nodes_in_group(GROUP):
-		var bullet := node as Node2D
+		var bullet := node as Node
 		if _is_live(world, bullet):
 			bullets.append(bullet)
 	return bullets
 
 
 ## Bullets whose centre (laser: head) lies within `radius` of `center`.
-static func query_circle(world: Node, center: Vector2, radius: float) -> Array[Node2D]:
-	var hits: Array[Node2D] = []
+static func query_circle(world: Node, center: Vector2, radius: float) -> Array[Node]:
+	var hits: Array[Node] = []
 	var radius_squared := radius * radius
 	for bullet in get_all(world):
 		if center.distance_squared_to(bullet.global_position) <= radius_squared:
@@ -46,19 +51,24 @@ static func query_circle(world: Node, center: Vector2, radius: float) -> Array[N
 
 
 ## Bullets whose hitbox overlaps `shape` placed at `shape_transform` (global).
-## Uses physics, so a laser body counts wherever its segments overlap.
-## Newly spawned bullets appear after their first physics frame.
-static func query_shape(world: Node2D, shape: Shape2D, shape_transform: Transform2D) -> Array[Node2D]:
-	var hits: Array[Node2D] = []
+## Pooled bullets and laser bodies answer on the CPU (a laser counts wherever
+## its segments overlap); legacy bullets come from a physics query, so they
+## appear after their first physics frame.
+static func query_shape(world: Node2D, shape: Shape2D, shape_transform: Transform2D) -> Array[Node]:
+	var hits: Array[Node] = []
 	if world == null or not world.is_inside_tree() or shape == null:
 		return hits
+	var seen: Dictionary = {}
+	for bullet in get_all(world):
+		if bullet.has_method("overlaps_shape") and bullet.overlaps_shape(shape, shape_transform):
+			seen[bullet.get_instance_id()] = true
+			hits.append(bullet)
 	var query := PhysicsShapeQueryParameters2D.new()
 	query.shape = shape
 	query.transform = shape_transform
 	query.collision_mask = LAYER
 	query.collide_with_areas = true
 	query.collide_with_bodies = false
-	var seen: Dictionary = {}
 	var exclude: Array[RID] = []
 	var space := world.get_world_2d().direct_space_state
 	while true:
@@ -78,7 +88,7 @@ static func query_shape(world: Node2D, shape: Shape2D, shape_transform: Transfor
 
 ## Removes one bullet and reports it on the world's hub. Returns false when the
 ## bullet is not a live bullet under `world`.
-static func cancel(world: Node, bullet: Node2D, reason: StringName) -> bool:
+static func cancel(world: Node, bullet: Node, reason: StringName) -> bool:
 	if not _is_live(world, bullet):
 		return false
 	var hub := world.get_node_or_null(NodePath(HUB_NAME)) as EnemyBulletHub
@@ -92,7 +102,7 @@ static func cancel(world: Node, bullet: Node2D, reason: StringName) -> bool:
 static func cancel_all(world: Node, bullets: Array, reason: StringName) -> int:
 	var count := 0
 	for bullet in bullets:
-		if cancel(world, bullet as Node2D, reason):
+		if cancel(world, bullet as Node, reason):
 			count += 1
 	return count
 
@@ -103,7 +113,7 @@ static func cancel_all(world: Node, bullets: Array, reason: StringName) -> int:
 ## laser tail already drawn never change. Only FoundationBullet and CurvedLaser
 ## support effects; other bodies return false.
 static func apply_effect(
-	bullet: Node2D,
+	bullet: Node,
 	handle: StringName,
 	speed_mult := 1.0,
 	heading_offset_degrees := 0.0,
@@ -114,12 +124,12 @@ static func apply_effect(
 	return bullet.call("apply_trajectory_effect", handle, speed_mult, heading_offset_degrees, duration)
 
 
-static func remove_effect(bullet: Node2D, handle: StringName) -> bool:
+static func remove_effect(bullet: Node, handle: StringName) -> bool:
 	return _supports_effects(bullet) and bullet.call("remove_trajectory_effect", handle)
 
 
 ## {speed_mult, heading_offset, until} of the active effect, or empty.
-static func get_effect(bullet: Node2D, handle: StringName) -> Dictionary:
+static func get_effect(bullet: Node, handle: StringName) -> Dictionary:
 	return bullet.call("get_trajectory_effect", handle) if _supports_effects(bullet) else {}
 
 
@@ -133,7 +143,7 @@ static func get_hub(world: Node) -> EnemyBulletHub:
 	return hub
 
 
-static func _is_live(world: Node, bullet: Node2D) -> bool:
+static func _is_live(world: Node, bullet: Node) -> bool:
 	return (
 		bullet != null
 		and is_instance_valid(bullet)
@@ -144,7 +154,7 @@ static func _is_live(world: Node, bullet: Node2D) -> bool:
 	)
 
 
-static func _supports_effects(bullet: Node2D) -> bool:
+static func _supports_effects(bullet: Node) -> bool:
 	return (
 		bullet != null
 		and is_instance_valid(bullet)
@@ -153,10 +163,10 @@ static func _supports_effects(bullet: Node2D) -> bool:
 	)
 
 
-static func _bullet_from_collider(collider: Node) -> Node2D:
+static func _bullet_from_collider(collider: Node) -> Node:
 	var node := collider
 	while node != null:
 		if node.is_in_group(GROUP):
-			return node as Node2D
+			return node as Node
 		node = node.get_parent()
 	return null

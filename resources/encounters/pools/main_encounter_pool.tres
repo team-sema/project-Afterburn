@@ -7,7 +7,7 @@
 [ext_resource type="Resource" uid="uid://dyru17mhjp7x4" path="res://resources/encounters/presets/striker_drone_diamond_5.tres" id="5_striker5"]
 [ext_resource type="Resource" uid="uid://c4axu4brwnlic" path="res://resources/encounters/presets/striker_drone_diamond_13.tres" id="5_striker13"]
 [ext_resource type="Resource" uid="uid://cgyspc32titp8" path="res://resources/encounters/presets/awl_charge_formation.tres" id="6_awl"]
-[ext_resource type="Resource" path="res://resources/encounters/presets/bomb_pair.tres" id="7_bomb_pair"]
+[ext_resource type="Resource" uid="uid://dsglifoijmtoi" path="res://resources/encounters/presets/bomb_pair.tres" id="7_bomb_pair"]
 [ext_resource type="Resource" uid="uid://bm3y3hs8ty058" path="res://resources/encounters/presets/caster_single.tres" id="8_caster"]
 [ext_resource type="Resource" uid="uid://dhfkqigg4j6d0" path="res://resources/encounters/presets/x9_drone_down.tres" id="9_x9_drone"]
 [ext_resource type="Resource" uid="uid://p7t6m8jhj1oh" path="res://resources/encounters/presets/x9_caster_drone_orbit.tres" id="10_x9_orbit"]
@@ -18,7 +18,7 @@
 [ext_resource type="Resource" uid="uid://cmcx8phjvugiy" path="res://resources/encounters/presets/drone_spread_formation.tres" id="16_drone_spread"]
 [ext_resource type="Resource" uid="uid://cnv5hhobmfb57" path="res://resources/encounters/presets/drone_slow_zigzag.tres" id="17_drone_slow"]
 [ext_resource type="Resource" uid="uid://dnjmmfljget1v" path="res://resources/encounters/presets/drone_halt_formation.tres" id="18_drone_halt"]
-[ext_resource type="Resource" path="res://resources/encounters/presets/courier_single.tres" id="19_courier"]
+[ext_resource type="Resource" uid="uid://beuw64o4xh1h" path="res://resources/encounters/presets/courier_single.tres" id="19_courier"]
 
 [sub_resource type="Resource" id="Entry_drone"]
 script = ExtResource("2_entry")

@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="BulletAppearance" format=3 uid="uid://f5prcpxmacqp"]
+
+[ext_resource type="Script" path="res://projectiles/bullet_appearance.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/enemies/sniper_round.svg" id="2"]
+
+[resource]
+script = ExtResource("1")
+form = 2
+core_size = Vector2(3, 30)
+tint = Color(1, 1, 1, 1)
+texture = ExtResource("2")
+wide_size = Vector2(7.2, 36)
+tight_size = Vector2(4.4, 32)
+wide_color = Color(1, 0.16, 0.1, 0.3)
+tight_color = Color(1, 0.3, 0.14, 0.55)
+core_color = Color(1, 0.92, 0.82, 1)
+collision_size = Vector2(3, 30)
+collision_offset = Vector2(0, 0)

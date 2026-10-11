@@ -33,10 +33,10 @@
 | 클래스 | 역할 |
 |--------|------|
 | `StatsComponent` | HP + `health_changed` / `no_health` |
-| `HurtboxComponent` | 피격 Area2D · `hurt(hitbox)` · 무적 시 shape off |
+| `HurtboxComponent` | 피격 Area2D · `hurt(hitbox)` · 무적 시 shape off · 레이어 1이면 `enemy_bullet_targets` 그룹에 들어가 풀 탄·레이저의 CPU 판정 표적이 됨 |
 | `HitboxComponent` | 공격 Area2D · `damage` · `hit_hurtbox` |
 | `HurtComponent` | hurt → 피해 처리 · 공용 무적 타이머와 반투명 표시 · 플레이어 기본 0.6초 무적 · `armor_hits`만큼 피격을 피해 없이 흡수 |
-| `ShieldComponent` | 버퍼 HP · **시작 최대 1** · 피해는 실드 우선·초과분은 선체 · 미만 시 경과 초를 세고 필요 초(`regen_charge_duration` / 충전속도) 이상이면 `restore_shield(1)` · HUD 게이지는 경과/필요 초 · `notify_hit` 시 경과 리셋 |
+| `ShieldComponent` | 버퍼 HP · **시작 최대 2** ([플레이어 · 생존](player.md#생존)) · 피해는 실드 우선·초과분은 선체 · 미만 시 경과 초를 세고 필요 초(`regen_charge_duration` / 충전속도) 이상이면 `restore_shield(1)` · HUD 게이지는 경과/필요 초 · `notify_hit` 시 경과 리셋 |
 | `DestroyedComponent` | `no_health` 시 이펙트+free(기본). Enemy는 `auto_destroy_on_no_health=false`로 점수→이펙트→free를 직접 소유 |
 | `ScoreComponent` | `GameStats.score`에 가산 |
 | `ExperienceDropComponent` | 적 사망 시 경험치 오브 스폰 |
@@ -53,7 +53,7 @@
 | `ScaleComponent` | 펀치 스케일 트윈 |
 | `ShakeComponent` | 위치 셰이크 |
 | `FlashComponent` | 화이트 플래시 머티리얼 · 선택적 `flash_root`로 다중 CanvasItem 동시 플래시 |
-| `EntryWarningComponent` | 화면 밖 고속 진입 전 VisibleRect 가장자리 경고. Interceptor는 좌/우 등장 위치에서 스폰 쪽(왼↔오)을 가리킴 |
+| `EntryWarningComponent` | 화면 밖 고속 진입 전 VisibleRect 가장자리 경고. 공용 `DangerIndicator` 방위각·화살표 사용. Interceptor는 좌/우 등장 위치에서 실제 진입 궤도를 가리킴 |
 | `EncounterStepWarning` | ELITE/BOSS 관문 직전 맵 중앙 관문 경고 (종류별 문구·색, 띠·스트라이프·테두리 맥동, SFX). WAVE는 경고 없음 |
 | `SpawnerComponent` | PackedScene 인스턴스. 부모 미지정 시 `gameplay_world`, 자신이 트리 밖이면 메인 루프로 월드를 찾음 |
 | `EnemySpawner` | 선택된 `EncounterPreset`만 실제 생성하고 의존성·Encounter ID를 트리 진입 전에 주입. 단일 적도 동일한 `FormationController` 생명주기를 사용 |
@@ -92,9 +92,8 @@
 | `SniperAttackComponent` | 스나이퍼 이중선 조준·완전 조준 유지 · 고속탄 발사·반동 · 쿨다운 반복 |
 | `SniperAimCone` | 스나이퍼 조준 이중선 텔레그래프 `_draw` |
 | `HoldPositionMovementStep` | 위치 고정(무한) MovementStep |
-| `EnemyFireVolumeBoostComponent` | 위기: 탄수·스프레드 증가 (`augment_behaviors/`) |
 | `CounterShotComponent` | 피격/사망 반격 탄 *(풀에서 제외, 레거시)* |
-| `DeathBurstComponent` | 적 증강 유폭: 일반 적 사망 시 느린 탄 링 (`augment_behaviors/`) |
+| `DeathBurstComponent` | 적 증강 유폭: 일반 적 사망 시 곧 사라지는 근거리 탄 링 (`augment_behaviors/`) |
 | `ArmorPlateComponent` | 적 증강 장갑판: 일반 적의 `HurtComponent.armor_hits` +1 · 장갑 표시 원 · 엘리트·보스는 붙자마자 제거 (`augment_behaviors/`) |
 | `EnemyEvolutionMark` | 진화형 적의 금색 맥동 외곽 — `Anchor/Core` 텍스처를 1.5배로 복사해 뒤에 그림 |
 | `WakeShotComponent` | 진화 Striker: 편대 해제 뒤 이동 방향 좌우로 느린 탄 한 쌍을 일정 간격으로 흘림 |

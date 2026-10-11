@@ -1,77 +1,36 @@
 class_name EntryWarningComponent
-extends Node2D
-
-## Minimal edge telegraph for a fast offscreen entry. The marker sits just inside
-## the VisibleRect edge hit by entry_direction (typically a cardinal axis for
-## lateral lanes) and never moves the actor.
-
+extends DangerIndicator
+## Places a shared danger indicator at the actor's entry edge.
 @export var actor: Node2D
 @export var entry_direction := Vector2.DOWN
-@export_range(0.1, 3.0, 0.05, "suffix:s") var warning_duration := 0.55
 @export_range(0.0, 32.0, 1.0, "suffix:px") var edge_inset := 4.0
-@export var warning_color := Color(1.0, 0.32, 0.12, 0.95)
-## When true, the arrow points toward the offscreen spawn side (left entry → left,
-## right entry → right) while the marker stays just inside that edge.
-@export var face_spawn_side := false
-
-var _elapsed := 0.0
-var _active := true
-
 
 func _ready() -> void:
+	super._ready()
 	assert(actor != null, "EntryWarningComponent requires an actor.")
 	assert(not entry_direction.is_zero_approx(), "EntryWarningComponent requires entry_direction.")
 	top_level = true
-	z_index = 100
-	# Formation slots finish applying after add_child/_ready, so pin on the next idle.
-	call_deferred("_refresh_edge_marker")
-
+	_refresh_edge_marker.call_deferred()
 
 func _refresh_edge_marker() -> void:
-	if not _active or actor == null or not is_instance_valid(actor):
+	if not is_instance_valid(actor):
+		queue_free()
 		return
 	_update_edge_transform()
 	queue_redraw()
 
-
 func _process(delta: float) -> void:
-	if not _active or actor == null or not is_instance_valid(actor):
-		return
-	_elapsed += delta
-	if _elapsed >= warning_duration:
-		_active = false
-		hide()
+	if not is_instance_valid(actor):
 		queue_free()
 		return
-	_update_edge_transform()
-	# A hard neon blink reads clearly without suggesting sine-wave motion.
-	modulate.a = 1.0 if int(_elapsed * 10.0) % 2 == 0 else 0.38
-
-
-func is_warning_active() -> bool:
-	return _active
-
-
-func _draw() -> void:
-	# Compact stroke arrow: chevron + shaft + tip dot (local +Y).
-	var chevron := PackedVector2Array([
-		Vector2(-5.0, -3.0),
-		Vector2.ZERO,
-		Vector2(5.0, -3.0),
-	])
-	draw_polyline(chevron, warning_color, 2.0, true)
-	draw_line(Vector2(0.0, -7.0), Vector2.ZERO, warning_color, 1.75, true)
-	draw_circle(Vector2(0.0, -8.5), 1.1, warning_color)
-
+	super._process(delta)
+	if is_warning_active(): _update_edge_transform()
 
 func _update_edge_transform() -> void:
-	var direction := entry_direction.normalized()
-	var visible_rect := actor.get_viewport_rect()
-	# entry_direction is the inward axis used to reach the appearance edge from offscreen.
-	global_position = _find_forward_rect_entry(actor.global_position, direction, visible_rect)
-	global_position += direction * edge_inset
-	var face_direction := -direction if face_spawn_side else direction
-	global_rotation = face_direction.angle() - Vector2.DOWN.angle()
+	inward_direction = entry_direction.normalized()
+	global_position = _find_forward_rect_entry(actor.global_position, inward_direction, actor.get_viewport_rect())
+	global_position += inward_direction * edge_inset
+	global_rotation = 0.0
 
 
 func _find_forward_rect_entry(origin: Vector2, direction: Vector2, rect: Rect2) -> Vector2:

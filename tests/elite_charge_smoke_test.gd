@@ -114,20 +114,17 @@ func _run() -> void:
 	attack.dash_direction = Vector2.DOWN
 	attack._shot_elapsed = 0.0
 	attack.use_spine = false
-	attack.shot_count = 3
 	player.position = bounds.get_center() + Vector2(0, 120)
-	attack.spread_degrees = 18.0
-	attack.apply_action_rate_multiplier(10.0)
+	attack.pressure = 10
 	attack._process(0.11)
 	await process_frame
-	_expect(get_nodes_in_group("enemy_projectiles").size() == before_count + 6, "action-rate and volume augments apply to both fountain sides")
+	_expect(get_nodes_in_group("enemy_projectiles").size() == before_count + 2, "pressure shortens the fountain interval below 0.11s")
 	before_count = get_nodes_in_group("enemy_projectiles").size()
 	elite.global_position = bounds.get_center()
 	attack.dash_direction = Vector2.DOWN
 	attack._shot_elapsed = 0.0
 	attack.use_spine = true
-	attack.shot_count = 1
-	attack.apply_action_rate_multiplier(1.0)
+	attack.pressure = 0
 	attack._process(0.06)
 	await process_frame
 	var spines := get_nodes_in_group("enemy_projectiles").slice(before_count)
@@ -142,18 +139,17 @@ func _run() -> void:
 		_expect(state.velocity_at(1.8).normalized().is_equal_approx(state.velocity_at(0.0).normalized()), "spines keep their side")
 		_expect(is_equal_approx(spine.lifetime, 4.0), "spine lifetime")
 		_expect(spine.appearance.collision_size == Vector2(6, 12), "spines use the 1.5x elite needle")
-	attack.apply_action_rate_multiplier(10.0)
+	attack.pressure = 10
 	attack._shot_elapsed = 0.0
 	attack._process(0.05)
 	await process_frame
-	_expect(get_nodes_in_group("enemy_projectiles").size() == before_count + 4, "action rate keeps the minimum spine interval")
+	_expect(get_nodes_in_group("enemy_projectiles").size() == before_count + 4, "pressure shortens the spine interval below 0.05s")
 	before_count = get_nodes_in_group("enemy_projectiles").size()
 	elite.global_position = bounds.get_center()
 	attack.dash_direction = Vector2.DOWN
 	attack._shot_elapsed = 0.0
 	attack.use_spine = false
-	attack.shot_count = 1
-	attack.apply_action_rate_multiplier(1.0)
+	attack.pressure = 0
 	attack._process(0.15)
 	await process_frame
 	var lasers := get_nodes_in_group("enemy_projectiles").slice(before_count)

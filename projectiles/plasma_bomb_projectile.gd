@@ -279,7 +279,7 @@ func _pull_bullets(step: float) -> void:
 		if not bullet.has_method("get_travel_velocity"):
 			continue
 		var velocity: Vector2 = bullet.call("get_travel_velocity")
-		var toward := global_position - bullet.global_position
+		var toward: Vector2 = global_position - bullet.global_position
 		if velocity.is_zero_approx() or toward.is_zero_approx():
 			continue
 		var turn := clampf(velocity.angle_to(toward), -max_turn, max_turn)

@@ -30,15 +30,15 @@ func _run() -> void:
 	await physics_frame
 	await physics_frame
 	await process_frame
-	laser.get_node("HitboxComponent").apply_contacts()
-	_expect(lab.hits == 1, "body capsules inflict a real physics hit away from the head")
-	laser.get_node("HitboxComponent").apply_contacts()
+	laser.apply_contacts()
+	_expect(lab.hits == 1, "body segments inflict a real hit away from the head")
+	laser.apply_contacts()
 	_expect(lab.hits == 1, "overlapping segments and repeated checks respect invulnerability")
 	_expect(not laser.is_queued_for_deletion(), "laser persists after contact")
 	await create_timer(0.7).timeout
 	await physics_frame
 	await physics_frame
-	laser.get_node("HitboxComponent").apply_contacts()
+	laser.apply_contacts()
 	_expect(lab.hits == 2, "body can hit again after immunity expires without leaving the laser")
 	laser._physics_process(0.6)
 	var path := laser.get_predicted_path(0.8)

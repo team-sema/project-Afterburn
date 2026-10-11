@@ -1,6 +1,6 @@
 # 탄막 API 레퍼런스와 본 게임 이식 안내
 
-코드 확인: 2026-10-05. 현재 구현된 API의 사용 설명이다. 게임 규칙의 정본은 [전투 기획서](design/combat.md)이다. 별도 API 문서를 요청한 데 따라 사용 계약을 모아 두었다. API 변경 시 이 문서도 함께 갱신한다.
+코드 확인: 2026-10-08. 현재 구현된 API의 사용 설명이다. 게임 규칙의 정본은 [전투 기획서](design/combat.md)이다. 별도 API 문서를 요청한 데 따라 사용 계약을 모아 두었다. API 변경 시 이 문서도 함께 갱신한다.
 
 ## 시작하기: 적에 .gd 패턴 지정하기 (2026-09-17)
 
@@ -52,7 +52,7 @@ func build(params: Dictionary) -> void:
 - 조준 고정 연발 예제: [locked_burst_pattern.gd](../patterns/locked_burst_pattern.gd). `aim()` 뒤 `Aim.LOCKED` 바늘탄 3발(0.12초 간격) → 2초 휴식 → 반복. `build(params)`로 `shots`, `gap`, `rest`, `speed`를 씬에서 조정할 수 있다. 본 게임 적에는 배정하지 않았다.
 - 조준 부채꼴 연발 예제: [aimed_fan_burst_pattern.gd](../patterns/aimed_fan_burst_pattern.gd). 5방향 40° 부채꼴의 중앙 탄이 매 발사 표적을 향하는 `Aim.EACH_SHOT`, 0.15초 간격 5연발 → 1.6초 휴식 → 반복. `ways`, `spread`, `shots`, `gap`, `rest`, `speed`를 `build(params)`로 조정. 본 게임 적에는 배정하지 않았다.
 - 16방향 혼합 시험: [mixed_sixteen_pattern.gd](../patterns/mixed_sixteen_pattern.gd). 이 `.gd`가 현재 시험 씬의 실행 원본이다. 예전 `.tres`는 저장 형식 호환 예제로 남겨 둔다.
-- 쇼케이스 패턴: [`patterns/showcase/`](../patterns/showcase/) 17종(탄→탄 SPAWN 데모 `comet_trail`, 다중 Volley SPAWN 데모 `saturn_burst`, 예고형 빔 데모 `beam_lattice`, 벽 반사 데모 `ricochet`, 2026-10-07 탄막 교본 『弾幕 最強のシューティングゲームを作る！』 응용 5종 `washer_spiral`·`stepping_spiral`·`winder`·`overtaking_curtain`·`star_placed` 포함). Lab 패턴 목록에 `showcase/…`로 나온다. 본 게임 적에는 배정하지 않았다. 색만 바꾼 탄은 [`labs/bullet/showcase_shots.gd`](../labs/bullet/showcase_shots.gd)로 만든다(외형 복제 후 `tint` 변경, 텍스처 공유).
+- 쇼케이스 패턴: [`patterns/showcase/`](../patterns/showcase/) 19종(탄→탄 SPAWN 데모 `comet_trail`, 무판정 유령탄 데모 `phantom_drift`·`lattice_shift`, 다중 Volley SPAWN 데모 `saturn_burst`, 예고형 빔 데모 `beam_lattice`, 벽 반사 데모 `ricochet`, 2026-10-07 탄막 교본 『弾幕 最強のシューティングゲームを作る！』 응용 5종 `washer_spiral`·`stepping_spiral`·`winder`·`overtaking_curtain`·`star_placed` 포함). Lab 패턴 목록에 `showcase/…`로 나온다. 본 게임 적에는 배정하지 않았다. 색만 바꾼 탄은 [`labs/bullet/showcase_shots.gd`](../labs/bullet/showcase_shots.gd)로 만든다(외형 복제 후 `tint` 변경, 텍스처 공유).
 
   | 파일 | 형태 | 쓰는 기능 |
   |------|------|-----------|
@@ -72,6 +72,8 @@ func build(params: Dictionary) -> void:
   | `winder_pattern.gd` | 좌우 발사구의 쌀탄 6줄 광선이 반대 위상으로 ±30° 흔들리며 통로가 열렸다 닫히는 와이퍼 | `origin_offset` 발사구 2개 · 0.05초마다 링 `fire_together` · sin 기준각 5초 주기 |
   | `overtaking_curtain_pattern.gd` | 발사구 3곳의 조준 부채꼴 8묶음이 0.08초마다 22px/s씩 빨라져 앞 묶음을 추월하며 두꺼운 벽으로 뭉쳤다 퍼짐 | `aim()` + `Aim.LOCKED` · `origin_offset` · 묶음별 속도·tint |
   | `star_placed_pattern.gd` | 오각별 윤곽을 따라 탄을 한 발씩 놓고 다 그린 뒤 0.5초 멈춰 붉게 번쩍이며 동시 발사. 각 탄은 반지름 방향에서 144° 비틀려 중심을 지나 반대쪽으로 소용돌이치고, 36° 돌린 큰 별이 반대로 돈다 | `origin_offset`으로 배치 · `speed = 0` · 탄별 `wait`(공통 발사 시각까지 남은 시간) → `tint_to` → `speed_to` → 원래 색 복귀 |
+  | `phantom_drift_pattern.gd` | 청록 쌀탄 부채꼴이 내려오다 판정이 꺼져 반투명한 창백한 유령탄이 되고, 좌우로 갈라져 느리게 흘러간 뒤 분홍으로 불투명해지며 판정이 켜지고 표적으로 재조준해 돌진 | `intangible()` → `parallel`(투명도·색·`turn_to`·속도) → `parallel`(불투명·색·정지) → `tangible()` → `homing` → `speed_to` |
+  | `lattice_shift_pattern.gd` | 빨강 `\` 선·파랑 `/` 선(탄 간격 8.9px)으로 된 마름모 우리. 빨강은 왼쪽, 파랑은 오른쪽으로만 움직여 격자가 내려간다. 실체 상태로 1/4칸 내려간 뒤 유령이 되어 반 칸 더 벌어지며 새 교차점이 예전 칸 중심에 놓이고, 다시 실체화 | 반 주기 `LATERAL_WAVE` 수평 이동만 사용(속도 0) · `intangible()`/`tangible()` · 12 Action 무한 반복 · 틱별 지연을 유령 대기에서 흡수 · `build(params)`의 `field` |
   | `saturn_burst_pattern.gd` | 조준한 보라 대형 구탄이 멈추며 하얗게 압축된 뒤 기울어진 타원 고리 두 겹(노랑 32발·청록 32발)으로 모양을 유지하며 터짐. 구탄 3발이 0.9초 간격 | `speed_to(0)` → `parallel`(시각·판정 축소, 색) → `spawn_together`(SINGLE 32개, 방향별 타원 반지름 속도) ×2, 둘째에 `consume` |
 
   검증: `tests/labs/showcase_patterns_smoke_test.gd` (Lab 로더로 모두 불러와 3초 재생 시 발사·반복 유지).
@@ -170,10 +172,10 @@ fan.aim = BarrageVolley.Aim.EACH_SHOT
 is_valid() -> bool
 spawn(parent: Node2D, origin: Vector2, direction: Vector2,
       speed: float, debug := false, target: Node2D = null,
-      target_resolver := Callable(), shared_config := false) -> Node2D
+      target_resolver := Callable(), shared_config := false) -> Node
 ```
 
-`spawn`은 월드 좌표에서 한 발을 생성·발사하고 노드를 반환한다. 실패하면 `null`. 부모는 트리 안에 있어야 한다. 방향은 유한한 0이 아닌 벡터, 속도는 유한한 0 이상이며 `TRAIL_LASER`의 초기 속도는 0보다 커야 한다. `BEAM`은 속도를 쓰지 않는다(0 허용). `shared_config`는 내부 공유 경로(SPAWN, BarragePlayer의 발사) 전용이다. true면 이 Shot의 설정을 복제·재검증하지 않고 공유하므로, 직접 호출할 때는 쓰지 않는다. 이 메서드를 재정의하는 Shot(예: `SniperBarrageShot`)도 같은 인자 목록을 유지해야 한다. 통상 발사는 Sequence/Player를 사용하고 단발 연결에 이 메서드를 사용할 수 있다.
+`spawn`은 월드 좌표에서 한 발을 생성·발사하고 노드를 반환한다. `BULLET`은 Node2D가 아닌 가벼운 `FoundationBullet`(Node) 핸들이며 위치는 `global_position` 속성으로 읽는다. 레이저·빔·레거시는 Node2D다. 실패하면 `null`. 부모는 트리 안에 있어야 한다. 방향은 유한한 0이 아닌 벡터, 속도는 유한한 0 이상이며 `TRAIL_LASER`의 초기 속도는 0보다 커야 한다. `BEAM`은 속도를 쓰지 않는다(0 허용). `shared_config`는 내부 공유 경로(SPAWN, BarragePlayer의 발사) 전용이다. true면 이 Shot의 설정을 복제·재검증하지 않고 공유하므로, 직접 호출할 때는 쓰지 않는다. 이 메서드를 재정의하는 Shot(예: `SniperBarrageShot`)도 같은 인자 목록을 유지해야 한다. 통상 발사는 Sequence/Player를 사용하고 단발 연결에 이 메서드를 사용할 수 있다.
 
 ### 이전 설정 호환
 
@@ -242,6 +244,8 @@ tint_to(color: Color, seconds: float)
 opacity_to(alpha: float, seconds: float)
 visual_scale_to(scale: float, seconds: float)
 hitbox_scale_to(scale: float, seconds: float)
+intangible()
+tangible()
 parallel(group: Array[BulletAction])
 spawn(volley: BarrageVolley, consume := false)
 spawn_together(volleys: Array[BarrageVolley], consume := false)
@@ -262,6 +266,15 @@ validation_error() -> String
 - `tint_to`: 일반 탄은 기본색을 바꾼다. 레이저는 기존 금색 팔레트에 곱할 색을 바꾼다(초기 흰색). 따라서 레이저에 파란색을 지정한 결과는 순수한 파란색과 다를 수 있다.
 - `opacity_to`: 전체 투명도 0~1. 투명해져도 판정과 수명은 유지된다.
 - `visual_scale_to` / `hitbox_scale_to`: 각각 시각·판정 배율. 0 초과 16 이하. 서로 자동 연동되지 않는다.
+- `intangible` / `tangible`: 판정을 즉시 끄고 켠다(순간 Action). 꺼진 동안 플레이어와 겹쳐도 피격·소멸이 없고 이동·SPAWN은 계속된다. 켜는 순간 플레이어와 겹쳐 있으면 다음 물리 프레임에 피격된다. 외형은 바꾸지 않으므로 `opacity_to`·`tint_to`를 함께 쓰고, **판정을 켜기 전에 불투명도를 먼저 되돌린다**. `BULLET` 몸체 전용이다(레이저 Shot에 있으면 무효). 꺼진 탄도 `EnemyBullets` 조회·소거 대상이지만 물리 쿼리 `query_shape`에는 잡히지 않는다. 규칙 정본: [전투 — 무판정 구간](design/combat.md#무판정-구간-tangible--구현-완료).
+
+```gdscript
+# 내려오다 유령이 되어 옆으로 흐른 뒤 다시 실체화하는 탄
+shot.behavior = BulletBehavior.new().wait(0.9).intangible().parallel([
+    BulletAction.make(BulletAction.Type.OPACITY, 0.3, 0.15),
+    BulletAction.make(BulletAction.Type.TURN_TO, 70, 0.15),
+]).wait(1.1).opacity_to(1.0, 0.3).tangible()
+```
 - `spawn`: 그 순간 탄의 위치에서 `volley`를 발사한다(아래 「탄→탄 발사」). `consume = true`면 발사 후 탄을 지운다.
 - `spawn_together`: Volley 여러 개를 한 SPAWN으로 같은 위치·진행 방향에서 함께 발사한다. Volley마다 속도·각도·조준이 따로이며 합계 32발까지다.
 - `repeat(n)`: Behavior 전체를 총 n번 실행. 기본값 1, 0은 무한. 마지막 상태는 다음 반복으로 이어진다. 예: `turn_by(30, 1).repeat(3)`은 총 90° 선회한다.
@@ -279,10 +292,11 @@ BulletAction.visual_scale_to(scale, seconds)
 BulletAction.hitbox_scale_to(scale, seconds)
 BulletAction.spawn(volley, consume := false)
 BulletAction.spawn_together(volleys, consume := false)
+BulletAction.set_tangible(on: bool)
 BulletAction.make(type, value, seconds)
 ```
 
-`Type`: `WAIT`, `TURN_BY`, `TURN_TO`, `TURN_AT`, `HEADING_WAVE`, `LATERAL_WAVE`, `SPEED`, `TINT`, `OPACITY`, `VISUAL_SCALE`, `HITBOX_SCALE`, `PARALLEL`, `HOMING`, `SPAWN`. 기존 저장 enum 번호는 유지한다(SPAWN은 끝에 추가).
+`Type`: `WAIT`, `TURN_BY`, `TURN_TO`, `TURN_AT`, `HEADING_WAVE`, `LATERAL_WAVE`, `SPEED`, `TINT`, `OPACITY`, `VISUAL_SCALE`, `HITBOX_SCALE`, `PARALLEL`, `HOMING`, `SPAWN`, `TANGIBLE`. 기존 저장 enum 번호는 유지한다(SPAWN·TANGIBLE은 끝에 추가). `TANGIBLE`은 duration 0, `value` 0(끔)·1(켬)만 허용하며 병렬 묶음에 넣을 수 있다(채널 `tangible`).
 
 직접 편집할 수 있는 필드는 `type`, `duration`, `value`, `period`, `phase`, `color`, `children`, `transition_type`, `ease_type`, `payload`(SPAWN Volley), `payloads`(SPAWN Volley 목록, 비어 있지 않으면 `payload`보다 우선), `consume_parent`(SPAWN 후 부모 제거)이다. SPAWN 전용 조회는 `spawn_volleys()`(실제 발사 목록)와 `spawn_count()`(합계 발수)다. `make`는 `period`를 자동 설정하지 않으므로 파동 액션을 직접 만들면 `period`도 지정한다. `BulletAction`의 나머지 메서드는 `eased(transition, ease)`(자기 자신 반환), `uses_easing()`, `progress(elapsed)`, `channel()`, `length()`, `validation_error()`, `spawn_error()`다.
 
@@ -300,7 +314,7 @@ shot.behavior = BulletBehavior.new().wait(0.3).parallel([
 
 이 예제의 판정 두께는 유지된다. 발사 후 Behavior 자체를 교체하거나 임의 콜백을 실행하는 API는 없다. 탄 제거는 11절의 `EnemyBullets.cancel`을 쓴다.
 
-실행기는 Action 경계의 누적 상태와 탄별 궤적 표본을 재사용한다. 과거·미래 조회는 실제 탄 나이를 전진시키지 않으며, 몸체·판정·경로 예측은 같은 위치 계산을 사용한다. 경계의 1e-10초 이내 부동소수점 오차는 경계 시각으로 처리한다. 발사 후 외부에서 속도·방향을 바꾸는 효과는 11절의 `EnemyBullets.apply_effect`를 쓴다.
+실행기는 Action 경계의 누적 상태와 탄별 궤적 표본을 재사용한다. 같은 Behavior 인스턴스를 쓰는 탄(BarragePlayer가 쏜 같은 Shot의 탄, 같은 SPAWN의 자식)은 Behavior가 정하는 상태를 나이별로 공유하고, 적분이 필요한 경로는 발사 속도별 로컬 궤적 하나를 회전해 쓴다(호밍 제외, `turn_to`는 발사 방향별). 감속·방향 오프셋 같은 외부 개입은 탄 전용 기록이라 공유와 무관하다. 탄별 개입을 새로 만들 때는 공유 Behavior나 `sample_shared` 결과를 수정하지 말고 탄 전용 상태를 쓴다. 규칙 정본: [전투 — 실행 상태 캐시](design/combat.md#실행-상태-캐시--구현-완료). 과거·미래 조회는 실제 탄 나이를 전진시키지 않으며, 몸체·판정·경로 예측은 같은 위치 계산을 사용한다. 경계의 1e-10초 이내 부동소수점 오차는 경계 시각으로 처리한다. 발사 후 외부에서 속도·방향을 바꾸는 효과는 11절의 `EnemyBullets.apply_effect`를 쓴다.
 
 ### 비행 중 표적 추적
 
@@ -433,7 +447,7 @@ advance(seconds: float)
 - `stop`은 미래 발사를 취소한다. 기존 탄을 소거하지 않는다.
 - 발사자·탄 부모·고정 모드 필수 표적의 트리 이탈은 재생을 중단한다. 같은 노드가 복귀해도 자동 재개하지 않는다. resolve_target 콜백 모드의 표적 부재는 해당 조준 발사만 건너뛴다.
 - 공개 상태: `running`, `last_error`, `show_hitbox`. `running`은 pause 상태에서도 true다. `show_hitbox`는 이후 생성 탄에 적용한다.
-- 신호 `volley_fired(projectiles: Array[Node2D])`: 생성된 묶음. `finished`: 자연 종료 때 한 번. stop/재생 교체에서는 발생하지 않는다.
+- 신호 `volley_fired(projectiles: Array[Node])`: 생성된 묶음. `finished`: 자연 종료 때 한 번. stop/재생 교체에서는 발생하지 않는다.
 
 ## 8. 16방향 혼합 패턴 전체 예제
 
@@ -515,9 +529,9 @@ fire_together(layers)
 - 발사 시점 난수(각도·속도·대기 jitter)는 없다. 필요하면 시드 RNG를 Player가 소유하는 방식으로 추가한다.
 - 탄→탄 발사(`SPAWN`)는 재귀 깊이 1, 한 SPAWN의 Volley 합계 32발, 부모 1발당 자식 128발로 제한한다. 레이저 머리는 SPAWN을 실행하지 않고, 경로 예측은 미래의 자식 탄을 포함하지 않는다.
 - 중첩 Behavior 그룹, 액션 단위 반복, 외부 이벤트 대기, 실행 중 Behavior 교체는 제공하지 않는다. 외부 궤도 효과는 속도 배율·방향 오프셋만 제공한다(11절).
-- 탄 노드와 물리 판정은 탄마다 존재한다. 배치 렌더링은 노드/충돌 처리 비용까지 제거하지 않는다.
+- `BULLET`은 탄 부모별 `EnemyBulletPool`이 한 루프에서 진행·판정·렌더링하는 풀 탄이다. 탄마다 Node 핸들(트리·그룹·`queue_free`·인스턴스 id)은 남지만 Node2D·Area2D·자체 처리 콜백은 없다. 레이저·빔은 Node2D이되 물리 판정 없이 CPU 선분 판정을 쓴다. 남는 비용은 궤적 상태 객체 평가(효과가 걸린 탄·액션 있는 탄)와 전수 조회다(10절).
 - 위치·예측·레이저 과거 몸통은 같은 궤적 함수를 쓴다. 일반 이동 적분은 1/120초 중점 근사다. 직진·단일 일정 선회는 해석식, 단일 방향 파동은 직접 속도 평가를 사용한다.
-- 예측 반경(`get_hazard_radius`)은 Behavior 전체의 최대 판정 배율을 사용하므로 실제 현재 판정보다 보수적일 수 있다. 성능 측정 결과와 환경은 작업 기록을 참고한다.
+- 예측 반경(`get_hazard_radius`)은 Behavior 전체의 최대 판정 배율을 사용하므로 실제 현재 판정보다 보수적일 수 있다. 경로 예측도 판정 꺼짐(`intangible`) 구간을 구분하지 않는다. 성능 측정 결과와 환경은 작업 기록을 참고한다.
 
 ## 10. 본 게임 이식 — Drone·Striker·Interceptor·Caster 적용 완료
 
@@ -525,7 +539,7 @@ fire_together(layers)
 
 [EnemyShootComponent](../components/enemy_shoot_component.gd)는 기본 조준/부채꼴 사격과 버스트를 담당한다. 화면 진입 후 활성화, 초기 지연, 활성 기간, 발사 금지선, actor 전방 발사, 표적 없음 처리, 행동 속도 배율을 함께 관리한다.
 
-Caster도 공통 EnemyShootComponent를 사용하며 Radial 전용 컴포넌트는 제거했다. [EnemyModifierFactory](../components/enemy_modifier_factory.gd)는 공통 발사 컴포넌트에 속도 배율을 전달한다. `pattern_fire_volume_boost`는 스폰 시 발수 증강을 적용할 패턴의 명시적 opt-in이며 Drone·Striker·Interceptor만 켠다. 패턴을 변이하는 첫 증강이 시작 전에 컴포넌트 독립 사본(snapshot)을 만들어 거기에 적용하므로 공유 프리셋은 바뀌지 않는다. 실행 중 사본 수정이나 자동 재시작은 지원하지 않는다.
+Caster도 공통 EnemyShootComponent를 사용하며 Radial 전용 컴포넌트는 제거했다. [EnemyModifierFactory](../components/enemy_modifier_factory.gd)는 공통 발사 컴포넌트에 속도 배율을 전달한다. 패턴 난이도는 `build(params)`의 `pressure`(탄막 압력 `P`)로 패턴이 직접 해석한다([전투 — 탄막 압력](design/combat.md#탄막-압력)). 탄속 배율처럼 패턴을 변이하는 첫 증강은 시작 전에 컴포넌트 독립 사본(snapshot)을 만들어 거기에 적용하므로 공유 프리셋은 바뀌지 않는다. 실행 중 사본 수정이나 자동 재시작은 지원하지 않는다.
 
 ### 1단계: 탄 생성만 연결 — 호환 경로로 유지
 
@@ -556,9 +570,9 @@ Drone은 `drone_pattern.gd`, Striker·Interceptor는 `aimed_burst_pattern.gd`를
 
 이관한 일반 적의 Timer는 최초 활성화 지연에만 사용한다. Elite Awl은 공격 제어자가 돌진 중 `BarrageShot.spawn`으로 가시 바늘과 분수 호밍 레이저(`barrage_shot`)를 직접 만들고, 발사 타이밍·난수·이동을 소유한다.
 
-Elite Fighter는 `elite_fighter_pattern.gd`의 유한 Sequence로 부채꼴/집중 사격을 재생한다. 제어자는 이동 정지·재개와 고정 조준 예고를 담당하고 마지막 발사의 `finished`로 다음 단계에 진입한다. ACTION_RATE는 단계별 최소 간격을 반영한 Player.time_scale로 적용한다.
+Elite Fighter는 `elite_fighter_pattern.gd`의 유한 Sequence로 부채꼴/집중 사격을 재생한다. 제어자는 이동 정지·재개와 고정 조준 예고를 담당하고 마지막 발사의 `finished`로 다음 단계에 진입한다. 난이도는 단계마다 `build(params)`의 `pressure`(탄막 압력)로 패턴이 해석한다.
 
-Sniper는 `SniperBarrageShot`이 BarrageShot의 `is_valid()`와 `spawn()`을 재정의하는 특수 몸체 어댑터다. 폭·사거리·피해량은 Resource 설정으로 스냅샷되며 기존 SniperBullet의 Line2D 외형·판정·finished 계약을 유지한다. Appearance/Behavior/입자 꼬리는 지원하지 않는다. 탄 소멸의 finished는 Sequence의 발사 완료 신호와 별개다. 조준선·반동·재발사 일정은 SniperAttackComponent에 남는다.
+Sniper는 `SniperBarrageShot`이 BarrageShot의 `is_valid()`와 `spawn()`을 재정의해 폭·사거리·피해량을 일반 풀 탄 설정으로 번역하는 레시피다. 폭은 줄무늬 외형(`sniper_round.tres`)과 사각 판정의 크기, 사거리는 수명, 피해량은 `FoundationBullet.damage`가 된다. 설정은 Resource로 스냅샷된다. 몸체는 다른 적탄과 같아 조회·소거·궤도 개입 계약을 그대로 따른다. 조준선·반동·재발사 일정은 SniperAttackComponent에 남는다.
 
 `labs/enemy_attack/enemy_attack_lab.tscn`에서 세 기체의 예고·이동·사격을 재생할 수 있다. 비사격 적의 돌진·접촉·폭발은 기존 계약을 유지한다.
 
@@ -568,7 +582,11 @@ Sniper는 `SniperBarrageShot`이 BarrageShot의 `is_valid()`와 `spawn()`을 재
 
 안전 비율 격자 계산 개선은 레거시 탄에도 적용된다. MultiMesh·레이저 메쉬·판정 표시 배칭과 Behavior 계산 최적화는 새 FoundationBullet/CurvedLaser 경로에 적용된다. `Kind.LEGACY`는 기존 Sprite·파티클·컴포넌트를 사용하므로 API로 발사해도 새 배치 렌더러로 전환되지 않는다. 반대로 기존 Timer에서 새 BarrageShot을 발사하면 새 렌더링 최적화가 적용된다.
 
-BarragePlayer가 발사한 탄은 `play()`가 복제·검증한 설정(외형·Behavior)을 SPAWN 자식과 같은 방식으로 공유하므로 발사 시 탄마다 복제·재검증하지 않는다(직접 `shot.spawn()` 호출은 기존대로 복제한다). Behavior의 런타임 분석(채널·해석 경로·SPAWN 일정)도 Behavior 인스턴스에 1회 캐시되어 같은 Behavior를 쓰는 모든 탄이 읽기 전용으로 공유하며, builder 호출이 캐시를 무효화한다. 실행 중에는 시각 채널(색·투명도·배율) 액션이 없는 탄이 매 틱 상태 샘플을 건너뛰고, 방향·속도 변화가 없는 탄은 회전 갱신도 건너뛴다. 레이저 몸통은 외부 궤도 개입·호밍이 없는 동안 점별 분기 없이 같은 궤적 함수로 샘플링하고, 판정 캡슐은 폭 계수를 사전 계산하며 바뀐 값만 물리 서버에 쓴다. 외부 궤도 개입(`apply_effect`)·벽 반사·호밍은 해당 생략 경로를 쓰지 않으므로 동작이 달라지지 않는다. 측정 기준은 `tests/benchmarks/projectile_render_benchmark.gd`(갱신 루프 단독, 결과: `artifacts/projectile_render_benchmark.json`)·`tests/benchmarks/behavior_performance_benchmark.gd`·`tests/benchmarks/barrage_stress_benchmark.gd`(실전형: BarragePlayer가 실제 패턴을 이동 표적에 라이브 발사, 물리·화면 이탈·렌더링 포함, 결과: `artifacts/barrage_stress_benchmark.json`)다. 실전형 기준 꼬리 입자를 포함한 ~350발 유지 부하는 프레임 중앙 ~10ms(p95 ~17ms)로 60fps 안에 있고, ~1000발 유지는 틱 비용이 프레임 예산을 넘어 물리 catch-up으로 프레임이 수백 ms까지 밀린다. 그 영역의 지배 비용은 9절의 한계(탄별 노드·물리 판정)다.
+BarragePlayer가 발사한 탄은 `play()`가 복제·검증한 설정(외형·Behavior)을 SPAWN 자식과 같은 방식으로 공유하므로 발사 시 탄마다 복제·재검증하지 않는다(직접 `shot.spawn()` 호출은 기존대로 복제한다). Behavior의 런타임 분석(채널·해석 경로·SPAWN 일정)도 Behavior 인스턴스에 1회 캐시되어 같은 Behavior를 쓰는 모든 탄이 읽기 전용으로 공유하며, builder 호출이 캐시를 무효화한다. 실행 중에는 시각 채널(색·투명도·배율) 액션이 없는 탄이 매 틱 상태 샘플을 건너뛰고, 방향·속도 변화가 없는 탄은 회전 갱신도 건너뛴다. 레이저 몸통은 외부 궤도 개입·호밍이 없는 동안 점별 분기 없이 같은 궤적 함수로 샘플링한다. 외부 궤도 개입(`apply_effect`)·벽 반사·호밍은 해당 생략 경로를 쓰지 않으므로 동작이 달라지지 않는다. 측정 기준은 `tests/benchmarks/bullet_pool_benchmark.gd`(고정 발사 일정을 이동 표적 Hurtbox에 쏘며 우선순위 센티널로 스크립트 틱 `tick_ms`, 물리 서버 스텝 `server_ms`, process 패스를 나눠 잼, 결과: `artifacts/bullet_pool_benchmark.json`)·`tests/benchmarks/behavior_performance_benchmark.gd`·`tests/benchmarks/barrage_stress_benchmark.gd`(실전형: BarragePlayer가 실제 패턴을 이동 표적에 라이브 발사, 결과: `artifacts/barrage_stress_benchmark.json`)다. 실전형 결과의 `physics_ms`는 엔진 모니터(`TIME_PHYSICS_PROCESS`)값으로, 최근 1초 안의 가장 긴 물리 스텝이라 발사 스파이크를 보여 주며 정상 상태의 틱 비용이 아니다.
+
+탄 풀(`EnemyBulletPool`, 9절)로 바꾸기 전의 노드 시대 수치는 `artifacts/bullet_pool_prototype_benchmark.json`의 `nodes` 행에 남겨 두었다. 같은 일정 기준 60Hz 틱당 CPU(스크립트 틱 + 물리 서버 스텝 + 렌더러 process 패스 중앙값)는 ~240발 2.8ms, ~660발 6.8ms, ~1260발 12.7ms였고 512발 동시 발사 스파이크는 63ms였다. 풀 전환 뒤(`bullet_pool_benchmark`, 틱 + 서버 중앙값): ~240발 1.6ms, ~660발 3.0ms, ~1250발 4.9ms(1134발이 직진 고속 경로), 스파이크 19.7ms, 드로우콜 1~5. 사라진 비용은 탄별 Area2D의 물리 서버 스텝(1260발 3.4ms), 배치 렌더러의 노드 순회(2.6ms), 노드별 처리 콜백이며, 직진탄은 상태 객체 없이 한 줄 곱셈으로 움직인다. 남는 스파이크 비용은 Node 핸들 생성·트리 추가다.
+
+직진 고속 경로의 계약: 빈 Behavior에 반사가 없는 탄은 BulletBehaviorState 없이 `origin + direction × speed × age`로 위치를 계산하고, `apply_effect`나 `behavior_state` 읽기가 오는 순간 같은 궤적의 상태를 만들어 현재 age에서 이어 간다. 효과 전 위치는 두 방식이 수식까지 같고, 효과 후에는 같은 객체가 같은 계산을 하므로 외부 개입·예측 계약은 그대로다. 시간 왜곡장형 반경 50px 감속을 건 ~1260발은 틱 9.3ms(노드 시대 11.4+3.3+2.9ms)로, 추가분은 전수 조회(`query_circle`)와 효과가 걸린 탄의 상태 객체 평가다. 벼랑 끝처럼 화면 전체 탄에 효과를 거는 최악의 경우(~1750발, 모든 탄이 효과 경로)는 여전히 예산을 넘는다(틱 27ms, 노드 시대 29ms). 효과 경로의 위치 평가가 탄당 ~12µs이고, 규칙이 매 틱 모든 탄에 `get_effect`를 묻는 전수 조회도 비용이다. 즉 남은 한계는 효과가 걸린 탄의 상태 객체 평가와 전수 조회이며, 효과를 받지 않는 직진탄은 더 이상 비용의 중심이 아니다.
 
 ## 11. 적탄 조회·소거 — EnemyBullets
 
@@ -576,20 +594,19 @@ BarragePlayer가 발사한 탄은 `play()`가 복제·검증한 설정(외형·B
 
 플레이어 효과와 증강은 날아가는 적탄을 이 정적 API로 찾고 지운다. 그룹을 직접 순회하거나 `queue_free`하지 않는다.
 
-- 모든 적탄 몸체는 `enemy_projectiles` 그룹에 속한다. `FoundationBullet`·`CurvedLaser`·`TelegraphBeam`·레거시 기본탄의 판정은 물리 레이어 4(`enemy_projectile`, `EnemyBullets.LAYER`)에 올라간다. `FoundationBullet`의 판정은 감지당하기만 하는(monitoring 없는) 수동 영역이고, 피격은 레이어 1 Hurtbox가 레이어 4를 감지해 전달한다(정본: [전투 — 데미지 파이프라인](design/combat.md#데미지-파이프라인)). 레이저·빔은 스스로 겹침을 검사하고 레거시 탄은 스스로 감시한다. 그 밖에 이 레이어를 감지하는 영역은 없으므로 적탄 조회·소거는 아래 명시적 쿼리를 쓴다.
-- `SniperBullet`은 판정을 감지 불가로 두므로 `query_shape`에 잡히지 않는다. 그룹 기반 조회·소거는 동일하게 적용된다.
+- 모든 적탄 몸체는 `enemy_projectiles` 그룹에 속한다. `FoundationBullet`·`CurvedLaser`·`TelegraphBeam`은 물리 판정이 없다. 레이어 1 Hurtbox가 `enemy_bullet_targets` 그룹(`EnemyBullets.TARGET_GROUP`)에 들어가고, `EnemyBulletPool`과 레이저·빔이 매 물리 틱 그 Hurtbox 모양과 CPU로 판정해 대리 Hitbox로 피격을 전달한다(정본: [전투 — 데미지 파이프라인](design/combat.md#데미지-파이프라인)). 레거시 기본탄만 물리 레이어 4(`enemy_projectile`, `EnemyBullets.LAYER`)에서 스스로 감시한다. 적탄 조회·소거는 아래 명시적 쿼리를 쓴다.
 
 ```gdscript
-EnemyBullets.get_all(world) -> Array[Node2D]
-EnemyBullets.query_circle(world, center, radius) -> Array[Node2D]
-EnemyBullets.query_shape(world, shape, global_transform) -> Array[Node2D]
+EnemyBullets.get_all(world) -> Array[Node]
+EnemyBullets.query_circle(world, center, radius) -> Array[Node]
+EnemyBullets.query_shape(world, shape, global_transform) -> Array[Node]
 EnemyBullets.cancel(world, bullet, reason) -> bool
 EnemyBullets.cancel_all(world, bullets, reason) -> int
 EnemyBullets.get_hub(world) -> EnemyBulletHub
 ```
 
 - `world`는 적탄이 사는 게임플레이 월드다. 그 아래의 살아 있는(삭제 예약되지 않은) 적탄만 대상이다.
-- `query_circle`은 탄 중심(레이저는 머리, 빔은 시작점)까지의 거리로 판단한다. `query_shape`는 물리 판정으로 판단하므로 레이저는 몸통 어느 마디가 겹쳐도 잡힌다. 빔은 판정이 켜진 유지 단계에서만 `query_shape`에 잡힌다(예고·전개·소멸 중에는 `get_all`·`query_circle`로만 찾는다). 방금 생성된 탄은 첫 물리 프레임 이후에 잡힌다.
+- `query_circle`은 탄 중심(레이저는 머리, 빔은 시작점)까지의 거리로 판단한다. `query_shape`는 풀 탄·레이저·빔에는 각 몸체의 `overlaps_shape`(CPU `Shape2D.collide`)로, 레거시 탄에는 물리 쿼리로 묻는다. 레이저는 몸통 어느 마디가 겹쳐도 잡힌다. 빔은 판정이 켜진 유지 단계에서만 `query_shape`에 잡힌다(예고·전개·소멸 중에는 `get_all`·`query_circle`로만 찾는다). 레거시 탄은 첫 물리 프레임 이후에 잡힌다. 반환 원소는 Node이며 위치는 `global_position`으로 읽는다(풀 탄은 Node2D가 아니다).
 - `cancel`은 탄을 삭제 예약하고, 월드에 허브가 있으면 `bullet_cancelled(position, reason, bullet)`을 먼저 발행한다. 발행 중에는 탄이 아직 유효하다. 이미 지워졌거나 월드 밖인 탄은 false를 반환한다. 레이저는 몸체 하나가 한 번의 소거다.
 - 허브는 `get_hub(world)`로 처음 구독할 때 월드 아래에 생기고 월드와 함께 사라진다. 소거 보상·충전 같은 증강은 이 신호를 구독한다.
 - 게임이 쓰는 소거 이유: `augment_resume`(오퍼 재개 버스트) · `elite_reward`(엘리트 탄소거) · `boss`(보스 페이즈 정리) · `lab`(랩 정리).
@@ -606,7 +623,7 @@ EnemyBullets.get_effect(bullet, handle) -> Dictionary   # {speed_mult, heading_o
 - 탄의 현재 나이부터 적용한다. 핸들마다 하나이며 같은 핸들은 교체한다. 속도 배율은 핸들끼리 곱하고 방향 오프셋(도)은 더한다. `duration <= 0`은 해제할 때까지 유지한다.
 - 적용·교체·해제·만료 순간의 위치에서 새 구간이 시작되므로 탄이 튀지 않고, 지나온 위치와 레이저 몸통은 그대로다. 만료는 경로 예측에 미리 반영된다. 모두 해제하면 현재 위치에서 기본 속도로 이어 간다(원래 궤적으로 되돌아가지 않음).
 - 흡인처럼 위치에 따라 방향이 바뀌는 효과는 매 틱 같은 핸들을 새 오프셋으로 재등록한다. 현재 이동 방향은 탄의 `get_travel_velocity()`로 읽는다.
-- `FoundationBullet`·`CurvedLaser`만 지원한다. `TelegraphBeam`·레거시 기본탄·SniperBullet은 false를 반환한다. 호밍 탄은 효과가 없는 자기 궤적 위치 기준으로 표적 방향을 계산한다. 규칙 정본: [전투 — 외부 궤도 개입](design/combat.md#외부-궤도-개입--구현-완료).
+- `FoundationBullet`(저격탄 포함)·`CurvedLaser`만 지원한다. `TelegraphBeam`·레거시 기본탄은 false를 반환한다. 호밍 탄은 효과가 없는 자기 궤적 위치 기준으로 표적 방향을 계산한다. 규칙 정본: [전투 — 외부 궤도 개입](design/combat.md#외부-궤도-개입--구현-완료).
 - 원 안에 머무는 동안만 감속하는 장은 `BulletSlowField`([bullet_slow_field.gd](../projectiles/bullet_slow_field.gd))를 쓴다. 들어올 때 한 번 걸고 나갈 때 풀어, 머무는 탄에 구간이 쌓이지 않는다.
 
 ### 직접 시험

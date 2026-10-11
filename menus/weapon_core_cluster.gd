@@ -69,6 +69,7 @@ func apply_slot_size(side: float, p_show_outer_frame: bool = false) -> void:
 			trait_size = Vector2(maxf(8.0, side * 0.28), maxf(8.0, side * 0.28))
 		orbit_radius = side * 0.2
 	custom_minimum_size = slot_size
+	update_minimum_size()
 	size = slot_size
 	_sync_core_rect()
 	if _show_traits and not _bound_traits.is_empty():
@@ -104,6 +105,7 @@ func bind_weapon(
 	if _core == null:
 		return
 	custom_minimum_size = slot_size
+	update_minimum_size()
 	size = slot_size
 	_core.visible = true
 	_core.interactive = true

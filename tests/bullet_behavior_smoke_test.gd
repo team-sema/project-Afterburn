@@ -131,7 +131,7 @@ func run() -> void:
 	var shot := load("res://resources/projectiles/round_straight_shot.tres").duplicate(true) as BarrageShot
 	shot.behavior = BulletBehavior.new().visual_scale_to(3, 1).hitbox_scale_to(3, 1)
 	var bullet := shot.spawn(world, Vector2(100, 100), Vector2.DOWN, 0) as FoundationBullet
-	bullet.set_physics_process(false)
+	bullet.simulating = false
 	bullet.age = 1
 	bullet._update_pose()
 	await physics_frame
@@ -153,7 +153,8 @@ func run() -> void:
 	var balls: Array[FoundationBullet] = []
 	var lasers: Array[CurvedLaser] = []
 	for node in get_nodes_in_group("enemy_projectiles"):
-		node.set_physics_process(false)
+		if node is FoundationBullet: node.simulating = false
+		else: node.set_physics_process(false)
 		if node is FoundationBullet: balls.append(node)
 		elif node is CurvedLaser: lasers.append(node)
 	expect(balls.size() == 8 and lasers.size() == 8, "mixed preset emits 8 balls and 8 lasers together")
@@ -180,7 +181,7 @@ func run() -> void:
 		lab.pattern_player.stop()
 		for node in get_nodes_in_group("enemy_projectiles"):
 			if node is FoundationBullet and not node.is_queued_for_deletion():
-				node.set_physics_process(false)
+				node.simulating = false
 				node.age = 1.5
 				node._update_pose()
 		lab._toggle_hitboxes(true)

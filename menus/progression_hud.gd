@@ -1,5 +1,7 @@
 class_name ProgressionHud
-extends VBoxContainer
+extends Control
+
+signal augment_ready_changed(ready: bool)
 
 @export var progression: Node
 ## Optional. When set and running a sequence, Threat HUD shows phase progress
@@ -74,13 +76,12 @@ func _refresh_experience() -> void:
 	var is_ready := _current_experience >= _experience_required
 	if is_ready:
 		if _bullet_cancel_reward_active:
-			experience_label.text = "LEVEL %02d   XP RECOVERY" % _level
+			experience_label.text = "XP RECOVERY"
 		else:
-			# No level prefix: the full line must stay inside the 134px HUD column.
+			# Keep the ready prompt within the slanted lower display.
 			experience_label.text = "AUGMENT READY [C]"
 	else:
-		experience_label.text = "LEVEL %02d   %d / %d XP" % [
-			_level,
+		experience_label.text = "XP %d / %d" % [
 			_current_experience,
 			_experience_required,
 		]
@@ -91,6 +92,7 @@ func _set_augment_ready(is_ready: bool) -> void:
 	if _is_augment_ready == is_ready:
 		return
 	_is_augment_ready = is_ready
+	augment_ready_changed.emit(is_ready)
 	_highlight_time = 0.0
 	if is_ready:
 		return

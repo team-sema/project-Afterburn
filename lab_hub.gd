@@ -1,6 +1,7 @@
 extends Control
 
 const LABS := [
+	["HUD · 인터셉터 청색 경고 시안", "res://labs/hud/interceptor_warning_lab.tscn"],
 	["탄막 · 패턴 스크립트", "res://labs/bullet/bullet_lab.tscn"],
 	["보스 · 거대 항모", "res://labs/bosses/carrier/carrier_boss_lab.tscn"],
 	["보스 · 옥타곤", "res://labs/bosses/octagon/octagon_boss_lab.tscn"],

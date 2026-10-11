@@ -6,6 +6,8 @@ Nova Drift 풍: **밝은 기하 코어 + 다중 글로우 레이어 + 어두운 
 
 ## World
 
+- **와이드 화면 바깥 배경**: `effects/window_side_fill.gd`와 `effects/window_side_fill.gdshader`가 조종석 바깥의 여백만 그린다. 비율·명도·출격 및 일시정지 동기화 규칙은 [씬 흐름 · 가변 창 비율](scene-flow.md#가변-창-비율--좌우-여백)을 따른다.
+
 - **전투 판독성**: 배경 별은 탄·기체보다 낮은 밝기로 둔다. `FarStars`는 RGB 0.65, 큰 십자별이 있는 `CloseStars`는 RGB 0.4의 중립색 `self_modulate`를 적용한다(알파 1). 별의 배치·밀도·스크롤과 출격 스트릭은 유지하며 공용 배경을 쓰는 메뉴에도 같은 명도를 적용한다.
 - `WorldEnvironment` — HDR 글로우/블룸
 - **파손 궤도 링**: 기본 배경의 주인공은 화면 밖까지 이어지는 거대한 환형 인공 구조물이다. 청록색 금속 외벽·반복되는 장갑판/트러스·끊어진 두 단면의 주황 잔열과 부유 파편으로 크기와 파손 상태를 읽힌다. 구조물 안쪽에는 어두운 행성의 가장자리를 두고, 플레이어가 주로 머무는 화면 하단 중앙은 낮은 대비로 유지한다. 광원은 국소적인 단면에 집중하며 전장 전체 섬광이나 탄환처럼 이동하는 밝은 점은 쓰지 않는다.
@@ -81,6 +83,7 @@ Nova Drift 풍: **밝은 기하 코어 + 다중 글로우 레이어 + 어두운 
 Flash / Scale / Shake — 피격·발사 시 펀치감
 
 - `FlashComponent`: 단일 `sprite` 또는 `flash_root`의 CanvasItem 자식들을 한꺼번에 화이트 플래시 (Tanker 실드 다중 레이어)
+- 플레이어 피격: 견딜만한 피격과 위험한 피격을 등급으로 나눠 함선 플래시·조종석 패널 흔들림·`ImpactVfx` 프로필 `player_shield`·전장 가장자리 경고(`effects/playfield_damage_warning.gd`)·피격점 맥동을 낸다. 등급·수치·완료 조건은 [플레이어 · 피격 연출](player.md#피격-연출)이 정본이다.
 - `EntryWarningComponent`: 고속 진입 전 VisibleRect 가장자리 화살표 점멸
 - `EncounterStepWarning`: ELITE/BOSS 관문 직전 맵 중앙 관문 경고 — 종류별 문구·색(ELITE 주황빨강 · BOSS 자홍), 펼쳐지는 검은 띠 + 해저드 스트라이프 + 테두리 맥동 + 클락슨 SFX. WAVE는 경고 없음 ([런 페이싱](run-pacing.md#관문-경고-encounterstepwarning))
 
@@ -95,3 +98,13 @@ Flash / Scale / Shake — 피격·발사 시 펀치감
 - `assets/backgrounds/` — 패럴랙스 배경 PNG
 - `assets/ui/` · `assets/pickups/` — UI·픽업 마스크
 
+
+## 공용 위험 표시
+
+`effects/danger_indicator.gd` (`DangerIndicator`)는 전투 로직에 의존하지 않는 Node2D 표시다. 기존 방위각 눈금·브래킷이 수렴하고 같은 중심의 화살표가 진입 방향으로 0.18초 동안 뻗은 뒤 맥동한다. 문구나 숫자는 없다.
+
+- 설정: `warning_color`(기본 청록 #35ffe1), `warning_scale`(기본 1), `warning_duration`(기본 0.9초), `inward_direction`(눈금이 열리는 방향), `trajectory_direction`(화살표 방향). 위치는 Node2D 위치로 지정한다. 방향은 표시 노드 로컬 좌표 기준이며 0벡터 궤도는 inward 방향으로 대체한다.
+- 기본 눈금 반지름은 28→20px, 화살표는 5→24px. 색의 알파와 크기 설정은 모든 선에 함께 적용한다. 시간 만료 시 숨기고 해제하며 일시정지 때 멈춘다.
+- `auto_advance=false`는 Lab처럼 외부 시간이 소유하는 경우 사용한다. `set_preview_time()`으로 동일 렌더러를 재생·되감기한다.
+- `EntryWarningComponent`는 이 표시를 상속하여 화면 가장자리 배치만 담당한다. 인터셉터 최초/왕복 진입은 실제 이동 벡터를 전달하며 각각 기존 0.9/0.6초를 유지하고 크기는 1.0배다. 엘리트 Awl 재진입은 기존 붉은색과 경고 시간을 유지하고 크기는 1.4배다.
+- 검증: 공용 표시의 시간 만료·되감기·방향·설정, 인터셉터와 진화형 및 엘리트 경고 회귀, Lab 렌더를 확인한다.

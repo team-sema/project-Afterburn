@@ -19,6 +19,8 @@ const FILL_FILLED := Color(0.08, 0.32, 0.45, 0.98)
 const PREVIEW_COLOR := Color(0.38, 0.94, 1.0, 1.0)
 const ICON_COLOR := Color(0.88, 0.98, 1.0, 1.0)
 
+@export var cockpit_rows := false
+
 var _registry: PlayerAugmentRegistry
 var _slots: Array = []
 var _highlighted_tag: StringName = &""
@@ -148,17 +150,25 @@ func get_slot_polygon(index: int) -> PackedVector2Array:
 		return PackedVector2Array()
 	var row := floori(float(index) / float(COLUMN_COUNT))
 	var column := index % COLUMN_COUNT
-	var origin := Vector2(
-		(size.x - GRID_WIDTH) * 0.5 + column * COLUMN_STEP,
-		(size.y - GRID_HEIGHT) * 0.5 + row * SLOT_HEIGHT + (SLOT_HEIGHT * 0.5 if column % 2 == 1 else 0.0),
-	)
+	var width := 20.0 if cockpit_rows else SLOT_WIDTH
+	var height := width * 0.866025
+	var origin: Vector2
+	if cockpit_rows:
+		# Flat-top hexes share their diagonal and horizontal edges.
+		var grid_width := width * 4.0
+		origin = Vector2((size.x - grid_width) * 0.5 + column * width * 0.75, 1.0 + row * height + (height * 0.5 if column % 2 == 1 else 0.0))
+	else:
+		origin = Vector2(
+			(size.x - GRID_WIDTH) * 0.5 + column * COLUMN_STEP,
+			(size.y - GRID_HEIGHT) * 0.5 + row * SLOT_HEIGHT + (SLOT_HEIGHT * 0.5 if column % 2 == 1 else 0.0),
+		)
 	return PackedVector2Array([
-		origin + Vector2(SLOT_WIDTH * 0.25, 0.0),
-		origin + Vector2(SLOT_WIDTH * 0.75, 0.0),
-		origin + Vector2(SLOT_WIDTH, SLOT_HEIGHT * 0.5),
-		origin + Vector2(SLOT_WIDTH * 0.75, SLOT_HEIGHT),
-		origin + Vector2(SLOT_WIDTH * 0.25, SLOT_HEIGHT),
-		origin + Vector2(0.0, SLOT_HEIGHT * 0.5),
+		origin + Vector2(width * 0.25, 0.0),
+		origin + Vector2(width * 0.75, 0.0),
+		origin + Vector2(width, height * 0.5),
+		origin + Vector2(width * 0.75, height),
+		origin + Vector2(width * 0.25, height),
+		origin + Vector2(0.0, height * 0.5),
 	])
 
 
@@ -196,7 +206,7 @@ func _draw() -> void:
 			var icon_color := Color(ICON_COLOR, _preview_alpha) if is_module_preview else ICON_COLOR
 			draw_texture_rect(
 				icon,
-				Rect2(center - Vector2(6.0, 6.0), Vector2(12.0, 12.0)),
+				Rect2(center - Vector2(6, 6), Vector2(12, 12)),
 				false,
 				icon_color,
 			)
