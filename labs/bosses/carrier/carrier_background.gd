@@ -1,26 +1,20 @@
 extends CanvasLayer
+## Render the actual game background independently of the Lab destruction camera.
 const Playfield := preload("res://menus/playfield_layout.gd")
-## Screen-space Lab starfield: camera pullback must never expose its edges.
-const TEXTURES = [preload("res://assets/backgrounds/space.png"), preload("res://assets/backgrounds/far_stars.png"), preload("res://assets/backgrounds/close_stars.png")]
-const SPEEDS = [2.0,5.0,20.0]
-var scroll := PackedFloat32Array([0,0,0])
-var tiles: Array[TextureRect] = []
+var background_viewport: SubViewport
+var background: SpaceBackground
+
 func _ready() -> void:
 	layer = -100
 	follow_viewport_enabled = false
-	for texture in TEXTURES:
-		for copy in 2:
-			var tile := TextureRect.new()
-			tile.texture = texture
-			tile.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-			tile.stretch_mode = TextureRect.STRETCH_TILE
-			tile.size = Vector2(Playfield.SIZE)
-			tile.position.y = -360 * copy
-			tile.mouse_filter = Control.MOUSE_FILTER_IGNORE
-			add_child(tile)
-			tiles.append(tile)
-func _process(delta: float) -> void:
-	for i in 3:
-		scroll[i] = fposmod(scroll[i] + SPEEDS[i]*delta,360)
-		tiles[i*2].position.y = scroll[i]
-		tiles[i*2+1].position.y = scroll[i]-360
+	var container := SubViewportContainer.new()
+	container.size = Vector2(Playfield.SIZE)
+	container.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(container)
+	background_viewport = SubViewport.new()
+	background_viewport.size = Playfield.SIZE
+	background_viewport.use_hdr_2d = true
+	background_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	container.add_child(background_viewport)
+	background = preload("res://effects/space_background.tscn").instantiate()
+	background_viewport.add_child(background)
