@@ -315,7 +315,7 @@ func _record_frame(phase: String) -> void:
 		int(Performance.get_monitor(Performance.PHYSICS_2D_COLLISION_PAIRS)),
 		int(Performance.get_monitor(Performance.MEMORY_STATIC) / 1024),
 		_live_sum(["Enemy", "ShootingEnemy", "KamikazeEnemy", "InterceptorEnemy", "SniperEnemy", "TankerEnemy", "BombEnemy"]),
-		_live_sum(["FoundationBullet", "CurvedLaser", "SniperBullet", "BaseEnemyProjectile", "TelegraphBeam"]),
+		_live_sum(["FoundationBullet", "CurvedLaser", "BaseEnemyProjectile", "TelegraphBeam"]),
 		int(_live.get("ExperienceOrb", 0)),
 		_live_sum(["player_blaster.gd", "player_shotgun_pellet.gd", "player_homing_missile.gd", "aux_cannon_bolt.gd", "PlasmaBombProjectile"]),
 		1 if paused else 0,

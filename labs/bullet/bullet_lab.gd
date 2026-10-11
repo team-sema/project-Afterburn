@@ -543,11 +543,11 @@ func _toggle_hitboxes(enabled: bool) -> void:
 	# New projectiles share a single instanced debug renderer.
 	var legacy := is_combo() and shape_choice.selected == SHAPE_LEGACY
 	get_tree().debug_collisions_hint = enabled and legacy
-	var renderer = world.get_meta("projectile_renderer", null)
-	if is_instance_valid(renderer):
-		renderer.extra_debug_shapes.clear()
-		if enabled and not legacy:
-			renderer.extra_debug_shapes.append(hurtbox.get_child(0))
+	var pool := EnemyBulletPool.for_parent(world)
+	pool.extra_debug_shapes.clear()
+	if enabled and not legacy:
+		pool.extra_debug_shapes.append(hurtbox.get_child(0))
+	pool.queue_redraw()
 	for bullet in get_tree().get_nodes_in_group("enemy_projectiles"):
 		if world.is_ancestor_of(bullet) and bullet is FoundationBullet:
 			bullet.show_hitbox = enabled

@@ -121,7 +121,7 @@ func _test_hit_after_reactivation() -> void:
 	_expect(hits[0] == 0, "an intangible bullet does not hit")
 	if is_instance_valid(bullet):
 		_expect(not bullet.tangible, "body reports the hitbox off")
-		_expect((bullet._hitbox.get_child(0) as CollisionShape2D).disabled, "collision shape is disabled while off")
+		_expect(not bullet.overlaps_shape(CircleShape2D.new(), Transform2D(0.0, center)), "shape queries skip the ghost while off")
 		_expect(EnemyBullets.query_circle(_world, center, 4.0).has(bullet), "query_circle still finds the ghost")
 	await _physics_frames(12) # Past 0.3 s: switched on while still overlapping.
 	_expect(hits[0] == 1, "turning on over the player hits once (got %d)" % hits[0])

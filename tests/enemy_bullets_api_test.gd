@@ -105,7 +105,7 @@ func _add_legacy(parent: Node2D, position: Vector2) -> Node2D:
 	return bullet
 
 
-func _only(hits: Array[Node2D], expected: Node2D) -> bool:
+func _only(hits: Array[Node], expected: Node) -> bool:
 	return hits.size() == 1 and hits[0] == expected
 
 

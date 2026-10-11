@@ -5,7 +5,6 @@ extends Node2D
 ## an impact flare at its far end, and finally thins out. Fixed at the launch
 ## position and direction. Rules: combat.md 예고형 빔.
 
-const HITBOX_SCRIPT := preload("res://projectiles/curved_laser_hitbox.gd")
 ## Extra length past the viewport edge so the beam end is off screen.
 const EDGE_MARGIN := 8.0
 const SPARK_COUNT := 5
@@ -36,8 +35,11 @@ var age := 0.0
 var length := 0.0
 var _direction := Vector2.DOWN
 var _active := false
+## Shape-less HitboxComponent handed to hurtboxes as the damage source; the
+## beam segment is tested on the CPU against EnemyBullets.TARGET_GROUP.
 var _hitbox: HitboxComponent
-var _shape: CollisionShape2D
+var _hitting := false
+var _targets: Array[EnemyBulletPool.Target] = []
 
 
 func launch(direction: Vector2, _speed: float) -> void:
@@ -67,7 +69,7 @@ func total_duration() -> float:
 
 
 func is_hitbox_active() -> bool:
-	return _shape != null and not _shape.disabled
+	return _hitting
 
 
 func get_end_point() -> Vector2:
@@ -83,12 +85,36 @@ func _physics_process(delta: float) -> void:
 		_active = false
 		queue_free()
 		return
-	var hitting := phase == Phase.HOLD
-	if hitting != is_hitbox_active():
-		_shape.disabled = not hitting
-	if hitting:
-		_hitbox.apply_contacts()
+	_hitting = phase == Phase.HOLD
+	if _hitting:
+		apply_contacts()
 	queue_redraw()
+
+
+## CPU collision of the held beam segment against player-side hurtboxes.
+func apply_contacts() -> void:
+	if not is_inside_tree():
+		return
+	EnemyBulletPool.collect_targets(get_tree(), _targets)
+	var start := global_position
+	var end := get_end_point()
+	for target in _targets:
+		if target.hurtbox.is_invincible:
+			continue
+		var hit: Variant = EnemyBulletPool.segment_hits(start, end, hit_width * 0.5, target)
+		if hit != null:
+			_hitbox.global_position = hit
+			_hitbox._on_hurtbox_entered(target.hurtbox)
+
+
+## True when `shape` at `shape_transform` overlaps the held beam
+## (EnemyBullets.query_shape).
+func overlaps_shape(shape: Shape2D, shape_transform: Transform2D) -> bool:
+	if not _active or not _hitting:
+		return false
+	var rectangle := RectangleShape2D.new()
+	rectangle.size = Vector2(length, hit_width)
+	return shape.collide(shape_transform, rectangle, global_transform.translated_local(Vector2(length * 0.5, 0.0)))
 
 
 ## Visual width now: warn width, eased up to core width, held, then thinned out.
@@ -125,18 +151,12 @@ func get_travel_velocity() -> Vector2:
 
 
 func _build_hitbox() -> void:
-	_hitbox = HITBOX_SCRIPT.new() as HitboxComponent
+	_hitbox = HitboxComponent.new()
 	_hitbox.name = "HitboxComponent"
-	_hitbox.collision_layer = EnemyBullets.LAYER
-	_hitbox.collision_mask = 1
-	_shape = CollisionShape2D.new()
-	_shape.name = "CollisionShape2D"
-	var rectangle := RectangleShape2D.new()
-	rectangle.size = Vector2(length, hit_width)
-	_shape.shape = rectangle
-	_shape.position = Vector2(length * 0.5, 0.0)
-	_shape.disabled = true
-	_hitbox.add_child(_shape)
+	_hitbox.collision_layer = 0
+	_hitbox.collision_mask = 0
+	_hitbox.monitoring = false
+	_hitbox.monitorable = false
 	add_child(_hitbox)
 
 

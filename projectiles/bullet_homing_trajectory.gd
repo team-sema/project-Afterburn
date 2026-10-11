@@ -57,7 +57,7 @@ func _init(runtime) -> void:
 	_normalize(first)
 	_frames.append(first)
 
-func configure(owner: Node2D, origin: Vector2, target: Node2D, resolver: Callable) -> void:
+func configure(owner: Node, origin: Vector2, target: Node2D, resolver: Callable) -> void:
 	_owner = weakref(owner)
 	_origin = origin
 	_target = weakref(target) if is_instance_valid(target) else null

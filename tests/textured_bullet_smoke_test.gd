@@ -14,20 +14,21 @@ func run() -> void:
 	var bullets: Array[FoundationBullet] = []
 	for i in 20:
 		var bullet := shot.spawn(world, Vector2(30 + i * 28, 130), Vector2.DOWN, 30) as FoundationBullet
-		bullet.set_physics_process(false)
+		bullet.simulating = false
 		bullet.age = 0.5
 		bullet._update_pose()
 		bullet.show_hitbox = true
 		bullets.append(bullet)
-	var shape := bullets[0]._hitbox.get_child(0) as CollisionShape2D
-	expect(shape.shape is RectangleShape2D and shape.shape.size == Vector2(4, 8), "rectangle shape matches original")
-	expect(shape.position == Vector2(0, 1) and shape.scale == Vector2.ONE, "visual growth preserves hitbox and offset")
+	var shape := bullets[0].collision_shape()
+	expect(shape is RectangleShape2D and shape.size == Vector2(4, 8), "rectangle shape matches original")
+	var pose := bullets[0].collision_transform()
+	expect(pose.origin.is_equal_approx(bullets[0].global_position + Vector2(0, 1).rotated(bullets[0].global_rotation)) and pose.get_scale().is_equal_approx(Vector2.ONE), "visual growth preserves hitbox and offset")
 	expect(is_equal_approx(bullets[0].visual_scale, 1.5), "visual scale behavior applies")
 	await process_frame
-	var renderer = world.get_node("ProjectileBatchRenderer")
-	renderer.refresh()
-	expect(renderer._batches.size() == 1 and renderer._texture_materials.size() == 1, "20 textured bullets share one instance batch and 3 layer materials")
-	expect(renderer._debug_mesh.visible_instance_count == 20, "rectangle debug batch populated")
+	var pool := EnemyBulletPool.for_parent(world)
+	var groups: Dictionary = pool.get_render_groups()
+	expect(groups.size() == 1 and groups.values()[0].items.size() == 3, "20 textured bullets share one instance batch and 3 layer materials")
+	expect(groups.values()[0].members.size() == 20 and pool._debug_count == 20, "rectangle batch and debug outlines populated")
 	if DisplayServer.get_name() != "headless":
 		await RenderingServer.frame_post_draw
 		await process_frame
@@ -41,16 +42,15 @@ func run() -> void:
 		old.get_node("Sprite2D/Trail").emitting = false
 		old.get_node("ScaleComponent").scale_tween.kill()
 		old.get_node("Sprite2D").scale = Vector2.ONE
-	# Third row: textured fallback with the same shader and a straight behavior.
+	# Third row: the scene-instantiated body with a straight behavior.
 	for i in 12:
 		var bullet := preload("res://projectiles/foundation_bullet.tscn").instantiate() as FoundationBullet
 		bullet.appearance = shot.appearance
 		bullet.behavior = BulletBehavior.new()
-		bullet.use_batched_rendering = false
 		world.add_child(bullet)
-		bullet.position = Vector2(40 + i * 45, 300)
+		bullet.global_position = Vector2(40 + i * 45, 300)
 		bullet.launch(Vector2.DOWN, 0)
-		bullet.set_physics_process(false)
+		bullet.simulating = false
 	# Real rectangle collision: visual growth alone must not enlarge the hitbox.
 	var hurt := HurtboxComponent.new()
 	hurt.position = Vector2(614, 61)
@@ -68,7 +68,7 @@ func run() -> void:
 	collision_shot.appearance = shot.appearance
 	collision_shot.behavior = BulletBehavior.new().visual_scale_to(3, 1).hitbox_scale_to(3, 1)
 	var collision_bullet := collision_shot.spawn(world, Vector2(610, 60), Vector2.DOWN, 0) as FoundationBullet
-	collision_bullet.set_physics_process(false)
+	collision_bullet.simulating = false
 	collision_bullet.age = 1
 	collision_bullet._update_pose()
 	await physics_frame

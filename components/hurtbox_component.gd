@@ -15,6 +15,9 @@ func _ready() -> void:
 		monitoring = true
 		collision_mask |= EnemyBullets.LAYER
 		area_entered.connect(_on_passive_hitbox_entered)
+		# Pooled bullets and laser bodies test this hurtbox on the CPU
+		# (EnemyBulletPool, CurvedLaser, TelegraphBeam) instead of physics.
+		add_to_group(EnemyBullets.TARGET_GROUP)
 
 func _on_passive_hitbox_entered(area: Area2D) -> void:
 	# Hitboxes that monitor themselves (contact bodies, lasers, beams, legacy

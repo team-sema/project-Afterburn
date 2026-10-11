@@ -23,7 +23,7 @@ func _bullet(parent: Node, appearance: BulletAppearance, motion: BulletBehavior,
 	parent.add_child(bullet)
 	bullet.global_position = origin
 	bullet.launch(direction, speed)
-	bullet.set_physics_process(false)
+	bullet.simulating = false
 	return bullet
 
 
@@ -48,9 +48,8 @@ func _run() -> void:
 	single._physics_process(0.6)
 	_expect(stepped.global_position.distance_to(single.global_position) < 0.001, "frame partition does not change the trajectory")
 	_expect(absf(angle_difference(single.global_rotation, single.get_travel_velocity().angle() + PI * 0.5)) < 0.001, "rice follows instantaneous travel direction")
-	var first_shape := stepped.get_node("HitboxComponent/CollisionShape2D") as CollisionShape2D
-	var second_shape := single.get_node("HitboxComponent/CollisionShape2D") as CollisionShape2D
-	_expect(first_shape.shape != second_shape.shape, "collision shapes are per projectile")
+	_expect(stepped.collision_shape() != single.collision_shape(), "collision shapes are per projectile")
+	_expect(stepped.collision_shape() is CapsuleShape2D, "rice collides as a capsule")
 	stepped.behavior.actions[0].value = 0
 	_expect(is_equal_approx(single.behavior.actions[0].value, 12.0), "active motion is isolated")
 	stepped.free()
@@ -137,11 +136,11 @@ func _test_lab() -> void:
 			lab.set("_invincible_left", 0.0)
 			var before: int = lab.hits
 			var bullet := _bullet(lab.world, appearance, motion, lab.target.position - Vector2(0, 25), Vector2.DOWN, 95)
-			bullet.set_physics_process(true)
+			bullet.simulating = true
 			await create_timer(0.5).timeout
 			# Waves can move laterally away from a 2px target; aim along the known path.
 			if motion == STRAIGHT:
-				_expect(lab.hits == before + 1, "each straight appearance hits through the physics hurtbox")
+				_expect(lab.hits == before + 1, "each straight appearance hits through the pooled hurtbox test")
 			if is_instance_valid(bullet):
 				bullet.queue_free()
 			await process_frame
@@ -152,7 +151,7 @@ func _test_lab() -> void:
 	var start := target_position - BulletBehaviorState.new(WAVE, Vector2.DOWN, 95, Color.WHITE, 8).position_at(0.3)
 	var curved := _bullet(lab.world, ROUND, WAVE, start, Vector2.DOWN, 95)
 	var hits_before: int = lab.hits
-	curved.set_physics_process(true)
+	curved.simulating = true
 	await create_timer(0.5).timeout
 	_expect(lab.hits == hits_before + 1, "wave collision follows the visible path")
 	lab._on_hurt(null)
@@ -168,7 +167,7 @@ func _test_lab() -> void:
 	lab.safety_meter.measure()
 	_expect(lab.safety_meter.relevant_projectile_count == 1, "wave segments count as one projectile")
 	var frozen := wave_bullet.global_position
-	wave_bullet.set_physics_process(true)
+	wave_bullet.simulating = true
 	lab.toggle_pause()
 	await create_timer(0.1, true).timeout
 	_expect(wave_bullet.global_position == frozen, "pause freezes projectiles")

@@ -69,8 +69,10 @@ func _measure_blocked_ratio(projectiles: Array[Node], enemies: Array[Node]) -> f
 	var projectile_paths: Array[Dictionary] = []
 	relevant_projectile_count = 0
 	for projectile in projectiles:
-		var actor := projectile as Node2D
-		if actor == null or actor.is_queued_for_deletion():
+		# Pooled bullets are plain Nodes with a global_position property, so
+		# read the body dynamically instead of requiring a Node2D.
+		var actor: Variant = projectile
+		if actor == null or actor.is_queued_for_deletion() or not ("global_position" in actor):
 			continue
 		var points := PackedVector2Array()
 		var radius := projectile_hazard_radius
@@ -137,7 +139,7 @@ func _measure_blocked_ratio(projectiles: Array[Node], enemies: Array[Node]) -> f
 	return float(blocked) / float(total_cells)
 
 
-func _get_projectile_velocity(projectile: Node2D) -> Vector2:
+func _get_projectile_velocity(projectile: Node) -> Vector2:
 	var move := projectile.get_node_or_null("MoveComponent") as MoveComponent
 	if move != null:
 		return move.velocity
