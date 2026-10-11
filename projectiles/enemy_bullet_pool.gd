@@ -109,7 +109,7 @@ func register(bullet: FoundationBullet) -> void:
 	group.members.append(bullet)
 	var multimesh := group.multimesh
 	if multimesh.instance_count < group.members.size():
-		multimesh.instance_count = maxi(group.members.size(), multimesh.instance_count * 2)
+		_grow(group, maxi(group.members.size(), multimesh.instance_count * 2))
 	multimesh.visible_instance_count = group.members.size()
 	multimesh.set_instance_transform_2d(bullet._slot, OFFSCREEN)
 	multimesh.set_instance_color(bullet._slot, Color.WHITE)
@@ -119,6 +119,24 @@ func register(bullet: FoundationBullet) -> void:
 	bullet.tree_exiting.connect(_unregister.bind(bullet))
 	if bullet.show_hitbox:
 		_debug_count += 1
+
+
+## Enlarges a group's instance buffer. Setting instance_count reallocates the
+## buffer and zeroes every instance (transform, colour, custom data), so the
+## live members are uploaded again; static-visual bullets never rewrite their
+## colour on their own and would otherwise turn invisible.
+func _grow(group: RenderGroup, count: int) -> void:
+	var multimesh := group.multimesh
+	multimesh.instance_count = count
+	for member in group.members:
+		if member._slot < 0:
+			continue
+		multimesh.set_instance_color(member._slot, Color(1, 1, 1, member.render_opacity) if member._active else Color.WHITE)
+		multimesh.set_instance_custom_data(member._slot, member.render_tint)
+		if member._active and member.visible:
+			multimesh.set_instance_transform_2d(member._slot, Transform2D(member.global_rotation, Vector2.ONE * member.visual_scale, 0.0, member.global_position))
+		else:
+			multimesh.set_instance_transform_2d(member._slot, OFFSCREEN)
 
 
 func _unregister(bullet: FoundationBullet) -> void:
