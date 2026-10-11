@@ -11,6 +11,13 @@ enum Phase { ENTRY, RECOVERY, AIM, PULLBACK, DASH, REENTRY_WARNING, REENTRY }
 @export_range(0.25, 3.0, 0.05) var reentry_warning_scale := 1.4
 @export var pullback_distance := 28.0
 @export var pullback_duration := 0.5
+## Shot intervals during the dash. Barrage pressure moves them toward the
+## limits so the spines (or fountain lasers) left on the path sit closer.
+## Aim, re-entry warning, counter window and dash speed stay.
+@export var spine_interval := 0.06
+@export var pressure_spine_interval_limit := 0.04
+@export var fountain_interval := 0.14
+@export var pressure_fountain_interval_limit := 0.08
 ## Nonzero seeds allow repeatable legacy/new comparisons without VFX RNG interference.
 @export var shot_random_seed := 0
 var _shot_rng := RandomNumberGenerator.new()
@@ -20,7 +27,8 @@ var dash_direction := Vector2.DOWN
 var _elapsed := 0.0
 var _shot_elapsed := 0.0
 var _wake_elapsed := 0.0
-var _action_rate := 1.0
+## Barrage pressure P, read at spawn.
+var pressure := 0
 var _hold_position := Vector2.ZERO
 var _visual: Node2D
 var _aim_locked := false
@@ -35,6 +43,7 @@ func _ready() -> void:
 	if shot_random_seed == 0: _shot_rng.randomize()
 	else: _shot_rng.seed = shot_random_seed
 	super._ready()
+	pressure = enemy.get_barrage_pressure()
 	fire_timer.stop()
 	spine_shot = _make_spine_shot()
 	_visual = enemy.get_node("ChargeVisual")
@@ -42,10 +51,6 @@ func _ready() -> void:
 	(enemy.get_node("VisibleOnScreenNotifier2D") as FreeOffscreenComponent).suspend_despawn()
 	process_priority = 20
 	set_process(true)
-
-
-func apply_action_rate_multiplier(multiplier: float) -> void:
-	_action_rate = maxf(0.01, multiplier)
 
 
 func _process(delta: float) -> void:
@@ -156,13 +161,13 @@ func _advance_dash(delta: float) -> void:
 			_visual.emit_wake(enemy.global_position - dash_direction * 14.0, dash_direction)
 	_shot_elapsed += delta
 	if use_spine:
-		var spine_interval := maxf(0.04, 0.06 / _action_rate)
-		if _shot_elapsed >= spine_interval:
-			_shot_elapsed -= spine_interval
+		var interval := BarragePressure.scale(spine_interval, pressure_spine_interval_limit, pressure)
+		if _shot_elapsed >= interval:
+			_shot_elapsed -= interval
 			if bounds.has_point(enemy.global_position):
 				_drop_spines()
 		return
-	var interval := maxf(0.08, 0.14 / _action_rate)
+	var interval := BarragePressure.scale(fountain_interval, pressure_fountain_interval_limit, pressure)
 	if _shot_elapsed >= interval:
 		_shot_elapsed -= interval
 		if bounds.has_point(enemy.global_position):
@@ -174,13 +179,10 @@ func _emit_fountain() -> void:
 	var world := get_tree().get_first_node_in_group("gameplay_world") as Node2D
 	if world == null: world = get_tree().current_scene as Node2D
 	var tail := enemy.global_position - dash_direction * 14.0
-	var count := maxi(1, shot_count)
 	for side in [-1.0, 1.0]:
 		var direction := Vector2.UP.rotated(deg_to_rad(side * _shot_rng.randf_range(15.0, 45.0)))
 		var speed := _shot_rng.randf_range(150.0, 180.0)
-		for index in count:
-			var offset := lerpf(-spread_degrees * 0.5, spread_degrees * 0.5, float(index) / (count - 1)) if count > 1 else 0.0
-			barrage_shot.spawn(world, tail, direction.rotated(deg_to_rad(offset)), speed, false, _pattern_target(), _pattern_target)
+		barrage_shot.spawn(world, tail, direction, speed, false, _pattern_target(), _pattern_target)
 	_volleys_fired += 1
 
 
@@ -189,11 +191,8 @@ func _drop_spines() -> void:
 	var world := get_tree().get_first_node_in_group("gameplay_world") as Node2D
 	if world == null: world = get_tree().current_scene as Node2D
 	var perpendicular := Vector2(-dash_direction.y, dash_direction.x)
-	var count := maxi(1, shot_count)
 	for side in [perpendicular, -perpendicular]:
-		for index in count:
-			var offset := lerpf(-spread_degrees * 0.5, spread_degrees * 0.5, float(index) / (count - 1)) if count > 1 else 0.0
-			spine_shot.spawn(world, enemy.global_position, side.rotated(deg_to_rad(offset)), 30.0)
+		spine_shot.spawn(world, enemy.global_position, side, 30.0)
 	_volleys_fired += 1
 
 

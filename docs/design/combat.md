@@ -160,7 +160,7 @@ Hitbox와 Hurtbox 중 하나라도 **트리 밖**이면 그 겹침은 무시한�
 - 실행 복사는 기본 BarrageSequence에 데이터만 복사하며 패턴 생성자를 재실행하지 않는다. 발사 금지선은 FIRE를 건너뛰고 일정은 진행한다. 컴포넌트의 표적 조회 경로에서는 표적 부재 시 조준 Volley만 건너뛰고 다음 발사에서 재조회한다. 기존 Player의 고정 표적 모드는 트리 이탈 시 중단 계약을 유지한다.
 - ACTION_RATE는 패턴 시간 배율에 적용하며 탄 이동/Behavior는 바꾸지 않는다. 초기 지연은 기존처럼 실제 게임 시간이다.
 
-- 본 게임 Drone은 `patterns/drone_pattern.gd`, Striker·Interceptor는 `patterns/aimed_burst_pattern.gd`, Caster는 `patterns/caster_pattern.gd`를 사용한다. 모두 신규 바늘탄·직진 Behavior·공통 다이아몬드 꼬리·8초 수명을 사용한다. 기존 기본탄의 초기 확대/섬광과 시간당 파티클은 그대로 복제하지 않는다. 발사 수치·활성 조건은 각 적 기획서를 따른다. Radial 전용 컴포넌트는 제거했다. 패턴의 포화 사격 적용 범위는 [증강](augments.md)을 따른다.
+- 본 게임 Drone은 `patterns/drone_pattern.gd`, Striker·Interceptor는 `patterns/aimed_burst_pattern.gd`, Caster는 `patterns/caster_pattern.gd`를 사용한다. 모두 신규 바늘탄·직진 Behavior·공통 다이아몬드 꼬리·8초 수명을 사용한다. 기존 기본탄의 초기 확대/섬광과 시간당 파티클은 그대로 복제하지 않는다. 발사 수치·활성 조건은 각 적 기획서를 따른다. Radial 전용 컴포넌트는 제거했다. 패턴의 난이도 상승은 [탄막 압력](#탄막-압력)을 따른다.
 - pattern_script가 없는 레거시 모드에서는 `EnemyShootComponent.barrage_shot`을 선택해 새 탄만 연결할 수도 있다. 이때 방향 주입 없는 전용 씬 발사는 기존 projectile_scene 경로를 유지하고 새 탄 생성은 deferred 단계에서 수행한다.
 - Elite Awl은 공격 컴포넌트가 돌진 중 `BarrageShot.spawn`으로 가시 바늘과 분수 호밍 레이저를 직접 만든다. 이동 서브스텝·발사 난수·예고는 공격 컴포넌트가 소유하며 Sequence 이식은 하지 않았다. 패턴과 공격 재생 Lab은 [Elite Awl](elites/elite-awl.md#탄막-이식)을 따른다.
 - 안전 비율 격자 최적화는 레거시 탄에도 적용된다. 새 MultiMesh/레이저 메쉬·판정 표시 배칭은 FoundationBullet/CurvedLaser에 적용되며 `Kind.LEGACY`는 기존 Sprite/파티클 렌더링을 사용한다.
@@ -370,6 +370,30 @@ player.play(mixed, emitter, world)
 - Drone · Striker · 이를 상속한 Interceptor가 안전선을 사용한다. Elite 및 Caster/Sniper 전용 공격은 사용하지 않는다.
 - 안전선은 볼리 생성 직전에 매번 공통값을 읽는다. 런타임에 공통값이 바뀌면 이미 활성화된 적용 대상도 다음 발사부터 새 값을 사용한다.
 
+### 탄막 압력
+
+적 탄막에서 "더 자주 쏜다"와 "더 촘촘히 쏜다"는 플레이어가 받는 압력이라는 한 축이다. 어느 쪽으로 표현해야 자연스러운지는 패턴이 정한다. 엘리트 Awl의 가시 궤적은 남는 바늘 사이 거리가 줄어야 밀도가 오르지만, 바늘마다 부채꼴을 붙이면 다른 패턴이 된다. 그래서 런은 단계 하나만 올리고, 패턴이 그 단계를 자기 방식으로 해석한다.
+
+- **정의**: 탄막 압력 `P`는 0부터 쌓이는 정수 단계다. 적마다 스폰 순간의 값으로 고정한다.
+- **출처**: `P` = (현재 Threat − 1) + 적 증강 보너스 합.
+  - Threat가 1 오를 때마다(엘리트·보스 처치 정산마다) +1. Threat 1에서 증강이 없으면 `P` = 0이고, 현재 튜닝과 같다.
+  - 포화 사격은 1장마다 +2로, 지금 가장 강한 수단이다. 다른 적 증강도 보너스를 가질 수 있다. 보너스는 배율 스탯이 아니라 더하는 정수다.
+  - 보너스는 특정 적 계열에만 붙을 수 있다. `고속 기폭 장치`는 Bomb 계열에만 +4다([Bomb](enemies/bomb.md)).
+- **해석**: 패턴은 `build(params)`의 `pressure`로, 엘리트 공격 컴포넌트는 같은 값을 받아 자기 패턴을 만든다. 무엇이 단계마다 얼마나 바뀌는지는 각 적·엘리트 기획서의 표에 적는다.
+- **공통 곡선**: 패턴은 바뀌는 값마다 기준(`P` = 0)과 한계만 정하고, 값 = 기준 + (한계 − 기준) × `t(P)`로 계산한다. `t(P)` = 1 − 2^(−`P` / 4)이다. 4단계마다 남은 거리의 절반씩 다가가므로 한계에 닿지 않고, 단계가 오를수록 변화가 줄어든다. 반감 단계 4는 게임 전체의 스케일링 속도를 정하는 하나의 값이다. 정수 값(연사 수·링 탄 수)은 반올림하고, 좌우 대칭이 필요한 링은 짝수로 맞춘다.
+
+  | `P` | 0 | 1 | 3 | 4 | 6 | 10 | 20 |
+  |---|---|---|---|---|---|---|---|
+  | `t(P)` | 0 | 0.16 | 0.41 | 0.5 | 0.65 | 0.82 | 0.97 |
+
+- **해석하지 않는 패턴**은 변하지 않는다. 바깥에서 볼리를 일괄로 고치지 않는다. 일반 적은 모두 해석표를 갖거나 "변화 없음"을 명시한다. 엘리트 4종은 각 문서의 해석표를 따른다. 일반 Awl은 아직 해석하지 않으므로 `P`로 변하지 않는다.
+- **불변 조건**: 회피 판단에 쓰는 예고(조준선·락온·경로 예고·반격 시간), 탄속, 패턴의 모양과 정체성은 `P`로 바꾸지 않는다. 기다리는 시간 자체가 위협인 경우(Bomb 신관)는 해석표에서 한계를 두고 줄일 수 있다. 패턴마다 최소 탈출 간격(탄 사이 최소 거리·각도)을 정해 그 아래로 내리지 않는다. 한계 값에서도 동시 탄 수가 `P` = 0의 2배를 넘지 않게 한계를 정한다.
+- **측정**: Bullet Lab의 정지 안전 비율로 `P` = 0과 높은 단계(예: 10)에서 패턴을 비교해, 패턴 사이의 압력 증가가 크게 어긋나지 않게 맞춘다.
+- **공격 속도(ACTION_RATE)와의 관계**: 탄막 패턴의 시간 간격은 `P`가 맡는다. 엘리트의 ACTION_RATE·ARMING_RATE·탄 수 경로는 없앴다. 일반 적 컴포넌트의 ACTION_RATE·ARMING_RATE 배율은 코드에 남아 있지만, 지금 이 값을 주는 적 증강은 없다. 탄막이 아닌 타이밍에 ACTION_RATE를 쓸지는 미결정이다.
+- **구현**: 곡선은 `BarragePressure`(`projectiles/barrage_pressure.gd`). `P`는 `EnemyAugmentRegistry.get_barrage_pressure()`가 `threat_level`(EnemyGenerator가 Threat 변화를 따라 갱신)과 `EnemyAugment.pressure_bonus`·`pressure_group`(노드 그룹, 비면 모든 적)으로 계산하고, `Enemy.get_barrage_pressure()`가 첫 조회 때 고정한다. `EnemyShootComponent`는 패턴 `build(params)`에 `pressure`를 넣고, 패턴은 씬 `pattern_params`가 지정한 한계(`rest_limit`·`shots_limit`·`burst_span`·`count_limit`)만 해석한다. Sniper·Striker 항적·Bomb 신관은 각 컴포넌트의 `pressure_*_limit`로, 엘리트는 공격 컴포넌트의 `pressure` 값으로 서브 패턴마다 해석한다.
+
+미결정: 포화 사격의 최대 스택(현재 무제한, 곡선이 한계에 닿지 않아 상한 없이도 값이 폭주하지 않는다) · 다른 증강의 보너스 · 일반 Awl 해석.
+
 ### 엘리트 이상 처치 탄소거
 
 - Threat 엘리트 처치 시 게임을 멈추지 않고 플레이필드의 `enemy_projectiles`를 제거한다. 플레이어 탄환은 제거하지 않는다.
@@ -401,7 +425,8 @@ player.play(mixed, emitter, world)
 - 플레이어 피해는 피격당 1이며 실드가 먼저 소모된다.
 - 중복 치명 입력으로 점수·XP가 중복 지급되지 않는다.
 - 엘리트 처치 시 화면 안 적탄만 XP로 바꾸고 게임을 멈추지 않으며, 정산 완료 전 다음 오퍼를 열지 않는다.
+- 탄막 압력 `P`는 (Threat − 1) + 적 증강 보너스이며 그룹 한정 보너스는 그 그룹의 적만 받는다. 각 일반 적은 해석표의 값만 바꾸고, 예고·탄속·패턴 모양과 `P`를 해석하지 않는 적은 그대로다.
 - Bullet Lab은 정지 안전 비율을 표시하며, 감시 범위 밖의 적과 적탄은 계산에서 제외한다.
 - 적탄 경로·접촉 피해 몸체·Bomb 접근 영역이 정지 안전 비율에 반영되고, 성긴 탄막은 높은 비율을 유지한다.
 
-검증 참고: `tests/bullet_cancel_reward_smoke_test.gd` · `tests/labs/safe_space_meter_test.gd`. Godot 실행은 `tools/run-godot.cmd`를 사용한다.
+검증 참고: `tests/barrage_pressure_test.gd` · `tests/bullet_cancel_reward_smoke_test.gd` · `tests/labs/safe_space_meter_test.gd`. Godot 실행은 `tools/run-godot.cmd`를 사용한다.

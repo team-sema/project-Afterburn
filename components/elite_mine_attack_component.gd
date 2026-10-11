@@ -19,14 +19,20 @@ enum Phase { ENTRY, READY, THROW, RECOVERY, FIELD_WARNING, FIELD }
 @export var ring_speed := 80.0
 @export var ring_angle_step := 18.0
 @export var field_warning_duration := 0.6
+@export_group("Barrage pressure limits")
+## Values the barrage pressure approaches (docs/design/elites/elite-bomb.md).
+## Flight, blinks, the body warning and the orb halts stay.
+@export var pressure_arm_duration_limit := 1.0
+@export var pressure_ring_count_limit := 16
+@export var pressure_recovery_limit := 1.5
 
 var phase := Phase.ENTRY
 var mines: Array[Node2D] = []
 var mines_thrown := 0
 var _remaining := 0.0
 var _thrown_in_cycle := 0
-var _action_rate := 1.0
-var _arming_rate := 1.0
+## Barrage pressure P, read at spawn.
+var pressure := 0
 ## Patterns alternate: mine throw (A), then the orb minefield (B).
 var next_is_field := false
 var field_direction := Vector2.DOWN
@@ -35,6 +41,7 @@ var _warning_elapsed := 0.0
 
 func _ready() -> void:
 	super._ready()
+	pressure = enemy.get_barrage_pressure()
 	fire_timer.stop()
 	enemy.get_node("EliteAimCone").hide()
 	(enemy.get_node("StatsComponent") as StatsComponent).no_health.connect(clear_mines)
@@ -47,20 +54,16 @@ func _ready() -> void:
 	set_process(true)
 
 
-func apply_action_rate_multiplier(multiplier: float) -> void:
-	_action_rate = maxf(0.01, multiplier)
-
-
-func apply_arming_rate_multiplier(multiplier: float) -> void:
-	_arming_rate *= maxf(0.01, multiplier)
-
-
 func get_arm_duration() -> float:
-	return maxf(0.8, arm_duration / _arming_rate)
+	return BarragePressure.scale(arm_duration, pressure_arm_duration_limit, pressure)
 
 
 func get_ring_count() -> int:
-	return ring_count + maxi(0, shot_count - 1)
+	return BarragePressure.scale_even(ring_count, pressure_ring_count_limit, pressure)
+
+
+func get_recovery_duration() -> float:
+	return BarragePressure.scale(recovery_duration, pressure_recovery_limit, pressure)
 
 
 func _process(delta: float) -> void:
@@ -116,9 +119,9 @@ func _throw_mine() -> void:
 	if _thrown_in_cycle >= mine_count:
 		phase = Phase.RECOVERY
 		next_is_field = true
-		_remaining += maxf(1.2, recovery_duration / _action_rate)
+		_remaining += get_recovery_duration()
 	else:
-		_remaining += maxf(0.15, throw_interval / _action_rate)
+		_remaining += throw_interval
 
 
 ## Centre first, then alternate left/right with growing offsets.
@@ -147,7 +150,7 @@ func _begin_field() -> void:
 	phase = Phase.FIELD
 	_set_warning_flash(false)
 	var sequence := FIELD_PATTERN.new()
-	sequence.build({"angle": rad_to_deg(field_direction.angle() - PI * 0.5), "rate": _action_rate})
+	sequence.build({"angle": rad_to_deg(field_direction.angle() - PI * 0.5), "pressure": pressure})
 	var world := get_tree().get_first_node_in_group("gameplay_world") as Node2D
 	if world == null: world = get_tree().current_scene as Node2D
 	if not barrage_player.play(sequence, enemy, world):
@@ -158,7 +161,7 @@ func _begin_field() -> void:
 func _field_finished() -> void:
 	phase = Phase.RECOVERY
 	next_is_field = false
-	_remaining = maxf(1.2, recovery_duration / _action_rate)
+	_remaining = get_recovery_duration()
 	enemy.movement_controller.set_process(true)
 
 

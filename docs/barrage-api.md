@@ -539,7 +539,7 @@ fire_together(layers)
 
 [EnemyShootComponent](../components/enemy_shoot_component.gd)는 기본 조준/부채꼴 사격과 버스트를 담당한다. 화면 진입 후 활성화, 초기 지연, 활성 기간, 발사 금지선, actor 전방 발사, 표적 없음 처리, 행동 속도 배율을 함께 관리한다.
 
-Caster도 공통 EnemyShootComponent를 사용하며 Radial 전용 컴포넌트는 제거했다. [EnemyModifierFactory](../components/enemy_modifier_factory.gd)는 공통 발사 컴포넌트에 속도 배율을 전달한다. `pattern_fire_volume_boost`는 스폰 시 발수 증강을 적용할 패턴의 명시적 opt-in이며 Drone·Striker·Interceptor만 켠다. 패턴을 변이하는 첫 증강이 시작 전에 컴포넌트 독립 사본(snapshot)을 만들어 거기에 적용하므로 공유 프리셋은 바뀌지 않는다. 실행 중 사본 수정이나 자동 재시작은 지원하지 않는다.
+Caster도 공통 EnemyShootComponent를 사용하며 Radial 전용 컴포넌트는 제거했다. [EnemyModifierFactory](../components/enemy_modifier_factory.gd)는 공통 발사 컴포넌트에 속도 배율을 전달한다. 패턴 난이도는 `build(params)`의 `pressure`(탄막 압력 `P`)로 패턴이 직접 해석한다([전투 — 탄막 압력](design/combat.md#탄막-압력)). 탄속 배율처럼 패턴을 변이하는 첫 증강은 시작 전에 컴포넌트 독립 사본(snapshot)을 만들어 거기에 적용하므로 공유 프리셋은 바뀌지 않는다. 실행 중 사본 수정이나 자동 재시작은 지원하지 않는다.
 
 ### 1단계: 탄 생성만 연결 — 호환 경로로 유지
 
@@ -570,7 +570,7 @@ Drone은 `drone_pattern.gd`, Striker·Interceptor는 `aimed_burst_pattern.gd`를
 
 이관한 일반 적의 Timer는 최초 활성화 지연에만 사용한다. Elite Awl은 공격 제어자가 돌진 중 `BarrageShot.spawn`으로 가시 바늘과 분수 호밍 레이저(`barrage_shot`)를 직접 만들고, 발사 타이밍·난수·이동을 소유한다.
 
-Elite Fighter는 `elite_fighter_pattern.gd`의 유한 Sequence로 부채꼴/집중 사격을 재생한다. 제어자는 이동 정지·재개와 고정 조준 예고를 담당하고 마지막 발사의 `finished`로 다음 단계에 진입한다. ACTION_RATE는 단계별 최소 간격을 반영한 Player.time_scale로 적용한다.
+Elite Fighter는 `elite_fighter_pattern.gd`의 유한 Sequence로 부채꼴/집중 사격을 재생한다. 제어자는 이동 정지·재개와 고정 조준 예고를 담당하고 마지막 발사의 `finished`로 다음 단계에 진입한다. 난이도는 단계마다 `build(params)`의 `pressure`(탄막 압력)로 패턴이 해석한다.
 
 Sniper는 `SniperBarrageShot`이 BarrageShot의 `is_valid()`와 `spawn()`을 재정의하는 특수 몸체 어댑터다. 폭·사거리·피해량은 Resource 설정으로 스냅샷되며 기존 SniperBullet의 Line2D 외형·판정·finished 계약을 유지한다. Appearance/Behavior/입자 꼬리는 지원하지 않는다. 탄 소멸의 finished는 Sequence의 발사 완료 신호와 별개다. 조준선·반동·재발사 일정은 SniperAttackComponent에 남는다.
 

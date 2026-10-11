@@ -6,18 +6,22 @@ enum Phase { ENTRY, READY, SPELL, REST }
 
 @export var ready_duration := 0.6
 @export var rest_duration := 1.4
+## Rest the barrage pressure approaches. Bullet halts and turns are warnings and stay.
+@export var pressure_rest_limit := 0.8
 @export var lane_spin_degrees := 9.0
 
 var phase := Phase.ENTRY
 var spell: int = Spell.BREATHING_RINGS
 var cycle := 0
 var reference_direction := Vector2.DOWN
+## Barrage pressure P, read at spawn; each spell interprets it.
+var pressure := 0
 var _remaining := 0.0
-var _action_rate := 1.0
 
 
 func _ready() -> void:
 	super._ready()
+	pressure = enemy.get_barrage_pressure()
 	fire_timer.stop()
 	enemy.get_node("EliteAimCone").hide()
 	barrage_player = BarragePlayer.new()
@@ -27,10 +31,6 @@ func _ready() -> void:
 	barrage_player.finished.connect(_spell_finished)
 	process_priority = 20
 	set_process(true)
-
-
-func apply_action_rate_multiplier(multiplier: float) -> void:
-	_action_rate = maxf(0.01, multiplier)
 
 
 func get_lane_spin() -> float:
@@ -60,7 +60,7 @@ func _begin_spell() -> void:
 	reference_direction = Vector2.DOWN if direction.is_zero_approx() else direction
 	var sequence := PHASE_PATTERN.new()
 	sequence.build({"spell": spell, "angle": rad_to_deg(reference_direction.angle() - PI * 0.5),
-		"spin": get_lane_spin(), "extra_shots": maxi(0, shot_count - 1), "rate": _action_rate})
+		"spin": get_lane_spin(), "pressure": pressure})
 	var world := get_tree().get_first_node_in_group("gameplay_world") as Node2D
 	if world == null: world = get_tree().current_scene as Node2D
 	if not barrage_player.play(sequence, enemy, world):
@@ -70,7 +70,7 @@ func _begin_spell() -> void:
 
 func _spell_finished() -> void:
 	phase = Phase.REST
-	_remaining = maxf(0.8, rest_duration / _action_rate)
+	_remaining = BarragePressure.scale(rest_duration, pressure_rest_limit, pressure)
 	if spell == Spell.HALT_AND_AIM:
 		cycle += 1
 	spell = (spell + 1) % 3

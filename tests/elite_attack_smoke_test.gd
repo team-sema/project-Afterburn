@@ -113,16 +113,15 @@ func _run() -> void:
 	attack._process(1.61)
 	_expect(attack.phase == attack.Phase.SALVO, "pattern A resumes after recovery")
 
-	# Action rate, pause and volume augment
+	# Pause and barrage pressure
 	elite.stats_component.health = 100
-	attack.apply_action_rate_multiplier(10.0)
 	attack._process(0.45)
 	for i in 3:
-		attack._process(0.18)
+		attack._process(0.341)
 	await process_frame
 	_expect(get_nodes_in_group("enemy_projectiles").size() == 138, "low-health salvo is unchanged")
-	_expect(attack.phase == attack.Phase.AIM, "action rate keeps the minimum salvo gap")
-	_expect(is_equal_approx(attack._remaining, 1.0), "action rate preserves full warning")
+	_expect(attack.phase == attack.Phase.AIM, "salvo keeps its 0.34s gap")
+	_expect(is_equal_approx(attack._remaining, 1.0), "rail aim warning lasts one second")
 	attack.set_process(true)
 	paused = true
 	var remaining: float = attack._remaining
@@ -133,27 +132,23 @@ func _run() -> void:
 	attack.set_process(false)
 	attack._process(1.01)
 	for i in 9:
-		attack._process(0.08)
+		attack._process(0.131)
 	await process_frame
 	_expect(get_nodes_in_group("enemy_projectiles").size() == 168, "low-health rails are unchanged")
-	_expect(attack.phase == attack.Phase.RECOVERY, "action rate keeps the minimum rail gap")
-	_expect(is_equal_approx(attack._remaining, 1.0), "action rate preserves minimum recovery")
-	attack.shot_count += 2
-	attack.phase = attack.Phase.SALVO
-	attack._play_phase("salvo")
-	attack.barrage_player.stop()
-	await process_frame
-	_expect(get_nodes_in_group("enemy_projectiles").size() == 178, "volume augment adds needles to each salvo pod")
-	attack._begin_rail()
-	attack.barrage_player.stop()
-	await process_frame
-	_expect(get_nodes_in_group("enemy_projectiles").size() == 181, "volume augment leaves the three rails unchanged")
-	attack._begin_scissor()
-	attack.barrage_player.stop()
-	await process_frame
-	_expect(get_nodes_in_group("enemy_projectiles").size() == 191, "volume augment adds pellets to each scissor pod")
-	attack.apply_action_rate_multiplier(10.0)
-	_expect(is_equal_approx(attack.barrage_player.time_scale, 1.6), "action rate keeps the minimum scissor gap")
+	_expect(attack.phase == attack.Phase.RECOVERY, "rail keeps its 0.13s gap at pressure 0")
+	_expect(is_equal_approx(attack._remaining, 1.6), "recovery rests 1.6 seconds at pressure 0")
+	var pressured_salvo := _phase_counts("salvo", 6)
+	_expect(pressured_salvo == [8, 8, 8, 8], "pressure 6 puts four needles in each salvo pod: %s" % [pressured_salvo])
+	var pressured_rail := _phase_counts("rail", 6)
+	_expect(pressured_rail.size() == 14 and pressured_rail[0] == 3, "pressure 6 packs fourteen rail shots of three lines")
+	_expect(is_equal_approx(_phase_span("rail", 6), 0.13 * 9), "rail burst keeps its 1.17s length")
+	var pressured_scissor := _phase_counts("scissor", 6)
+	_expect(pressured_scissor.size() == 13 and pressured_scissor[0] == 6, "pressure 6 packs thirteen three-way scissor shots")
+	_expect(is_equal_approx(_phase_span("scissor", 6), 0.16 * 9), "scissor burst keeps its 1.44s length")
+	attack.pressure = 6
+	attack.phase = attack.Phase.RAIL
+	attack._phase_finished()
+	_expect(is_equal_approx(attack._remaining, BarragePressure.scale(1.6, 1.0, 6)), "pressure shortens the recovery")
 	world.queue_free()
 	await process_frame
 	if failures.is_empty():
@@ -163,6 +158,32 @@ func _run() -> void:
 		for failure in failures:
 			push_error(failure)
 		quit(1)
+
+
+func _phase_sequence(mode: String, pressure: int) -> BarrageSequence:
+	var sequence := (preload("res://patterns/elite_fighter_pattern.gd") as Script).new() as BarrageSequence
+	sequence.build({"mode": mode, "pressure": pressure})
+	return sequence
+
+
+func _phase_counts(mode: String, pressure: int) -> Array:
+	var counts := []
+	for step in _phase_sequence(mode, pressure).steps:
+		if step.action != BarrageStep.Action.FIRE:
+			continue
+		var total := 0
+		for volley in step.get_volleys():
+			total += 1 if volley.layout == BarrageVolley.Layout.SINGLE else volley.count
+		counts.append(total)
+	return counts
+
+
+func _phase_span(mode: String, pressure: int) -> float:
+	var span := 0.0
+	for step in _phase_sequence(mode, pressure).steps:
+		if step.action == BarrageStep.Action.WAIT:
+			span += step.value
+	return span
 
 
 func _advance(bullet: Node, age: float) -> void:

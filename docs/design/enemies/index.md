@@ -34,7 +34,7 @@ Drone에는 색과 탄만 다른 변종 3종(산탄·느린탄·정지탄, `enem
 
 ## EnemyModifierFactory
 
-HEALTH / MOVE_SPEED / ACTION_RATE (+ `EnemyShootComponent` / `SniperAttackComponent` 주기). Caster 링도 공통 `EnemyShootComponent`의 패턴으로 실행한다.
+HEALTH / MOVE_SPEED / ACTION_RATE (+ `EnemyShootComponent` / `SniperAttackComponent` 주기). 탄막 난이도는 [탄막 압력](../combat.md#탄막-압력)을 각 적이 해석한다. Caster 링도 공통 `EnemyShootComponent`의 패턴으로 실행한다.
 
 ## 진화형
 

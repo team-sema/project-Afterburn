@@ -6,6 +6,8 @@ extends Node
 
 @export var barrage_shot: BarrageShot
 @export_range(0.05, 5.0, 0.05, "suffix:s") var interval := 0.45
+## Interval the barrage pressure approaches; shorter gaps close up the wake.
+@export_range(0.05, 5.0, 0.05, "suffix:s") var pressure_interval_limit := 0.25
 @export_range(1.0, 1000.0, 1.0, "suffix:px/s") var projectile_speed := 55.0
 ## Shares the ordinary-enemy lower-screen safety line.
 @export var apply_shot_threshold := true
@@ -21,6 +23,7 @@ func _ready() -> void:
 	assert(enemy != null, "WakeShotComponent must be attached directly to an Enemy.")
 	assert(barrage_shot != null and barrage_shot.is_valid(), "WakeShotComponent requires a valid BarrageShot.")
 	_last_position = enemy.global_position
+	interval = BarragePressure.scale(interval, pressure_interval_limit, enemy.get_barrage_pressure())
 
 
 func get_shots_fired() -> int:

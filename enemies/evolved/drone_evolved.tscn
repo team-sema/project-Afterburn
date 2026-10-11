@@ -14,4 +14,4 @@ health = 40
 
 [node name="EnemyShootComponent" parent="."]
 pattern_script = ExtResource("3_pattern")
-pattern_params = {"ways": 1, "spread": 0.0, "shots": 3, "gap": 0.12, "rest": 4.5, "speed": 105.0}
+pattern_params = {"ways": 1, "spread": 0.0, "shots": 3, "shots_limit": 6, "gap": 0.12, "rest": 4.5, "speed": 105.0}

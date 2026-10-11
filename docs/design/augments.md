@@ -42,10 +42,10 @@ XP를 모은 뒤 플레이어가 선택 시점을 정하며, 무기·모듈·시
 |----|--------|------|--------|
 | `enemy_health_boost_1_2` | 적 증원 | HEALTH ×1.2 | — |
 | `enemy_move_speed_boost_1_2` | 가속 적대 | MOVE_SPEED ×1.2 | — |
-| `enemy_fire_volume_boost` | 포화 사격 | ACTION_RATE ×1.25 + 탄 2 · 스프레드 18° | — |
+| `enemy_fire_volume_boost` | 포화 사격 | [탄막 압력](combat.md#탄막-압력) +2 (모든 적) · 무제한 | — |
 | `enemy_near_death_experience` | 임사 체험 | 치명 시 HP1 · 1초 무적 후 사망 · one-time | — |
 | `enemy_drone_formation_reinforcement` | 드론 증원 편대 | Drone 편대 +1 · one-time | ![드론](enemies/sprites/enemy_drone.svg) |
-| `enemy_bomb_fast_fuse` | 고속 기폭 장치 | Bomb 무장·Elite Bomb 기뢰 점멸 ÷1.5 · one-time | ![폭탄](enemies/sprites/enemy_bomb.svg) |
+| `enemy_bomb_fast_fuse` | 고속 기폭 장치 | [탄막 압력](combat.md#탄막-압력) +4 (`bomb` 그룹: Bomb·정지형·진화형·Elite Bomb) · one-time | ![폭탄](enemies/sprites/enemy_bomb.svg) |
 | `enemy_xp_drift_speed_boost` | XP 드롭 속도 증가 | XP_DRIFT_SPEED ×1.2 · 최대 2스택(×1.44) | — |
 | `enemy_projectile_speed_boost` | 고속탄 | 일반 적 PROJECTILE_SPEED ×1.15 · 최대 2스택(×1.3225) | — |
 | `enemy_xp_drop_chance_down` | 빈약한 전리품 | XP_DROP_CHANCE ×0.9 · 최대 2스택(×0.81) | — |
@@ -58,7 +58,7 @@ XP를 모은 뒤 플레이어가 선택 시점을 정하며, 무기·모듈·시
 
 반격탄은 CounterShotComponent가 피격/사망 이벤트에서 BarrageShot을 직접 발사한다. 기본 카드의 탄속 200px/s·1발·쿨다운 0.25초를 유지한다. 다발 설정은 지정한 펼침각으로 발사한다. 신규 반격탄은 반지름 4px 원형 판정과 공통 입자 꼬리를 사용하며, 발사 방향의 수직축으로 진폭 4px·주기 1초의 lateral_wave를 반복한다. 기존 화면 X축 왕복에서 발사 방향 기준 파동으로 바뀌고 발사점에서 시작한다. 수명은 8초다. 타깃이 없거나 겹치면 발사하지 않는다. 발동 순간 위치·방향·설정을 고정해 물리 콜백 밖에서 생성하며, 적이 바로 삭제되어도 요청한 반격은 남지만 월드가 제거되면 취소한다. 일반 오퍼 풀 제외는 유지한다.
 
-포화 사격의 발수·펼침각은 Drone·Striker·Interceptor의 패턴에도 스폰 시 적용한다. 패턴의 `pattern_fire_volume_boost` 명시적 opt-in으로 연결하며 시작 전에 적용한다. Caster는 기존처럼 ACTION_RATE만 적용한다. 기존 엘리트의 발수 증가 경로는 유지한다.
+포화 사격과 고속 기폭 장치는 탄막을 직접 고치지 않고 [탄막 압력](combat.md#탄막-압력) `P`에 단계를 더한다. 선택 뒤 스폰되는 적이 받으며, 무엇이 얼마나 바뀌는지는 각 적 기획서의 해석표를 따른다. 포화 사격 1장은 Threat 두 단계를 앞당기는 효과다. 일반 Awl만 아직 `P`를 해석하지 않는다.
 
 XP 드롭 속도 증가는 선택 뒤 스폰되는 적의 `ExperienceDropComponent.drift_speed_multiplier`에 곱해지고, 그 적이 떨어뜨리는 XP 오브의 낙하 속도(기본 155px/s)를 올린다. 이미 화면에 있는 오브와 탄소거 XP는 바뀌지 않는다. 오브가 함선보다 빨리 지나가 놓치기 쉬워지므로 레벨업이 늦어지는 대가 카드다. 2스택이면 약 223px/s다. 배율·스택은 임시값이다.
 
@@ -176,6 +176,7 @@ XP 드롭 속도 증가는 선택 뒤 스폰되는 적의 `ExperienceDropCompone
 - 적 풀은 21종(일반 13 + 진화 8)이다. 스탯 적 증강은 선택 뒤 스폰되는 적에만 적용되고, 스택 한도를 넘겨 나오지 않는다.
 - 진화 카드는 그 원본 적이 스폰되기 전에는 나오지 않는다. 고르면 이후 스폰되는 원본만 진화형으로 나오고, Encounter ID와 다른 적 증강은 유지된다. 한 번 고른 진화는 다시 나오지 않는다.
 - XP 드롭 속도 증가·빈약한 전리품은 그 적이 떨어뜨리는 오브의 낙하 속도·드롭 확률만 바꾸며, 확정 드롭과 탄소거 XP는 그대로다.
+- 포화 사격은 모든 적의 탄막 압력을 +2, 고속 기폭 장치는 `bomb` 그룹만 +4 한다. 탄막을 직접 고치는 경로(부채꼴 변환·발수 추가)는 없다.
 - 고속탄·유폭·장갑판은 일반 적에게만 적용되고 엘리트·보스는 그대로다. 장갑판은 적마다 첫 피격 1회만 흡수한다.
 - 유폭 탄은 일반 탄보다 크게 시작해 날아가며 외형과 판정이 함께 줄어들고, 0.7초 안에 모두 사라진다.
 - 엘리트 호위대를 고르면 이후 엘리트 관문(보스 제외)마다 Drone 2기가 함께 나온다. 리롤 봉쇄는 남은 리롤을 1 줄이고, 남은 리롤이 0이면 후보에서 빠진다.

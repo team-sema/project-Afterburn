@@ -21,6 +21,9 @@ enum CombatState {
 @export_range(0.0, 2.0, 0.01) var lock_on_duration := 0.75
 @export_range(0.05, 5.0, 0.05) var shot_recovery_duration := 0.1
 @export_range(0.1, 20.0, 0.05) var cooldown_duration := 2.5
+## Cooldown the barrage pressure approaches. Aim and lock-on are dodge
+## warnings and never scale with pressure.
+@export_range(0.1, 20.0, 0.05) var pressure_cooldown_limit := 1.0
 @export_range(1.0, 45.0, 0.5) var telegraph_start_angle := 14.0
 @export_range(0.0, 15.0, 0.05) var telegraph_end_angle := 0.05
 @export_range(100.0, 2000.0, 10.0) var projectile_speed := 900.0
@@ -53,6 +56,7 @@ var _recoil_property := "position"
 func _ready() -> void:
 	enemy = get_parent() as Enemy
 	assert(enemy != null, "SniperAttackComponent must be attached to an Enemy.")
+	cooldown_duration = BarragePressure.scale(cooldown_duration, pressure_cooldown_limit, enemy.get_barrage_pressure())
 	_base_aim_duration = aim_duration
 	_base_lock_on_duration = lock_on_duration
 	_base_cooldown_duration = cooldown_duration

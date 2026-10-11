@@ -11,17 +11,15 @@ func _initialize() -> void:
 func expect(ok: bool, message: String) -> void:
 	if not ok: failures.append(message)
 
-func actor(path: String, boosted := false) -> EnemyShootComponent:
+## Spawns at the given barrage pressure through the real registry path:
+## P = Threat - 1 with no augments, fixed when the shoot component builds.
+func actor(path: String, pressure := 0) -> EnemyShootComponent:
 	var enemy := load(path).instantiate() as Enemy
 	enemy.augment_registry = registry
 	enemy.position = Vector2(100, 50)
-	# Exercise the real deferred spawn modifier path, including stacked boosts.
-	if boosted:
-		var factory := enemy.get_node("EnemyModifierFactory") as EnemyModifierFactory
-		factory.local_behavior_components = [
-			preload("res://components/augment_behaviors/enemy_fire_volume_boost_component.tscn"),
-			preload("res://components/augment_behaviors/enemy_fire_volume_boost_component.tscn")]
+	registry.threat_level = pressure + 1
 	world.add_child(enemy)
+	registry.threat_level = 1
 	var shoot := enemy.get_node("EnemyShootComponent") as EnemyShootComponent
 	shoot.fire_timer.stop()
 	shoot.set_process(false)
@@ -69,15 +67,14 @@ func run() -> void:
 	expect(batches.size() == 4, "Striker resumes at next scheduled volley")
 	striker.barrage_player.stop()
 
-	var caster := actor("res://enemies/shooting_enemy.tscn", true)
-	var drone := actor("res://enemies/normal_enemy.tscn", true)
-	var boosted := actor("res://enemies/moving_enemy.tscn", true)
+	var caster := actor("res://enemies/shooting_enemy.tscn")
+	var drone := actor("res://enemies/normal_enemy.tscn", 6)
+	var pressured := actor("res://enemies/moving_enemy.tscn", 6)
+	var pressured_caster := actor("res://enemies/shooting_enemy.tscn", 6)
 	await process_frame
-	# Deferred modifier callbacks have run; no initial delays have elapsed.
-	expect(not caster.pattern_fire_volume_boost, "Caster excludes volume boost")
 	var rings: Array = []
 	start(caster, rings)
-	expect(rings.size() == 1 and rings[0].size() == 16, "Caster retains sixteen bullets under boost")
+	expect(rings.size() == 1 and rings[0].size() == 16, "Caster fires sixteen bullets at pressure 0")
 	expect(rings[0][0].get_travel_velocity().is_equal_approx(Vector2(95, 0)), "Caster starts at right")
 	for i in 4: caster.barrage_player.advance(0.1)
 	expect(rings.size() == 5, "five rings per burst")
@@ -92,18 +89,29 @@ func run() -> void:
 	expect(rings.size() == 7, "Caster action rate scales ring interval")
 	caster.barrage_player.stop()
 
+	var pressured_rings: Array = []
+	start(pressured_caster, pressured_rings)
+	expect(pressured_rings[0].size() == 22, "Caster pressure 6 widens each ring to 22 bullets")
+	for i in 4: pressured_caster.barrage_player.advance(0.1)
+	expect(pressured_rings.size() == 5, "pressure keeps five rings per burst")
+	pressured_caster.barrage_player.stop()
+
+	var drone_rest := BarragePressure.scale(4.5, 2.5, 6)
 	var drone_batches: Array = []
 	start(drone, drone_batches)
-	expect(drone_batches[0].size() == 5, "Drone stacked volume boosts add four bullets")
-	var boosted_batches: Array = []
-	start(boosted, boosted_batches)
-	boosted.barrage_player.advance(0.15)
-	expect(boosted_batches.size() == 2 and boosted_batches[0].size() == 9 and boosted_batches[1].size() == 9, "boost applies once to every reused volley")
-	var left: Vector2 = boosted_batches[0][0].get_travel_velocity().normalized()
-	var right: Vector2 = boosted_batches[0][-1].get_travel_velocity().normalized()
-	expect(is_equal_approx(rad_to_deg(left.angle_to(right)), 18.0), "boost minimum spread")
+	expect(drone_batches[0].size() == 1, "Drone pressure keeps a single aimed needle")
+	drone.barrage_player.advance(drone_rest - 0.01)
+	expect(drone_batches.size() == 1, "Drone pressure rest not cut short")
+	drone.barrage_player.advance(0.02)
+	expect(drone_batches.size() == 2, "Drone pressure 6 rests %.2f seconds" % drone_rest)
+	var pressured_batches: Array = []
+	start(pressured, pressured_batches)
+	pressured.barrage_player.advance(0.15)
+	expect(pressured_batches.size() == 2 and pressured_batches[0].size() == 5 and pressured_batches[1].size() == 5, "Striker pressure keeps the five-way fan")
+	pressured.barrage_player.advance(BarragePressure.scale(4.5, 2.5, 6) + 0.001)
+	expect(pressured_batches.size() == 3, "Striker pressure shortens the rest")
 	drone.barrage_player.stop()
-	boosted.barrage_player.stop()
+	pressured.barrage_player.stop()
 
 	var interceptor := actor("res://enemies/interceptor_enemy.tscn")
 	var shots: Array = []
@@ -123,6 +131,17 @@ func run() -> void:
 	interceptor._process(0.7)
 	interceptor.barrage_player.advance(20)
 	expect(shots.size() == 5 and not interceptor.barrage_player.running, "window stops future fire")
+
+	var dense := actor("res://enemies/interceptor_enemy.tscn", 6)
+	var dense_shots: Array = []
+	dense.barrage_player.volley_fired.connect(func(bullets: Array[Node2D]): dense_shots.append(bullets))
+	dense._process(0)
+	dense.fire_timer.stop()
+	dense._start_pattern()
+	dense.barrage_player.set_physics_process(false)
+	dense.barrage_player.advance(0.401)
+	expect(dense_shots.size() == 8, "Interceptor pressure 6 packs eight shots into the same 0.4s burst (got %d)" % dense_shots.size())
+	dense.barrage_player.stop()
 
 	# A dead emitter cancels future fire but leaves existing world bullets alive.
 	drone._start_pattern()

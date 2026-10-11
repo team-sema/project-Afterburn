@@ -86,6 +86,9 @@ var _augment_result: Label
 var _augment_mode := AugmentTestMode.PLAYER
 var _simulated_player_level := 0
 var _simulated_enemy_tier := 0
+## Barrage pressure P for the next spawns (docs/design/combat.md 탄막 압력).
+var pressure_level: SpinBox
+var _pressure_readout: Label
 
 
 func _ready() -> void:
@@ -98,6 +101,7 @@ func _ready() -> void:
 	_load_trait_definitions()
 	_enemy_encounters = _load_encounter_presets()
 	_build_enemy_buttons()
+	_build_pressure_row()
 	_build_slot_buttons()
 	_build_weapon_buttons()
 	_load_augment_resources()
@@ -596,6 +600,56 @@ func _player_augment_kind_label(kind: PlayerAugmentKind.Kind) -> String:
 func _update_mode_badge(status: String) -> void:
 	var badge := $Layout/Playfield/ModeBadge/Label as Label
 	badge.text = status
+
+
+## Sets the run Threat behind P: P = (Threat - 1) + enemy augment bonuses. Each
+## enemy keeps the P it spawned with, so the change applies to the next spawns.
+func set_barrage_pressure(value: int) -> void:
+	pressure_level.set_value_no_signal(value)
+	enemy_registry.threat_level = maxi(value, 0) + 1
+	_refresh_pressure_readout()
+	_update_mode_badge("탄막 압력 P %d · 다음 스폰부터" % get_barrage_pressure())
+
+
+func get_barrage_pressure() -> int:
+	return enemy_registry.get_barrage_pressure(null)
+
+
+func _build_pressure_row() -> void:
+	var spawn_row := spawn_count.get_parent() as HBoxContainer
+	var label_settings := (spawn_row.get_child(0) as Label).label_settings
+	var row := HBoxContainer.new()
+	row.name = "PressureRow"
+	var title := Label.new()
+	title.text = "탄막 압력 P"
+	title.label_settings = label_settings
+	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(title)
+	_pressure_readout = Label.new()
+	_pressure_readout.label_settings = label_settings
+	_pressure_readout.modulate = Color(1.0, 1.0, 1.0, 0.6)
+	row.add_child(_pressure_readout)
+	pressure_level = SpinBox.new()
+	pressure_level.min_value = 0
+	pressure_level.max_value = 20
+	pressure_level.custom_minimum_size = spawn_count.custom_minimum_size
+	pressure_level.tooltip_text = "Threat − 1에 해당하는 기본 단계. 적 증강 보너스는 따로 더해진다."
+	pressure_level.value_changed.connect(func(value: float) -> void: set_barrage_pressure(int(value)))
+	row.add_child(pressure_level)
+	spawn_row.get_parent().add_child(row)
+	spawn_row.get_parent().move_child(row, spawn_row.get_index() + 1)
+	enemy_registry.augment_added.connect(func(_augment: EnemyAugment) -> void: _refresh_pressure_readout())
+	enemy_registry.augment_removed.connect(func(_augment: EnemyAugment) -> void: _refresh_pressure_readout())
+	enemy_registry.augments_cleared.connect(_refresh_pressure_readout)
+	pressure_level.set_value_no_signal(enemy_registry.threat_level - 1)
+	_refresh_pressure_readout()
+
+
+## Shows the P an ordinary enemy spawns with; group bonuses (e.g. bomb) come on top.
+func _refresh_pressure_readout() -> void:
+	var base := maxi(enemy_registry.threat_level - 1, 0)
+	var total := get_barrage_pressure()
+	_pressure_readout.text = "→ %d" % total if total == base else "+%d → %d" % [total - base, total]
 
 
 func _load_encounter_presets() -> Array[EncounterPreset]:

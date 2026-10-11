@@ -51,6 +51,15 @@ var _formation_intent := MovementIntent.new()
 @onready var hit_sound_player: VariablePitchAudioStreamPlayer = $HitSoundPlayer
 
 var _is_dying := false
+var _barrage_pressure := -1
+
+## Barrage pressure P fixed at the first query, which components make while the
+## enemy spawns. Without a registry (labs, bare scenes) it stays 0.
+func get_barrage_pressure() -> int:
+	if _barrage_pressure < 0:
+		_barrage_pressure = augment_registry.get_barrage_pressure(self) if augment_registry != null else 0
+	return _barrage_pressure
+
 
 func _ready() -> void:
 	add_to_group("enemies")

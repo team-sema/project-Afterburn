@@ -2,7 +2,8 @@ extends BarrageSequence
 ## Halting needle (정지탄 드론): the needle flies a short way, brakes to a stop
 ## in front of the drone, turns red as the warning, snaps toward the target and
 ## dashes. The lesson is Sniper's: moving before the launch does nothing,
-## dodge after it commits. pattern_params: speed, hold, dash_speed, rest.
+## dodge after it commits. pattern_params: speed, hold, dash_speed, rest,
+## rest_limit (barrage pressure shortens only the rest; the warning is kept).
 
 const NEEDLE := preload("res://resources/projectiles/needle.tres")
 const TRAIL := preload("res://resources/projectiles/diamond_trail.tres")
@@ -27,5 +28,6 @@ func build(params: Dictionary) -> void:
 	volley.aim = BarrageVolley.Aim.EACH_SHOT
 	volley.speed = float(params.get("speed", 120.0))
 	fire(volley)
-	wait(float(params.get("rest", 4.5)))
+	var pressure := int(params.get("pressure", 0))
+	wait(BarragePressure.scale(float(params.get("rest", 4.5)), float(params.get("rest_limit", 2.5)), pressure))
 	repeat()

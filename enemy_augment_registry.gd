@@ -9,6 +9,10 @@ signal augments_cleared
 ## Shared lower-screen safety line for every opted-in EnemyShootComponent.
 @export_range(0.0, 1.0, 0.01) var shot_threshold_y_ratio := 0.7
 
+## Current run Threat, kept in sync by EnemyGenerator. Each level above 1 adds
+## one barrage pressure level to later spawns.
+var threat_level := 1
+
 var _seen_enemy_scene_paths := {}
 
 
@@ -58,6 +62,17 @@ func get_additional_spawn_count(spawn_id: StringName) -> int:
 		if augment.target_spawn_id == spawn_id:
 			additional_count += augment.additional_spawn_count
 	return additional_count
+
+
+## Barrage pressure P for an enemy spawning now: (Threat - 1) + augment bonuses.
+func get_barrage_pressure(enemy: Node) -> int:
+	var pressure := maxi(threat_level - 1, 0)
+	for augment in active_augments:
+		if augment.pressure_bonus <= 0:
+			continue
+		if augment.pressure_group == &"" or (enemy != null and enemy.is_in_group(augment.pressure_group)):
+			pressure += augment.pressure_bonus
+	return pressure
 
 
 func get_elite_escort_presets() -> Array[EncounterPreset]:
