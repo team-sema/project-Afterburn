@@ -12,6 +12,10 @@ const COLOR_SHADER := preload("res://projectiles/projectile_color.gdshader")
 const META := &"enemy_bullet_pool"
 const OFFSCREEN := Transform2D(0.0, Vector2(-100000.0, -100000.0))
 const DEBUG_COLOR := Color(0.2, 1.0, 0.75, 0.7)
+## Instances a render group starts with. Large enough that ordinary play never
+## grows a buffer (a growth re-uploads every live instance, see _grow); 64
+## bytes per instance, so a group costs 32 KB up front.
+const INITIAL_INSTANCES := 512
 
 
 class RenderGroup:
@@ -403,7 +407,7 @@ func _group_for(appearance: BulletAppearance) -> RenderGroup:
 		multimesh.mesh = BATCH_RENDERER._make_bullet_mesh(appearance)
 		var item := _make_item(group, _color_material)
 		RenderingServer.canvas_item_add_multimesh(item, multimesh.get_rid())
-	multimesh.instance_count = 64
+	multimesh.instance_count = INITIAL_INSTANCES
 	multimesh.visible_instance_count = 0
 	_groups[key] = group
 	return group
