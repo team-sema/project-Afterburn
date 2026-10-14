@@ -70,11 +70,12 @@ func run() -> void:
 	# were already there must keep their colour/tint (static visuals never
 	# rewrite them), or a Caster ring curtain turns invisible mid-pattern.
 	var grown: Array[FoundationBullet] = []
-	for i in 100:
+	var total := EnemyBulletPool.INITIAL_INSTANCES + 40
+	for i in total:
 		grown.append(bullet(other, "round"))
 	var other_pool := other.get_node("EnemyBulletPool") as EnemyBulletPool
 	var round_group = other_pool.get_render_groups()[grown[0]._render_key]
-	expect(round_group.multimesh.instance_count >= 101 and round_group.members.size() == 101, "buffer grows with the group")
+	expect(round_group.multimesh.instance_count >= total + 1 and round_group.members.size() == total + 1, "buffer grows with the group")
 	if DisplayServer.get_name() != "headless":
 		var kept: Color = round_group.multimesh.get_instance_custom_data(0)
 		expect(kept.is_equal_approx(other.get_child(0).render_tint) or kept.a > 0.0, "early instances keep their tint after the buffer grows")
