@@ -47,6 +47,9 @@ var _color_material: ShaderMaterial
 ## same object type and hit position as before.
 var _proxy: HitboxComponent
 var _targets: Array[Target] = []
+## Graze rings (GrazeComponent) as circle targets, index-matched with receivers.
+var _grazers: Array[Target] = []
+var _graze_receivers: Array[GrazeComponent] = []
 var _debug_count := 0
 var _capsule := CapsuleShape2D.new()
 ## Extra shapes drawn with the debug outlines (lab: the target hurtbox).
@@ -194,6 +197,9 @@ func _physics_process(delta: float) -> void:
 	collect_targets(get_tree(), _targets)
 	var targets := _targets
 	var target_count := targets.size()
+	_collect_grazers()
+	var grazers := _grazers
+	var grazer_count := grazers.size()
 	var write := 0
 	var count := _bullets.size()
 	for read in count:
@@ -223,6 +229,15 @@ func _physics_process(delta: float) -> void:
 					break
 			if bullet._group == null:
 				continue
+		if grazer_count > 0 and bullet.tangible:
+			var graze_reach := bullet._bounding_radius * bullet.hitbox_scale
+			for index in grazer_count:
+				var ring := grazers[index]
+				var graze_span := graze_reach + ring.radius
+				if absf(ring.center.x - point.x) > graze_span or absf(ring.center.y - point.y) > graze_span:
+					continue
+				if _overlaps_target(bullet, point, ring):
+					_graze_receivers[index].report_bullet(frame, point)
 		# Inline instance write (see _write_instance) to save a call per bullet.
 		var multimesh: MultiMesh = bullet._group.multimesh
 		if bullet.visible:
@@ -262,6 +277,23 @@ func _write_instance(bullet: FoundationBullet) -> void:
 
 
 # --- Collision -------------------------------------------------------------
+
+## Graze rings that can graze this tick, as circle targets (index-matched
+## with _graze_receivers).
+func _collect_grazers() -> void:
+	_grazers.clear()
+	_graze_receivers.clear()
+	for node in get_tree().get_nodes_in_group(GrazeComponent.GROUP):
+		var receiver := node as GrazeComponent
+		if receiver == null or not receiver.can_graze():
+			continue
+		var ring := Target.new()
+		ring.kind = 0
+		ring.center = receiver.get_center()
+		ring.radius = receiver.get_radius()
+		_grazers.append(ring)
+		_graze_receivers.append(receiver)
+
 
 ## Player-side hurtboxes (EnemyBullets.TARGET_GROUP) with their enabled shapes,
 ## flattened into `out` (cleared first). Shared with the laser bodies.
