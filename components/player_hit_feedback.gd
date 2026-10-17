@@ -5,6 +5,7 @@ extends Node
 ## grades: ship flash, shield-coloured impact VFX, the playfield edge warning
 ## and the hit point pulse while the shield is empty. Cockpit panel shake and
 ## the shield arc react on their own from the same signal / shield events.
+## Also plays the shield hit / break / recharge sounds (SFX bus).
 ## Rules and numbers: docs/design/player.md「피격 연출」.
 
 const FLASH_ABSORBED := 0.12
@@ -22,6 +23,9 @@ const PULSE_MAX := 1.6
 @export var flash_component: FlashComponent
 @export var hit_point: PlayerHitPoint
 @export var impact_profile: ImpactProfile = preload("res://effects/impact_profiles/player_shield.tres")
+@export var hit_sound: AudioStream = preload("res://sounds/shield_hit.wav")
+@export var break_sound: AudioStream = preload("res://sounds/shield_break.wav")
+@export var recharge_sound: AudioStream = preload("res://sounds/shield_restore.wav")
 
 var _core: PlayerHitPointCore
 var _core_fill := Color.WHITE
@@ -29,10 +33,17 @@ var _pulsing := false
 var _pulse_elapsed := 0.0
 var _last_shield := -1
 var _last_severity := -1
+var _sound_player: AudioStreamPlayer
+## Last sound started, for tests (no audio output in headless runs).
+var last_sound: AudioStream
 
 
 func _ready() -> void:
 	set_process(false)
+	_sound_player = AudioStreamPlayer.new()
+	_sound_player.bus = &"SFX"
+	_sound_player.max_polyphony = 3
+	add_child(_sound_player)
 	if hit_point != null:
 		_core = hit_point.get_node_or_null("Visual/Core") as PlayerHitPointCore
 		if _core != null:
@@ -41,6 +52,7 @@ func _ready() -> void:
 		hurt_component.player_hit.connect(_on_player_hit)
 	if shield_component != null:
 		shield_component.shield_changed.connect(_on_shield_changed)
+		shield_component.shield_recharged.connect(_play_sound.bind(recharge_sound, -6.0))
 		_last_shield = shield_component.get_current_shield()
 		if _last_shield <= 0:
 			_set_pulsing(true)
@@ -62,6 +74,10 @@ func _on_player_hit(severity: int, hit_position: Vector2, impact_direction: Vect
 	if severity == HurtComponent.HitSeverity.LETHAL:
 		return
 	var broken := severity == HurtComponent.HitSeverity.SHIELD_BROKEN
+	if broken:
+		_play_sound(break_sound, -2.0)
+	else:
+		_play_sound(hit_sound, -4.0)
 	if flash_component != null:
 		flash_component.flash_duration = FLASH_BROKEN if broken else FLASH_ABSORBED
 		flash_component.flash()
@@ -79,6 +95,17 @@ func _on_player_hit(severity: int, hit_position: Vector2, impact_direction: Vect
 		var warning := _warning()
 		if warning != null:
 			warning.start(true)
+
+
+func _play_sound(stream: AudioStream, volume_db: float) -> void:
+	if stream == null:
+		return
+	last_sound = stream
+	if _sound_player == null or not _sound_player.is_inside_tree():
+		return
+	_sound_player.stream = stream
+	_sound_player.volume_db = volume_db
+	_sound_player.play()
 
 
 func _on_shield_changed(current: int, _maximum: int) -> void:

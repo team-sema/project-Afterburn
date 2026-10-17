@@ -168,6 +168,8 @@ func _populate_overlay(stage: SubViewport) -> void:
 			card.call("configure_copy", "워밍업", "셰이더 준비", load("res://icon.svg"))
 	var warning := EncounterStepWarning.new()
 	warning.warning_duration = 1.0
+	# Visual only: the klaxon would sound behind the black fade on first start.
+	warning.play_sound = false
 	stage.add_child(warning)
 
 

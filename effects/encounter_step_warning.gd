@@ -26,6 +26,8 @@ const SUBLINE := "CLEAR THE LANE"
 
 @export_range(0.2, 3.0, 0.05, "suffix:s") var warning_duration := 1.6
 @export var kind := EncounterSequenceStep.Kind.ELITE
+## Off for silent copies (the menu's shader warm-up draws one offscreen).
+@export var play_sound := true
 
 var _elapsed := 0.0
 var _active := true
@@ -48,7 +50,8 @@ static func present(
 
 
 func _ready() -> void:
-	_play_sfx()
+	if play_sound:
+		_play_sfx()
 	queue_redraw()
 
 

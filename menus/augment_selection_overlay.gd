@@ -86,6 +86,8 @@ func _ready() -> void:
 		button.size = CHOICE_CARD_SIZE
 		button.pivot_offset = CHOICE_CARD_SIZE * 0.5
 		button.pressed.connect(_on_choice_pressed.bind(index))
+		button.set_meta(UiSounds.PRESS_META, &"augment_card_select")
+		button.set_meta(UiSounds.FOCUS_META, &"augment_card_focus")
 		button.focus_entered.connect(_highlight_choice.bind(index))
 		button.mouse_entered.connect(_on_control_hovered.bind(button))
 	slot_action_label.pressed.connect(_on_expand_slot_pressed)
@@ -129,6 +131,7 @@ func open_choices(
 	_apply_stage_rect()
 	_set_input_enabled(false)
 	_reset_result_state()
+	UiSounds.play(&"augment_offer_open")
 	_set_choices(choices)
 	_focused_choice_index = 0
 	_showing_ship_modules = show_ship_modules

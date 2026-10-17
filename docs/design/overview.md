@@ -30,6 +30,7 @@
 |------|------|
 | `ResourceStash` | `GameStats` (`game_stats.tres`) 홀더 |
 | `MusicPlayer` | BGM (`sounds/music.ogg`, bus `Music`) |
+| `UiSoundHub` | UI 효과음 (`menus/ui_sounds.gd`, bus `SFX`) · [씬 플로우 · UI 효과음](scene-flow.md) |
 
 레지스트리·오퍼 컨트롤러는 Autoload가 아니라 **World 자식**이다.
 

@@ -36,7 +36,7 @@
 | `HurtboxComponent` | 피격 Area2D · `hurt(hitbox)` · 무적 시 shape off · 레이어 1이면 `enemy_bullet_targets` 그룹에 들어가 풀 탄·레이저의 CPU 판정 표적이 됨 |
 | `HitboxComponent` | 공격 Area2D · `damage` · `hit_hurtbox` |
 | `HurtComponent` | hurt → 피해 처리 · 공용 무적 타이머와 반투명 표시 · 플레이어 기본 0.6초 무적 · `armor_hits`만큼 피격을 피해 없이 흡수 |
-| `ShieldComponent` | 버퍼 HP · **시작 최대 2** ([플레이어 · 생존](player.md#생존)) · 피해는 실드 우선·초과분은 선체 · 미만 시 충전 진행도(0~1)를 자동 충전(`delta / (regen_charge_duration 120 / 충전속도)`)과 `add_graze_charge`(배율 무관)로 채우고 1이면 `restore_shield(1)` · HUD 게이지는 진행도 · `notify_hit` 시 진행도 리셋 |
+| `ShieldComponent` | 버퍼 HP · **시작 최대 2** ([플레이어 · 생존](player.md#생존)) · 피해는 실드 우선·초과분은 선체 · 미만 시 충전 진행도(0~1)를 자동 충전(`delta / (regen_charge_duration 120 / 충전속도)`)과 `add_graze_charge`(배율 무관)로 채우고 1이면 `restore_shield(1)` · HUD 게이지는 진행도 · `notify_hit` 시 진행도 리셋 · 충전으로 1칸이 차면 `shield_recharged`(회복음) |
 | `GrazeComponent` | 함선 Area2D · 피격점 반경 +10px 원 · `EnemyBulletPool`의 `report_bullet`과 레이어 4 레거시 탄 겹침으로 범위 안 적탄을 알고 0.1초마다 그레이즈 1회(실드 1/30칸·10점·스파크) · 무적 중 정지 · `grazed(position, charged)` ([플레이어 · 그레이즈](player.md#그레이즈)) |
 | `DestroyedComponent` | `no_health` 시 이펙트+free(기본). Enemy는 `auto_destroy_on_no_health=false`로 점수→이펙트→free를 직접 소유 |
 | `ScoreComponent` | `GameStats.score`에 가산 |
@@ -65,7 +65,7 @@
 | `LaunchSequence` | 런 시작 출격 연출(함선 상승·배경 가속·음악 로우패스 열기·엔진 SFX) 뒤 `EncounterDirector.start_sequence()`. `current_scene`이 있을 때만 자동 재생. `set_music_muffled()` 정적 함수로 Music 버스 로우패스 제어 ([씬 흐름](scene-flow.md#런-시작--출격-시퀀스-effectslaunch_sequencegd-launchsequence)) |
 | `EncounterRun` | 스폰된 편대 1개의 적을 편대 해제 후까지 추적, 전부 사라지면 `completed` (ELITE `wait_for_clear` 판정) |
 | `OnetimeAnimatedEffect` | 애니 종료 시 free |
-| `VariablePitchAudioStreamPlayer` | 피치 랜덤 SFX. 씬 트리 밖이면 `play_with_variance`는 no-op |
+| `VariablePitchAudioStreamPlayer` | 피치 랜덤 SFX. 씬 트리 밖이면 `play_with_variance`는 no-op · 그레이즈 틱이 사용 |
 
 ## 상태머신
 
