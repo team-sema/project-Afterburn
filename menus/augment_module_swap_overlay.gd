@@ -20,6 +20,7 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	visible = false
 	cancel_button.pressed.connect(_on_cancel_pressed)
+	cancel_button.set_meta(UiSounds.PRESS_META, &"back")
 
 
 func open(

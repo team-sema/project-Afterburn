@@ -10,6 +10,8 @@ signal shield_changed(current_shield: int, max_shield: int)
 signal shield_absorbed(damage: int)
 ## 다음 실드 칸 충전률 0~1 (HUD 소형 게이지)
 signal charge_changed(progress: float)
+## 충전(자동·그레이즈)이 1칸을 채워 실드가 +1 됐을 때 (회복음). 시설 최대 증가는 제외.
+signal shield_recharged
 
 ## 시설 보너스를 뺀 기본 최대 실드. 런 시작 시 현재=최대.
 @export var base_max_shield := 2
@@ -129,7 +131,10 @@ func _add_charge(fraction: float) -> void:
 		_set_charge_progress(next)
 		return
 	_reset_charge()
+	var before := _current_shield
 	restore_shield(1)
+	if _current_shield > before:
+		shield_recharged.emit()
 
 
 func _charge_duration() -> float:

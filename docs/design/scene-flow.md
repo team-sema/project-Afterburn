@@ -67,13 +67,31 @@ Menu ─(게임 시작)→ World
 
 포커스와 마우스 호버는 같은 모습이다. 마우스가 항목 위에 올라가면 그 항목이 포커스를 가져간다.
 
+### UI 효과음 (`menus/ui_sounds.gd`, Autoload `UiSoundHub`)
+
+의도: 메뉴와 오퍼에서 입력이 먹혔다는 것을 짧은 소리로 확인시킨다. 에셋은 Kenney "Interface Sounds"(CC0)에서 골라 `sounds/ui/`에 두고 원본 파일명은 `sounds/ui/LICENSE.txt`에 적는다.
+
+| id | 파일 | 볼륨 | 언제 |
+|---|---|---|---|
+| `focus` | `ui_focus.ogg` | −10dB | 방향키·Tab·마우스로 포커스가 다른 항목으로 옮겨질 때 |
+| `accept` | `ui_accept.ogg` | −6dB | 버튼 결정(키보드·마우스). Esc로 일시정지를 열 때 |
+| `back` | `ui_back.ogg` | −6dB | 설정 `돌아가기`·Esc 닫기, 교체 모달 `취소`, Esc로 일시정지 해제 |
+| `augment_ready` | `augment_ready.ogg` | −6dB | `AUGMENT READY [C]`가 false→true가 될 때 |
+| `augment_offer_open` | `augment_offer_open.ogg` | −4dB | 오퍼 오버레이가 열리기 시작할 때 (PLAYER·ENEMY 공통) |
+| `augment_card_focus` | `augment_card_focus.ogg` | −8dB | 오퍼 카드 사이 포커스 이동 (`focus` 대신) |
+| `augment_card_select` | `augment_card_select.ogg` | −4dB | 오퍼 카드 결정 (`accept` 대신) |
+
+- 모든 `BaseButton` 누름은 자동으로 `accept`를 낸다. 버튼 메타 `ui_press_sound`로 다른 id를 주거나 `&""`로 끈다. 포커스 소리는 메타 `ui_focus_sound`로 바꾼다.
+- 화면이 열리며 코드로 잡는 포커스(`grab_focus`)는 소리를 내지 않는다. 방향·Tab 입력이나 마우스 입력이 있었던 그 프레임(또는 다음 프레임)의 포커스 변화만 `focus`를 낸다.
+- `SFX` 버스로 내보내 효과음 볼륨 설정을 따르고, 일시정지 중에도 재생한다(`PROCESS_MODE_ALWAYS`). 같은 소리가 한 프레임에 두 번 겹치면 하나만 낸다. 동시 재생은 4음까지.
+
 ## Menu (`menus/menu.tscn`)
 
 - 타이틀 표시: **갤럭시 메이헴**(36px, 네온 글로우). 그 위에 보조 문구 `PROJECT AFTERBURN`, 아래에 1px 청색 구분선을 둔다. 타이틀 밝기는 ±8%로 천천히 맥동한다.
 - 배경: 공용 배경 `menu_backdrop.tscn`. 진입 시 0.4초 페이드인.
 - 메뉴 항목(세로): **게임 시작 · 설정 · 종료**. 진입 시 `게임 시작`에 포커스. 위/아래로 이동하고 끝에서 반대쪽으로 순환하며 `ui_accept`로 결정한다. 웹 빌드에서는 `종료`를 숨긴다.
 - 포커스를 잃은 상태에서 방향·확인 입력이 오면 기본 항목(`게임 시작`, 설정에서 돌아온 직후엔 `설정`)에 포커스를 복구한다.
-- 메뉴 진입 시 World를 비동기로 미리 로드한다. `게임 시작`을 결정하면 메뉴 입력을 잠그고, 로딩이 끝나면 0.2초 페이드아웃 후 전환한다. 전환은 검은 페이드 뒤에서 World를 먼저 트리에 붙이고 메뉴를 지우는 **수동 교체**다. `change_scene_to_packed`는 메뉴를 먼저 지워 World 인스턴스가 끝날 때까지(약 0.3초) 기본 배경색(회색) 빈 프레임이 보이므로 쓰지 않는다. 대기 중에는 메뉴 아래에 `게임 준비 중... N%`를 표시한다. 로딩 실패 시 `게임 로딩 실패`를 표시하고 시작 항목을 비활성화한다. World 로딩이 끝나면 오퍼 카드 폴더(`resources/player_augments`, `resources/enemy_augments`)도 메뉴 뒤에서 한 파일씩 순서대로 미리 읽어, World `_ready`의 폴더 스캔이 캐시만 읽게 한다(동시 스레드 로드는 씬 로드와 의존 리소스를 공유해 파싱 오류를 내므로 금지). 프로세스당 첫 시작에는 페이드아웃이 끝난 검은 화면 뒤에서 `effects/shader_warmup.gd`가 오프스크린 SubViewport(HDR 전장용 · SDR 오버레이용)에 함선·일반 적·엘리트 외형, 배경, 폭발, 탄 종류별 배치, 카드를 3프레임 그려 셰이더·파티클 파이프라인을 미리 컴파일한다. 이 워밍업이 없으면 World 첫 프레임이 약 180ms(엔진 파티클 170ms·궤도 링 90ms·HDR 글로우 40ms가 겹침), 런 중 첫 탄·엘리트·오퍼 프레임이 각 30~60ms 멈춘다. 두 번째 시작부터는 건너뛴다.
+- 메뉴 진입 시 World를 비동기로 미리 로드한다. `게임 시작`을 결정하면 메뉴 입력을 잠그고, 로딩이 끝나면 0.2초 페이드아웃 후 전환한다. 전환은 검은 페이드 뒤에서 World를 먼저 트리에 붙이고 메뉴를 지우는 **수동 교체**다. `change_scene_to_packed`는 메뉴를 먼저 지워 World 인스턴스가 끝날 때까지(약 0.3초) 기본 배경색(회색) 빈 프레임이 보이므로 쓰지 않는다. 대기 중에는 메뉴 아래에 `게임 준비 중... N%`를 표시한다. 로딩 실패 시 `게임 로딩 실패`를 표시하고 시작 항목을 비활성화한다. World 로딩이 끝나면 오퍼 카드 폴더(`resources/player_augments`, `resources/enemy_augments`)도 메뉴 뒤에서 한 파일씩 순서대로 미리 읽어, World `_ready`의 폴더 스캔이 캐시만 읽게 한다(동시 스레드 로드는 씬 로드와 의존 리소스를 공유해 파싱 오류를 내므로 금지). 프로세스당 첫 시작에는 페이드아웃이 끝난 검은 화면 뒤에서 `effects/shader_warmup.gd`가 오프스크린 SubViewport(HDR 전장용 · SDR 오버레이용)에 함선·일반 적·엘리트 외형, 배경, 폭발, 탄 종류별 배치, 카드·관문 경고를 3프레임 그려 셰이더·파티클 파이프라인을 미리 컴파일한다. 워밍업은 소리를 내지 않는다(폭발 스트림을 비우고 관문 경고는 `play_sound = false`). 이 워밍업이 없으면 World 첫 프레임이 약 180ms(엔진 파티클 170ms·궤도 링 90ms·HDR 글로우 40ms가 겹침), 런 중 첫 탄·엘리트·오퍼 프레임이 각 30~60ms 멈춘다. 두 번째 시작부터는 건너뛴다.
 - 하단: 왼쪽 `최고 점수 000000`(현재 런 기록, 저장되지 않음), 오른쪽 조작 안내 `↑↓ 이동 · Enter 결정`.
 
 ## 설정 (`menus/settings_menu.tscn`)
@@ -255,12 +273,18 @@ Menu와 일시정지 위에 뜨는 모달 패널이다(씬 전환 아님). 같�
 - XP 충족·탄소거 보상·엘리트 게이트로 HUD 글자가 바뀌어도 World 조종석 프레임과 전장의 위치·폭이 변하지 않는다.
 - 좌우 조종석 글씨는 HUD 폰트와 LINEAR 필터로 기울어진 상태에서도 계단이 없고, 전장 서브뷰포트는 340×360 NEAREST 확대와 MSAA 없음을 유지한다 (`tests/side_hud_crisp_rendering_test.gd`).
 - 시작화면에서 World로 넘어갈 때 검은 페이드 외의 색(기본 배경색 회색)이 한 프레임도 보이지 않는다.
+- 첫 시작의 셰이더 워밍업은 어떤 효과음도 재생하지 않는다 (`tests/shader_warmup_silent_test.gd`).
+- UI 효과음: 일반 버튼은 `accept`, 메타 `back` 버튼은 `back`, 빈 메타는 무음이다. 화면이 연 포커스는 무음, 방향키로 옮긴 포커스는 `focus`, 오퍼 카드는 `augment_card_focus`다. 모든 UI 효과음 파일이 로드된다 (`tests/ui_sounds_test.gd`).
 
 검증 참고: `tests/hud_layout_stability_test.gd` · `tests/pause_smoke_test.gd` · `tests/menu_loading_smoke_test.gd` · `tests/settings_menu_smoke_test.gd` · `tests/game_over_smoke_test.gd` · `tests/master_volume_control_test.gd`. Godot 실행은 `tools/run-godot.cmd`를 사용한다.
 
 조종석 검증: `tests/cockpit_hud_test.gd`에서 6개 패널 전개·일시정지·재출격·아트의 실제 투명 영역 안에 피탄점이 머무는지·피탄 반지름+1px 클램프 여백·전장 bleed(뷰포트 372×360, 가시 영역 340×360, 배경·궤도 링 사각형 확장)·최대 15시설/4베이를 검증한다. 회전된 계기 모서리가 콘솔 유리 안에 들어가는지, 기본 5칸·최대 15칸의 시설 개별 호버와 4베이의 여백, 긴 준비 문구, 정보와 소속 패널의 전개 동행도 확인한다. 기존 HUD·시설 미리보기·무기 포커스·메뉴/설정·출격 회귀와 기본/최대 확장 실제 실행 캡처로 배치와 점등을 확인한다.
 
 ## 변경 이력
+
+- 2026-10-17: 첫 시작 셰이더 워밍업이 관문 경고 클락슨(`warning_sound.wav`)을 검은 화면 뒤에서 울리던 문제 수정.
+
+- 2026-10-17: UI 효과음(Kenney Interface Sounds CC0) 추가. 버튼 결정·뒤로·포커스 이동·증강 준비·오퍼 열림·카드 포커스/선택.
 
 - 2026-10-17: 충전한 그레이즈마다 실드 충전 막대가 밝아졌다가 0.15초 동안 돌아오는 발광 추가.
 

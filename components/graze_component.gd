@@ -22,6 +22,9 @@ const INTERVAL_EPSILON := 0.000001
 @export var shield_component: ShieldComponent
 @export var game_stats: GameStats
 @export var impact_profile: ImpactProfile = preload("res://effects/impact_profiles/player_graze.tres")
+## Very quiet: it repeats every 0.1 s while grazing.
+@export var tick_sound: AudioStream = preload("res://sounds/graze_tick.wav")
+@export_range(-40.0, 0.0, 0.5, "suffix:dB") var tick_volume_db := -18.0
 
 ## Game seconds spent in range toward the next graze. Kept when the ring
 ## empties so short brushes add up.
@@ -33,9 +36,17 @@ var _reported_distance := INF
 var _shape := CircleShape2D.new()
 var _hurtbox: HurtboxComponent
 var _hurt_shape: CollisionShape2D
+var _tick_player: VariablePitchAudioStreamPlayer
 
 
 func _ready() -> void:
+	_tick_player = VariablePitchAudioStreamPlayer.new()
+	_tick_player.stream = tick_sound
+	_tick_player.bus = &"SFX"
+	_tick_player.volume_db = tick_volume_db
+	_tick_player.pitch_min = 0.94
+	_tick_player.pitch_max = 1.08
+	add_child(_tick_player)
 	add_to_group(GROUP)
 	# Run after every EnemyBulletPool so this tick's reports are in.
 	process_physics_priority = 10
@@ -122,6 +133,8 @@ func _graze_once(bullet_point: Vector2) -> void:
 	var spark_position := center + direction * get_radius()
 	if impact_profile != null:
 		ImpactVfx.emit_from(self, spark_position, impact_profile, direction)
+	if tick_sound != null:
+		_tick_player.play_with_variance()
 	grazed.emit(spark_position, charged)
 
 

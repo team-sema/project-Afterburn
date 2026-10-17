@@ -134,6 +134,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	if settings_menu.visible:
 		return
 
+	UiSounds.play(&"back" if _is_manual_pause else &"accept")
 	_set_manual_pause(not _is_manual_pause)
 	get_viewport().set_input_as_handled()
 

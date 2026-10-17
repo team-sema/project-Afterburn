@@ -29,6 +29,7 @@ func _ready() -> void:
 	for index in slot_buttons.size():
 		slot_buttons[index].pressed.connect(_on_slot_pressed.bind(index))
 	cancel_button.pressed.connect(_on_cancel_pressed)
+	cancel_button.set_meta(UiSounds.PRESS_META, &"back")
 
 
 func open_for_replace(

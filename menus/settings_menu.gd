@@ -50,6 +50,7 @@ func _ready() -> void:
 	event_log_button.gui_input.connect(_on_event_log_gui_input)
 	GameSettings.instance.combat_event_log_changed.connect(_on_event_log_changed)
 	back_button.pressed.connect(close)
+	back_button.set_meta(UiSounds.PRESS_META, &"back")
 	GameSettings.instance.volume_changed.connect(_on_settings_volume_changed)
 	GameSettings.instance.fullscreen_changed.connect(_on_settings_fullscreen_changed)
 	_sync_from_settings()
@@ -73,6 +74,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	if not visible:
 		return
 	if event.is_action_pressed("ui_cancel"):
+		UiSounds.play(&"back")
 		close()
 		accept_event()
 		return

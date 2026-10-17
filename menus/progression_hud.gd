@@ -93,6 +93,8 @@ func _set_augment_ready(is_ready: bool) -> void:
 		return
 	_is_augment_ready = is_ready
 	augment_ready_changed.emit(is_ready)
+	if is_ready:
+		UiSounds.play(&"augment_ready")
 	_highlight_time = 0.0
 	if is_ready:
 		return
