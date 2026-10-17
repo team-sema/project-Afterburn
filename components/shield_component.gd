@@ -3,24 +3,28 @@ extends Node
 
 ## 선체(StatsComponent.health)와 분리된 방어 자원(버퍼 HP).
 ## 피해는 실드를 먼저 깎고, 남는 양만 선체로 넘긴다.
-## 현재 < 최대이면 충전 경과 시간을 세고, 필요 초 이상이면 실드 +1.
+## 현재 < 최대이면 충전 진행도(0~1칸)를 자동 충전·그레이즈로 채우고, 1칸이 되면 실드 +1.
 
 signal shield_changed(current_shield: int, max_shield: int)
 ## 실드가 피해를 일부라도 흡수했을 때 (HUD·연출용). 인자는 흡수한 양.
 signal shield_absorbed(damage: int)
-## 다음 실드 칸 충전률 0~1 (HUD 소형 게이지 = 경과 / 필요 초)
+## 다음 실드 칸 충전률 0~1 (HUD 소형 게이지)
 signal charge_changed(progress: float)
 
 ## 시설 보너스를 뺀 기본 최대 실드. 런 시작 시 현재=최대.
 @export var base_max_shield := 2
-## 실드 1칸을 채우는 데 걸리는 초 (현재 < 최대일 때).
-@export_range(0.5, 120.0, 0.1) var regen_charge_duration := 30.0
+## 자동 충전만으로 실드 1칸을 채우는 데 걸리는 초 (현재 < 최대일 때).
+@export_range(0.5, 300.0, 0.1) var regen_charge_duration := 120.0
+
+const CHARGE_EPSILON := 0.000001
 
 var _facility_bonus := 0
 var _current_shield := 0
-## Seconds spent charging toward the next shield point.
-var _charge_elapsed := 0.0
-## Facility SHIELD_CHARGE_SPEED_MULT product. Higher = shorter charge duration.
+## Fraction (0~1) of the next shield point charged so far. Auto charge and
+## graze both add to it; any hit clears it.
+var _charge_progress := 0.0
+## Facility SHIELD_CHARGE_SPEED_MULT product. Higher = shorter auto charge.
+## Graze charge ignores it (docs/design/player.md「그레이즈」).
 var charge_speed_multiplier := 1.0
 ## Run rule cards (e.g. brink trade-off). Multiplies the facility channel.
 var rule_charge_speed_multiplier := 1.0
@@ -28,7 +32,7 @@ var rule_charge_speed_multiplier := 1.0
 
 func _ready() -> void:
 	_current_shield = get_max_shield()
-	_charge_elapsed = 0.0
+	_charge_progress = 0.0
 	set_process(false)
 	shield_changed.emit(_current_shield, get_max_shield())
 	charge_changed.emit(0.0)
@@ -39,13 +43,7 @@ func _process(delta: float) -> void:
 		_reset_charge()
 		set_process(false)
 		return
-	var duration := _charge_duration()
-	var next := _charge_elapsed + delta
-	if next < duration:
-		_set_charge_elapsed(next)
-		return
-	_reset_charge()
-	restore_shield(1)
+	_add_charge(delta / _charge_duration())
 	if not _needs_regen():
 		set_process(false)
 
@@ -58,11 +56,20 @@ func get_current_shield() -> int:
 	return _current_shield
 
 
-## HUD 0~1. Source of truth is elapsed seconds vs charge duration.
+## HUD 0~1: how much of the next shield point is charged.
 func get_charge_progress() -> float:
 	if not _needs_regen():
 		return 0.0
-	return clampf(_charge_elapsed / _charge_duration(), 0.0, 1.0)
+	return clampf(_charge_progress, 0.0, 1.0)
+
+
+## Graze charge: adds `fraction` of a shield point, unaffected by the charge
+## speed multipliers. Returns false (and does nothing) when the shield is full.
+func add_graze_charge(fraction: float) -> bool:
+	if fraction <= 0.0 or not _needs_regen():
+		return false
+	_add_charge(fraction)
+	return true
 
 
 ## 최대 실드를 늘리고 늘어난 만큼만 현재 실드도 올린다 (전체 리필이 아니다).
@@ -114,6 +121,17 @@ func absorb_damage(damage: int) -> int:
 	return damage - absorbed
 
 
+## Advances the charge; reaching one whole point restores it and clears the charge.
+func _add_charge(fraction: float) -> void:
+	var next := _charge_progress + fraction
+	# Float steps (e.g. 30 × 1/30) can land a hair below 1.0.
+	if next < 1.0 - CHARGE_EPSILON:
+		_set_charge_progress(next)
+		return
+	_reset_charge()
+	restore_shield(1)
+
+
 func _charge_duration() -> float:
 	return maxf(
 		0.05,
@@ -143,12 +161,12 @@ func _set_current_shield(value: int) -> void:
 
 
 func _reset_charge() -> void:
-	_set_charge_elapsed(0.0)
+	_set_charge_progress(0.0)
 
 
-func _set_charge_elapsed(value: float) -> void:
+func _set_charge_progress(value: float) -> void:
 	var next := maxf(0.0, value)
-	if is_equal_approx(next, _charge_elapsed):
+	if is_equal_approx(next, _charge_progress):
 		return
-	_charge_elapsed = next
+	_charge_progress = next
 	charge_changed.emit(get_charge_progress())

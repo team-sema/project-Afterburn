@@ -17,13 +17,14 @@
 
 **레이어 3은 미사용.** 레이어 4(`enemy_projectile`, [EnemyBullets](../barrage-api.md#11-적탄-조회소거--enemybullets))에는 레거시 기본탄의 판정만 올라가고, 플레이어 탄 Hitbox는 layer 0 + hurtbox **mask**로 동작한다.
 
-새 적탄(FoundationBullet)·곡선 레이저·예고형 빔은 물리 판정을 갖지 않는다. 레이어 1 Hurtbox는 `_ready`에서 `enemy_bullet_targets` 그룹에 들어가고, 탄 부모마다 하나인 `EnemyBulletPool`이 매 물리 틱 그 Hurtbox들의 활성 CollisionShape2D(원·캡슐, 그 밖은 `Shape2D.collide`)를 모아 모든 탄과 CPU로 판정한다. 레이저·빔도 같은 표적 목록에 몸통 선분을 댄다. 피격은 셰이프 없는 대리 HitboxComponent(피해 1, 위치는 맞은 지점)를 Hurtbox에 넘겨 기존 파이프라인을 그대로 탄다. 레이어 1 Hurtbox는 레거시 탄을 위해 mask에 레이어 4도 유지한다.
+새 적탄(FoundationBullet)·곡선 레이저·예고형 빔은 물리 판정을 갖지 않는다. 레이어 1 Hurtbox는 `_ready`에서 `enemy_bullet_targets` 그룹에 들어가고, 탄 부모마다 하나인 `EnemyBulletPool`이 매 물리 틱 그 Hurtbox들의 활성 CollisionShape2D(원·캡슐, 그 밖은 `Shape2D.collide`)를 모아 모든 탄과 CPU로 판정한다. 레이저·빔도 같은 표적 목록에 몸통 선분을 댄다. 피격은 셰이프 없는 대리 HitboxComponent(피해 1, 위치는 맞은 지점)를 Hurtbox에 넘겨 기존 파이프라인을 그대로 탄다. 레이어 1 Hurtbox는 레거시 탄을 위해 mask에 레이어 4도 유지한다. 같은 루프가 피격 검사 뒤 `GrazeComponent` 그레이즈 원(피격점 반경 +10px)과 겹치는 탄을 함선에 알린다([플레이어 · 그레이즈](player.md#그레이즈)). 레이저·빔은 그레이즈 대상이 아니다.
 
 ## 레이어/마스크 실사용
 
 | 액터 | Layer | Mask |
 |------|-------|------|
 | Player Hurtbox | 1 | 1+4 · 수동 적탄 감지 주체 |
+| Player Graze (`GrazeComponent`) | 0 | 4 · 레거시 탄 그레이즈 감지 (Foundation 탄은 탄 풀이 알림) |
 | Enemy Hurtbox | 2 | 0 |
 | Enemy Hitbox (몸) | 0 | 1 |
 | 적탄 (레거시) | 4 | 1 |

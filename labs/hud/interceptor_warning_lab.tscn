@@ -1,8 +1,8 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene format=3 uid="uid://br14d8oahwao4"]
 
-[ext_resource type="Script" path="res://labs/hud/interceptor_warning_lab.gd" id="1"]
+[ext_resource type="Script" uid="uid://ct2ksql6ey0kr" path="res://labs/hud/interceptor_warning_lab.gd" id="1"]
 
-[node name="InterceptorWarningLab" type="Control"]
+[node name="InterceptorWarningLab" type="Control" unique_id=1774078990]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0

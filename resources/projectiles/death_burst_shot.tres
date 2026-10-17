@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://cllhljtf4jfsc" path="res://projectiles/barrage_shot.gd" id="1"]
 [ext_resource type="Script" uid="uid://decidrufsjx8w" path="res://projectiles/bullet_behavior.gd" id="2"]
 [ext_resource type="Script" uid="uid://chw3u3xfqd8f4" path="res://projectiles/bullet_action.gd" id="3"]
+[ext_resource type="Script" uid="uid://b7ji6bnvap1qe" path="res://projectiles/barrage_volley.gd" id="3_iujl4"]
 [ext_resource type="Resource" uid="uid://bl7s3e10gxigx" path="res://resources/projectiles/orb.tres" id="4"]
 
 [sub_resource type="Resource" id="VisualShrink"]
